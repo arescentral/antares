@@ -37,7 +37,7 @@ namespace antares {
             {"override", {&ActionBase::override_, optional_action_override}}
 // clang-format on
 
-ActionType Action::type() const { return base.type; }
+Action::Type Action::type() const { return base.type; }
 
 Action::Action(AgeAction a) : age(std::move(a)) {}
 Action::Action(AssumeAction a) : assume(std::move(a)) {}
@@ -76,40 +76,40 @@ Action::Action(ZoomAction a) : zoom(std::move(a)) {}
 
 Action::Action(Action&& a) {
     switch (a.type()) {
-        case ActionType::AGE: new (this) Action(std::move(a.age)); break;
-        case ActionType::ASSUME: new (this) Action(std::move(a.assume)); break;
-        case ActionType::CAP_SPEED: new (this) Action(std::move(a.cap_speed)); break;
-        case ActionType::CAPTURE: new (this) Action(std::move(a.capture)); break;
-        case ActionType::CLOAK: new (this) Action(std::move(a.cloak)); break;
-        case ActionType::CONDITION: new (this) Action(std::move(a.condition)); break;
-        case ActionType::CREATE: new (this) Action(std::move(a.create)); break;
-        case ActionType::DISABLE: new (this) Action(std::move(a.disable)); break;
-        case ActionType::ENERGIZE: new (this) Action(std::move(a.energize)); break;
-        case ActionType::EQUIP: new (this) Action(std::move(a.equip)); break;
-        case ActionType::FIRE: new (this) Action(std::move(a.fire)); break;
-        case ActionType::FLASH: new (this) Action(std::move(a.flash)); break;
-        case ActionType::HEAL: new (this) Action(std::move(a.heal)); break;
-        case ActionType::HOLD: new (this) Action(std::move(a.hold_position)); break;
-        case ActionType::KEY: new (this) Action(std::move(a.key)); break;
-        case ActionType::KILL: new (this) Action(std::move(a.kill)); break;
-        case ActionType::LAND: new (this) Action(std::move(a.land)); break;
-        case ActionType::MESSAGE: new (this) Action(std::move(a.message)); break;
-        case ActionType::MORPH: new (this) Action(std::move(a.morph)); break;
-        case ActionType::MOVE: new (this) Action(std::move(a.move)); break;
-        case ActionType::OCCUPY: new (this) Action(std::move(a.occupy)); break;
-        case ActionType::ORDER: new (this) Action(std::move(a.order)); break;
-        case ActionType::PAY: new (this) Action(std::move(a.pay)); break;
-        case ActionType::PUSH: new (this) Action(std::move(a.push)); break;
-        case ActionType::REVEAL: new (this) Action(std::move(a.reveal)); break;
-        case ActionType::SCORE: new (this) Action(std::move(a.score)); break;
-        case ActionType::SELECT: new (this) Action(std::move(a.select)); break;
-        case ActionType::PLAY: new (this) Action(std::move(a.play)); break;
-        case ActionType::SPARK: new (this) Action(std::move(a.spark)); break;
-        case ActionType::SPIN: new (this) Action(std::move(a.spin)); break;
-        case ActionType::THRUST: new (this) Action(std::move(a.thrust)); break;
-        case ActionType::WARP: new (this) Action(std::move(a.warp)); break;
-        case ActionType::WIN: new (this) Action(std::move(a.win)); break;
-        case ActionType::ZOOM: new (this) Action(std::move(a.zoom)); break;
+        case Action::Type::AGE: new (this) Action(std::move(a.age)); break;
+        case Action::Type::ASSUME: new (this) Action(std::move(a.assume)); break;
+        case Action::Type::CAP_SPEED: new (this) Action(std::move(a.cap_speed)); break;
+        case Action::Type::CAPTURE: new (this) Action(std::move(a.capture)); break;
+        case Action::Type::CLOAK: new (this) Action(std::move(a.cloak)); break;
+        case Action::Type::CONDITION: new (this) Action(std::move(a.condition)); break;
+        case Action::Type::CREATE: new (this) Action(std::move(a.create)); break;
+        case Action::Type::DISABLE: new (this) Action(std::move(a.disable)); break;
+        case Action::Type::ENERGIZE: new (this) Action(std::move(a.energize)); break;
+        case Action::Type::EQUIP: new (this) Action(std::move(a.equip)); break;
+        case Action::Type::FIRE: new (this) Action(std::move(a.fire)); break;
+        case Action::Type::FLASH: new (this) Action(std::move(a.flash)); break;
+        case Action::Type::HEAL: new (this) Action(std::move(a.heal)); break;
+        case Action::Type::HOLD: new (this) Action(std::move(a.hold_position)); break;
+        case Action::Type::KEY: new (this) Action(std::move(a.key)); break;
+        case Action::Type::KILL: new (this) Action(std::move(a.kill)); break;
+        case Action::Type::LAND: new (this) Action(std::move(a.land)); break;
+        case Action::Type::MESSAGE: new (this) Action(std::move(a.message)); break;
+        case Action::Type::MORPH: new (this) Action(std::move(a.morph)); break;
+        case Action::Type::MOVE: new (this) Action(std::move(a.move)); break;
+        case Action::Type::OCCUPY: new (this) Action(std::move(a.occupy)); break;
+        case Action::Type::ORDER: new (this) Action(std::move(a.order)); break;
+        case Action::Type::PAY: new (this) Action(std::move(a.pay)); break;
+        case Action::Type::PUSH: new (this) Action(std::move(a.push)); break;
+        case Action::Type::REVEAL: new (this) Action(std::move(a.reveal)); break;
+        case Action::Type::SCORE: new (this) Action(std::move(a.score)); break;
+        case Action::Type::SELECT: new (this) Action(std::move(a.select)); break;
+        case Action::Type::PLAY: new (this) Action(std::move(a.play)); break;
+        case Action::Type::SPARK: new (this) Action(std::move(a.spark)); break;
+        case Action::Type::SPIN: new (this) Action(std::move(a.spin)); break;
+        case Action::Type::THRUST: new (this) Action(std::move(a.thrust)); break;
+        case Action::Type::WARP: new (this) Action(std::move(a.warp)); break;
+        case Action::Type::WIN: new (this) Action(std::move(a.win)); break;
+        case Action::Type::ZOOM: new (this) Action(std::move(a.zoom)); break;
     }
 }
 
@@ -121,40 +121,40 @@ Action& Action::operator=(Action&& a) {
 
 Action::~Action() {
     switch (type()) {
-        case ActionType::AGE: age.~AgeAction(); break;
-        case ActionType::ASSUME: assume.~AssumeAction(); break;
-        case ActionType::CAP_SPEED: cap_speed.~CapSpeedAction(); break;
-        case ActionType::CAPTURE: capture.~CaptureAction(); break;
-        case ActionType::CLOAK: cloak.~CloakAction(); break;
-        case ActionType::CONDITION: condition.~ConditionAction(); break;
-        case ActionType::CREATE: create.~CreateAction(); break;
-        case ActionType::DISABLE: disable.~DisableAction(); break;
-        case ActionType::ENERGIZE: energize.~EnergizeAction(); break;
-        case ActionType::EQUIP: equip.~EquipAction(); break;
-        case ActionType::FIRE: fire.~FireAction(); break;
-        case ActionType::FLASH: flash.~FlashAction(); break;
-        case ActionType::HEAL: heal.~HealAction(); break;
-        case ActionType::HOLD: hold_position.~HoldPositionAction(); break;
-        case ActionType::KEY: key.~KeyAction(); break;
-        case ActionType::KILL: kill.~KillAction(); break;
-        case ActionType::LAND: land.~LandAction(); break;
-        case ActionType::MESSAGE: message.~MessageAction(); break;
-        case ActionType::MORPH: morph.~MorphAction(); break;
-        case ActionType::MOVE: move.~MoveAction(); break;
-        case ActionType::OCCUPY: occupy.~OccupyAction(); break;
-        case ActionType::ORDER: order.~OrderAction(); break;
-        case ActionType::PAY: pay.~PayAction(); break;
-        case ActionType::PUSH: push.~PushAction(); break;
-        case ActionType::REVEAL: reveal.~RevealAction(); break;
-        case ActionType::SCORE: score.~ScoreAction(); break;
-        case ActionType::SELECT: select.~SelectAction(); break;
-        case ActionType::PLAY: play.~PlayAction(); break;
-        case ActionType::SPARK: spark.~SparkAction(); break;
-        case ActionType::SPIN: spin.~SpinAction(); break;
-        case ActionType::THRUST: thrust.~ThrustAction(); break;
-        case ActionType::WARP: warp.~WarpAction(); break;
-        case ActionType::WIN: win.~WinAction(); break;
-        case ActionType::ZOOM: zoom.~ZoomAction(); break;
+        case Action::Type::AGE: age.~AgeAction(); break;
+        case Action::Type::ASSUME: assume.~AssumeAction(); break;
+        case Action::Type::CAP_SPEED: cap_speed.~CapSpeedAction(); break;
+        case Action::Type::CAPTURE: capture.~CaptureAction(); break;
+        case Action::Type::CLOAK: cloak.~CloakAction(); break;
+        case Action::Type::CONDITION: condition.~ConditionAction(); break;
+        case Action::Type::CREATE: create.~CreateAction(); break;
+        case Action::Type::DISABLE: disable.~DisableAction(); break;
+        case Action::Type::ENERGIZE: energize.~EnergizeAction(); break;
+        case Action::Type::EQUIP: equip.~EquipAction(); break;
+        case Action::Type::FIRE: fire.~FireAction(); break;
+        case Action::Type::FLASH: flash.~FlashAction(); break;
+        case Action::Type::HEAL: heal.~HealAction(); break;
+        case Action::Type::HOLD: hold_position.~HoldPositionAction(); break;
+        case Action::Type::KEY: key.~KeyAction(); break;
+        case Action::Type::KILL: kill.~KillAction(); break;
+        case Action::Type::LAND: land.~LandAction(); break;
+        case Action::Type::MESSAGE: message.~MessageAction(); break;
+        case Action::Type::MORPH: morph.~MorphAction(); break;
+        case Action::Type::MOVE: move.~MoveAction(); break;
+        case Action::Type::OCCUPY: occupy.~OccupyAction(); break;
+        case Action::Type::ORDER: order.~OrderAction(); break;
+        case Action::Type::PAY: pay.~PayAction(); break;
+        case Action::Type::PUSH: push.~PushAction(); break;
+        case Action::Type::REVEAL: reveal.~RevealAction(); break;
+        case Action::Type::SCORE: score.~ScoreAction(); break;
+        case Action::Type::SELECT: select.~SelectAction(); break;
+        case Action::Type::PLAY: play.~PlayAction(); break;
+        case Action::Type::SPARK: spark.~SparkAction(); break;
+        case Action::Type::SPIN: spin.~SpinAction(); break;
+        case Action::Type::THRUST: thrust.~ThrustAction(); break;
+        case Action::Type::WARP: warp.~WarpAction(); break;
+        case Action::Type::WIN: win.~WinAction(); break;
+        case Action::Type::ZOOM: zoom.~ZoomAction(); break;
     }
 }
 
@@ -257,42 +257,42 @@ static ActionBase::Override optional_action_override(path_value x) {
             .value_or(ActionBase::Override{});
 }
 
-static ActionType required_action_type(path_value x) {
-    return required_enum<ActionType>(
-            x, {{"age", ActionType::AGE},
-                {"assume", ActionType::ASSUME},
-                {"cap-speed", ActionType::CAP_SPEED},
-                {"capture", ActionType::CAPTURE},
-                {"cloak", ActionType::CLOAK},
-                {"condition", ActionType::CONDITION},
-                {"create", ActionType::CREATE},
-                {"disable", ActionType::DISABLE},
-                {"energize", ActionType::ENERGIZE},
-                {"equip", ActionType::EQUIP},
-                {"fire", ActionType::FIRE},
-                {"flash", ActionType::FLASH},
-                {"heal", ActionType::HEAL},
-                {"hold", ActionType::HOLD},
-                {"key", ActionType::KEY},
-                {"kill", ActionType::KILL},
-                {"land", ActionType::LAND},
-                {"message", ActionType::MESSAGE},
-                {"morph", ActionType::MORPH},
-                {"move", ActionType::MOVE},
-                {"occupy", ActionType::OCCUPY},
-                {"order", ActionType::ORDER},
-                {"pay", ActionType::PAY},
-                {"push", ActionType::PUSH},
-                {"reveal", ActionType::REVEAL},
-                {"score", ActionType::SCORE},
-                {"select", ActionType::SELECT},
-                {"play", ActionType::PLAY},
-                {"spark", ActionType::SPARK},
-                {"spin", ActionType::SPIN},
-                {"thrust", ActionType::THRUST},
-                {"warp", ActionType::WARP},
-                {"win", ActionType::WIN},
-                {"zoom", ActionType::ZOOM}});
+static Action::Type required_action_type(path_value x) {
+    return required_enum<Action::Type>(
+            x, {{"age", Action::Type::AGE},
+                {"assume", Action::Type::ASSUME},
+                {"cap-speed", Action::Type::CAP_SPEED},
+                {"capture", Action::Type::CAPTURE},
+                {"cloak", Action::Type::CLOAK},
+                {"condition", Action::Type::CONDITION},
+                {"create", Action::Type::CREATE},
+                {"disable", Action::Type::DISABLE},
+                {"energize", Action::Type::ENERGIZE},
+                {"equip", Action::Type::EQUIP},
+                {"fire", Action::Type::FIRE},
+                {"flash", Action::Type::FLASH},
+                {"heal", Action::Type::HEAL},
+                {"hold", Action::Type::HOLD},
+                {"key", Action::Type::KEY},
+                {"kill", Action::Type::KILL},
+                {"land", Action::Type::LAND},
+                {"message", Action::Type::MESSAGE},
+                {"morph", Action::Type::MORPH},
+                {"move", Action::Type::MOVE},
+                {"occupy", Action::Type::OCCUPY},
+                {"order", Action::Type::ORDER},
+                {"pay", Action::Type::PAY},
+                {"push", Action::Type::PUSH},
+                {"reveal", Action::Type::REVEAL},
+                {"score", Action::Type::SCORE},
+                {"select", Action::Type::SELECT},
+                {"play", Action::Type::PLAY},
+                {"spark", Action::Type::SPARK},
+                {"spin", Action::Type::SPIN},
+                {"thrust", Action::Type::THRUST},
+                {"warp", Action::Type::WARP},
+                {"win", Action::Type::WIN},
+                {"zoom", Action::Type::ZOOM}});
 }
 
 static Action age_action(path_value x) {
@@ -393,11 +393,11 @@ static Action key_action(path_value x) {
                 {"disable", {&KeyAction::disable, optional_keys}}});
 }
 
-static KillKind required_kill_kind(path_value x) {
-    return required_enum<KillKind>(
-            x, {{"none", KillKind::NONE},
-                {"expire", KillKind::EXPIRE},
-                {"destroy", KillKind::DESTROY}});
+static KillAction::Kind required_kill_kind(path_value x) {
+    return required_enum<KillAction::Kind>(
+            x, {{"none", KillAction::Kind::NONE},
+                {"expire", KillAction::Kind::EXPIRE},
+                {"destroy", KillAction::Kind::DESTROY}});
 }
 
 static Action kill_action(path_value x) {
@@ -433,17 +433,17 @@ static sfz::optional<coordPointType> optional_coord_point(path_value x) {
     return sfz::make_optional(coordPointType{(uint32_t)p->h, (uint32_t)p->v});
 }
 
-static sfz::optional<MoveOrigin> optional_origin(path_value x) {
-    return optional_enum<MoveOrigin>(
-            x, {{"level", MoveOrigin::LEVEL},
-                {"subject", MoveOrigin::SUBJECT},
-                {"object", MoveOrigin::OBJECT}});
+static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
+    return optional_enum<MoveAction::Origin>(
+            x, {{"level", MoveAction::Origin::LEVEL},
+                {"subject", MoveAction::Origin::SUBJECT},
+                {"object", MoveAction::Origin::OBJECT}});
 }
 
 static Action move_action(path_value x) {
     return required_struct<MoveAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"origin", {&MoveAction::origin, optional_origin, MoveOrigin::LEVEL}},
+                {"origin", {&MoveAction::origin, optional_origin, MoveAction::Origin::LEVEL}},
                 {"to", {&MoveAction::to, optional_coord_point, coordPointType{0, 0}}},
                 {"distance", {&MoveAction::distance, optional_int, 0}}});
 }
@@ -464,14 +464,14 @@ static Action pay_action(path_value x) {
                 {"player", {&PayAction::player, optional_admiral}}});
 }
 
-static PushKind required_push_kind(path_value x) {
-    return required_enum<PushKind>(
-            x, {{"stop", PushKind::STOP},
-                {"collide", PushKind::COLLIDE},
-                {"decelerate", PushKind::DECELERATE},
-                {"boost", PushKind::BOOST},
-                {"set", PushKind::SET},
-                {"cruise", PushKind::CRUISE}});
+static PushAction::Kind required_push_kind(path_value x) {
+    return required_enum<PushAction::Kind>(
+            x, {{"stop", PushAction::Kind::STOP},
+                {"collide", PushAction::Kind::COLLIDE},
+                {"decelerate", PushAction::Kind::DECELERATE},
+                {"boost", PushAction::Kind::BOOST},
+                {"set", PushAction::Kind::SET},
+                {"cruise", PushAction::Kind::CRUISE}});
 }
 
 static Action push_action(path_value x) {
@@ -564,40 +564,40 @@ Action action(path_value x) {
     }
 
     switch (required_action_type(x.get("type"))) {
-        case ActionType::AGE: return age_action(x);
-        case ActionType::ASSUME: return assume_action(x);
-        case ActionType::CAP_SPEED: return cap_speed_action(x);
-        case ActionType::CAPTURE: return capture_action(x);
-        case ActionType::CLOAK: return cloak_action(x);
-        case ActionType::CONDITION: return condition_action(x);
-        case ActionType::CREATE: return create_action(x);
-        case ActionType::DISABLE: return disable_action(x);
-        case ActionType::ENERGIZE: return energize_action(x);
-        case ActionType::EQUIP: return equip_action(x);
-        case ActionType::FIRE: return fire_action(x);
-        case ActionType::FLASH: return flash_action(x);
-        case ActionType::HEAL: return heal_action(x);
-        case ActionType::HOLD: return hold_action(x);
-        case ActionType::KEY: return key_action(x);
-        case ActionType::KILL: return kill_action(x);
-        case ActionType::LAND: return land_action(x);
-        case ActionType::MESSAGE: return message_action(x);
-        case ActionType::MORPH: return morph_action(x);
-        case ActionType::MOVE: return move_action(x);
-        case ActionType::OCCUPY: return occupy_action(x);
-        case ActionType::ORDER: return order_action(x);
-        case ActionType::PAY: return pay_action(x);
-        case ActionType::PUSH: return push_action(x);
-        case ActionType::REVEAL: return reveal_action(x);
-        case ActionType::SCORE: return score_action(x);
-        case ActionType::SELECT: return select_action(x);
-        case ActionType::PLAY: return play_action(x);
-        case ActionType::SPARK: return spark_action(x);
-        case ActionType::SPIN: return spin_action(x);
-        case ActionType::THRUST: return thrust_action(x);
-        case ActionType::WARP: return warp_action(x);
-        case ActionType::WIN: return win_action(x);
-        case ActionType::ZOOM: return zoom_action(x);
+        case Action::Type::AGE: return age_action(x);
+        case Action::Type::ASSUME: return assume_action(x);
+        case Action::Type::CAP_SPEED: return cap_speed_action(x);
+        case Action::Type::CAPTURE: return capture_action(x);
+        case Action::Type::CLOAK: return cloak_action(x);
+        case Action::Type::CONDITION: return condition_action(x);
+        case Action::Type::CREATE: return create_action(x);
+        case Action::Type::DISABLE: return disable_action(x);
+        case Action::Type::ENERGIZE: return energize_action(x);
+        case Action::Type::EQUIP: return equip_action(x);
+        case Action::Type::FIRE: return fire_action(x);
+        case Action::Type::FLASH: return flash_action(x);
+        case Action::Type::HEAL: return heal_action(x);
+        case Action::Type::HOLD: return hold_action(x);
+        case Action::Type::KEY: return key_action(x);
+        case Action::Type::KILL: return kill_action(x);
+        case Action::Type::LAND: return land_action(x);
+        case Action::Type::MESSAGE: return message_action(x);
+        case Action::Type::MORPH: return morph_action(x);
+        case Action::Type::MOVE: return move_action(x);
+        case Action::Type::OCCUPY: return occupy_action(x);
+        case Action::Type::ORDER: return order_action(x);
+        case Action::Type::PAY: return pay_action(x);
+        case Action::Type::PUSH: return push_action(x);
+        case Action::Type::REVEAL: return reveal_action(x);
+        case Action::Type::SCORE: return score_action(x);
+        case Action::Type::SELECT: return select_action(x);
+        case Action::Type::PLAY: return play_action(x);
+        case Action::Type::SPARK: return spark_action(x);
+        case Action::Type::SPIN: return spin_action(x);
+        case Action::Type::THRUST: return thrust_action(x);
+        case Action::Type::WARP: return warp_action(x);
+        case Action::Type::WIN: return win_action(x);
+        case Action::Type::ZOOM: return zoom_action(x);
     }
 }
 

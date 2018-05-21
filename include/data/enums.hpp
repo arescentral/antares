@@ -21,68 +21,6 @@
 
 namespace antares {
 
-enum class ActionType {
-    AGE,
-    ASSUME,
-    CAP_SPEED,
-    CAPTURE,
-    CLOAK,
-    CONDITION,
-    CREATE,
-    DISABLE,
-    ENERGIZE,
-    EQUIP,
-    FIRE,
-    FLASH,
-    HEAL,
-    HOLD,
-    KEY,
-    KILL,
-    LAND,
-    MESSAGE,
-    MORPH,
-    MOVE,
-    OCCUPY,
-    ORDER,
-    PAY,
-    PUSH,
-    REVEAL,
-    SCORE,
-    SELECT,
-    PLAY,
-    SPARK,
-    SPIN,
-    THRUST,
-    WARP,
-    WIN,
-    ZOOM,
-};
-
-enum class ConditionType {
-    AUTOPILOT,
-    BUILDING,
-    COMPUTER,
-    COUNTER,
-    DESTROYED,
-    DISTANCE,
-    HEALTH,
-    MESSAGE,
-    ORDERED,
-    OWNER,
-    SHIPS,
-    SPEED,
-    SUBJECT,
-    TIME,
-    ZOOM,
-};
-
-enum class AnimationDirection {
-    NONE   = 0,   // 0
-    PLUS   = +1,  // +
-    MINUS  = -1,  // -
-    RANDOM = 2,   // ?
-};
-
 // Hues, combined with a shade to get a color.
 enum class Hue {
     GRAY        = 0,
@@ -103,53 +41,11 @@ enum class Hue {
     RED         = 15,
 };
 
-enum class KillKind {
-    // Removes the focus without any further fanfare.
-    NONE = 0,
-
-    // Removes the subject without any further fanfare.
-    // Essentially, this is NONE, but always reflexive.
-    EXPIRE = 1,
-
-    // Removes the subject and executes its destroy action.
-    DESTROY = 2,
-};
-
-enum class MoveOrigin {
-    LEVEL,    // absolute coordinates, in level’s rotated frame of reference
-    SUBJECT,  // relative to subject
-    OBJECT,   // relative to object
-};
-
-enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
-
-enum class IconShape {
-    SQUARE,
-    TRIANGLE,
-    DIAMOND,
-    PLUS,
-};
-
-enum class InterfaceStyle { LARGE, SMALL };
-
-enum class LevelType { SOLO, NET, DEMO };
-
 // Restricts actions based on the owners of the subject and object.
 enum class Owner {
     ANY       = 0,   // Always execute.
     SAME      = 1,   // Execute only if match.
     DIFFERENT = -1,  // Execute only if no match.
-};
-
-enum class PlayerType { HUMAN, CPU };
-
-enum class PushKind {
-    STOP,        // set focus’s velocity to 0
-    COLLIDE,     // impart velocity from subject like a collision (capped)
-    DECELERATE,  // decrease focus’s velocity (capped)
-    SET,         // set focus’s velocity to value in subject’s direction
-    BOOST,       // add to focus’s velocity in subject’s direction
-    CRUISE,      // set focus’s velocity in focus’s direction
 };
 
 // Different screens on the minicomputer.
@@ -160,8 +56,6 @@ enum class Screen {
     MESSAGE = 4,
     STATUS  = 5,
 };
-
-enum class SubjectValue { CONTROL, TARGET, PLAYER };
 
 // The three weapons a ship may have.
 enum class Weapon {

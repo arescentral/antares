@@ -83,12 +83,13 @@ static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x)
                });
 }
 
-static AnimationDirection required_animation_direction(path_value x) {
-    return required_enum<AnimationDirection>(
-            x, {{"0", AnimationDirection::NONE},
-                {"+", AnimationDirection::PLUS},
-                {"-", AnimationDirection::MINUS},
-                {"?", AnimationDirection::RANDOM}});
+static BaseObject::Animation::Direction required_animation_direction(path_value x) {
+    using Direction = BaseObject::Animation::Direction;
+    return required_enum<Direction>(
+            x, {{"0", Direction::NONE},
+                {"+", Direction::PLUS},
+                {"-", Direction::MINUS},
+                {"?", Direction::RANDOM}});
 }
 
 static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
@@ -164,12 +165,13 @@ static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
                });
 }
 
-static IconShape required_icon_shape(path_value x) {
-    return required_enum<IconShape>(
-            x, {{"square", IconShape::SQUARE},
-                {"triangle", IconShape::TRIANGLE},
-                {"diamond", IconShape::DIAMOND},
-                {"plus", IconShape::PLUS}});
+static BaseObject::Icon::Shape required_icon_shape(path_value x) {
+    using Shape = BaseObject::Icon::Shape;
+    return required_enum<Shape>(
+            x, {{"square", Shape::SQUARE},
+                {"triangle", Shape::TRIANGLE},
+                {"diamond", Shape::DIAMOND},
+                {"plus", Shape::PLUS}});
 }
 
 static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {

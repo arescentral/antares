@@ -225,7 +225,7 @@ void apply(
         Handle<SpaceObject> object, Point* offset) {
     bool destroy = false;
     switch (a.kind) {
-        case KillKind::EXPIRE:
+        case KillAction::Kind::EXPIRE:
             if (subject.get()) {
                 focus = subject;
             } else {
@@ -233,7 +233,7 @@ void apply(
             }
             break;
 
-        case KillKind::DESTROY:
+        case KillAction::Kind::DESTROY:
             if (subject.get()) {
                 focus   = subject;
                 destroy = true;
@@ -242,7 +242,7 @@ void apply(
             }
             break;
 
-        case KillKind::NONE: break;
+        case KillAction::Kind::NONE: break;
     }
 
     // if the object is occupied by a human, eject him since he can't die
@@ -358,9 +358,9 @@ void apply(
     }
 
     switch (a.kind) {
-        case PushKind::STOP: focus->velocity = {Fixed::zero(), Fixed::zero()}; break;
+        case PushAction::Kind::STOP: focus->velocity = {Fixed::zero(), Fixed::zero()}; break;
 
-        case PushKind::BOOST: {
+        case PushAction::Kind::BOOST: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, focus->direction);
             focus->velocity.h += a.value * fx;
@@ -368,21 +368,21 @@ void apply(
             break;
         }
 
-        case PushKind::CRUISE: {
+        case PushAction::Kind::CRUISE: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, focus->direction);
             focus->velocity = {a.value * fx, a.value * fy};
             break;
         }
 
-        case PushKind::SET: {
+        case PushAction::Kind::SET: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, subject->direction);
             focus->velocity = {a.value * fx, a.value * fy};
             break;
         }
 
-        case PushKind::COLLIDE: {
+        case PushAction::Kind::COLLIDE: {
             if ((focus->base->mass <= Fixed::zero()) || (focus->maxVelocity <= Fixed::zero())) {
                 return;
             }
@@ -398,7 +398,7 @@ void apply(
             break;
         }
 
-        case PushKind::DECELERATE: {
+        case PushAction::Kind::DECELERATE: {
             if ((focus->base->mass <= Fixed::zero()) || (focus->maxVelocity <= Fixed::zero())) {
                 return;
             }
@@ -517,11 +517,11 @@ void apply(
         Handle<SpaceObject> object, Point* offset) {
     coordPointType newLocation;
     switch (a.origin) {
-        case MoveOrigin::LEVEL:
+        case MoveAction::Origin::LEVEL:
             newLocation = Translate_Coord_To_Level_Rotation(a.to.h, a.to.v);
             break;
-        case MoveOrigin::SUBJECT: newLocation = subject->location; break;
-        case MoveOrigin::OBJECT: newLocation = object->location; break;
+        case MoveAction::Origin::SUBJECT: newLocation = subject->location; break;
+        case MoveAction::Origin::OBJECT: newLocation = object->location; break;
     }
     newLocation.h += focus->randomSeed.next(a.distance << 1) - a.distance;
     newLocation.v += focus->randomSeed.next(a.distance << 1) - a.distance;
@@ -740,53 +740,59 @@ static void execute_actions(
         }
 
         switch (action.type()) {
-            case ActionType::AGE: apply(action.age, subject, focus, object, offset); break;
-            case ActionType::ASSUME: apply(action.assume, subject, focus, object, offset); break;
-            case ActionType::CAP_SPEED:
+            case Action::Type::AGE: apply(action.age, subject, focus, object, offset); break;
+            case Action::Type::ASSUME: apply(action.assume, subject, focus, object, offset); break;
+            case Action::Type::CAP_SPEED:
                 apply(action.cap_speed, subject, focus, object, offset);
                 break;
-            case ActionType::CAPTURE: apply(action.capture, subject, focus, object, offset); break;
-            case ActionType::CLOAK: apply(action.cloak, subject, focus, object, offset); break;
-            case ActionType::CONDITION:
+            case Action::Type::CAPTURE:
+                apply(action.capture, subject, focus, object, offset);
+                break;
+            case Action::Type::CLOAK: apply(action.cloak, subject, focus, object, offset); break;
+            case Action::Type::CONDITION:
                 apply(action.condition, subject, focus, object, offset);
                 break;
-            case ActionType::CREATE: apply(action.create, subject, focus, object, offset); break;
-            case ActionType::DISABLE: apply(action.disable, subject, focus, object, offset); break;
-            case ActionType::ENERGIZE:
+            case Action::Type::CREATE: apply(action.create, subject, focus, object, offset); break;
+            case Action::Type::DISABLE:
+                apply(action.disable, subject, focus, object, offset);
+                break;
+            case Action::Type::ENERGIZE:
                 apply(action.energize, subject, focus, object, offset);
                 break;
-            case ActionType::EQUIP: apply(action.equip, subject, focus, object, offset); break;
-            case ActionType::FIRE: apply(action.fire, subject, focus, object, offset); break;
-            case ActionType::FLASH: apply(action.flash, subject, focus, object, offset); break;
-            case ActionType::HEAL: apply(action.heal, subject, focus, object, offset); break;
-            case ActionType::HOLD:
+            case Action::Type::EQUIP: apply(action.equip, subject, focus, object, offset); break;
+            case Action::Type::FIRE: apply(action.fire, subject, focus, object, offset); break;
+            case Action::Type::FLASH: apply(action.flash, subject, focus, object, offset); break;
+            case Action::Type::HEAL: apply(action.heal, subject, focus, object, offset); break;
+            case Action::Type::HOLD:
                 apply(action.hold_position, subject, focus, object, offset);
                 break;
-            case ActionType::KEY: apply(action.key, subject, focus, object, offset); break;
-            case ActionType::KILL: apply(action.kill, subject, focus, object, offset); break;
-            case ActionType::LAND: apply(action.land, subject, focus, object, offset); break;
-            case ActionType::MESSAGE: apply(action.message, subject, focus, object, offset); break;
-            case ActionType::MORPH: apply(action.morph, subject, focus, object, offset); break;
-            case ActionType::MOVE: apply(action.move, subject, focus, object, offset); break;
-            case ActionType::OCCUPY: apply(action.occupy, subject, focus, object, offset); break;
-            case ActionType::ORDER: apply(action.order, subject, focus, object, offset); break;
-            case ActionType::PAY: apply(action.pay, subject, focus, object, offset); break;
-            case ActionType::PLAY: apply(action.play, subject, focus, object, offset); break;
-            case ActionType::PUSH: apply(action.push, subject, focus, object, offset); break;
-            case ActionType::REVEAL: apply(action.reveal, subject, focus, object, offset); break;
-            case ActionType::SCORE: apply(action.score, subject, focus, object, offset); break;
-            case ActionType::SELECT: apply(action.select, subject, focus, object, offset); break;
-            case ActionType::SPARK: apply(action.spark, subject, focus, object, offset); break;
-            case ActionType::SPIN: apply(action.spin, subject, focus, object, offset); break;
-            case ActionType::THRUST: apply(action.thrust, subject, focus, object, offset); break;
-            case ActionType::WARP: apply(action.warp, subject, focus, object, offset); break;
-            case ActionType::WIN: apply(action.win, subject, focus, object, offset); break;
-            case ActionType::ZOOM: apply(action.zoom, subject, focus, object, offset); break;
+            case Action::Type::KEY: apply(action.key, subject, focus, object, offset); break;
+            case Action::Type::KILL: apply(action.kill, subject, focus, object, offset); break;
+            case Action::Type::LAND: apply(action.land, subject, focus, object, offset); break;
+            case Action::Type::MESSAGE:
+                apply(action.message, subject, focus, object, offset);
+                break;
+            case Action::Type::MORPH: apply(action.morph, subject, focus, object, offset); break;
+            case Action::Type::MOVE: apply(action.move, subject, focus, object, offset); break;
+            case Action::Type::OCCUPY: apply(action.occupy, subject, focus, object, offset); break;
+            case Action::Type::ORDER: apply(action.order, subject, focus, object, offset); break;
+            case Action::Type::PAY: apply(action.pay, subject, focus, object, offset); break;
+            case Action::Type::PLAY: apply(action.play, subject, focus, object, offset); break;
+            case Action::Type::PUSH: apply(action.push, subject, focus, object, offset); break;
+            case Action::Type::REVEAL: apply(action.reveal, subject, focus, object, offset); break;
+            case Action::Type::SCORE: apply(action.score, subject, focus, object, offset); break;
+            case Action::Type::SELECT: apply(action.select, subject, focus, object, offset); break;
+            case Action::Type::SPARK: apply(action.spark, subject, focus, object, offset); break;
+            case Action::Type::SPIN: apply(action.spin, subject, focus, object, offset); break;
+            case Action::Type::THRUST: apply(action.thrust, subject, focus, object, offset); break;
+            case Action::Type::WARP: apply(action.warp, subject, focus, object, offset); break;
+            case Action::Type::WIN: apply(action.win, subject, focus, object, offset); break;
+            case Action::Type::ZOOM: apply(action.zoom, subject, focus, object, offset); break;
         }
 
         switch (action.type()) {
-            case ActionType::SCORE:
-            case ActionType::MESSAGE: checkConditions = true; break;
+            case Action::Type::SCORE:
+            case Action::Type::MESSAGE: checkConditions = true; break;
             default: break;
         }
     }

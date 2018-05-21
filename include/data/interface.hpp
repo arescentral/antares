@@ -32,6 +32,8 @@ class path_value;
 
 enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
 
+enum class InterfaceStyle { LARGE, SMALL };
+
 struct interfaceLabelType {
     int64_t stringID;
     int64_t stringNumber;

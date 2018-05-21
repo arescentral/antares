@@ -199,9 +199,9 @@ void CreateWeaponDataText(
         for (const auto& action : weaponObject->activate.action) {
             const NamedHandle<const BaseObject>* created_base;
             switch (action.type()) {
-                case ActionType::CREATE: created_base = &action.create.base; break;
-                case ActionType::MORPH: created_base = &action.morph.base; break;
-                case ActionType::EQUIP: created_base = &action.equip.base; break;
+                case Action::Type::CREATE: created_base = &action.create.base; break;
+                case Action::Type::MORPH: created_base = &action.morph.base; break;
+                case Action::Type::EQUIP: created_base = &action.equip.base; break;
                 default: continue;
             }
             if ((*created_base)->attributes & kIsGuided) {

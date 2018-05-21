@@ -40,10 +40,14 @@ struct Initial;
 struct Race;
 
 struct Level {
-    LevelType type = LevelType::DEMO;
+    enum class Type { SOLO, NET, DEMO };
+
+    Type type = Type::DEMO;
 
     struct Player {
-        PlayerType              playerType = PlayerType::CPU;
+        enum class Type { HUMAN, CPU };
+
+        Type                    playerType = Type::CPU;
         NamedHandle<const Race> playerRace;
         pn::string              name;
         Fixed                   earningPower = Fixed::zero();

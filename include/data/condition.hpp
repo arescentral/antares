@@ -33,6 +33,26 @@ union Action;
 struct Initial;
 class path_value;
 
+enum class ConditionType {
+    AUTOPILOT,
+    BUILDING,
+    COMPUTER,
+    COUNTER,
+    DESTROYED,
+    DISTANCE,
+    HEALTH,
+    MESSAGE,
+    ORDERED,
+    OWNER,
+    SHIPS,
+    SPEED,
+    SUBJECT,
+    TIME,
+    ZOOM,
+};
+
+enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
+
 struct ConditionBase {
     ConditionType         type;
     ConditionOp           op         = ConditionOp::EQ;
@@ -148,7 +168,9 @@ struct SpeedCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct SubjectCondition : ConditionBase {
-    SubjectValue value;
+    enum class Value { CONTROL, TARGET, PLAYER };
+
+    Value value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -172,6 +194,8 @@ struct ZoomCondition : ConditionBase {
 };
 
 union Condition {
+    using Type = ConditionType;
+
     ConditionBase base;
     ConditionType type() const;
 

@@ -129,8 +129,13 @@ class BaseObject {
     sfz::optional<RgbColor> shieldColor;  // color on radar (!has_value() = don't draw shields)
 
     struct Icon {
-        IconShape shape;
-        int64_t   size;
+        enum class Shape {
+            SQUARE,
+            TRIANGLE,
+            DIAMOND,
+            PLUS,
+        } shape;
+        int64_t size;
     };
     sfz::optional<Icon> icon;
 
@@ -206,14 +211,21 @@ class BaseObject {
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
+        enum class Direction {
+            NONE   = 0,   // 0
+            PLUS   = +1,  // +
+            MINUS  = -1,  // -
+            RANDOM = 2,   // ?
+        };
+
         pn::string sprite;  // ID of sprite resource
         int16_t    layer;   // 0 = no layer 1->3 = back to front
         int32_t    scale;   // sprite scale; 4096 = 100%
 
-        Range<Fixed>       frames;     // range of frames from sprite
-        AnimationDirection direction;  // frame sequence
-        Fixed              speed;      // speed at which object animates
-        Range<Fixed>       first;      // starting shape #
+        Range<Fixed> frames;     // range of frames from sprite
+        Direction    direction;  // frame sequence
+        Fixed        speed;      // speed at which object animates
+        Range<Fixed> first;      // starting shape #
     };
     sfz::optional<Animation> animation;
 

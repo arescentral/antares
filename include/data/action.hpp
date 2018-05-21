@@ -40,12 +40,42 @@ struct Initial;
 union Condition;
 class path_value;
 
-//
-// ActionBase:
-//  Defines any action that an object can take.  Conditions that can cause an action to execute
-//  are:
-//  destroy, expire, create, collide, activate, or message.
-//
+enum class ActionType {
+    AGE,
+    ASSUME,
+    CAP_SPEED,
+    CAPTURE,
+    CLOAK,
+    CONDITION,
+    CREATE,
+    DISABLE,
+    ENERGIZE,
+    EQUIP,
+    FIRE,
+    FLASH,
+    HEAL,
+    HOLD,
+    KEY,
+    KILL,
+    LAND,
+    MESSAGE,
+    MORPH,
+    MOVE,
+    OCCUPY,
+    ORDER,
+    PAY,
+    PUSH,
+    REVEAL,
+    SCORE,
+    SELECT,
+    PLAY,
+    SPARK,
+    SPIN,
+    THRUST,
+    WARP,
+    WIN,
+    ZOOM,
+};
 
 struct ActionBase {
     ActionType type;
@@ -141,7 +171,17 @@ struct KeyAction : public ActionBase {
 };
 
 struct KillAction : public ActionBase {
-    KillKind kind;
+    enum class Kind {
+        // Removes the focus without any further fanfare.
+        NONE = 0,
+
+        // Removes the subject without any further fanfare.
+        // Essentially, this is NONE, but always reflexive.
+        EXPIRE = 1,
+
+        // Removes the subject and executes its destroy action.
+        DESTROY = 2,
+    } kind;
 };
 
 struct LandAction : public ActionBase {
@@ -159,7 +199,11 @@ struct MorphAction : public ActionBase {
 };
 
 struct MoveAction : public ActionBase {
-    MoveOrigin     origin;
+    enum class Origin {
+        LEVEL,    // absolute coordinates, in level’s rotated frame of reference
+        SUBJECT,  // relative to subject
+        OBJECT,   // relative to object
+    } origin;
     coordPointType to;
     int64_t        distance;
 };
@@ -176,8 +220,15 @@ struct PayAction : public ActionBase {
 };
 
 struct PushAction : public ActionBase {
-    PushKind kind;
-    Fixed    value;
+    enum class Kind {
+        STOP,        // set focus’s velocity to 0
+        COLLIDE,     // impart velocity from subject like a collision (capped)
+        DECELERATE,  // decrease focus’s velocity (capped)
+        SET,         // set focus’s velocity to value in subject’s direction
+        BOOST,       // add to focus’s velocity in subject’s direction
+        CRUISE,      // set focus’s velocity in focus’s direction
+    } kind;
+    Fixed value;
 };
 
 struct RevealAction : public ActionBase {
@@ -237,8 +288,10 @@ struct ZoomAction : public ActionBase {
 };
 
 union Action {
+    using Type = ActionType;
+
     ActionBase base;
-    ActionType type() const;
+    Type       type() const;
 
     AgeAction          age;
     AssumeAction       assume;

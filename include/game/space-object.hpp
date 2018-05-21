@@ -165,10 +165,11 @@ class SpaceObject {
 
     struct {
         struct {
-            Fixed              thisShape;
-            Fixed              frameFraction;
-            AnimationDirection direction;
-            Fixed              speed;
+            using Direction = BaseObject::Animation::Direction;
+            Fixed     thisShape;
+            Fixed     frameFraction;
+            Direction direction;
+            Fixed     speed;
         } animation;
         Handle<Vector> vector;
     } frame;

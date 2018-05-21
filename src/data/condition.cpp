@@ -35,7 +35,7 @@ namespace antares {
             {"action", {&ConditionBase::action, required_array<Action, action>}}
 // clang-format on
 
-ConditionType Condition::type() const { return base.type; }
+Condition::Type Condition::type() const { return base.type; }
 
 Condition::Condition(AutopilotCondition a) : autopilot(std::move(a)) {}
 Condition::Condition(BuildingCondition a) : building(std::move(a)) {}
@@ -55,21 +55,21 @@ Condition::Condition(ZoomCondition a) : zoom(std::move(a)) {}
 
 Condition::Condition(Condition&& a) {
     switch (a.type()) {
-        case ConditionType::AUTOPILOT: new (this) Condition(std::move(a.autopilot)); break;
-        case ConditionType::BUILDING: new (this) Condition(std::move(a.building)); break;
-        case ConditionType::COMPUTER: new (this) Condition(std::move(a.computer)); break;
-        case ConditionType::COUNTER: new (this) Condition(std::move(a.counter)); break;
-        case ConditionType::DESTROYED: new (this) Condition(std::move(a.destroyed)); break;
-        case ConditionType::DISTANCE: new (this) Condition(std::move(a.distance)); break;
-        case ConditionType::HEALTH: new (this) Condition(std::move(a.health)); break;
-        case ConditionType::MESSAGE: new (this) Condition(std::move(a.message)); break;
-        case ConditionType::ORDERED: new (this) Condition(std::move(a.ordered)); break;
-        case ConditionType::OWNER: new (this) Condition(std::move(a.owner)); break;
-        case ConditionType::SHIPS: new (this) Condition(std::move(a.ships)); break;
-        case ConditionType::SPEED: new (this) Condition(std::move(a.speed)); break;
-        case ConditionType::SUBJECT: new (this) Condition(std::move(a.subject)); break;
-        case ConditionType::TIME: new (this) Condition(std::move(a.time)); break;
-        case ConditionType::ZOOM: new (this) Condition(std::move(a.zoom)); break;
+        case Condition::Type::AUTOPILOT: new (this) Condition(std::move(a.autopilot)); break;
+        case Condition::Type::BUILDING: new (this) Condition(std::move(a.building)); break;
+        case Condition::Type::COMPUTER: new (this) Condition(std::move(a.computer)); break;
+        case Condition::Type::COUNTER: new (this) Condition(std::move(a.counter)); break;
+        case Condition::Type::DESTROYED: new (this) Condition(std::move(a.destroyed)); break;
+        case Condition::Type::DISTANCE: new (this) Condition(std::move(a.distance)); break;
+        case Condition::Type::HEALTH: new (this) Condition(std::move(a.health)); break;
+        case Condition::Type::MESSAGE: new (this) Condition(std::move(a.message)); break;
+        case Condition::Type::ORDERED: new (this) Condition(std::move(a.ordered)); break;
+        case Condition::Type::OWNER: new (this) Condition(std::move(a.owner)); break;
+        case Condition::Type::SHIPS: new (this) Condition(std::move(a.ships)); break;
+        case Condition::Type::SPEED: new (this) Condition(std::move(a.speed)); break;
+        case Condition::Type::SUBJECT: new (this) Condition(std::move(a.subject)); break;
+        case Condition::Type::TIME: new (this) Condition(std::move(a.time)); break;
+        case Condition::Type::ZOOM: new (this) Condition(std::move(a.zoom)); break;
     }
 }
 
@@ -81,41 +81,41 @@ Condition& Condition::operator=(Condition&& a) {
 
 Condition::~Condition() {
     switch (type()) {
-        case ConditionType::AUTOPILOT: autopilot.~AutopilotCondition(); break;
-        case ConditionType::BUILDING: building.~BuildingCondition(); break;
-        case ConditionType::COMPUTER: computer.~ComputerCondition(); break;
-        case ConditionType::COUNTER: counter.~CounterCondition(); break;
-        case ConditionType::DESTROYED: destroyed.~DestroyedCondition(); break;
-        case ConditionType::DISTANCE: distance.~DistanceCondition(); break;
-        case ConditionType::HEALTH: health.~HealthCondition(); break;
-        case ConditionType::MESSAGE: message.~MessageCondition(); break;
-        case ConditionType::ORDERED: ordered.~OrderedCondition(); break;
-        case ConditionType::OWNER: owner.~OwnerCondition(); break;
-        case ConditionType::SHIPS: ships.~ShipsCondition(); break;
-        case ConditionType::SPEED: speed.~SpeedCondition(); break;
-        case ConditionType::SUBJECT: subject.~SubjectCondition(); break;
-        case ConditionType::TIME: time.~TimeCondition(); break;
-        case ConditionType::ZOOM: zoom.~ZoomCondition(); break;
+        case Condition::Type::AUTOPILOT: autopilot.~AutopilotCondition(); break;
+        case Condition::Type::BUILDING: building.~BuildingCondition(); break;
+        case Condition::Type::COMPUTER: computer.~ComputerCondition(); break;
+        case Condition::Type::COUNTER: counter.~CounterCondition(); break;
+        case Condition::Type::DESTROYED: destroyed.~DestroyedCondition(); break;
+        case Condition::Type::DISTANCE: distance.~DistanceCondition(); break;
+        case Condition::Type::HEALTH: health.~HealthCondition(); break;
+        case Condition::Type::MESSAGE: message.~MessageCondition(); break;
+        case Condition::Type::ORDERED: ordered.~OrderedCondition(); break;
+        case Condition::Type::OWNER: owner.~OwnerCondition(); break;
+        case Condition::Type::SHIPS: ships.~ShipsCondition(); break;
+        case Condition::Type::SPEED: speed.~SpeedCondition(); break;
+        case Condition::Type::SUBJECT: subject.~SubjectCondition(); break;
+        case Condition::Type::TIME: time.~TimeCondition(); break;
+        case Condition::Type::ZOOM: zoom.~ZoomCondition(); break;
     }
 }
 
-static ConditionType required_condition_type(path_value x) {
-    return required_enum<ConditionType>(
-            x, {{"autopilot", ConditionType::AUTOPILOT},
-                {"building", ConditionType::BUILDING},
-                {"computer", ConditionType::COMPUTER},
-                {"counter", ConditionType::COUNTER},
-                {"destroyed", ConditionType::DESTROYED},
-                {"distance", ConditionType::DISTANCE},
-                {"health", ConditionType::HEALTH},
-                {"message", ConditionType::MESSAGE},
-                {"ordered", ConditionType::ORDERED},
-                {"owner", ConditionType::OWNER},
-                {"ships", ConditionType::SHIPS},
-                {"speed", ConditionType::SPEED},
-                {"subject", ConditionType::SUBJECT},
-                {"time", ConditionType::TIME},
-                {"zoom", ConditionType::ZOOM}});
+static Condition::Type required_condition_type(path_value x) {
+    return required_enum<Condition::Type>(
+            x, {{"autopilot", Condition::Type::AUTOPILOT},
+                {"building", Condition::Type::BUILDING},
+                {"computer", Condition::Type::COMPUTER},
+                {"counter", Condition::Type::COUNTER},
+                {"destroyed", Condition::Type::DESTROYED},
+                {"distance", Condition::Type::DISTANCE},
+                {"health", Condition::Type::HEALTH},
+                {"message", Condition::Type::MESSAGE},
+                {"ordered", Condition::Type::ORDERED},
+                {"owner", Condition::Type::OWNER},
+                {"ships", Condition::Type::SHIPS},
+                {"speed", Condition::Type::SPEED},
+                {"subject", Condition::Type::SUBJECT},
+                {"time", Condition::Type::TIME},
+                {"zoom", Condition::Type::ZOOM}});
 }
 
 static ConditionOp required_condition_op(path_value x) {
@@ -207,11 +207,11 @@ static Condition speed_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS, {"value", {&SpeedCondition::value, required_fixed}}});
 }
 
-static SubjectValue required_subject_value(path_value x) {
-    return required_enum<SubjectValue>(
-            x, {{"control", SubjectValue::CONTROL},
-                {"target", SubjectValue::TARGET},
-                {"player", SubjectValue::PLAYER}});
+static SubjectCondition::Value required_subject_value(path_value x) {
+    return required_enum<SubjectCondition::Value>(
+            x, {{"control", SubjectCondition::Value::CONTROL},
+                {"target", SubjectCondition::Value::TARGET},
+                {"player", SubjectCondition::Value::PLAYER}});
 }
 
 static Condition subject_condition(path_value x) {
@@ -241,21 +241,21 @@ Condition condition(path_value x) {
     }
 
     switch (required_condition_type(x.get("type"))) {
-        case ConditionType::AUTOPILOT: return autopilot_condition(x);
-        case ConditionType::BUILDING: return building_condition(x);
-        case ConditionType::COMPUTER: return computer_condition(x);
-        case ConditionType::COUNTER: return counter_condition(x);
-        case ConditionType::DESTROYED: return destroyed_condition(x);
-        case ConditionType::DISTANCE: return distance_condition(x);
-        case ConditionType::HEALTH: return health_condition(x);
-        case ConditionType::MESSAGE: return message_condition(x);
-        case ConditionType::ORDERED: return ordered_condition(x);
-        case ConditionType::OWNER: return owner_condition(x);
-        case ConditionType::SHIPS: return ships_condition(x);
-        case ConditionType::SPEED: return speed_condition(x);
-        case ConditionType::SUBJECT: return subject_condition(x);
-        case ConditionType::TIME: return time_condition(x);
-        case ConditionType::ZOOM: return zoom_condition(x);
+        case Condition::Type::AUTOPILOT: return autopilot_condition(x);
+        case Condition::Type::BUILDING: return building_condition(x);
+        case Condition::Type::COMPUTER: return computer_condition(x);
+        case Condition::Type::COUNTER: return counter_condition(x);
+        case Condition::Type::DESTROYED: return destroyed_condition(x);
+        case Condition::Type::DISTANCE: return distance_condition(x);
+        case Condition::Type::HEALTH: return health_condition(x);
+        case Condition::Type::MESSAGE: return message_condition(x);
+        case Condition::Type::ORDERED: return ordered_condition(x);
+        case Condition::Type::OWNER: return owner_condition(x);
+        case Condition::Type::SHIPS: return ships_condition(x);
+        case Condition::Type::SPEED: return speed_condition(x);
+        case Condition::Type::SUBJECT: return subject_condition(x);
+        case Condition::Type::TIME: return time_condition(x);
+        case Condition::Type::ZOOM: return zoom_condition(x);
     }
 }
 

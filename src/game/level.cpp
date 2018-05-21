@@ -133,17 +133,17 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
 #endif  // DATA_COVERAGE
 
     switch (action.type()) {
-        case ActionType::CREATE:
+        case Action::Type::CREATE:
             AddBaseObjectMedia(action.create.base, all_colors, Required::YES);
             break;
-        case ActionType::MORPH:
+        case Action::Type::MORPH:
             AddBaseObjectMedia(action.morph.base, all_colors, Required::YES);
             break;
-        case ActionType::EQUIP:
+        case Action::Type::EQUIP:
             AddBaseObjectMedia(action.equip.base, all_colors, Required::YES);
             break;
 
-        case ActionType::PLAY:
+        case Action::Type::PLAY:
             if (action.play.sound.has_value()) {
                 sys.sound.load(*action.play.sound);
             } else {
@@ -208,7 +208,7 @@ LoadState start_construct_level(const Level& level) {
 
     int i = 0;
     for (const auto& player : g.level->players) {
-        if (player.playerType == PlayerType::HUMAN) {
+        if (player.playerType == Level::Player::Type::HUMAN) {
             auto admiral = Admiral::make(i++, kAIsHuman, player);
             admiral->pay(Fixed::from_long(5000));
             g.admiral = admiral;

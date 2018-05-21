@@ -149,11 +149,11 @@ bool is_true(const SpeedCondition& c) {
 bool is_true(const SubjectCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     switch (c.value) {
-        case SubjectValue::CONTROL:
+        case SubjectCondition::Value::CONTROL:
             return sObject.get() && op_eq(c.op, sObject, g.admiral->control());
-        case SubjectValue::TARGET:
+        case SubjectCondition::Value::TARGET:
             return sObject.get() && op_eq(c.op, sObject, g.admiral->target());
-        case SubjectValue::PLAYER: return sObject.get() && op_eq(c.op, sObject, g.ship);
+        case SubjectCondition::Value::PLAYER: return sObject.get() && op_eq(c.op, sObject, g.ship);
     }
 }
 
@@ -176,21 +176,21 @@ bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.value);
 
 bool is_true(const Condition& c) {
     switch (c.type()) {
-        case ConditionType::AUTOPILOT: return is_true(c.autopilot);
-        case ConditionType::BUILDING: return is_true(c.building);
-        case ConditionType::COMPUTER: return is_true(c.computer);
-        case ConditionType::COUNTER: return is_true(c.counter);
-        case ConditionType::DESTROYED: return is_true(c.destroyed);
-        case ConditionType::DISTANCE: return is_true(c.distance);
-        case ConditionType::HEALTH: return is_true(c.health);
-        case ConditionType::MESSAGE: return is_true(c.message);
-        case ConditionType::ORDERED: return is_true(c.ordered);
-        case ConditionType::OWNER: return is_true(c.owner);
-        case ConditionType::SHIPS: return is_true(c.ships);
-        case ConditionType::SPEED: return is_true(c.speed);
-        case ConditionType::SUBJECT: return is_true(c.subject);
-        case ConditionType::TIME: return is_true(c.time);
-        case ConditionType::ZOOM: return is_true(c.zoom);
+        case Condition::Type::AUTOPILOT: return is_true(c.autopilot);
+        case Condition::Type::BUILDING: return is_true(c.building);
+        case Condition::Type::COMPUTER: return is_true(c.computer);
+        case Condition::Type::COUNTER: return is_true(c.counter);
+        case Condition::Type::DESTROYED: return is_true(c.destroyed);
+        case Condition::Type::DISTANCE: return is_true(c.distance);
+        case Condition::Type::HEALTH: return is_true(c.health);
+        case Condition::Type::MESSAGE: return is_true(c.message);
+        case Condition::Type::ORDERED: return is_true(c.ordered);
+        case Condition::Type::OWNER: return is_true(c.owner);
+        case Condition::Type::SHIPS: return is_true(c.ships);
+        case Condition::Type::SPEED: return is_true(c.speed);
+        case Condition::Type::SUBJECT: return is_true(c.subject);
+        case Condition::Type::TIME: return is_true(c.time);
+        case Condition::Type::ZOOM: return is_true(c.zoom);
     }
 }
 

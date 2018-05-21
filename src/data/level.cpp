@@ -48,15 +48,16 @@ static sfz::optional<int32_t> optional_int32(path_value x) {
     return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
 }
 
-template <LevelType T>
+template <Level::Type T>
 static Level::Player required_player(path_value x);
 
-static PlayerType required_player_type(path_value x) {
-    return required_enum<PlayerType>(x, {{"human", PlayerType::HUMAN}, {"cpu", PlayerType::CPU}});
+static Level::Player::Type required_player_type(path_value x) {
+    return required_enum<Level::Player::Type>(
+            x, {{"human", Level::Player::Type::HUMAN}, {"cpu", Level::Player::Type::CPU}});
 }
 
 template <>
-Level::Player required_player<LevelType::DEMO>(path_value x) {
+Level::Player required_player<Level::Type::DEMO>(path_value x) {
     return required_struct<Level::Player>(
             x, {{"name", {&Level::Player::name, required_string_copy}},
                 {"race", {&Level::Player::playerRace, required_race}},
@@ -64,7 +65,7 @@ Level::Player required_player<LevelType::DEMO>(path_value x) {
 }
 
 template <>
-Level::Player required_player<LevelType::SOLO>(path_value x) {
+Level::Player required_player<Level::Type::SOLO>(path_value x) {
     return required_struct<Level::Player>(
             x, {{"type", {&Level::Player::playerType, required_player_type}},
                 {"name", {&Level::Player::name, required_string_copy}},
@@ -74,7 +75,7 @@ Level::Player required_player<LevelType::SOLO>(path_value x) {
 }
 
 template <>
-Level::Player required_player<LevelType::NET>(path_value x) {
+Level::Player required_player<Level::Type::NET>(path_value x) {
     return required_struct<Level::Player>(
             x, {{"type", {&Level::Player::playerType, required_player_type}},
                 {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
@@ -139,9 +140,10 @@ static Level::StatusLine required_status_line(path_value x) {
             {"par", {&Level::par, optional_par}}
 // clang-format on
 
-static LevelType required_level_type(path_value x) {
-    return required_enum<LevelType>(
-            x, {{"solo", LevelType::SOLO}, {"net", LevelType::NET}, {"demo", LevelType::DEMO}});
+static Level::Type required_level_type(path_value x) {
+    return required_enum<Level::Type>(
+            x,
+            {{"solo", Level::Type::SOLO}, {"net", Level::Type::NET}, {"demo", Level::Type::DEMO}});
 }
 
 static Level demo_level(path_value x) {
@@ -150,7 +152,7 @@ static Level demo_level(path_value x) {
                        COMMON_LEVEL_FIELDS,
                        {"players",
                         {&Level::players,
-                         required_array<Level::Player, required_player<LevelType::DEMO>>}},
+                         required_array<Level::Player, required_player<Level::Type::DEMO>>}},
                });
 }
 
@@ -160,7 +162,7 @@ static Level solo_level(path_value x) {
                        COMMON_LEVEL_FIELDS,
                        {"players",
                         {&Level::players,
-                         required_array<Level::Player, required_player<LevelType::SOLO>>}},
+                         required_array<Level::Player, required_player<Level::Type::SOLO>>}},
                        {"no_ships", {&Level::own_no_ships_text, optional_string, ""}},
                        {"prologue", {&Level::prologue, optional_string, ""}},
                        {"epilogue", {&Level::epilogue, optional_string, ""}},
@@ -173,7 +175,7 @@ static Level net_level(path_value x) {
                        COMMON_LEVEL_FIELDS,
                        {"players",
                         {&Level::players,
-                         required_array<Level::Player, required_player<LevelType::NET>>}},
+                         required_array<Level::Player, required_player<Level::Type::NET>>}},
                        {"own_no_ships", {&Level::own_no_ships_text, optional_string, ""}},
                        {"foe_no_ships", {&Level::foe_no_ships_text, optional_string, ""}},
                        {"description", {&Level::description, optional_string, ""}},
@@ -186,9 +188,9 @@ Level level(pn::value_cref x0) {
         throw std::runtime_error("must be map");
     }
     switch (required_level_type(x.get("type"))) {
-        case LevelType::DEMO: return demo_level(x);
-        case LevelType::SOLO: return solo_level(x);
-        case LevelType::NET: return net_level(x);
+        case Level::Type::DEMO: return demo_level(x);
+        case Level::Type::SOLO: return solo_level(x);
+        case Level::Type::NET: return net_level(x);
     }
 }
 
