@@ -33,8 +33,7 @@ using std::swap;
 
 ReplayGame::ReplayGame(int16_t replay_id)
         : _state(NEW),
-          _resource(Resource::replay(replay_id)),
-          _data(_resource.data()),
+          _data(Resource::replay(replay_id)),
           _random_seed{_data.global_seed},
           _level(*Level::get(_data.chapter_id - 1)),
           _game_result(NO_GAME),

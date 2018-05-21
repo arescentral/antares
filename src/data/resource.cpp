@@ -27,6 +27,7 @@
 #include "data/field.hpp"
 #include "data/font-data.hpp"
 #include "data/interface.hpp"
+#include "data/replay.hpp"
 #include "data/sprite-data.hpp"
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
@@ -104,7 +105,9 @@ std::vector<std::unique_ptr<InterfaceItem>> Resource::interface(pn::string_view 
     return interface_items(0, path_value{procyon(pn::format("interfaces/{0}.pn", name))});
 }
 
-Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
+ReplayData Resource::replay(int id) {
+    return ReplayData(load(pn::format("replays/{0}.NLRP", id))->data());
+}
 
 std::vector<int32_t> Resource::rotation_table() {
     Resource             rsrc = path("rotation-table");

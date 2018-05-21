@@ -33,6 +33,7 @@ class InterfaceItem;
 class NatePixTable;
 class Texture;
 struct FontData;
+struct ReplayData;
 struct SpriteData;
 
 class Resource {
@@ -43,7 +44,7 @@ class Resource {
     static FontData                                    font(pn::string_view name);
     static Texture                                     font_image(pn::string_view name);
     static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
-    static Resource                                    replay(int id);
+    static ReplayData                                  replay(int id);
     static std::vector<int32_t>                        rotation_table();
     static SpriteData                                  sprite_data(pn::string_view name);
     static ArrayPixMap                                 sprite_image(pn::string_view name);

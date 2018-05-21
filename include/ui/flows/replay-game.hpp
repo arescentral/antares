@@ -45,7 +45,6 @@ class ReplayGame : public Card {
     };
     State _state;
 
-    Resource          _resource;
     ReplayData        _data;
     Random            _random_seed;
     const Level&      _level;
