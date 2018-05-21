@@ -26,6 +26,7 @@
 
 #include "data/enums.hpp"
 #include "data/handle.hpp"
+#include "data/range.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -37,15 +38,6 @@ struct Level;
 struct Initial;
 union Condition;
 struct Race;
-
-template <typename T>
-struct Range {
-    T begin, end;
-
-    T range() const { return end - begin; }
-
-    static constexpr Range empty() { return {-1, -1}; }
-};
 
 class path_value {
     enum class Kind { ROOT, KEY, INDEX };

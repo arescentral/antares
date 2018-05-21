@@ -18,6 +18,7 @@
 
 #include "data/races.hpp"
 
+#include "data/field.hpp"
 #include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"

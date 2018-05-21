@@ -26,6 +26,7 @@
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
 #include "data/condition.hpp"
+#include "data/field.hpp"
 #include "data/initial.hpp"
 #include "data/level.hpp"
 #include "data/races.hpp"

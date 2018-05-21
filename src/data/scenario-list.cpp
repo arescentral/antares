@@ -22,7 +22,9 @@
 #include <string.h>
 #include <pn/file>
 #include <sfz/sfz.hpp>
+
 #include "config/dirs.hpp"
+#include "data/field.hpp"
 #include "data/level.hpp"
 
 using std::vector;

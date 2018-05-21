@@ -22,6 +22,7 @@
 #include <pn/string>
 
 #include "data/action.hpp"
+#include "data/range.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"

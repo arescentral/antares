@@ -20,6 +20,8 @@
 
 #include "data/base-object.hpp"
 
+#include "data/field.hpp"
+
 namespace antares {
 
 static int32_t required_int32(path_value x) {

@@ -26,8 +26,8 @@
 #include <vector>
 
 #include "data/enums.hpp"
-#include "data/field.hpp"
 #include "data/handle.hpp"
+#include "data/range.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -38,6 +38,7 @@ class SpaceObject;
 struct Level;
 struct Initial;
 union Condition;
+class path_value;
 
 //
 // ActionBase:
