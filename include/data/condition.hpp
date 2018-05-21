@@ -41,15 +41,6 @@ struct ConditionBase {
     Handle<const Initial> subject;
     Handle<const Initial> object;
     std::vector<Action>   action;
-
-    ConditionBase()                = default;
-    ConditionBase(ConditionBase&&) = default;
-    ConditionBase& operator=(ConditionBase&&) = default;
-    virtual ~ConditionBase()                  = default;
-    virtual bool is_true() const;
-
-    ConditionBase(const ConditionBase&) = delete;
-    ConditionBase& operator=(const ConditionBase&) = delete;
 };
 
 // Ops: EQ, NE
@@ -57,8 +48,7 @@ struct ConditionBase {
 //
 // Warning: not net-safe.
 struct AutopilotCondition : ConditionBase {
-    bool         value;
-    virtual bool is_true() const;
+    bool value;
 };
 
 // Ops: EQ, NE
@@ -67,8 +57,7 @@ struct AutopilotCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct BuildingCondition : ConditionBase {
-    bool         value;
-    virtual bool is_true() const;
+    bool value;
 };
 
 // Ops: EQ, NE
@@ -76,9 +65,8 @@ struct BuildingCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct ComputerCondition : ConditionBase {
-    Screen       screen;
-    int64_t      line;
-    virtual bool is_true() const;
+    Screen  screen;
+    int64_t line;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -87,7 +75,6 @@ struct CounterCondition : ConditionBase {
     Handle<Admiral> player;
     int64_t         counter;
     int64_t         value;
-    virtual bool    is_true() const;
 };
 
 // Ops: EQ, NE
@@ -99,7 +86,6 @@ struct CounterCondition : ConditionBase {
 struct DestroyedCondition : ConditionBase {
     Handle<const Initial> initial;
     bool                  value;
-    virtual bool          is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -109,8 +95,7 @@ struct DestroyedCondition : ConditionBase {
 // TODO(sfiera): provide a definition of “distance” in this context, and especially what
 // “extremely” distant means.
 struct DistanceCondition : ConditionBase {
-    int64_t      value;
-    virtual bool is_true() const;
+    int64_t value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -119,8 +104,7 @@ struct DistanceCondition : ConditionBase {
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
-    double       value;
-    virtual bool is_true() const;
+    double value;
 };
 
 // Ops: EQ, NE
@@ -128,24 +112,20 @@ struct HealthCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct MessageCondition : ConditionBase {
-    int64_t      id;
-    int64_t      page;
-    virtual bool is_true() const;
+    int64_t id;
+    int64_t page;
 };
 
 // Ops: EQ, NE
 // Precondition: `subject` and `object` exist.
 // Compares target of `subject` to `object`.
-struct OrderedCondition : ConditionBase {
-    virtual bool is_true() const;
-};
+struct OrderedCondition : ConditionBase {};
 
 // Ops: EQ, NE
 // Precondition: `subject` exists.
 // Compares owner of `subject` to `player`.
 struct OwnerCondition : ConditionBase {
     Handle<Admiral> player;
-    virtual bool    is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -153,15 +133,13 @@ struct OwnerCondition : ConditionBase {
 struct ShipsCondition : ConditionBase {
     Handle<Admiral> player;
     int64_t         value;
-    virtual bool    is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `subject` exists.
 // Compares speed of `subject` to `value`.
 struct SpeedCondition : ConditionBase {
-    Fixed        value;
-    virtual bool is_true() const;
+    Fixed value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -171,7 +149,6 @@ struct SpeedCondition : ConditionBase {
 // Warning: not net-safe.
 struct SubjectCondition : ConditionBase {
     SubjectValue value;
-    virtual bool is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -182,9 +159,8 @@ struct SubjectCondition : ConditionBase {
 //
 // TODO(sfiera): provide a way to specify game time “normally”
 struct TimeCondition : ConditionBase {
-    ticks        duration;
-    bool         legacy_start_time;
-    virtual bool is_true() const;
+    ticks duration;
+    bool  legacy_start_time;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -192,8 +168,7 @@ struct TimeCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct ZoomCondition : ConditionBase {
-    Zoom         value;
-    virtual bool is_true() const;
+    Zoom value;
 };
 
 union Condition {

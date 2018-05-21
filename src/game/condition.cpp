@@ -64,37 +64,37 @@ static bool op_eq(ConditionOp op, const X& x, const Y& y) {
     }
 }
 
-bool ConditionBase::is_true() const { return false; }
-
-bool AutopilotCondition::is_true() const { return op_eq(op, IsPlayerShipOnAutoPilot(), value); }
-
-bool BuildingCondition::is_true() const {
-    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-    return buildAtObject.get() && op_eq(op, buildAtObject->totalBuildTime > ticks(0), value);
+bool is_true(const AutopilotCondition& c) {
+    return op_eq(c.op, IsPlayerShipOnAutoPilot(), c.value);
 }
 
-bool ComputerCondition::is_true() const {
-    if (line < 0) {
-        return op_eq(op, g.mini.currentScreen, screen);
+bool is_true(const BuildingCondition& c) {
+    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
+    return buildAtObject.get() && op_eq(c.op, buildAtObject->totalBuildTime > ticks(0), c.value);
+}
+
+bool is_true(const ComputerCondition& c) {
+    if (c.line < 0) {
+        return op_eq(c.op, g.mini.currentScreen, c.screen);
     } else {
         return op_eq(
-                op, std::pair<Screen, int>(g.mini.currentScreen, g.mini.selectLine),
-                std::pair<Screen, int>(screen, line));
+                c.op, std::pair<Screen, int>(g.mini.currentScreen, g.mini.selectLine),
+                std::pair<Screen, int>(c.screen, c.line));
     }
 }
 
-bool CounterCondition::is_true() const {
-    return op_compare(op, GetAdmiralScore(player, counter), value);
+bool is_true(const CounterCondition& c) {
+    return op_compare(c.op, GetAdmiralScore(c.player, c.counter), c.value);
 }
 
-bool DestroyedCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(initial);
-    return op_eq(op, !sObject.get(), value);
+bool is_true(const DestroyedCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.initial);
+    return op_eq(c.op, !sObject.get(), c.value);
 }
 
-bool DistanceCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    auto dObject = GetObjectFromInitialNumber(object);
+bool is_true(const DistanceCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto dObject = GetObjectFromInitialNumber(c.object);
     if (sObject.get() && dObject.get()) {
         int32_t  difference = ABS<int>(sObject->location.h - dObject->location.h);
         uint32_t dcalc      = difference;
@@ -103,76 +103,101 @@ bool DistanceCondition::is_true() const {
 
         if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
             distance = distance * distance + dcalc * dcalc;
-            return op_compare(op, distance, value);
+            return op_compare(c.op, distance, c.value);
         }
     }
     return false;
 }
 
-bool HealthCondition::is_true() const {
-    auto   sObject = GetObjectFromInitialNumber(subject);
+bool is_true(const HealthCondition& c) {
+    auto   sObject = GetObjectFromInitialNumber(c.subject);
     double health  = 0.0;
     if (sObject.get()) {
         health = sObject->health();
         health /= sObject->max_health();
     }
-    return op_compare(op, health, value);
+    return op_compare(c.op, health, c.value);
 }
 
-bool MessageCondition::is_true() const { return op_eq(op, Messages::current(), id + page - 1); }
+bool is_true(const MessageCondition& c) {
+    return op_eq(c.op, Messages::current(), c.id + c.page - 1);
+}
 
-bool OrderedCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    auto dObject = GetObjectFromInitialNumber(object);
+bool is_true(const OrderedCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto dObject = GetObjectFromInitialNumber(c.object);
     return sObject.get() && dObject.get() &&
-           op_eq(op, std::make_pair(sObject->destObject, sObject->destObjectID),
+           op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
                  std::make_pair(dObject, dObject->id));
 }
 
-bool OwnerCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    return sObject.get() && op_eq(op, player, sObject->owner);
+bool is_true(const OwnerCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.subject);
+    return sObject.get() && op_eq(c.op, c.player, sObject->owner);
 }
 
-bool ShipsCondition::is_true() const { return op_compare(op, GetAdmiralShipsLeft(player), value); }
+bool is_true(const ShipsCondition& c) {
+    return op_compare(c.op, GetAdmiralShipsLeft(c.player), c.value);
+}
 
-bool SpeedCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
+bool is_true(const SpeedCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.subject);
     return sObject.get() &&
-           op_compare(op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), value);
+           op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
 }
 
-bool SubjectCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    switch (value) {
+bool is_true(const SubjectCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.subject);
+    switch (c.value) {
         case SubjectValue::CONTROL:
-            return sObject.get() && op_eq(op, sObject, g.admiral->control());
-        case SubjectValue::TARGET: return sObject.get() && op_eq(op, sObject, g.admiral->target());
-        case SubjectValue::PLAYER: return sObject.get() && op_eq(op, sObject, g.ship);
+            return sObject.get() && op_eq(c.op, sObject, g.admiral->control());
+        case SubjectValue::TARGET:
+            return sObject.get() && op_eq(c.op, sObject, g.admiral->target());
+        case SubjectValue::PLAYER: return sObject.get() && op_eq(c.op, sObject, g.ship);
     }
 }
 
-bool TimeCondition::is_true() const {
+bool is_true(const TimeCondition& c) {
     // Tricky: the original code for handling startTime counted g.time in major ticks,
     // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
     // (game start) counts as 1/3 towards time conditions to preserve old behavior.
     game_ticks t;
-    if (!legacy_start_time) {
-        t = game_ticks{duration};
-    } else if ((3 * duration) < g.level->startTime) {
-        t = game_ticks{(3 * duration) - g.level->startTime};
+    if (!c.legacy_start_time) {
+        t = game_ticks{c.duration};
+    } else if ((3 * c.duration) < g.level->startTime) {
+        t = game_ticks{(3 * c.duration) - g.level->startTime};
     } else {
-        t = game_ticks{duration - (g.level->startTime / 3)};
+        t = game_ticks{c.duration - (g.level->startTime / 3)};
     }
-    return op_compare(op, g.time, t);
+    return op_compare(c.op, g.time, t);
 }
 
-bool ZoomCondition::is_true() const { return op_compare(op, g.zoom, value); }
+bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.value); }
+
+bool is_true(const Condition& c) {
+    switch (c.type()) {
+        case ConditionType::AUTOPILOT: return is_true(c.autopilot);
+        case ConditionType::BUILDING: return is_true(c.building);
+        case ConditionType::COMPUTER: return is_true(c.computer);
+        case ConditionType::COUNTER: return is_true(c.counter);
+        case ConditionType::DESTROYED: return is_true(c.destroyed);
+        case ConditionType::DISTANCE: return is_true(c.distance);
+        case ConditionType::HEALTH: return is_true(c.health);
+        case ConditionType::MESSAGE: return is_true(c.message);
+        case ConditionType::ORDERED: return is_true(c.ordered);
+        case ConditionType::OWNER: return is_true(c.owner);
+        case ConditionType::SHIPS: return is_true(c.ships);
+        case ConditionType::SPEED: return is_true(c.speed);
+        case ConditionType::SUBJECT: return is_true(c.subject);
+        case ConditionType::TIME: return is_true(c.time);
+        case ConditionType::ZOOM: return is_true(c.zoom);
+    }
+}
 
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {
         int index = (&c - g.level->conditions.data());
-        if ((g.condition_enabled[index] || c.base.persistent) && (&c.base)->is_true()) {
+        if ((g.condition_enabled[index] || c.base.persistent) && is_true(c)) {
             g.condition_enabled[index] = false;
             auto  sObject              = GetObjectFromInitialNumber(c.base.subject);
             auto  dObject              = GetObjectFromInitialNumber(c.base.object);
