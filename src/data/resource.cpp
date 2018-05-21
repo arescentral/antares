@@ -25,6 +25,7 @@
 
 #include "config/dirs.hpp"
 #include "data/field.hpp"
+#include "data/font-data.hpp"
 #include "data/interface.hpp"
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
@@ -90,10 +91,12 @@ static Texture load_hidpi_texture(pn::string_view name) {
 
 Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
 
-Font Resource::font(pn::string_view name) {
-    return ::antares::font(
-            procyon(pn::format("fonts/{0}.pn", name)),
-            load_hidpi_texture(pn::format("fonts/{0}", name)));
+FontData Resource::font(pn::string_view name) {
+    return font_data(procyon(pn::format("fonts/{0}.pn", name)));
+}
+
+Texture Resource::font_image(pn::string_view name) {
+    return load_hidpi_texture(pn::format("fonts/{0}", name));
 }
 
 std::vector<std::unique_ptr<InterfaceItem>> Resource::interface(pn::string_view name) {

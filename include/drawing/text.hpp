@@ -56,7 +56,8 @@ class Font {
 
     std::map<pn::rune, Rect> _glyphs;
 };
-Font font(pn::value_cref name, Texture texture);
+
+Font font(pn::string_view name);
 
 }  // namespace antares
 

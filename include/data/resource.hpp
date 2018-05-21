@@ -31,14 +31,15 @@ namespace antares {
 class InterfaceItem;
 class Texture;
 class NatePixTable;
-class Font;
+struct FontData;
 
 class Resource {
   public:
     static bool     exists(pn::string_view path);
     static Resource path(pn::string_view path);
 
-    static Font                                        font(pn::string_view name);
+    static FontData                                    font(pn::string_view name);
+    static Texture                                     font_image(pn::string_view name);
     static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
     static Resource                                    replay(int id);
     static std::vector<int32_t>                        rotation_table();
