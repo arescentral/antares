@@ -94,14 +94,6 @@ static Level::Par optional_par(path_value x) {
             .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
-/*
-        struct Counter {
-            int  player = 0;
-            int  which  = 0;
-            bool fixed  = false;
-        };
-        */
-
 static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(path_value x) {
     return optional_struct<Level::StatusLine::Counter>(
             x, {
