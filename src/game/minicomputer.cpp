@@ -80,14 +80,6 @@ const int32_t kInLineButton  = kCompAcceptKeyNum;
 const int32_t kOutLineButton = kCompCancelKeyNum;
 
 enum {
-    kMainMiniScreen    = 1,
-    kBuildMiniScreen   = 2,
-    kSpecialMiniScreen = 3,
-    kMessageMiniScreen = 4,
-    kStatusMiniScreen  = 5,
-};
-
-enum {
     kMainMiniBuild   = 1,
     kMainMiniSpecial = 2,
     kMainMiniMessage = 3,
@@ -201,8 +193,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstr
 
 static void draw_mini_ship_data(
         Handle<SpaceObject> obj, Hue header_hue, int16_t screen_top, pn::string_view label);
-static void MiniComputerExecute(
-        int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
+static void MiniComputerExecute(Screen whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 
 void    MiniComputerSetStatusStrings(void);
 int32_t MiniComputerGetStatusValue(int32_t);
@@ -210,7 +201,7 @@ void    MiniComputerMakeStatusString(int32_t which_line, pn::string& string);
 
 void MiniScreenInit() {
     g.mini.selectLine    = kMiniScreenNoLineSelected;
-    g.mini.currentScreen = kMainMiniScreen;
+    g.mini.currentScreen = Screen::MAIN;
     g.mini.clickLine     = kMiniScreenNoLineSelected;
 
     g.mini.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
@@ -381,11 +372,11 @@ static void draw_minicomputer_lines() {
 
 void draw_mini_screen() {
     switch (g.mini.currentScreen) {
-        case kMainMiniScreen:
-        case kBuildMiniScreen:
-        case kSpecialMiniScreen:
-        case kMessageMiniScreen:
-        case kStatusMiniScreen: draw_minicomputer_lines(); break;
+        case Screen::MAIN:
+        case Screen::BUILD:
+        case Screen::SPECIAL:
+        case Screen::MESSAGE:
+        case Screen::STATUS: draw_minicomputer_lines(); break;
     }
     draw_mini_ship_data(
             g.admiral->control(), Hue::YELLOW, kMiniSelectTop + instrument_top(), "CONTROL");
@@ -437,7 +428,7 @@ static miniScreenLineType cancel(pn::string_view name) {
 }
 
 template <size_t size>
-static void make_mini_screen(int16_t screen, const miniScreenLineType (&lines)[size]) {
+static void make_mini_screen(Screen screen, const miniScreenLineType (&lines)[size]) {
     auto* item           = g.mini.lineData.get();
     auto* button         = g.mini.lineData.get() + kMiniScreenCharHeight;
     g.mini.currentScreen = screen;
@@ -589,9 +580,13 @@ static void update_status_screen_lines() {
 // only for updating volitile lines--doesn't draw whole screen!
 void UpdateMiniScreenLines() {
     switch (g.mini.currentScreen) {
-        case kBuildMiniScreen: update_build_screen_lines(); break;
+        case Screen::BUILD: update_build_screen_lines(); break;
+        case Screen::STATUS: update_status_screen_lines(); break;
 
-        case kStatusMiniScreen: update_status_screen_lines(); break;
+        case Screen::MAIN:
+        case Screen::MESSAGE:
+        case Screen::SPECIAL:
+            break;  // nothing to do
     }
 }
 
@@ -879,7 +874,7 @@ static void show_build_screen(Handle<Admiral> adm, int32_t line) {
             accept("Build"),
             cancel("Main Menu"),
     };
-    make_mini_screen(kBuildMiniScreen, lines);
+    make_mini_screen(Screen::BUILD, lines);
     MiniComputerSetBuildStrings();
 }
 
@@ -898,7 +893,7 @@ static void show_special_screen(Handle<Admiral> adm, int32_t line) {
             accept("Execute"),
             cancel("Main Menu"),
     };
-    make_mini_screen(kSpecialMiniScreen, lines);
+    make_mini_screen(Screen::SPECIAL, lines);
 }
 
 static void show_message_screen(Handle<Admiral> adm, int32_t line) {
@@ -913,7 +908,7 @@ static void show_message_screen(Handle<Admiral> adm, int32_t line) {
             accept("Execute"),
             cancel("Main Menu"),
     };
-    make_mini_screen(kMessageMiniScreen, lines);
+    make_mini_screen(Screen::MESSAGE, lines);
 }
 
 static void show_status_screen(Handle<Admiral> adm, int32_t line) {
@@ -923,7 +918,7 @@ static void show_status_screen(Handle<Admiral> adm, int32_t line) {
     const miniScreenLineType lines[] = {
             text("MISSION STATUS", true), cancel("Main Menu"),
     };
-    make_mini_screen(kStatusMiniScreen, lines);
+    make_mini_screen(Screen::STATUS, lines);
     MiniComputerSetStatusStrings();
 }
 
@@ -939,11 +934,11 @@ static void show_main_screen(Handle<Admiral> adm, int32_t line) {
             selectable("<Mission Status>", show_status_screen),
             accept("Select"),
     };
-    make_mini_screen(kMainMiniScreen, lines);
+    make_mini_screen(Screen::MAIN, lines);
 }
 
 static void MiniComputerExecute(
-        int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
+        Screen whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
     if (whichLine != kMiniScreenNoLineSelected) {
         // TODO(sfiera): has to work for remote players, which means
         const miniScreenLineType* line = &g.mini.lineData[whichLine];
@@ -958,7 +953,7 @@ void MiniComputerDoCancel() { show_main_screen(g.admiral, 0); }
 void MiniComputerSetBuildStrings() {
     // sets the ship type strings for the build screen
     // also sets up the values = base object num
-    if (g.mini.currentScreen != kBuildMiniScreen) {
+    if (g.mini.currentScreen != Screen::BUILD) {
         return;
     }
 
@@ -1014,7 +1009,7 @@ void MiniComputerSetBuildStrings() {
 //  returns 0
 
 Fixed MiniComputerGetPriceOfCurrentSelection() {
-    if ((g.mini.currentScreen != kBuildMiniScreen) ||
+    if ((g.mini.currentScreen != Screen::BUILD) ||
         (g.mini.selectLine == kMiniScreenNoLineSelected)) {
         return Fixed::zero();
     }
@@ -1436,14 +1431,14 @@ void MiniComputerHandleMouseStillDown(Point where) {
 }
 
 // for ambrosia tutorial, a horrific hack
-void MiniComputer_SetScreenAndLineHack(int32_t whichScreen, int32_t whichLine) {
+void MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine) {
     Point w;
 
     switch (whichScreen) {
-        case kBuildMiniScreen: show_build_screen(g.admiral, 0); break;
-        case kSpecialMiniScreen: show_special_screen(g.admiral, 0); break;
-        case kMessageMiniScreen: show_message_screen(g.admiral, 0); break;
-        case kStatusMiniScreen: show_status_screen(g.admiral, 0); break;
+        case Screen::BUILD: show_build_screen(g.admiral, 0); break;
+        case Screen::SPECIAL: show_special_screen(g.admiral, 0); break;
+        case Screen::MESSAGE: show_message_screen(g.admiral, 0); break;
+        case Screen::STATUS: show_status_screen(g.admiral, 0); break;
         default: show_main_screen(g.admiral, 0); break;
     }
 

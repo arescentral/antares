@@ -55,15 +55,15 @@ static void draw_tiny_plus(const Rect& rect, const RgbColor& color) {
     sys.video->draw_plus(rect, color);
 }
 
-static draw_tiny_t draw_tiny_function(IconShape shape, int size) {
+static draw_tiny_t draw_tiny_function(BaseObject::Icon::Shape shape, int size) {
     if (size <= 0) {
         return NULL;
     }
     switch (shape) {
-        case IconShape::TRIANGLE: return draw_tiny_triangle;
-        case IconShape::SQUARE: return draw_tiny_square;
-        case IconShape::PLUS: return draw_tiny_plus;
-        case IconShape::DIAMOND: return draw_tiny_diamond;
+        case BaseObject::Icon::Shape::TRIANGLE: return draw_tiny_triangle;
+        case BaseObject::Icon::Shape::SQUARE: return draw_tiny_square;
+        case BaseObject::Icon::Shape::PLUS: return draw_tiny_plus;
+        case BaseObject::Icon::Shape::DIAMOND: return draw_tiny_diamond;
         default: return NULL;
     }
 }
@@ -137,7 +137,7 @@ Handle<Sprite> AddSprite(
             sprite->whichShape = whichShape;
             sprite->scale      = scale;
             sprite->whichLayer = layer;
-            sprite->icon       = icon.value_or(BaseObject::Icon{IconShape::SQUARE, 0});
+            sprite->icon = icon.value_or(BaseObject::Icon{BaseObject::Icon::Shape::SQUARE, 0});
             sprite->tinyColor  = {tiny_hue, tiny_shade};
             sprite->draw_tiny  = draw_tiny_function(sprite->icon.shape, sprite->icon.size);
             sprite->killMe     = false;

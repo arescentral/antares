@@ -45,8 +45,8 @@ Point BriefingSprite_GetBestLocation(
         int32_t gridWidth, int32_t gridHeight, Rect* bounds);
 
 void GetInitialObjectSpriteData(
-        Handle<const Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
-        coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect);
+        Handle<const Initial> whichObject, int32_t maxSize, Rect* bounds, coordPointType* corner,
+        int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect);
 
 void GetRealObjectSpriteData(
         coordPointType* realCoord, const BaseObject* baseObject, Handle<Admiral> owner,
@@ -212,9 +212,8 @@ void Briefing_Grid_Set(
 }
 
 void GetInitialObjectSpriteData(
-        Handle<const Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
-        coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where,
-        Rect* spriteRect) {
+        Handle<const Initial> whichObject, int32_t maxSize, Rect* bounds, coordPointType* corner,
+        int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect) {
     spriteRect->right = spriteRect->left = -1;
 
     auto sObject = GetObjectFromInitialNumber(whichObject);
@@ -423,10 +422,10 @@ void BriefPoint_Data_Get(
         int32_t whichPoint, const Level& level, pn::string_ref header, pn::string_ref content,
         Rect* hiliteBounds, coordPointType* corner, int32_t scale, int32_t minSectorSize,
         int32_t maxSize, Rect* bounds) {
-    Point                  where;
-    Rect                   spriteRect;
-    int32_t                thisScale;
-    const Level::Briefing* brief = &level.briefings[whichPoint];
+    Point           where;
+    Rect            spriteRect;
+    int32_t         thisScale;
+    const Briefing* brief = &level.briefings[whichPoint];
 
 #pragma unused(minSectorSize)
     hiliteBounds->right = hiliteBounds->left = 0;

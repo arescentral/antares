@@ -284,11 +284,11 @@ SpaceObject::SpaceObject(
             frame.animation.thisShape += randomSeed.next(base->animation->first.range());
         }
         frame.animation.direction = base->animation->direction;
-        if (base->animation->direction == AnimationDirection::RANDOM) {
+        if (base->animation->direction == BaseObject::Animation::Direction::RANDOM) {
             if (randomSeed.next(2) == 1) {
-                frame.animation.direction = AnimationDirection::PLUS;
+                frame.animation.direction = BaseObject::Animation::Direction::PLUS;
             } else {
-                frame.animation.direction = AnimationDirection::MINUS;
+                frame.animation.direction = BaseObject::Animation::Direction::MINUS;
             }
         }
         frame.animation.frameFraction = Fixed::zero();
@@ -329,7 +329,7 @@ SpaceObject::SpaceObject(
         if (weapon->base) {
             const auto& frame = weapon->base->device;
             weapon->ammo      = frame->ammo;
-            if ((frame->range > 0) && (frame->usage & kUseForAttacking)) {
+            if ((frame->range > 0) && (frame->usage.attacking)) {
                 longestWeaponRange  = max(frame->range, longestWeaponRange);
                 shortestWeaponRange = min(frame->range, shortestWeaponRange);
             }
@@ -403,11 +403,11 @@ void SpaceObject::change_base_type(
             obj->frame.animation.thisShape += obj->randomSeed.next(base.animation->first.range());
         }
         frame.animation.direction = base.animation->direction;
-        if (base.animation->direction == AnimationDirection::RANDOM) {
+        if (base.animation->direction == BaseObject::Animation::Direction::RANDOM) {
             if (randomSeed.next(2) == 1) {
-                frame.animation.direction = AnimationDirection::PLUS;
+                frame.animation.direction = BaseObject::Animation::Direction::PLUS;
             } else {
-                frame.animation.direction = AnimationDirection::MINUS;
+                frame.animation.direction = BaseObject::Animation::Direction::MINUS;
             }
         }
         obj->frame.animation.frameFraction = Fixed::zero();
@@ -480,7 +480,7 @@ void SpaceObject::change_base_type(
             }
         }
         r = weapon->base->device->range;
-        if ((r > 0) && (weapon->base->device->usage & kUseForAttacking)) {
+        if ((r > 0) && (weapon->base->device->usage.attacking)) {
             if (r > obj->longestWeaponRange) {
                 obj->longestWeaponRange = r;
             }
@@ -507,8 +507,9 @@ void SpaceObject::change_base_type(
             throw std::runtime_error("Couldn't load a requested sprite");
         }
 
-        obj->sprite->table      = spriteTable;
-        obj->sprite->icon       = base.icon.value_or(BaseObject::Icon{IconShape::SQUARE, 0});
+        obj->sprite->table = spriteTable;
+        obj->sprite->icon =
+                base.icon.value_or(BaseObject::Icon{BaseObject::Icon::Shape::SQUARE, 0});
         obj->sprite->whichLayer = sprite_layer(base);
         obj->sprite->scale      = sprite_scale(base);
 

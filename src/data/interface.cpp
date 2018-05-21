@@ -34,6 +34,11 @@ using sfz::range;
 
 namespace antares {
 
+static InterfaceStyle required_interface_style(path_value x) {
+    return required_enum<InterfaceStyle>(
+            x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
+}
+
 static int16_t optional_key_num(path_value x) {
     auto k = optional_string(x);
     if (!k.has_value()) {

@@ -21,6 +21,7 @@
 #include <set>
 #include <sfz/sfz.hpp>
 
+#include "data/condition.hpp"
 #include "data/plugin.hpp"
 #include "data/races.hpp"
 #include "drawing/pix-table.hpp"
@@ -62,8 +63,7 @@ enum class Required : bool {
     YES = true,
 };
 
-void AddBaseObjectActionMedia(
-        const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors);
+void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16> all_colors);
 void AddActionMedia(const Action& action, std::bitset<16> all_colors);
 
 void AddBaseObjectMedia(
@@ -121,10 +121,9 @@ void AddBaseObjectMedia(
     }
 }
 
-void AddBaseObjectActionMedia(
-        const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors) {
+void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16> all_colors) {
     for (const auto& action : actions) {
-        AddActionMedia(*action, all_colors);
+        AddActionMedia(action, all_colors);
     }
 }
 
@@ -133,13 +132,27 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    auto base = action.created_base();
-    if (base) {
-        AddBaseObjectMedia(*base, all_colors, Required::YES);
-    }
+    switch (action.type()) {
+        case Action::Type::CREATE:
+            AddBaseObjectMedia(action.create.base, all_colors, Required::YES);
+            break;
+        case Action::Type::MORPH:
+            AddBaseObjectMedia(action.morph.base, all_colors, Required::YES);
+            break;
+        case Action::Type::EQUIP:
+            AddBaseObjectMedia(action.equip.base, all_colors, Required::YES);
+            break;
 
-    for (const pn::string_view sound : action.sound_ids()) {
-        sys.sound.load(sound);
+        case Action::Type::PLAY:
+            if (action.play.sound.has_value()) {
+                sys.sound.load(*action.play.sound);
+            } else {
+                for (const auto& s : action.play.any) {
+                    sys.sound.load(s.sound);
+                }
+            }
+
+        default: break;
     }
 }
 
@@ -157,8 +170,7 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(
-        Handle<const Level::Initial> initial, coordPointType* coord, int32_t rotation) {
+void GetInitialCoord(Handle<const Initial> initial, coordPointType* coord, int32_t rotation) {
     *coord = rotate_coords(initial->at.h, initial->at.v, rotation);
 }
 
@@ -196,7 +208,7 @@ LoadState start_construct_level(const Level& level) {
 
     int i = 0;
     for (const auto& player : g.level->players) {
-        if (player.playerType == PlayerType::HUMAN) {
+        if (player.playerType == Level::Player::Type::HUMAN) {
             auto admiral = Admiral::make(i++, kAIsHuman, player);
             admiral->pay(Fixed::from_long(5000));
             g.admiral = admiral;
@@ -210,9 +222,9 @@ LoadState start_construct_level(const Level& level) {
     // *** END INIT ADMIRALS ***
 
     g.initials.clear();
-    g.initials.resize(Level::Initial::all().size());
+    g.initials.resize(Initial::all().size());
     g.initial_ids.clear();
-    g.initial_ids.resize(Level::Initial::all().size());
+    g.initial_ids.resize(Initial::all().size());
     g.condition_enabled.clear();
     g.condition_enabled.resize(g.level->conditions.size());
 
@@ -222,7 +234,7 @@ LoadState start_construct_level(const Level& level) {
     sys.sound.reset();
 
     LoadState s;
-    s.max = Level::Initial::all().size() * 3L + 1 +
+    s.max = Initial::all().size() * 3L + 1 +
             g.level->startTime.count();  // for each run through the initial num
 
     return s;
@@ -241,7 +253,7 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
     }
 }
 
-static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> all_colors) {
+static void load_initial(Handle<const Initial> initial, std::bitset<16> all_colors) {
     Handle<Admiral>               owner           = initial->owner;
     const BuildableObject&        buildableObject = initial->base;
     NamedHandle<const BaseObject> baseObject;
@@ -276,11 +288,11 @@ static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> a
     }
 }
 
-static void load_condition(Handle<const Level::Condition> condition, std::bitset<16> all_colors) {
-    for (const auto& action : condition->action) {
-        AddActionMedia(*action, all_colors);
+static void load_condition(Handle<const Condition> condition, std::bitset<16> all_colors) {
+    for (const auto& action : condition->base.action) {
+        AddActionMedia(action, all_colors);
     }
-    g.condition_enabled[condition.number()] = condition->initially_enabled;
+    g.condition_enabled[condition.number()] = !condition->base.disabled;
 }
 
 static void run_game_1s() {
@@ -312,24 +324,24 @@ void construct_level(LoadState* state) {
 
     if (step == 0) {
         load_blessed_objects(all_colors);
-        load_initial(Handle<const Level::Initial>(step), all_colors);
-    } else if (step < Level::Initial::all().size()) {
-        load_initial(Handle<const Level::Initial>(step), all_colors);
-    } else if (step == Level::Initial::all().size()) {
+        load_initial(Handle<const Initial>(step), all_colors);
+    } else if (step < Initial::all().size()) {
+        load_initial(Handle<const Initial>(step), all_colors);
+    } else if (step == Initial::all().size()) {
         // add media for all condition actions
-        step -= Level::Initial::all().size();
-        for (auto c : Level::Condition::all()) {
+        step -= Initial::all().size();
+        for (auto c : Condition::all()) {
             load_condition(c, all_colors);
         }
-        create_initial(Handle<const Level::Initial>(step));
-    } else if (step < (2 * Level::Initial::all().size())) {
-        step -= Level::Initial::all().size();
-        create_initial(Handle<const Level::Initial>(step));
-    } else if (step < (3 * Level::Initial::all().size())) {
+        create_initial(Handle<const Initial>(step));
+    } else if (step < (2 * Initial::all().size())) {
+        step -= Initial::all().size();
+        create_initial(Handle<const Initial>(step));
+    } else if (step < (3 * Initial::all().size())) {
         // double back and set up any defined initial destinations
-        step -= (2 * Level::Initial::all().size());
-        set_initial_destination(Handle<const Level::Initial>(step), false);
-    } else if (step == (3 * Level::Initial::all().size())) {
+        step -= (2 * Initial::all().size());
+        set_initial_destination(Handle<const Initial>(step), false);
+    } else if (step == (3 * Initial::all().size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
         g.time = game_ticks(-g.level->startTime);
@@ -377,11 +389,11 @@ void GetLevelFullScaleAndCorner(
         mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for (const auto& initial : Level::Initial::all()) {
+    for (const auto& initial : Initial::all()) {
         if (!initial->hide) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
-            for (const auto& other : Level::Initial::all()) {
+            for (const auto& other : Initial::all()) {
                 GetInitialCoord(other, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
@@ -403,7 +415,7 @@ void GetLevelFullScaleAndCorner(
     otherCoord.v = kUniversalCenter;
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
-    for (const auto& initial : Level::Initial::all()) {
+    for (const auto& initial : Initial::all()) {
         if (!initial->hide) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 

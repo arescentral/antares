@@ -22,43 +22,12 @@
 #include <pn/string>
 
 #include "data/action.hpp"
+#include "data/range.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"
 
 namespace antares {
-
-const int32_t kMaxSpaceObject = 250;
-
-const ticks kTimeToCheckHome = secs(15);
-
-const int32_t kEnergyPodAmount = 500;  // average (calced) of 500 energy units/pod
-
-const int32_t kWarpAcceleration = 1;  // how fast we warp in & out
-
-const int32_t kNoWeapon          = -1;
-const int32_t kMaxWeaponPosition = 3;
-
-const int32_t kNoShip              = -1;
-const int32_t kNoDestinationCoord  = 0;
-const int32_t kNoDestinationObject = -1;
-const int32_t kNoOwner             = -1;
-
-const int16_t kObjectInUse     = 1;
-const int16_t kObjectToBeFreed = 2;
-const int16_t kObjectAvailable = 0;
-
-const int32_t kNoClass = -1;
-
-// any class > 10000 = direct map to base object - 10000
-const int32_t kLiteralClass = 10000;
-
-const int32_t kHitStateMax      = 128;
-const int32_t kCloakOnStateMax  = 254;
-const int32_t kCloakOffStateMax = -252;
-
-const int32_t kEngageRange = 1048576;  // range at which to engage closest ship
-                                       // about 2 subsectors (512 * 2)^2
 
 enum {
     kCanTurn              = 0x00000001,  // we have to worry about its rotation velocity
@@ -112,18 +81,6 @@ enum {
 };
 
 enum {
-    kSufficientEscortsExist = 0x00000002,
-    kMatchingFoeExists      = 0x00000080,  // unowned object with same level-key exists
-};
-
-//
-// Well, this is a hack. If a verb's exclusive filter == 0xffffffff
-// then we treat the high four bits of the inclusive filter like
-// a special tag, matching to the high four bits of an baseObject's
-// build flag.
-//
-
-enum {
     kSoftTargetIsBase      = 0x00000002,
     kHardTargetIsBase      = 0x08000000,
     kSoftTargetIsNotBase   = 0x00000004,
@@ -138,27 +95,6 @@ enum {
     kHardTargetIsFoe       = 0x01000000,
     kSoftTargetMatchesTags = 0x10000000,
     kHardTargetMatchesTags = 0x00080000,
-};
-
-// RUNTIME FLAG BITS
-enum {
-    kHasArrived   = 0x00000001,
-    kTargetLocked = 0x00000002,  // if some foe has locked on, you will be visible
-    kIsCloaked    = 0x00000004,  // if you are near a naturally shielding object
-    kIsHidden     = 0x00000008,  // overrides natural shielding
-    kIsTarget     = 0x00000010,  // preserve target lock in case you become invisible
-};
-
-const uint32_t kPresenceDataHiWordMask  = 0xffff0000;
-const uint32_t kPresenceDataLoWordMask  = 0x0000ffff;
-const int32_t  kPresenceDataHiWordShift = 16;
-
-enum kPresenceStateType {
-    kNormalPresence  = 0,
-    kLandingPresence = 1,
-    kWarpInPresence  = 3,
-    kWarpingPresence = 4,
-    kWarpOutPresence = 5
 };
 
 class BaseObject {
@@ -193,8 +129,13 @@ class BaseObject {
     sfz::optional<RgbColor> shieldColor;  // color on radar (!has_value() = don't draw shields)
 
     struct Icon {
-        IconShape shape;
-        int64_t   size;
+        enum class Shape {
+            SQUARE,
+            TRIANGLE,
+            DIAMOND,
+            PLUS,
+        } shape;
+        int64_t size;
     };
     sfz::optional<Icon> icon;
 
@@ -218,10 +159,10 @@ class BaseObject {
     } weapons;
 
     struct Destroy {
-        bool                                       dont_die;
-        bool                                       neutralize;
-        bool                                       release_energy;
-        std::vector<std::unique_ptr<const Action>> action;
+        bool                dont_die;
+        bool                neutralize;
+        bool                release_energy;
+        std::vector<Action> action;
     } destroy;
 
     struct Expire {
@@ -229,12 +170,12 @@ class BaseObject {
             Range<ticks> age;  // starting random age
             bool         animation = false;
         } after;
-        bool                                       dont_die;
-        std::vector<std::unique_ptr<const Action>> action;
+        bool                dont_die;
+        std::vector<Action> action;
     } expire;
 
     struct Create {
-        std::vector<std::unique_ptr<const Action>> action;
+        std::vector<Action> action;
     } create;
 
     struct Collide {
@@ -242,20 +183,20 @@ class BaseObject {
             bool subject = false;
             bool object  = false;
         } as;
-        bool                                       solid  = false;
-        bool                                       edge   = false;
-        int32_t                                    damage = 0;
-        std::vector<std::unique_ptr<const Action>> action;
+        bool                solid  = false;
+        bool                edge   = false;
+        int32_t             damage = 0;
+        std::vector<Action> action;
     } collide;
 
     struct Activate {
-        Range<ticks>                               period;
-        std::vector<std::unique_ptr<const Action>> action;
+        Range<ticks>        period;
+        std::vector<Action> action;
     } activate;
 
     struct Arrive {
-        int32_t                                    distance;
-        std::vector<std::unique_ptr<const Action>> action;
+        int32_t             distance;
+        std::vector<Action> action;
     } arrive;
 
     // rotation: for objects whose shapes depend on their direction
@@ -270,14 +211,21 @@ class BaseObject {
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
+        enum class Direction {
+            NONE   = 0,   // 0
+            PLUS   = +1,  // +
+            MINUS  = -1,  // -
+            RANDOM = 2,   // ?
+        };
+
         pn::string sprite;  // ID of sprite resource
         int16_t    layer;   // 0 = no layer 1->3 = back to front
         int32_t    scale;   // sprite scale; 4096 = 100%
 
-        Range<Fixed>       frames;     // range of frames from sprite
-        AnimationDirection direction;  // frame sequence
-        Fixed              speed;      // speed at which object animates
-        Range<Fixed>       first;      // starting shape #
+        Range<Fixed> frames;     // range of frames from sprite
+        Direction    direction;  // frame sequence
+        Fixed        speed;      // speed at which object animates
+        Range<Fixed> first;      // starting shape #
     };
     sfz::optional<Animation> animation;
 
@@ -302,7 +250,11 @@ class BaseObject {
 
     // weapon: weapon objects have no physical form, and can only be activated
     struct Device {
-        uint32_t usage;  // when is this used?
+        struct Usage {
+            bool attacking;
+            bool defense;
+            bool transportation;
+        } usage;
         enum Direction {
             FORE,  // should use when foe is in front of bearer
             OMNI,  // should use when foe is anywhere near bearer
@@ -359,8 +311,6 @@ class BaseObject {
             bool  legacy_non_builder = false;
         } build;
     } ai;
-
-    static const int byte_size = 318;
 };
 BaseObject base_object(pn::value_cref x);
 

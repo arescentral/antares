@@ -20,7 +20,10 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/briefing.hpp"
+#include "data/condition.hpp"
 #include "data/field.hpp"
+#include "data/initial.hpp"
 #include "data/plugin.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
@@ -28,10 +31,6 @@
 namespace macroman = sfz::macroman;
 
 namespace antares {
-
-static std::vector<Level::Initial>                    optional_initial_array(path_value x);
-static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x);
-static std::vector<Level::Briefing>                   optional_briefing_array(path_value x);
 
 const Level* Level::get(int number) { return plug.chapters[number]; }
 
@@ -49,95 +48,38 @@ static sfz::optional<int32_t> optional_int32(path_value x) {
     return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
 }
 
-static bool valid_sha1(pn::string_view s) {
-    if (s.size() != 40) {
-        return false;
-    }
-    for (pn::rune r : s) {
-        if (!(((pn::rune{'0'} <= r) && (r <= pn::rune{'9'})) ||
-              ((pn::rune{'a'} <= r) && (r <= pn::rune{'f'})))) {
-            return false;
-        }
-    }
-    return true;
+template <Level::Type T>
+static Level::Player required_player(path_value x);
+
+static Level::Player::Type required_player_type(path_value x) {
+    return required_enum<Level::Player::Type>(
+            x, {{"human", Level::Player::Type::HUMAN}, {"cpu", Level::Player::Type::CPU}});
 }
 
-static sfz::optional<pn::string_view> optional_identifier(path_value x) {
-    auto id = optional_string(x);
-    if (id.has_value() && !valid_sha1(*id)) {
-        throw std::runtime_error(
-                pn::format("{0}invalid identifier (must be lowercase sha1 digest)", x.prefix())
-                        .c_str());
-    }
-    return id;
+template <>
+Level::Player required_player<Level::Type::DEMO>(path_value x) {
+    return required_struct<Level::Player>(
+            x, {{"name", {&Level::Player::name, required_string_copy}},
+                {"race", {&Level::Player::playerRace, required_race}},
+                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
 }
 
-static ScenarioInfo fill_identifier(ScenarioInfo info) {
-    if (!info.identifier.empty()) {
-        return info;
-    }
-    sfz::sha1 sha;
-    sha.write(info.title);
-    info.identifier = sha.compute().hex();
-    return info;
+template <>
+Level::Player required_player<Level::Type::SOLO>(path_value x) {
+    return required_struct<Level::Player>(
+            x, {{"type", {&Level::Player::playerType, required_player_type}},
+                {"name", {&Level::Player::name, required_string_copy}},
+                {"race", {&Level::Player::playerRace, required_race}},
+                {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
+                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
 }
 
-ScenarioInfo scenario_info(pn::value_cref x0) {
-    path_value x{x0};
-    return fill_identifier(required_struct<ScenarioInfo>(
-            x, {{"title", {&ScenarioInfo::title, required_string_copy}},
-                {"identifier", {&ScenarioInfo::identifier, optional_identifier, ""}},
-                {"format", {&ScenarioInfo::format, required_int}},
-                {"download_url", {&ScenarioInfo::download_url, optional_string_copy}},
-                {"author", {&ScenarioInfo::author, required_string_copy}},
-                {"author_url", {&ScenarioInfo::author_url, optional_string_copy}},
-                {"version", {&ScenarioInfo::version, required_string_copy}},
-                {"warp_in_flare", {&ScenarioInfo::warpInFlareID, required_base}},
-                {"warp_out_flare", {&ScenarioInfo::warpOutFlareID, required_base}},
-                {"player_body", {&ScenarioInfo::playerBodyID, required_base}},
-                {"energy_blob", {&ScenarioInfo::energyBlobID, required_base}},
-                {"intro", {&ScenarioInfo::intro, optional_string_copy}},
-                {"about", {&ScenarioInfo::about, optional_string_copy}},
-                {"splash", {&ScenarioInfo::splash_screen, required_string_copy}},
-                {"starmap", {&ScenarioInfo::starmap, required_string_copy}}}));
-}
-
-static Level::Player required_player(path_value x, LevelType level_type) {
-    switch (level_type) {
-        case LevelType::DEMO:
-            return required_struct<Level::Player>(
-                    x, {{"name", {&Level::Player::name, required_string_copy}},
-                        {"race", {&Level::Player::playerRace, required_race}},
-                        {"earning_power",
-                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
-        case LevelType::SOLO:
-            return required_struct<Level::Player>(
-                    x, {{"type", {&Level::Player::playerType, required_player_type}},
-                        {"name", {&Level::Player::name, required_string_copy}},
-                        {"race", {&Level::Player::playerRace, required_race}},
-                        {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
-                        {"earning_power",
-                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
-        case LevelType::NET:
-            return required_struct<Level::Player>(
-                    x, {{"type", {&Level::Player::playerType, required_player_type}},
-                        {"earning_power",
-                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
-                        {"races", nullptr}});  // TODO(sfiera): populate field
-    }
-}
-
-template <LevelType level_type>
-static std::vector<Level::Player> required_player_array(path_value x) {
-    if (x.value().is_array()) {
-        std::vector<Level::Player> p;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            p.push_back(required_player(x.get(i), level_type));
-        }
-        return p;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
-    }
+template <>
+Level::Player required_player<Level::Type::NET>(path_value x) {
+    return required_struct<Level::Player>(
+            x, {{"type", {&Level::Player::playerType, required_player_type}},
+                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
+                {"races", nullptr}});  // TODO(sfiera): populate field
 }
 
 static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
@@ -152,14 +94,6 @@ static Level::Par optional_par(path_value x) {
                    })
             .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
 }
-
-/*
-        struct Counter {
-            int  player = 0;
-            int  which  = 0;
-            bool fixed  = false;
-        };
-        */
 
 static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(path_value x) {
     return optional_struct<Level::StatusLine::Counter>(
@@ -188,62 +122,60 @@ static Level::StatusLine required_status_line(path_value x) {
                });
 };
 
-static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref                 a = x.value().as_array();
-        std::vector<Level::StatusLine> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_status_line(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
             {"type", {&Level::type, required_level_type}},                                       \
             {"chapter", {&Level::chapter, optional_int}},                                        \
             {"title", {&Level::name, required_string_copy}},                                     \
-            {"initials", {&Level::initials, optional_initial_array}},                            \
-            {"conditions", {&Level::conditions, optional_condition_array}},                      \
-            {"briefings", {&Level::briefings, optional_briefing_array}},                         \
+            {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
+            {"conditions", {&Level::conditions, optional_array<Condition, condition>}},          \
+            {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
             {"starmap", {&Level::starmap, optional_rect}},                                       \
             {"song", {&Level::song, optional_string_copy}},                                      \
-            {"status", {&Level::status, optional_status_line_array}},                            \
+            {"status",                                                                           \
+             {&Level::status, optional_array<Level::StatusLine, required_status_line>}},         \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"skip", {&Level::skip, optional_level}},                                            \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \
             {"par", {&Level::par, optional_par}}
 // clang-format on
 
-Level demo_level(path_value x) {
+static Level::Type required_level_type(path_value x) {
+    return required_enum<Level::Type>(
+            x,
+            {{"solo", Level::Type::SOLO}, {"net", Level::Type::NET}, {"demo", Level::Type::DEMO}});
+}
+
+static Level demo_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
-                       {"players", {&Level::players, required_player_array<LevelType::DEMO>}},
+                       {"players",
+                        {&Level::players,
+                         required_array<Level::Player, required_player<Level::Type::DEMO>>}},
                });
 }
 
-Level solo_level(path_value x) {
+static Level solo_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
-                       {"players", {&Level::players, required_player_array<LevelType::SOLO>}},
+                       {"players",
+                        {&Level::players,
+                         required_array<Level::Player, required_player<Level::Type::SOLO>>}},
                        {"no_ships", {&Level::own_no_ships_text, optional_string, ""}},
                        {"prologue", {&Level::prologue, optional_string, ""}},
                        {"epilogue", {&Level::epilogue, optional_string, ""}},
                });
 }
 
-Level net_level(path_value x) {
+static Level net_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
-                       {"players", {&Level::players, required_player_array<LevelType::NET>}},
+                       {"players",
+                        {&Level::players,
+                         required_array<Level::Player, required_player<Level::Type::NET>>}},
                        {"own_no_ships", {&Level::own_no_ships_text, optional_string, ""}},
                        {"foe_no_ships", {&Level::foe_no_ships_text, optional_string, ""}},
                        {"description", {&Level::description, optional_string, ""}},
@@ -256,263 +188,9 @@ Level level(pn::value_cref x0) {
         throw std::runtime_error("must be map");
     }
     switch (required_level_type(x.get("type"))) {
-        case LevelType::DEMO: return demo_level(x);
-        case LevelType::SOLO: return solo_level(x);
-        case LevelType::NET: return net_level(x);
-    }
-}
-
-static std::unique_ptr<Level::Condition> autopilot_condition(path_value x) {
-    std::unique_ptr<Level::AutopilotCondition> c(new Level::AutopilotCondition);
-    c->value = required_bool(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> building_condition(path_value x) {
-    std::unique_ptr<Level::BuildingCondition> c(new Level::BuildingCondition);
-    c->value = required_bool(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> computer_condition(path_value x) {
-    std::unique_ptr<Level::ComputerCondition> c(new Level::ComputerCondition);
-    c->screen = required_screen(x.get("screen"));
-    c->line   = optional_int(x.get("line")).value_or(-1);
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> counter_condition(path_value x) {
-    std::unique_ptr<Level::CounterCondition> c(new Level::CounterCondition);
-    c->player  = required_admiral(x.get("player"));
-    c->counter = required_int(x.get("counter"));
-    c->value   = required_int(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> destroyed_condition(path_value x) {
-    std::unique_ptr<Level::DestroyedCondition> c(new Level::DestroyedCondition);
-    c->initial = required_initial(x.get("initial"));
-    c->value   = required_bool(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> distance_condition(path_value x) {
-    std::unique_ptr<Level::DistanceCondition> c(new Level::DistanceCondition);
-    c->value = required_int(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> health_condition(path_value x) {
-    std::unique_ptr<Level::HealthCondition> c(new Level::HealthCondition);
-    c->value = required_double(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> message_condition(path_value x) {
-    std::unique_ptr<Level::MessageCondition> c(new Level::MessageCondition);
-    c->id   = required_int(x.get("id"));
-    c->page = required_int(x.get("page"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> ordered_condition(path_value x) {
-    return std::unique_ptr<Level::OrderedCondition>(new Level::OrderedCondition);
-}
-
-static std::unique_ptr<Level::Condition> owner_condition(path_value x) {
-    std::unique_ptr<Level::OwnerCondition> c(new Level::OwnerCondition);
-    c->player = required_admiral(x.get("player"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> ships_condition(path_value x) {
-    std::unique_ptr<Level::ShipsCondition> c(new Level::ShipsCondition);
-    c->player = required_admiral(x.get("player"));
-    c->value  = required_int(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> speed_condition(path_value x) {
-    std::unique_ptr<Level::SpeedCondition> c(new Level::SpeedCondition);
-    c->value = required_fixed(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> subject_condition(path_value x) {
-    std::unique_ptr<Level::SubjectCondition> c(new Level::SubjectCondition);
-    c->value = required_subject_value(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> time_condition(path_value x) {
-    std::unique_ptr<Level::TimeCondition> c(new Level::TimeCondition);
-    c->duration          = required_ticks(x.get("duration"));
-    c->legacy_start_time = optional_bool(x.get("legacy_start_time")).value_or(false);
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> zoom_condition(path_value x) {
-    std::unique_ptr<Level::ZoomCondition> c(new Level::ZoomCondition);
-    c->value = required_zoom(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> condition(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    pn::string_view                   type = required_string(x.get("type"));
-    std::unique_ptr<Level::Condition> c;
-    if (type == "autopilot") {
-        c = autopilot_condition(x);
-    } else if (type == "building") {
-        c = building_condition(x);
-    } else if (type == "computer") {
-        c = computer_condition(x);
-    } else if (type == "counter") {
-        c = counter_condition(x);
-    } else if (type == "destroyed") {
-        c = destroyed_condition(x);
-    } else if (type == "distance") {
-        c = distance_condition(x);
-    } else if (type == "false") {
-        return std::unique_ptr<Level::Condition>(new Level::FalseCondition);
-    } else if (type == "health") {
-        c = health_condition(x);
-    } else if (type == "message") {
-        c = message_condition(x);
-    } else if (type == "ordered") {
-        c = ordered_condition(x);
-    } else if (type == "owner") {
-        c = owner_condition(x);
-    } else if (type == "ships") {
-        c = ships_condition(x);
-    } else if (type == "speed") {
-        c = speed_condition(x);
-    } else if (type == "subject") {
-        c = subject_condition(x);
-    } else if (type == "time") {
-        c = time_condition(x);
-    } else if (type == "zoom") {
-        c = zoom_condition(x);
-    } else {
-        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
-    }
-
-    c->op                = required_condition_op(x.get("op"));
-    c->persistent        = optional_bool(x.get("persistent")).value_or(false);
-    c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
-    c->subject           = optional_initial(x.get("subject")).value_or(Level::Initial::none());
-    c->object            = optional_initial(x.get("object")).value_or(Level::Initial::none());
-    c->action            = required_action_array(x.get("action"));
-
-    return c;
-}
-
-static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        std::vector<std::unique_ptr<Level::Condition>> v;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            v.push_back(condition(x.get(i)));
-        }
-        return v;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-static Level::Briefing briefing(path_value x) {
-    return required_struct<Level::Briefing>(
-            x, {
-                       {"object",
-                        {&Level::Briefing::object, optional_initial, Level::Initial::none()}},
-                       {"title", {&Level::Briefing::title, required_string_copy}},
-                       {"content", {&Level::Briefing::content, required_string_copy}},
-               });
-}
-
-static std::vector<Level::Briefing> optional_briefing_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        std::vector<Level::Briefing> v;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            v.push_back(briefing(x.get(i)));
-        }
-        return v;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-static BuildableObject required_buildable_object(path_value x) {
-    return BuildableObject{required_string_copy(x)};
-}
-
-std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref a = x.value().as_array();
-        if (a.size() > kMaxShipCanBuild) {
-            throw std::runtime_error(pn::format(
-                                             "{0}has {1} elements, more than max of {2}",
-                                             x.prefix(), a.size(), kMaxShipCanBuild)
-                                             .c_str());
-        }
-        std::vector<BuildableObject> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_buildable_object(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-Level::Initial::Override optional_override(path_value x) {
-    return optional_struct<Level::Initial::Override>(
-                   x, {{"name", {&Level::Initial::Override::name, optional_string_copy}},
-                       {"sprite", {&Level::Initial::Override::sprite, optional_string_copy}}})
-            .value_or(Level::Initial::Override{});
-}
-
-Level::Initial::Target optional_target(path_value x) {
-    return optional_struct<Level::Initial::Target>(
-                   x,
-                   {{"initial",
-                     {&Level::Initial::Target::initial, optional_initial, Level::Initial::none()}},
-                    {"lock", {&Level::Initial::Target::lock, optional_bool, false}}})
-            .value_or(Level::Initial::Target{});
-}
-
-static Level::Initial initial(path_value x) {
-    return required_struct<Level::Initial>(
-            x, {{"base", {&Level::Initial::base, required_buildable_object}},
-                {"owner", {&Level::Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
-                {"at", {&Level::Initial::at, required_point}},
-                {"earning", {&Level::Initial::earning, optional_fixed, Fixed::zero()}},
-                {"hide", {&Level::Initial::hide, optional_bool, false}},
-                {"flagship", {&Level::Initial::flagship, optional_bool, false}},
-                {"override", {&Level::Initial::override_, optional_override}},
-                {"target", {&Level::Initial::target, optional_target}},
-                {"build", {&Level::Initial::build, optional_buildable_object_array}}});
-}
-
-static std::vector<Level::Initial> optional_initial_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        std::vector<Level::Initial> v;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            v.push_back(initial(x.get(i)));
-        }
-        return v;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+        case Level::Type::DEMO: return demo_level(x);
+        case Level::Type::SOLO: return solo_level(x);
+        case Level::Type::NET: return net_level(x);
     }
 }
 

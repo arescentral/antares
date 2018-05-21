@@ -68,7 +68,7 @@ void  MiniComputerHandleClick(Point);
 void  MiniComputerHandleDoubleClick(Point);
 void  MiniComputerHandleMouseUp(Point);
 void  MiniComputerHandleMouseStillDown(Point);
-void  MiniComputer_SetScreenAndLineHack(int32_t whichScreen, int32_t whichLine);
+void  MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine);
 
 }  // namespace antares
 

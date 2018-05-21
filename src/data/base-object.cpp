@@ -20,6 +20,8 @@
 
 #include "data/base-object.hpp"
 
+#include "data/field.hpp"
+
 namespace antares {
 
 static int32_t required_int32(path_value x) {
@@ -52,7 +54,7 @@ static std::map<pn::string, bool> optional_tags(path_value x) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
 
@@ -79,6 +81,15 @@ static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x)
                        {"scale", {&Rotation::scale, required_scale}},
                        {"frames", {&Rotation::frames, required_int_range}},
                });
+}
+
+static BaseObject::Animation::Direction required_animation_direction(path_value x) {
+    using Direction = BaseObject::Animation::Direction;
+    return required_enum<Direction>(
+            x, {{"0", Direction::NONE},
+                {"+", Direction::PLUS},
+                {"-", Direction::MINUS},
+                {"?", Direction::RANDOM}});
 }
 
 static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
@@ -121,23 +132,13 @@ static sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
     return optional_struct<Bolt>(x, {{"color", {&Bolt::color, required_color}}});
 }
 
-static uint32_t optional_usage(path_value x) {
-    if (x.value().is_null()) {
-        return 0;
-    } else if (x.value().is_map()) {
-        static const pn::string_view flags[3] = {"transportation", "attacking", "defense"};
-        uint32_t                     bit      = 0x00000001;
-        uint32_t                     result   = 0x00000000;
-        for (pn::string_view flag : flags) {
-            if (optional_bool(x.get(flag)).value_or(false)) {
-                result |= bit;
-            }
-            bit <<= 1;
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
+static BaseObject::Device::Usage optional_usage(path_value x) {
+    using Usage = BaseObject::Device::Usage;
+    return optional_struct<Usage>(
+                   x, {{"attacking", {&Usage::attacking, optional_bool, false}},
+                       {"defense", {&Usage::defense, optional_bool, false}},
+                       {"transportation", {&Usage::transportation, optional_bool, false}}})
+            .value_or(Usage{});
 }
 
 static BaseObject::Device::Direction required_device_direction(path_value x) {
@@ -162,6 +163,15 @@ static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
                        {"inverse_speed", {&Device::inverseSpeed, required_fixed}},
                        {"restock_cost", {&Device::restockCost, required_int32}},
                });
+}
+
+static BaseObject::Icon::Shape required_icon_shape(path_value x) {
+    using Shape = BaseObject::Icon::Shape;
+    return required_enum<Shape>(
+            x, {{"square", Shape::SQUARE},
+                {"triangle", Shape::TRIANGLE},
+                {"diamond", Shape::DIAMOND},
+                {"plus", Shape::PLUS}});
 }
 
 static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
@@ -339,7 +349,8 @@ static BaseObject::Destroy optional_destroy(path_value x) {
                            {"neutralize", {&BaseObject::Destroy::neutralize, required_bool}},
                            {"release_energy",
                             {&BaseObject::Destroy::release_energy, required_bool}},
-                           {"action", {&BaseObject::Destroy::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Destroy::action, optional_array<Action, action>}},
                    })
             .value_or(BaseObject::Destroy{});
 }
@@ -362,7 +373,8 @@ static BaseObject::Expire optional_expire(path_value x) {
                    {
                            {"after", {&BaseObject::Expire::after, optional_expire_after}},
                            {"dont_die", {&BaseObject::Expire::dont_die, required_bool}},
-                           {"action", {&BaseObject::Expire::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Expire::action, optional_array<Action, action>}},
                    })
             .value_or(BaseObject::Expire{});
 }
@@ -371,7 +383,8 @@ static BaseObject::Create optional_create(path_value x) {
     return optional_struct<BaseObject::Create>(
                    x,
                    {
-                           {"action", {&BaseObject::Create::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Create::action, optional_array<Action, action>}},
                    })
             .value_or(BaseObject::Create{});
 }
@@ -394,7 +407,8 @@ static BaseObject::Collide optional_collide(path_value x) {
                            {"damage", {&BaseObject::Collide::damage, required_int32}},
                            {"solid", {&BaseObject::Collide::solid, required_bool}},
                            {"edge", {&BaseObject::Collide::edge, required_bool}},
-                           {"action", {&BaseObject::Collide::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Collide::action, optional_array<Action, action>}},
                    })
             .value_or(BaseObject::Collide{});
 }
@@ -406,7 +420,8 @@ static BaseObject::Activate optional_activate(path_value x) {
                            {"period",
                             {&BaseObject::Activate::period, optional_ticks_range,
                              Range<ticks>{ticks(0), ticks(0)}}},
-                           {"action", {&BaseObject::Activate::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Activate::action, optional_array<Action, action>}},
                    })
             .value_or(BaseObject::Activate{});
 }
@@ -416,7 +431,8 @@ static BaseObject::Arrive optional_arrive(path_value x) {
                    x,
                    {
                            {"distance", {&BaseObject::Arrive::distance, required_int32}},
-                           {"action", {&BaseObject::Arrive::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Arrive::action, optional_array<Action, action>}},
                    })
             .value_or(BaseObject::Arrive{});
 }

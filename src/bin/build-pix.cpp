@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "drawing/build-pix.hpp"
@@ -77,11 +78,15 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
 }
 
 std::function<pn::string_view()> prologue(pn::string_view chapter) {
-    return [chapter]() -> pn::string_view { return plug.levels[chapter.copy()].prologue; };
+    return [chapter]() -> pn::string_view {
+        return plug.levels.find(chapter.copy())->second.prologue;
+    };
 }
 
 std::function<pn::string_view()> epilogue(pn::string_view chapter) {
-    return [chapter]() -> pn::string_view { return plug.levels[chapter.copy()].epilogue; };
+    return [chapter]() -> pn::string_view {
+        return plug.levels.find(chapter.copy())->second.epilogue;
+    };
 }
 
 template <typename VideoDriver>

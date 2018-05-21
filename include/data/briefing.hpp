@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,18 +16,26 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_SCENARIO_LIST_HPP_
-#define ANTARES_DATA_SCENARIO_LIST_HPP_
+#ifndef ANTARES_DATA_BRIEFING_HPP_
+#define ANTARES_DATA_BRIEFING_HPP_
 
 #include <pn/string>
-#include <vector>
 
-#include "data/info.hpp"
+#include "data/handle.hpp"
 
 namespace antares {
 
-std::vector<Info> scenario_list();
+class path_value;
+struct Initial;
+
+struct Briefing {
+    Handle<const Initial> object;   // Object to focus on, or none for freestanding.
+    pn::string            title;    // Plain text, used for title bar.
+    pn::string            content;  // Styled text, used for body.
+};
+
+Briefing briefing(path_value x);
 
 }  // namespace antares
 
-#endif  // ANTARES_DATA_SCENARIO_LIST_HPP_
+#endif  // ANTARES_DATA_BRIEFING_HPP_

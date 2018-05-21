@@ -23,6 +23,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
+#include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "drawing/briefing.hpp"

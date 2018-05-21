@@ -26,6 +26,7 @@
 
 #include "data/enums.hpp"
 #include "data/handle.hpp"
+#include "data/range.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -34,18 +35,9 @@
 namespace antares {
 
 struct Level;
-struct Level_Initial;
-struct Level_Condition;
+struct Initial;
+union Condition;
 struct Race;
-
-template <typename T>
-struct Range {
-    T begin, end;
-
-    T range() const { return end - begin; }
-
-    static constexpr Range empty() { return {-1, -1}; }
-};
 
 class path_value {
     enum class Kind { ROOT, KEY, INDEX };
@@ -103,24 +95,24 @@ sfz::optional<ticks> optional_ticks(path_value x);
 ticks                required_ticks(path_value x);
 sfz::optional<secs>  optional_secs(path_value x);
 
-sfz::optional<Handle<Admiral>>             optional_admiral(path_value x);
-Handle<Admiral>                            required_admiral(path_value x);
-NamedHandle<const BaseObject>              required_base(path_value x);
-sfz::optional<Handle<const Level_Initial>> optional_initial(path_value x);
-Handle<const Level_Initial>                required_initial(path_value x);
-sfz::optional<NamedHandle<const Level>>    optional_level(path_value x);
-sfz::optional<Owner>                       optional_owner(path_value x);
-Owner                                      required_owner(path_value x);
-NamedHandle<const Race>                    required_race(path_value x);
+sfz::optional<Handle<Admiral>>          optional_admiral(path_value x);
+Handle<Admiral>                         required_admiral(path_value x);
+NamedHandle<const BaseObject>           required_base(path_value x);
+sfz::optional<Handle<const Initial>>    optional_initial(path_value x);
+Handle<const Initial>                   required_initial(path_value x);
+sfz::optional<NamedHandle<const Level>> optional_level(path_value x);
+sfz::optional<Owner>                    optional_owner(path_value x);
+Owner                                   required_owner(path_value x);
+NamedHandle<const Race>                 required_race(path_value x);
 
-sfz::optional<Range<int64_t>>     optional_int_range(path_value x);
-Range<int64_t>                    required_int_range(path_value x);
-sfz::optional<Range<Fixed>>       optional_fixed_range(path_value x);
-Range<Fixed>                      required_fixed_range(path_value x);
-sfz::optional<Range<ticks>>       optional_ticks_range(path_value x);
-Range<ticks>                      required_ticks_range(path_value x);
-HandleList<const Level_Condition> optional_condition_range(path_value x);
-HandleList<const Level_Initial>   required_initial_range(path_value x);
+sfz::optional<Range<int64_t>> optional_int_range(path_value x);
+Range<int64_t>                required_int_range(path_value x);
+sfz::optional<Range<Fixed>>   optional_fixed_range(path_value x);
+Range<Fixed>                  required_fixed_range(path_value x);
+sfz::optional<Range<ticks>>   optional_ticks_range(path_value x);
+Range<ticks>                  required_ticks_range(path_value x);
+HandleList<const Condition>   optional_condition_range(path_value x);
+HandleList<const Initial>     required_initial_range(path_value x);
 
 sfz::optional<Point> optional_point(path_value x);
 Point                required_point(path_value x);
@@ -130,29 +122,52 @@ Rect                 required_rect(path_value x);
 sfz::optional<RgbColor> optional_color(path_value x);
 RgbColor                required_color(path_value x);
 
-AnimationDirection        required_animation_direction(path_value x);
-sfz::optional<Hue>        optional_hue(path_value x);
-Hue                       required_hue(path_value x);
-InterfaceStyle            required_interface_style(path_value x);
-KillKind                  required_kill_kind(path_value x);
-sfz::optional<MoveOrigin> optional_origin(path_value x);
-int                       required_key(path_value x);
-ConditionOp               required_condition_op(path_value x);
-IconShape                 required_icon_shape(path_value x);
-LevelType                 required_level_type(path_value x);
-PlayerType                required_player_type(path_value x);
-PushKind                  required_push_kind(path_value x);
-Screen                    required_screen(path_value x);
-SubjectValue              required_subject_value(path_value x);
-Weapon                    required_weapon(path_value x);
-Zoom                      required_zoom(path_value x);
+sfz::optional<Hue> optional_hue(path_value x);
+Hue                required_hue(path_value x);
+Screen             required_screen(path_value x);
+Zoom               required_zoom(path_value x);
 
-uint32_t optional_object_attributes(path_value x);
 uint32_t optional_keys(path_value x);
 
-std::vector<pn::string> required_string_array(path_value x);
-std::vector<pn::string> optional_string_array(path_value x);
-std::vector<int>        optional_int_array(path_value x);
+template <typename T, int N>
+sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_string()) {
+        pn::string_view s = x.value().as_string();
+        for (auto kv : values) {
+            if (s == kv.first) {
+                sfz::optional<T> t;
+                t.emplace(kv.second);
+                return t;
+            }
+        }
+    }
+
+    pn::array keys;
+    for (auto kv : values) {
+        keys.push_back(kv.first.copy());
+    }
+    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
+}
+
+template <typename T, int N>
+T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
+    if (x.value().is_string()) {
+        for (auto kv : values) {
+            pn::string_view s = x.value().as_string();
+            if (s == kv.first) {
+                return kv.second;
+            }
+        }
+    }
+
+    pn::array keys;
+    for (auto kv : values) {
+        keys.push_back(kv.first.copy());
+    }
+    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
+}
 
 template <typename T>
 struct field {
@@ -178,8 +193,6 @@ struct field {
                   (t->*field) = reader(x).value_or(default_value).copy();
               }) {}
 };
-
-uint32_t optional_flags(path_value x, const std::map<pn::string_view, int>& flags);
 
 template <typename T>
 T required_struct(path_value x, const std::map<pn::string_view, field<T>>& fields) {
@@ -210,6 +223,20 @@ sfz::optional<T> optional_struct(path_value x, const std::map<pn::string_view, f
         return sfz::make_optional(required_struct(x, fields));
     } else {
         throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
+    }
+}
+
+template <typename T, T (*F)(path_value x)>
+static std::vector<T> required_array(path_value x) {
+    if (x.value().is_array()) {
+        pn::array_cref a = x.value().as_array();
+        std::vector<T> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(F(x.get(i)));
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
     }
 }
 

@@ -79,24 +79,20 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
-    bool         found_at_least_one = false;
-    ScenarioList list;
-    for (size_t i = 0; i < list.size(); ++i) {
-        const auto& s = list.at(i);
-        pn::dump(
-                stdout, pn::map{{s.identifier.copy(),
-                                 pn::map{
-                                         {"title", s.title.copy()},
-                                         {"download_url", maybe_string(s.download_url)},
-                                         {"author", s.author.copy()},
-                                         {"author_url", maybe_string(s.author_url)},
-                                         {"version", s.version.copy()},
-                                 }}});
-        found_at_least_one = true;
+    std::vector<Info> scenarios = scenario_list();
+    pn::map           m;
+    for (const Info& s : scenarios) {
+        m[s.identifier.copy()] = pn::map{
+                {"title", s.title.copy()},     {"download_url", maybe_string(s.download_url)},
+                {"author", s.author.copy()},   {"author_url", maybe_string(s.author_url)},
+                {"version", s.version.copy()},
+        };
     }
-    if (!found_at_least_one) {
+
+    if (m.empty()) {
         exit(1);
     }
+    pn::dump(stdout, m);
 }
 
 }  // namespace antares

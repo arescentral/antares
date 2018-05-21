@@ -23,13 +23,16 @@
 #include <pn/string>
 
 #include "data/enums.hpp"
-#include "data/field.hpp"
 #include "math/geometry.hpp"
 #include "video/driver.hpp"
 
 namespace antares {
 
+class path_value;
+
 enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
+
+enum class InterfaceStyle { LARGE, SMALL };
 
 struct interfaceLabelType {
     int64_t stringID;

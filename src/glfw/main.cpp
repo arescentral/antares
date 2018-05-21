@@ -121,10 +121,9 @@ void main(int argc, char* const* argv) {
 
     if (scenario.has_value()) {
         sys.prefs->set_scenario_identifier(*scenario);
-        bool         have_scenario = false;
-        ScenarioList l;
-        for (auto i : range(l.size())) {
-            const auto& entry = l.at(i);
+        bool              have_scenario = false;
+        std::vector<Info> scenarios     = scenario_list();
+        for (const Info& entry : scenarios) {
             if (entry.identifier == *scenario) {
                 have_scenario = true;
                 break;

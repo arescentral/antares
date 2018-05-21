@@ -28,7 +28,8 @@
 #include <zipxx/zipxx.hpp>
 
 #include "config/dirs.hpp"
-#include "data/level.hpp"
+#include "data/field.hpp"
+#include "data/info.hpp"
 #include "data/replay.hpp"
 #include "drawing/pix-map.hpp"
 #include "math/geometry.hpp"
@@ -213,7 +214,7 @@ static int64_t    kVersion        = 20;
 
 static const char kPluginInfoFile[] = "info.pn";
 
-ScenarioInfo info_for_zip_archive(ZipArchive& archive) {
+Info info_for_zip_archive(ZipArchive& archive) {
     ZipFileReader file{archive, kPluginInfoFile};
     try {
         pn::value  x;
@@ -222,13 +223,13 @@ ScenarioInfo info_for_zip_archive(ZipArchive& archive) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        return scenario_info(x);
+        return info(path_value{x});
     } catch (...) {
         std::throw_with_nested(std::runtime_error(archive.path().copy().c_str()));
     }
 }
 
-void check_version(const ScenarioInfo& archive, int64_t expected) {
+void check_version(const Info& archive, int64_t expected) {
     int64_t actual = archive.format;
     if (actual != expected) {
         throw std::runtime_error(
@@ -237,7 +238,7 @@ void check_version(const ScenarioInfo& archive, int64_t expected) {
     }
 }
 
-void check_identifier(const ScenarioInfo& archive, pn::string_view expected) {
+void check_identifier(const Info& archive, pn::string_view expected) {
     if (archive.identifier != expected) {
         throw std::runtime_error(pn::format(
                                          "mismatch in plugin identifier {0}",
@@ -262,8 +263,8 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
     {
         // Make sure that the provided file is actually an archive that
         // will be usable as a plugin, then get its identifier.
-        ZipArchive   archive(path, 0);
-        ScenarioInfo info = info_for_zip_archive(archive);
+        ZipArchive archive(path, 0);
+        Info       info = info_for_zip_archive(archive);
         check_version(info, kVersion);
         found_scenario = info.identifier.copy();
     }
@@ -392,9 +393,9 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     pn::string file   = pn::format("{0}.antaresplugin", _scenario);
     pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
-    pn::string   full_path = pn::format("{0}/{1}", _downloads_dir, file);
-    ZipArchive   archive(full_path, 0);
-    ScenarioInfo info = info_for_zip_archive(archive);
+    pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
+    ZipArchive archive(full_path, 0);
+    Info       info = info_for_zip_archive(archive);
 
     check_version(info, kVersion);
     check_identifier(info, _scenario);

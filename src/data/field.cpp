@@ -206,28 +206,6 @@ pn::string_view required_string(path_value x) {
     }
 }
 
-template <typename T, int N>
-sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_string()) {
-        pn::string_view s = x.value().as_string();
-        for (auto kv : values) {
-            if (s == kv.first) {
-                sfz::optional<T> t;
-                t.emplace(kv.second);
-                return t;
-            }
-        }
-    }
-
-    pn::array keys;
-    for (auto kv : values) {
-        keys.push_back(kv.first.copy());
-    }
-    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
-}
-
 static ticks parse_ticks(path_value x, pn::string_view s) {
     try {
         enum { START, START_COMPONENT, COMPONENT_DONE, INT, DECIMAL, FLOAT } state = START;
@@ -377,24 +355,24 @@ NamedHandle<const BaseObject> required_base(path_value x) {
     return NamedHandle<const BaseObject>(required_string(x));
 }
 
-sfz::optional<Handle<const Level::Initial>> optional_initial(path_value x) {
+sfz::optional<Handle<const Initial>> optional_initial(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_int()) {
-        return sfz::make_optional(Handle<const Level::Initial>(x.value().as_int()));
+        return sfz::make_optional(Handle<const Initial>(x.value().as_int()));
     } else if (x.value().as_string() == "player") {
-        return sfz::make_optional(Handle<const Level::Initial>(-2));
+        return sfz::make_optional(Handle<const Initial>(-2));
     } else {
         throw std::runtime_error(
                 pn::format("{0}: must be null, int, or \"player\"", x.path()).c_str());
     }
 }
 
-Handle<const Level::Initial> required_initial(path_value x) {
+Handle<const Initial> required_initial(path_value x) {
     if (x.value().is_int()) {
-        return Handle<const Level::Initial>(x.value().as_int());
+        return Handle<const Initial>(x.value().as_int());
     } else if (x.value().as_string() == "player") {
-        return Handle<const Level::Initial>(-2);
+        return Handle<const Initial>(-2);
     } else {
         throw std::runtime_error(pn::format("{0}: must be int, or \"player\"", x.path()).c_str());
     }
@@ -418,27 +396,18 @@ NamedHandle<const Race> required_race(path_value x) {
     return NamedHandle<const Race>(required_string(x));
 }
 
-template <typename T, int N>
-T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
-    if (x.value().is_string()) {
-        for (auto kv : values) {
-            pn::string_view s = x.value().as_string();
-            if (s == kv.first) {
-                return kv.second;
-            }
-        }
-    }
-
-    pn::array keys;
-    for (auto kv : values) {
-        keys.push_back(kv.first.copy());
-    }
-    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
-}
-
 Owner required_owner(path_value x) {
     return required_enum<Owner>(
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
+}
+
+template <typename T, T (*F)(path_value)>
+std::pair<T, T> range(path_value x) {
+    struct Pair {
+        T begin, end;
+    };
+    Pair p = required_struct<Pair>(x, {{"begin", {&Pair::begin, F}}, {"end", {&Pair::end, F}}});
+    return {p.begin, p.end};
 }
 
 sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
@@ -448,9 +417,8 @@ sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
         int64_t begin = x.value().as_int();
         return sfz::make_optional(Range<int64_t>{begin, begin + 1});
     } else if (x.value().is_map()) {
-        int64_t begin = required_int(x.get("begin"));
-        int64_t end   = required_int(x.get("end"));
-        return sfz::make_optional(Range<int64_t>{begin, end});
+        auto r = range<int64_t, required_int>(x);
+        return sfz::make_optional(Range<int64_t>{r.first, r.second});
     } else {
         throw std::runtime_error(pn::format("{0}: must be null, int, or map", x.path()).c_str());
     }
@@ -461,11 +429,10 @@ Range<int64_t> required_int_range(path_value x) {
         int64_t begin = x.value().as_int();
         return Range<int64_t>{begin, begin + 1};
     } else if (x.value().is_map()) {
-        int64_t begin = required_int(x.get("begin"));
-        int64_t end   = required_int(x.get("end"));
-        return Range<int64_t>{begin, end};
+        auto r = range<int64_t, required_int>(x);
+        return {r.first, r.second};
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null, int, or map", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be int or map", x.path()).c_str());
     }
 }
 
@@ -477,9 +444,8 @@ sfz::optional<Range<Fixed>> optional_fixed_range(path_value x) {
         Fixed end   = Fixed::from_val(begin.val() + 1);
         return sfz::make_optional(Range<Fixed>{begin, end});
     } else if (x.value().is_map()) {
-        Fixed begin = required_fixed(x.get("begin"));
-        Fixed end   = required_fixed(x.get("end"));
-        return sfz::make_optional(Range<Fixed>{begin, end});
+        auto r = range<Fixed, required_fixed>(x);
+        return sfz::make_optional(Range<Fixed>{r.first, r.second});
     } else {
         throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
     }
@@ -491,9 +457,8 @@ Range<Fixed> required_fixed_range(path_value x) {
         Fixed end   = Fixed::from_val(begin.val() + 1);
         return {begin, end};
     } else if (x.value().is_map()) {
-        Fixed begin = required_fixed(x.get("begin"));
-        Fixed end   = required_fixed(x.get("end"));
-        return {begin, end};
+        auto r = range<Fixed, required_fixed>(x);
+        return {r.first, r.second};
     } else {
         throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
     }
@@ -506,12 +471,10 @@ sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
         ticks begin = required_ticks(x);
         return sfz::make_optional(Range<ticks>{begin, begin + ticks{1}});
     } else if (x.value().is_map()) {
-        ticks begin = required_ticks(x.get("begin"));
-        ticks end   = required_ticks(x.get("end"));
-        return sfz::make_optional(Range<ticks>{begin, end});
+        auto r = range<ticks, required_ticks>(x);
+        return sfz::make_optional(Range<ticks>{r.first, r.second});
     } else {
-        throw std::runtime_error(
-                pn::format("{0}: must be null, string, or map", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null, string or map", x.path()).c_str());
     }
 }
 
@@ -520,51 +483,40 @@ Range<ticks> required_ticks_range(path_value x) {
         ticks begin = required_ticks(x);
         return Range<ticks>{begin, begin + ticks{1}};
     } else if (x.value().is_map()) {
-        ticks begin = required_ticks(x.get("begin"));
-        ticks end   = required_ticks(x.get("end"));
-        return Range<ticks>{begin, end};
+        auto r = range<ticks, required_ticks>(x);
+        return {r.first, r.second};
     } else {
         throw std::runtime_error(pn::format("{0}: must be string or map", x.path()).c_str());
     }
 }
 
-HandleList<const Level_Condition> optional_condition_range(path_value x) {
+HandleList<const Condition> optional_condition_range(path_value x) {
     auto range = optional_int_range(x);
     if (range.has_value()) {
-        return HandleList<const Level::Condition>(range->begin, range->end);
+        return HandleList<const Condition>(range->begin, range->end);
     } else {
         return {-1, -1};
     }
 }
 
-HandleList<const Level::Initial> required_initial_range(path_value x) {
+HandleList<const Initial> required_initial_range(path_value x) {
     auto range = required_int_range(x);
-    return HandleList<const Level::Initial>(range.begin, range.end);
+    return HandleList<const Initial>(range.begin, range.end);
+}
+
+static int32_t required_int32(path_value x) {
+    return required_int(x, {-0x80000000ll, 0x80000000ll});
 }
 
 sfz::optional<Point> optional_point(path_value x) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_map()) {
-        int32_t px = required_int(x.get("x"));
-        int32_t py = required_int(x.get("y"));
-        return sfz::make_optional<Point>({px, py});
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    return optional_struct<Point>(
+            x, {{"x", {&Point::h, required_int32}}, {"y", {&Point::v, required_int32}}});
 }
 
 Point required_point(path_value x) {
-    if (x.value().is_map()) {
-        int32_t px = required_int(x.get("x"));
-        int32_t py = required_int(x.get("y"));
-        return {px, py};
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    return required_struct<Point>(
+            x, {{"x", {&Point::h, required_int32}}, {"y", {&Point::v, required_int32}}});
 }
-
-static int32_t required_int32(path_value x) { return required_int(x, {-2147483648, 2147483648}); }
 
 sfz::optional<Rect> optional_rect(path_value x) {
     return optional_struct<Rect>(
@@ -596,24 +548,18 @@ sfz::optional<RgbColor> optional_color(path_value x) {
     }
 }
 
-RgbColor required_color(path_value x) {
-    if (x.value().is_map()) {
-        int32_t r = required_int(x.get("r"));
-        int32_t g = required_int(x.get("g"));
-        int32_t b = required_int(x.get("b"));
-        int32_t a = optional_int(x.get("a")).value_or(255);
-        return rgba(r, g, b, a);
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+static uint8_t                required_uint8(path_value x) { return required_int(x, {0, 256}); }
+static sfz::optional<uint8_t> optional_uint8(path_value x) {
+    auto i = optional_int(x, {0, 256});
+    return i.has_value() ? sfz::make_optional<uint8_t>(*i) : sfz::nullopt;
 }
 
-AnimationDirection required_animation_direction(path_value x) {
-    return required_enum<AnimationDirection>(
-            x, {{"0", AnimationDirection::NONE},
-                {"+", AnimationDirection::PLUS},
-                {"-", AnimationDirection::MINUS},
-                {"?", AnimationDirection::RANDOM}});
+RgbColor required_color(path_value x) {
+    return required_struct<RgbColor>(
+            x, {{"r", {&RgbColor::red, required_uint8}},
+                {"g", {&RgbColor::green, required_uint8}},
+                {"b", {&RgbColor::blue, required_uint8}},
+                {"a", {&RgbColor::alpha, optional_uint8, 255}}});
 }
 
 sfz::optional<Hue> optional_hue(path_value x) {
@@ -656,26 +602,7 @@ Hue required_hue(path_value x) {
                 {"gray", Hue::GRAY}});
 }
 
-InterfaceStyle required_interface_style(path_value x) {
-    return required_enum<InterfaceStyle>(
-            x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
-}
-
-KillKind required_kill_kind(path_value x) {
-    return required_enum<KillKind>(
-            x, {{"none", KillKind::NONE},
-                {"expire", KillKind::EXPIRE},
-                {"destroy", KillKind::DESTROY}});
-}
-
-sfz::optional<MoveOrigin> optional_origin(path_value x) {
-    return optional_enum<MoveOrigin>(
-            x, {{"level", MoveOrigin::LEVEL},
-                {"subject", MoveOrigin::SUBJECT},
-                {"object", MoveOrigin::OBJECT}});
-}
-
-int required_key(path_value x) {
+static int required_key(path_value x) {
     return required_enum<int>(
             x, {{"up", 0},
                 {"down", 1},
@@ -705,43 +632,6 @@ int required_key(path_value x) {
                 {"mouse", 31}});
 }
 
-ConditionOp required_condition_op(path_value x) {
-    return required_enum<ConditionOp>(
-            x, {{"eq", ConditionOp::EQ},
-                {"ne", ConditionOp::NE},
-                {"lt", ConditionOp::LT},
-                {"gt", ConditionOp::GT},
-                {"le", ConditionOp::LE},
-                {"ge", ConditionOp::GE}});
-}
-
-IconShape required_icon_shape(path_value x) {
-    return required_enum<IconShape>(
-            x, {{"square", IconShape::SQUARE},
-                {"triangle", IconShape::TRIANGLE},
-                {"diamond", IconShape::DIAMOND},
-                {"plus", IconShape::PLUS}});
-}
-
-LevelType required_level_type(path_value x) {
-    return required_enum<LevelType>(
-            x, {{"solo", LevelType::SOLO}, {"net", LevelType::NET}, {"demo", LevelType::DEMO}});
-}
-
-PlayerType required_player_type(path_value x) {
-    return required_enum<PlayerType>(x, {{"human", PlayerType::HUMAN}, {"cpu", PlayerType::CPU}});
-}
-
-PushKind required_push_kind(path_value x) {
-    return required_enum<PushKind>(
-            x, {{"stop", PushKind::STOP},
-                {"collide", PushKind::COLLIDE},
-                {"decelerate", PushKind::DECELERATE},
-                {"boost", PushKind::BOOST},
-                {"set", PushKind::SET},
-                {"cruise", PushKind::CRUISE}});
-}
-
 Screen required_screen(path_value x) {
     return required_enum<Screen>(
             x, {{"main", Screen::MAIN},
@@ -749,18 +639,6 @@ Screen required_screen(path_value x) {
                 {"special", Screen::SPECIAL},
                 {"message", Screen::MESSAGE},
                 {"status", Screen::STATUS}});
-}
-
-SubjectValue required_subject_value(path_value x) {
-    return required_enum<SubjectValue>(
-            x, {{"control", SubjectValue::CONTROL},
-                {"target", SubjectValue::TARGET},
-                {"player", SubjectValue::PLAYER}});
-}
-
-Weapon required_weapon(path_value x) {
-    return required_enum<Weapon>(
-            x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});
 }
 
 Zoom required_zoom(path_value x) {
@@ -773,31 +651,6 @@ Zoom required_zoom(path_value x) {
                 {"foe", Zoom::FOE},
                 {"object", Zoom::OBJECT},
                 {"all", Zoom::ALL}});
-}
-
-uint32_t optional_object_attributes(path_value x) {
-    return optional_flags(
-            x, {{"can_be_engaged", 1},
-                {"does_bounce", 6},
-                {"can_be_destination", 10},
-                {"can_engage", 11},
-                {"can_evade", 12},
-                {"can_accept_build", 14},
-                {"can_accept_destination", 15},
-                {"autotarget", 16},
-                {"animation_cycle", 17},
-                {"can_collide", 18},
-                {"can_be_hit", 19},
-                {"is_destination", 20},
-                {"hide_effect", 21},
-                {"release_energy_on_death", 22},
-                {"hated", 23},
-                {"occupies_space", 24},
-                {"static_destination", 25},
-                {"can_be_evaded", 26},
-                {"neutral_death", 27},
-                {"is_guided", 28},
-                {"appear_on_radar", 29}});
 }
 
 uint32_t optional_keys(path_value x) {
@@ -816,72 +669,7 @@ uint32_t optional_keys(path_value x) {
     }
 }
 
-std::vector<pn::string> required_string_array(path_value x) {
-    if (x.value().is_array()) {
-        pn::array_cref          a = x.value().as_array();
-        std::vector<pn::string> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_string(x.get(i)).copy());
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
-    }
-}
-
 pn::string required_string_copy(path_value x) { return required_string(x).copy(); }
-
-std::vector<pn::string> optional_string_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref          a = x.value().as_array();
-        std::vector<pn::string> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_string(x.get(i)).copy());
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-std::vector<int> optional_int_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref   a = x.value().as_array();
-        std::vector<int> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_int(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-uint32_t optional_flags(path_value x, const std::map<pn::string_view, int>& flags) {
-    if (x.value().is_null()) {
-        return 0;
-    } else if (x.value().is_map()) {
-        uint32_t result = 0;
-        for (auto kv : flags) {
-            if (optional_bool(x.get(kv.first)).value_or(false)) {
-                result |= 1 << kv.second;
-            }
-        }
-        for (auto kv : x.value().as_map()) {
-            if (flags.find(kv.key()) == flags.end()) {
-                path_value v = x.get(kv.key());
-                throw std::runtime_error(pn::format("{0}unknown flag", v.prefix()).c_str());
-            }
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
-    }
-}
 
 }  // namespace antares
 
