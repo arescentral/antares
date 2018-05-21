@@ -99,6 +99,35 @@ Condition::~Condition() {
     }
 }
 
+static ConditionType required_condition_type(path_value x) {
+    return required_enum<ConditionType>(
+            x, {{"autopilot", ConditionType::AUTOPILOT},
+                {"building", ConditionType::BUILDING},
+                {"computer", ConditionType::COMPUTER},
+                {"counter", ConditionType::COUNTER},
+                {"destroyed", ConditionType::DESTROYED},
+                {"distance", ConditionType::DISTANCE},
+                {"health", ConditionType::HEALTH},
+                {"message", ConditionType::MESSAGE},
+                {"ordered", ConditionType::ORDERED},
+                {"owner", ConditionType::OWNER},
+                {"ships", ConditionType::SHIPS},
+                {"speed", ConditionType::SPEED},
+                {"subject", ConditionType::SUBJECT},
+                {"time", ConditionType::TIME},
+                {"zoom", ConditionType::ZOOM}});
+}
+
+static ConditionOp required_condition_op(path_value x) {
+    return required_enum<ConditionOp>(
+            x, {{"eq", ConditionOp::EQ},
+                {"ne", ConditionOp::NE},
+                {"lt", ConditionOp::LT},
+                {"gt", ConditionOp::GT},
+                {"le", ConditionOp::LE},
+                {"ge", ConditionOp::GE}});
+}
+
 static Condition autopilot_condition(path_value x) {
     return required_struct<AutopilotCondition>(
             x, {COMMON_CONDITION_FIELDS,
@@ -176,6 +205,13 @@ static Condition ships_condition(path_value x) {
 static Condition speed_condition(path_value x) {
     return required_struct<SpeedCondition>(
             x, {COMMON_CONDITION_FIELDS, {"value", {&SpeedCondition::value, required_fixed}}});
+}
+
+static SubjectValue required_subject_value(path_value x) {
+    return required_enum<SubjectValue>(
+            x, {{"control", SubjectValue::CONTROL},
+                {"target", SubjectValue::TARGET},
+                {"player", SubjectValue::PLAYER}});
 }
 
 static Condition subject_condition(path_value x) {

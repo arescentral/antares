@@ -122,26 +122,52 @@ Rect                 required_rect(path_value x);
 sfz::optional<RgbColor> optional_color(path_value x);
 RgbColor                required_color(path_value x);
 
-ActionType                required_action_type(path_value x);
-ConditionType             required_condition_type(path_value x);
-AnimationDirection        required_animation_direction(path_value x);
-sfz::optional<Hue>        optional_hue(path_value x);
-Hue                       required_hue(path_value x);
-InterfaceStyle            required_interface_style(path_value x);
-KillKind                  required_kill_kind(path_value x);
-sfz::optional<MoveOrigin> optional_origin(path_value x);
-int                       required_key(path_value x);
-ConditionOp               required_condition_op(path_value x);
-IconShape                 required_icon_shape(path_value x);
-LevelType                 required_level_type(path_value x);
-PlayerType                required_player_type(path_value x);
-PushKind                  required_push_kind(path_value x);
-Screen                    required_screen(path_value x);
-SubjectValue              required_subject_value(path_value x);
-Weapon                    required_weapon(path_value x);
-Zoom                      required_zoom(path_value x);
+sfz::optional<Hue> optional_hue(path_value x);
+Hue                required_hue(path_value x);
+Screen             required_screen(path_value x);
+Zoom               required_zoom(path_value x);
 
 uint32_t optional_keys(path_value x);
+
+template <typename T, int N>
+sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_string()) {
+        pn::string_view s = x.value().as_string();
+        for (auto kv : values) {
+            if (s == kv.first) {
+                sfz::optional<T> t;
+                t.emplace(kv.second);
+                return t;
+            }
+        }
+    }
+
+    pn::array keys;
+    for (auto kv : values) {
+        keys.push_back(kv.first.copy());
+    }
+    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
+}
+
+template <typename T, int N>
+T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
+    if (x.value().is_string()) {
+        for (auto kv : values) {
+            pn::string_view s = x.value().as_string();
+            if (s == kv.first) {
+                return kv.second;
+            }
+        }
+    }
+
+    pn::array keys;
+    for (auto kv : values) {
+        keys.push_back(kv.first.copy());
+    }
+    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
+}
 
 template <typename T>
 struct field {

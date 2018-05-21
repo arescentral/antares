@@ -206,28 +206,6 @@ pn::string_view required_string(path_value x) {
     }
 }
 
-template <typename T, int N>
-sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_string()) {
-        pn::string_view s = x.value().as_string();
-        for (auto kv : values) {
-            if (s == kv.first) {
-                sfz::optional<T> t;
-                t.emplace(kv.second);
-                return t;
-            }
-        }
-    }
-
-    pn::array keys;
-    for (auto kv : values) {
-        keys.push_back(kv.first.copy());
-    }
-    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
-}
-
 static ticks parse_ticks(path_value x, pn::string_view s) {
     try {
         enum { START, START_COMPONENT, COMPONENT_DONE, INT, DECIMAL, FLOAT } state = START;
@@ -418,24 +396,6 @@ NamedHandle<const Race> required_race(path_value x) {
     return NamedHandle<const Race>(required_string(x));
 }
 
-template <typename T, int N>
-T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
-    if (x.value().is_string()) {
-        for (auto kv : values) {
-            pn::string_view s = x.value().as_string();
-            if (s == kv.first) {
-                return kv.second;
-            }
-        }
-    }
-
-    pn::array keys;
-    for (auto kv : values) {
-        keys.push_back(kv.first.copy());
-    }
-    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
-}
-
 Owner required_owner(path_value x) {
     return required_enum<Owner>(
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
@@ -602,71 +562,6 @@ RgbColor required_color(path_value x) {
                 {"a", {&RgbColor::alpha, optional_uint8, 255}}});
 }
 
-ActionType required_action_type(path_value x) {
-    return required_enum<ActionType>(
-            x, {{"age", ActionType::AGE},
-                {"assume", ActionType::ASSUME},
-                {"cap-speed", ActionType::CAP_SPEED},
-                {"capture", ActionType::CAPTURE},
-                {"cloak", ActionType::CLOAK},
-                {"condition", ActionType::CONDITION},
-                {"create", ActionType::CREATE},
-                {"disable", ActionType::DISABLE},
-                {"energize", ActionType::ENERGIZE},
-                {"equip", ActionType::EQUIP},
-                {"fire", ActionType::FIRE},
-                {"flash", ActionType::FLASH},
-                {"heal", ActionType::HEAL},
-                {"hold", ActionType::HOLD},
-                {"key", ActionType::KEY},
-                {"kill", ActionType::KILL},
-                {"land", ActionType::LAND},
-                {"message", ActionType::MESSAGE},
-                {"morph", ActionType::MORPH},
-                {"move", ActionType::MOVE},
-                {"occupy", ActionType::OCCUPY},
-                {"order", ActionType::ORDER},
-                {"pay", ActionType::PAY},
-                {"push", ActionType::PUSH},
-                {"reveal", ActionType::REVEAL},
-                {"score", ActionType::SCORE},
-                {"select", ActionType::SELECT},
-                {"play", ActionType::PLAY},
-                {"spark", ActionType::SPARK},
-                {"spin", ActionType::SPIN},
-                {"thrust", ActionType::THRUST},
-                {"warp", ActionType::WARP},
-                {"win", ActionType::WIN},
-                {"zoom", ActionType::ZOOM}});
-}
-
-ConditionType required_condition_type(path_value x) {
-    return required_enum<ConditionType>(
-            x, {{"autopilot", ConditionType::AUTOPILOT},
-                {"building", ConditionType::BUILDING},
-                {"computer", ConditionType::COMPUTER},
-                {"counter", ConditionType::COUNTER},
-                {"destroyed", ConditionType::DESTROYED},
-                {"distance", ConditionType::DISTANCE},
-                {"health", ConditionType::HEALTH},
-                {"message", ConditionType::MESSAGE},
-                {"ordered", ConditionType::ORDERED},
-                {"owner", ConditionType::OWNER},
-                {"ships", ConditionType::SHIPS},
-                {"speed", ConditionType::SPEED},
-                {"subject", ConditionType::SUBJECT},
-                {"time", ConditionType::TIME},
-                {"zoom", ConditionType::ZOOM}});
-}
-
-AnimationDirection required_animation_direction(path_value x) {
-    return required_enum<AnimationDirection>(
-            x, {{"0", AnimationDirection::NONE},
-                {"+", AnimationDirection::PLUS},
-                {"-", AnimationDirection::MINUS},
-                {"?", AnimationDirection::RANDOM}});
-}
-
 sfz::optional<Hue> optional_hue(path_value x) {
     return optional_enum<Hue>(
             x, {{"red", Hue::RED},
@@ -707,26 +602,7 @@ Hue required_hue(path_value x) {
                 {"gray", Hue::GRAY}});
 }
 
-InterfaceStyle required_interface_style(path_value x) {
-    return required_enum<InterfaceStyle>(
-            x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
-}
-
-KillKind required_kill_kind(path_value x) {
-    return required_enum<KillKind>(
-            x, {{"none", KillKind::NONE},
-                {"expire", KillKind::EXPIRE},
-                {"destroy", KillKind::DESTROY}});
-}
-
-sfz::optional<MoveOrigin> optional_origin(path_value x) {
-    return optional_enum<MoveOrigin>(
-            x, {{"level", MoveOrigin::LEVEL},
-                {"subject", MoveOrigin::SUBJECT},
-                {"object", MoveOrigin::OBJECT}});
-}
-
-int required_key(path_value x) {
+static int required_key(path_value x) {
     return required_enum<int>(
             x, {{"up", 0},
                 {"down", 1},
@@ -756,43 +632,6 @@ int required_key(path_value x) {
                 {"mouse", 31}});
 }
 
-ConditionOp required_condition_op(path_value x) {
-    return required_enum<ConditionOp>(
-            x, {{"eq", ConditionOp::EQ},
-                {"ne", ConditionOp::NE},
-                {"lt", ConditionOp::LT},
-                {"gt", ConditionOp::GT},
-                {"le", ConditionOp::LE},
-                {"ge", ConditionOp::GE}});
-}
-
-IconShape required_icon_shape(path_value x) {
-    return required_enum<IconShape>(
-            x, {{"square", IconShape::SQUARE},
-                {"triangle", IconShape::TRIANGLE},
-                {"diamond", IconShape::DIAMOND},
-                {"plus", IconShape::PLUS}});
-}
-
-LevelType required_level_type(path_value x) {
-    return required_enum<LevelType>(
-            x, {{"solo", LevelType::SOLO}, {"net", LevelType::NET}, {"demo", LevelType::DEMO}});
-}
-
-PlayerType required_player_type(path_value x) {
-    return required_enum<PlayerType>(x, {{"human", PlayerType::HUMAN}, {"cpu", PlayerType::CPU}});
-}
-
-PushKind required_push_kind(path_value x) {
-    return required_enum<PushKind>(
-            x, {{"stop", PushKind::STOP},
-                {"collide", PushKind::COLLIDE},
-                {"decelerate", PushKind::DECELERATE},
-                {"boost", PushKind::BOOST},
-                {"set", PushKind::SET},
-                {"cruise", PushKind::CRUISE}});
-}
-
 Screen required_screen(path_value x) {
     return required_enum<Screen>(
             x, {{"main", Screen::MAIN},
@@ -800,18 +639,6 @@ Screen required_screen(path_value x) {
                 {"special", Screen::SPECIAL},
                 {"message", Screen::MESSAGE},
                 {"status", Screen::STATUS}});
-}
-
-SubjectValue required_subject_value(path_value x) {
-    return required_enum<SubjectValue>(
-            x, {{"control", SubjectValue::CONTROL},
-                {"target", SubjectValue::TARGET},
-                {"player", SubjectValue::PLAYER}});
-}
-
-Weapon required_weapon(path_value x) {
-    return required_enum<Weapon>(
-            x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});
 }
 
 Zoom required_zoom(path_value x) {

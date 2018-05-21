@@ -257,6 +257,44 @@ static ActionBase::Override optional_action_override(path_value x) {
             .value_or(ActionBase::Override{});
 }
 
+static ActionType required_action_type(path_value x) {
+    return required_enum<ActionType>(
+            x, {{"age", ActionType::AGE},
+                {"assume", ActionType::ASSUME},
+                {"cap-speed", ActionType::CAP_SPEED},
+                {"capture", ActionType::CAPTURE},
+                {"cloak", ActionType::CLOAK},
+                {"condition", ActionType::CONDITION},
+                {"create", ActionType::CREATE},
+                {"disable", ActionType::DISABLE},
+                {"energize", ActionType::ENERGIZE},
+                {"equip", ActionType::EQUIP},
+                {"fire", ActionType::FIRE},
+                {"flash", ActionType::FLASH},
+                {"heal", ActionType::HEAL},
+                {"hold", ActionType::HOLD},
+                {"key", ActionType::KEY},
+                {"kill", ActionType::KILL},
+                {"land", ActionType::LAND},
+                {"message", ActionType::MESSAGE},
+                {"morph", ActionType::MORPH},
+                {"move", ActionType::MOVE},
+                {"occupy", ActionType::OCCUPY},
+                {"order", ActionType::ORDER},
+                {"pay", ActionType::PAY},
+                {"push", ActionType::PUSH},
+                {"reveal", ActionType::REVEAL},
+                {"score", ActionType::SCORE},
+                {"select", ActionType::SELECT},
+                {"play", ActionType::PLAY},
+                {"spark", ActionType::SPARK},
+                {"spin", ActionType::SPIN},
+                {"thrust", ActionType::THRUST},
+                {"warp", ActionType::WARP},
+                {"win", ActionType::WIN},
+                {"zoom", ActionType::ZOOM}});
+}
+
 static Action age_action(path_value x) {
     return required_struct<AgeAction>(
             x, {COMMON_ACTION_FIELDS,
@@ -312,6 +350,11 @@ static Action energize_action(path_value x) {
             x, {COMMON_ACTION_FIELDS, {"value", {&EnergizeAction::value, required_int}}});
 }
 
+static Weapon required_weapon(path_value x) {
+    return required_enum<Weapon>(
+            x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});
+}
+
 static Action equip_action(path_value x) {
     return required_struct<EquipAction>(
             x, {COMMON_ACTION_FIELDS,
@@ -350,6 +393,13 @@ static Action key_action(path_value x) {
                 {"disable", {&KeyAction::disable, optional_keys}}});
 }
 
+static KillKind required_kill_kind(path_value x) {
+    return required_enum<KillKind>(
+            x, {{"none", KillKind::NONE},
+                {"expire", KillKind::EXPIRE},
+                {"destroy", KillKind::DESTROY}});
+}
+
 static Action kill_action(path_value x) {
     return required_struct<KillAction>(
             x, {COMMON_ACTION_FIELDS, {"kind", {&KillAction::kind, required_kill_kind}}});
@@ -383,6 +433,13 @@ static sfz::optional<coordPointType> optional_coord_point(path_value x) {
     return sfz::make_optional(coordPointType{(uint32_t)p->h, (uint32_t)p->v});
 }
 
+static sfz::optional<MoveOrigin> optional_origin(path_value x) {
+    return optional_enum<MoveOrigin>(
+            x, {{"level", MoveOrigin::LEVEL},
+                {"subject", MoveOrigin::SUBJECT},
+                {"object", MoveOrigin::OBJECT}});
+}
+
 static Action move_action(path_value x) {
     return required_struct<MoveAction>(
             x, {COMMON_ACTION_FIELDS,
@@ -405,6 +462,16 @@ static Action pay_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"value", {&PayAction::value, required_fixed}},
                 {"player", {&PayAction::player, optional_admiral}}});
+}
+
+static PushKind required_push_kind(path_value x) {
+    return required_enum<PushKind>(
+            x, {{"stop", PushKind::STOP},
+                {"collide", PushKind::COLLIDE},
+                {"decelerate", PushKind::DECELERATE},
+                {"boost", PushKind::BOOST},
+                {"set", PushKind::SET},
+                {"cruise", PushKind::CRUISE}});
 }
 
 static Action push_action(path_value x) {

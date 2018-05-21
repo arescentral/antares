@@ -51,6 +51,10 @@ static sfz::optional<int32_t> optional_int32(path_value x) {
 template <LevelType T>
 static Level::Player required_player(path_value x);
 
+static PlayerType required_player_type(path_value x) {
+    return required_enum<PlayerType>(x, {{"human", PlayerType::HUMAN}, {"cpu", PlayerType::CPU}});
+}
+
 template <>
 Level::Player required_player<LevelType::DEMO>(path_value x) {
     return required_struct<Level::Player>(
@@ -143,7 +147,12 @@ static Level::StatusLine required_status_line(path_value x) {
             {"par", {&Level::par, optional_par}}
 // clang-format on
 
-Level demo_level(path_value x) {
+static LevelType required_level_type(path_value x) {
+    return required_enum<LevelType>(
+            x, {{"solo", LevelType::SOLO}, {"net", LevelType::NET}, {"demo", LevelType::DEMO}});
+}
+
+static Level demo_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
@@ -153,7 +162,7 @@ Level demo_level(path_value x) {
                });
 }
 
-Level solo_level(path_value x) {
+static Level solo_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
@@ -166,7 +175,7 @@ Level solo_level(path_value x) {
                });
 }
 
-Level net_level(path_value x) {
+static Level net_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,

@@ -83,6 +83,14 @@ static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x)
                });
 }
 
+static AnimationDirection required_animation_direction(path_value x) {
+    return required_enum<AnimationDirection>(
+            x, {{"0", AnimationDirection::NONE},
+                {"+", AnimationDirection::PLUS},
+                {"-", AnimationDirection::MINUS},
+                {"?", AnimationDirection::RANDOM}});
+}
+
 static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
     using Animation = BaseObject::Animation;
     return optional_struct<Animation>(
@@ -154,6 +162,14 @@ static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
                        {"inverse_speed", {&Device::inverseSpeed, required_fixed}},
                        {"restock_cost", {&Device::restockCost, required_int32}},
                });
+}
+
+static IconShape required_icon_shape(path_value x) {
+    return required_enum<IconShape>(
+            x, {{"square", IconShape::SQUARE},
+                {"triangle", IconShape::TRIANGLE},
+                {"diamond", IconShape::DIAMOND},
+                {"plus", IconShape::PLUS}});
 }
 
 static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
