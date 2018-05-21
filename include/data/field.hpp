@@ -35,7 +35,7 @@ namespace antares {
 
 struct Level;
 struct Initial;
-struct Condition;
+union Condition;
 struct Race;
 
 template <typename T>
@@ -131,6 +131,7 @@ sfz::optional<RgbColor> optional_color(path_value x);
 RgbColor                required_color(path_value x);
 
 ActionType                required_action_type(path_value x);
+ConditionType             required_condition_type(path_value x);
 AnimationDirection        required_animation_direction(path_value x);
 sfz::optional<Hue>        optional_hue(path_value x);
 Hue                       required_hue(path_value x);

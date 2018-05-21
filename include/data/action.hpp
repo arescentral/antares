@@ -37,7 +37,7 @@ namespace antares {
 class SpaceObject;
 struct Level;
 struct Initial;
-struct Condition;
+union Condition;
 
 //
 // ActionBase:

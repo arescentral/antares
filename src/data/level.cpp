@@ -131,8 +131,7 @@ static Level::StatusLine required_status_line(path_value x) {
             {"chapter", {&Level::chapter, optional_int}},                                        \
             {"title", {&Level::name, required_string_copy}},                                     \
             {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
-            {"conditions",                                                                       \
-             {&Level::conditions, optional_array<std::unique_ptr<Condition>, condition>}},       \
+            {"conditions", {&Level::conditions, optional_array<Condition, condition>}},          \
             {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
             {"starmap", {&Level::starmap, optional_rect}},                                       \
             {"song", {&Level::song, optional_string_copy}},                                      \

@@ -33,7 +33,8 @@ union Action;
 struct Initial;
 class path_value;
 
-struct Condition {
+struct ConditionBase {
+    ConditionType         type;
     ConditionOp           op         = ConditionOp::EQ;
     bool                  disabled   = false;
     bool                  persistent = false;
@@ -41,26 +42,21 @@ struct Condition {
     Handle<const Initial> object;
     std::vector<Action>   action;
 
-    static const Condition*            get(int n);
-    static HandleList<const Condition> all();
+    ConditionBase()                = default;
+    ConditionBase(ConditionBase&&) = default;
+    ConditionBase& operator=(ConditionBase&&) = default;
+    virtual ~ConditionBase()                  = default;
+    virtual bool is_true() const;
 
-    Condition()            = default;
-    Condition(Condition&&) = default;
-    Condition& operator=(Condition&&) = default;
-    virtual ~Condition()              = default;
-    virtual bool is_true() const      = 0;
-
-    Condition(const Condition&) = delete;
-    Condition& operator=(const Condition&) = delete;
+    ConditionBase(const ConditionBase&) = delete;
+    ConditionBase& operator=(const ConditionBase&) = delete;
 };
-
-std::unique_ptr<Condition> condition(path_value x);
 
 // Ops: EQ, NE
 // Compares local player’s autopilot state (on = true; off = false) to `value`.
 //
 // Warning: not net-safe.
-struct AutopilotCondition : Condition {
+struct AutopilotCondition : ConditionBase {
     bool         value;
     virtual bool is_true() const;
 };
@@ -70,7 +66,7 @@ struct AutopilotCondition : Condition {
 // Compares local player’s build object state (building = true; not building = false) to `value`.
 //
 // Warning: not net-safe.
-struct BuildingCondition : Condition {
+struct BuildingCondition : ConditionBase {
     bool         value;
     virtual bool is_true() const;
 };
@@ -79,7 +75,7 @@ struct BuildingCondition : Condition {
 // Compares local player’s (screen, line), or just screen if line < 0.
 //
 // Warning: not net-safe.
-struct ComputerCondition : Condition {
+struct ComputerCondition : ConditionBase {
     Screen       screen;
     int64_t      line;
     virtual bool is_true() const;
@@ -87,7 +83,7 @@ struct ComputerCondition : Condition {
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Compares given counter of given admiral to `value`.
-struct CounterCondition : Condition {
+struct CounterCondition : ConditionBase {
     Handle<Admiral> player;
     int64_t         counter;
     int64_t         value;
@@ -100,7 +96,7 @@ struct CounterCondition : Condition {
 // Note: the initial object referenced here can be (and usually is) different from either `subject`
 // or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
-struct DestroyedCondition : Condition {
+struct DestroyedCondition : ConditionBase {
     Handle<const Initial> initial;
     bool                  value;
     virtual bool          is_true() const;
@@ -112,13 +108,8 @@ struct DestroyedCondition : Condition {
 //
 // TODO(sfiera): provide a definition of “distance” in this context, and especially what
 // “extremely” distant means.
-struct DistanceCondition : Condition {
+struct DistanceCondition : ConditionBase {
     int64_t      value;
-    virtual bool is_true() const;
-};
-
-// Always false.
-struct FalseCondition : Condition {
     virtual bool is_true() const;
 };
 
@@ -127,7 +118,7 @@ struct FalseCondition : Condition {
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
-struct HealthCondition : Condition {
+struct HealthCondition : ConditionBase {
     double       value;
     virtual bool is_true() const;
 };
@@ -136,7 +127,7 @@ struct HealthCondition : Condition {
 // Compares (id, page) of local player’s current message to (id, page).
 //
 // Warning: not net-safe.
-struct MessageCondition : Condition {
+struct MessageCondition : ConditionBase {
     int64_t      id;
     int64_t      page;
     virtual bool is_true() const;
@@ -145,21 +136,21 @@ struct MessageCondition : Condition {
 // Ops: EQ, NE
 // Precondition: `subject` and `object` exist.
 // Compares target of `subject` to `object`.
-struct OrderedCondition : Condition {
+struct OrderedCondition : ConditionBase {
     virtual bool is_true() const;
 };
 
 // Ops: EQ, NE
 // Precondition: `subject` exists.
 // Compares owner of `subject` to `player`.
-struct OwnerCondition : Condition {
+struct OwnerCondition : ConditionBase {
     Handle<Admiral> player;
     virtual bool    is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Compares ship count of `player` to `value`.
-struct ShipsCondition : Condition {
+struct ShipsCondition : ConditionBase {
     Handle<Admiral> player;
     int64_t         value;
     virtual bool    is_true() const;
@@ -168,7 +159,7 @@ struct ShipsCondition : Condition {
 // Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `subject` exists.
 // Compares speed of `subject` to `value`.
-struct SpeedCondition : Condition {
+struct SpeedCondition : ConditionBase {
     Fixed        value;
     virtual bool is_true() const;
 };
@@ -178,7 +169,7 @@ struct SpeedCondition : Condition {
 // Compares `subject` to the control, target, or flagship of the local player, per `value`.
 //
 // Warning: not net-safe.
-struct SubjectCondition : Condition {
+struct SubjectCondition : ConditionBase {
     SubjectValue value;
     virtual bool is_true() const;
 };
@@ -190,7 +181,7 @@ struct SubjectCondition : Condition {
 // time after the
 //
 // TODO(sfiera): provide a way to specify game time “normally”
-struct TimeCondition : Condition {
+struct TimeCondition : ConditionBase {
     ticks        duration;
     bool         legacy_start_time;
     virtual bool is_true() const;
@@ -200,10 +191,56 @@ struct TimeCondition : Condition {
 // Compares zoom level of the local player to `value`.
 //
 // Warning: not net-safe.
-struct ZoomCondition : Condition {
+struct ZoomCondition : ConditionBase {
     Zoom         value;
     virtual bool is_true() const;
 };
+
+union Condition {
+    ConditionBase base;
+    ConditionType type() const;
+
+    AutopilotCondition autopilot;
+    BuildingCondition  building;
+    ComputerCondition  computer;
+    CounterCondition   counter;
+    DestroyedCondition destroyed;
+    DistanceCondition  distance;
+    HealthCondition    health;
+    MessageCondition   message;
+    OrderedCondition   ordered;
+    OwnerCondition     owner;
+    ShipsCondition     ships;
+    SpeedCondition     speed;
+    SubjectCondition   subject;
+    TimeCondition      time;
+    ZoomCondition      zoom;
+
+    Condition(AutopilotCondition c);
+    Condition(BuildingCondition c);
+    Condition(ComputerCondition c);
+    Condition(CounterCondition c);
+    Condition(DestroyedCondition c);
+    Condition(DistanceCondition c);
+    Condition(HealthCondition c);
+    Condition(MessageCondition c);
+    Condition(OrderedCondition c);
+    Condition(OwnerCondition c);
+    Condition(ShipsCondition c);
+    Condition(SpeedCondition c);
+    Condition(SubjectCondition c);
+    Condition(TimeCondition c);
+    Condition(ZoomCondition c);
+
+    ~Condition();
+    Condition(Condition&&);
+    Condition& operator=(Condition&&);
+
+    static const Condition*            get(int n);
+    static HandleList<const Condition> all();
+};
+
+Condition condition(path_value x);
 
 }  // namespace antares
 

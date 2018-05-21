@@ -640,6 +640,25 @@ ActionType required_action_type(path_value x) {
                 {"zoom", ActionType::ZOOM}});
 }
 
+ConditionType required_condition_type(path_value x) {
+    return required_enum<ConditionType>(
+            x, {{"autopilot", ConditionType::AUTOPILOT},
+                {"building", ConditionType::BUILDING},
+                {"computer", ConditionType::COMPUTER},
+                {"counter", ConditionType::COUNTER},
+                {"destroyed", ConditionType::DESTROYED},
+                {"distance", ConditionType::DISTANCE},
+                {"health", ConditionType::HEALTH},
+                {"message", ConditionType::MESSAGE},
+                {"ordered", ConditionType::ORDERED},
+                {"owner", ConditionType::OWNER},
+                {"ships", ConditionType::SHIPS},
+                {"speed", ConditionType::SPEED},
+                {"subject", ConditionType::SUBJECT},
+                {"time", ConditionType::TIME},
+                {"zoom", ConditionType::ZOOM}});
+}
+
 AnimationDirection required_animation_direction(path_value x) {
     return required_enum<AnimationDirection>(
             x, {{"0", AnimationDirection::NONE},

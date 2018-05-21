@@ -58,6 +58,24 @@ enum class ActionType {
     ZOOM,
 };
 
+enum class ConditionType {
+    AUTOPILOT,
+    BUILDING,
+    COMPUTER,
+    COUNTER,
+    DESTROYED,
+    DISTANCE,
+    HEALTH,
+    MESSAGE,
+    ORDERED,
+    OWNER,
+    SHIPS,
+    SPEED,
+    SUBJECT,
+    TIME,
+    ZOOM,
+};
+
 enum class AnimationDirection {
     NONE   = 0,   // 0
     PLUS   = +1,  // +

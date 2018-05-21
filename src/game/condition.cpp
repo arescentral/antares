@@ -34,7 +34,7 @@ namespace antares {
 
 const Condition* Condition::get(int number) {
     if ((0 <= number) && (number < g.level->conditions.size())) {
-        return g.level->conditions[number].get();
+        return &g.level->conditions[number];
     }
     return nullptr;
 }
@@ -63,6 +63,8 @@ static bool op_eq(ConditionOp op, const X& x, const Y& y) {
         default: return false;
     }
 }
+
+bool ConditionBase::is_true() const { return false; }
 
 bool AutopilotCondition::is_true() const { return op_eq(op, IsPlayerShipOnAutoPilot(), value); }
 
@@ -106,8 +108,6 @@ bool DistanceCondition::is_true() const {
     }
     return false;
 }
-
-bool FalseCondition::is_true() const { return false; }
 
 bool HealthCondition::is_true() const {
     auto   sObject = GetObjectFromInitialNumber(subject);
@@ -172,12 +172,12 @@ bool ZoomCondition::is_true() const { return op_compare(op, g.zoom, value); }
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {
         int index = (&c - g.level->conditions.data());
-        if ((g.condition_enabled[index] || c->persistent) && c->is_true()) {
+        if ((g.condition_enabled[index] || c.base.persistent) && (&c.base)->is_true()) {
             g.condition_enabled[index] = false;
-            auto  sObject              = GetObjectFromInitialNumber(c->subject);
-            auto  dObject              = GetObjectFromInitialNumber(c->object);
+            auto  sObject              = GetObjectFromInitialNumber(c.base.subject);
+            auto  dObject              = GetObjectFromInitialNumber(c.base.object);
             Point offset;
-            exec(c->action, sObject, dObject, &offset);
+            exec(c.base.action, sObject, dObject, &offset);
         }
     }
 }

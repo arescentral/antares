@@ -35,7 +35,7 @@
 namespace antares {
 
 struct Briefing;
-struct Condition;
+union Condition;
 struct Initial;
 struct Race;
 
@@ -90,9 +90,9 @@ struct Level {
         int64_t    losses;
     } par;
 
-    std::vector<Initial>                    initials;
-    std::vector<std::unique_ptr<Condition>> conditions;
-    std::vector<Briefing>                   briefings;
+    std::vector<Initial>   initials;
+    std::vector<Condition> conditions;
+    std::vector<Briefing>  briefings;
 
     pn::string prologue;           // SOLO
     pn::string epilogue;           // SOLO

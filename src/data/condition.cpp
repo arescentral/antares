@@ -26,165 +26,201 @@ namespace antares {
 
 // clang-format off
 #define COMMON_CONDITION_FIELDS                                                                   \
-            {"type", nullptr},                                                                    \
-            {"op", {&Condition::op, required_condition_op}},                                      \
-            {"persistent", {&Condition::persistent, optional_bool, false}},                       \
-            {"disabled", {&Condition::disabled, optional_bool, false}},                           \
-            {"subject", {&Condition::subject, optional_initial, Initial::none()}},                \
-            {"object", {&Condition::object, optional_initial, Initial::none()}},                  \
-            {"action", {&Condition::action, required_array<Action, action>}}
+            {"type", {&ConditionBase::type, required_condition_type}},                            \
+            {"op", {&ConditionBase::op, required_condition_op}},                                  \
+            {"persistent", {&ConditionBase::persistent, optional_bool, false}},                   \
+            {"disabled", {&ConditionBase::disabled, optional_bool, false}},                       \
+            {"subject", {&ConditionBase::subject, optional_initial, Initial::none()}},            \
+            {"object", {&ConditionBase::object, optional_initial, Initial::none()}},              \
+            {"action", {&ConditionBase::action, required_array<Action, action>}}
 // clang-format on
 
-template <typename T>
-static std::unique_ptr<Condition> condition_ptr(T t) {
-    return std::unique_ptr<Condition>(new T(std::move(t)));
+ConditionType Condition::type() const { return base.type; }
+
+Condition::Condition(AutopilotCondition a) : autopilot(std::move(a)) {}
+Condition::Condition(BuildingCondition a) : building(std::move(a)) {}
+Condition::Condition(ComputerCondition a) : computer(std::move(a)) {}
+Condition::Condition(CounterCondition a) : counter(std::move(a)) {}
+Condition::Condition(DestroyedCondition a) : destroyed(std::move(a)) {}
+Condition::Condition(DistanceCondition a) : distance(std::move(a)) {}
+Condition::Condition(HealthCondition a) : health(std::move(a)) {}
+Condition::Condition(MessageCondition a) : message(std::move(a)) {}
+Condition::Condition(OrderedCondition a) : ordered(std::move(a)) {}
+Condition::Condition(OwnerCondition a) : owner(std::move(a)) {}
+Condition::Condition(ShipsCondition a) : ships(std::move(a)) {}
+Condition::Condition(SpeedCondition a) : speed(std::move(a)) {}
+Condition::Condition(SubjectCondition a) : subject(std::move(a)) {}
+Condition::Condition(TimeCondition a) : time(std::move(a)) {}
+Condition::Condition(ZoomCondition a) : zoom(std::move(a)) {}
+
+Condition::Condition(Condition&& a) {
+    switch (a.type()) {
+        case ConditionType::AUTOPILOT: new (this) Condition(std::move(a.autopilot)); break;
+        case ConditionType::BUILDING: new (this) Condition(std::move(a.building)); break;
+        case ConditionType::COMPUTER: new (this) Condition(std::move(a.computer)); break;
+        case ConditionType::COUNTER: new (this) Condition(std::move(a.counter)); break;
+        case ConditionType::DESTROYED: new (this) Condition(std::move(a.destroyed)); break;
+        case ConditionType::DISTANCE: new (this) Condition(std::move(a.distance)); break;
+        case ConditionType::HEALTH: new (this) Condition(std::move(a.health)); break;
+        case ConditionType::MESSAGE: new (this) Condition(std::move(a.message)); break;
+        case ConditionType::ORDERED: new (this) Condition(std::move(a.ordered)); break;
+        case ConditionType::OWNER: new (this) Condition(std::move(a.owner)); break;
+        case ConditionType::SHIPS: new (this) Condition(std::move(a.ships)); break;
+        case ConditionType::SPEED: new (this) Condition(std::move(a.speed)); break;
+        case ConditionType::SUBJECT: new (this) Condition(std::move(a.subject)); break;
+        case ConditionType::TIME: new (this) Condition(std::move(a.time)); break;
+        case ConditionType::ZOOM: new (this) Condition(std::move(a.zoom)); break;
+    }
 }
 
-static std::unique_ptr<Condition> autopilot_condition(path_value x) {
-    return condition_ptr(required_struct<AutopilotCondition>(
+Condition& Condition::operator=(Condition&& a) {
+    this->~Condition();
+    new (this) Condition(std::move(a));
+    return *this;
+}
+
+Condition::~Condition() {
+    switch (type()) {
+        case ConditionType::AUTOPILOT: autopilot.~AutopilotCondition(); break;
+        case ConditionType::BUILDING: building.~BuildingCondition(); break;
+        case ConditionType::COMPUTER: computer.~ComputerCondition(); break;
+        case ConditionType::COUNTER: counter.~CounterCondition(); break;
+        case ConditionType::DESTROYED: destroyed.~DestroyedCondition(); break;
+        case ConditionType::DISTANCE: distance.~DistanceCondition(); break;
+        case ConditionType::HEALTH: health.~HealthCondition(); break;
+        case ConditionType::MESSAGE: message.~MessageCondition(); break;
+        case ConditionType::ORDERED: ordered.~OrderedCondition(); break;
+        case ConditionType::OWNER: owner.~OwnerCondition(); break;
+        case ConditionType::SHIPS: ships.~ShipsCondition(); break;
+        case ConditionType::SPEED: speed.~SpeedCondition(); break;
+        case ConditionType::SUBJECT: subject.~SubjectCondition(); break;
+        case ConditionType::TIME: time.~TimeCondition(); break;
+        case ConditionType::ZOOM: zoom.~ZoomCondition(); break;
+    }
+}
+
+static Condition autopilot_condition(path_value x) {
+    return required_struct<AutopilotCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
-                {"value", {&AutopilotCondition::value, required_bool}}}));
+                {"value", {&AutopilotCondition::value, required_bool}}});
 }
 
-static std::unique_ptr<Condition> building_condition(path_value x) {
-    return condition_ptr(required_struct<BuildingCondition>(
+static Condition building_condition(path_value x) {
+    return required_struct<BuildingCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
-                {"value", {&BuildingCondition::value, required_bool}}}));
+                {"value", {&BuildingCondition::value, required_bool}}});
 }
 
-static std::unique_ptr<Condition> computer_condition(path_value x) {
-    return condition_ptr(required_struct<ComputerCondition>(
+static Condition computer_condition(path_value x) {
+    return required_struct<ComputerCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
                 {"screen", {&ComputerCondition::screen, required_screen}},
-                {"line", {&ComputerCondition::line, optional_int, -1}}}));
+                {"line", {&ComputerCondition::line, optional_int, -1}}});
 }
 
-static std::unique_ptr<Condition> counter_condition(path_value x) {
-    return condition_ptr(required_struct<CounterCondition>(
+static Condition counter_condition(path_value x) {
+    return required_struct<CounterCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", {&CounterCondition::player, required_admiral}},
                 {"counter", {&CounterCondition::counter, required_int}},
-                {"value", {&CounterCondition::value, required_int}}}));
+                {"value", {&CounterCondition::value, required_int}}});
 }
 
-static std::unique_ptr<Condition> destroyed_condition(path_value x) {
-    return condition_ptr(required_struct<DestroyedCondition>(
+static Condition destroyed_condition(path_value x) {
+    return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"initial", {&DestroyedCondition::initial, required_initial}},
-                {"value", {&DestroyedCondition::value, required_bool}}}));
+                {"value", {&DestroyedCondition::value, required_bool}}});
 }
 
-static std::unique_ptr<Condition> distance_condition(path_value x) {
-    return condition_ptr(required_struct<DistanceCondition>(
+static Condition distance_condition(path_value x) {
+    return required_struct<DistanceCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
-                {"value", {&DistanceCondition::value, required_int}}}));
+                {"value", {&DistanceCondition::value, required_int}}});
 }
 
-static std::unique_ptr<Condition> health_condition(path_value x) {
-    return condition_ptr(required_struct<HealthCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"value", {&HealthCondition::value, required_double}}}));
+static Condition health_condition(path_value x) {
+    return required_struct<HealthCondition>(
+            x, {COMMON_CONDITION_FIELDS, {"value", {&HealthCondition::value, required_double}}});
 }
 
-static std::unique_ptr<Condition> message_condition(path_value x) {
-    return condition_ptr(required_struct<MessageCondition>(
+static Condition message_condition(path_value x) {
+    return required_struct<MessageCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
                 {"id", {&MessageCondition::id, required_int}},
-                {"page", {&MessageCondition::page, required_int}}}));
+                {"page", {&MessageCondition::page, required_int}}});
 }
 
-static std::unique_ptr<Condition> ordered_condition(path_value x) {
-    return condition_ptr(required_struct<OrderedCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"player", nullptr}, {"value", nullptr}}));
+static Condition ordered_condition(path_value x) {
+    return required_struct<OrderedCondition>(
+            x, {COMMON_CONDITION_FIELDS, {"player", nullptr}, {"value", nullptr}});
 }
 
-static std::unique_ptr<Condition> owner_condition(path_value x) {
-    return condition_ptr(required_struct<OwnerCondition>(
-            x,
-            {COMMON_CONDITION_FIELDS, {"player", {&OwnerCondition::player, required_admiral}}}));
+static Condition owner_condition(path_value x) {
+    return required_struct<OwnerCondition>(
+            x, {COMMON_CONDITION_FIELDS, {"player", {&OwnerCondition::player, required_admiral}}});
 }
 
-static std::unique_ptr<Condition> ships_condition(path_value x) {
-    return condition_ptr(required_struct<ShipsCondition>(
+static Condition ships_condition(path_value x) {
+    return required_struct<ShipsCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", {&ShipsCondition::player, required_admiral}},
-                {"value", {&ShipsCondition::value, required_int}}}));
+                {"value", {&ShipsCondition::value, required_int}}});
 }
 
-static std::unique_ptr<Condition> speed_condition(path_value x) {
-    return condition_ptr(required_struct<SpeedCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"value", {&SpeedCondition::value, required_fixed}}}));
+static Condition speed_condition(path_value x) {
+    return required_struct<SpeedCondition>(
+            x, {COMMON_CONDITION_FIELDS, {"value", {&SpeedCondition::value, required_fixed}}});
 }
 
-static std::unique_ptr<Condition> subject_condition(path_value x) {
-    return condition_ptr(required_struct<SubjectCondition>(
+static Condition subject_condition(path_value x) {
+    return required_struct<SubjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
-                {"value", {&SubjectCondition::value, required_subject_value}}}));
+                {"value", {&SubjectCondition::value, required_subject_value}}});
 }
 
-static std::unique_ptr<Condition> time_condition(path_value x) {
-    return condition_ptr(required_struct<TimeCondition>(
-            x,
-            {COMMON_CONDITION_FIELDS,
-             {"duration", {&TimeCondition::duration, required_ticks}},
-             {"legacy_start_time", {&TimeCondition::legacy_start_time, optional_bool, false}}}));
+static Condition time_condition(path_value x) {
+    return required_struct<TimeCondition>(
+            x, {COMMON_CONDITION_FIELDS,
+                {"duration", {&TimeCondition::duration, required_ticks}},
+                {"legacy_start_time", {&TimeCondition::legacy_start_time, optional_bool, false}}});
 }
 
-static std::unique_ptr<Condition> zoom_condition(path_value x) {
-    return condition_ptr(required_struct<ZoomCondition>(
+static Condition zoom_condition(path_value x) {
+    return required_struct<ZoomCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
-                {"value", {&ZoomCondition::value, required_zoom}}}));
+                {"value", {&ZoomCondition::value, required_zoom}}});
 }
 
-std::unique_ptr<Condition> condition(path_value x) {
+Condition condition(path_value x) {
     if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
 
-    pn::string_view            type = required_string(x.get("type"));
-    std::unique_ptr<Condition> c;
-    if (type == "autopilot") {
-        return autopilot_condition(x);
-    } else if (type == "building") {
-        return building_condition(x);
-    } else if (type == "computer") {
-        return computer_condition(x);
-    } else if (type == "counter") {
-        return counter_condition(x);
-    } else if (type == "destroyed") {
-        return destroyed_condition(x);
-    } else if (type == "distance") {
-        return distance_condition(x);
-    } else if (type == "false") {
-        return std::unique_ptr<Condition>(new FalseCondition);
-    } else if (type == "health") {
-        return health_condition(x);
-    } else if (type == "message") {
-        return message_condition(x);
-    } else if (type == "ordered") {
-        return ordered_condition(x);
-    } else if (type == "owner") {
-        return owner_condition(x);
-    } else if (type == "ships") {
-        return ships_condition(x);
-    } else if (type == "speed") {
-        return speed_condition(x);
-    } else if (type == "subject") {
-        return subject_condition(x);
-    } else if (type == "time") {
-        return time_condition(x);
-    } else if (type == "zoom") {
-        return zoom_condition(x);
-    } else {
-        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
+    switch (required_condition_type(x.get("type"))) {
+        case ConditionType::AUTOPILOT: return autopilot_condition(x);
+        case ConditionType::BUILDING: return building_condition(x);
+        case ConditionType::COMPUTER: return computer_condition(x);
+        case ConditionType::COUNTER: return counter_condition(x);
+        case ConditionType::DESTROYED: return destroyed_condition(x);
+        case ConditionType::DISTANCE: return distance_condition(x);
+        case ConditionType::HEALTH: return health_condition(x);
+        case ConditionType::MESSAGE: return message_condition(x);
+        case ConditionType::ORDERED: return ordered_condition(x);
+        case ConditionType::OWNER: return owner_condition(x);
+        case ConditionType::SHIPS: return ships_condition(x);
+        case ConditionType::SPEED: return speed_condition(x);
+        case ConditionType::SUBJECT: return subject_condition(x);
+        case ConditionType::TIME: return time_condition(x);
+        case ConditionType::ZOOM: return zoom_condition(x);
     }
-    return c;
 }
 
 }  // namespace antares
