@@ -79,10 +79,9 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
-    bool         found_at_least_one = false;
-    ScenarioList list;
-    for (size_t i = 0; i < list.size(); ++i) {
-        const auto& s = list.at(i);
+    bool              found_at_least_one = false;
+    std::vector<Info> scenarios          = scenario_list();
+    for (const Info& s : scenarios) {
         pn::dump(
                 stdout, pn::map{{s.identifier.copy(),
                                  pn::map{

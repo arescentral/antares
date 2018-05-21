@@ -26,18 +26,7 @@
 
 namespace antares {
 
-class ScenarioList {
-  public:
-    ScenarioList();
-    ScenarioList(const ScenarioList&) = delete;
-    ScenarioList& operator=(const ScenarioList&) = delete;
-
-    size_t      size() const;
-    const Info& at(size_t index) const;
-
-  private:
-    std::vector<Info> _scenarios;
-};
+std::vector<Info> scenario_list();
 
 }  // namespace antares
 

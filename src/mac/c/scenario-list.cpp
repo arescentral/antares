@@ -47,12 +47,11 @@ struct AntaresScenarioListEntry {
 };
 
 struct AntaresScenarioList {
-    antares::ScenarioList            cxx_obj;
     vector<AntaresScenarioListEntry> entries;
 
     AntaresScenarioList() {
-        for (size_t i = 0; i < cxx_obj.size(); ++i) {
-            entries.emplace_back(cxx_obj.at(i));
+        for (const antares::Info& s : antares::scenario_list()) {
+            entries.emplace_back(s);
         }
     }
 };
