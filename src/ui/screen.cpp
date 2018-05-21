@@ -23,7 +23,6 @@
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
-#include "data/field.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -41,7 +40,7 @@ namespace antares {
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen)
         : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
     try {
-        _items = interface_items(0, path_value{load_pn(name)});
+        _items = Resource::interface(name);
         for (auto& item : _items) {
             item->bounds.offset(bounds.left, bounds.top);
         }
@@ -51,17 +50,6 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool 
 }
 
 InterfaceScreen::~InterfaceScreen() {}
-
-pn::value InterfaceScreen::load_pn(pn::string_view id) {
-    Resource   rsrc = Resource::interface(id);
-    pn::value  x;
-    pn_error_t e;
-    if (!pn::parse(rsrc.string().open(), x, &e)) {
-        throw std::runtime_error(
-                pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
-    }
-    return x;
-}
 
 void InterfaceScreen::become_front() {
     this->adjust_interface();

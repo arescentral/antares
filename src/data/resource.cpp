@@ -24,6 +24,8 @@
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
+#include "data/field.hpp"
+#include "data/interface.hpp"
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
 #include "video/driver.hpp"
@@ -93,9 +95,11 @@ Font Resource::font(pn::string_view name) {
             procyon(pn::format("fonts/{0}.pn", name)),
             load_hidpi_texture(pn::format("fonts/{0}", name)));
 }
-Resource Resource::interface(pn::string_view name) {
-    return Resource(load(pn::format("interfaces/{0}.pn", name)));
+
+std::vector<std::unique_ptr<InterfaceItem>> Resource::interface(pn::string_view name) {
+    return interface_items(0, path_value{procyon(pn::format("interfaces/{0}.pn", name))});
 }
+
 Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
 
 std::vector<int32_t> Resource::rotation_table() {

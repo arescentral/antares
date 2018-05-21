@@ -28,6 +28,7 @@
 
 namespace antares {
 
+class InterfaceItem;
 class Texture;
 class NatePixTable;
 class Font;
@@ -37,15 +38,15 @@ class Resource {
     static bool     exists(pn::string_view path);
     static Resource path(pn::string_view path);
 
-    static Font                    font(pn::string_view name);
-    static Resource                interface(pn::string_view name);
-    static Resource                replay(int id);
-    static std::vector<int32_t>    rotation_table();
-    static NatePixTable            sprite(pn::string_view name, Hue hue);
-    static std::vector<pn::string> strings(int id);
-    static pn::string              text(int id);
-    static Texture                 texture(pn::string_view name);
-    static Texture                 texture(int16_t id);
+    static Font                                        font(pn::string_view name);
+    static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
+    static Resource                                    replay(int id);
+    static std::vector<int32_t>                        rotation_table();
+    static NatePixTable                                sprite(pn::string_view name, Hue hue);
+    static std::vector<pn::string>                     strings(int id);
+    static pn::string                                  text(int id);
+    static Texture                                     texture(pn::string_view name);
+    static Texture                                     texture(int16_t id);
 
     Resource(Resource&&) = default;
     Resource& operator=(Resource&&) = default;
