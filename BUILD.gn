@@ -130,6 +130,7 @@ source_set("libantares-data") {
     "include/data/replay.hpp",
     "include/data/resource.hpp",
     "include/data/scenario-list.hpp",
+    "include/data/sprite-data.hpp",
     "src/data/action.cpp",
     "src/data/base-object.cpp",
     "src/data/briefing.cpp",
@@ -147,6 +148,7 @@ source_set("libantares-data") {
     "src/data/replay.cpp",
     "src/data/resource.cpp",
     "src/data/scenario-list.cpp",
+    "src/data/sprite-data.cpp",
   ]
   public_deps = [
     ":libantares-lang",

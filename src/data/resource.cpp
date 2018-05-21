@@ -27,6 +27,7 @@
 #include "data/field.hpp"
 #include "data/font-data.hpp"
 #include "data/interface.hpp"
+#include "data/sprite-data.hpp"
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
 #include "video/driver.hpp"
@@ -134,13 +135,16 @@ std::vector<pn::string> Resource::strings(int id) {
     return result;
 }
 
-NatePixTable Resource::sprite(pn::string_view name, Hue hue) {
-    pn::value   x = procyon(pn::format("sprites/{0}.pn", name));
-    ArrayPixMap image =
-            read_png(Resource::path(pn::format("sprites/{0}/image.png", name)).data().open());
-    ArrayPixMap overlay =
-            read_png(Resource::path(pn::format("sprites/{0}/overlay.png", name)).data().open());
-    return NatePixTable(name, hue, x, std::move(image), std::move(overlay));
+SpriteData Resource::sprite_data(pn::string_view name) {
+    return ::antares::sprite_data(procyon(pn::format("sprites/{0}.pn", name)));
+}
+
+ArrayPixMap Resource::sprite_image(pn::string_view name) {
+    return read_png(Resource::path(pn::format("sprites/{0}/image.png", name)).data().open());
+}
+
+ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
+    return read_png(Resource::path(pn::format("sprites/{0}/overlay.png", name)).data().open());
 }
 
 pn::string Resource::text(int id) {

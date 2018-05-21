@@ -103,7 +103,7 @@ void ResetAllSprites() {
 
 void Pix::reset() {
     _pix.clear();
-    _cursor.reset(new NatePixTable(Resource::sprite("cursor", Hue::GRAY)));
+    _cursor.reset(new NatePixTable("cursor", Hue::GRAY));
 }
 
 NatePixTable* Pix::add(pn::string_view name, Hue hue) {
@@ -112,7 +112,7 @@ NatePixTable* Pix::add(pn::string_view name, Hue hue) {
         return result;
     }
 
-    auto it = _pix.emplace(std::make_pair(name.copy(), hue), Resource::sprite(name, hue)).first;
+    auto it = _pix.emplace(std::make_pair(name.copy(), hue), NatePixTable(name, hue)).first;
     return &it->second;
 }
 

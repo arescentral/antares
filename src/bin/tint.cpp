@@ -38,7 +38,7 @@ namespace antares {
 namespace {
 
 void draw(pn::string_view name, Hue hue, ArrayPixMap& pix) {
-    NatePixTable               table = Resource::sprite(name, hue);
+    NatePixTable               table(name, hue);
     const NatePixTable::Frame& frame = table.at(9);
     pix.resize(Size(frame.width(), frame.height()));
     pix.copy(frame.pix_map());
