@@ -55,7 +55,7 @@ std::vector<Info> scenario_list() {
         scenarios.emplace_back(info(path_value{x}));
         scenarios.back().identifier = kFactoryScenarioIdentifier;
     } catch (...) {
-        std::throw_with_nested(std::runtime_error(factory_info_path.copy().c_str()));
+        // ignore
     }
 
     ScopedGlob g;
@@ -82,7 +82,7 @@ std::vector<Info> scenario_list() {
             }
             scenarios.emplace_back(info(path_value{x}));
         } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+            // ignore
         }
     }
 
