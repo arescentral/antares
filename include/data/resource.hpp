@@ -39,8 +39,8 @@ struct SpriteData;
 
 class Resource {
   public:
-    static bool     exists(pn::string_view path);
-    static Resource path(pn::string_view path);
+    static bool      exists(pn::string_view path);
+    static pn::value procyon(pn::string_view path);
 
     static FontData                                    font(pn::string_view name);
     static Texture                                     font_image(pn::string_view name);
@@ -67,7 +67,11 @@ class Resource {
     pn::string_view string() const;
 
   private:
-    static pn::value procyon(pn::string_view path);
+    static Resource path(pn::string_view path);
+
+    static Texture   load_png(pn::string_view path, int scale);
+    static Texture   load_hidpi_texture(pn::string_view name);
+    static SoundData load_audio(pn::string_view name);
 
     Resource(std::unique_ptr<sfz::mapped_file> file);
     std::unique_ptr<sfz::mapped_file> _file;

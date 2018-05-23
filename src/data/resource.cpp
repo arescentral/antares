@@ -66,13 +66,13 @@ bool Resource::exists(pn::string_view resource_path) {
     return false;
 }
 
-static Texture load_png(pn::string_view path, int scale) {
+Texture Resource::load_png(pn::string_view path, int scale) {
     Resource    rsrc = Resource::path(pn::format("{0}.png", path));
     ArrayPixMap pix  = read_png(rsrc.data().open());
     return sys.video->texture(pn::format("/{0}.png", path), pix, scale);
 }
 
-static Texture load_hidpi_texture(pn::string_view name) {
+Texture Resource::load_hidpi_texture(pn::string_view name) {
     int scale = sys.video->scale();
     while (true) {
         try {
@@ -92,7 +92,7 @@ static Texture load_hidpi_texture(pn::string_view name) {
     }
 }
 
-static SoundData load_audio(pn::string_view name) {
+SoundData Resource::load_audio(pn::string_view name) {
     static const struct {
         const char ext[6];
         SoundData (*fn)(pn::data_view);
@@ -199,9 +199,12 @@ pn::string_view Resource::string() const {
 }
 
 pn::value Resource::procyon(pn::string_view path) {
-    pn::value x;
-    if (!pn::parse(Resource::path(path).data().open(), x, nullptr)) {
-        throw std::runtime_error("invalid sprite");
+    pn::value  x;
+    pn_error_t e;
+    if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+        throw std::runtime_error(
+                pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
+                        .c_str());
     }
     return x;
 }

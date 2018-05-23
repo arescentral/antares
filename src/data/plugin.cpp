@@ -71,14 +71,8 @@ static void read_all_levels() {
         const pn::string_view id =
                 full_path.substr(dir.size() + 8, full_path.size() - dir.size() - 11);
 
+        pn::value x = Resource::procyon(path);
         try {
-            pn::value  x;
-            pn_error_t e;
-            if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
-                throw std::runtime_error(
-                        pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
-                                .c_str());
-            }
             auto it = plug.levels.emplace(id.copy(), level(x)).first;
             if (it->second.chapter.has_value()) {
                 plug.chapters[*it->second.chapter] = &it->second;
@@ -90,13 +84,8 @@ static void read_all_levels() {
 }
 
 void PluginInit() {
+    pn::value x = Resource::procyon("info.pn");
     try {
-        pn::value  x;
-        pn_error_t e;
-        if (!pn::parse(Resource::path("info.pn").data().open(), x, &e)) {
-            throw std::runtime_error(
-                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
-        }
         plug.info = info(path_value{x});
         if (plug.info.format != kPluginFormat) {
             throw std::runtime_error(
@@ -117,13 +106,8 @@ void load_race(const NamedHandle<const Race>& r) {
     }
 
     pn::string path = pn::format("races/{0}.pn", r.name());
+    pn::value  x    = Resource::procyon(path);
     try {
-        pn::value  x;
-        pn_error_t e;
-        if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
-            throw std::runtime_error(
-                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
-        }
         plug.races.emplace(r.name().copy(), race(path_value{x}));
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.copy().c_str()));
@@ -157,13 +141,8 @@ static void merge_value(pn::value_ref base, pn::value_cref patch) {
 
 static pn::value merged_object(pn::string_view name) {
     pn::string path = pn::format("objects/{0}.pn", name);
+    pn::value  x    = Resource::procyon(path);
     try {
-        pn::value  x;
-        pn_error_t e;
-        if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
-            throw std::runtime_error(
-                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
-        }
         pn::value tpl;
         if (!x.is_map() || !x.to_map().pop("template", tpl) || tpl.is_null()) {
             return x;
