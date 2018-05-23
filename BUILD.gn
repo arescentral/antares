@@ -130,6 +130,7 @@ source_set("libantares-data") {
     "include/data/replay.hpp",
     "include/data/resource.hpp",
     "include/data/scenario-list.hpp",
+    "include/data/sndfile.hpp",
     "include/data/sprite-data.hpp",
     "src/data/action.cpp",
     "src/data/base-object.cpp",
@@ -148,6 +149,7 @@ source_set("libantares-data") {
     "src/data/replay.cpp",
     "src/data/resource.cpp",
     "src/data/scenario-list.cpp",
+    "src/data/sndfile.cpp",
     "src/data/sprite-data.cpp",
   ]
   public_deps = [
@@ -156,6 +158,9 @@ source_set("libantares-data") {
     "//ext/libsfz",
     "//ext/libzipxx",
     "//ext/procyon:procyon-cpp",
+  ]
+  deps = [
+    "//ext/libsndfile",
   ]
   configs += [ ":antares_private" ]
 }
@@ -291,19 +296,16 @@ source_set("libantares-sound") {
     "include/sound/fx.hpp",
     "include/sound/music.hpp",
     "include/sound/openal-driver.hpp",
-    "include/sound/sndfile.hpp",
     "src/sound/driver.cpp",
     "src/sound/fx.cpp",
     "src/sound/music.cpp",
     "src/sound/openal-driver.cpp",
-    "src/sound/sndfile.cpp",
   ]
   public_deps = [
     ":libantares-game",
     ":libantares-lang",
     "//ext/libmodplug",
     "//ext/libsfz",
-    "//ext/libsndfile",
   ]
   libs = []
   if (target_os == "mac") {

@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "sound/sndfile.hpp"
+#include "data/sndfile.hpp"
 
 #include <sndfile.h>
 #include <string.h>
@@ -113,7 +113,7 @@ void Sndfile::convert(pn::data_ref data, ALenum& format, ALsizei& frequency) con
     VirtualFile userdata = {
             .data = _data, .pointer = 0,
     };
-    SF_INFO info = {};
+    SF_INFO                                       info = {};
     std::unique_ptr<SNDFILE, decltype(&sf_close)> file(
             sf_open_virtual(&io, SFM_READ, &info, &userdata), sf_close);
 

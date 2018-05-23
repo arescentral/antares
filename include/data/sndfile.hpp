@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_SOUND_SNDFILE_HPP_
-#define ANTARES_SOUND_SNDFILE_HPP_
+#ifndef ANTARES_DATA_SNDFILE_HPP_
+#define ANTARES_DATA_SNDFILE_HPP_
 
 #include <pn/data>
 
@@ -45,4 +45,4 @@ class Sndfile {
 
 }  // namespace antares
 
-#endif  // ANTARES_SOUND_SNDFILE_HPP_
+#endif  // ANTARES_DATA_SNDFILE_HPP_

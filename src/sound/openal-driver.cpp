@@ -22,7 +22,7 @@
 #include <pn/file>
 
 #include "data/resource.hpp"
-#include "sound/sndfile.hpp"
+#include "data/sndfile.hpp"
 
 using std::unique_ptr;
 
