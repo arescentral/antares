@@ -52,19 +52,16 @@ class NullChannel : public SoundChannel {
   public:
     NullChannel() {}
 
-    virtual void activate() {}
-
-    virtual void amp(uint8_t volume) { static_cast<void>(volume); }
-
-    virtual void quiet() {}
+    void activate() override {}
+    void quiet() override {}
 };
 
 class NullSound : public Sound {
   public:
     NullSound() {}
 
-    virtual void play() {}
-    virtual void loop() {}
+    virtual void play(uint8_t volume) {}
+    virtual void loop(uint8_t volume) {}
 };
 
 }  // namespace
@@ -92,30 +89,25 @@ class LogSoundDriver::LogChannel : public SoundChannel {
   public:
     LogChannel(LogSoundDriver& driver) : _id(++driver._last_id), _driver(driver) {}
 
-    virtual void activate() { _driver._active_channel = this; }
+    void activate() override { _driver._active_channel = this; }
 
-    void play(pn::string_view sound_path) {
-        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        pn::string line = pn::format("play\t{0}\t{1}\t{2}\n", _id, t, sound_path);
-        _driver._sound_log.write(line);
+    void play(pn::string_view kind, pn::string_view sound_path, uint8_t volume) {
+        int64_t t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        pn::format(
+                _driver._sound_log, "{0}\t{1}\tplay\t{2}\t{3}\t{4}\n", t, _id, kind, volume,
+                sound_path);
     }
 
-    void loop(pn::string_view sound_path) {
-        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        pn::string line = pn::format("loop\t{0}\t{1}\t{2}\n", _id, t, sound_path);
-        _driver._sound_log.write(line);
+    void loop(pn::string_view kind, pn::string_view sound_path, uint8_t volume) {
+        int64_t t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        pn::format(
+                _driver._sound_log, "{0}\t{1}\tloop\t{2}\t{3}\t{4}\n", t, _id, kind, volume,
+                sound_path);
     }
 
-    virtual void amp(uint8_t volume) {
-        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        pn::string line = pn::format("amp\t{0}\t{1}\t{2}\n", _id, t, volume);
-        _driver._sound_log.write(line);
-    }
-
-    virtual void quiet() {
-        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        pn::string line = pn::format("quiet\t{0}\t{1}\n", _id, t);
-        _driver._sound_log.write(line);
+    void quiet() override {
+        int64_t t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        pn::format(_driver._sound_log, "{0}\t{1}\tquiet\n", t, _id);
     }
 
   private:
@@ -125,15 +117,15 @@ class LogSoundDriver::LogChannel : public SoundChannel {
 
 class LogSoundDriver::LogSound : public Sound {
   public:
-    LogSound(const LogSoundDriver& driver, pn::string_view path)
-            : _driver(driver), _path(path.copy()) {}
+    LogSound(const LogSoundDriver& driver, pn::string_view kind, pn::string_view path)
+            : _driver(driver), _kind(kind.copy()), _path(path.copy()) {}
 
-    virtual void play() { _driver._active_channel->play(_path); }
-
-    virtual void loop() { _driver._active_channel->loop(_path); }
+    virtual void play(uint8_t volume) { _driver._active_channel->play(_kind, _path, volume); }
+    virtual void loop(uint8_t volume) { _driver._active_channel->loop(_kind, _path, volume); }
 
   private:
     const LogSoundDriver& _driver;
+    const pn::string      _kind;
     const pn::string      _path;
 };
 
@@ -145,11 +137,11 @@ unique_ptr<SoundChannel> LogSoundDriver::open_channel() {
 }
 
 unique_ptr<Sound> LogSoundDriver::open_sound(pn::string_view path) {
-    return unique_ptr<Sound>(new LogSound(*this, pn::format("/sounds/{0}", path)));
+    return unique_ptr<Sound>(new LogSound(*this, "sound", path));
 }
 
 unique_ptr<Sound> LogSoundDriver::open_music(pn::string_view path) {
-    return unique_ptr<Sound>(new LogSound(*this, pn::format("/music/{0}", path)));
+    return unique_ptr<Sound>(new LogSound(*this, "music", path));
 }
 
 void LogSoundDriver::set_global_volume(uint8_t volume) { static_cast<void>(volume); }

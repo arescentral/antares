@@ -176,11 +176,8 @@ void SoundFX::play(pn::string_view id, uint8_t amplitude, usecs persistence, uin
         channels[whichChannel].soundPriority  = priority;
         channels[whichChannel].soundVolume    = amplitude;
 
-        channels[whichChannel].channelPtr->quiet();
-
-        channels[whichChannel].channelPtr->amp(amplitude);
         channels[whichChannel].channelPtr->activate();
-        sounds[whichSound].soundHandle->play();
+        sounds[whichSound].soundHandle->play(amplitude);
     }
 }
 

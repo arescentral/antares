@@ -33,8 +33,8 @@ class Sound {
 
     virtual ~Sound() {}
 
-    virtual void play() = 0;
-    virtual void loop() = 0;
+    virtual void play(uint8_t volume) = 0;
+    virtual void loop(uint8_t volume) = 0;
 };
 
 class SoundChannel {
@@ -45,9 +45,8 @@ class SoundChannel {
 
     virtual ~SoundChannel() {}
 
-    virtual void activate()          = 0;
-    virtual void amp(uint8_t volume) = 0;
-    virtual void quiet()             = 0;
+    virtual void activate() = 0;
+    virtual void quiet()    = 0;
 };
 
 class SoundDriver {

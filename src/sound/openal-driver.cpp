@@ -60,8 +60,8 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
         alGetError();  // discard.
     }
 
-    virtual void play();
-    virtual void loop();
+    virtual void play(uint8_t volume);
+    virtual void loop(uint8_t volume);
 
     void buffer(const SoundData& s) {
         ALenum format = (s.channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
@@ -98,9 +98,13 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         alGetError();  // discard.
     }
 
-    virtual void activate() { _driver._active_channel = this; }
+    void activate() override { _driver._active_channel = this; }
 
-    void play(const OpenAlSound& sound) {
+    void play(const OpenAlSound& sound, uint8_t volume) {
+        quiet();
+
+        alSourcef(_source, AL_GAIN, volume / 255.0f);
+        check_al_error("alSourcef");
         alSourcei(_source, AL_LOOPING, AL_FALSE);
         check_al_error("alSourcei");
         alSourcei(_source, AL_BUFFER, sound.buffer());
@@ -109,7 +113,11 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         check_al_error("alSourcePlay");
     }
 
-    void loop(const OpenAlSound& sound) {
+    void loop(const OpenAlSound& sound, uint8_t volume) {
+        quiet();
+
+        alSourcef(_source, AL_GAIN, volume / 255.0f);
+        check_al_error("alSourcef");
         alSourcei(_source, AL_LOOPING, AL_TRUE);
         check_al_error("alSourcei");
         alSourcei(_source, AL_BUFFER, sound.buffer());
@@ -118,12 +126,7 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         check_al_error("alSourcePlay");
     }
 
-    virtual void amp(uint8_t volume) {
-        alSourcef(_source, AL_GAIN, volume / 256.0f);
-        check_al_error("alSourcef");
-    }
-
-    virtual void quiet() {
+    void quiet() override {
         alSourceStop(_source);
         check_al_error("alSourceStop");
     }
@@ -133,9 +136,13 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
     ALuint             _source;
 };
 
-void OpenAlSoundDriver::OpenAlSound::play() { _driver._active_channel->play(*this); }
+void OpenAlSoundDriver::OpenAlSound::play(uint8_t volume) {
+    _driver._active_channel->play(*this, volume);
+}
 
-void OpenAlSoundDriver::OpenAlSound::loop() { _driver._active_channel->loop(*this); }
+void OpenAlSoundDriver::OpenAlSound::loop(uint8_t volume) {
+    _driver._active_channel->loop(*this, volume);
+}
 
 OpenAlSoundDriver::OpenAlSoundDriver() : _active_channel(NULL) {
     // TODO(sfiera): error-checking.

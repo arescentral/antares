@@ -62,8 +62,7 @@ void Music::play(Type type, pn::string_view song) {
     if (play) {
         _song_sound = sys.audio->open_music(song);
         _channel->activate();
-        _channel->amp(255 * volume);
-        _song_sound->loop();
+        _song_sound->loop(255 * volume);
         _playing = true;
     }
 }
