@@ -21,6 +21,7 @@
 
 #include <pn/array>
 #include <pn/string>
+#include <sfz/sfz.hpp>
 
 #include "data/enums.hpp"
 #include "math/geometry.hpp"
@@ -62,24 +63,17 @@ struct InterfaceItem {
 
 Interface interface(int id0, path_value x);
 
-struct PlainRect : public InterfaceItem {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
-
-    Hue            hue   = Hue::GRAY;
-    InterfaceStyle style = InterfaceStyle::LARGE;
-};
-
 struct LabeledItem : public InterfaceItem {
     pn::string label;
 };
 
-struct LabeledRect : public LabeledItem {
+struct BoxRect : public InterfaceItem {
     virtual std::unique_ptr<InterfaceItem> copy() const;
     virtual void                           accept(const Visitor& visitor) const;
 
-    Hue            hue   = Hue::GRAY;
-    InterfaceStyle style = InterfaceStyle::LARGE;
+    sfz::optional<pn::string> label;
+    Hue                       hue   = Hue::GRAY;
+    InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
 struct TextRect : public InterfaceItem {
@@ -145,8 +139,7 @@ struct TabBox : public InterfaceItem {
 class InterfaceItem::Visitor {
   public:
     ~Visitor();
-    virtual void visit_plain_rect(const PlainRect&) const           = 0;
-    virtual void visit_labeled_rect(const LabeledRect&) const       = 0;
+    virtual void visit_box_rect(const BoxRect&) const               = 0;
     virtual void visit_text_rect(const TextRect&) const             = 0;
     virtual void visit_picture_rect(const PictureRect&) const       = 0;
     virtual void visit_plain_button(const PlainButton&) const       = 0;

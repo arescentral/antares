@@ -1049,7 +1049,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
     DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
 }
 
-void draw_labeled_box(Point origin, const LabeledRect& item) {
+void draw_labeled_box(Point origin, const BoxRect& item) {
     Rect     tRect, uRect;
     int16_t  vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -1075,7 +1075,7 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 
     // draw the string
 
-    pn::string_view s = item.label;
+    pn::string_view s = *item.label;
     swidth            = GetInterfaceStringWidth(s, item.style) + kInterfaceTextHBuffer * 2;
     swidth            = (tRect.right - tRect.left) - swidth;
     sheight           = GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2;
@@ -1149,6 +1149,14 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
     mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
 }
 
+void draw_box_rect(Point origin, const BoxRect& item) {
+    if (item.label.has_value()) {
+        draw_labeled_box(origin, item);
+    } else {
+        draw_plain_rect(origin, item);
+    }
+}
+
 void draw_text_rect(Point origin, const TextRect& item) {
     Rect bounds = item.bounds;
     bounds.offset(origin.h, origin.v);
@@ -1188,8 +1196,7 @@ struct DrawInterfaceItemVisitor : InterfaceItem::Visitor {
     InputMode mode;
     DrawInterfaceItemVisitor(Point p, InputMode mode) : p(p), mode(mode) {}
 
-    virtual void visit_plain_rect(const PlainRect& i) const { draw_plain_rect(p, i); }
-    virtual void visit_labeled_rect(const LabeledRect& i) const { draw_labeled_box(p, i); }
+    virtual void visit_box_rect(const BoxRect& i) const { draw_box_rect(p, i); }
     virtual void visit_text_rect(const TextRect& i) const { draw_text_rect(p, i); }
     virtual void visit_picture_rect(const PictureRect& i) const { draw_picture_rect(p, i); }
     virtual void visit_plain_button(const PlainButton& i) const { draw_button(p, mode, i); }
@@ -1216,20 +1223,16 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         return t.style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
     }
 
-    virtual void visit_plain_rect(const PlainRect& item) const {
+    virtual void visit_box_rect(const BoxRect& item) const {
         initialize_bounds(item);
         bounds->left -= h_border(item);
         bounds->right += h_border(item);
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_labeled_rect(const LabeledRect& item) const {
-        initialize_bounds(item);
-        bounds->left -= h_border(item);
-        bounds->right += h_border(item);
-        bounds->top -= GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2 +
-                       kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+        if (item.label.has_value()) {
+            bounds->top -= GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2 +
+                           kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+        } else {
+            bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+        }
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 

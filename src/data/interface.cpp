@@ -82,24 +82,14 @@ Interface interface(int id0, path_value x) {
 
         pn::string_view type = required_string(item.get("type"));
         if (type == "rect") {
-            if (item.get("label").value().is_null()) {
-                data.items.emplace_back(new PlainRect(required_struct<PlainRect>(
-                        item, {
-                                      {"type", nullptr},
-                                      {"bounds", {&PlainRect::bounds, required_rect}},
-                                      {"hue", {&PlainRect::hue, required_hue}},
-                                      {"style", {&PlainRect::style, required_interface_style}},
-                              })));
-            } else {
-                data.items.emplace_back(new LabeledRect(required_struct<LabeledRect>(
-                        item, {
-                                      {"type", nullptr},
-                                      {"bounds", {&LabeledRect::bounds, required_rect}},
-                                      {"label", {&LabeledRect::label, required_string_copy}},
-                                      {"hue", {&LabeledRect::hue, required_hue}},
-                                      {"style", {&LabeledRect::style, required_interface_style}},
-                              })));
-            }
+            data.items.emplace_back(
+                    required_struct<BoxRect>(
+                            item, {{"type", nullptr},
+                                   {"bounds", {&BoxRect::bounds, required_rect}},
+                                   {"label", {&BoxRect::label, optional_string_copy}},
+                                   {"hue", {&BoxRect::hue, required_hue}},
+                                   {"style", {&BoxRect::style, required_interface_style}}})
+                            .copy());
             data.items.back()->id = id++;
         } else if (type == "button") {
             data.items.emplace_back(new PlainButton(required_struct<PlainButton>(
@@ -199,22 +189,15 @@ Interface interface(int id0, path_value x) {
     return data;
 }
 
-std::unique_ptr<InterfaceItem> PlainRect::copy() const {
-    std::unique_ptr<PlainRect> copy(new PlainRect);
+std::unique_ptr<InterfaceItem> BoxRect::copy() const {
+    std::unique_ptr<BoxRect> copy(new BoxRect);
     copy->bounds = bounds;
     copy->id     = id;
-    copy->hue    = hue;
-    copy->style  = style;
-    return std::move(copy);
-}
-
-std::unique_ptr<InterfaceItem> LabeledRect::copy() const {
-    std::unique_ptr<LabeledRect> copy(new LabeledRect);
-    copy->bounds = bounds;
-    copy->id     = id;
-    copy->label  = label.copy();
-    copy->hue    = hue;
-    copy->style  = style;
+    if (label.has_value()) {
+        copy->label.emplace(label->copy());
+    }
+    copy->hue   = hue;
+    copy->style = style;
     return std::move(copy);
 }
 
@@ -300,8 +283,7 @@ std::unique_ptr<InterfaceItem> TabBox::copy() const {
     return std::move(copy);
 }
 
-void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(*this); }
-void LabeledRect::accept(const Visitor& visitor) const { visitor.visit_labeled_rect(*this); }
+void BoxRect::accept(const Visitor& visitor) const { visitor.visit_box_rect(*this); }
 void TextRect::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
 void PictureRect::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
 void PlainButton::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }

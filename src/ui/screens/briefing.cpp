@@ -64,10 +64,10 @@ static const int32_t kMissionDataBottomBuffer = 15;
 static const int32_t kMissionDataHBuffer      = 41;
 static const int32_t kMissionLineHJog         = 10;
 
-static LabeledRect data_item(const InterfaceItem& map_rect) {
+static BoxRect data_item(const InterfaceItem& map_rect) {
     Rect bounds(0, 0, 200, 200);
     bounds.center_in(map_rect.bounds);
-    LabeledRect r;
+    BoxRect r;
     r.id     = 0;
     r.bounds = bounds;
     r.hue    = Hue::GOLD;
@@ -100,7 +100,7 @@ static vector<inlinePictType> populate_inline_picts(
 }
 
 static void update_mission_brief_point(
-        LabeledRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
+        BoxRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
         vector<pair<Point, Point>>& lines, pn::string_ref text) {
     if (whichBriefPoint < 0) {
@@ -193,7 +193,7 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label = std::move(header);
+    dataItem->label.emplace(std::move(header));
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     inlinePict = populate_inline_picts(dataItem->bounds, text, dataItem->style);
