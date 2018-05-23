@@ -33,8 +33,8 @@ class Sound {
 
     virtual ~Sound() {}
 
-    virtual void play() = 0;
-    virtual void loop() = 0;
+    virtual void play(uint8_t volume) = 0;
+    virtual void loop(uint8_t volume) = 0;
 };
 
 class SoundChannel {
@@ -45,9 +45,8 @@ class SoundChannel {
 
     virtual ~SoundChannel() {}
 
-    virtual void activate()          = 0;
-    virtual void amp(uint8_t volume) = 0;
-    virtual void quiet()             = 0;
+    virtual void activate() = 0;
+    virtual void quiet()    = 0;
 };
 
 class SoundDriver {
@@ -58,9 +57,10 @@ class SoundDriver {
 
     virtual ~SoundDriver();
 
-    virtual std::unique_ptr<SoundChannel> open_channel()            = 0;
-    virtual std::unique_ptr<Sound> open_sound(pn::string_view path) = 0;
-    virtual void set_global_volume(uint8_t volume)                  = 0;
+    virtual std::unique_ptr<SoundChannel> open_channel()                    = 0;
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path)  = 0;
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path)  = 0;
+    virtual void                          set_global_volume(uint8_t volume) = 0;
 
     static SoundDriver* driver();
 };
@@ -72,8 +72,9 @@ class NullSoundDriver : public SoundDriver {
     NullSoundDriver& operator=(const NullSoundDriver&) = delete;
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(pn::string_view path);
-    virtual void set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path);
+    virtual void                          set_global_volume(uint8_t volume);
 };
 
 class LogSoundDriver : public SoundDriver {
@@ -81,8 +82,9 @@ class LogSoundDriver : public SoundDriver {
     LogSoundDriver(pn::string_view path);
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(pn::string_view path);
-    virtual void set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path);
+    virtual void                          set_global_volume(uint8_t volume);
 
   private:
     class LogSound;

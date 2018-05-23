@@ -40,14 +40,12 @@ class OpenAlSoundDriver : public SoundDriver {
 
     virtual std::unique_ptr<SoundChannel> open_channel();
     virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path);
     virtual void                          set_global_volume(uint8_t volume);
 
   private:
     class OpenAlChannel;
     class OpenAlSound;
-
-    template <typename T>
-    static void read_sound(pn::data_view data, OpenAlSound& sound);
 
     ALCcontext*    _context;
     ALCdevice*     _device;

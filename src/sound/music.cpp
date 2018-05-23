@@ -60,10 +60,9 @@ void Music::play(Type type, pn::string_view song) {
     _song      = song.copy();
 
     if (play) {
-        _song_sound = sys.audio->open_sound(pn::format("/music/{0}", _song));
+        _song_sound = sys.audio->open_music(song);
         _channel->activate();
-        _channel->amp(255 * volume);
-        _song_sound->loop();
+        _song_sound->loop(255 * volume);
         _playing = true;
     }
 }

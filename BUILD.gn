@@ -111,6 +111,7 @@ source_set("libantares-config") {
 source_set("libantares-data") {
   sources = [
     "include/data/action.hpp",
+    "include/data/audio.hpp",
     "include/data/base-object.hpp",
     "include/data/briefing.hpp",
     "include/data/condition.hpp",
@@ -132,6 +133,7 @@ source_set("libantares-data") {
     "include/data/scenario-list.hpp",
     "include/data/sprite-data.hpp",
     "src/data/action.cpp",
+    "src/data/audio.cpp",
     "src/data/base-object.cpp",
     "src/data/briefing.cpp",
     "src/data/condition.cpp",
@@ -156,6 +158,10 @@ source_set("libantares-data") {
     "//ext/libsfz",
     "//ext/libzipxx",
     "//ext/procyon:procyon-cpp",
+  ]
+  deps = [
+    "//ext/libmodplug",
+    "//ext/libsndfile",
   ]
   configs += [ ":antares_private" ]
 }
@@ -291,19 +297,15 @@ source_set("libantares-sound") {
     "include/sound/fx.hpp",
     "include/sound/music.hpp",
     "include/sound/openal-driver.hpp",
-    "include/sound/sndfile.hpp",
     "src/sound/driver.cpp",
     "src/sound/fx.cpp",
     "src/sound/music.cpp",
     "src/sound/openal-driver.cpp",
-    "src/sound/sndfile.cpp",
   ]
   public_deps = [
     ":libantares-game",
     ":libantares-lang",
-    "//ext/libmodplug",
     "//ext/libsfz",
-    "//ext/libsndfile",
   ]
   libs = []
   if (target_os == "mac") {
@@ -585,10 +587,8 @@ if (target_os == "mac") {
 
   source_set("libantares-mac") {
     sources = [
-      "include/mac/audio-file.hpp",
       "include/mac/core-foundation.hpp",
       "include/mac/core-opengl.hpp",
-      "src/mac/audio-file.cpp",
       "src/mac/core-foundation.cpp",
       "src/mac/core-opengl.cpp",
       "src/mac/http.cpp",

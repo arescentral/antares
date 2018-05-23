@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
+#include "data/audio.hpp"
 #include "data/field.hpp"
 #include "data/font-data.hpp"
 #include "data/interface.hpp"
@@ -91,6 +92,26 @@ static Texture load_hidpi_texture(pn::string_view name) {
     }
 }
 
+static SoundData load_audio(pn::string_view name) {
+    static const struct {
+        const char ext[6];
+        SoundData (*fn)(pn::data_view);
+    } fmts[] = {
+            {".aiff", sndfile::convert}, {".s3m", modplug::convert}, {".xm", modplug::convert},
+    };
+
+    for (const auto& fmt : fmts) {
+        pn::string path_ext = pn::format("{0}{1}", name, fmt.ext);
+        if (!Resource::exists(path_ext)) {
+            continue;
+        }
+        Resource rsrc = Resource::path(path_ext);
+        return fmt.fn(rsrc.data());
+    }
+    throw std::runtime_error(
+            pn::format("couldn't find sound {0}", pn::dump(name, pn::dump_short)).c_str());
+}
+
 Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
 
 FontData Resource::font(pn::string_view name) {
@@ -103,6 +124,10 @@ Texture Resource::font_image(pn::string_view name) {
 
 std::vector<std::unique_ptr<InterfaceItem>> Resource::interface(pn::string_view name) {
     return interface_items(0, path_value{procyon(pn::format("interfaces/{0}.pn", name))});
+}
+
+SoundData Resource::music(pn::string_view name) {
+    return load_audio(pn::format("music/{0}", name));
 }
 
 ReplayData Resource::replay(int id) {
@@ -136,6 +161,10 @@ std::vector<pn::string> Resource::strings(int id) {
         result.push_back(s.copy());
     }
     return result;
+}
+
+SoundData Resource::sound(pn::string_view name) {
+    return load_audio(pn::format("sounds/{0}", name));
 }
 
 SpriteData Resource::sprite_data(pn::string_view name) {

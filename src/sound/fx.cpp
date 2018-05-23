@@ -176,11 +176,8 @@ void SoundFX::play(pn::string_view id, uint8_t amplitude, usecs persistence, uin
         channels[whichChannel].soundPriority  = priority;
         channels[whichChannel].soundVolume    = amplitude;
 
-        channels[whichChannel].channelPtr->quiet();
-
-        channels[whichChannel].channelPtr->amp(amplitude);
         channels[whichChannel].channelPtr->activate();
-        sounds[whichSound].soundHandle->play();
+        sounds[whichSound].soundHandle->play(amplitude);
     }
 }
 
@@ -219,7 +216,7 @@ void SoundFX::reset() {
         if (!sounds[i].soundHandle.get()) {
             auto id               = kFixedSounds[i];
             sounds[i].id          = id.copy();
-            sounds[i].soundHandle = sys.audio->open_sound(pn::format("/sounds/{0}", id));
+            sounds[i].soundHandle = sys.audio->open_sound(id);
         }
     }
 }
@@ -233,7 +230,7 @@ void SoundFX::load(pn::string_view id) {
     if (whichSound == sounds.size()) {
         sounds.emplace_back();
         sounds.back().id          = id.copy();
-        sounds.back().soundHandle = sys.audio->open_sound(pn::format("/sounds/{0}", id));
+        sounds.back().soundHandle = sys.audio->open_sound(id);
     }
 }
 

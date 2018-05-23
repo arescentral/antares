@@ -18,11 +18,10 @@
 
 #include "sound/openal-driver.hpp"
 
-#include <libmodplug/modplug.h>
 #include <pn/file>
 
+#include "data/audio.hpp"
 #include "data/resource.hpp"
-#include "sound/sndfile.hpp"
 
 using std::unique_ptr;
 
@@ -50,44 +49,6 @@ void check_al_error(pn::string_view method) {
     }
 }
 
-class ModPlugFile {
-  public:
-    ModPlugFile(pn::data_view data) {
-        ModPlug_Settings settings;
-        ModPlug_GetSettings(&settings);
-        settings.mFlags            = MODPLUG_ENABLE_OVERSAMPLING;
-        settings.mChannels         = 2;
-        settings.mBits             = 16;
-        settings.mFrequency        = 44100;
-        settings.mStereoSeparation = 128;
-        settings.mResamplingMode   = MODPLUG_RESAMPLE_LINEAR;
-        ModPlug_SetSettings(&settings);
-        file = ModPlug_Load(data.data(), data.size());
-    }
-
-    ModPlugFile(const ModPlugFile&) = delete;
-
-    ~ModPlugFile() {
-        if (file) {
-            ModPlug_Unload(file);
-        }
-    }
-
-    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const {
-        format    = AL_FORMAT_STEREO16;
-        frequency = 44100;
-        uint8_t buffer[1024];
-        ssize_t read;
-        do {
-            read = ModPlug_Read(file, buffer, 1024);
-            data += pn::data_view(buffer, read);
-        } while (read > 0);
-    }
-
-  private:
-    ::ModPlugFile* file;
-};
-
 }  // namespace
 
 class OpenAlSoundDriver::OpenAlSound : public Sound {
@@ -99,16 +60,12 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
         alGetError();  // discard.
     }
 
-    virtual void play();
-    virtual void loop();
+    virtual void play(uint8_t volume);
+    virtual void loop(uint8_t volume);
 
-    template <typename T>
-    void buffer(const T& file) {
-        pn::data data;
-        ALenum   format;
-        ALsizei  frequency;
-        file.convert(data, format, frequency);
-        alBufferData(_buffer, format, data.data(), data.size(), frequency);
+    void buffer(const SoundData& s) {
+        ALenum format = (s.channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+        alBufferData(_buffer, format, s.data.data(), s.data.size(), s.frequency);
         check_al_error("alBufferData");
     }
 
@@ -141,9 +98,13 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         alGetError();  // discard.
     }
 
-    virtual void activate() { _driver._active_channel = this; }
+    void activate() override { _driver._active_channel = this; }
 
-    void play(const OpenAlSound& sound) {
+    void play(const OpenAlSound& sound, uint8_t volume) {
+        quiet();
+
+        alSourcef(_source, AL_GAIN, volume / 255.0f);
+        check_al_error("alSourcef");
         alSourcei(_source, AL_LOOPING, AL_FALSE);
         check_al_error("alSourcei");
         alSourcei(_source, AL_BUFFER, sound.buffer());
@@ -152,7 +113,11 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         check_al_error("alSourcePlay");
     }
 
-    void loop(const OpenAlSound& sound) {
+    void loop(const OpenAlSound& sound, uint8_t volume) {
+        quiet();
+
+        alSourcef(_source, AL_GAIN, volume / 255.0f);
+        check_al_error("alSourcef");
         alSourcei(_source, AL_LOOPING, AL_TRUE);
         check_al_error("alSourcei");
         alSourcei(_source, AL_BUFFER, sound.buffer());
@@ -161,12 +126,7 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         check_al_error("alSourcePlay");
     }
 
-    virtual void amp(uint8_t volume) {
-        alSourcef(_source, AL_GAIN, volume / 256.0f);
-        check_al_error("alSourcef");
-    }
-
-    virtual void quiet() {
+    void quiet() override {
         alSourceStop(_source);
         check_al_error("alSourceStop");
     }
@@ -176,9 +136,13 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
     ALuint             _source;
 };
 
-void OpenAlSoundDriver::OpenAlSound::play() { _driver._active_channel->play(*this); }
+void OpenAlSoundDriver::OpenAlSound::play(uint8_t volume) {
+    _driver._active_channel->play(*this, volume);
+}
 
-void OpenAlSoundDriver::OpenAlSound::loop() { _driver._active_channel->loop(*this); }
+void OpenAlSoundDriver::OpenAlSound::loop(uint8_t volume) {
+    _driver._active_channel->loop(*this, volume);
+}
 
 OpenAlSoundDriver::OpenAlSoundDriver() : _active_channel(NULL) {
     // TODO(sfiera): error-checking.
@@ -196,34 +160,18 @@ unique_ptr<SoundChannel> OpenAlSoundDriver::open_channel() {
     return unique_ptr<SoundChannel>(new OpenAlChannel(*this));
 }
 
-template <typename T>
-void OpenAlSoundDriver::read_sound(pn::data_view data, OpenAlSound& sound) {
-    T file(data);
-    sound.buffer(file);
+unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
+    unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
+    SoundData               s = Resource::sound(path);
+    sound->buffer(s);
+    return std::move(sound);
 }
 
-unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
-    static const struct {
-        const char ext[6];
-        void (*fn)(pn::data_view, OpenAlSound&);
-    } fmts[] = {
-            {".aiff", read_sound<Sndfile>},
-            {".s3m", read_sound<ModPlugFile>},
-            {".xm", read_sound<ModPlugFile>},
-    };
-
-    unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
-    for (const auto& fmt : fmts) {
-        try {
-            Resource rsrc = Resource::path(pn::format("{0}{1}", path, fmt.ext));
-            fmt.fn(rsrc.data(), *sound);
-            return std::move(sound);
-        } catch (std::exception& e) {
-            continue;
-        }
-    }
-    throw std::runtime_error(
-            pn::format("couldn't load sound {0}", pn::dump(path, pn::dump_short)).c_str());
+unique_ptr<Sound> OpenAlSoundDriver::open_music(pn::string_view path) {
+    unique_ptr<OpenAlSound> music(new OpenAlSound(*this));
+    SoundData               s = Resource::music(path);
+    music->buffer(s);
+    return std::move(music);
 }
 
 void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }
