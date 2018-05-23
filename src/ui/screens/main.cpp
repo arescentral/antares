@@ -44,7 +44,10 @@ const int  kTitleTextScrollWidth = 450;
 
 }  // namespace
 
-MainScreen::MainScreen() : InterfaceScreen("main", {0, 0, 640, 480}, true), _state(NORMAL) {}
+MainScreen::MainScreen()
+        : InterfaceScreen("main", {0, 0, 640, 480}, true),
+          _state(NORMAL),
+          _replays(Resource::list_replays()) {}
 
 MainScreen::~MainScreen() {}
 
@@ -78,7 +81,7 @@ void MainScreen::fire_timer() {
         stack()->push(new ScrollTextScreen(
                 *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
     } else {
-        stack()->push(new ReplayGame(_replays.at(option)));
+        stack()->push(new ReplayGame(_replays[option]));
     }
 }
 

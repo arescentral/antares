@@ -18,7 +18,6 @@
 
 #include "data/plugin.hpp"
 
-#include <glob.h>
 #include <algorithm>
 #include <pn/file>
 
@@ -43,33 +42,10 @@ static constexpr int kPluginFormat = 20;
 
 ANTARES_GLOBAL ScenarioGlobals plug;
 
-namespace {
-
-struct ScopedGlob {
-    glob_t data;
-    ScopedGlob() { memset(&data, sizeof(data), 0); }
-    ~ScopedGlob() { globfree(&data); }
-};
-
-}  // namespace
-
 static void read_all_levels() {
-    ScopedGlob g;
-    pn::string dir;
-    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
-        dir = application_path().copy();
-    } else {
-        dir = scenario_path();
-    }
-    glob(pn::format("{0}/levels/*.pn", dir).c_str(), 0, NULL, &g.data);
-
     plug.levels.clear();
     plug.chapters.clear();
-    for (int i = 0; i < g.data.gl_pathc; ++i) {
-        const pn::string_view full_path = g.data.gl_pathv[i];
-        const pn::string_view name =
-                full_path.substr(dir.size() + 8, full_path.size() - dir.size() - 11);
-
+    for (pn::string_view name : Resource::list_levels()) {
         auto it = plug.levels.emplace(name.copy(), Resource::level(name)).first;
         if (it->second.chapter.has_value()) {
             plug.chapters[*it->second.chapter] = &it->second;

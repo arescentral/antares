@@ -40,6 +40,9 @@ struct SpriteData;
 
 class Resource {
   public:
+    static std::vector<pn::string> list_levels();
+    static std::vector<pn::string> list_replays();
+
     static FontData                                    font(pn::string_view name);
     static Texture                                     font_image(pn::string_view name);
     static Info                                        info();
@@ -48,7 +51,7 @@ class Resource {
     static SoundData                                   music(pn::string_view name);
     static BaseObject                                  object(pn::string_view path);
     static Race                                        race(pn::string_view path);
-    static ReplayData                                  replay(int id);
+    static ReplayData                                  replay(pn::string_view name);
     static std::vector<int32_t>                        rotation_table();
     static SoundData                                   sound(pn::string_view name);
     static SpriteData                                  sprite_data(pn::string_view name);

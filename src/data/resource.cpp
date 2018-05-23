@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
+#include "config/preferences.hpp"
 #include "data/audio.hpp"
 #include "data/base-object.hpp"
 #include "data/briefing.hpp"
@@ -44,6 +45,56 @@
 namespace path = sfz::path;
 
 namespace antares {
+
+namespace {
+
+class ResourceLister : public sfz::TreeWalker {
+  public:
+    ResourceLister(pn::string_view root, pn::string_view extension, std::vector<pn::string>* names)
+            : _root_size(root.size()), _extension(extension), _names(names) {}
+
+    void file(pn::string_view name, const sfz::Stat& st) const override {
+        name = name.substr(_root_size + 1);
+
+        const int extension_start = name.size() - _extension.size();
+        if ((extension_start <= 0) || (name.substr(extension_start) != _extension)) {
+            return;
+        }
+        name = name.substr(0, extension_start);
+
+        _names->push_back(name.copy());
+    }
+
+    // Ignore non-regular-files:
+    void pre_directory(pn::string_view name, const sfz::Stat& st) const override {}
+    void cycle_directory(pn::string_view name, const sfz::Stat& st) const override {}
+    void post_directory(pn::string_view name, const sfz::Stat& st) const override {}
+    void symlink(pn::string_view name, const sfz::Stat& st) const override {}
+    void broken_symlink(pn::string_view name, const sfz::Stat& st) const override {}
+    void other(pn::string_view name, const sfz::Stat& st) const override {}
+
+  private:
+    const int                      _root_size;
+    const pn::string_view          _extension;
+    std::vector<pn::string>* const _names;
+};
+
+}  // namespace
+
+static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_view extension) {
+    std::vector<pn::string> resources;
+    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
+        pn::string path = pn::format("{0}/{1}", application_path(), dir);
+        sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
+    } else {
+        pn::string path = pn::format("{0}/{1}", scenario_path(), dir);
+        sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
+    }
+    return resources;
+}
+
+std::vector<pn::string> Resource::list_levels() { return list_resources("levels", ".pn"); }
+std::vector<pn::string> Resource::list_replays() { return list_resources("replays", ".NLRP"); }
 
 static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
     pn::string      scenario = scenario_path();
@@ -230,8 +281,8 @@ Race Resource::race(pn::string_view name) {
     }
 }
 
-ReplayData Resource::replay(int id) {
-    pn::string path = pn::format("replays/{0}.NLRP", id);
+ReplayData Resource::replay(pn::string_view name) {
+    pn::string path = pn::format("replays/{0}.NLRP", name);
     try {
         return ReplayData(load(path)->data());
     } catch (...) {

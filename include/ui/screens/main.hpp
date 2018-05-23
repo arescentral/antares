@@ -19,7 +19,10 @@
 #ifndef ANTARES_UI_SCREENS_MAIN_HPP_
 #define ANTARES_UI_SCREENS_MAIN_HPP_
 
-#include "data/replay-list.hpp"
+#include <pn/string>
+#include <vector>
+
+#include "math/units.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -59,9 +62,9 @@ class MainScreen : public InterfaceScreen {
         NORMAL   = 0,
         QUITTING = 1,
     };
-    State      _state;
-    ReplayList _replays;
-    wall_time  _next_timer;
+    State                   _state;
+    std::vector<pn::string> _replays;
+    wall_time               _next_timer;
 };
 
 }  // namespace antares
