@@ -23,12 +23,18 @@
 
 namespace antares {
 
+struct SoundData {
+    pn::data data;  // 16-bit signed LPCM
+    int      channels;
+    int      frequency;
+};
+
 namespace sndfile {
-void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency);
+SoundData convert(pn::data_view in);
 }  // namespace sndfile
 
 namespace modplug {
-void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency);
+SoundData convert(pn::data_view in);
 }  // namespace modplug
 
 }  // namespace antares

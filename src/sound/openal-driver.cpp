@@ -63,9 +63,9 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
     virtual void play();
     virtual void loop();
 
-    void buffer(pn::data_view data, int channels, int frequency) {
-        ALenum format = (channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
-        alBufferData(_buffer, format, data.data(), data.size(), frequency);
+    void buffer(const SoundData& s) {
+        ALenum format = (s.channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+        alBufferData(_buffer, format, s.data.data(), s.data.size(), s.frequency);
         check_al_error("alBufferData");
     }
 
@@ -156,7 +156,7 @@ unique_ptr<SoundChannel> OpenAlSoundDriver::open_channel() {
 unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     static const struct {
         const char ext[6];
-        void (*fn)(pn::data_view, pn::data_ref, int*, int*);
+        SoundData (*fn)(pn::data_view);
     } fmts[] = {
             {".aiff", sndfile::convert}, {".s3m", modplug::convert}, {".xm", modplug::convert},
     };
@@ -167,12 +167,9 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
         if (!Resource::exists(path_ext)) {
             continue;
         }
-        Resource rsrc = Resource::path(path_ext);
-        pn::data data;
-        int      channels;
-        int      frequency;
-        fmt.fn(rsrc.data(), data, &channels, &frequency);
-        sound->buffer(data, channels, frequency);
+        Resource  rsrc = Resource::path(path_ext);
+        SoundData s    = fmt.fn(rsrc.data());
+        sound->buffer(s);
         return std::move(sound);
     }
     throw std::runtime_error(

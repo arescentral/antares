@@ -103,7 +103,7 @@ static sf_count_t sf_vio_tell(void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->tell();
 }
 
-void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) {
+SoundData convert(pn::data_view in) {
     SF_VIRTUAL_IO io = {
             .get_filelen = sf_vio_get_filelen,
             .seek        = sf_vio_seek,
@@ -124,20 +124,22 @@ void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) 
         throw std::runtime_error(pn::format("audio file has {0} channels", info.channels).c_str());
     }
 
-    *frequency = info.samplerate;
-    *channels  = info.channels;
+    SoundData s;
+    s.frequency = info.samplerate;
+    s.channels  = info.channels;
     int16_t shorts[1024];
     while (auto count = sf_read_short(file.get(), shorts, 1024)) {
-        out += pn::data_view{reinterpret_cast<uint8_t*>(shorts),
-                             static_cast<int>(sizeof(int16_t) * count)};
+        s.data += pn::data_view{reinterpret_cast<uint8_t*>(shorts),
+                                static_cast<int>(sizeof(int16_t) * count)};
     }
+    return s;
 }
 
 }  // namespace sndfile
 
 namespace modplug {
 
-void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) {
+SoundData convert(pn::data_view in) {
     ModPlug_Settings settings;
     ModPlug_GetSettings(&settings);
     settings.mFlags            = MODPLUG_ENABLE_OVERSAMPLING;
@@ -150,14 +152,16 @@ void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) 
     std::unique_ptr<::ModPlugFile, decltype(&ModPlug_Unload)> file(
             ModPlug_Load(in.data(), in.size()), ModPlug_Unload);
 
-    *channels  = 2;
-    *frequency = 44100;
+    SoundData s;
+    s.channels  = 2;
+    s.frequency = 44100;
     uint8_t buffer[1024];
     ssize_t read;
     do {
         read = ModPlug_Read(file.get(), buffer, 1024);
-        out += pn::data_view(buffer, read);
+        s.data += pn::data_view(buffer, read);
     } while (read > 0);
+    return s;
 }
 
 }  // namespace modplug
