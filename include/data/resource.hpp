@@ -54,6 +54,7 @@ class Resource {
     static Texture                                     texture(pn::string_view name);
     static Texture                                     texture(int16_t id);
 
+    Resource()           = default;
     Resource(Resource&&) = default;
     Resource& operator=(Resource&&) = default;
 

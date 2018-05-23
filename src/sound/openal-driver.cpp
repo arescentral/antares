@@ -50,43 +50,32 @@ void check_al_error(pn::string_view method) {
     }
 }
 
-class ModPlugFile {
-  public:
-    ModPlugFile(pn::data_view data) {
-        ModPlug_Settings settings;
-        ModPlug_GetSettings(&settings);
-        settings.mFlags            = MODPLUG_ENABLE_OVERSAMPLING;
-        settings.mChannels         = 2;
-        settings.mBits             = 16;
-        settings.mFrequency        = 44100;
-        settings.mStereoSeparation = 128;
-        settings.mResamplingMode   = MODPLUG_RESAMPLE_LINEAR;
-        ModPlug_SetSettings(&settings);
-        file = ModPlug_Load(data.data(), data.size());
-    }
+namespace modplug {
 
-    ModPlugFile(const ModPlugFile&) = delete;
+void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) {
+    ModPlug_Settings settings;
+    ModPlug_GetSettings(&settings);
+    settings.mFlags            = MODPLUG_ENABLE_OVERSAMPLING;
+    settings.mChannels         = 2;
+    settings.mBits             = 16;
+    settings.mFrequency        = 44100;
+    settings.mStereoSeparation = 128;
+    settings.mResamplingMode   = MODPLUG_RESAMPLE_LINEAR;
+    ModPlug_SetSettings(&settings);
+    std::unique_ptr<::ModPlugFile, decltype(&ModPlug_Unload)> file(
+            ModPlug_Load(in.data(), in.size()), ModPlug_Unload);
 
-    ~ModPlugFile() {
-        if (file) {
-            ModPlug_Unload(file);
-        }
-    }
+    *channels  = 2;
+    *frequency = 44100;
+    uint8_t buffer[1024];
+    ssize_t read;
+    do {
+        read = ModPlug_Read(file.get(), buffer, 1024);
+        out += pn::data_view(buffer, read);
+    } while (read > 0);
+}
 
-    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const {
-        format    = AL_FORMAT_STEREO16;
-        frequency = 44100;
-        uint8_t buffer[1024];
-        ssize_t read;
-        do {
-            read = ModPlug_Read(file, buffer, 1024);
-            data += pn::data_view(buffer, read);
-        } while (read > 0);
-    }
-
-  private:
-    ::ModPlugFile* file;
-};
+}  // namespace modplug
 
 }  // namespace
 
@@ -102,12 +91,8 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
     virtual void play();
     virtual void loop();
 
-    template <typename T>
-    void buffer(const T& file) {
-        pn::data data;
-        ALenum   format;
-        ALsizei  frequency;
-        file.convert(data, format, frequency);
+    void buffer(pn::data_view data, int channels, int frequency) {
+        ALenum format = (channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
         alBufferData(_buffer, format, data.data(), data.size(), frequency);
         check_al_error("alBufferData");
     }
@@ -196,31 +181,27 @@ unique_ptr<SoundChannel> OpenAlSoundDriver::open_channel() {
     return unique_ptr<SoundChannel>(new OpenAlChannel(*this));
 }
 
-template <typename T>
-void OpenAlSoundDriver::read_sound(pn::data_view data, OpenAlSound& sound) {
-    T file(data);
-    sound.buffer(file);
-}
-
 unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     static const struct {
         const char ext[6];
-        void (*fn)(pn::data_view, OpenAlSound&);
+        void (*fn)(pn::data_view, pn::data_ref, int*, int*);
     } fmts[] = {
-            {".aiff", read_sound<Sndfile>},
-            {".s3m", read_sound<ModPlugFile>},
-            {".xm", read_sound<ModPlugFile>},
+            {".aiff", sndfile::convert}, {".s3m", modplug::convert}, {".xm", modplug::convert},
     };
 
     unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
     for (const auto& fmt : fmts) {
-        try {
-            Resource rsrc = Resource::path(pn::format("{0}{1}", path, fmt.ext));
-            fmt.fn(rsrc.data(), *sound);
-            return std::move(sound);
-        } catch (std::exception& e) {
+        pn::string path_ext = pn::format("{0}{1}", path, fmt.ext);
+        if (!Resource::exists(path_ext)) {
             continue;
         }
+        Resource rsrc = Resource::path(path_ext);
+        pn::data data;
+        int      channels;
+        int      frequency;
+        fmt.fn(rsrc.data(), data, &channels, &frequency);
+        sound->buffer(data, channels, frequency);
+        return std::move(sound);
     }
     throw std::runtime_error(
             pn::format("couldn't load sound {0}", pn::dump(path, pn::dump_short)).c_str());

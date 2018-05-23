@@ -21,28 +21,12 @@
 
 #include <pn/data>
 
-#ifdef __APPLE__
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#else
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
-
 namespace antares {
+namespace sndfile {
 
-class Sndfile {
-  public:
-    Sndfile(pn::data_view data);
-    Sndfile(const Sndfile&) = delete;
-    Sndfile& operator=(const Sndfile&) = delete;
+void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency);
 
-    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const;
-
-  private:
-    pn::data_view _data;
-};
-
+}  // namespace sndfile
 }  // namespace antares
 
 #endif  // ANTARES_DATA_SNDFILE_HPP_
