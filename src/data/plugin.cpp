@@ -112,54 +112,12 @@ void load_race(const NamedHandle<const Race>& r) {
     }
 }
 
-static void merge_value(pn::value_ref base, pn::value_cref patch) {
-    switch (patch.type()) {
-        case PN_NULL:
-        case PN_BOOL:
-        case PN_INT:
-        case PN_FLOAT:
-        case PN_DATA:
-        case PN_STRING:
-        case PN_ARRAY: base = patch.copy(); return;
-
-        case PN_MAP: break;
-    }
-    pn::map_ref m = base.to_map();
-    for (pn::key_value_cref kv : patch.as_map()) {
-        pn::string_view k = kv.key();
-        if (m.has(k)) {
-            pn::value v = m.get(k).copy();
-            merge_value(v, patch.as_map().get(k));
-            m.set(k, std::move(v));
-        } else {
-            m.set(k, kv.value().copy());
-        }
-    }
-}
-
-static pn::value merged_object(pn::string_view name) {
-    pn::value x = Resource::object(name);
-    try {
-        pn::value tpl;
-        if (!x.is_map() || !x.to_map().pop("template", tpl) || tpl.is_null()) {
-            return x;
-        } else if (tpl.is_string()) {
-            pn::value base = merged_object(tpl.as_string());
-            merge_value(base, x);
-            return base;
-        } else {
-            throw std::runtime_error("template: must be null or string");
-        }
-    } catch (...) {
-        std::throw_with_nested(std::runtime_error(name.copy().c_str()));
-    }
-}
-
 void load_object(const NamedHandle<const BaseObject>& o) {
     if (plug.objects.find(o.name().copy()) != plug.objects.end()) {
         return;  // already loaded.
     }
-    pn::value x = merged_object(o.name());
+
+    pn::value x = Resource::object(o.name());
     try {
         plug.objects.emplace(o.name().copy(), base_object(x));
     } catch (...) {
