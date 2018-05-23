@@ -36,13 +36,14 @@ struct SpriteData;
 
 class Resource {
   public:
-    static bool      exists(pn::string_view path);
-    static pn::value procyon(pn::string_view path);
-
     static FontData                                    font(pn::string_view name);
     static Texture                                     font_image(pn::string_view name);
+    static pn::value                                   info();
     static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
+    static pn::value                                   level(pn::string_view path);
     static SoundData                                   music(pn::string_view name);
+    static pn::value                                   object(pn::string_view path);
+    static pn::value                                   race(pn::string_view path);
     static ReplayData                                  replay(int id);
     static std::vector<int32_t>                        rotation_table();
     static SoundData                                   sound(pn::string_view name);

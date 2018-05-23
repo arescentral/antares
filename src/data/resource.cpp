@@ -53,7 +53,18 @@ static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
                     .c_str());
 }
 
-bool Resource::exists(pn::string_view resource_path) {
+static pn::value procyon(pn::string_view path) {
+    pn::value  x;
+    pn_error_t e;
+    if (!pn::parse(load(path)->data().open(), x, &e)) {
+        throw std::runtime_error(
+                pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
+                        .c_str());
+    }
+    return x;
+}
+
+static bool exists(pn::string_view resource_path) {
     pn::string      scenario = scenario_path();
     pn::string_view factory  = factory_scenario_path();
     pn::string_view app      = application_path();
@@ -101,7 +112,7 @@ static SoundData load_audio(pn::string_view name) {
 
     for (const auto& fmt : fmts) {
         pn::string path_ext = pn::format("{0}{1}", name, fmt.ext);
-        if (!Resource::exists(path_ext)) {
+        if (!exists(path_ext)) {
             continue;
         }
         return fmt.fn(load(path_ext)->data());
@@ -118,12 +129,26 @@ Texture Resource::font_image(pn::string_view name) {
     return load_hidpi_texture(pn::format("fonts/{0}", name));
 }
 
+pn::value Resource::info() { return procyon("info.pn"); }
+
 std::vector<std::unique_ptr<InterfaceItem>> Resource::interface(pn::string_view name) {
     return interface_items(0, path_value{procyon(pn::format("interfaces/{0}.pn", name))});
 }
 
+pn::value Resource::level(pn::string_view name) {
+    return procyon(pn::format("levels/{0}.pn", name));
+}
+
 SoundData Resource::music(pn::string_view name) {
     return load_audio(pn::format("music/{0}", name));
+}
+
+pn::value Resource::object(pn::string_view name) {
+    return procyon(pn::format("objects/{0}.pn", name));
+}
+
+pn::value Resource::race(pn::string_view name) {
+    return procyon(pn::format("races/{0}.pn", name));
 }
 
 ReplayData Resource::replay(int id) {
@@ -178,17 +203,6 @@ pn::string Resource::text(int id) { return load(pn::format("text/{0}.txt", id))-
 
 Texture Resource::texture(pn::string_view name) {
     return load_hidpi_texture(pn::format("pictures/{0}", name));
-}
-
-pn::value Resource::procyon(pn::string_view path) {
-    pn::value  x;
-    pn_error_t e;
-    if (!pn::parse(load(path)->data().open(), x, &e)) {
-        throw std::runtime_error(
-                pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
-                        .c_str());
-    }
-    return x;
 }
 
 }  // namespace antares

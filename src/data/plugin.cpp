@@ -67,24 +67,23 @@ static void read_all_levels() {
     plug.chapters.clear();
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const pn::string_view full_path = g.data.gl_pathv[i];
-        const pn::string_view path      = full_path.substr(dir.size() + 1);
-        const pn::string_view id =
+        const pn::string_view name =
                 full_path.substr(dir.size() + 8, full_path.size() - dir.size() - 11);
 
-        pn::value x = Resource::procyon(path);
+        pn::value x = Resource::level(name);
         try {
-            auto it = plug.levels.emplace(id.copy(), level(x)).first;
+            auto it = plug.levels.emplace(name.copy(), level(x)).first;
             if (it->second.chapter.has_value()) {
                 plug.chapters[*it->second.chapter] = &it->second;
             }
         } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+            std::throw_with_nested(std::runtime_error(name.copy().c_str()));
         }
     }
 }
 
 void PluginInit() {
-    pn::value x = Resource::procyon("info.pn");
+    pn::value x = Resource::info();
     try {
         plug.info = info(path_value{x});
         if (plug.info.format != kPluginFormat) {
@@ -105,12 +104,11 @@ void load_race(const NamedHandle<const Race>& r) {
         return;  // already loaded.
     }
 
-    pn::string path = pn::format("races/{0}.pn", r.name());
-    pn::value  x    = Resource::procyon(path);
+    pn::value x = Resource::race(r.name());
     try {
         plug.races.emplace(r.name().copy(), race(path_value{x}));
     } catch (...) {
-        std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+        std::throw_with_nested(std::runtime_error(r.name().copy().c_str()));
     }
 }
 
@@ -140,8 +138,7 @@ static void merge_value(pn::value_ref base, pn::value_cref patch) {
 }
 
 static pn::value merged_object(pn::string_view name) {
-    pn::string path = pn::format("objects/{0}.pn", name);
-    pn::value  x    = Resource::procyon(path);
+    pn::value x = Resource::object(name);
     try {
         pn::value tpl;
         if (!x.is_map() || !x.to_map().pop("template", tpl) || tpl.is_null()) {
@@ -154,7 +151,7 @@ static pn::value merged_object(pn::string_view name) {
             throw std::runtime_error("template: must be null or string");
         }
     } catch (...) {
-        std::throw_with_nested(std::runtime_error(path.c_str()));
+        std::throw_with_nested(std::runtime_error(name.copy().c_str()));
     }
 }
 
