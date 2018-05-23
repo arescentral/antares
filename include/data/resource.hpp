@@ -21,32 +21,37 @@
 
 #include <stdint.h>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 #include <vector>
-
-#include "data/enums.hpp"
 
 namespace antares {
 
 class ArrayPixMap;
+class BaseObject;
 class InterfaceItem;
 class NatePixTable;
 class Texture;
+struct Info;
 struct FontData;
+struct Level;
+struct Race;
 struct ReplayData;
 struct SoundData;
 struct SpriteData;
 
 class Resource {
   public:
-    static bool     exists(pn::string_view path);
-    static Resource path(pn::string_view path);
+    static std::vector<pn::string> list_levels();
+    static std::vector<pn::string> list_replays();
 
     static FontData                                    font(pn::string_view name);
     static Texture                                     font_image(pn::string_view name);
+    static Info                                        info();
     static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
+    static Level                                       level(pn::string_view path);
     static SoundData                                   music(pn::string_view name);
-    static ReplayData                                  replay(int id);
+    static BaseObject                                  object(pn::string_view path);
+    static Race                                        race(pn::string_view path);
+    static ReplayData                                  replay(pn::string_view name);
     static std::vector<int32_t>                        rotation_table();
     static SoundData                                   sound(pn::string_view name);
     static SpriteData                                  sprite_data(pn::string_view name);
@@ -57,20 +62,7 @@ class Resource {
     static Texture                                     texture(pn::string_view name);
     static Texture                                     texture(int16_t id);
 
-    Resource()           = default;
-    Resource(Resource&&) = default;
-    Resource& operator=(Resource&&) = default;
-
-    ~Resource();
-
-    pn::data_view   data() const;
-    pn::string_view string() const;
-
-  private:
-    static pn::value procyon(pn::string_view path);
-
-    Resource(std::unique_ptr<sfz::mapped_file> file);
-    std::unique_ptr<sfz::mapped_file> _file;
+    Resource() = delete;
 };
 
 }  // namespace antares

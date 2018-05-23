@@ -32,7 +32,7 @@ struct Level;
 
 class ReplayGame : public Card {
   public:
-    ReplayGame(int16_t replay_id);
+    ReplayGame(pn::string_view replay_name);
     ~ReplayGame();
 
     virtual void become_front();

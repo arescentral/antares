@@ -24,10 +24,18 @@
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
+#include "config/preferences.hpp"
 #include "data/audio.hpp"
+#include "data/base-object.hpp"
+#include "data/briefing.hpp"
+#include "data/condition.hpp"
 #include "data/field.hpp"
 #include "data/font-data.hpp"
+#include "data/info.hpp"
+#include "data/initial.hpp"
 #include "data/interface.hpp"
+#include "data/level.hpp"
+#include "data/races.hpp"
 #include "data/replay.hpp"
 #include "data/sprite-data.hpp"
 #include "drawing/text.hpp"
@@ -37,6 +45,56 @@
 namespace path = sfz::path;
 
 namespace antares {
+
+namespace {
+
+class ResourceLister : public sfz::TreeWalker {
+  public:
+    ResourceLister(pn::string_view root, pn::string_view extension, std::vector<pn::string>* names)
+            : _root_size(root.size()), _extension(extension), _names(names) {}
+
+    void file(pn::string_view name, const sfz::Stat& st) const override {
+        name = name.substr(_root_size + 1);
+
+        const int extension_start = name.size() - _extension.size();
+        if ((extension_start <= 0) || (name.substr(extension_start) != _extension)) {
+            return;
+        }
+        name = name.substr(0, extension_start);
+
+        _names->push_back(name.copy());
+    }
+
+    // Ignore non-regular-files:
+    void pre_directory(pn::string_view name, const sfz::Stat& st) const override {}
+    void cycle_directory(pn::string_view name, const sfz::Stat& st) const override {}
+    void post_directory(pn::string_view name, const sfz::Stat& st) const override {}
+    void symlink(pn::string_view name, const sfz::Stat& st) const override {}
+    void broken_symlink(pn::string_view name, const sfz::Stat& st) const override {}
+    void other(pn::string_view name, const sfz::Stat& st) const override {}
+
+  private:
+    const int                      _root_size;
+    const pn::string_view          _extension;
+    std::vector<pn::string>* const _names;
+};
+
+}  // namespace
+
+static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_view extension) {
+    std::vector<pn::string> resources;
+    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
+        pn::string path = pn::format("{0}/{1}", application_path(), dir);
+        sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
+    } else {
+        pn::string path = pn::format("{0}/{1}", scenario_path(), dir);
+        sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
+    }
+    return resources;
+}
+
+std::vector<pn::string> Resource::list_levels() { return list_resources("levels", ".pn"); }
+std::vector<pn::string> Resource::list_replays() { return list_resources("replays", ".NLRP"); }
 
 static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
     pn::string      scenario = scenario_path();
@@ -53,7 +111,18 @@ static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
                     .c_str());
 }
 
-bool Resource::exists(pn::string_view resource_path) {
+static pn::value procyon(pn::string_view path) {
+    pn::value  x;
+    pn_error_t e;
+    if (!pn::parse(load(path)->data().open(), x, &e)) {
+        throw std::runtime_error(
+                pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
+                        .c_str());
+    }
+    return x;
+}
+
+static bool exists(pn::string_view resource_path) {
     pn::string      scenario = scenario_path();
     pn::string_view factory  = factory_scenario_path();
     pn::string_view app      = application_path();
@@ -66,30 +135,28 @@ bool Resource::exists(pn::string_view resource_path) {
     return false;
 }
 
-static Texture load_png(pn::string_view path, int scale) {
-    Resource    rsrc = Resource::path(pn::format("{0}.png", path));
-    ArrayPixMap pix  = read_png(rsrc.data().open());
-    return sys.video->texture(pn::format("/{0}.png", path), pix, scale);
-}
-
 static Texture load_hidpi_texture(pn::string_view name) {
     int scale = sys.video->scale();
-    while (true) {
+    while (scale) {
+        pn::string path;
+        if (scale > 1) {
+            path = pn::format("{0}@{1}x.png", name, scale);
+        } else {
+            path = pn::format("{0}.png", name);
+        }
+        if (!exists(path)) {
+            scale >>= 1;
+            continue;
+        }
         try {
-            pn::string path = name.copy();
-            if (scale > 1) {
-                return load_png(pn::format("{0}@{1}x", name, scale), scale);
-            } else {
-                return load_png(name, scale);
-            }
+            ArrayPixMap pix = read_png(load(path)->data().open());
+            return sys.video->texture(pn::format("/{0}", path), pix, scale);
         } catch (...) {
-            if (scale > 1) {
-                scale >>= 1;
-            } else {
-                throw;
-            }
+            std::throw_with_nested(std::runtime_error(path.c_str()));
         }
     }
+    throw std::runtime_error(
+            pn::format("couldn't find picture {0}", pn::dump(name, pn::dump_short)).c_str());
 }
 
 static SoundData load_audio(pn::string_view name) {
@@ -101,66 +168,161 @@ static SoundData load_audio(pn::string_view name) {
     };
 
     for (const auto& fmt : fmts) {
-        pn::string path_ext = pn::format("{0}{1}", name, fmt.ext);
-        if (!Resource::exists(path_ext)) {
+        pn::string path = pn::format("{0}{1}", name, fmt.ext);
+        if (!exists(path)) {
             continue;
         }
-        Resource rsrc = Resource::path(path_ext);
-        return fmt.fn(rsrc.data());
+        try {
+            return fmt.fn(load(path)->data());
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
+        }
     }
     throw std::runtime_error(
             pn::format("couldn't find sound {0}", pn::dump(name, pn::dump_short)).c_str());
 }
 
-Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
-
 FontData Resource::font(pn::string_view name) {
-    return font_data(procyon(pn::format("fonts/{0}.pn", name)));
+    pn::string path = pn::format("fonts/{0}.pn", name);
+    try {
+        return font_data(procyon(path));
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
 }
 
 Texture Resource::font_image(pn::string_view name) {
     return load_hidpi_texture(pn::format("fonts/{0}", name));
 }
 
+Info Resource::info() {
+    static const char path[] = "info.pn";
+    try {
+        return ::antares::info(path_value{procyon(path)});
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path));
+    }
+}
+
 std::vector<std::unique_ptr<InterfaceItem>> Resource::interface(pn::string_view name) {
-    return interface_items(0, path_value{procyon(pn::format("interfaces/{0}.pn", name))});
+    pn::string path = pn::format("interfaces/{0}.pn", name);
+    try {
+        return interface_items(0, path_value{procyon(path)});
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
+}
+
+Level Resource::level(pn::string_view name) {
+    pn::string path = pn::format("levels/{0}.pn", name);
+    try {
+        return ::antares::level(procyon(path));
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
 }
 
 SoundData Resource::music(pn::string_view name) {
     return load_audio(pn::format("music/{0}", name));
 }
 
-ReplayData Resource::replay(int id) {
-    return ReplayData(load(pn::format("replays/{0}.NLRP", id))->data());
+static void merge_value(pn::value_ref base, pn::value_cref patch) {
+    switch (patch.type()) {
+        case PN_NULL:
+        case PN_BOOL:
+        case PN_INT:
+        case PN_FLOAT:
+        case PN_DATA:
+        case PN_STRING:
+        case PN_ARRAY: base = patch.copy(); return;
+
+        case PN_MAP: break;
+    }
+    pn::map_ref m = base.to_map();
+    for (pn::key_value_cref kv : patch.as_map()) {
+        pn::string_view k = kv.key();
+        if (m.has(k)) {
+            pn::value v = m.get(k).copy();
+            merge_value(v, patch.as_map().get(k));
+            m.set(k, std::move(v));
+        } else {
+            m.set(k, kv.value().copy());
+        }
+    }
+}
+
+static pn::value merged_object(pn::string_view name) {
+    pn::string path = pn::format("objects/{0}.pn", name);
+    try {
+        pn::value x = procyon(path);
+        pn::value tpl;
+        if (!x.is_map() || !x.to_map().pop("template", tpl) || tpl.is_null()) {
+            return x;
+        } else if (tpl.is_string()) {
+            pn::value base = merged_object(tpl.as_string());
+            merge_value(base, x);
+            return base;
+        } else {
+            throw std::runtime_error("template: must be null or string");
+        }
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
+}
+
+BaseObject Resource::object(pn::string_view name) { return base_object(merged_object(name)); }
+
+Race Resource::race(pn::string_view name) {
+    pn::string path = pn::format("races/{0}.pn", name);
+    try {
+        return ::antares::race(path_value{procyon(path)});
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
+}
+
+ReplayData Resource::replay(pn::string_view name) {
+    pn::string path = pn::format("replays/{0}.NLRP", name);
+    try {
+        return ReplayData(load(path)->data());
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
 }
 
 std::vector<int32_t> Resource::rotation_table() {
-    Resource             rsrc = path("rotation-table");
-    pn::file             in   = rsrc.data().open();
-    std::vector<int32_t> v;
-    v.resize(SystemGlobals::ROT_TABLE_SIZE);
-    for (int32_t& i : v) {
-        in.read(&i).check();
+    const char path[] = "rotation-table";
+    try {
+        auto                 mapped_file = load(path);
+        pn::file             in          = mapped_file->data().open();
+        std::vector<int32_t> v;
+        v.resize(SystemGlobals::ROT_TABLE_SIZE);
+        for (int32_t& i : v) {
+            in.read(&i).check();
+        }
+        if (!in.read(pn::pad(1)).eof()) {
+            throw std::runtime_error("didn't consume all of rotation data");
+        }
+        return v;
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path));
     }
-    if (!in.read(pn::pad(1)).eof()) {
-        throw std::runtime_error("didn't consume all of rotation data");
-    }
-    return v;
 }
 
 std::vector<pn::string> Resource::strings(int id) {
-    Resource  rsrc(load(pn::format("strings/{0}.pn", id)));
-    pn::value strings;
-    if (!pn::parse(rsrc.data().open(), strings, nullptr)) {
-        throw std::runtime_error(pn::format("Couldn't parse strings/{0}.pn", id).c_str());
+    pn::string path = pn::format("strings/{0}.pn", id);
+    try {
+        pn::value               x = procyon(path);
+        pn::array_cref          l = x.as_array();
+        std::vector<pn::string> result;
+        for (pn::value_cref x : l) {
+            pn::string_view s = x.as_string();
+            result.push_back(s.copy());
+        }
+        return result;
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
     }
-    pn::array_cref          l = strings.as_array();
-    std::vector<pn::string> result;
-    for (pn::value_cref x : l) {
-        pn::string_view s = x.as_string();
-        result.push_back(s.copy());
-    }
-    return result;
 }
 
 SoundData Resource::sound(pn::string_view name) {
@@ -168,42 +330,43 @@ SoundData Resource::sound(pn::string_view name) {
 }
 
 SpriteData Resource::sprite_data(pn::string_view name) {
-    return ::antares::sprite_data(procyon(pn::format("sprites/{0}.pn", name)));
+    pn::string path = pn::format("sprites/{0}.pn", name);
+    try {
+        return ::antares::sprite_data(procyon(path));
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
 }
 
 ArrayPixMap Resource::sprite_image(pn::string_view name) {
-    return read_png(Resource::path(pn::format("sprites/{0}/image.png", name)).data().open());
+    pn::string path = pn::format("sprites/{0}/image.png", name);
+    try {
+        return read_png(load(path)->data().open());
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
 }
 
 ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
-    return read_png(Resource::path(pn::format("sprites/{0}/overlay.png", name)).data().open());
+    pn::string path = pn::format("sprites/{0}/overlay.png", name);
+    try {
+        return read_png(load(path)->data().open());
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
 }
 
 pn::string Resource::text(int id) {
-    return Resource(load(pn::format("text/{0}.txt", id))).string().copy();
+    pn::string path = pn::format("text/{0}.txt", id);
+    try {
+        return load(path)->string().copy();
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
 }
 
 Texture Resource::texture(pn::string_view name) {
     return load_hidpi_texture(pn::format("pictures/{0}", name));
-}
-
-Resource::Resource(std::unique_ptr<sfz::mapped_file> file) : _file(std::move(file)) {}
-
-Resource::~Resource() {}
-
-pn::data_view Resource::data() const { return _file->data(); }
-
-pn::string_view Resource::string() const {
-    return pn::string_view{reinterpret_cast<const char*>(_file->data().data()),
-                           static_cast<int>(_file->data().size())};
-}
-
-pn::value Resource::procyon(pn::string_view path) {
-    pn::value x;
-    if (!pn::parse(Resource::path(path).data().open(), x, nullptr)) {
-        throw std::runtime_error("invalid sprite");
-    }
-    return x;
 }
 
 }  // namespace antares
