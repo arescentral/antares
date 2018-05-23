@@ -40,8 +40,8 @@ namespace antares {
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen)
         : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
     try {
-        _items = Resource::interface(name);
-        for (auto& item : _items) {
+        _data = Resource::interface(name);
+        for (auto& item : _data.items) {
             item->bounds.offset(bounds.left, bounds.top);
         }
     } catch (...) {
@@ -61,7 +61,7 @@ void InterfaceScreen::resign_front() { become_normal(); }
 void InterfaceScreen::become_normal() {
     _state      = NORMAL;
     _hit_button = nullptr;
-    for (auto& item : _items) {
+    for (auto& item : _data.items) {
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && button->status == kIH_Hilite) {
             button->status = kActive;
@@ -76,8 +76,8 @@ void InterfaceScreen::draw() const {
         copy_area = _bounds;
     } else {
         next()->draw();
-        GetAnyInterfaceItemGraphicBounds(*_items[0], &copy_area);
-        for (const auto& item : _items) {
+        GetAnyInterfaceItemGraphicBounds(*_data.items[0], &copy_area);
+        for (const auto& item : _data.items) {
             Rect r;
             GetAnyInterfaceItemGraphicBounds(*item, &r);
             copy_area.enlarge_to(r);
@@ -87,7 +87,7 @@ void InterfaceScreen::draw() const {
 
     Rects().fill(copy_area, RgbColor::black());
 
-    for (const auto& item : _items) {
+    for (const auto& item : _data.items) {
         draw_interface_item(*item, sys.video->input_mode(), off);
     }
     overlay();
@@ -104,7 +104,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     if (event.button() != 0) {
         return;
     }
-    for (auto& item : _items) {
+    for (auto& item : _data.items) {
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         Button* button = dynamic_cast<Button*>(item.get());
@@ -145,7 +145,7 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
-    for (auto& item : _items) {
+    for (auto& item : _data.items) {
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && button->status != kDimmed && button->key == key_code) {
             become_normal();
@@ -172,7 +172,7 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    for (auto& item : _items) {
+    for (auto& item : _data.items) {
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && button->status != kDimmed && button->gamepad == event.button) {
             become_normal();
@@ -202,20 +202,20 @@ void InterfaceScreen::overlay() const {}
 void InterfaceScreen::adjust_interface() {}
 
 void InterfaceScreen::truncate(size_t size) {
-    if (size > _items.size()) {
+    if (size > _data.items.size()) {
         throw std::runtime_error("");
     }
-    _items.resize(size);
+    _data.items.resize(size);
 }
 
 void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItem>>& items) {
-    const int offset_id = _items.size();
+    const int offset_id = _data.items.size();
     const int offset_x  = (_bounds.width() / 2) - 320;
     const int offset_y  = (_bounds.height() / 2) - 240;
     for (const auto& item : items) {
-        _items.emplace_back(item->copy());
-        _items.back()->id += offset_id;
-        _items.back()->bounds.offset(offset_x, offset_y);
+        _data.items.emplace_back(item->copy());
+        _data.items.back()->id += offset_id;
+        _data.items.back()->bounds.offset(offset_x, offset_y);
     }
 }
 
@@ -225,10 +225,10 @@ Point InterfaceScreen::offset() const {
     return bounds.origin();
 }
 
-size_t InterfaceScreen::size() const { return _items.size(); }
+size_t InterfaceScreen::size() const { return _data.items.size(); }
 
-const InterfaceItem& InterfaceScreen::item(int i) const { return *_items[i]; }
+const InterfaceItem& InterfaceScreen::item(int i) const { return *_data.items[i]; }
 
-InterfaceItem& InterfaceScreen::mutable_item(int i) { return *_items[i]; }
+InterfaceItem& InterfaceScreen::mutable_item(int i) { return *_data.items[i]; }
 
 }  // namespace antares

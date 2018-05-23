@@ -29,6 +29,7 @@
 namespace antares {
 
 class path_value;
+struct InterfaceItem;
 
 enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
 
@@ -39,7 +40,11 @@ struct interfaceLabelType {
     int64_t stringNumber;
 };
 
-class InterfaceItem {
+struct Interface {
+    std::vector<std::unique_ptr<InterfaceItem>> items;
+};
+
+struct InterfaceItem {
   public:
     class Visitor;
 
@@ -55,7 +60,7 @@ class InterfaceItem {
     Rect bounds;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value x);
+Interface interface(int id0, path_value x);
 
 struct PlainRect : public InterfaceItem {
     virtual std::unique_ptr<InterfaceItem> copy() const;

@@ -72,12 +72,12 @@ class InterfaceScreen : public Card {
     pn::value load_pn(pn::string_view id);
     void      become_normal();
 
-    const Rect                                  _bounds;
-    const bool                                  _full_screen;
-    std::vector<std::unique_ptr<InterfaceItem>> _items;
-    Button*                                     _hit_button;
-    uint32_t                                    _pressed;
-    Cursor                                      _cursor;
+    const Rect _bounds;
+    const bool _full_screen;
+    Interface  _data;
+    Button*    _hit_button;
+    uint32_t   _pressed;
+    Cursor     _cursor;
 };
 
 }  // namespace antares

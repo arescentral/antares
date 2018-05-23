@@ -27,10 +27,10 @@ namespace antares {
 
 class ArrayPixMap;
 class BaseObject;
-class InterfaceItem;
 class NatePixTable;
 class Texture;
 struct Info;
+struct Interface;
 struct FontData;
 struct Level;
 struct Race;
@@ -43,24 +43,24 @@ class Resource {
     static std::vector<pn::string> list_levels();
     static std::vector<pn::string> list_replays();
 
-    static FontData                                    font(pn::string_view name);
-    static Texture                                     font_image(pn::string_view name);
-    static Info                                        info();
-    static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
-    static Level                                       level(pn::string_view path);
-    static SoundData                                   music(pn::string_view name);
-    static BaseObject                                  object(pn::string_view path);
-    static Race                                        race(pn::string_view path);
-    static ReplayData                                  replay(pn::string_view name);
-    static std::vector<int32_t>                        rotation_table();
-    static SoundData                                   sound(pn::string_view name);
-    static SpriteData                                  sprite_data(pn::string_view name);
-    static ArrayPixMap                                 sprite_image(pn::string_view name);
-    static ArrayPixMap                                 sprite_overlay(pn::string_view name);
-    static std::vector<pn::string>                     strings(int id);
-    static pn::string                                  text(int id);
-    static Texture                                     texture(pn::string_view name);
-    static Texture                                     texture(int16_t id);
+    static FontData                font(pn::string_view name);
+    static Texture                 font_image(pn::string_view name);
+    static Info                    info();
+    static Interface               interface(pn::string_view name);
+    static Level                   level(pn::string_view path);
+    static SoundData               music(pn::string_view name);
+    static BaseObject              object(pn::string_view path);
+    static Race                    race(pn::string_view path);
+    static ReplayData              replay(pn::string_view name);
+    static std::vector<int32_t>    rotation_table();
+    static SoundData               sound(pn::string_view name);
+    static SpriteData              sprite_data(pn::string_view name);
+    static ArrayPixMap             sprite_image(pn::string_view name);
+    static ArrayPixMap             sprite_overlay(pn::string_view name);
+    static std::vector<pn::string> strings(int id);
+    static pn::string              text(int id);
+    static Texture                 texture(pn::string_view name);
+    static Texture                 texture(int16_t id);
 
     Resource() = delete;
 };

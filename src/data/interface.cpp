@@ -70,20 +70,20 @@ struct Tab {
     pn::string label;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value x) {
+Interface interface(int id0, path_value x) {
     if (!x.value().is_array()) {
         throw std::runtime_error(pn::format("{0}must be array", x.prefix()).c_str());
     }
 
-    std::vector<std::unique_ptr<InterfaceItem>> items;
-    int                                         id = id0;
+    Interface data;
+    int       id = id0;
     for (auto i : range(x.value().as_array().size())) {
         path_value item = x.get(i);
 
         pn::string_view type = required_string(item.get("type"));
         if (type == "rect") {
             if (item.get("label").value().is_null()) {
-                items.emplace_back(new PlainRect(required_struct<PlainRect>(
+                data.items.emplace_back(new PlainRect(required_struct<PlainRect>(
                         item, {
                                       {"type", nullptr},
                                       {"bounds", {&PlainRect::bounds, required_rect}},
@@ -91,7 +91,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                                       {"style", {&PlainRect::style, required_interface_style}},
                               })));
             } else {
-                items.emplace_back(new LabeledRect(required_struct<LabeledRect>(
+                data.items.emplace_back(new LabeledRect(required_struct<LabeledRect>(
                         item, {
                                       {"type", nullptr},
                                       {"bounds", {&LabeledRect::bounds, required_rect}},
@@ -100,9 +100,9 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                                       {"style", {&LabeledRect::style, required_interface_style}},
                               })));
             }
-            items.back()->id = id++;
+            data.items.back()->id = id++;
         } else if (type == "button") {
-            items.emplace_back(new PlainButton(required_struct<PlainButton>(
+            data.items.emplace_back(new PlainButton(required_struct<PlainButton>(
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&PlainButton::bounds, required_rect}},
@@ -112,9 +112,9 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                                   {"hue", {&PlainButton::hue, required_hue}},
                                   {"style", {&PlainButton::style, required_interface_style}},
                           })));
-            items.back()->id = id++;
+            data.items.back()->id = id++;
         } else if (type == "checkbox") {
-            items.emplace_back(new CheckboxButton(required_struct<CheckboxButton>(
+            data.items.emplace_back(new CheckboxButton(required_struct<CheckboxButton>(
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&CheckboxButton::bounds, required_rect}},
@@ -124,9 +124,9 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                                   {"hue", {&CheckboxButton::hue, required_hue}},
                                   {"style", {&CheckboxButton::style, required_interface_style}},
                           })));
-            items.back()->id = id++;
+            data.items.back()->id = id++;
         } else if (type == "radio") {
-            items.emplace_back(new RadioButton(required_struct<RadioButton>(
+            data.items.emplace_back(new RadioButton(required_struct<RadioButton>(
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&RadioButton::bounds, required_rect}},
@@ -136,17 +136,17 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                                   {"hue", {&RadioButton::hue, required_hue}},
                                   {"style", {&RadioButton::style, required_interface_style}},
                           })));
-            items.back()->id = id++;
+            data.items.back()->id = id++;
         } else if (type == "picture") {
-            items.emplace_back(new PictureRect(required_struct<PictureRect>(
+            data.items.emplace_back(new PictureRect(required_struct<PictureRect>(
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&PictureRect::bounds, required_rect}},
                                   {"id", {&PictureRect::texture, required_texture}},
                           })));
-            items.back()->id = id++;
+            data.items.back()->id = id++;
         } else if (type == "text") {
-            items.emplace_back(new TextRect(required_struct<TextRect>(
+            data.items.emplace_back(new TextRect(required_struct<TextRect>(
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&TextRect::bounds, required_rect}},
@@ -154,7 +154,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                                   {"hue", {&TextRect::hue, required_hue}},
                                   {"style", {&TextRect::style, required_interface_style}},
                           })));
-            items.back()->id = id++;
+            data.items.back()->id = id++;
         } else if (type == "tab-box") {
             TabBox tab_box = required_struct<TabBox>(
                     item, {
@@ -182,21 +182,21 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                 button.label       = std::move(tab.label);
                 button.hue         = tab_box.hue;
                 button.style       = tab_box.style;
-                button.tab_content = interface_items(0, tabs.get(i).get("content"));
+                button.tab_content = interface(0, tabs.get(i).get("content")).items;
                 button.id          = id++;
-                items.emplace_back(new TabBoxButton(std::move(button)));
+                data.items.emplace_back(new TabBoxButton(std::move(button)));
                 button_bounds.left = button_bounds.right + 37;
             }
 
             tab_box.top_right_border_size = tab_box.bounds.right - button_bounds.right - 17;
             tab_box.id                    = id++;
-            items.emplace_back(new TabBox(std::move(tab_box)));
+            data.items.emplace_back(new TabBox(std::move(tab_box)));
         } else {
             throw std::runtime_error(
                     pn::format("{0}: unknown type: {1}", item.path(), type).c_str());
         }
     }
-    return items;
+    return data;
 }
 
 std::unique_ptr<InterfaceItem> PlainRect::copy() const {
