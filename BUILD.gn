@@ -587,10 +587,8 @@ if (target_os == "mac") {
 
   source_set("libantares-mac") {
     sources = [
-      "include/mac/audio-file.hpp",
       "include/mac/core-foundation.hpp",
       "include/mac/core-opengl.hpp",
-      "src/mac/audio-file.cpp",
       "src/mac/core-foundation.cpp",
       "src/mac/core-opengl.cpp",
       "src/mac/http.cpp",
