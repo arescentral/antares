@@ -26,10 +26,14 @@
 namespace antares {
 
 class ArrayPixMap;
+class BaseObject;
 class InterfaceItem;
 class NatePixTable;
 class Texture;
+struct Info;
 struct FontData;
+struct Level;
+struct Race;
 struct ReplayData;
 struct SoundData;
 struct SpriteData;
@@ -38,12 +42,12 @@ class Resource {
   public:
     static FontData                                    font(pn::string_view name);
     static Texture                                     font_image(pn::string_view name);
-    static pn::value                                   info();
+    static Info                                        info();
     static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
-    static pn::value                                   level(pn::string_view path);
+    static Level                                       level(pn::string_view path);
     static SoundData                                   music(pn::string_view name);
-    static pn::value                                   object(pn::string_view path);
-    static pn::value                                   race(pn::string_view path);
+    static BaseObject                                  object(pn::string_view path);
+    static Race                                        race(pn::string_view path);
     static ReplayData                                  replay(int id);
     static std::vector<int32_t>                        rotation_table();
     static SoundData                                   sound(pn::string_view name);

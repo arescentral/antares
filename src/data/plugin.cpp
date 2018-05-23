@@ -70,22 +70,16 @@ static void read_all_levels() {
         const pn::string_view name =
                 full_path.substr(dir.size() + 8, full_path.size() - dir.size() - 11);
 
-        pn::value x = Resource::level(name);
-        try {
-            auto it = plug.levels.emplace(name.copy(), level(x)).first;
-            if (it->second.chapter.has_value()) {
-                plug.chapters[*it->second.chapter] = &it->second;
-            }
-        } catch (...) {
-            std::throw_with_nested(std::runtime_error(name.copy().c_str()));
+        auto it = plug.levels.emplace(name.copy(), Resource::level(name)).first;
+        if (it->second.chapter.has_value()) {
+            plug.chapters[*it->second.chapter] = &it->second;
         }
     }
 }
 
 void PluginInit() {
-    pn::value x = Resource::info();
+    plug.info = Resource::info();
     try {
-        plug.info = info(path_value{x});
         if (plug.info.format != kPluginFormat) {
             throw std::runtime_error(
                     pn::format("unknown plugin format {0}", plug.info.format).c_str());
@@ -103,26 +97,14 @@ void load_race(const NamedHandle<const Race>& r) {
     if (plug.races.find(r.name().copy()) != plug.races.end()) {
         return;  // already loaded.
     }
-
-    pn::value x = Resource::race(r.name());
-    try {
-        plug.races.emplace(r.name().copy(), race(path_value{x}));
-    } catch (...) {
-        std::throw_with_nested(std::runtime_error(r.name().copy().c_str()));
-    }
+    plug.races.emplace(r.name().copy(), Resource::race(r.name()));
 }
 
 void load_object(const NamedHandle<const BaseObject>& o) {
     if (plug.objects.find(o.name().copy()) != plug.objects.end()) {
         return;  // already loaded.
     }
-
-    pn::value x = Resource::object(o.name());
-    try {
-        plug.objects.emplace(o.name().copy(), base_object(x));
-    } catch (...) {
-        std::throw_with_nested(std::runtime_error(o.name().copy().c_str()));
-    }
+    plug.objects.emplace(o.name().copy(), Resource::object(o.name()));
 }
 
 }  // namespace antares
