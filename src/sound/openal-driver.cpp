@@ -154,26 +154,10 @@ unique_ptr<SoundChannel> OpenAlSoundDriver::open_channel() {
 }
 
 unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
-    static const struct {
-        const char ext[6];
-        SoundData (*fn)(pn::data_view);
-    } fmts[] = {
-            {".aiff", sndfile::convert}, {".s3m", modplug::convert}, {".xm", modplug::convert},
-    };
-
     unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
-    for (const auto& fmt : fmts) {
-        pn::string path_ext = pn::format("{0}{1}", path, fmt.ext);
-        if (!Resource::exists(path_ext)) {
-            continue;
-        }
-        Resource  rsrc = Resource::path(path_ext);
-        SoundData s    = fmt.fn(rsrc.data());
-        sound->buffer(s);
-        return std::move(sound);
-    }
-    throw std::runtime_error(
-            pn::format("couldn't load sound {0}", pn::dump(path, pn::dump_short)).c_str());
+    SoundData               s = Resource::sound(path);
+    sound->buffer(s);
+    return std::move(sound);
 }
 
 void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }

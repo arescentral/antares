@@ -34,6 +34,7 @@ class NatePixTable;
 class Texture;
 struct FontData;
 struct ReplayData;
+struct SoundData;
 struct SpriteData;
 
 class Resource {
@@ -46,6 +47,7 @@ class Resource {
     static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
     static ReplayData                                  replay(int id);
     static std::vector<int32_t>                        rotation_table();
+    static SoundData                                   sound(pn::string_view name);
     static SpriteData                                  sprite_data(pn::string_view name);
     static ArrayPixMap                                 sprite_image(pn::string_view name);
     static ArrayPixMap                                 sprite_overlay(pn::string_view name);
