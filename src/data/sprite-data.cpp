@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,42 +16,19 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
-#define ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
+#include "data/sprite-data.hpp"
 
-#include "data/replay.hpp"
-#include "data/resource.hpp"
-#include "game/input-source.hpp"
-#include "game/main.hpp"
-#include "math/random.hpp"
-#include "ui/card.hpp"
+#include "data/field.hpp"
 
 namespace antares {
 
-struct Level;
-
-class ReplayGame : public Card {
-  public:
-    ReplayGame(int16_t replay_id);
-    ~ReplayGame();
-
-    virtual void become_front();
-
-  private:
-    enum State {
-        NEW,
-        FADING_OUT,
-        PLAYING,
-    };
-    State _state;
-
-    ReplayData        _data;
-    Random            _random_seed;
-    const Level&      _level;
-    GameResult        _game_result;
-    ReplayInputSource _input_source;
-};
+SpriteData sprite_data(pn::value_cref x) {
+    return required_struct<SpriteData>(
+            path_value{x},
+            {{"rows", {&SpriteData::rows, optional_int, 1}},
+             {"cols", {&SpriteData::cols, optional_int, 1}},
+             {"center", {&SpriteData::center, required_point}},
+             {"frames", {&SpriteData::frames, required_array<Rect, required_rect>}}});
+}
 
 }  // namespace antares
-
-#endif  // ANTARES_UI_FLOWS_REPLAY_GAME_HPP_

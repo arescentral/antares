@@ -28,24 +28,31 @@
 
 namespace antares {
 
-class Texture;
+class ArrayPixMap;
+class InterfaceItem;
 class NatePixTable;
-class Font;
+class Texture;
+struct FontData;
+struct ReplayData;
+struct SpriteData;
 
 class Resource {
   public:
     static bool     exists(pn::string_view path);
     static Resource path(pn::string_view path);
 
-    static Font                    font(pn::string_view name);
-    static Resource                interface(pn::string_view name);
-    static Resource                replay(int id);
-    static std::vector<int32_t>    rotation_table();
-    static NatePixTable            sprite(pn::string_view name, Hue hue);
-    static std::vector<pn::string> strings(int id);
-    static pn::string              text(int id);
-    static Texture                 texture(pn::string_view name);
-    static Texture                 texture(int16_t id);
+    static FontData                                    font(pn::string_view name);
+    static Texture                                     font_image(pn::string_view name);
+    static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
+    static ReplayData                                  replay(int id);
+    static std::vector<int32_t>                        rotation_table();
+    static SpriteData                                  sprite_data(pn::string_view name);
+    static ArrayPixMap                                 sprite_image(pn::string_view name);
+    static ArrayPixMap                                 sprite_overlay(pn::string_view name);
+    static std::vector<pn::string>                     strings(int id);
+    static pn::string                                  text(int id);
+    static Texture                                     texture(pn::string_view name);
+    static Texture                                     texture(int16_t id);
 
     Resource(Resource&&) = default;
     Resource& operator=(Resource&&) = default;

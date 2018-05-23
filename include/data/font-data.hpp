@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,42 +16,26 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
-#define ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
+#ifndef ANTARES_FONT_DATA_HPP_
+#define ANTARES_FONT_DATA_HPP_
 
-#include "data/replay.hpp"
-#include "data/resource.hpp"
-#include "game/input-source.hpp"
-#include "game/main.hpp"
-#include "math/random.hpp"
-#include "ui/card.hpp"
+#include <map>
+#include <pn/string>
+#include <pn/value>
+
+#include "math/geometry.hpp"
 
 namespace antares {
 
-struct Level;
-
-class ReplayGame : public Card {
-  public:
-    ReplayGame(int16_t replay_id);
-    ~ReplayGame();
-
-    virtual void become_front();
-
-  private:
-    enum State {
-        NEW,
-        FADING_OUT,
-        PLAYING,
-    };
-    State _state;
-
-    ReplayData        _data;
-    Random            _random_seed;
-    const Level&      _level;
-    GameResult        _game_result;
-    ReplayInputSource _input_source;
+struct FontData {
+    int64_t                  logical_width;
+    int64_t                  height;
+    int64_t                  ascent;
+    std::map<pn::rune, Rect> glyphs;
 };
+
+FontData font_data(pn::value_cref x);
 
 }  // namespace antares
 
-#endif  // ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
+#endif  // ANTARES_FONT_DATA_HPP_

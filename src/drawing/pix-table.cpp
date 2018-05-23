@@ -23,8 +23,8 @@
 #include <pn/map>
 #include <sfz/sfz.hpp>
 
-#include "data/field.hpp"
 #include "data/resource.hpp"
+#include "data/sprite-data.hpp"
 #include "drawing/color.hpp"
 #include "game/sys.hpp"
 #include "video/driver.hpp"
@@ -36,57 +36,32 @@ using std::vector;
 
 namespace antares {
 
-std::vector<Rect> required_rect_array(path_value x) {
-    if (x.value().is_array()) {
-        pn::array_cref    a = x.value().as_array();
-        std::vector<Rect> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_rect(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
-    }
-}
-
-NatePixTable::NatePixTable(
-        pn::string_view name, Hue hue, pn::value_cref x0, ArrayPixMap image, ArrayPixMap overlay) {
-    path_value x{x0};
-
-    struct SpriteData {
-        int64_t           rows, cols;
-        Point             center;
-        std::vector<Rect> frames;
-    };
-    auto s = required_struct<SpriteData>(
-            x, {
-                       {"rows", {&SpriteData::rows, optional_int, 1}},
-                       {"cols", {&SpriteData::cols, optional_int, 1}},
-                       {"center", {&SpriteData::center, required_point}},
-                       {"frames", {&SpriteData::frames, required_rect_array}},
-               });
+NatePixTable::NatePixTable(pn::string_view name, Hue hue) {
+    SpriteData  data    = Resource::sprite_data(name);
+    ArrayPixMap image   = Resource::sprite_image(name);
+    ArrayPixMap overlay = Resource::sprite_overlay(name);
 
     if (image.size() != overlay.size()) {
         throw std::runtime_error("size mismatch between image and overlay");
     }
-    if (image.size().width % s.cols) {
+    if (image.size().width % data.cols) {
         throw std::runtime_error("sprite column count does not evenly split image");
     }
-    if (image.size().height % s.rows) {
+    if (image.size().height % data.rows) {
         throw std::runtime_error("sprite row count does not evenly split image");
     }
-    if (s.frames.size() != (s.rows * s.cols)) {
+    if (data.frames.size() != (data.rows * data.cols)) {
         throw std::runtime_error("frame count not equal to rows * cols");
     }
-    for (Rect frame : s.frames) {
+    for (Rect frame : data.frames) {
         const int  i           = _frames.size();
-        const int  col         = i % s.cols;
-        const int  row         = i / s.cols;
-        const int  cell_width  = image.size().width / s.cols;
-        const int  cell_height = image.size().height / s.rows;
+        const int  col         = i % data.cols;
+        const int  row         = i / data.cols;
+        const int  cell_width  = image.size().width / data.cols;
+        const int  cell_height = image.size().height / data.rows;
         const Rect cell(Point(cell_width * col, cell_height * row), Size(cell_width, cell_height));
         Rect       sprite = frame;
-        sprite.offset(s.center.h, s.center.v);
+        sprite.offset(data.center.h, data.center.v);
         Rect bounds(frame);
         bounds.offset(2 * -bounds.left, 2 * -bounds.top);
         if (hue == Hue::GRAY) {

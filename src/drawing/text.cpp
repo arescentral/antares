@@ -24,7 +24,7 @@
 #include <pn/string>
 #include <pn/value>
 
-#include "data/field.hpp"
+#include "data/font-data.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
@@ -57,35 +57,9 @@ Font::Font(
           ascent(ascent),
           _glyphs(glyphs) {}
 
-static std::map<pn::rune, Rect> required_glyphs(path_value x) {
-    if (x.value().is_map()) {
-        std::map<pn::rune, Rect> glyphs;
-        for (pn::key_value_cref kv : x.value().as_map()) {
-            pn::string_view glyph  = kv.key();
-            path_value      rect   = x.get(glyph);
-            glyphs[*glyph.begin()] = required_rect(rect);
-        }
-        return glyphs;
-    } else {
-        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
-    }
-}
-
-Font font(pn::value_cref x, Texture texture) {
-    struct FontData {
-        int64_t                  logical_width;
-        int64_t                  height;
-        int64_t                  ascent;
-        std::map<pn::rune, Rect> glyphs;
-    };
-    auto d = required_struct<FontData>(
-            path_value{x}, {
-                                   {"image", nullptr},
-                                   {"logical-width", {&FontData::logical_width, required_int}},
-                                   {"height", {&FontData::height, required_int}},
-                                   {"ascent", {&FontData::ascent, required_int}},
-                                   {"glyphs", {&FontData::glyphs, required_glyphs}},
-                           });
+Font font(pn::string_view name) {
+    FontData d       = Resource::font(name);
+    Texture  texture = Resource::font_image(name);
     return Font(std::move(texture), d.logical_width, d.height, d.ascent, d.glyphs);
 }
 
