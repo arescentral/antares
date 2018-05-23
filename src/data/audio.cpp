@@ -16,14 +16,16 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "data/sndfile.hpp"
+#include "data/audio.hpp"
 
+#include <libmodplug/modplug.h>
 #include <sndfile.h>
 #include <string.h>
 #include <memory>
 #include <pn/file>
 
 namespace antares {
+
 namespace sndfile {
 
 namespace {
@@ -81,23 +83,23 @@ struct VirtualFile {
 
 }  // namespace
 
-sf_count_t sf_vio_get_filelen(void* user_data) {
+static sf_count_t sf_vio_get_filelen(void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->get_filelen();
 }
 
-sf_count_t sf_vio_seek(sf_count_t offset, int whence, void* user_data) {
+static sf_count_t sf_vio_seek(sf_count_t offset, int whence, void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->seek(offset, whence);
 }
 
-sf_count_t sf_vio_read(void* ptr, sf_count_t count, void* user_data) {
+static sf_count_t sf_vio_read(void* ptr, sf_count_t count, void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->read(ptr, count);
 }
 
-sf_count_t sf_vio_write(const void* ptr, sf_count_t count, void* user_data) {
+static sf_count_t sf_vio_write(const void* ptr, sf_count_t count, void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->write(ptr, count);
 }
 
-sf_count_t sf_vio_tell(void* user_data) {
+static sf_count_t sf_vio_tell(void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->tell();
 }
 
@@ -132,4 +134,32 @@ void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) 
 }
 
 }  // namespace sndfile
+
+namespace modplug {
+
+void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) {
+    ModPlug_Settings settings;
+    ModPlug_GetSettings(&settings);
+    settings.mFlags            = MODPLUG_ENABLE_OVERSAMPLING;
+    settings.mChannels         = 2;
+    settings.mBits             = 16;
+    settings.mFrequency        = 44100;
+    settings.mStereoSeparation = 128;
+    settings.mResamplingMode   = MODPLUG_RESAMPLE_LINEAR;
+    ModPlug_SetSettings(&settings);
+    std::unique_ptr<::ModPlugFile, decltype(&ModPlug_Unload)> file(
+            ModPlug_Load(in.data(), in.size()), ModPlug_Unload);
+
+    *channels  = 2;
+    *frequency = 44100;
+    uint8_t buffer[1024];
+    ssize_t read;
+    do {
+        read = ModPlug_Read(file.get(), buffer, 1024);
+        out += pn::data_view(buffer, read);
+    } while (read > 0);
+}
+
+}  // namespace modplug
+
 }  // namespace antares

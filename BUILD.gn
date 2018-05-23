@@ -111,6 +111,7 @@ source_set("libantares-config") {
 source_set("libantares-data") {
   sources = [
     "include/data/action.hpp",
+    "include/data/audio.hpp",
     "include/data/base-object.hpp",
     "include/data/briefing.hpp",
     "include/data/condition.hpp",
@@ -130,9 +131,9 @@ source_set("libantares-data") {
     "include/data/replay.hpp",
     "include/data/resource.hpp",
     "include/data/scenario-list.hpp",
-    "include/data/sndfile.hpp",
     "include/data/sprite-data.hpp",
     "src/data/action.cpp",
+    "src/data/audio.cpp",
     "src/data/base-object.cpp",
     "src/data/briefing.cpp",
     "src/data/condition.cpp",
@@ -149,7 +150,6 @@ source_set("libantares-data") {
     "src/data/replay.cpp",
     "src/data/resource.cpp",
     "src/data/scenario-list.cpp",
-    "src/data/sndfile.cpp",
     "src/data/sprite-data.cpp",
   ]
   public_deps = [
@@ -160,6 +160,7 @@ source_set("libantares-data") {
     "//ext/procyon:procyon-cpp",
   ]
   deps = [
+    "//ext/libmodplug",
     "//ext/libsndfile",
   ]
   configs += [ ":antares_private" ]
@@ -304,7 +305,6 @@ source_set("libantares-sound") {
   public_deps = [
     ":libantares-game",
     ":libantares-lang",
-    "//ext/libmodplug",
     "//ext/libsfz",
   ]
   libs = []

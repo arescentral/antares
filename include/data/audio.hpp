@@ -22,11 +22,15 @@
 #include <pn/data>
 
 namespace antares {
+
 namespace sndfile {
-
 void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency);
-
 }  // namespace sndfile
+
+namespace modplug {
+void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency);
+}  // namespace modplug
+
 }  // namespace antares
 
 #endif  // ANTARES_DATA_SNDFILE_HPP_

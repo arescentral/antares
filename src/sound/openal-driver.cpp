@@ -18,11 +18,10 @@
 
 #include "sound/openal-driver.hpp"
 
-#include <libmodplug/modplug.h>
 #include <pn/file>
 
+#include "data/audio.hpp"
 #include "data/resource.hpp"
-#include "data/sndfile.hpp"
 
 using std::unique_ptr;
 
@@ -49,33 +48,6 @@ void check_al_error(pn::string_view method) {
                 pn::format("{0}: {1}", method, al_error_to_string(error)).c_str());
     }
 }
-
-namespace modplug {
-
-void convert(pn::data_view in, pn::data_ref out, int* channels, int* frequency) {
-    ModPlug_Settings settings;
-    ModPlug_GetSettings(&settings);
-    settings.mFlags            = MODPLUG_ENABLE_OVERSAMPLING;
-    settings.mChannels         = 2;
-    settings.mBits             = 16;
-    settings.mFrequency        = 44100;
-    settings.mStereoSeparation = 128;
-    settings.mResamplingMode   = MODPLUG_RESAMPLE_LINEAR;
-    ModPlug_SetSettings(&settings);
-    std::unique_ptr<::ModPlugFile, decltype(&ModPlug_Unload)> file(
-            ModPlug_Load(in.data(), in.size()), ModPlug_Unload);
-
-    *channels  = 2;
-    *frequency = 44100;
-    uint8_t buffer[1024];
-    ssize_t read;
-    do {
-        read = ModPlug_Read(file.get(), buffer, 1024);
-        out += pn::data_view(buffer, read);
-    } while (read > 0);
-}
-
-}  // namespace modplug
 
 }  // namespace
 
