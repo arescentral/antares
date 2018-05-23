@@ -66,13 +66,12 @@ bool Resource::exists(pn::string_view resource_path) {
     return false;
 }
 
-Texture Resource::load_png(pn::string_view path, int scale) {
-    Resource    rsrc = Resource::path(pn::format("{0}.png", path));
-    ArrayPixMap pix  = read_png(rsrc.data().open());
+static Texture load_png(pn::string_view path, int scale) {
+    ArrayPixMap pix = read_png(load(pn::format("{0}.png", path))->data().open());
     return sys.video->texture(pn::format("/{0}.png", path), pix, scale);
 }
 
-Texture Resource::load_hidpi_texture(pn::string_view name) {
+static Texture load_hidpi_texture(pn::string_view name) {
     int scale = sys.video->scale();
     while (true) {
         try {
@@ -92,7 +91,7 @@ Texture Resource::load_hidpi_texture(pn::string_view name) {
     }
 }
 
-SoundData Resource::load_audio(pn::string_view name) {
+static SoundData load_audio(pn::string_view name) {
     static const struct {
         const char ext[6];
         SoundData (*fn)(pn::data_view);
@@ -105,14 +104,11 @@ SoundData Resource::load_audio(pn::string_view name) {
         if (!Resource::exists(path_ext)) {
             continue;
         }
-        Resource rsrc = Resource::path(path_ext);
-        return fmt.fn(rsrc.data());
+        return fmt.fn(load(path_ext)->data());
     }
     throw std::runtime_error(
             pn::format("couldn't find sound {0}", pn::dump(name, pn::dump_short)).c_str());
 }
-
-Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
 
 FontData Resource::font(pn::string_view name) {
     return font_data(procyon(pn::format("fonts/{0}.pn", name)));
@@ -135,8 +131,8 @@ ReplayData Resource::replay(int id) {
 }
 
 std::vector<int32_t> Resource::rotation_table() {
-    Resource             rsrc = path("rotation-table");
-    pn::file             in   = rsrc.data().open();
+    auto                 mapped_file = load("rotation-table");
+    pn::file             in          = mapped_file->data().open();
     std::vector<int32_t> v;
     v.resize(SystemGlobals::ROT_TABLE_SIZE);
     for (int32_t& i : v) {
@@ -149,9 +145,8 @@ std::vector<int32_t> Resource::rotation_table() {
 }
 
 std::vector<pn::string> Resource::strings(int id) {
-    Resource  rsrc(load(pn::format("strings/{0}.pn", id)));
     pn::value strings;
-    if (!pn::parse(rsrc.data().open(), strings, nullptr)) {
+    if (!pn::parse(load(pn::format("strings/{0}.pn", id))->data().open(), strings, nullptr)) {
         throw std::runtime_error(pn::format("Couldn't parse strings/{0}.pn", id).c_str());
     }
     pn::array_cref          l = strings.as_array();
@@ -172,36 +167,23 @@ SpriteData Resource::sprite_data(pn::string_view name) {
 }
 
 ArrayPixMap Resource::sprite_image(pn::string_view name) {
-    return read_png(Resource::path(pn::format("sprites/{0}/image.png", name)).data().open());
+    return read_png(load(pn::format("sprites/{0}/image.png", name))->data().open());
 }
 
 ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
-    return read_png(Resource::path(pn::format("sprites/{0}/overlay.png", name)).data().open());
+    return read_png(load(pn::format("sprites/{0}/overlay.png", name))->data().open());
 }
 
-pn::string Resource::text(int id) {
-    return Resource(load(pn::format("text/{0}.txt", id))).string().copy();
-}
+pn::string Resource::text(int id) { return load(pn::format("text/{0}.txt", id))->string().copy(); }
 
 Texture Resource::texture(pn::string_view name) {
     return load_hidpi_texture(pn::format("pictures/{0}", name));
 }
 
-Resource::Resource(std::unique_ptr<sfz::mapped_file> file) : _file(std::move(file)) {}
-
-Resource::~Resource() {}
-
-pn::data_view Resource::data() const { return _file->data(); }
-
-pn::string_view Resource::string() const {
-    return pn::string_view{reinterpret_cast<const char*>(_file->data().data()),
-                           static_cast<int>(_file->data().size())};
-}
-
 pn::value Resource::procyon(pn::string_view path) {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+    if (!pn::parse(load(path)->data().open(), x, &e)) {
         throw std::runtime_error(
                 pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
                         .c_str());

@@ -21,10 +21,7 @@
 
 #include <stdint.h>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 #include <vector>
-
-#include "data/enums.hpp"
 
 namespace antares {
 
@@ -57,24 +54,7 @@ class Resource {
     static Texture                                     texture(pn::string_view name);
     static Texture                                     texture(int16_t id);
 
-    Resource()           = default;
-    Resource(Resource&&) = default;
-    Resource& operator=(Resource&&) = default;
-
-    ~Resource();
-
-    pn::data_view   data() const;
-    pn::string_view string() const;
-
-  private:
-    static Resource path(pn::string_view path);
-
-    static Texture   load_png(pn::string_view path, int scale);
-    static Texture   load_hidpi_texture(pn::string_view name);
-    static SoundData load_audio(pn::string_view name);
-
-    Resource(std::unique_ptr<sfz::mapped_file> file);
-    std::unique_ptr<sfz::mapped_file> _file;
+    Resource() = delete;
 };
 
 }  // namespace antares
