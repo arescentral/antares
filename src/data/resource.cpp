@@ -126,6 +126,10 @@ std::vector<std::unique_ptr<InterfaceItem>> Resource::interface(pn::string_view 
     return interface_items(0, path_value{procyon(pn::format("interfaces/{0}.pn", name))});
 }
 
+SoundData Resource::music(pn::string_view name) {
+    return load_audio(pn::format("music/{0}", name));
+}
+
 ReplayData Resource::replay(int id) {
     return ReplayData(load(pn::format("replays/{0}.NLRP", id))->data());
 }
@@ -159,7 +163,9 @@ std::vector<pn::string> Resource::strings(int id) {
     return result;
 }
 
-SoundData Resource::sound(pn::string_view name) { return load_audio(name); }
+SoundData Resource::sound(pn::string_view name) {
+    return load_audio(pn::format("sounds/{0}", name));
+}
 
 SpriteData Resource::sprite_data(pn::string_view name) {
     return ::antares::sprite_data(procyon(pn::format("sprites/{0}.pn", name)));

@@ -78,6 +78,11 @@ unique_ptr<Sound> NullSoundDriver::open_sound(pn::string_view path) {
     return unique_ptr<Sound>(new NullSound);
 }
 
+unique_ptr<Sound> NullSoundDriver::open_music(pn::string_view path) {
+    static_cast<void>(path);
+    return unique_ptr<Sound>(new NullSound);
+}
+
 void NullSoundDriver::set_global_volume(uint8_t volume) { static_cast<void>(volume); }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +145,11 @@ unique_ptr<SoundChannel> LogSoundDriver::open_channel() {
 }
 
 unique_ptr<Sound> LogSoundDriver::open_sound(pn::string_view path) {
-    return unique_ptr<Sound>(new LogSound(*this, path));
+    return unique_ptr<Sound>(new LogSound(*this, pn::format("/sounds/{0}", path)));
+}
+
+unique_ptr<Sound> LogSoundDriver::open_music(pn::string_view path) {
+    return unique_ptr<Sound>(new LogSound(*this, pn::format("/music/{0}", path)));
 }
 
 void LogSoundDriver::set_global_volume(uint8_t volume) { static_cast<void>(volume); }

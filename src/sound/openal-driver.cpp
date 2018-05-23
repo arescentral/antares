@@ -160,6 +160,13 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     return std::move(sound);
 }
 
+unique_ptr<Sound> OpenAlSoundDriver::open_music(pn::string_view path) {
+    unique_ptr<OpenAlSound> music(new OpenAlSound(*this));
+    SoundData               s = Resource::music(path);
+    music->buffer(s);
+    return std::move(music);
+}
+
 void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }
 
 }  // namespace antares

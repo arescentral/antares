@@ -45,6 +45,7 @@ class Resource {
     static FontData                                    font(pn::string_view name);
     static Texture                                     font_image(pn::string_view name);
     static std::vector<std::unique_ptr<InterfaceItem>> interface(pn::string_view name);
+    static SoundData                                   music(pn::string_view name);
     static ReplayData                                  replay(int id);
     static std::vector<int32_t>                        rotation_table();
     static SoundData                                   sound(pn::string_view name);
