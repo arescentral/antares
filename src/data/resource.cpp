@@ -207,7 +207,7 @@ Info Resource::info() {
 Interface Resource::interface(pn::string_view name) {
     pn::string path = pn::format("interfaces/{0}.pn", name);
     try {
-        return ::antares::interface(0, path_value{procyon(path)});
+        return ::antares::interface(path_value{procyon(path)});
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }

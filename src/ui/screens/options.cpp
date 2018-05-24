@@ -354,7 +354,7 @@ void KeyControlScreen::set_tab(Tab tab) {
         TabBoxButton& item = dynamic_cast<TabBoxButton&>(mutable_item(i));
         if (buttons[tab] == i) {
             item.on = true;
-            extend(item.tab_content);
+            extend(item.tab_content.items);
         } else {
             item.on = false;
         }

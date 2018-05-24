@@ -57,11 +57,11 @@ struct InterfaceItem {
     virtual std::unique_ptr<InterfaceItem> copy() const                         = 0;
     virtual void                           accept(const Visitor& visitor) const = 0;
 
-    int  id = -1;
-    Rect bounds;
+    int64_t id = -1;
+    Rect    bounds;
 };
 
-Interface interface(int id0, path_value x);
+Interface interface(path_value x);
 
 struct LabeledItem : public InterfaceItem {
     pn::string label;
@@ -123,8 +123,8 @@ struct TabBoxButton : public Button {
     virtual std::unique_ptr<InterfaceItem> copy() const;
     virtual void                           accept(const Visitor& visitor) const;
 
-    bool                                        on = false;
-    std::vector<std::unique_ptr<InterfaceItem>> tab_content;
+    bool      on = false;
+    Interface tab_content;
 };
 
 struct TabBox : public InterfaceItem {

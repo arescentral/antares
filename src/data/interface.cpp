@@ -65,18 +65,12 @@ static int16_t optional_gamepad_button(path_value x) {
 
 Texture required_texture(path_value x) { return Resource::texture(required_string(x)); }
 
-struct Tab {
-    int64_t    width;
-    pn::string label;
-};
-
-Interface interface(int id0, path_value x) {
+Interface interface(path_value x) {
     if (!x.value().is_array()) {
         throw std::runtime_error(pn::format("{0}must be array", x.prefix()).c_str());
     }
 
     Interface data;
-    int       id = id0;
     for (auto i : range(x.value().as_array().size())) {
         path_value item = x.get(i);
 
@@ -85,16 +79,17 @@ Interface interface(int id0, path_value x) {
             data.items.emplace_back(
                     required_struct<BoxRect>(
                             item, {{"type", nullptr},
+                                   {"id", {&BoxRect::id, required_int}},
                                    {"bounds", {&BoxRect::bounds, required_rect}},
                                    {"label", {&BoxRect::label, optional_string_copy}},
                                    {"hue", {&BoxRect::hue, required_hue}},
                                    {"style", {&BoxRect::style, required_interface_style}}})
                             .copy());
-            data.items.back()->id = id++;
         } else if (type == "button") {
             data.items.emplace_back(new PlainButton(required_struct<PlainButton>(
                     item, {
                                   {"type", nullptr},
+                                  {"id", {&PlainButton::id, required_int}},
                                   {"bounds", {&PlainButton::bounds, required_rect}},
                                   {"label", {&PlainButton::label, required_string_copy}},
                                   {"key", {&PlainButton::key, optional_key_num}},
@@ -102,11 +97,11 @@ Interface interface(int id0, path_value x) {
                                   {"hue", {&PlainButton::hue, required_hue}},
                                   {"style", {&PlainButton::style, required_interface_style}},
                           })));
-            data.items.back()->id = id++;
         } else if (type == "checkbox") {
             data.items.emplace_back(new CheckboxButton(required_struct<CheckboxButton>(
                     item, {
                                   {"type", nullptr},
+                                  {"id", {&CheckboxButton::id, required_int}},
                                   {"bounds", {&CheckboxButton::bounds, required_rect}},
                                   {"label", {&CheckboxButton::label, required_string_copy}},
                                   {"key", {&CheckboxButton::key, optional_key_num}},
@@ -114,11 +109,11 @@ Interface interface(int id0, path_value x) {
                                   {"hue", {&CheckboxButton::hue, required_hue}},
                                   {"style", {&CheckboxButton::style, required_interface_style}},
                           })));
-            data.items.back()->id = id++;
         } else if (type == "radio") {
             data.items.emplace_back(new RadioButton(required_struct<RadioButton>(
                     item, {
                                   {"type", nullptr},
+                                  {"id", {&RadioButton::id, required_int}},
                                   {"bounds", {&RadioButton::bounds, required_rect}},
                                   {"label", {&RadioButton::label, required_string_copy}},
                                   {"key", {&RadioButton::key, optional_key_num}},
@@ -126,29 +121,29 @@ Interface interface(int id0, path_value x) {
                                   {"hue", {&RadioButton::hue, required_hue}},
                                   {"style", {&RadioButton::style, required_interface_style}},
                           })));
-            data.items.back()->id = id++;
         } else if (type == "picture") {
             data.items.emplace_back(new PictureRect(required_struct<PictureRect>(
                     item, {
                                   {"type", nullptr},
+                                  {"id", {&PictureRect::id, required_int}},
                                   {"bounds", {&PictureRect::bounds, required_rect}},
-                                  {"id", {&PictureRect::texture, required_texture}},
+                                  {"picture", {&PictureRect::texture, required_texture}},
                           })));
-            data.items.back()->id = id++;
         } else if (type == "text") {
             data.items.emplace_back(new TextRect(required_struct<TextRect>(
                     item, {
                                   {"type", nullptr},
+                                  {"id", {&TextRect::id, required_int}},
                                   {"bounds", {&TextRect::bounds, required_rect}},
                                   {"text", {&TextRect::text, optional_string, ""}},
                                   {"hue", {&TextRect::hue, required_hue}},
                                   {"style", {&TextRect::style, required_interface_style}},
                           })));
-            data.items.back()->id = id++;
         } else if (type == "tab-box") {
             TabBox tab_box = required_struct<TabBox>(
                     item, {
                                   {"type", nullptr},
+                                  {"id", {&TabBox::id, required_int}},
                                   {"bounds", {&TabBox::bounds, required_rect}},
                                   {"hue", {&TabBox::hue, required_hue}},
                                   {"style", {&TabBox::style, required_interface_style}},
@@ -160,26 +155,33 @@ Interface interface(int id0, path_value x) {
 
             path_value tabs = item.get("tabs");
             for (auto i : range(tabs.value().as_array().size())) {
+                struct Tab {
+                    int64_t    id;
+                    int64_t    width;
+                    pn::string label;
+                    Interface  content;
+                };
+
                 auto tab = required_struct<Tab>(
                         tabs.get(i), {
+                                             {"id", {&Tab::id, required_int}},
                                              {"width", {&Tab::width, required_int}},
                                              {"label", {&Tab::label, required_string_copy}},
-                                             {"content", nullptr},
+                                             {"content", {&Tab::content, interface}},
                                      });
                 button_bounds.right = button_bounds.left + tab.width;
                 TabBoxButton button;
+                button.id          = tab.id;
                 button.bounds      = button_bounds;
                 button.label       = std::move(tab.label);
                 button.hue         = tab_box.hue;
                 button.style       = tab_box.style;
-                button.tab_content = interface(0, tabs.get(i).get("content")).items;
-                button.id          = id++;
+                button.tab_content = std::move(tab.content);
                 data.items.emplace_back(new TabBoxButton(std::move(button)));
                 button_bounds.left = button_bounds.right + 37;
             }
 
             tab_box.top_right_border_size = tab_box.bounds.right - button_bounds.right - 17;
-            tab_box.id                    = id++;
             data.items.emplace_back(new TabBox(std::move(tab_box)));
         } else {
             throw std::runtime_error(
