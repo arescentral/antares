@@ -57,8 +57,7 @@ struct InterfaceItem {
     virtual std::unique_ptr<InterfaceItem> copy() const                         = 0;
     virtual void                           accept(const Visitor& visitor) const = 0;
 
-    int64_t id = -1;
-    Rect    bounds;
+    Rect bounds;
 };
 
 Interface interface(path_value x);
@@ -93,6 +92,7 @@ struct PictureRect : public InterfaceItem {
 };
 
 struct Button : public LabeledItem {
+    int64_t                 id      = -1;
     int16_t                 key     = 0;
     int16_t                 gamepad = 0;
     Hue                     hue     = Hue::GRAY;

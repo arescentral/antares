@@ -79,7 +79,6 @@ Interface interface(path_value x) {
             data.items.emplace_back(
                     required_struct<BoxRect>(
                             item, {{"type", nullptr},
-                                   {"id", {&BoxRect::id, required_int}},
                                    {"bounds", {&BoxRect::bounds, required_rect}},
                                    {"label", {&BoxRect::label, optional_string_copy}},
                                    {"hue", {&BoxRect::hue, required_hue}},
@@ -125,7 +124,6 @@ Interface interface(path_value x) {
             data.items.emplace_back(new PictureRect(required_struct<PictureRect>(
                     item, {
                                   {"type", nullptr},
-                                  {"id", {&PictureRect::id, required_int}},
                                   {"bounds", {&PictureRect::bounds, required_rect}},
                                   {"picture", {&PictureRect::texture, required_texture}},
                           })));
@@ -133,7 +131,6 @@ Interface interface(path_value x) {
             data.items.emplace_back(new TextRect(required_struct<TextRect>(
                     item, {
                                   {"type", nullptr},
-                                  {"id", {&TextRect::id, required_int}},
                                   {"bounds", {&TextRect::bounds, required_rect}},
                                   {"text", {&TextRect::text, optional_string, ""}},
                                   {"hue", {&TextRect::hue, required_hue}},
@@ -143,7 +140,6 @@ Interface interface(path_value x) {
             TabBox tab_box = required_struct<TabBox>(
                     item, {
                                   {"type", nullptr},
-                                  {"id", {&TabBox::id, required_int}},
                                   {"bounds", {&TabBox::bounds, required_rect}},
                                   {"hue", {&TabBox::hue, required_hue}},
                                   {"style", {&TabBox::style, required_interface_style}},
@@ -194,7 +190,6 @@ Interface interface(path_value x) {
 std::unique_ptr<InterfaceItem> BoxRect::copy() const {
     std::unique_ptr<BoxRect> copy(new BoxRect);
     copy->bounds = bounds;
-    copy->id     = id;
     if (label.has_value()) {
         copy->label.emplace(label->copy());
     }
@@ -206,7 +201,6 @@ std::unique_ptr<InterfaceItem> BoxRect::copy() const {
 std::unique_ptr<InterfaceItem> TextRect::copy() const {
     std::unique_ptr<TextRect> copy(new TextRect);
     copy->bounds = bounds;
-    copy->id     = id;
     copy->text   = text.copy();
     copy->hue    = hue;
     copy->style  = style;
@@ -216,7 +210,6 @@ std::unique_ptr<InterfaceItem> TextRect::copy() const {
 std::unique_ptr<InterfaceItem> PictureRect::copy() const {
     std::unique_ptr<PictureRect> copy(new PictureRect);
     copy->bounds = bounds;
-    copy->id     = id;
     return std::move(copy);
 }
 
@@ -278,7 +271,6 @@ std::unique_ptr<InterfaceItem> TabBoxButton::copy() const {
 std::unique_ptr<InterfaceItem> TabBox::copy() const {
     std::unique_ptr<TabBox> copy(new TabBox);
     copy->bounds                = bounds;
-    copy->id                    = id;
     copy->hue                   = hue;
     copy->style                 = style;
     copy->top_right_border_size = top_right_border_size;

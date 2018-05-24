@@ -209,12 +209,10 @@ void InterfaceScreen::truncate(size_t size) {
 }
 
 void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItem>>& items) {
-    const int offset_id = _data.items.size();
-    const int offset_x  = (_bounds.width() / 2) - 320;
-    const int offset_y  = (_bounds.height() / 2) - 240;
+    const int offset_x = (_bounds.width() / 2) - 320;
+    const int offset_y = (_bounds.height() / 2) - 240;
     for (const auto& item : items) {
         _data.items.emplace_back(item->copy());
-        _data.items.back()->id += offset_id;
         _data.items.back()->bounds.offset(offset_x, offset_y);
     }
 }

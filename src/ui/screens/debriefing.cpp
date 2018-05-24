@@ -58,7 +58,6 @@ void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
 
 BoxRect interface_item(const Rect& text_bounds) {
     BoxRect r;
-    r.id     = 0;
     r.bounds = text_bounds;
     r.hue    = Hue::GOLD;
     r.style  = InterfaceStyle::LARGE;

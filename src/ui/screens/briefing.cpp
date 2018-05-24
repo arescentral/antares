@@ -68,7 +68,6 @@ static BoxRect data_item(const InterfaceItem& map_rect) {
     Rect bounds(0, 0, 200, 200);
     bounds.center_in(map_rect.bounds);
     BoxRect r;
-    r.id     = 0;
     r.bounds = bounds;
     r.hue    = Hue::GOLD;
     r.style  = InterfaceStyle::LARGE;
