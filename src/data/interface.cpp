@@ -224,7 +224,6 @@ PlainButtonData PlainButtonData::copy() const {
     copy->gamepad = gamepad;
     copy->hue     = hue;
     copy->style   = style;
-    copy->status  = status;
     return std::move(*copy);
 }
 
@@ -237,8 +236,6 @@ CheckboxButtonData CheckboxButtonData::copy() const {
     copy->gamepad = gamepad;
     copy->hue     = hue;
     copy->style   = style;
-    copy->status  = status;
-    copy->on      = on;
     return std::move(*copy);
 }
 
@@ -251,8 +248,6 @@ RadioButtonData RadioButtonData::copy() const {
     copy->gamepad = gamepad;
     copy->hue     = hue;
     copy->style   = style;
-    copy->status  = status;
-    copy->on      = on;
     return std::move(*copy);
 }
 
@@ -265,8 +260,6 @@ TabBoxButtonData TabBoxButtonData::copy() const {
     copy->gamepad = gamepad;
     copy->hue     = hue;
     copy->style   = style;
-    copy->status  = status;
-    copy->on      = on;
 
     struct EmplaceBackVisitor : InterfaceItemData::Visitor {
         InterfaceData* i;

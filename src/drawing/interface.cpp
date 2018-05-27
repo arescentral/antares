@@ -335,7 +335,7 @@ void draw_tab_box(Point origin, const TabBoxData& item) {
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
-void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
+void draw_button(Point origin, InputMode mode, const PlainButtonData& item, ButtonState state) {
     Rect     tRect, uRect, vRect;
     int16_t  swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -360,7 +360,7 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
 
         // top border
 
-        if (item.status == kDimmed) {
+        if (state == ButtonState::DISABLED) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM;
@@ -379,12 +379,12 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
         vRect =
                 Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
                      tRect.bottom - kInterfaceHTop + 1);
-        if (item.status == kIH_Hilite) {
+        if (state == ButtonState::ACTIVE) {
             shade = LIGHT;
             mDrawPuffUpRect(rects, uRect, item.hue, shade);
             mDrawPuffUpRect(rects, vRect, item.hue, shade);
         } else {
-            if (item.status == kDimmed) {
+            if (state == ButtonState::DISABLED) {
                 shade = VERY_DARK;
             } else {
                 shade = MEDIUM + kSlightlyLighterColor;
@@ -409,7 +409,7 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
                 Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                      tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-        if (item.status == kIH_Hilite)
+        if (state == ButtonState::ACTIVE)
             shade = LIGHT;
         else
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
@@ -421,9 +421,9 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
         color = GetRGBTranslateColorShade(item.hue, shade);
         Rects().fill(uRect, color);
 
-        if (item.status == kIH_Hilite) {
+        if (state == ButtonState::ACTIVE) {
             color = GetRGBTranslateColorShade(item.hue, DARKEST);
-        } else if (item.status == kDimmed) {
+        } else if (state == ButtonState::DISABLED) {
             color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
         } else {
             color = GetRGBTranslateColorShade(item.hue, LIGHTER);
@@ -436,7 +436,7 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
         // draw the key code
         {
             Rects rects;
-            if (item.status == kDimmed)
+            if (state == ButtonState::DISABLED)
                 shade = VERY_DARK;
             else
                 shade = LIGHT;
@@ -448,7 +448,7 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
                     tRect.bottom - kInterfaceContentBuffer + 1);
             mDrawPuffUpRect(rects, uRect, item.hue, shade);
 
-            if (item.status == kIH_Hilite)
+            if (state == ButtonState::ACTIVE)
                 shade = LIGHT;
             else
                 shade = DARK;  // DARKEST;
@@ -461,7 +461,7 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
 
             swidth = GetInterfaceStringWidth(shortcut_text, item.style);
             swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
-            if (item.status == kDimmed) {
+            if (state == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
             } else {
                 color = GetRGBTranslateColorShade(item.hue, DARKEST);
@@ -474,9 +474,9 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
 
         // draw the button title
         {
-            if (item.status == kIH_Hilite) {
+            if (state == ButtonState::ACTIVE) {
                 color = GetRGBTranslateColorShade(item.hue, DARKEST);
-            } else if (item.status == kDimmed) {
+            } else if (state == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(item.hue, DARKEST + kSlightlyLighterColor);
             } else {
                 color = GetRGBTranslateColorShade(item.hue, LIGHTER);
@@ -491,7 +491,7 @@ void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
     }
 }
 
-void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
+void draw_tab_box_button(Point origin, const TabBoxButtonData& item, ButtonState state, bool on) {
     Rect     tRect;
     int16_t  swidth, sheight, h_border = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -510,7 +510,7 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
 
     // top border
 
-    if (item.status == kDimmed) {
+    if (state == ButtonState::DISABLED) {
         shade = VERY_DARK;
     } else {
         shade = MEDIUM;
@@ -526,14 +526,14 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
     Rect right(
             tRect.right, tRect.top + kInterfaceHTop, tRect.right + h_border + 1,
             tRect.bottom - kInterfaceHTop + 1);
-    if (!item.on) {
+    if (!on) {
         Rects rects;
-        if (item.status == kIH_Hilite) {
+        if (state == ButtonState::ACTIVE) {
             shade = LIGHT;
             mDrawPuffUpRect(rects, left, item.hue, shade);
             mDrawPuffUpRect(rects, right, item.hue, shade);
         } else {
-            if (item.status == kDimmed) {
+            if (state == ButtonState::DISABLED) {
                 shade = VERY_DARK;
             } else
                 shade = DARK;
@@ -554,9 +554,9 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
         rects.fill(Rect(left.left - 3, left.bottom + 3, right.right + 3, left.bottom + 4), darker);
     } else {
         Rects rects;
-        if (item.status == kIH_Hilite) {
+        if (state == ButtonState::ACTIVE) {
             shade = LIGHT;
-        } else if (item.status == kDimmed) {
+        } else if (state == ButtonState::DISABLED) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM;
@@ -599,9 +599,9 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
                 tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-        if (item.on) {
+        if (on) {
             shade = MEDIUM;
-        } else if (item.status == kIH_Hilite) {
+        } else if (state == ButtonState::ACTIVE) {
             shade = LIGHT;
         } else {
             shade = DARKER;  // DARKEST + kSlightlyLighterColor;
@@ -613,10 +613,10 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
         color = GetRGBTranslateColorShade(item.hue, shade);
         Rects().fill(uRect, color);
 
-        if (!item.on) {
-            if (item.status == kIH_Hilite) {
+        if (!on) {
+            if (state == ButtonState::ACTIVE) {
                 color = GetRGBTranslateColorShade(item.hue, DARKEST);
-            } else if (item.status == kDimmed) {
+            } else if (state == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
             } else {
                 color = GetRGBTranslateColorShade(item.hue, LIGHT);
@@ -632,9 +632,9 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
         DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
     } else {
         // draw the key code
-        if (item.on) {
+        if (on) {
             shade = MEDIUM + kLighterColor;
-        } else if (item.status == kIH_Hilite) {
+        } else if (state == ButtonState::ACTIVE) {
             shade = VERY_LIGHT;
         } else {
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
@@ -649,9 +649,9 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
                 tRect.bottom - kInterfaceContentBuffer + 1);
         mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
 
-        if (item.on) {
+        if (on) {
             shade = MEDIUM;
-        } else if (item.status == kIH_Hilite) {
+        } else if (state == ButtonState::ACTIVE) {
             shade = VERY_LIGHT;
         } else {
             shade = DARKER;  // DARKEST + kSlightlyLighterColor;
@@ -665,7 +665,7 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
 
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
-        if (item.status == kDimmed) {
+        if (state == ButtonState::DISABLED) {
             color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
         } else {
             color = GetRGBTranslateColorShade(item.hue, DARKEST);
@@ -676,10 +676,10 @@ void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
                 color);
 
         // draw the button title
-        if (!item.on) {
-            if (item.status == kIH_Hilite) {
+        if (!on) {
+            if (state == ButtonState::ACTIVE) {
                 color = GetRGBTranslateColorShade(item.hue, DARKEST);
-            } else if (item.status == kDimmed) {
+            } else if (state == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
             } else {
                 color = GetRGBTranslateColorShade(item.hue, LIGHT);
@@ -715,7 +715,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
 
     // top border
 
-    if ( item.status == kDimmed)
+    if ( state == ButtonState::DISABLED)
         shade = VERY_DARK;
     else shade = MEDIUM;
 
@@ -745,9 +745,9 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
                                                                                                                                                                                       tRect.bottom - kInterfaceHTop + 1);
                
                                                                                                                                                                               if (
-                                                                                                                                                                          item.status
+                                                                                                                                                                          state
                                                                                                                                                                           ==
-                                                                                                                                                                          kIH_Hilite)
+                                                                                                                                                                          ButtonState::ACTIVE)
                                                                                                                                                                               {
                                                                                                                                                                                   shade
                                                                                                                                                                           = LIGHT;
@@ -784,7 +784,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
                                                                                                                                                                           1);
                
                                                                                                                                                                                   if
-                                                                                                                                                                          (!item.on) {
+                                                                                                                                                                          (!on) {
                                                                                                                                                                                       PaintOval(pix, wRect, RgbColor::black());
                                                                                                                                                                                   }
                                                                                                                                                                           else {
@@ -796,8 +796,8 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
                                                                                                                                                                               } else
                                                                                                                                                                               {
                                                                                                                                                                                   if (
-                                                                                                                                                                          item.status
-                                                                                                                                                                          == kDimmed)
+                                                                                                                                                                          state
+                                                                                                                                                                          == ButtonState::DISABLED)
                                                                                                                                                                                       shade = VERY_DARK;
                                                                                                                                                                                   else
                                                                                                                                                                           shade =
@@ -834,11 +834,11 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
                                                                                                                                                                                   wRect.inset(1,
                                                                                                                                                                           1);
                                                                                                                                                                                   if
-                                                                                                                                                                          (!item.on) {
+                                                                                                                                                                          (!on) {
                                                                                                                                                                                       PaintOval(pix, wRect, RgbColor::black());
                                                                                                                                                                                   }
                                                                                                                                                                           else if
-                                                                                                                                                                          (item.status
+                                                                                                                                                                          (state
                                                                                                                                                                           == kActive) {
                                                                                                                                                                                       const RgbColor color =
                                                                                                                                                                           GetRGBTranslateColorShade(item.hue,
@@ -868,9 +868,9 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
                                                                                                                                                                           kInterfaceContentBuffer);
                
                                                                                                                                                                               if (
-                                                                                                                                                                          item.status
+                                                                                                                                                                          state
                                                                                                                                                                           ==
-                                                                                                                                                                          kIH_Hilite)
+                                                                                                                                                                          ButtonState::ACTIVE)
                                                                                                                                                                                   shade
                                                                                                                                                                           = LIGHT;
                                                                                                                                                                               else
@@ -895,16 +895,16 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
                                                                                                                                                                               pix->view(uRect).fill(color);
                
                                                                                                                                                                               if
-                                                                                                                                                                          (item.status
+                                                                                                                                                                          (state
                                                                                                                                                                           ==
-                                                                                                                                                                          kIH_Hilite) {
+                                                                                                                                                                          ButtonState::ACTIVE) {
                                                                                                                                                                                   color
                                                                                                                                                                           =
                                                                                                                                                                           GetRGBTranslateColorShade(item.hue,
                                                                                                                                                                           DARKEST);
                                                                                                                                                                               } else if
-                                                                                                                                                                          (item.status
-                                                                                                                                                                          == kDimmed) {
+                                                                                                                                                                          (state
+                                                                                                                                                                          == ButtonState::DISABLED) {
                                                                                                                                                                                   color
                                                                                                                                                                           =
                                                                                                                                                                           GetRGBTranslateColorShade(item.hue,
@@ -941,7 +941,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, Pi
                                                                                                                                                                           }
                                                                                                                                                                           */
 
-void draw_checkbox(Point origin, const CheckboxButtonData& item) {
+void draw_checkbox(Point origin, const CheckboxButtonData& item, ButtonState state, bool on) {
     Rect     tRect, uRect, vRect, wRect;
     int16_t  swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -959,7 +959,7 @@ void draw_checkbox(Point origin, const CheckboxButtonData& item) {
 
     // top border
 
-    if (item.status == kDimmed)
+    if (state == ButtonState::DISABLED)
         shade = VERY_DARK;
     else
         shade = MEDIUM;
@@ -987,7 +987,7 @@ void draw_checkbox(Point origin, const CheckboxButtonData& item) {
             Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
                  tRect.bottom - kInterfaceHTop + 1);
 
-    if (item.status == kIH_Hilite) {
+    if (state == ButtonState::ACTIVE) {
         shade = LIGHT;
         mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
         mDrawPuffUpRect(Rects(), vRect, item.hue, shade);
@@ -995,14 +995,14 @@ void draw_checkbox(Point origin, const CheckboxButtonData& item) {
         wRect.inset(3, 3);
         mDrawPuffDownRect(Rects(), wRect, item.hue, shade);
         wRect.inset(1, 1);
-        if (!item.on) {
+        if (!on) {
             color = RgbColor::black();
         } else {
             color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
         }
         Rects().fill(wRect, color);
     } else {
-        if (item.status == kDimmed)
+        if (state == ButtonState::DISABLED)
             shade = VERY_DARK;
         else
             shade = MEDIUM + kSlightlyLighterColor;
@@ -1012,9 +1012,9 @@ void draw_checkbox(Point origin, const CheckboxButtonData& item) {
         wRect.inset(3, 3);
         mDrawPuffDownRect(Rects(), wRect, item.hue, shade);
         wRect.inset(1, 1);
-        if (!item.on) {
+        if (!on) {
             color = RgbColor::black();
-        } else if (item.status == kActive) {
+        } else if (state == ButtonState::ENABLED) {
             color = GetRGBTranslateColorShade(item.hue, LIGHT);
         } else {
             color = GetRGBTranslateColorShade(item.hue, MEDIUM);
@@ -1026,7 +1026,7 @@ void draw_checkbox(Point origin, const CheckboxButtonData& item) {
             Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                  tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-    if (item.status == kIH_Hilite)
+    if (state == ButtonState::ACTIVE)
         shade = LIGHT;
     else
         shade = DARKEST + kSlightlyLighterColor;
@@ -1036,9 +1036,9 @@ void draw_checkbox(Point origin, const CheckboxButtonData& item) {
     color = GetRGBTranslateColorShade(item.hue, shade);
     Rects().fill(uRect, color);
 
-    if (item.status == kIH_Hilite) {
+    if (state == ButtonState::ACTIVE) {
         color = GetRGBTranslateColorShade(item.hue, DARKEST);
-    } else if (item.status == kDimmed) {
+    } else if (state == ButtonState::DISABLED) {
         color = GetRGBTranslateColorShade(item.hue, DARK);
     } else {
         color = GetRGBTranslateColorShade(item.hue, LIGHT);

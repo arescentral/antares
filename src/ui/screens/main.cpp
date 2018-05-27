@@ -117,22 +117,22 @@ void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
 
 void MainScreen::adjust_interface() {
     if (plug.chapters.find(1) == plug.chapters.end()) {
-        dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).item()->status = kDimmed;
+        dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).state = ButtonState::DISABLED;
     }
 
     // TODO(sfiera): switch on whether or not network games are available.
-    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).item()->status = kDimmed;
+    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).state = ButtonState::DISABLED;
 
     if (!plug.info.intro.has_value()) {
-        dynamic_cast<PlainButton&>(mutable_item(REPLAY_INTRO)).item()->status = kDimmed;
+        dynamic_cast<PlainButton&>(mutable_item(REPLAY_INTRO)).state = ButtonState::DISABLED;
     }
 
     if (_replays.size() == 0) {
-        dynamic_cast<PlainButton&>(mutable_item(DEMO)).item()->status = kDimmed;
+        dynamic_cast<PlainButton&>(mutable_item(DEMO)).state = ButtonState::DISABLED;
     }
 
     if (!plug.info.about.has_value()) {
-        dynamic_cast<PlainButton&>(mutable_item(ABOUT_ARES)).item()->status = kDimmed;
+        dynamic_cast<PlainButton&>(mutable_item(ABOUT_ARES)).state = ButtonState::DISABLED;
     }
 }
 

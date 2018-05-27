@@ -115,14 +115,14 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
 
 void SelectLevelScreen::adjust_interface() {
     if (_index > 0) {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kActive;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).state = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).state = ButtonState::DISABLED;
     }
     if (_index < _chapters.size() - 1) {
-        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kActive;
+        dynamic_cast<Button&>(mutable_item(NEXT)).state = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(NEXT)).state = ButtonState::DISABLED;
     }
 }
 

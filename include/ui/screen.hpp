@@ -134,6 +134,8 @@ class PictureRect : public InterfaceItem {
 
 class Button : public InterfaceItem {
   public:
+    ButtonState state = ButtonState::ENABLED;
+
     ButtonData*       item() override       = 0;
     const ButtonData* item() const override = 0;
 };
@@ -153,6 +155,7 @@ class CheckboxButton : public Button {
   public:
     CheckboxButton(CheckboxButtonData data) : data{std::move(data)} {}
     CheckboxButtonData data;
+    bool               on = false;
 
     void                      draw(Point origin, InputMode mode) const override;
     Rect                      bounds() const override;
@@ -164,6 +167,7 @@ class RadioButton : public Button {
   public:
     RadioButton(RadioButtonData data) : data{std::move(data)} {}
     RadioButtonData data;
+    bool            on = false;
 
     void                   draw(Point origin, InputMode mode) const override;
     Rect                   bounds() const override;
@@ -175,6 +179,7 @@ class TabBoxButton : public Button {
   public:
     TabBoxButton(TabBoxButtonData data) : data{std::move(data)} {}
     TabBoxButtonData data;
+    bool             on = false;
 
     void                    draw(Point origin, InputMode mode) const override;
     Rect                    bounds() const override;

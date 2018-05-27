@@ -300,14 +300,14 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
 void BriefingScreen::adjust_interface() {
     if (_briefing_point > _briefing_point_start) {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kActive;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).state = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).state = ButtonState::DISABLED;
     }
     if (_briefing_point < _briefing_point_end - 1) {
-        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kActive;
+        dynamic_cast<Button&>(mutable_item(NEXT)).state = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(NEXT)).state = ButtonState::DISABLED;
     }
 }
 

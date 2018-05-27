@@ -107,8 +107,8 @@ void InterfaceScreen::become_normal() {
     _hit_button = nullptr;
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->item()->status == kIH_Hilite) {
-            button->item()->status = kActive;
+        if (button && button->state == ButtonState::ACTIVE) {
+            button->state = ButtonState::ENABLED;
         }
     }
 }
@@ -149,10 +149,10 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     for (auto& item : _items) {
         Rect    bounds = item->bounds();
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && (button->item()->status != kDimmed) && (bounds.contains(where))) {
+        if (button && (button->state != ButtonState::DISABLED) && (bounds.contains(where))) {
             become_normal();
-            _state                 = MOUSE_DOWN;
-            button->item()->status = kIH_Hilite;
+            _state        = MOUSE_DOWN;
+            button->state = ButtonState::ACTIVE;
             sys.sound.select();
             _hit_button = button;
             return;
@@ -169,9 +169,9 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        _state                      = NORMAL;
-        Rect bounds                 = _hit_button->bounds();
-        _hit_button->item()->status = kActive;
+        _state             = NORMAL;
+        Rect bounds        = _hit_button->bounds();
+        _hit_button->state = ButtonState::ENABLED;
         if (bounds.contains(where)) {
             handle_button(*_hit_button);
         }
@@ -187,10 +187,10 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->item()->status != kDimmed && button->item()->key == key_code) {
+        if (button && button->state != ButtonState::DISABLED && button->item()->key == key_code) {
             become_normal();
-            _state                 = KEY_DOWN;
-            button->item()->status = kIH_Hilite;
+            _state        = KEY_DOWN;
+            button->state = ButtonState::ACTIVE;
             sys.sound.select();
             _hit_button = button;
             _pressed    = key_code;
@@ -202,10 +202,10 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
     const int32_t key_code = event.key() + 1;
     if ((_state == KEY_DOWN) && (_pressed == key_code)) {
-        _state                      = NORMAL;
-        _hit_button->item()->status = kActive;
+        _state             = NORMAL;
+        _hit_button->state = ButtonState::ENABLED;
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
-            b->data.on = true;
+            b->on = true;
         }
         handle_button(*_hit_button);
     }
@@ -214,11 +214,11 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->item()->status != kDimmed &&
+        if (button && button->state != ButtonState::DISABLED &&
             button->item()->gamepad == event.button) {
             become_normal();
-            _state                 = GAMEPAD_DOWN;
-            button->item()->status = kIH_Hilite;
+            _state        = GAMEPAD_DOWN;
+            button->state = ButtonState::ACTIVE;
             sys.sound.select();
             _hit_button = button;
             _pressed    = event.button;
@@ -229,10 +229,10 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
-        _state                      = NORMAL;
-        _hit_button->item()->status = kActive;
+        _state             = NORMAL;
+        _hit_button->state = ButtonState::ENABLED;
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
-            b->data.on = true;
+            b->on = true;
         }
         handle_button(*_hit_button);
     }
@@ -285,13 +285,17 @@ Rect PictureRect::bounds() const { return picture_rect_bounds(data); }
 PictureRectData*       PictureRect::item() { return &data; }
 const PictureRectData* PictureRect::item() const { return &data; }
 
-void PlainButton::draw(Point offset, InputMode mode) const { draw_button(offset, mode, data); }
-Rect PlainButton::bounds() const { return plain_button_bounds(data); }
+void PlainButton::draw(Point offset, InputMode mode) const {
+    draw_button(offset, mode, data, state);
+}
+Rect                   PlainButton::bounds() const { return plain_button_bounds(data); }
 PlainButtonData*       PlainButton::item() { return &data; }
 const PlainButtonData* PlainButton::item() const { return &data; }
 
-void CheckboxButton::draw(Point offset, InputMode) const { draw_checkbox(offset, data); }
-Rect CheckboxButton::bounds() const { return checkbox_button_bounds(data); }
+void CheckboxButton::draw(Point offset, InputMode) const {
+    draw_checkbox(offset, data, state, on);
+}
+Rect                      CheckboxButton::bounds() const { return checkbox_button_bounds(data); }
 CheckboxButtonData*       CheckboxButton::item() { return &data; }
 const CheckboxButtonData* CheckboxButton::item() const { return &data; }
 
@@ -300,8 +304,10 @@ Rect                   RadioButton::bounds() const { return radio_button_bounds(
 RadioButtonData*       RadioButton::item() { return &data; }
 const RadioButtonData* RadioButton::item() const { return &data; }
 
-void TabBoxButton::draw(Point offset, InputMode) const { draw_tab_box_button(offset, data); }
-Rect TabBoxButton::bounds() const { return tab_box_button_bounds(data); }
+void TabBoxButton::draw(Point offset, InputMode) const {
+    draw_tab_box_button(offset, data, state, on);
+}
+Rect                    TabBoxButton::bounds() const { return tab_box_button_bounds(data); }
 TabBoxButtonData*       TabBoxButton::item() { return &data; }
 const TabBoxButtonData* TabBoxButton::item() const { return &data; }
 

@@ -32,8 +32,6 @@ namespace antares {
 class path_value;
 struct InterfaceItemData;
 
-enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
-
 enum class InterfaceStyle { LARGE, SMALL };
 
 struct interfaceLabelType {
@@ -88,13 +86,12 @@ struct PictureRectData : public InterfaceItemData {
 };
 
 struct ButtonData : public InterfaceItemData {
-    int64_t                 id = -1;
-    pn::string              label;
-    int16_t                 key     = 0;
-    int16_t                 gamepad = 0;
-    Hue                     hue     = Hue::GRAY;
-    InterfaceStyle          style   = InterfaceStyle::LARGE;
-    interfaceItemStatusType status  = kActive;
+    int64_t        id = -1;
+    pn::string     label;
+    int16_t        key     = 0;
+    int16_t        gamepad = 0;
+    Hue            hue     = Hue::GRAY;
+    InterfaceStyle style   = InterfaceStyle::LARGE;
 };
 
 struct PlainButtonData : public ButtonData {
@@ -105,22 +102,17 @@ struct PlainButtonData : public ButtonData {
 struct CheckboxButtonData : public ButtonData {
     CheckboxButtonData copy() const;
     virtual void       accept(const Visitor& visitor) const;
-
-    bool on = false;
 };
 
 struct RadioButtonData : public ButtonData {
     RadioButtonData copy() const;
     virtual void    accept(const Visitor& visitor) const;
-
-    bool on = false;
 };
 
 struct TabBoxButtonData : public ButtonData {
     TabBoxButtonData copy() const;
     virtual void     accept(const Visitor& visitor) const;
 
-    bool          on = false;
     InterfaceData tab_content;
 };
 

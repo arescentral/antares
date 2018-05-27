@@ -27,6 +27,12 @@
 
 namespace antares {
 
+enum class ButtonState {
+    DISABLED,
+    ENABLED,
+    ACTIVE,
+};
+
 const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
 
@@ -38,10 +44,10 @@ void draw_box_rect(Point origin, const BoxRectData& item);
 void draw_labeled_box(Point origin, const BoxRectData& item);
 void draw_text_rect(Point origin, const TextRectData& item);
 void draw_picture_rect(Point origin, const PictureRectData& item);
-void draw_button(Point origin, InputMode mode, const PlainButtonData& item);
-void draw_checkbox(Point origin, const CheckboxButtonData& item);
+void draw_button(Point origin, InputMode mode, const PlainButtonData& item, ButtonState state);
+void draw_checkbox(Point origin, const CheckboxButtonData& item, ButtonState state, bool on);
 void draw_tab_box(Point origin, const TabBoxData& item);
-void draw_tab_box_button(Point origin, const TabBoxButtonData& item);
+void draw_tab_box_button(Point origin, const TabBoxButtonData& item, ButtonState state, bool on);
 
 Rect box_rect_bounds(const BoxRectData& item);
 Rect labeled_box_bounds(const BoxRectData& item);
