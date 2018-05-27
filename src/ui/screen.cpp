@@ -52,9 +52,9 @@ struct EmplaceBackVisitor : InterfaceItemData::Visitor {
     }
 
     void visit_picture_rect(const PictureRectData& data) const override {
-        auto copy    = data.copy();
-        copy.texture = Resource::texture(data.picture);
-        vec->emplace_back(new PictureRect{std::move(copy)});
+        PictureRect picture{data.copy()};
+        picture.texture = Resource::texture(data.picture);
+        vec->emplace_back(new PictureRect{std::move(picture)});
     }
 
     void visit_plain_button(const PlainButtonData& data) const override {
@@ -280,7 +280,7 @@ Rect                TextRect::bounds() const { return text_rect_bounds(data); }
 TextRectData*       TextRect::item() { return &data; }
 const TextRectData* TextRect::item() const { return &data; }
 
-void PictureRect::draw(Point offset, InputMode) const { draw_picture_rect(offset, data); }
+void PictureRect::draw(Point offset, InputMode) const { draw_picture_rect(offset, data, texture); }
 Rect PictureRect::bounds() const { return picture_rect_bounds(data); }
 PictureRectData*       PictureRect::item() { return &data; }
 const PictureRectData* PictureRect::item() const { return &data; }

@@ -125,6 +125,7 @@ class PictureRect : public InterfaceItem {
   public:
     PictureRect(PictureRectData data) : data{std::move(data)} {}
     PictureRectData data;
+    Texture         texture;
 
     void                   draw(Point origin, InputMode mode) const override;
     Rect                   bounds() const override;

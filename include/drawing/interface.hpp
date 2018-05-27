@@ -43,7 +43,7 @@ int16_t GetInterfaceTextHeightFromWidth(pn::string_view text, InterfaceStyle sty
 void draw_box_rect(Point origin, const BoxRectData& item);
 void draw_labeled_box(Point origin, const BoxRectData& item);
 void draw_text_rect(Point origin, const TextRectData& item);
-void draw_picture_rect(Point origin, const PictureRectData& item);
+void draw_picture_rect(Point origin, const PictureRectData& item, const Texture& texture);
 void draw_button(Point origin, InputMode mode, const PlainButtonData& item, ButtonState state);
 void draw_checkbox(Point origin, const CheckboxButtonData& item, ButtonState state, bool on);
 void draw_tab_box(Point origin, const TabBoxData& item);

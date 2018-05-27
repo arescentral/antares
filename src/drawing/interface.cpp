@@ -1183,10 +1183,10 @@ int16_t GetInterfaceTextHeightFromWidth(
     return interface_text.height();
 }
 
-void draw_picture_rect(Point origin, const PictureRectData& item) {
+void draw_picture_rect(Point origin, const PictureRectData& item, const Texture& texture) {
     Rect bounds = item.bounds;
     bounds.offset(origin.h, origin.v);
-    item.texture.draw(bounds.left, bounds.top);
+    texture.draw(bounds.left, bounds.top);
 }
 
 static Rect initialize_bounds(const InterfaceItemData& item) {

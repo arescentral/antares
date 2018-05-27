@@ -82,7 +82,6 @@ struct PictureRectData : public InterfaceItemData {
     virtual void    accept(const Visitor& visitor) const;
 
     pn::string picture;
-    Texture    texture;
 };
 
 struct ButtonData : public InterfaceItemData {
