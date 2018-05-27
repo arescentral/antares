@@ -64,10 +64,10 @@ static const int32_t kMissionDataBottomBuffer = 15;
 static const int32_t kMissionDataHBuffer      = 41;
 static const int32_t kMissionLineHJog         = 10;
 
-static BoxRect data_item(const InterfaceItem& map_rect) {
+static BoxRectData data_item(const InterfaceItemData& map_rect) {
     Rect bounds(0, 0, 200, 200);
     bounds.center_in(map_rect.bounds);
-    BoxRect r;
+    BoxRectData r;
     r.bounds = bounds;
     r.hue    = Hue::GOLD;
     r.style  = InterfaceStyle::LARGE;
@@ -99,7 +99,7 @@ static vector<inlinePictType> populate_inline_picts(
 }
 
 static void update_mission_brief_point(
-        BoxRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
+        BoxRectData* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
         vector<pair<Point, Point>>& lines, pn::string_ref text) {
     if (whichBriefPoint < 0) {
@@ -301,18 +301,18 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
 void BriefingScreen::adjust_interface() {
     if (_briefing_point > _briefing_point_start) {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kDimmed;
     }
     if (_briefing_point < _briefing_point_end - 1) {
-        dynamic_cast<Button&>(mutable_item(NEXT)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(NEXT)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kDimmed;
     }
 }
 
-void BriefingScreen::handle_button(Button& button) {
+void BriefingScreen::handle_button(ButtonData& button) {
     switch (button.id) {
         case DONE: stack()->pop(this); break;
 

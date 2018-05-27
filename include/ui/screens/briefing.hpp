@@ -44,7 +44,7 @@ class BriefingScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(Button& button);
+    virtual void handle_button(ButtonData& button);
 
   private:
     enum Item {
@@ -67,12 +67,12 @@ class BriefingScreen : public InterfaceScreen {
     void show_object_data(int index, const GamepadButtonDownEvent& event);
     void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
 
-    const Level&    _level;
-    bool* const     _cancelled;
-    int             _briefing_point;
-    const int       _briefing_point_start;
-    const int       _briefing_point_end;
-    mutable BoxRect _data_item;
+    const Level&        _level;
+    bool* const         _cancelled;
+    int                 _briefing_point;
+    const int           _briefing_point_start;
+    const int           _briefing_point_end;
+    mutable BoxRectData _data_item;
 
     Rect _bounds;
     Rect _star_rect;

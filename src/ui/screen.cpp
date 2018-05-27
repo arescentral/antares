@@ -62,7 +62,7 @@ void InterfaceScreen::become_normal() {
     _state      = NORMAL;
     _hit_button = nullptr;
     for (auto& item : _data.items) {
-        Button* button = dynamic_cast<Button*>(item.get());
+        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
         if (button && button->status == kIH_Hilite) {
             button->status = kActive;
         }
@@ -107,7 +107,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     for (auto& item : _data.items) {
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
-        Button* button = dynamic_cast<Button*>(item.get());
+        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
         if (button && (button->status != kDimmed) && (bounds.contains(where))) {
             become_normal();
             _state         = MOUSE_DOWN;
@@ -146,7 +146,7 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
     for (auto& item : _data.items) {
-        Button* button = dynamic_cast<Button*>(item.get());
+        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
         if (button && button->status != kDimmed && button->key == key_code) {
             become_normal();
             _state         = KEY_DOWN;
@@ -164,7 +164,7 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     if ((_state == KEY_DOWN) && (_pressed == key_code)) {
         _state              = NORMAL;
         _hit_button->status = kActive;
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
+        if (TabBoxButtonData* b = dynamic_cast<TabBoxButtonData*>(_hit_button)) {
             b->on = true;
         }
         handle_button(*_hit_button);
@@ -173,7 +173,7 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& item : _data.items) {
-        Button* button = dynamic_cast<Button*>(item.get());
+        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
         if (button && button->status != kDimmed && button->gamepad == event.button) {
             become_normal();
             _state         = GAMEPAD_DOWN;
@@ -190,7 +190,7 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
         _state              = NORMAL;
         _hit_button->status = kActive;
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
+        if (TabBoxButtonData* b = dynamic_cast<TabBoxButtonData*>(_hit_button)) {
             b->on = true;
         }
         handle_button(*_hit_button);
@@ -208,7 +208,7 @@ void InterfaceScreen::truncate(size_t size) {
     _data.items.resize(size);
 }
 
-void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItem>>& items) {
+void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items) {
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
     for (const auto& item : items) {
@@ -225,8 +225,8 @@ Point InterfaceScreen::offset() const {
 
 size_t InterfaceScreen::size() const { return _data.items.size(); }
 
-const InterfaceItem& InterfaceScreen::item(int i) const { return *_data.items[i]; }
+const InterfaceItemData& InterfaceScreen::item(int i) const { return *_data.items[i]; }
 
-InterfaceItem& InterfaceScreen::mutable_item(int i) { return *_data.items[i]; }
+InterfaceItemData& InterfaceScreen::mutable_item(int i) { return *_data.items[i]; }
 
 }  // namespace antares

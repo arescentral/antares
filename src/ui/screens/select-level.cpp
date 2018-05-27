@@ -115,18 +115,18 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
 
 void SelectLevelScreen::adjust_interface() {
     if (_index > 0) {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kDimmed;
     }
     if (_index < _chapters.size() - 1) {
-        dynamic_cast<Button&>(mutable_item(NEXT)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(NEXT)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kDimmed;
     }
 }
 
-void SelectLevelScreen::handle_button(Button& button) {
+void SelectLevelScreen::handle_button(ButtonData& button) {
     switch (button.id) {
         case OK:
             _state      = FADING_OUT;
@@ -166,7 +166,7 @@ void SelectLevelScreen::overlay() const { draw_level_name(); }
 void SelectLevelScreen::draw_level_name() const {
     const pn::string_view chapter_name = (*_level)->name;
 
-    const InterfaceItem& i = item(NAME);
+    const InterfaceItemData& i = item(NAME);
 
     RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);

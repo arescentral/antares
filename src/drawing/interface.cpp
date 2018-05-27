@@ -257,7 +257,7 @@ void draw_plain_rect(Point origin, const T& item) {
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
-void draw_tab_box(Point origin, const TabBox& item) {
+void draw_tab_box(Point origin, const TabBoxData& item) {
     Rects          rects;
     Rect           uRect;
     int16_t        vcenter, h_border = kInterfaceSmallHBorder;
@@ -333,7 +333,7 @@ void draw_tab_box(Point origin, const TabBox& item) {
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
-void draw_button(Point origin, InputMode mode, const PlainButton& item) {
+void draw_button(Point origin, InputMode mode, const PlainButtonData& item) {
     Rect     tRect, uRect, vRect;
     int16_t  swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -489,7 +489,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
     }
 }
 
-void draw_tab_box_button(Point origin, const TabBoxButton& item) {
+void draw_tab_box_button(Point origin, const TabBoxButtonData& item) {
     Rect     tRect;
     int16_t  swidth, sheight, h_border = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -697,7 +697,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
 }
 
 /*
-void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap* pix) {
+void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButtonData& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
     int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t         shade;
@@ -939,7 +939,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                           }
                                                                                                                                                                           */
 
-void draw_checkbox(Point origin, const CheckboxButton& item) {
+void draw_checkbox(Point origin, const CheckboxButtonData& item) {
     Rect     tRect, uRect, vRect, wRect;
     int16_t  swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -1049,7 +1049,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
     DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
 }
 
-void draw_labeled_box(Point origin, const BoxRect& item) {
+void draw_labeled_box(Point origin, const BoxRectData& item) {
     Rect     tRect, uRect;
     int16_t  vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -1149,7 +1149,7 @@ void draw_labeled_box(Point origin, const BoxRect& item) {
     mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
 }
 
-void draw_box_rect(Point origin, const BoxRect& item) {
+void draw_box_rect(Point origin, const BoxRectData& item) {
     if (item.label.has_value()) {
         draw_labeled_box(origin, item);
     } else {
@@ -1157,7 +1157,7 @@ void draw_box_rect(Point origin, const BoxRect& item) {
     }
 }
 
-void draw_text_rect(Point origin, const TextRect& item) {
+void draw_text_rect(Point origin, const TextRectData& item) {
     Rect bounds = item.bounds;
     bounds.offset(origin.h, origin.v);
     draw_text_in_rect(bounds, item.text, item.style, item.hue);
@@ -1183,7 +1183,7 @@ int16_t GetInterfaceTextHeightFromWidth(
     return interface_text.height();
 }
 
-void draw_picture_rect(Point origin, const PictureRect& item) {
+void draw_picture_rect(Point origin, const PictureRectData& item) {
     Rect bounds = item.bounds;
     bounds.offset(origin.h, origin.v);
     item.texture.draw(bounds.left, bounds.top);
@@ -1191,26 +1191,28 @@ void draw_picture_rect(Point origin, const PictureRect& item) {
 
 namespace {
 
-struct DrawInterfaceItemVisitor : InterfaceItem::Visitor {
+struct DrawInterfaceItemVisitor : InterfaceItemData::Visitor {
     Point     p;
     InputMode mode;
     DrawInterfaceItemVisitor(Point p, InputMode mode) : p(p), mode(mode) {}
 
-    virtual void visit_box_rect(const BoxRect& i) const { draw_box_rect(p, i); }
-    virtual void visit_text_rect(const TextRect& i) const { draw_text_rect(p, i); }
-    virtual void visit_picture_rect(const PictureRect& i) const { draw_picture_rect(p, i); }
-    virtual void visit_plain_button(const PlainButton& i) const { draw_button(p, mode, i); }
-    virtual void visit_radio_button(const RadioButton& i) const {}
-    virtual void visit_checkbox_button(const CheckboxButton& i) const { draw_checkbox(p, i); }
-    virtual void visit_tab_box(const TabBox& i) const { draw_tab_box(p, i); }
-    virtual void visit_tab_box_button(const TabBoxButton& i) const { draw_tab_box_button(p, i); }
+    virtual void visit_box_rect(const BoxRectData& i) const { draw_box_rect(p, i); }
+    virtual void visit_text_rect(const TextRectData& i) const { draw_text_rect(p, i); }
+    virtual void visit_picture_rect(const PictureRectData& i) const { draw_picture_rect(p, i); }
+    virtual void visit_plain_button(const PlainButtonData& i) const { draw_button(p, mode, i); }
+    virtual void visit_radio_button(const RadioButtonData& i) const {}
+    virtual void visit_checkbox_button(const CheckboxButtonData& i) const { draw_checkbox(p, i); }
+    virtual void visit_tab_box(const TabBoxData& i) const { draw_tab_box(p, i); }
+    virtual void visit_tab_box_button(const TabBoxButtonData& i) const {
+        draw_tab_box_button(p, i);
+    }
 };
 
-struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
+struct GetBoundsInterfaceItemVisitor : InterfaceItemData::Visitor {
     Rect* bounds;
     GetBoundsInterfaceItemVisitor(Rect* bounds) : bounds(bounds) {}
 
-    void initialize_bounds(const InterfaceItem& item) const {
+    void initialize_bounds(const InterfaceItemData& item) const {
         *bounds = item.bounds;
         bounds->left -= kInterfaceContentBuffer;
         bounds->top -= kInterfaceContentBuffer;
@@ -1223,7 +1225,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         return t.style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
     }
 
-    virtual void visit_box_rect(const BoxRect& item) const {
+    virtual void visit_box_rect(const BoxRectData& item) const {
         initialize_bounds(item);
         bounds->left -= h_border(item);
         bounds->right += h_border(item);
@@ -1236,7 +1238,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
-    virtual void visit_text_rect(const TextRect& item) const {
+    virtual void visit_text_rect(const TextRectData& item) const {
         initialize_bounds(item);
         bounds->left -= h_border(item);
         bounds->right += h_border(item);
@@ -1244,7 +1246,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
-    virtual void visit_picture_rect(const PictureRect& item) const {
+    virtual void visit_picture_rect(const PictureRectData& item) const {
         initialize_bounds(item);
         bounds->left -= kInterfaceSmallHBorder;
         bounds->right += kInterfaceSmallHBorder;
@@ -1252,7 +1254,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
-    virtual void visit_plain_button(const PlainButton& item) const {
+    virtual void visit_plain_button(const PlainButtonData& item) const {
         initialize_bounds(item);
         bounds->left -= h_border(item);
         bounds->right += h_border(item);
@@ -1260,7 +1262,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
-    virtual void visit_radio_button(const RadioButton& item) const {
+    virtual void visit_radio_button(const RadioButtonData& item) const {
         initialize_bounds(item);
         bounds->left -= bounds->bottom - bounds->top + 2 * kInterfaceVEdgeHeight +
                         2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
@@ -1270,7 +1272,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
-    virtual void visit_checkbox_button(const CheckboxButton& item) const {
+    virtual void visit_checkbox_button(const CheckboxButtonData& item) const {
         initialize_bounds(item);
         bounds->left -= bounds->bottom - bounds->top + 2 * kInterfaceVEdgeHeight +
                         2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
@@ -1280,7 +1282,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
-    virtual void visit_tab_box(const TabBox& item) const {
+    virtual void visit_tab_box(const TabBoxData& item) const {
         initialize_bounds(item);
         bounds->left -= h_border(item);
         bounds->right += h_border(item);
@@ -1288,7 +1290,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
-    virtual void visit_tab_box_button(const TabBoxButton& item) const {
+    virtual void visit_tab_box_button(const TabBoxButtonData& item) const {
         initialize_bounds(item);
         bounds->left -= h_border(item) + 5;
         bounds->right += h_border(item) + 5;
@@ -1309,15 +1311,15 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
 
 }  // namespace
 
-void draw_interface_item(const InterfaceItem& item, InputMode mode) {
+void draw_interface_item(const InterfaceItemData& item, InputMode mode) {
     item.accept(DrawInterfaceItemVisitor({0, 0}, mode));
 }
 
-void draw_interface_item(const InterfaceItem& item, InputMode mode, Point origin) {
+void draw_interface_item(const InterfaceItemData& item, InputMode mode, Point origin) {
     item.accept(DrawInterfaceItemVisitor(origin, mode));
 }
 
-void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect* bounds) {
+void GetAnyInterfaceItemGraphicBounds(const InterfaceItemData& item, Rect* bounds) {
     item.accept(GetBoundsInterfaceItemVisitor(bounds));
 }
 

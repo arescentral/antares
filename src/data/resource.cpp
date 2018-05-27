@@ -204,7 +204,7 @@ Info Resource::info() {
     }
 }
 
-Interface Resource::interface(pn::string_view name) {
+InterfaceData Resource::interface(pn::string_view name) {
     pn::string path = pn::format("interfaces/{0}.pn", name);
     try {
         return ::antares::interface(path_value{procyon(path)});

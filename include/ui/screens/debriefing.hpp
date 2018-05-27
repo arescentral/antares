@@ -49,7 +49,7 @@ class DebriefingScreen : public Card {
             int your_kill, int par_kill);
 
   private:
-    BoxRect initialize(pn::string_view message, bool do_score);
+    BoxRectData initialize(pn::string_view message, bool do_score);
 
     enum State {
         TYPING,
@@ -67,7 +67,7 @@ class DebriefingScreen : public Card {
     wall_time _next_update;
     int       _typed_chars;
 
-    BoxRect _data_item;
+    BoxRectData _data_item;
 };
 
 const char* stringify(DebriefingScreen::State state);

@@ -69,44 +69,45 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
 SoundControlScreen::~SoundControlScreen() {}
 
 void SoundControlScreen::adjust_interface() {
-    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on = sys.prefs->play_idle_music();
-    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on = sys.prefs->play_music_in_game();
-    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on  = sys.prefs->speech_on();
+    dynamic_cast<CheckboxButtonData&>(mutable_item(IDLE_MUSIC)).on = sys.prefs->play_idle_music();
+    dynamic_cast<CheckboxButtonData&>(mutable_item(GAME_MUSIC)).on =
+            sys.prefs->play_music_in_game();
+    dynamic_cast<CheckboxButtonData&>(mutable_item(SPEECH_ON)).on = sys.prefs->speech_on();
 
     if (false) {  // TODO(sfiera): if speech available.
-        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(SPEECH_ON)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(SPEECH_ON)).status = kDimmed;
     }
 
     if (sys.prefs->volume() > 0) {
-        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(VOLUME_DOWN)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(VOLUME_DOWN)).status = kDimmed;
     }
 
     if (sys.prefs->volume() < kMaxVolumePreference) {
-        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(VOLUME_UP)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(VOLUME_UP)).status = kDimmed;
     }
 }
 
-void SoundControlScreen::handle_button(Button& button) {
+void SoundControlScreen::handle_button(ButtonData& button) {
     switch (button.id) {
         case GAME_MUSIC:
-            sys.prefs->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_play_music_in_game(!dynamic_cast<CheckboxButtonData&>(button).on);
             adjust_interface();
             break;
 
         case IDLE_MUSIC:
-            sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButtonData&>(button).on);
             sys.music.sync();  // TODO(sfiera): do this in driver.
             adjust_interface();
             break;
 
         case SPEECH_ON:
-            sys.prefs->set_speech_on(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_speech_on(!dynamic_cast<CheckboxButtonData&>(button).on);
             adjust_interface();
             break;
 
@@ -241,19 +242,19 @@ void KeyControlScreen::fire_timer() {
 
 void KeyControlScreen::adjust_interface() {
     for (size_t i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        dynamic_cast<TabBoxButton&>(mutable_item(i)).hue = Hue::AQUA;
+        dynamic_cast<TabBoxButtonData&>(mutable_item(i)).hue = Hue::AQUA;
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
-        size_t key                                 = kKeyIndices[_tab] + i - _key_start;
-        int    key_num                             = sys.prefs->key(key);
-        dynamic_cast<Button&>(mutable_item(i)).key = key_num;
+        size_t key                                     = kKeyIndices[_tab] + i - _key_start;
+        int    key_num                                 = sys.prefs->key(key);
+        dynamic_cast<ButtonData&>(mutable_item(i)).key = key_num;
         if (key == _selected_key) {
-            dynamic_cast<Button&>(mutable_item(i)).status = kIH_Hilite;
+            dynamic_cast<ButtonData&>(mutable_item(i)).status = kIH_Hilite;
         } else {
-            dynamic_cast<Button&>(mutable_item(i)).status = kActive;
+            dynamic_cast<ButtonData&>(mutable_item(i)).status = kActive;
         }
-        dynamic_cast<Button&>(mutable_item(i)).hue = Hue::AQUA;
+        dynamic_cast<ButtonData&>(mutable_item(i)).hue = Hue::AQUA;
     }
 
     if (_flashed_on) {
@@ -265,15 +266,15 @@ void KeyControlScreen::adjust_interface() {
     }
 
     if (_conflicts.empty()) {
-        dynamic_cast<Button&>(mutable_item(DONE)).status          = kActive;
-        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).status = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(DONE)).status          = kActive;
+        dynamic_cast<ButtonData&>(mutable_item(SOUND_CONTROL)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(DONE)).status          = kDimmed;
-        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).status = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(DONE)).status          = kDimmed;
+        dynamic_cast<ButtonData&>(mutable_item(SOUND_CONTROL)).status = kDimmed;
     }
 }
 
-void KeyControlScreen::handle_button(Button& button) {
+void KeyControlScreen::handle_button(ButtonData& button) {
     switch (button.id) {
         case DONE:
         case CANCEL:
@@ -314,9 +315,9 @@ void KeyControlScreen::overlay() const {
                 "{0}: {1} conflicts with {2}: {3}", _tabs.at(get_tab_num(key_one)),
                 _keys.at(key_one), _tabs.at(get_tab_num(key_two)), _keys.at(key_two));
 
-        const TextRect& box    = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
-        Rect            bounds = box.bounds;
-        Point           off    = offset();
+        const TextRectData& box    = dynamic_cast<const TextRectData&>(item(CONFLICT_TEXT));
+        Rect                bounds = box.bounds;
+        Point               off    = offset();
         bounds.offset(off.h, off.v);
         draw_text_in_rect(bounds, text, box.style, box.hue);
     }
@@ -351,7 +352,7 @@ void KeyControlScreen::set_tab(Tab tab) {
 
     truncate(_key_start);
     for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        TabBoxButton& item = dynamic_cast<TabBoxButton&>(mutable_item(i));
+        TabBoxButtonData& item = dynamic_cast<TabBoxButtonData&>(mutable_item(i));
         if (buttons[tab] == i) {
             item.on = true;
             extend(item.tab_content.items);
@@ -386,11 +387,12 @@ void KeyControlScreen::update_conflicts() {
 
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
-        Button& item = dynamic_cast<Button&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
-        item.hue     = Hue::GOLD;
+        ButtonData& item =
+                dynamic_cast<ButtonData&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
+        item.hue = Hue::GOLD;
     } else {
-        Button& item = dynamic_cast<Button&>(mutable_item(SHIP_TAB + get_tab_num(key)));
-        item.hue     = Hue::GOLD;
+        ButtonData& item = dynamic_cast<ButtonData&>(mutable_item(SHIP_TAB + get_tab_num(key)));
+        item.hue         = Hue::GOLD;
     }
 }
 

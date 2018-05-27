@@ -94,7 +94,7 @@ void LoadingScreen::fire_timer() {
     }
 }
 
-void LoadingScreen::handle_button(Button& button) {}
+void LoadingScreen::handle_button(ButtonData& button) {}
 
 void LoadingScreen::overlay() const {
     Rect above_content(0, 0, 640, 480);

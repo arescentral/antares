@@ -56,8 +56,8 @@ void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
     }
 }
 
-BoxRect interface_item(const Rect& text_bounds) {
-    BoxRect r;
+BoxRectData interface_item(const Rect& text_bounds) {
+    BoxRectData r;
     r.bounds = text_bounds;
     r.hue    = Hue::GOLD;
     r.style  = InterfaceStyle::LARGE;
@@ -65,7 +65,7 @@ BoxRect interface_item(const Rect& text_bounds) {
     return r;
 }
 
-Rect pix_bounds(const InterfaceItem& item) {
+Rect pix_bounds(const InterfaceItemData& item) {
     Rect r;
     GetAnyInterfaceItemGraphicBounds(item, &r);
     return r;
@@ -216,7 +216,7 @@ void DebriefingScreen::fire_timer() {
     }
 }
 
-BoxRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
+BoxRectData DebriefingScreen::initialize(pn::string_view message, bool do_score) {
     _message = message.copy();
 
     int text_height = GetInterfaceTextHeightFromWidth(_message, InterfaceStyle::LARGE, kTextWidth);
@@ -226,9 +226,9 @@ BoxRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
     }
     text_bounds.center_in(viewport());
 
-    BoxRect data_item = interface_item(text_bounds);
-    _pix_bounds       = pix_bounds(data_item);
-    _message_bounds   = text_bounds;
+    BoxRectData data_item = interface_item(text_bounds);
+    _pix_bounds           = pix_bounds(data_item);
+    _message_bounds       = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
     return data_item;
 }

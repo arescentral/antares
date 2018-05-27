@@ -57,7 +57,7 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
     }
 }
 
-void HelpScreen::handle_button(Button& button) {
+void HelpScreen::handle_button(ButtonData& button) {
     switch (button.id) {
         case DONE: stack()->pop(this); break;
 

@@ -65,10 +65,10 @@ void PlayAgainScreen::become_front() {
 
 void PlayAgainScreen::adjust_interface() {
     // TODO(sfiera): disable if networked.
-    dynamic_cast<Button&>(mutable_item(RESTART)).status = kActive;
+    dynamic_cast<ButtonData&>(mutable_item(RESTART)).status = kActive;
 }
 
-void PlayAgainScreen::handle_button(Button& button) {
+void PlayAgainScreen::handle_button(ButtonData& button) {
     switch (button.id) {
         case RESTART:
             _state           = FADING_OUT;

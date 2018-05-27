@@ -30,7 +30,7 @@ class BaseObject;
 class NatePixTable;
 class Texture;
 struct Info;
-struct Interface;
+struct InterfaceData;
 struct FontData;
 struct Level;
 struct Race;
@@ -46,7 +46,7 @@ class Resource {
     static FontData                font(pn::string_view name);
     static Texture                 font_image(pn::string_view name);
     static Info                    info();
-    static Interface               interface(pn::string_view name);
+    static InterfaceData           interface(pn::string_view name);
     static Level                   level(pn::string_view path);
     static SoundData               music(pn::string_view name);
     static BaseObject              object(pn::string_view path);

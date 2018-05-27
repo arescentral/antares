@@ -50,15 +50,15 @@ class InterfaceScreen : public Card {
   protected:
     virtual void overlay() const;
     virtual void adjust_interface();
-    virtual void handle_button(Button& button) = 0;
+    virtual void handle_button(ButtonData& button) = 0;
 
     void truncate(size_t size);
-    void extend(const std::vector<std::unique_ptr<InterfaceItem>>& items);
+    void extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items);
 
-    Point                offset() const;
-    size_t               size() const;
-    const InterfaceItem& item(int index) const;
-    InterfaceItem&       mutable_item(int index);
+    Point                    offset() const;
+    size_t                   size() const;
+    const InterfaceItemData& item(int index) const;
+    InterfaceItemData&       mutable_item(int index);
 
   private:
     enum State {
@@ -72,12 +72,12 @@ class InterfaceScreen : public Card {
     pn::value load_pn(pn::string_view id);
     void      become_normal();
 
-    const Rect _bounds;
-    const bool _full_screen;
-    Interface  _data;
-    Button*    _hit_button;
-    uint32_t   _pressed;
-    Cursor     _cursor;
+    const Rect    _bounds;
+    const bool    _full_screen;
+    InterfaceData _data;
+    ButtonData*   _hit_button;
+    uint32_t      _pressed;
+    Cursor        _cursor;
 };
 
 }  // namespace antares

@@ -117,26 +117,26 @@ void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
 
 void MainScreen::adjust_interface() {
     if (plug.chapters.find(1) == plug.chapters.end()) {
-        dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).status = kDimmed;
+        dynamic_cast<PlainButtonData&>(mutable_item(START_NEW_GAME)).status = kDimmed;
     }
 
     // TODO(sfiera): switch on whether or not network games are available.
-    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).status = kDimmed;
+    dynamic_cast<PlainButtonData&>(mutable_item(START_NETWORK_GAME)).status = kDimmed;
 
     if (!plug.info.intro.has_value()) {
-        dynamic_cast<PlainButton&>(mutable_item(REPLAY_INTRO)).status = kDimmed;
+        dynamic_cast<PlainButtonData&>(mutable_item(REPLAY_INTRO)).status = kDimmed;
     }
 
     if (_replays.size() == 0) {
-        dynamic_cast<PlainButton&>(mutable_item(DEMO)).status = kDimmed;
+        dynamic_cast<PlainButtonData&>(mutable_item(DEMO)).status = kDimmed;
     }
 
     if (!plug.info.about.has_value()) {
-        dynamic_cast<PlainButton&>(mutable_item(ABOUT_ARES)).status = kDimmed;
+        dynamic_cast<PlainButtonData&>(mutable_item(ABOUT_ARES)).status = kDimmed;
     }
 }
 
-void MainScreen::handle_button(antares::Button& button) {
+void MainScreen::handle_button(ButtonData& button) {
     switch (button.id) {
         case QUIT:
             // 1-second fade-out.
