@@ -112,7 +112,7 @@ struct TabBoxButtonData : public ButtonData {
     TabBoxButtonData copy() const;
     virtual void     accept(const Visitor& visitor) const;
 
-    InterfaceData tab_content;
+    std::vector<std::unique_ptr<InterfaceItemData>> content;
 };
 
 struct TabBoxData : public InterfaceItemData {
