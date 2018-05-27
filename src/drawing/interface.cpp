@@ -257,6 +257,8 @@ void draw_plain_rect(Point origin, const T& item) {
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
+}  // namespace
+
 void draw_tab_box(Point origin, const TabBoxData& item) {
     Rects          rects;
     Rect           uRect;
@@ -1163,8 +1165,6 @@ void draw_text_rect(Point origin, const TextRectData& item) {
     draw_text_in_rect(bounds, item.text, item.style, item.hue);
 }
 
-}  // namespace
-
 void draw_text_in_rect(Rect tRect, pn::string_view text, InterfaceStyle style, Hue hue) {
     RgbColor   color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
     StyledText interface_text(interface_font(style));
@@ -1189,138 +1189,99 @@ void draw_picture_rect(Point origin, const PictureRectData& item) {
     item.texture.draw(bounds.left, bounds.top);
 }
 
-namespace {
-
-struct DrawInterfaceItemVisitor : InterfaceItemData::Visitor {
-    Point     p;
-    InputMode mode;
-    DrawInterfaceItemVisitor(Point p, InputMode mode) : p(p), mode(mode) {}
-
-    virtual void visit_box_rect(const BoxRectData& i) const { draw_box_rect(p, i); }
-    virtual void visit_text_rect(const TextRectData& i) const { draw_text_rect(p, i); }
-    virtual void visit_picture_rect(const PictureRectData& i) const { draw_picture_rect(p, i); }
-    virtual void visit_plain_button(const PlainButtonData& i) const { draw_button(p, mode, i); }
-    virtual void visit_radio_button(const RadioButtonData& i) const {}
-    virtual void visit_checkbox_button(const CheckboxButtonData& i) const { draw_checkbox(p, i); }
-    virtual void visit_tab_box(const TabBoxData& i) const { draw_tab_box(p, i); }
-    virtual void visit_tab_box_button(const TabBoxButtonData& i) const {
-        draw_tab_box_button(p, i);
-    }
-};
-
-struct GetBoundsInterfaceItemVisitor : InterfaceItemData::Visitor {
-    Rect* bounds;
-    GetBoundsInterfaceItemVisitor(Rect* bounds) : bounds(bounds) {}
-
-    void initialize_bounds(const InterfaceItemData& item) const {
-        *bounds = item.bounds;
-        bounds->left -= kInterfaceContentBuffer;
-        bounds->top -= kInterfaceContentBuffer;
-        bounds->right += kInterfaceContentBuffer + 1;
-        bounds->bottom += kInterfaceContentBuffer + 1;
-    }
-
-    template <typename T>
-    int h_border(T& t) const {
-        return t.style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
-    }
-
-    virtual void visit_box_rect(const BoxRectData& item) const {
-        initialize_bounds(item);
-        bounds->left -= h_border(item);
-        bounds->right += h_border(item);
-        if (item.label.has_value()) {
-            bounds->top -= GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2 +
-                           kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        } else {
-            bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        }
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_text_rect(const TextRectData& item) const {
-        initialize_bounds(item);
-        bounds->left -= h_border(item);
-        bounds->right += h_border(item);
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_picture_rect(const PictureRectData& item) const {
-        initialize_bounds(item);
-        bounds->left -= kInterfaceSmallHBorder;
-        bounds->right += kInterfaceSmallHBorder;
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_plain_button(const PlainButtonData& item) const {
-        initialize_bounds(item);
-        bounds->left -= h_border(item);
-        bounds->right += h_border(item);
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_radio_button(const RadioButtonData& item) const {
-        initialize_bounds(item);
-        bounds->left -= bounds->bottom - bounds->top + 2 * kInterfaceVEdgeHeight +
-                        2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
-                        kRadioIndicatorHOffset;
-        bounds->right += h_border(item);
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_checkbox_button(const CheckboxButtonData& item) const {
-        initialize_bounds(item);
-        bounds->left -= bounds->bottom - bounds->top + 2 * kInterfaceVEdgeHeight +
-                        2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
-                        kCheckIndicatorHOffset;
-        bounds->right += h_border(item);
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_tab_box(const TabBoxData& item) const {
-        initialize_bounds(item);
-        bounds->left -= h_border(item);
-        bounds->right += h_border(item);
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 2;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-    }
-
-    virtual void visit_tab_box_button(const TabBoxButtonData& item) const {
-        initialize_bounds(item);
-        bounds->left -= h_border(item) + 5;
-        bounds->right += h_border(item) + 5;
-        bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-        bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 2;
-    }
-
-    /*
-        case kListRect:
-            bounds->left -= thisHBorder;
-            bounds->right += thisHBorder;
-            bounds->top -= GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer * 2 +
-                            kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-            bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
-            break;
-            */
-};
-
-}  // namespace
-
-void draw_interface_item(const InterfaceItemData& item, InputMode mode) {
-    item.accept(DrawInterfaceItemVisitor({0, 0}, mode));
+static Rect initialize_bounds(const InterfaceItemData& item) {
+    Rect bounds = item.bounds;
+    bounds.left -= kInterfaceContentBuffer;
+    bounds.top -= kInterfaceContentBuffer;
+    bounds.right += kInterfaceContentBuffer + 1;
+    bounds.bottom += kInterfaceContentBuffer + 1;
+    return bounds;
 }
 
-void draw_interface_item(const InterfaceItemData& item, InputMode mode, Point origin) {
-    item.accept(DrawInterfaceItemVisitor(origin, mode));
+template <typename T>
+static int h_border(T& t) {
+    return t.style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
 }
 
-void GetAnyInterfaceItemGraphicBounds(const InterfaceItemData& item, Rect* bounds) {
-    item.accept(GetBoundsInterfaceItemVisitor(bounds));
+Rect box_rect_bounds(const BoxRectData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= h_border(item);
+    bounds.right += h_border(item);
+    if (item.label.has_value()) {
+        bounds.top -= GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2 +
+                      kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    } else {
+        bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    }
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    return bounds;
+}
+
+Rect text_rect_bounds(const TextRectData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= h_border(item);
+    bounds.right += h_border(item);
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    return bounds;
+}
+
+Rect picture_rect_bounds(const PictureRectData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= kInterfaceSmallHBorder;
+    bounds.right += kInterfaceSmallHBorder;
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    return bounds;
+}
+
+Rect plain_button_bounds(const PlainButtonData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= h_border(item);
+    bounds.right += h_border(item);
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    return bounds;
+}
+
+Rect radio_button_bounds(const RadioButtonData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= bounds.bottom - bounds.top + 2 * kInterfaceVEdgeHeight +
+                   2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
+                   kRadioIndicatorHOffset;
+    bounds.right += h_border(item);
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    return bounds;
+}
+
+Rect checkbox_button_bounds(const CheckboxButtonData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= bounds.bottom - bounds.top + 2 * kInterfaceVEdgeHeight +
+                   2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
+                   kCheckIndicatorHOffset;
+    bounds.right += h_border(item);
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    return bounds;
+}
+
+Rect tab_box_bounds(const TabBoxData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= h_border(item);
+    bounds.right += h_border(item);
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 2;
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    return bounds;
+}
+
+Rect tab_box_button_bounds(const TabBoxButtonData& item) {
+    Rect bounds = initialize_bounds(item);
+    bounds.left -= h_border(item) + 5;
+    bounds.right += h_border(item) + 5;
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+    bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 2;
+    return bounds;
 }
 
 }  // namespace antares

@@ -93,8 +93,10 @@ class InterfaceScreen : public Card {
 
 class InterfaceItem {
   public:
-    virtual InterfaceItemData*       item()       = 0;
-    virtual const InterfaceItemData* item() const = 0;
+    virtual void                     draw(Point origin, InputMode mode) const = 0;
+    virtual Rect                     bounds() const                           = 0;
+    virtual InterfaceItemData*       item()                                   = 0;
+    virtual const InterfaceItemData* item() const                             = 0;
 };
 
 class BoxRect : public InterfaceItem {
@@ -102,6 +104,8 @@ class BoxRect : public InterfaceItem {
     BoxRect(BoxRectData data) : data{std::move(data)} {}
     BoxRectData data;
 
+    void               draw(Point origin, InputMode mode) const override;
+    Rect               bounds() const override;
     BoxRectData*       item() override;
     const BoxRectData* item() const override;
 };
@@ -111,6 +115,8 @@ class TextRect : public InterfaceItem {
     TextRect(TextRectData data) : data{std::move(data)} {}
     TextRectData data;
 
+    void                draw(Point origin, InputMode mode) const override;
+    Rect                bounds() const override;
     TextRectData*       item() override;
     const TextRectData* item() const override;
 };
@@ -120,14 +126,16 @@ class PictureRect : public InterfaceItem {
     PictureRect(PictureRectData data) : data{std::move(data)} {}
     PictureRectData data;
 
+    void                   draw(Point origin, InputMode mode) const override;
+    Rect                   bounds() const override;
     PictureRectData*       item() override;
     const PictureRectData* item() const override;
 };
 
 class Button : public InterfaceItem {
   public:
-    virtual ButtonData*       item()       = 0;
-    virtual const ButtonData* item() const = 0;
+    ButtonData*       item() override       = 0;
+    const ButtonData* item() const override = 0;
 };
 
 class PlainButton : public Button {
@@ -135,6 +143,8 @@ class PlainButton : public Button {
     PlainButton(PlainButtonData data) : data{std::move(data)} {}
     PlainButtonData data;
 
+    void                   draw(Point origin, InputMode mode) const override;
+    Rect                   bounds() const override;
     PlainButtonData*       item() override;
     const PlainButtonData* item() const override;
 };
@@ -144,6 +154,8 @@ class CheckboxButton : public Button {
     CheckboxButton(CheckboxButtonData data) : data{std::move(data)} {}
     CheckboxButtonData data;
 
+    void                      draw(Point origin, InputMode mode) const override;
+    Rect                      bounds() const override;
     CheckboxButtonData*       item() override;
     const CheckboxButtonData* item() const override;
 };
@@ -153,6 +165,8 @@ class RadioButton : public Button {
     RadioButton(RadioButtonData data) : data{std::move(data)} {}
     RadioButtonData data;
 
+    void                   draw(Point origin, InputMode mode) const override;
+    Rect                   bounds() const override;
     RadioButtonData*       item() override;
     const RadioButtonData* item() const override;
 };
@@ -162,6 +176,8 @@ class TabBoxButton : public Button {
     TabBoxButton(TabBoxButtonData data) : data{std::move(data)} {}
     TabBoxButtonData data;
 
+    void                    draw(Point origin, InputMode mode) const override;
+    Rect                    bounds() const override;
     TabBoxButtonData*       item() override;
     const TabBoxButtonData* item() const override;
 };
@@ -171,6 +187,8 @@ class TabBox : public InterfaceItem {
     TabBox(TabBoxData data) : data{std::move(data)} {}
     TabBoxData data;
 
+    void              draw(Point origin, InputMode mode) const override;
+    Rect              bounds() const override;
     TabBoxData*       item() override;
     const TabBoxData* item() const override;
 };

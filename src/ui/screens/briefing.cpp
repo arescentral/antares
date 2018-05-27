@@ -99,7 +99,7 @@ static vector<inlinePictType> populate_inline_picts(
 }
 
 static void update_mission_brief_point(
-        BoxRectData* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
+        BoxRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
         vector<pair<Point, Point>>& lines, pn::string_ref text) {
     if (whichBriefPoint < 0) {
@@ -113,52 +113,53 @@ static void update_mission_brief_point(
             whichBriefPoint, level, header, text, &hiliteBounds, corner, scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
 
-    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
+    int16_t textHeight =
+            GetInterfaceTextHeightFromWidth(text, dataItem->data.style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->bounds.left =
+        dataItem->data.bounds.left =
                 (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
-        dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
-        dataItem->bounds.top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
-        highlight_rect          = Rect();
+        dataItem->data.bounds.right = dataItem->data.bounds.left + kMissionDataWidth;
+        dataItem->data.bounds.top =
+                (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
+        dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
+        highlight_rect               = Rect();
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
             (bounds->left + (bounds->right - bounds->left) / 2)) {
-            dataItem->bounds.right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->bounds.left  = dataItem->bounds.right - kMissionDataWidth;
+            dataItem->data.bounds.right = hiliteBounds.left - kMissionDataHBuffer;
+            dataItem->data.bounds.left  = dataItem->data.bounds.right - kMissionDataWidth;
         } else {
-            dataItem->bounds.left  = hiliteBounds.right + kMissionDataHBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+            dataItem->data.bounds.left  = hiliteBounds.right + kMissionDataHBuffer;
+            dataItem->data.bounds.right = dataItem->data.bounds.left + kMissionDataWidth;
         }
 
-        dataItem->bounds.top =
+        dataItem->data.bounds.top =
                 hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 - textHeight / 2;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
-        if (dataItem->bounds.top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->bounds.top    = bounds->top + kMissionDataTopBuffer;
-            dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
+        if (dataItem->data.bounds.top < (bounds->top + kMissionDataTopBuffer)) {
+            dataItem->data.bounds.top    = bounds->top + kMissionDataTopBuffer;
+            dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
         }
-        if (dataItem->bounds.bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
-            dataItem->bounds.bottom = bounds->bottom - kMissionDataBottomBuffer;
-            dataItem->bounds.top    = dataItem->bounds.bottom - textHeight;
+        if (dataItem->data.bounds.bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
+            dataItem->data.bounds.bottom = bounds->bottom - kMissionDataBottomBuffer;
+            dataItem->data.bounds.top    = dataItem->data.bounds.bottom - textHeight;
         }
 
-        if (dataItem->bounds.left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->bounds.left  = bounds->left + kMissionDataVBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+        if (dataItem->data.bounds.left < (bounds->left + kMissionDataVBuffer)) {
+            dataItem->data.bounds.left  = bounds->left + kMissionDataVBuffer;
+            dataItem->data.bounds.right = dataItem->data.bounds.left + kMissionDataWidth;
         }
-        if (dataItem->bounds.right > (bounds->right - kMissionDataVBuffer)) {
-            dataItem->bounds.right = bounds->right - kMissionDataVBuffer;
-            dataItem->bounds.left  = dataItem->bounds.right - kMissionDataWidth;
+        if (dataItem->data.bounds.right > (bounds->right - kMissionDataVBuffer)) {
+            dataItem->data.bounds.right = bounds->right - kMissionDataVBuffer;
+            dataItem->data.bounds.left  = dataItem->data.bounds.right - kMissionDataWidth;
         }
 
         hiliteBounds.right++;
         hiliteBounds.bottom++;
         highlight_rect = hiliteBounds;
-        Rect newRect;
-        GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
+        Rect newRect   = dataItem->bounds();
         lines.clear();
-        if (dataItem->bounds.right < hiliteBounds.left) {
+        if (dataItem->data.bounds.right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
@@ -192,10 +193,8 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label.emplace(std::move(header));
-    Rect newRect;
-    GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    inlinePict = populate_inline_picts(dataItem->bounds, text, dataItem->style);
+    dataItem->data.label.emplace(std::move(header));
+    inlinePict = populate_inline_picts(dataItem->data.bounds, text, dataItem->data.style);
 }
 
 BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
@@ -444,14 +443,13 @@ void BriefingScreen::draw_brief_point() const {
         }
     }
 
-    Rect bounds;
-    GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
+    Rect bounds = _data_item.bounds();
     bounds.offset(off.h, off.v);
     Rects().fill(bounds, RgbColor::black());
-    draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
-    bounds = _data_item.bounds;
+    _data_item.draw(off, KEYBOARD_MOUSE);
+    bounds = _data_item.data.bounds;
     bounds.offset(off.h, off.v);
-    draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue);
+    draw_text_in_rect(bounds, _text, _data_item.data.style, _data_item.data.hue);
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {

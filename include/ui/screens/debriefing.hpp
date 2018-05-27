@@ -22,6 +22,7 @@
 #include "drawing/styled-text.hpp"
 #include "math/units.hpp"
 #include "ui/card.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 
@@ -49,7 +50,7 @@ class DebriefingScreen : public Card {
             int your_kill, int par_kill);
 
   private:
-    BoxRectData initialize(pn::string_view message, bool do_score);
+    BoxRect initialize(pn::string_view message, bool do_score);
 
     enum State {
         TYPING,
@@ -67,7 +68,7 @@ class DebriefingScreen : public Card {
     wall_time _next_update;
     int       _typed_chars;
 
-    BoxRectData _data_item;
+    BoxRect _data_item;
 };
 
 const char* stringify(DebriefingScreen::State state);

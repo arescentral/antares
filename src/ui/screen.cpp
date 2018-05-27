@@ -120,11 +120,9 @@ void InterfaceScreen::draw() const {
         copy_area = _bounds;
     } else {
         next()->draw();
-        GetAnyInterfaceItemGraphicBounds(*_items[0]->item(), &copy_area);
+        copy_area = _items[0]->bounds();
         for (const auto& item : _items) {
-            Rect r;
-            GetAnyInterfaceItemGraphicBounds(*item->item(), &r);
-            copy_area.enlarge_to(r);
+            copy_area.enlarge_to(item->bounds());
         }
     }
     copy_area.offset(off.h, off.v);
@@ -132,7 +130,7 @@ void InterfaceScreen::draw() const {
     Rects().fill(copy_area, RgbColor::black());
 
     for (const auto& item : _items) {
-        draw_interface_item(*item->item(), sys.video->input_mode(), off);
+        item->draw(off, sys.video->input_mode());
     }
     overlay();
     if (stack()->top() == this) {
@@ -149,8 +147,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
         return;
     }
     for (auto& item : _items) {
-        Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(*item->item(), &bounds);
+        Rect    bounds = item->bounds();
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && (button->item()->status != kDimmed) && (bounds.contains(where))) {
             become_normal();
@@ -172,9 +169,8 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        _state = NORMAL;
-        Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(*_hit_button->item(), &bounds);
+        _state                      = NORMAL;
+        Rect bounds                 = _hit_button->bounds();
         _hit_button->item()->status = kActive;
         if (bounds.contains(where)) {
             handle_button(*_hit_button->item());
@@ -274,21 +270,44 @@ const InterfaceItemData& InterfaceScreen::item(int i) const { return *_items[i]-
 
 InterfaceItemData& InterfaceScreen::mutable_item(int i) { return *_items[i]->item(); }
 
-BoxRectData*              BoxRect::item() { return &data; }
-const BoxRectData*        BoxRect::item() const { return &data; }
-TextRectData*             TextRect::item() { return &data; }
-const TextRectData*       TextRect::item() const { return &data; }
-PictureRectData*          PictureRect::item() { return &data; }
-const PictureRectData*    PictureRect::item() const { return &data; }
-PlainButtonData*          PlainButton::item() { return &data; }
-const PlainButtonData*    PlainButton::item() const { return &data; }
+void               BoxRect::draw(Point offset, InputMode) const { draw_box_rect(offset, data); }
+Rect               BoxRect::bounds() const { return box_rect_bounds(data); }
+BoxRectData*       BoxRect::item() { return &data; }
+const BoxRectData* BoxRect::item() const { return &data; }
+
+void                TextRect::draw(Point offset, InputMode) const { draw_text_rect(offset, data); }
+Rect                TextRect::bounds() const { return text_rect_bounds(data); }
+TextRectData*       TextRect::item() { return &data; }
+const TextRectData* TextRect::item() const { return &data; }
+
+void PictureRect::draw(Point offset, InputMode) const { draw_picture_rect(offset, data); }
+Rect PictureRect::bounds() const { return picture_rect_bounds(data); }
+PictureRectData*       PictureRect::item() { return &data; }
+const PictureRectData* PictureRect::item() const { return &data; }
+
+void PlainButton::draw(Point offset, InputMode mode) const { draw_button(offset, mode, data); }
+Rect PlainButton::bounds() const { return plain_button_bounds(data); }
+PlainButtonData*       PlainButton::item() { return &data; }
+const PlainButtonData* PlainButton::item() const { return &data; }
+
+void CheckboxButton::draw(Point offset, InputMode) const { draw_checkbox(offset, data); }
+Rect CheckboxButton::bounds() const { return checkbox_button_bounds(data); }
 CheckboxButtonData*       CheckboxButton::item() { return &data; }
 const CheckboxButtonData* CheckboxButton::item() const { return &data; }
-RadioButtonData*          RadioButton::item() { return &data; }
-const RadioButtonData*    RadioButton::item() const { return &data; }
-TabBoxButtonData*         TabBoxButton::item() { return &data; }
-const TabBoxButtonData*   TabBoxButton::item() const { return &data; }
-TabBoxData*               TabBox::item() { return &data; }
-const TabBoxData*         TabBox::item() const { return &data; }
+
+void                   RadioButton::draw(Point offset, InputMode) const {}
+Rect                   RadioButton::bounds() const { return radio_button_bounds(data); }
+RadioButtonData*       RadioButton::item() { return &data; }
+const RadioButtonData* RadioButton::item() const { return &data; }
+
+void TabBoxButton::draw(Point offset, InputMode) const { draw_tab_box_button(offset, data); }
+Rect TabBoxButton::bounds() const { return tab_box_button_bounds(data); }
+TabBoxButtonData*       TabBoxButton::item() { return &data; }
+const TabBoxButtonData* TabBoxButton::item() const { return &data; }
+
+void              TabBox::draw(Point offset, InputMode) const { draw_tab_box(offset, data); }
+Rect              TabBox::bounds() const { return tab_box_bounds(data); }
+TabBoxData*       TabBox::item() { return &data; }
+const TabBoxData* TabBox::item() const { return &data; }
 
 }  // namespace antares
