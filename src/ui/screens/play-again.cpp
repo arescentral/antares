@@ -65,14 +65,14 @@ void PlayAgainScreen::become_front() {
 
 void PlayAgainScreen::adjust_interface() {
     // TODO(sfiera): disable if networked.
-    dynamic_cast<ButtonData&>(mutable_item(RESTART)).status = kActive;
+    dynamic_cast<Button&>(mutable_item(RESTART)).item()->status = kActive;
 }
 
-void PlayAgainScreen::handle_button(ButtonData& button) {
-    switch (button.id) {
+void PlayAgainScreen::handle_button(Button& button) {
+    switch (button.item()->id) {
         case RESTART:
             _state           = FADING_OUT;
-            *_button_pressed = static_cast<Item>(button.id);
+            *_button_pressed = static_cast<Item>(button.item()->id);
             stack()->push(
                     new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
             break;
@@ -80,12 +80,13 @@ void PlayAgainScreen::handle_button(ButtonData& button) {
         case QUIT:
         case RESUME:
         case SKIP:
-            *_button_pressed = static_cast<Item>(button.id);
+            *_button_pressed = static_cast<Item>(button.item()->id);
             stack()->pop(this);
             break;
 
         default:
-            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
+            throw std::runtime_error(
+                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
     }
 }
 

@@ -44,7 +44,7 @@ HelpScreen::HelpScreen()
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(item(BOX).bounds.width(), 0, 0);
+    _text.wrap_to(item(BOX).item()->bounds.width(), 0, 0);
 }
 
 HelpScreen::~HelpScreen() {}
@@ -57,17 +57,18 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
     }
 }
 
-void HelpScreen::handle_button(ButtonData& button) {
-    switch (button.id) {
+void HelpScreen::handle_button(Button& button) {
+    switch (button.item()->id) {
         case DONE: stack()->pop(this); break;
 
         default:
-            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
+            throw std::runtime_error(
+                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
     }
 }
 
 void HelpScreen::overlay() const {
-    Rect  bounds = item(BOX).bounds;
+    Rect  bounds = item(BOX).item()->bounds;
     Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);

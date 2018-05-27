@@ -173,7 +173,7 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         Rect bounds                 = _hit_button->bounds();
         _hit_button->item()->status = kActive;
         if (bounds.contains(where)) {
-            handle_button(*_hit_button->item());
+            handle_button(*_hit_button);
         }
     }
 }
@@ -207,7 +207,7 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
             b->data.on = true;
         }
-        handle_button(*_hit_button->item());
+        handle_button(*_hit_button);
     }
 }
 
@@ -234,7 +234,7 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
             b->data.on = true;
         }
-        handle_button(*_hit_button->item());
+        handle_button(*_hit_button);
     }
 }
 
@@ -266,9 +266,9 @@ Point InterfaceScreen::offset() const {
 
 size_t InterfaceScreen::size() const { return _items.size(); }
 
-const InterfaceItemData& InterfaceScreen::item(int i) const { return *_items[i]->item(); }
+const InterfaceItem& InterfaceScreen::item(int i) const { return *_items[i]; }
 
-InterfaceItemData& InterfaceScreen::mutable_item(int i) { return *_items[i]->item(); }
+InterfaceItem& InterfaceScreen::mutable_item(int i) { return *_items[i]; }
 
 void               BoxRect::draw(Point offset, InputMode) const { draw_box_rect(offset, data); }
 Rect               BoxRect::bounds() const { return box_rect_bounds(data); }

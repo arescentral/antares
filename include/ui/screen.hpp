@@ -61,15 +61,15 @@ class InterfaceScreen : public Card {
   protected:
     virtual void overlay() const;
     virtual void adjust_interface();
-    virtual void handle_button(ButtonData& button) = 0;
+    virtual void handle_button(Button& button) = 0;
 
     void truncate(size_t size);
     void extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items);
 
-    Point                    offset() const;
-    size_t                   size() const;
-    const InterfaceItemData& item(int index) const;
-    InterfaceItemData&       mutable_item(int index);
+    Point                offset() const;
+    size_t               size() const;
+    const InterfaceItem& item(int index) const;
+    InterfaceItem&       mutable_item(int index);
 
   private:
     enum State {

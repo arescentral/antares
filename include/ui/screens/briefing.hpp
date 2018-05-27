@@ -44,7 +44,7 @@ class BriefingScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(ButtonData& button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {

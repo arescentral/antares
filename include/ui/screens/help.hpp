@@ -33,7 +33,7 @@ class HelpScreen : public InterfaceScreen {
     virtual void overlay() const;
 
   protected:
-    virtual void handle_button(ButtonData& button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {

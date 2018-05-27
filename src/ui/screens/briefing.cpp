@@ -64,14 +64,14 @@ static const int32_t kMissionDataBottomBuffer = 15;
 static const int32_t kMissionDataHBuffer      = 41;
 static const int32_t kMissionLineHJog         = 10;
 
-static BoxRectData data_item(const InterfaceItemData& map_rect) {
+static BoxRect data_item(const InterfaceItem& map_rect) {
     Rect bounds(0, 0, 200, 200);
-    bounds.center_in(map_rect.bounds);
+    bounds.center_in(map_rect.item()->bounds);
     BoxRectData r;
     r.bounds = bounds;
     r.hue    = Hue::GOLD;
     r.style  = InterfaceStyle::LARGE;
-    return r;
+    return BoxRect{std::move(r)};
 }
 
 static const Font& interface_font(InterfaceStyle style) {
@@ -300,19 +300,19 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
 void BriefingScreen::adjust_interface() {
     if (_briefing_point > _briefing_point_start) {
-        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kActive;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kActive;
     } else {
-        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kDimmed;
     }
     if (_briefing_point < _briefing_point_end - 1) {
-        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kActive;
+        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kActive;
     } else {
-        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kDimmed;
     }
 }
 
-void BriefingScreen::handle_button(ButtonData& button) {
-    switch (button.id) {
+void BriefingScreen::handle_button(Button& button) {
+    switch (button.item()->id) {
         case DONE: stack()->pop(this); break;
 
         case PREVIOUS:
@@ -332,7 +332,8 @@ void BriefingScreen::handle_button(ButtonData& button) {
             break;
 
         default:
-            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
+            throw std::runtime_error(
+                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
     }
 }
 
@@ -341,7 +342,7 @@ void BriefingScreen::build_star_map() {
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
-    _bounds.center_in(item(MAP_RECT).bounds);
+    _bounds.center_in(item(MAP_RECT).item()->bounds);
 
     if (_level.starmap.has_value()) {
         _star_rect = *_level.starmap;
@@ -365,7 +366,7 @@ void BriefingScreen::build_brief_point() {
     if (_briefing_point >= 0) {
         coordPointType corner;
         int32_t        scale;
-        Rect           map_rect = item(MAP_RECT).bounds;
+        Rect           map_rect = item(MAP_RECT).item()->bounds;
         GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;

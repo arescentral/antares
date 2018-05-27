@@ -115,19 +115,19 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
 
 void SelectLevelScreen::adjust_interface() {
     if (_index > 0) {
-        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kActive;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kActive;
     } else {
-        dynamic_cast<ButtonData&>(mutable_item(PREVIOUS)).status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).item()->status = kDimmed;
     }
     if (_index < _chapters.size() - 1) {
-        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kActive;
+        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kActive;
     } else {
-        dynamic_cast<ButtonData&>(mutable_item(NEXT)).status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(NEXT)).item()->status = kDimmed;
     }
 }
 
-void SelectLevelScreen::handle_button(ButtonData& button) {
-    switch (button.id) {
+void SelectLevelScreen::handle_button(Button& button) {
+    switch (button.item()->id) {
         case OK:
             _state      = FADING_OUT;
             *_cancelled = false;
@@ -157,7 +157,8 @@ void SelectLevelScreen::handle_button(ButtonData& button) {
             break;
 
         default:
-            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
+            throw std::runtime_error(
+                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
     }
 }
 
@@ -166,7 +167,7 @@ void SelectLevelScreen::overlay() const { draw_level_name(); }
 void SelectLevelScreen::draw_level_name() const {
     const pn::string_view chapter_name = (*_level)->name;
 
-    const InterfaceItemData& i = item(NAME);
+    const InterfaceItem& i = item(NAME);
 
     RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);
@@ -174,7 +175,7 @@ void SelectLevelScreen::draw_level_name() const {
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    Rect  bounds = i.bounds;
+    Rect  bounds = i.item()->bounds;
     Point off    = offset();
     bounds.offset(off.h, off.v);
     retro.draw(bounds);
