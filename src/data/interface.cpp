@@ -63,8 +63,6 @@ static int16_t optional_gamepad_button(path_value x) {
     return i;
 }
 
-Texture required_texture(path_value x) { return Resource::texture(required_string(x)); }
-
 InterfaceData interface(path_value x) {
     if (!x.value().is_array()) {
         throw std::runtime_error(pn::format("{0}must be array", x.prefix()).c_str());
@@ -76,14 +74,14 @@ InterfaceData interface(path_value x) {
 
         pn::string_view type = required_string(item.get("type"));
         if (type == "rect") {
-            data.items.emplace_back(
-                    required_struct<BoxRectData>(
-                            item, {{"type", nullptr},
-                                   {"bounds", {&BoxRectData::bounds, required_rect}},
-                                   {"label", {&BoxRectData::label, optional_string_copy}},
-                                   {"hue", {&BoxRectData::hue, required_hue}},
-                                   {"style", {&BoxRectData::style, required_interface_style}}})
-                            .copy());
+            data.items.emplace_back(new BoxRectData(required_struct<BoxRectData>(
+                    item, {
+                                  {"type", nullptr},
+                                  {"bounds", {&BoxRectData::bounds, required_rect}},
+                                  {"label", {&BoxRectData::label, optional_string_copy}},
+                                  {"hue", {&BoxRectData::hue, required_hue}},
+                                  {"style", {&BoxRectData::style, required_interface_style}},
+                          })));
         } else if (type == "button") {
             data.items.emplace_back(new PlainButtonData(required_struct<PlainButtonData>(
                     item,
@@ -128,7 +126,7 @@ InterfaceData interface(path_value x) {
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&PictureRectData::bounds, required_rect}},
-                                  {"picture", {&PictureRectData::texture, required_texture}},
+                                  {"picture", {&PictureRectData::picture, required_string_copy}},
                           })));
         } else if (type == "text") {
             data.items.emplace_back(new TextRectData(required_struct<TextRectData>(
@@ -190,7 +188,7 @@ InterfaceData interface(path_value x) {
     return data;
 }
 
-std::unique_ptr<InterfaceItemData> BoxRectData::copy() const {
+BoxRectData BoxRectData::copy() const {
     std::unique_ptr<BoxRectData> copy(new BoxRectData);
     copy->bounds = bounds;
     if (label.has_value()) {
@@ -198,25 +196,26 @@ std::unique_ptr<InterfaceItemData> BoxRectData::copy() const {
     }
     copy->hue   = hue;
     copy->style = style;
-    return std::move(copy);
+    return std::move(*copy);
 }
 
-std::unique_ptr<InterfaceItemData> TextRectData::copy() const {
+TextRectData TextRectData::copy() const {
     std::unique_ptr<TextRectData> copy(new TextRectData);
     copy->bounds = bounds;
     copy->text   = text.copy();
     copy->hue    = hue;
     copy->style  = style;
-    return std::move(copy);
+    return std::move(*copy);
 }
 
-std::unique_ptr<InterfaceItemData> PictureRectData::copy() const {
+PictureRectData PictureRectData::copy() const {
     std::unique_ptr<PictureRectData> copy(new PictureRectData);
-    copy->bounds = bounds;
-    return std::move(copy);
+    copy->bounds  = bounds;
+    copy->picture = picture.copy();
+    return std::move(*copy);
 }
 
-std::unique_ptr<InterfaceItemData> PlainButtonData::copy() const {
+PlainButtonData PlainButtonData::copy() const {
     std::unique_ptr<PlainButtonData> copy(new PlainButtonData);
     copy->bounds  = bounds;
     copy->id      = id;
@@ -226,10 +225,10 @@ std::unique_ptr<InterfaceItemData> PlainButtonData::copy() const {
     copy->hue     = hue;
     copy->style   = style;
     copy->status  = status;
-    return std::move(copy);
+    return std::move(*copy);
 }
 
-std::unique_ptr<InterfaceItemData> CheckboxButtonData::copy() const {
+CheckboxButtonData CheckboxButtonData::copy() const {
     std::unique_ptr<CheckboxButtonData> copy(new CheckboxButtonData);
     copy->bounds  = bounds;
     copy->id      = id;
@@ -240,10 +239,10 @@ std::unique_ptr<InterfaceItemData> CheckboxButtonData::copy() const {
     copy->style   = style;
     copy->status  = status;
     copy->on      = on;
-    return std::move(copy);
+    return std::move(*copy);
 }
 
-std::unique_ptr<InterfaceItemData> RadioButtonData::copy() const {
+RadioButtonData RadioButtonData::copy() const {
     std::unique_ptr<RadioButtonData> copy(new RadioButtonData);
     copy->bounds  = bounds;
     copy->id      = id;
@@ -254,10 +253,10 @@ std::unique_ptr<InterfaceItemData> RadioButtonData::copy() const {
     copy->style   = style;
     copy->status  = status;
     copy->on      = on;
-    return std::move(copy);
+    return std::move(*copy);
 }
 
-std::unique_ptr<InterfaceItemData> TabBoxButtonData::copy() const {
+TabBoxButtonData TabBoxButtonData::copy() const {
     std::unique_ptr<TabBoxButtonData> copy(new TabBoxButtonData);
     copy->bounds  = bounds;
     copy->id      = id;
@@ -268,16 +267,56 @@ std::unique_ptr<InterfaceItemData> TabBoxButtonData::copy() const {
     copy->style   = style;
     copy->status  = status;
     copy->on      = on;
-    return std::move(copy);
+
+    struct EmplaceBackVisitor : InterfaceItemData::Visitor {
+        InterfaceData* i;
+        EmplaceBackVisitor(InterfaceData* i) : i{i} {}
+
+        void visit_box_rect(const BoxRectData& data) const override {
+            i->items.emplace_back(new BoxRectData{data.copy()});
+        }
+
+        void visit_text_rect(const TextRectData& data) const override {
+            i->items.emplace_back(new TextRectData{data.copy()});
+        }
+
+        void visit_picture_rect(const PictureRectData& data) const override {
+            i->items.emplace_back(new PictureRectData{data.copy()});
+        }
+
+        void visit_plain_button(const PlainButtonData& data) const override {
+            i->items.emplace_back(new PlainButtonData{data.copy()});
+        }
+
+        void visit_radio_button(const RadioButtonData& data) const override {
+            i->items.emplace_back(new RadioButtonData{data.copy()});
+        }
+
+        void visit_checkbox_button(const CheckboxButtonData& data) const override {
+            i->items.emplace_back(new CheckboxButtonData{data.copy()});
+        }
+
+        void visit_tab_box(const TabBoxData& data) const override {
+            i->items.emplace_back(new TabBoxData{data.copy()});
+        }
+
+        void visit_tab_box_button(const TabBoxButtonData& data) const override {
+            i->items.emplace_back(new TabBoxButtonData{data.copy()});
+        }
+    };
+    for (const auto& item : tab_content.items) {
+        item->accept(EmplaceBackVisitor{&copy->tab_content});
+    }
+    return std::move(*copy);
 }
 
-std::unique_ptr<InterfaceItemData> TabBoxData::copy() const {
+TabBoxData TabBoxData::copy() const {
     std::unique_ptr<TabBoxData> copy(new TabBoxData);
     copy->bounds                = bounds;
     copy->hue                   = hue;
     copy->style                 = style;
     copy->top_right_border_size = top_right_border_size;
-    return std::move(copy);
+    return std::move(*copy);
 }
 
 void BoxRectData::accept(const Visitor& visitor) const { visitor.visit_box_rect(*this); }

@@ -54,8 +54,7 @@ struct InterfaceItemData {
     InterfaceItemData& operator=(InterfaceItemData&&) = default;
     virtual ~InterfaceItemData() {}
 
-    virtual std::unique_ptr<InterfaceItemData> copy() const                         = 0;
-    virtual void                               accept(const Visitor& visitor) const = 0;
+    virtual void accept(const Visitor& visitor) const = 0;
 
     Rect bounds;
 };
@@ -63,8 +62,8 @@ struct InterfaceItemData {
 InterfaceData interface(path_value x);
 
 struct BoxRectData : public InterfaceItemData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    BoxRectData  copy() const;
+    virtual void accept(const Visitor& visitor) const;
 
     sfz::optional<pn::string> label;
     Hue                       hue   = Hue::GRAY;
@@ -72,8 +71,8 @@ struct BoxRectData : public InterfaceItemData {
 };
 
 struct TextRectData : public InterfaceItemData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    TextRectData copy() const;
+    virtual void accept(const Visitor& visitor) const;
 
     pn::string     text;
     Hue            hue   = Hue::GRAY;
@@ -81,10 +80,11 @@ struct TextRectData : public InterfaceItemData {
 };
 
 struct PictureRectData : public InterfaceItemData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    PictureRectData copy() const;
+    virtual void    accept(const Visitor& visitor) const;
 
-    Texture texture;
+    pn::string picture;
+    Texture    texture;
 };
 
 struct ButtonData : public InterfaceItemData {
@@ -98,35 +98,35 @@ struct ButtonData : public InterfaceItemData {
 };
 
 struct PlainButtonData : public ButtonData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    PlainButtonData copy() const;
+    virtual void    accept(const Visitor& visitor) const;
 };
 
 struct CheckboxButtonData : public ButtonData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    CheckboxButtonData copy() const;
+    virtual void       accept(const Visitor& visitor) const;
 
     bool on = false;
 };
 
 struct RadioButtonData : public ButtonData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    RadioButtonData copy() const;
+    virtual void    accept(const Visitor& visitor) const;
 
     bool on = false;
 };
 
 struct TabBoxButtonData : public ButtonData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    TabBoxButtonData copy() const;
+    virtual void     accept(const Visitor& visitor) const;
 
     bool          on = false;
     InterfaceData tab_content;
 };
 
 struct TabBoxData : public InterfaceItemData {
-    virtual std::unique_ptr<InterfaceItemData> copy() const;
-    virtual void                               accept(const Visitor& visitor) const;
+    TabBoxData   copy() const;
+    virtual void accept(const Visitor& visitor) const;
 
     Hue            hue                   = Hue::GRAY;
     InterfaceStyle style                 = InterfaceStyle::LARGE;

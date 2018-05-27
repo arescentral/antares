@@ -37,12 +37,56 @@ using std::vector;
 
 namespace antares {
 
+namespace {
+
+struct EmplaceBackVisitor : InterfaceItemData::Visitor {
+    std::vector<std::unique_ptr<InterfaceItem>>* vec;
+    EmplaceBackVisitor(std::vector<std::unique_ptr<InterfaceItem>>* v) : vec{v} {}
+
+    void visit_box_rect(const BoxRectData& data) const override {
+        vec->emplace_back(new BoxRect{data.copy()});
+    }
+
+    void visit_text_rect(const TextRectData& data) const override {
+        vec->emplace_back(new TextRect{data.copy()});
+    }
+
+    void visit_picture_rect(const PictureRectData& data) const override {
+        auto copy    = data.copy();
+        copy.texture = Resource::texture(data.picture);
+        vec->emplace_back(new PictureRect{std::move(copy)});
+    }
+
+    void visit_plain_button(const PlainButtonData& data) const override {
+        vec->emplace_back(new PlainButton{data.copy()});
+    }
+
+    void visit_radio_button(const RadioButtonData& data) const override {
+        vec->emplace_back(new RadioButton{data.copy()});
+    }
+
+    void visit_checkbox_button(const CheckboxButtonData& data) const override {
+        vec->emplace_back(new CheckboxButton{data.copy()});
+    }
+
+    void visit_tab_box(const TabBoxData& data) const override {
+        vec->emplace_back(new TabBox{data.copy()});
+    }
+
+    void visit_tab_box_button(const TabBoxButtonData& data) const override {
+        vec->emplace_back(new TabBoxButton{data.copy()});
+    }
+};
+
+}  // namespace
+
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen)
         : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
     try {
-        _data = Resource::interface(name);
-        for (auto& item : _data.items) {
+        InterfaceData data = Resource::interface(name);
+        for (auto& item : data.items) {
             item->bounds.offset(bounds.left, bounds.top);
+            item->accept(EmplaceBackVisitor{&_items});
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
@@ -61,10 +105,10 @@ void InterfaceScreen::resign_front() { become_normal(); }
 void InterfaceScreen::become_normal() {
     _state      = NORMAL;
     _hit_button = nullptr;
-    for (auto& item : _data.items) {
-        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
-        if (button && button->status == kIH_Hilite) {
-            button->status = kActive;
+    for (auto& item : _items) {
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && button->item()->status == kIH_Hilite) {
+            button->item()->status = kActive;
         }
     }
 }
@@ -76,10 +120,10 @@ void InterfaceScreen::draw() const {
         copy_area = _bounds;
     } else {
         next()->draw();
-        GetAnyInterfaceItemGraphicBounds(*_data.items[0], &copy_area);
-        for (const auto& item : _data.items) {
+        GetAnyInterfaceItemGraphicBounds(*_items[0]->item(), &copy_area);
+        for (const auto& item : _items) {
             Rect r;
-            GetAnyInterfaceItemGraphicBounds(*item, &r);
+            GetAnyInterfaceItemGraphicBounds(*item->item(), &r);
             copy_area.enlarge_to(r);
         }
     }
@@ -87,8 +131,8 @@ void InterfaceScreen::draw() const {
 
     Rects().fill(copy_area, RgbColor::black());
 
-    for (const auto& item : _data.items) {
-        draw_interface_item(*item, sys.video->input_mode(), off);
+    for (const auto& item : _items) {
+        draw_interface_item(*item->item(), sys.video->input_mode(), off);
     }
     overlay();
     if (stack()->top() == this) {
@@ -104,14 +148,14 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     if (event.button() != 0) {
         return;
     }
-    for (auto& item : _data.items) {
+    for (auto& item : _items) {
         Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(*item, &bounds);
-        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
-        if (button && (button->status != kDimmed) && (bounds.contains(where))) {
+        GetAnyInterfaceItemGraphicBounds(*item->item(), &bounds);
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && (button->item()->status != kDimmed) && (bounds.contains(where))) {
             become_normal();
-            _state         = MOUSE_DOWN;
-            button->status = kIH_Hilite;
+            _state                 = MOUSE_DOWN;
+            button->item()->status = kIH_Hilite;
             sys.sound.select();
             _hit_button = button;
             return;
@@ -130,10 +174,10 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
     if (_state == MOUSE_DOWN) {
         _state = NORMAL;
         Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(*_hit_button, &bounds);
-        _hit_button->status = kActive;
+        GetAnyInterfaceItemGraphicBounds(*_hit_button->item(), &bounds);
+        _hit_button->item()->status = kActive;
         if (bounds.contains(where)) {
-            handle_button(*_hit_button);
+            handle_button(*_hit_button->item());
         }
     }
 }
@@ -145,12 +189,12 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
-    for (auto& item : _data.items) {
-        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
-        if (button && button->status != kDimmed && button->key == key_code) {
+    for (auto& item : _items) {
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && button->item()->status != kDimmed && button->item()->key == key_code) {
             become_normal();
-            _state         = KEY_DOWN;
-            button->status = kIH_Hilite;
+            _state                 = KEY_DOWN;
+            button->item()->status = kIH_Hilite;
             sys.sound.select();
             _hit_button = button;
             _pressed    = key_code;
@@ -162,22 +206,23 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
     const int32_t key_code = event.key() + 1;
     if ((_state == KEY_DOWN) && (_pressed == key_code)) {
-        _state              = NORMAL;
-        _hit_button->status = kActive;
-        if (TabBoxButtonData* b = dynamic_cast<TabBoxButtonData*>(_hit_button)) {
-            b->on = true;
+        _state                      = NORMAL;
+        _hit_button->item()->status = kActive;
+        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
+            b->data.on = true;
         }
-        handle_button(*_hit_button);
+        handle_button(*_hit_button->item());
     }
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    for (auto& item : _data.items) {
-        ButtonData* button = dynamic_cast<ButtonData*>(item.get());
-        if (button && button->status != kDimmed && button->gamepad == event.button) {
+    for (auto& item : _items) {
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && button->item()->status != kDimmed &&
+            button->item()->gamepad == event.button) {
             become_normal();
-            _state         = GAMEPAD_DOWN;
-            button->status = kIH_Hilite;
+            _state                 = GAMEPAD_DOWN;
+            button->item()->status = kIH_Hilite;
             sys.sound.select();
             _hit_button = button;
             _pressed    = event.button;
@@ -188,12 +233,12 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
-        _state              = NORMAL;
-        _hit_button->status = kActive;
-        if (TabBoxButtonData* b = dynamic_cast<TabBoxButtonData*>(_hit_button)) {
-            b->on = true;
+        _state                      = NORMAL;
+        _hit_button->item()->status = kActive;
+        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
+            b->data.on = true;
         }
-        handle_button(*_hit_button);
+        handle_button(*_hit_button->item());
     }
 }
 
@@ -202,18 +247,18 @@ void InterfaceScreen::overlay() const {}
 void InterfaceScreen::adjust_interface() {}
 
 void InterfaceScreen::truncate(size_t size) {
-    if (size > _data.items.size()) {
+    if (size > _items.size()) {
         throw std::runtime_error("");
     }
-    _data.items.resize(size);
+    _items.resize(size);
 }
 
 void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items) {
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
     for (const auto& item : items) {
-        _data.items.emplace_back(item->copy());
-        _data.items.back()->bounds.offset(offset_x, offset_y);
+        item->accept(EmplaceBackVisitor{&_items});
+        _items.back()->item()->bounds.offset(offset_x, offset_y);
     }
 }
 
@@ -223,10 +268,27 @@ Point InterfaceScreen::offset() const {
     return bounds.origin();
 }
 
-size_t InterfaceScreen::size() const { return _data.items.size(); }
+size_t InterfaceScreen::size() const { return _items.size(); }
 
-const InterfaceItemData& InterfaceScreen::item(int i) const { return *_data.items[i]; }
+const InterfaceItemData& InterfaceScreen::item(int i) const { return *_items[i]->item(); }
 
-InterfaceItemData& InterfaceScreen::mutable_item(int i) { return *_data.items[i]; }
+InterfaceItemData& InterfaceScreen::mutable_item(int i) { return *_items[i]->item(); }
+
+BoxRectData*              BoxRect::item() { return &data; }
+const BoxRectData*        BoxRect::item() const { return &data; }
+TextRectData*             TextRect::item() { return &data; }
+const TextRectData*       TextRect::item() const { return &data; }
+PictureRectData*          PictureRect::item() { return &data; }
+const PictureRectData*    PictureRect::item() const { return &data; }
+PlainButtonData*          PlainButton::item() { return &data; }
+const PlainButtonData*    PlainButton::item() const { return &data; }
+CheckboxButtonData*       CheckboxButton::item() { return &data; }
+const CheckboxButtonData* CheckboxButton::item() const { return &data; }
+RadioButtonData*          RadioButton::item() { return &data; }
+const RadioButtonData*    RadioButton::item() const { return &data; }
+TabBoxButtonData*         TabBoxButton::item() { return &data; }
+const TabBoxButtonData*   TabBoxButton::item() const { return &data; }
+TabBoxData*               TabBox::item() { return &data; }
+const TabBoxData*         TabBox::item() const { return &data; }
 
 }  // namespace antares
