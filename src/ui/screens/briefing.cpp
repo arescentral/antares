@@ -74,14 +74,6 @@ static BoxRect data_item(const Widget& map_rect) {
     return BoxRect{std::move(r)};
 }
 
-static const Font& interface_font(InterfaceStyle style) {
-    if (style == InterfaceStyle::SMALL) {
-        return sys.fonts.small_button;
-    } else {
-        return sys.fonts.button;
-    }
-}
-
 static vector<inlinePictType> populate_inline_picts(
         Rect rect, pn::string_view text, InterfaceStyle style) {
     StyledText interface_text(interface_font(style));
