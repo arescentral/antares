@@ -119,9 +119,10 @@ struct TabBoxData : public InterfaceItemData {
     TabBoxData   copy() const;
     virtual void accept(const Visitor& visitor) const;
 
-    Hue            hue                   = Hue::GRAY;
-    InterfaceStyle style                 = InterfaceStyle::LARGE;
-    int16_t        top_right_border_size = 0;
+    Hue                           hue                   = Hue::GRAY;
+    InterfaceStyle                style                 = InterfaceStyle::LARGE;
+    int16_t                       top_right_border_size = 0;
+    std::vector<TabBoxButtonData> buttons;
 };
 
 class InterfaceItemData::Visitor {

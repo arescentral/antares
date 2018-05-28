@@ -174,7 +174,7 @@ static std::vector<std::unique_ptr<InterfaceItemData>> interface_items(path_valu
                 button.hue     = tab_box.hue;
                 button.style   = tab_box.style;
                 button.content = std::move(tab.content);
-                items.emplace_back(new TabBoxButtonData(std::move(button)));
+                tab_box.buttons.emplace_back(std::move(button));
                 button_bounds.left = button_bounds.right + 37;
             }
 
