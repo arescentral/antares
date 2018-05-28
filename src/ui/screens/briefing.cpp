@@ -64,7 +64,7 @@ static const int32_t kMissionDataBottomBuffer = 15;
 static const int32_t kMissionDataHBuffer      = 41;
 static const int32_t kMissionLineHJog         = 10;
 
-static BoxRect data_item(const InterfaceItem& map_rect) {
+static BoxRect data_item(const Widget& map_rect) {
     Rect bounds(0, 0, 200, 200);
     bounds.center_in(map_rect.item()->bounds);
     BoxRectData r;

@@ -26,19 +26,9 @@
 #include "game/cursor.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
+#include "ui/widget.hpp"
 
 namespace antares {
-
-class InterfaceItem;
-class BoxRect;
-class TextRect;
-class PictureRect;
-class Button;
-class PlainButton;
-class CheckboxButton;
-class RadioButton;
-class TabBoxButton;
-class TabBox;
 
 class InterfaceScreen : public Card {
   public:
@@ -66,10 +56,10 @@ class InterfaceScreen : public Card {
     void truncate(size_t size);
     void extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items);
 
-    Point                offset() const;
-    size_t               size() const;
-    const InterfaceItem& item(int index) const;
-    InterfaceItem&       mutable_item(int index);
+    Point         offset() const;
+    size_t        size() const;
+    const Widget& item(int index) const;
+    Widget&       mutable_item(int index);
 
   private:
     enum State {
@@ -83,120 +73,12 @@ class InterfaceScreen : public Card {
     pn::value load_pn(pn::string_view id);
     void      become_normal();
 
-    const Rect                                  _bounds;
-    const bool                                  _full_screen;
-    std::vector<std::unique_ptr<InterfaceItem>> _items;
-    Button*                                     _hit_button;
-    uint32_t                                    _pressed;
-    Cursor                                      _cursor;
-};
-
-class InterfaceItem {
-  public:
-    virtual void                     draw(Point origin, InputMode mode) const = 0;
-    virtual Rect                     bounds() const                           = 0;
-    virtual InterfaceItemData*       item()                                   = 0;
-    virtual const InterfaceItemData* item() const                             = 0;
-};
-
-class BoxRect : public InterfaceItem {
-  public:
-    BoxRect(BoxRectData data) : data{std::move(data)} {}
-    BoxRectData data;
-
-    void               draw(Point origin, InputMode mode) const override;
-    Rect               bounds() const override;
-    BoxRectData*       item() override;
-    const BoxRectData* item() const override;
-};
-
-class TextRect : public InterfaceItem {
-  public:
-    TextRect(TextRectData data) : data{std::move(data)} {}
-    TextRectData data;
-
-    void                draw(Point origin, InputMode mode) const override;
-    Rect                bounds() const override;
-    TextRectData*       item() override;
-    const TextRectData* item() const override;
-};
-
-class PictureRect : public InterfaceItem {
-  public:
-    PictureRect(PictureRectData data) : data{std::move(data)} {}
-    PictureRectData data;
-    Texture         texture;
-
-    void                   draw(Point origin, InputMode mode) const override;
-    Rect                   bounds() const override;
-    PictureRectData*       item() override;
-    const PictureRectData* item() const override;
-};
-
-class Button : public InterfaceItem {
-  public:
-    ButtonState state = ButtonState::ENABLED;
-
-    ButtonData*       item() override       = 0;
-    const ButtonData* item() const override = 0;
-};
-
-class PlainButton : public Button {
-  public:
-    PlainButton(PlainButtonData data) : data{std::move(data)} {}
-    PlainButtonData data;
-
-    void                   draw(Point origin, InputMode mode) const override;
-    Rect                   bounds() const override;
-    PlainButtonData*       item() override;
-    const PlainButtonData* item() const override;
-};
-
-class CheckboxButton : public Button {
-  public:
-    CheckboxButton(CheckboxButtonData data) : data{std::move(data)} {}
-    CheckboxButtonData data;
-    bool               on = false;
-
-    void                      draw(Point origin, InputMode mode) const override;
-    Rect                      bounds() const override;
-    CheckboxButtonData*       item() override;
-    const CheckboxButtonData* item() const override;
-};
-
-class RadioButton : public Button {
-  public:
-    RadioButton(RadioButtonData data) : data{std::move(data)} {}
-    RadioButtonData data;
-    bool            on = false;
-
-    void                   draw(Point origin, InputMode mode) const override;
-    Rect                   bounds() const override;
-    RadioButtonData*       item() override;
-    const RadioButtonData* item() const override;
-};
-
-class TabBoxButton : public Button {
-  public:
-    TabBoxButton(TabBoxButtonData data) : data{std::move(data)} {}
-    TabBoxButtonData data;
-    bool             on = false;
-
-    void                    draw(Point origin, InputMode mode) const override;
-    Rect                    bounds() const override;
-    TabBoxButtonData*       item() override;
-    const TabBoxButtonData* item() const override;
-};
-
-class TabBox : public InterfaceItem {
-  public:
-    TabBox(TabBoxData data) : data{std::move(data)} {}
-    TabBoxData data;
-
-    void              draw(Point origin, InputMode mode) const override;
-    Rect              bounds() const override;
-    TabBoxData*       item() override;
-    const TabBoxData* item() const override;
+    const Rect                           _bounds;
+    const bool                           _full_screen;
+    std::vector<std::unique_ptr<Widget>> _items;
+    Button*                              _hit_button;
+    uint32_t                             _pressed;
+    Cursor                               _cursor;
 };
 
 }  // namespace antares

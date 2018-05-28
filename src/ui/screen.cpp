@@ -40,8 +40,8 @@ namespace antares {
 namespace {
 
 struct EmplaceBackVisitor : InterfaceItemData::Visitor {
-    std::vector<std::unique_ptr<InterfaceItem>>* vec;
-    EmplaceBackVisitor(std::vector<std::unique_ptr<InterfaceItem>>* v) : vec{v} {}
+    std::vector<std::unique_ptr<Widget>>* vec;
+    EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
 
     void visit_box_rect(const BoxRectData& data) const override {
         vec->emplace_back(new BoxRect{data.copy()});
@@ -267,54 +267,8 @@ Point InterfaceScreen::offset() const {
 
 size_t InterfaceScreen::size() const { return _items.size(); }
 
-const InterfaceItem& InterfaceScreen::item(int i) const { return *_items[i]; }
+const Widget& InterfaceScreen::item(int i) const { return *_items[i]; }
 
-InterfaceItem& InterfaceScreen::mutable_item(int i) { return *_items[i]; }
-
-void               BoxRect::draw(Point offset, InputMode) const { draw_box_rect(offset, data); }
-Rect               BoxRect::bounds() const { return box_rect_bounds(data); }
-BoxRectData*       BoxRect::item() { return &data; }
-const BoxRectData* BoxRect::item() const { return &data; }
-
-void                TextRect::draw(Point offset, InputMode) const { draw_text_rect(offset, data); }
-Rect                TextRect::bounds() const { return text_rect_bounds(data); }
-TextRectData*       TextRect::item() { return &data; }
-const TextRectData* TextRect::item() const { return &data; }
-
-void PictureRect::draw(Point offset, InputMode) const { draw_picture_rect(offset, data, texture); }
-Rect PictureRect::bounds() const { return picture_rect_bounds(data); }
-PictureRectData*       PictureRect::item() { return &data; }
-const PictureRectData* PictureRect::item() const { return &data; }
-
-void PlainButton::draw(Point offset, InputMode mode) const {
-    draw_button(offset, mode, data, state);
-}
-Rect                   PlainButton::bounds() const { return plain_button_bounds(data); }
-PlainButtonData*       PlainButton::item() { return &data; }
-const PlainButtonData* PlainButton::item() const { return &data; }
-
-void CheckboxButton::draw(Point offset, InputMode) const {
-    draw_checkbox(offset, data, state, on);
-}
-Rect                      CheckboxButton::bounds() const { return checkbox_button_bounds(data); }
-CheckboxButtonData*       CheckboxButton::item() { return &data; }
-const CheckboxButtonData* CheckboxButton::item() const { return &data; }
-
-void                   RadioButton::draw(Point offset, InputMode) const {}
-Rect                   RadioButton::bounds() const { return radio_button_bounds(data); }
-RadioButtonData*       RadioButton::item() { return &data; }
-const RadioButtonData* RadioButton::item() const { return &data; }
-
-void TabBoxButton::draw(Point offset, InputMode) const {
-    draw_tab_box_button(offset, data, state, on);
-}
-Rect                    TabBoxButton::bounds() const { return tab_box_button_bounds(data); }
-TabBoxButtonData*       TabBoxButton::item() { return &data; }
-const TabBoxButtonData* TabBoxButton::item() const { return &data; }
-
-void              TabBox::draw(Point offset, InputMode) const { draw_tab_box(offset, data); }
-Rect              TabBox::bounds() const { return tab_box_bounds(data); }
-TabBoxData*       TabBox::item() { return &data; }
-const TabBoxData* TabBox::item() const { return &data; }
+Widget& InterfaceScreen::mutable_item(int i) { return *_items[i]; }
 
 }  // namespace antares

@@ -167,7 +167,7 @@ void SelectLevelScreen::overlay() const { draw_level_name(); }
 void SelectLevelScreen::draw_level_name() const {
     const pn::string_view chapter_name = (*_level)->name;
 
-    const InterfaceItem& i = item(NAME);
+    const Widget& i = item(NAME);
 
     RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);
