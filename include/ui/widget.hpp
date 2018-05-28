@@ -29,11 +29,13 @@ namespace antares {
 
 class Widget {
   public:
-    virtual void                     draw(Point origin, InputMode mode) const = 0;
-    virtual Rect                     inner_bounds() const                     = 0;
-    virtual Rect                     outer_bounds() const                     = 0;
-    virtual InterfaceItemData*       item()                                   = 0;
-    virtual const InterfaceItemData* item() const                             = 0;
+    virtual void draw(Point origin, InputMode mode) const = 0;
+    virtual Rect inner_bounds() const                     = 0;
+    virtual Rect outer_bounds() const                     = 0;
+
+  protected:
+    virtual InterfaceItemData*       item()       = 0;
+    virtual const InterfaceItemData* item() const = 0;
 };
 
 class BoxRect : public Widget {
@@ -41,9 +43,11 @@ class BoxRect : public Widget {
     BoxRect(BoxRectData data) : data{std::move(data)} {}
     BoxRectData data;
 
-    void               draw(Point origin, InputMode mode) const override;
-    Rect               inner_bounds() const override;
-    Rect               outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     BoxRectData*       item() override;
     const BoxRectData* item() const override;
 };
@@ -56,9 +60,11 @@ class TextRect : public Widget {
     Hue            hue() const { return item()->hue; }
     InterfaceStyle style() const { return item()->style; }
 
-    void                draw(Point origin, InputMode mode) const override;
-    Rect                inner_bounds() const override;
-    Rect                outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     TextRectData*       item() override;
     const TextRectData* item() const override;
 };
@@ -69,9 +75,11 @@ class PictureRect : public Widget {
     PictureRectData data;
     Texture         texture;
 
-    void                   draw(Point origin, InputMode mode) const override;
-    Rect                   inner_bounds() const override;
-    Rect                   outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     PictureRectData*       item() override;
     const PictureRectData* item() const override;
 };
@@ -88,6 +96,7 @@ class Button : public Widget {
     int16_t&       key() { return item()->key; }
     Hue&           hue() { return item()->hue; }
 
+  protected:
     ButtonData*       item() override       = 0;
     const ButtonData* item() const override = 0;
 };
@@ -97,9 +106,11 @@ class PlainButton : public Button {
     PlainButton(PlainButtonData data) : data{std::move(data)} {}
     PlainButtonData data;
 
-    void                   draw(Point origin, InputMode mode) const override;
-    Rect                   inner_bounds() const override;
-    Rect                   outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     PlainButtonData*       item() override;
     const PlainButtonData* item() const override;
 };
@@ -110,9 +121,11 @@ class CheckboxButton : public Button {
     CheckboxButtonData data;
     bool               on = false;
 
-    void                      draw(Point origin, InputMode mode) const override;
-    Rect                      inner_bounds() const override;
-    Rect                      outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     CheckboxButtonData*       item() override;
     const CheckboxButtonData* item() const override;
 };
@@ -123,9 +136,11 @@ class RadioButton : public Button {
     RadioButtonData data;
     bool            on = false;
 
-    void                   draw(Point origin, InputMode mode) const override;
-    Rect                   inner_bounds() const override;
-    Rect                   outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     RadioButtonData*       item() override;
     const RadioButtonData* item() const override;
 };
@@ -140,9 +155,11 @@ class TabBoxButton : public Button {
         return item()->content;
     }
 
-    void                    draw(Point origin, InputMode mode) const override;
-    Rect                    inner_bounds() const override;
-    Rect                    outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     TabBoxButtonData*       item() override;
     const TabBoxButtonData* item() const override;
 };
@@ -152,9 +169,11 @@ class TabBox : public Widget {
     TabBox(TabBoxData data) : data{std::move(data)} {}
     TabBoxData data;
 
-    void              draw(Point origin, InputMode mode) const override;
-    Rect              inner_bounds() const override;
-    Rect              outer_bounds() const override;
+    void draw(Point origin, InputMode mode) const override;
+    Rect inner_bounds() const override;
+    Rect outer_bounds() const override;
+
+  protected:
     TabBoxData*       item() override;
     const TabBoxData* item() const override;
 };

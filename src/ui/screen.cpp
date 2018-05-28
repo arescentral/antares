@@ -41,39 +41,58 @@ namespace {
 
 struct EmplaceBackVisitor : InterfaceItemData::Visitor {
     std::vector<std::unique_ptr<Widget>>* vec;
-    EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
+    Point                                 offset;
+
+    EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v, Point offset)
+            : vec{v}, offset{offset} {}
 
     void visit_box_rect(const BoxRectData& data) const override {
-        vec->emplace_back(new BoxRect{data.copy()});
+        auto copy = data.copy();
+        copy.bounds.offset(offset.h, offset.v);
+        vec->emplace_back(new BoxRect{std::move(copy)});
     }
 
     void visit_text_rect(const TextRectData& data) const override {
-        vec->emplace_back(new TextRect{data.copy()});
+        auto copy = data.copy();
+        copy.bounds.offset(offset.h, offset.v);
+        vec->emplace_back(new TextRect{std::move(copy)});
     }
 
     void visit_picture_rect(const PictureRectData& data) const override {
-        PictureRect picture{data.copy()};
+        auto copy = data.copy();
+        copy.bounds.offset(offset.h, offset.v);
+        PictureRect picture{std::move(copy)};
         picture.texture = Resource::texture(data.picture);
         vec->emplace_back(new PictureRect{std::move(picture)});
     }
 
     void visit_plain_button(const PlainButtonData& data) const override {
-        vec->emplace_back(new PlainButton{data.copy()});
+        auto copy = data.copy();
+        copy.bounds.offset(offset.h, offset.v);
+        vec->emplace_back(new PlainButton{std::move(copy)});
     }
 
     void visit_radio_button(const RadioButtonData& data) const override {
-        vec->emplace_back(new RadioButton{data.copy()});
+        auto copy = data.copy();
+        copy.bounds.offset(offset.h, offset.v);
+        vec->emplace_back(new RadioButton{std::move(copy)});
     }
 
     void visit_checkbox_button(const CheckboxButtonData& data) const override {
-        vec->emplace_back(new CheckboxButton{data.copy()});
+        auto copy = data.copy();
+        copy.bounds.offset(offset.h, offset.v);
+        vec->emplace_back(new CheckboxButton{std::move(copy)});
     }
 
     void visit_tab_box(const TabBoxData& data) const override {
+        auto copy = data.copy();
+        copy.bounds.offset(offset.h, offset.v);
         for (const auto& button : data.buttons) {
-            vec->emplace_back(new TabBoxButton{button.copy()});
+            auto copy = button.copy();
+            copy.bounds.offset(offset.h, offset.v);
+            vec->emplace_back(new TabBoxButton{std::move(copy)});
         }
-        vec->emplace_back(new TabBox{data.copy()});
+        vec->emplace_back(new TabBox{std::move(copy)});
     }
 
     void visit_tab_box_button(const TabBoxButtonData& data) const override {}
@@ -87,8 +106,7 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds)
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
         for (auto& item : data.items) {
-            item->bounds.offset(bounds.left, bounds.top);
-            item->accept(EmplaceBackVisitor{&_items});
+            item->accept(EmplaceBackVisitor{&_items, bounds.origin()});
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
@@ -255,8 +273,7 @@ void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
     for (const auto& item : items) {
-        item->accept(EmplaceBackVisitor{&_items});
-        _items.back()->item()->bounds.offset(offset_x, offset_y);
+        item->accept(EmplaceBackVisitor{&_items, {offset_x, offset_y}});
     }
 }
 
