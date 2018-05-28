@@ -191,7 +191,8 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
 
 InterfaceData interface(path_value x) {
     return required_struct<InterfaceData>(
-            x, {{"items",
+            x, {{"fullscreen", {&InterfaceData::fullscreen, required_bool}},
+                {"items",
                  {&InterfaceData::items,
                   required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
 }

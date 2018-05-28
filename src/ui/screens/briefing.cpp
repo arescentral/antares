@@ -190,7 +190,7 @@ static void update_mission_brief_point(
 }
 
 BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
-        : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
+        : InterfaceScreen("briefing", {0, 0, 640, 480}),
           _level(level),
           _cancelled(cancelled),
           _briefing_point(_level.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),

@@ -81,10 +81,11 @@ struct EmplaceBackVisitor : InterfaceItemData::Visitor {
 
 }  // namespace
 
-InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen)
-        : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
+InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds)
+        : _state(NORMAL), _bounds(bounds), _hit_button(nullptr) {
     try {
         InterfaceData data = Resource::interface(name);
+        _full_screen       = data.fullscreen;
         for (auto& item : data.items) {
             item->bounds.offset(bounds.left, bounds.top);
             item->accept(EmplaceBackVisitor{&_items});

@@ -64,7 +64,7 @@ void OptionsScreen::become_front() {
 }
 
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
-        : InterfaceScreen("options/sound", {0, 0, 640, 480}, true), _state(state) {}
+        : InterfaceScreen("options/sound", {0, 0, 640, 480}), _state(state) {}
 
 SoundControlScreen::~SoundControlScreen() {}
 
@@ -186,7 +186,7 @@ static size_t get_tab_num(size_t key) {
 }
 
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
-        : InterfaceScreen("options/keys", {0, 0, 640, 480}, true),
+        : InterfaceScreen("options/keys", {0, 0, 640, 480}),
           _state(state),
           _key_start(size()),
           _selected_key(-1),

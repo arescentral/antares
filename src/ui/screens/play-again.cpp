@@ -49,7 +49,7 @@ const char* interface_id(bool allow_resume, bool allow_skip) {
 }  // namespace
 
 PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed)
-        : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}, false),
+        : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}),
           _state(ASKING),
           _button_pressed(button_pressed) {}
 

@@ -45,7 +45,7 @@ const int  kTitleTextScrollWidth = 450;
 }  // namespace
 
 MainScreen::MainScreen()
-        : InterfaceScreen("main", {0, 0, 640, 480}, true),
+        : InterfaceScreen("main", {0, 0, 640, 480}),
           _state(NORMAL),
           _replays(Resource::list_replays()) {}
 

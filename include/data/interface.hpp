@@ -40,6 +40,7 @@ struct interfaceLabelType {
 };
 
 struct InterfaceData {
+    bool                                            fullscreen = false;
     std::vector<std::unique_ptr<InterfaceItemData>> items;
 };
 

@@ -32,7 +32,7 @@ namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen);
+    InterfaceScreen(pn::string_view name, const Rect& bounds);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -74,7 +74,7 @@ class InterfaceScreen : public Card {
     void      become_normal();
 
     const Rect                           _bounds;
-    const bool                           _full_screen;
+    bool                                 _full_screen = false;
     std::vector<std::unique_ptr<Widget>> _items;
     Button*                              _hit_button;
     uint32_t                             _pressed;

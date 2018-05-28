@@ -35,7 +35,7 @@ static const Hue   kLoadingScreenColor = Hue::PALE_GREEN;
 static const ticks kTypingDelay        = kMinorTick;
 
 LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
-        : InterfaceScreen("loading", {0, 0, 640, 480}, true),
+        : InterfaceScreen("loading", {0, 0, 640, 480}),
           _state(TYPING),
           _level(level),
           _cancelled(cancelled),
