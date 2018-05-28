@@ -30,7 +30,8 @@ namespace antares {
 class Widget {
   public:
     virtual void                     draw(Point origin, InputMode mode) const = 0;
-    virtual Rect                     bounds() const                           = 0;
+    virtual Rect                     inner_bounds() const                     = 0;
+    virtual Rect                     outer_bounds() const                     = 0;
     virtual InterfaceItemData*       item()                                   = 0;
     virtual const InterfaceItemData* item() const                             = 0;
 };
@@ -41,7 +42,8 @@ class BoxRect : public Widget {
     BoxRectData data;
 
     void               draw(Point origin, InputMode mode) const override;
-    Rect               bounds() const override;
+    Rect               inner_bounds() const override;
+    Rect               outer_bounds() const override;
     BoxRectData*       item() override;
     const BoxRectData* item() const override;
 };
@@ -52,7 +54,8 @@ class TextRect : public Widget {
     TextRectData data;
 
     void                draw(Point origin, InputMode mode) const override;
-    Rect                bounds() const override;
+    Rect                inner_bounds() const override;
+    Rect                outer_bounds() const override;
     TextRectData*       item() override;
     const TextRectData* item() const override;
 };
@@ -64,7 +67,8 @@ class PictureRect : public Widget {
     Texture         texture;
 
     void                   draw(Point origin, InputMode mode) const override;
-    Rect                   bounds() const override;
+    Rect                   inner_bounds() const override;
+    Rect                   outer_bounds() const override;
     PictureRectData*       item() override;
     const PictureRectData* item() const override;
 };
@@ -83,7 +87,8 @@ class PlainButton : public Button {
     PlainButtonData data;
 
     void                   draw(Point origin, InputMode mode) const override;
-    Rect                   bounds() const override;
+    Rect                   inner_bounds() const override;
+    Rect                   outer_bounds() const override;
     PlainButtonData*       item() override;
     const PlainButtonData* item() const override;
 };
@@ -95,7 +100,8 @@ class CheckboxButton : public Button {
     bool               on = false;
 
     void                      draw(Point origin, InputMode mode) const override;
-    Rect                      bounds() const override;
+    Rect                      inner_bounds() const override;
+    Rect                      outer_bounds() const override;
     CheckboxButtonData*       item() override;
     const CheckboxButtonData* item() const override;
 };
@@ -107,7 +113,8 @@ class RadioButton : public Button {
     bool            on = false;
 
     void                   draw(Point origin, InputMode mode) const override;
-    Rect                   bounds() const override;
+    Rect                   inner_bounds() const override;
+    Rect                   outer_bounds() const override;
     RadioButtonData*       item() override;
     const RadioButtonData* item() const override;
 };
@@ -119,7 +126,8 @@ class TabBoxButton : public Button {
     bool             on = false;
 
     void                    draw(Point origin, InputMode mode) const override;
-    Rect                    bounds() const override;
+    Rect                    inner_bounds() const override;
+    Rect                    outer_bounds() const override;
     TabBoxButtonData*       item() override;
     const TabBoxButtonData* item() const override;
 };
@@ -130,7 +138,8 @@ class TabBox : public Widget {
     TabBoxData data;
 
     void              draw(Point origin, InputMode mode) const override;
-    Rect              bounds() const override;
+    Rect              inner_bounds() const override;
+    Rect              outer_bounds() const override;
     TabBoxData*       item() override;
     const TabBoxData* item() const override;
 };

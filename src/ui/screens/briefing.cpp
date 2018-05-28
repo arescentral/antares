@@ -66,7 +66,7 @@ static const int32_t kMissionLineHJog         = 10;
 
 static BoxRect data_item(const Widget& map_rect) {
     Rect bounds(0, 0, 200, 200);
-    bounds.center_in(map_rect.item()->bounds);
+    bounds.center_in(map_rect.inner_bounds());
     BoxRectData r;
     r.bounds = bounds;
     r.hue    = Hue::GOLD;
@@ -149,7 +149,7 @@ static void update_mission_brief_point(
         hiliteBounds.right++;
         hiliteBounds.bottom++;
         highlight_rect = hiliteBounds;
-        Rect newRect   = dataItem->bounds();
+        Rect newRect   = dataItem->outer_bounds();
         lines.clear();
         if (dataItem->data.bounds.right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
@@ -334,7 +334,7 @@ void BriefingScreen::build_star_map() {
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
-    _bounds.center_in(item(MAP_RECT).item()->bounds);
+    _bounds.center_in(item(MAP_RECT).inner_bounds());
 
     if (_level.starmap.has_value()) {
         _star_rect = *_level.starmap;
@@ -358,7 +358,7 @@ void BriefingScreen::build_brief_point() {
     if (_briefing_point >= 0) {
         coordPointType corner;
         int32_t        scale;
-        Rect           map_rect = item(MAP_RECT).item()->bounds;
+        Rect           map_rect = item(MAP_RECT).inner_bounds();
         GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
@@ -436,7 +436,7 @@ void BriefingScreen::draw_brief_point() const {
         }
     }
 
-    Rect bounds = _data_item.bounds();
+    Rect bounds = _data_item.outer_bounds();
     bounds.offset(off.h, off.v);
     Rects().fill(bounds, RgbColor::black());
     _data_item.draw(off, KEYBOARD_MOUSE);

@@ -137,7 +137,7 @@ void SoundControlScreen::handle_button(Button& button) {
 
 void SoundControlScreen::overlay() const {
     const int volume = sys.prefs->volume();
-    Rect      bounds = item(VOLUME_BOX).item()->bounds;
+    Rect      bounds = item(VOLUME_BOX).inner_bounds();
     Point     off    = offset();
     bounds.offset(off.h, off.v);
 
@@ -317,7 +317,7 @@ void KeyControlScreen::overlay() const {
                 _keys.at(key_one), _tabs.at(get_tab_num(key_two)), _keys.at(key_two));
 
         const TextRect& box    = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
-        Rect            bounds = box.item()->bounds;
+        Rect            bounds = box.inner_bounds();
         Point           off    = offset();
         bounds.offset(off.h, off.v);
         draw_text_in_rect(bounds, text, box.item()->style, box.item()->hue);

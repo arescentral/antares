@@ -121,9 +121,9 @@ void InterfaceScreen::draw() const {
         copy_area = _bounds;
     } else {
         next()->draw();
-        copy_area = _items[0]->bounds();
+        copy_area = _items[0]->outer_bounds();
         for (const auto& item : _items) {
-            copy_area.enlarge_to(item->bounds());
+            copy_area.enlarge_to(item->outer_bounds());
         }
     }
     copy_area.offset(off.h, off.v);
@@ -148,7 +148,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
         return;
     }
     for (auto& item : _items) {
-        Rect    bounds = item->bounds();
+        Rect    bounds = item->outer_bounds();
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && (button->state != ButtonState::DISABLED) && (bounds.contains(where))) {
             become_normal();
@@ -171,7 +171,7 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
     }
     if (_state == MOUSE_DOWN) {
         _state             = NORMAL;
-        Rect bounds        = _hit_button->bounds();
+        Rect bounds        = _hit_button->outer_bounds();
         _hit_button->state = ButtonState::ENABLED;
         if (bounds.contains(where)) {
             handle_button(*_hit_button);

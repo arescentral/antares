@@ -371,7 +371,9 @@ void BoxRect::draw(Point offset, InputMode) const {
     }
 }
 
-Rect BoxRect::bounds() const {
+Rect BoxRect::inner_bounds() const { return data.bounds; }
+
+Rect BoxRect::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= h_border(data);
     bounds.right += h_border(data);
@@ -394,7 +396,9 @@ void TextRect::draw(Point offset, InputMode) const {
     draw_text_in_rect(bounds, data.text, data.style, data.hue);
 }
 
-Rect TextRect::bounds() const {
+Rect TextRect::inner_bounds() const { return data.bounds; }
+
+Rect TextRect::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= h_border(data);
     bounds.right += h_border(data);
@@ -412,7 +416,9 @@ void PictureRect::draw(Point offset, InputMode) const {
     texture.draw(bounds.left, bounds.top);
 }
 
-Rect PictureRect::bounds() const {
+Rect PictureRect::inner_bounds() const { return data.bounds; }
+
+Rect PictureRect::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= kInterfaceSmallHBorder;
     bounds.right += kInterfaceSmallHBorder;
@@ -580,7 +586,9 @@ void PlainButton::draw(Point offset, InputMode mode) const {
     }
 }
 
-Rect PlainButton::bounds() const {
+Rect PlainButton::inner_bounds() const { return data.bounds; }
+
+Rect PlainButton::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= h_border(data);
     bounds.right += h_border(data);
@@ -702,7 +710,9 @@ void CheckboxButton::draw(Point offset, InputMode) const {
     DrawInterfaceString(Point(swidth, sheight), s, data.style, color);
 }
 
-Rect CheckboxButton::bounds() const {
+Rect CheckboxButton::inner_bounds() const { return data.bounds; }
+
+Rect CheckboxButton::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= bounds.bottom - bounds.top + 2 * kInterfaceVEdgeHeight +
                    2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(data) +
@@ -845,7 +855,9 @@ void RadioButton::draw(Point offset, InputMode) const {
     */
 }
 
-Rect RadioButton::bounds() const {
+Rect RadioButton::inner_bounds() const { return data.bounds; }
+
+Rect RadioButton::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= bounds.bottom - bounds.top + 2 * kInterfaceVEdgeHeight +
                    2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(data) +
@@ -1066,7 +1078,9 @@ void TabBoxButton::draw(Point offset, InputMode) const {
     }
 }
 
-Rect TabBoxButton::bounds() const {
+Rect TabBoxButton::inner_bounds() const { return data.bounds; }
+
+Rect TabBoxButton::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= h_border(data) + 5;
     bounds.right += h_border(data) + 5;
@@ -1154,7 +1168,9 @@ void TabBox::draw(Point offset, InputMode) const {
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
-Rect TabBox::bounds() const {
+Rect TabBox::inner_bounds() const { return data.bounds; }
+
+Rect TabBox::outer_bounds() const {
     Rect bounds = initialize_bounds(data);
     bounds.left -= h_border(data);
     bounds.right += h_border(data);

@@ -221,7 +221,7 @@ BoxRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
     text_bounds.center_in(viewport());
 
     BoxRect data_item = interface_item(text_bounds);
-    _pix_bounds       = data_item.bounds();
+    _pix_bounds       = data_item.outer_bounds();
     _message_bounds   = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
     return data_item;

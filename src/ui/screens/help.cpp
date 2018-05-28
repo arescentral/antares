@@ -44,7 +44,7 @@ HelpScreen::HelpScreen()
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(item(BOX).item()->bounds.width(), 0, 0);
+    _text.wrap_to(item(BOX).inner_bounds().width(), 0, 0);
 }
 
 HelpScreen::~HelpScreen() {}
@@ -68,7 +68,7 @@ void HelpScreen::handle_button(Button& button) {
 }
 
 void HelpScreen::overlay() const {
-    Rect  bounds = item(BOX).item()->bounds;
+    Rect  bounds = item(BOX).inner_bounds();
     Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);
