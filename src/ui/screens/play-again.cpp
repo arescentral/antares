@@ -69,10 +69,10 @@ void PlayAgainScreen::adjust_interface() {
 }
 
 void PlayAgainScreen::handle_button(Button& button) {
-    switch (button.item()->id) {
+    switch (button.id()) {
         case RESTART:
             _state           = FADING_OUT;
-            *_button_pressed = static_cast<Item>(button.item()->id);
+            *_button_pressed = static_cast<Item>(button.id());
             stack()->push(
                     new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
             break;
@@ -80,13 +80,12 @@ void PlayAgainScreen::handle_button(Button& button) {
         case QUIT:
         case RESUME:
         case SKIP:
-            *_button_pressed = static_cast<Item>(button.item()->id);
+            *_button_pressed = static_cast<Item>(button.id());
             stack()->pop(this);
             break;
 
         default:
-            throw std::runtime_error(
-                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id()).c_str());
     }
 }
 

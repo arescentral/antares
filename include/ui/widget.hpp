@@ -53,6 +53,9 @@ class TextRect : public Widget {
     TextRect(TextRectData data) : data{std::move(data)} {}
     TextRectData data;
 
+    Hue            hue() const { return item()->hue; }
+    InterfaceStyle style() const { return item()->style; }
+
     void                draw(Point origin, InputMode mode) const override;
     Rect                inner_bounds() const override;
     Rect                outer_bounds() const override;
@@ -76,6 +79,14 @@ class PictureRect : public Widget {
 class Button : public Widget {
   public:
     ButtonState state = ButtonState::ENABLED;
+
+    int64_t        id() const { return item()->id; }
+    int16_t        key() const { return item()->key; }
+    int16_t        gamepad() const { return item()->gamepad; }
+    Hue            hue() const { return item()->hue; }
+    InterfaceStyle style() const { return item()->style; }
+    int16_t&       key() { return item()->key; }
+    Hue&           hue() { return item()->hue; }
 
     ButtonData*       item() override       = 0;
     const ButtonData* item() const override = 0;
@@ -124,6 +135,10 @@ class TabBoxButton : public Button {
     TabBoxButton(TabBoxButtonData data) : data{std::move(data)} {}
     TabBoxButtonData data;
     bool             on = false;
+
+    const std::vector<std::unique_ptr<InterfaceItemData>>& content() const {
+        return item()->content;
+    }
 
     void                    draw(Point origin, InputMode mode) const override;
     Rect                    inner_bounds() const override;

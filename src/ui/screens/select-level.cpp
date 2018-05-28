@@ -127,7 +127,7 @@ void SelectLevelScreen::adjust_interface() {
 }
 
 void SelectLevelScreen::handle_button(Button& button) {
-    switch (button.item()->id) {
+    switch (button.id()) {
         case OK:
             _state      = FADING_OUT;
             *_cancelled = false;
@@ -157,8 +157,7 @@ void SelectLevelScreen::handle_button(Button& button) {
             break;
 
         default:
-            throw std::runtime_error(
-                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id()).c_str());
     }
 }
 

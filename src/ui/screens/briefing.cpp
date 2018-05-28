@@ -304,7 +304,7 @@ void BriefingScreen::adjust_interface() {
 }
 
 void BriefingScreen::handle_button(Button& button) {
-    switch (button.item()->id) {
+    switch (button.id()) {
         case DONE: stack()->pop(this); break;
 
         case PREVIOUS:
@@ -324,8 +324,7 @@ void BriefingScreen::handle_button(Button& button) {
             break;
 
         default:
-            throw std::runtime_error(
-                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id()).c_str());
     }
 }
 

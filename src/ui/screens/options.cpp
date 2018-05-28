@@ -93,7 +93,7 @@ void SoundControlScreen::adjust_interface() {
 }
 
 void SoundControlScreen::handle_button(Button& button) {
-    switch (button.item()->id) {
+    switch (button.id()) {
         case GAME_MUSIC:
             sys.prefs->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on);
             adjust_interface();
@@ -125,13 +125,12 @@ void SoundControlScreen::handle_button(Button& button) {
         case DONE:
         case CANCEL:
         case KEY_CONTROL:
-            *_state = button_state(button.item()->id);
+            *_state = button_state(button.id());
             stack()->pop(this);
             break;
 
         default:
-            throw std::runtime_error(
-                    pn::format("Got unknown button {0}.", button.item()->id).c_str());
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id()).c_str());
     }
 }
 
@@ -242,19 +241,19 @@ void KeyControlScreen::fire_timer() {
 
 void KeyControlScreen::adjust_interface() {
     for (size_t i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        dynamic_cast<TabBoxButton&>(mutable_item(i)).item()->hue = Hue::AQUA;
+        dynamic_cast<TabBoxButton&>(mutable_item(i)).hue() = Hue::AQUA;
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
-        size_t key                                         = kKeyIndices[_tab] + i - _key_start;
-        int    key_num                                     = sys.prefs->key(key);
-        dynamic_cast<Button&>(mutable_item(i)).item()->key = key_num;
+        size_t key                                   = kKeyIndices[_tab] + i - _key_start;
+        int    key_num                               = sys.prefs->key(key);
+        dynamic_cast<Button&>(mutable_item(i)).key() = key_num;
         if (key == _selected_key) {
             dynamic_cast<Button&>(mutable_item(i)).state = ButtonState::ACTIVE;
         } else {
             dynamic_cast<Button&>(mutable_item(i)).state = ButtonState::ENABLED;
         }
-        dynamic_cast<Button&>(mutable_item(i)).item()->hue = Hue::AQUA;
+        dynamic_cast<Button&>(mutable_item(i)).hue() = Hue::AQUA;
     }
 
     if (_flashed_on) {
@@ -275,11 +274,11 @@ void KeyControlScreen::adjust_interface() {
 }
 
 void KeyControlScreen::handle_button(Button& button) {
-    switch (button.item()->id) {
+    switch (button.id()) {
         case DONE:
         case CANCEL:
         case SOUND_CONTROL:
-            *_state = button_state(button.item()->id);
+            *_state = button_state(button.id());
             stack()->pop(this);
             break;
 
@@ -288,18 +287,18 @@ void KeyControlScreen::handle_button(Button& button) {
         case SHORTCUT_TAB:
         case UTILITY_TAB:
         case HOT_KEY_TAB:
-            set_tab(button_tab(button.item()->id));
+            set_tab(button_tab(button.id()));
             adjust_interface();
             break;
 
         default: {
-            size_t key = kKeyIndices[_tab] + button.item()->id - _key_start;
+            size_t key = kKeyIndices[_tab] + button.id() - _key_start;
             if ((kKeyIndices[_tab] <= key) && (key < kKeyIndices[_tab + 1])) {
                 _selected_key = key;
                 adjust_interface();
             } else {
                 throw std::runtime_error(
-                        pn::format("Got unknown button {0}.", button.item()->id).c_str());
+                        pn::format("Got unknown button {0}.", button.id()).c_str());
             }
             break;
         }
@@ -320,7 +319,7 @@ void KeyControlScreen::overlay() const {
         Rect            bounds = box.inner_bounds();
         Point           off    = offset();
         bounds.offset(off.h, off.v);
-        draw_text_in_rect(bounds, text, box.item()->style, box.item()->hue);
+        draw_text_in_rect(bounds, text, box.style(), box.hue());
     }
 }
 
@@ -356,7 +355,7 @@ void KeyControlScreen::set_tab(Tab tab) {
         TabBoxButton& item = dynamic_cast<TabBoxButton&>(mutable_item(i));
         if (buttons[tab] == i) {
             item.on = true;
-            extend(item.item()->content);
+            extend(item.content());
         } else {
             item.on = false;
         }
@@ -389,10 +388,10 @@ void KeyControlScreen::update_conflicts() {
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
         Button& item = dynamic_cast<Button&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
-        item.item()->hue = Hue::GOLD;
+        item.hue()   = Hue::GOLD;
     } else {
-        Button& item     = dynamic_cast<Button&>(mutable_item(SHIP_TAB + get_tab_num(key)));
-        item.item()->hue = Hue::GOLD;
+        Button& item = dynamic_cast<Button&>(mutable_item(SHIP_TAB + get_tab_num(key)));
+        item.hue()   = Hue::GOLD;
     }
 }
 

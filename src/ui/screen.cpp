@@ -189,7 +189,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->state != ButtonState::DISABLED && button->item()->key == key_code) {
+        if (button && button->state != ButtonState::DISABLED && button->key() == key_code) {
             become_normal();
             _state        = KEY_DOWN;
             button->state = ButtonState::ACTIVE;
@@ -217,7 +217,7 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && button->state != ButtonState::DISABLED &&
-            button->item()->gamepad == event.button) {
+            button->gamepad() == event.button) {
             become_normal();
             _state        = GAMEPAD_DOWN;
             button->state = ButtonState::ACTIVE;
