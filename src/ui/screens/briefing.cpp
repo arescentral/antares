@@ -64,16 +64,6 @@ static const int32_t kMissionDataBottomBuffer = 15;
 static const int32_t kMissionDataHBuffer      = 41;
 static const int32_t kMissionLineHJog         = 10;
 
-static BoxRect data_item(const Widget& map_rect) {
-    Rect bounds(0, 0, 200, 200);
-    bounds.center_in(map_rect.inner_bounds());
-    BoxRectData r;
-    r.bounds = bounds;
-    r.hue    = Hue::GOLD;
-    r.style  = InterfaceStyle::LARGE;
-    return BoxRect{std::move(r)};
-}
-
 static vector<inlinePictType> populate_inline_picts(
         Rect rect, pn::string_view text, InterfaceStyle style) {
     StyledText interface_text(interface_font(style));
@@ -90,68 +80,73 @@ static vector<inlinePictType> populate_inline_picts(
     return result;
 }
 
-static void update_mission_brief_point(
-        BoxRect* dataItem, int32_t whichBriefPoint, const Level& level,
-        const coordPointType& corner, int32_t scale, const Rect& bounds,
-        vector<inlinePictType>* inlinePict, Rect* highlight_rect,
+static BoxRect update_mission_brief_point(
+        int32_t whichBriefPoint, const Level& level, const coordPointType& corner, int32_t scale,
+        const Rect& bounds, vector<inlinePictType>* inlinePict, Rect* highlight_rect,
         vector<pair<Point, Point>>* lines, pn::string_ref text) {
     if (whichBriefPoint < 0) {
         // No longer handled here.
-        return;
+        return BoxRect{{}};
     }
 
-    inlinePict->clear();
-    lines->clear();
-    *highlight_rect = Rect{};
+    BoxRectData data;
+    data.hue   = Hue::GOLD;
+    data.style = InterfaceStyle::LARGE;
 
-    auto info         = BriefPoint_Data_Get(whichBriefPoint, level, corner, scale, 32, bounds);
-    text              = std::move(info.content);
+    auto info = BriefPoint_Data_Get(whichBriefPoint, level, corner, scale, 32, bounds);
+    text      = std::move(info.content);
+    data.label.emplace(std::move(info.header));
     Rect hiliteBounds = info.highlight;
     hiliteBounds.offset(bounds.left, bounds.top);
+    *inlinePict     = populate_inline_picts(data.bounds, text, data.style);
+    *highlight_rect = Rect{};
 
-    int16_t textHeight =
-            GetInterfaceTextHeightFromWidth(text, dataItem->data.style, kMissionDataWidth);
+    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, data.style, kMissionDataWidth);
+
     if (hiliteBounds.empty()) {
-        dataItem->data.bounds = {
-                Point{(bounds.width() / 2) - (kMissionDataWidth / 2) + bounds.left,
-                      (bounds.height() / 2) - (textHeight / 2) + bounds.top},
-                Size{kMissionDataWidth, textHeight}};
+        data.bounds = {Point{(bounds.width() / 2) - (kMissionDataWidth / 2) + bounds.left,
+                             (bounds.height() / 2) - (textHeight / 2) + bounds.top},
+                       Size{kMissionDataWidth, textHeight}};
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
             (bounds.left + (bounds.right - bounds.left) / 2)) {
-            dataItem->data.bounds.right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->data.bounds.left  = dataItem->data.bounds.right - kMissionDataWidth;
+            data.bounds.right = hiliteBounds.left - kMissionDataHBuffer;
+            data.bounds.left  = data.bounds.right - kMissionDataWidth;
         } else {
-            dataItem->data.bounds.left  = hiliteBounds.right + kMissionDataHBuffer;
-            dataItem->data.bounds.right = dataItem->data.bounds.left + kMissionDataWidth;
+            data.bounds.left  = hiliteBounds.right + kMissionDataHBuffer;
+            data.bounds.right = data.bounds.left + kMissionDataWidth;
         }
 
-        dataItem->data.bounds.top =
+        data.bounds.top =
                 hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 - textHeight / 2;
-        dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
-        if (dataItem->data.bounds.top < (bounds.top + kMissionDataTopBuffer)) {
-            dataItem->data.bounds.top    = bounds.top + kMissionDataTopBuffer;
-            dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
+        data.bounds.bottom = data.bounds.top + textHeight;
+        if (data.bounds.top < (bounds.top + kMissionDataTopBuffer)) {
+            data.bounds.top    = bounds.top + kMissionDataTopBuffer;
+            data.bounds.bottom = data.bounds.top + textHeight;
         }
-        if (dataItem->data.bounds.bottom > (bounds.bottom - kMissionDataBottomBuffer)) {
-            dataItem->data.bounds.bottom = bounds.bottom - kMissionDataBottomBuffer;
-            dataItem->data.bounds.top    = dataItem->data.bounds.bottom - textHeight;
-        }
-
-        if (dataItem->data.bounds.left < (bounds.left + kMissionDataVBuffer)) {
-            dataItem->data.bounds.left  = bounds.left + kMissionDataVBuffer;
-            dataItem->data.bounds.right = dataItem->data.bounds.left + kMissionDataWidth;
-        }
-        if (dataItem->data.bounds.right > (bounds.right - kMissionDataVBuffer)) {
-            dataItem->data.bounds.right = bounds.right - kMissionDataVBuffer;
-            dataItem->data.bounds.left  = dataItem->data.bounds.right - kMissionDataWidth;
+        if (data.bounds.bottom > (bounds.bottom - kMissionDataBottomBuffer)) {
+            data.bounds.bottom = bounds.bottom - kMissionDataBottomBuffer;
+            data.bounds.top    = data.bounds.bottom - textHeight;
         }
 
+        if (data.bounds.left < (bounds.left + kMissionDataVBuffer)) {
+            data.bounds.left  = bounds.left + kMissionDataVBuffer;
+            data.bounds.right = data.bounds.left + kMissionDataWidth;
+        }
+        if (data.bounds.right > (bounds.right - kMissionDataVBuffer)) {
+            data.bounds.right = bounds.right - kMissionDataVBuffer;
+            data.bounds.left  = data.bounds.right - kMissionDataWidth;
+        }
+    }
+
+    BoxRect box_rect{std::move(data)};
+    lines->clear();
+    if (!hiliteBounds.empty()) {
         hiliteBounds.right++;
         hiliteBounds.bottom++;
         *highlight_rect = hiliteBounds;
-        Rect newRect    = dataItem->outer_bounds();
-        if (dataItem->data.bounds.right < hiliteBounds.left) {
+        Rect newRect    = box_rect.outer_bounds();
+        if (data.bounds.right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
@@ -185,8 +180,7 @@ static void update_mission_brief_point(
             lines->push_back(make_pair(p7, p8));
         }
     }
-    dataItem->data.label.emplace(std::move(info.header));
-    *inlinePict = populate_inline_picts(dataItem->data.bounds, text, dataItem->data.style);
+    return box_rect;
 }
 
 BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
@@ -196,7 +190,7 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
           _briefing_point(_level.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
           _briefing_point_start(_briefing_point),
           _briefing_point_end(_level.briefings.size()),
-          _data_item(data_item(item(MAP_RECT))) {
+          _data_item{{}} {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
         Star star;
@@ -362,9 +356,9 @@ void BriefingScreen::build_brief_point() {
 
         vector<inlinePictType> inline_pict;
 
-        update_mission_brief_point(
-                &_data_item, _briefing_point, _level, corner, scale, map_rect, &inline_pict,
-                &_highlight_rect, &_highlight_lines, _text);
+        _data_item = update_mission_brief_point(
+                _briefing_point, _level, corner, scale, map_rect, &inline_pict, &_highlight_rect,
+                &_highlight_lines, _text);
         swap(inline_pict, _inline_pict);
     }
 }
