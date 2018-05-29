@@ -35,10 +35,14 @@ struct BriefingSpriteBounds {
 void draw_briefing_objects(
         Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale);
 
-void BriefPoint_Data_Get(
-        int32_t whichPoint, const Level& level, pn::string_ref header, pn::string_ref content,
-        Rect* hiliteBounds, coordPointType* corner, int32_t scale, int32_t minSectorSize,
-        int32_t maxSize, Rect* bounds);
+struct BriefPointInfo {
+    pn::string header;
+    pn::string content;
+    Rect       highlight;
+};
+BriefPointInfo BriefPoint_Data_Get(
+        int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
+        int32_t maxSize, const Rect& bounds);
 
 }  // namespace antares
 

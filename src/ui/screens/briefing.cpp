@@ -91,33 +91,34 @@ static vector<inlinePictType> populate_inline_picts(
 }
 
 static void update_mission_brief_point(
-        BoxRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
-        int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
-        vector<pair<Point, Point>>& lines, pn::string_ref text) {
+        BoxRect* dataItem, int32_t whichBriefPoint, const Level& level,
+        const coordPointType& corner, int32_t scale, const Rect& bounds,
+        vector<inlinePictType>* inlinePict, Rect* highlight_rect,
+        vector<pair<Point, Point>>* lines, pn::string_ref text) {
     if (whichBriefPoint < 0) {
         // No longer handled here.
         return;
     }
 
-    Rect       hiliteBounds;
-    pn::string header;
-    BriefPoint_Data_Get(
-            whichBriefPoint, level, header, text, &hiliteBounds, corner, scale, 16, 32, bounds);
-    hiliteBounds.offset(bounds->left, bounds->top);
+    inlinePict->clear();
+    lines->clear();
+    *highlight_rect = Rect{};
+
+    auto info         = BriefPoint_Data_Get(whichBriefPoint, level, corner, scale, 32, bounds);
+    text              = std::move(info.content);
+    Rect hiliteBounds = info.highlight;
+    hiliteBounds.offset(bounds.left, bounds.top);
 
     int16_t textHeight =
             GetInterfaceTextHeightFromWidth(text, dataItem->data.style, kMissionDataWidth);
-    if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->data.bounds.left =
-                (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
-        dataItem->data.bounds.right = dataItem->data.bounds.left + kMissionDataWidth;
-        dataItem->data.bounds.top =
-                (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
-        dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
-        highlight_rect               = Rect();
+    if (hiliteBounds.empty()) {
+        dataItem->data.bounds = {
+                Point{(bounds.width() / 2) - (kMissionDataWidth / 2) + bounds.left,
+                      (bounds.height() / 2) - (textHeight / 2) + bounds.top},
+                Size{kMissionDataWidth, textHeight}};
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
-            (bounds->left + (bounds->right - bounds->left) / 2)) {
+            (bounds.left + (bounds.right - bounds.left) / 2)) {
             dataItem->data.bounds.right = hiliteBounds.left - kMissionDataHBuffer;
             dataItem->data.bounds.left  = dataItem->data.bounds.right - kMissionDataWidth;
         } else {
@@ -128,65 +129,64 @@ static void update_mission_brief_point(
         dataItem->data.bounds.top =
                 hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 - textHeight / 2;
         dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
-        if (dataItem->data.bounds.top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->data.bounds.top    = bounds->top + kMissionDataTopBuffer;
+        if (dataItem->data.bounds.top < (bounds.top + kMissionDataTopBuffer)) {
+            dataItem->data.bounds.top    = bounds.top + kMissionDataTopBuffer;
             dataItem->data.bounds.bottom = dataItem->data.bounds.top + textHeight;
         }
-        if (dataItem->data.bounds.bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
-            dataItem->data.bounds.bottom = bounds->bottom - kMissionDataBottomBuffer;
+        if (dataItem->data.bounds.bottom > (bounds.bottom - kMissionDataBottomBuffer)) {
+            dataItem->data.bounds.bottom = bounds.bottom - kMissionDataBottomBuffer;
             dataItem->data.bounds.top    = dataItem->data.bounds.bottom - textHeight;
         }
 
-        if (dataItem->data.bounds.left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->data.bounds.left  = bounds->left + kMissionDataVBuffer;
+        if (dataItem->data.bounds.left < (bounds.left + kMissionDataVBuffer)) {
+            dataItem->data.bounds.left  = bounds.left + kMissionDataVBuffer;
             dataItem->data.bounds.right = dataItem->data.bounds.left + kMissionDataWidth;
         }
-        if (dataItem->data.bounds.right > (bounds->right - kMissionDataVBuffer)) {
-            dataItem->data.bounds.right = bounds->right - kMissionDataVBuffer;
+        if (dataItem->data.bounds.right > (bounds.right - kMissionDataVBuffer)) {
+            dataItem->data.bounds.right = bounds.right - kMissionDataVBuffer;
             dataItem->data.bounds.left  = dataItem->data.bounds.right - kMissionDataWidth;
         }
 
         hiliteBounds.right++;
         hiliteBounds.bottom++;
-        highlight_rect = hiliteBounds;
-        Rect newRect   = dataItem->outer_bounds();
-        lines.clear();
+        *highlight_rect = hiliteBounds;
+        Rect newRect    = dataItem->outer_bounds();
         if (dataItem->data.bounds.right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
             Point p4(newRect.right + 2, newRect.top);
-            lines.push_back(make_pair(p1, p2));
-            lines.push_back(make_pair(p2, p3));
-            lines.push_back(make_pair(p3, p4));
+            lines->push_back(make_pair(p1, p2));
+            lines->push_back(make_pair(p2, p3));
+            lines->push_back(make_pair(p3, p4));
 
             Point p5(hiliteBounds.left, hiliteBounds.bottom - 1);
             Point p6(newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
             Point p7(newRect.right + kMissionLineHJog, newRect.bottom - 1);
             Point p8(newRect.right + 2, newRect.bottom - 1);
-            lines.push_back(make_pair(p5, p6));
-            lines.push_back(make_pair(p6, p7));
-            lines.push_back(make_pair(p7, p8));
+            lines->push_back(make_pair(p5, p6));
+            lines->push_back(make_pair(p6, p7));
+            lines->push_back(make_pair(p7, p8));
         } else {
             Point p1(hiliteBounds.right, hiliteBounds.top);
             Point p2(newRect.left - kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.left - kMissionLineHJog, newRect.top);
             Point p4(newRect.left - 3, newRect.top);
-            lines.push_back(make_pair(p1, p2));
-            lines.push_back(make_pair(p2, p3));
-            lines.push_back(make_pair(p3, p4));
+            lines->push_back(make_pair(p1, p2));
+            lines->push_back(make_pair(p2, p3));
+            lines->push_back(make_pair(p3, p4));
 
             Point p5(hiliteBounds.right, hiliteBounds.bottom - 1);
             Point p6(newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
             Point p7(newRect.left - kMissionLineHJog, newRect.bottom - 1);
             Point p8(newRect.left - 3, newRect.bottom - 1);
-            lines.push_back(make_pair(p5, p6));
-            lines.push_back(make_pair(p6, p7));
-            lines.push_back(make_pair(p7, p8));
+            lines->push_back(make_pair(p5, p6));
+            lines->push_back(make_pair(p6, p7));
+            lines->push_back(make_pair(p7, p8));
         }
     }
-    dataItem->data.label.emplace(std::move(header));
-    inlinePict = populate_inline_picts(dataItem->data.bounds, text, dataItem->data.style);
+    dataItem->data.label.emplace(std::move(info.header));
+    *inlinePict = populate_inline_picts(dataItem->data.bounds, text, dataItem->data.style);
 }
 
 BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
@@ -363,8 +363,8 @@ void BriefingScreen::build_brief_point() {
         vector<inlinePictType> inline_pict;
 
         update_mission_brief_point(
-                &_data_item, _briefing_point, _level, &corner, scale, &map_rect, inline_pict,
-                _highlight_rect, _highlight_lines, _text);
+                &_data_item, _briefing_point, _level, corner, scale, map_rect, &inline_pict,
+                &_highlight_rect, &_highlight_lines, _text);
         swap(inline_pict, _inline_pict);
     }
 }
