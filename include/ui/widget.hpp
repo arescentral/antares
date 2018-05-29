@@ -41,7 +41,9 @@ class Widget {
 class BoxRect : public Widget {
   public:
     BoxRect(BoxRectData data) : data{std::move(data)} {}
-    BoxRectData data;
+
+    Hue            hue() const { return item()->hue; }
+    InterfaceStyle style() const { return item()->style; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -50,12 +52,14 @@ class BoxRect : public Widget {
   protected:
     BoxRectData*       item() override;
     const BoxRectData* item() const override;
+
+  private:
+    BoxRectData data;
 };
 
 class TextRect : public Widget {
   public:
     TextRect(TextRectData data) : data{std::move(data)} {}
-    TextRectData data;
 
     Hue            hue() const { return item()->hue; }
     InterfaceStyle style() const { return item()->style; }
@@ -67,13 +71,15 @@ class TextRect : public Widget {
   protected:
     TextRectData*       item() override;
     const TextRectData* item() const override;
+
+  private:
+    TextRectData data;
 };
 
 class PictureRect : public Widget {
   public:
     PictureRect(PictureRectData data) : data{std::move(data)} {}
-    PictureRectData data;
-    Texture         texture;
+    Texture texture;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -82,6 +88,9 @@ class PictureRect : public Widget {
   protected:
     PictureRectData*       item() override;
     const PictureRectData* item() const override;
+
+  private:
+    PictureRectData data;
 };
 
 class Button : public Widget {
@@ -104,7 +113,6 @@ class Button : public Widget {
 class PlainButton : public Button {
   public:
     PlainButton(PlainButtonData data) : data{std::move(data)} {}
-    PlainButtonData data;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -113,13 +121,15 @@ class PlainButton : public Button {
   protected:
     PlainButtonData*       item() override;
     const PlainButtonData* item() const override;
+
+  private:
+    PlainButtonData data;
 };
 
 class CheckboxButton : public Button {
   public:
     CheckboxButton(CheckboxButtonData data) : data{std::move(data)} {}
-    CheckboxButtonData data;
-    bool               on = false;
+    bool on = false;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -128,13 +138,15 @@ class CheckboxButton : public Button {
   protected:
     CheckboxButtonData*       item() override;
     const CheckboxButtonData* item() const override;
+
+  private:
+    CheckboxButtonData data;
 };
 
 class RadioButton : public Button {
   public:
     RadioButton(RadioButtonData data) : data{std::move(data)} {}
-    RadioButtonData data;
-    bool            on = false;
+    bool on = false;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -143,13 +155,15 @@ class RadioButton : public Button {
   protected:
     RadioButtonData*       item() override;
     const RadioButtonData* item() const override;
+
+  private:
+    RadioButtonData data;
 };
 
 class TabBoxButton : public Button {
   public:
     TabBoxButton(TabBoxButtonData data) : data{std::move(data)} {}
-    TabBoxButtonData data;
-    bool             on = false;
+    bool on = false;
 
     const std::vector<std::unique_ptr<InterfaceItemData>>& content() const {
         return item()->content;
@@ -162,12 +176,14 @@ class TabBoxButton : public Button {
   protected:
     TabBoxButtonData*       item() override;
     const TabBoxButtonData* item() const override;
+
+  private:
+    TabBoxButtonData data;
 };
 
 class TabBox : public Widget {
   public:
     TabBox(TabBoxData data) : data{std::move(data)} {}
-    TabBoxData data;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -176,6 +192,9 @@ class TabBox : public Widget {
   protected:
     TabBoxData*       item() override;
     const TabBoxData* item() const override;
+
+  private:
+    TabBoxData data;
 };
 
 }  // namespace antares
