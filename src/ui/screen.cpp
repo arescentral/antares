@@ -125,8 +125,8 @@ void InterfaceScreen::become_normal() {
     _hit_button = nullptr;
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->state == ButtonState::ACTIVE) {
-            button->state = ButtonState::ENABLED;
+        if (button && button->state() == ButtonState::ACTIVE) {
+            button->state() = ButtonState::ENABLED;
         }
     }
 }
@@ -167,10 +167,10 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     for (auto& item : _items) {
         Rect    bounds = item->outer_bounds();
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && (button->state != ButtonState::DISABLED) && (bounds.contains(where))) {
+        if (button && (button->state() != ButtonState::DISABLED) && (bounds.contains(where))) {
             become_normal();
-            _state        = MOUSE_DOWN;
-            button->state = ButtonState::ACTIVE;
+            _state          = MOUSE_DOWN;
+            button->state() = ButtonState::ACTIVE;
             sys.sound.select();
             _hit_button = button;
             return;
@@ -187,9 +187,9 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        _state             = NORMAL;
-        Rect bounds        = _hit_button->outer_bounds();
-        _hit_button->state = ButtonState::ENABLED;
+        _state               = NORMAL;
+        Rect bounds          = _hit_button->outer_bounds();
+        _hit_button->state() = ButtonState::ENABLED;
         if (bounds.contains(where)) {
             handle_button(*_hit_button);
         }
@@ -205,10 +205,10 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->state != ButtonState::DISABLED && button->key() == key_code) {
+        if (button && button->state() != ButtonState::DISABLED && button->key() == key_code) {
             become_normal();
-            _state        = KEY_DOWN;
-            button->state = ButtonState::ACTIVE;
+            _state          = KEY_DOWN;
+            button->state() = ButtonState::ACTIVE;
             sys.sound.select();
             _hit_button = button;
             _pressed    = key_code;
@@ -220,10 +220,10 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
     const int32_t key_code = event.key() + 1;
     if ((_state == KEY_DOWN) && (_pressed == key_code)) {
-        _state             = NORMAL;
-        _hit_button->state = ButtonState::ENABLED;
+        _state               = NORMAL;
+        _hit_button->state() = ButtonState::ENABLED;
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
-            b->on = true;
+            b->on() = true;
         }
         handle_button(*_hit_button);
     }
@@ -232,11 +232,11 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& item : _items) {
         Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->state != ButtonState::DISABLED &&
+        if (button && button->state() != ButtonState::DISABLED &&
             button->gamepad() == event.button) {
             become_normal();
-            _state        = GAMEPAD_DOWN;
-            button->state = ButtonState::ACTIVE;
+            _state          = GAMEPAD_DOWN;
+            button->state() = ButtonState::ACTIVE;
             sys.sound.select();
             _hit_button = button;
             _pressed    = event.button;
@@ -247,10 +247,10 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
-        _state             = NORMAL;
-        _hit_button->state = ButtonState::ENABLED;
+        _state               = NORMAL;
+        _hit_button->state() = ButtonState::ENABLED;
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
-            b->on = true;
+            b->on() = true;
         }
         handle_button(*_hit_button);
     }

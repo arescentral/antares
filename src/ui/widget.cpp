@@ -470,7 +470,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
 
         // top border
 
-        if (state == ButtonState::DISABLED) {
+        if (state() == ButtonState::DISABLED) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM;
@@ -489,12 +489,12 @@ void PlainButton::draw(Point offset, InputMode mode) const {
         vRect =
                 Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
                      tRect.bottom - kInterfaceHTop + 1);
-        if (state == ButtonState::ACTIVE) {
+        if (state() == ButtonState::ACTIVE) {
             shade = LIGHT;
             mDrawPuffUpRect(rects, uRect, hue(), shade);
             mDrawPuffUpRect(rects, vRect, hue(), shade);
         } else {
-            if (state == ButtonState::DISABLED) {
+            if (state() == ButtonState::DISABLED) {
                 shade = VERY_DARK;
             } else {
                 shade = MEDIUM + kSlightlyLighterColor;
@@ -519,7 +519,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
                 Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                      tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-        if (state == ButtonState::ACTIVE)
+        if (state() == ButtonState::ACTIVE)
             shade = LIGHT;
         else
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
@@ -531,9 +531,9 @@ void PlainButton::draw(Point offset, InputMode mode) const {
         color = GetRGBTranslateColorShade(hue(), shade);
         Rects().fill(uRect, color);
 
-        if (state == ButtonState::ACTIVE) {
+        if (state() == ButtonState::ACTIVE) {
             color = GetRGBTranslateColorShade(hue(), DARKEST);
-        } else if (state == ButtonState::DISABLED) {
+        } else if (state() == ButtonState::DISABLED) {
             color = GetRGBTranslateColorShade(hue(), VERY_DARK);
         } else {
             color = GetRGBTranslateColorShade(hue(), LIGHTER);
@@ -546,7 +546,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
         // draw the key code
         {
             Rects rects;
-            if (state == ButtonState::DISABLED)
+            if (state() == ButtonState::DISABLED)
                 shade = VERY_DARK;
             else
                 shade = LIGHT;
@@ -558,7 +558,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
                     tRect.bottom - kInterfaceContentBuffer + 1);
             mDrawPuffUpRect(rects, uRect, hue(), shade);
 
-            if (state == ButtonState::ACTIVE)
+            if (state() == ButtonState::ACTIVE)
                 shade = LIGHT;
             else
                 shade = DARK;  // DARKEST;
@@ -571,7 +571,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
 
             swidth = GetInterfaceStringWidth(shortcut_text, style());
             swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
-            if (state == ButtonState::DISABLED) {
+            if (state() == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(hue(), VERY_DARK);
             } else {
                 color = GetRGBTranslateColorShade(hue(), DARKEST);
@@ -584,9 +584,9 @@ void PlainButton::draw(Point offset, InputMode mode) const {
 
         // draw the button title
         {
-            if (state == ButtonState::ACTIVE) {
+            if (state() == ButtonState::ACTIVE) {
                 color = GetRGBTranslateColorShade(hue(), DARKEST);
-            } else if (state == ButtonState::DISABLED) {
+            } else if (state() == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(hue(), DARKEST + kSlightlyLighterColor);
             } else {
                 color = GetRGBTranslateColorShade(hue(), LIGHTER);
@@ -633,7 +633,7 @@ void CheckboxButton::draw(Point offset, InputMode) const {
 
     // top border
 
-    if (state == ButtonState::DISABLED)
+    if (state() == ButtonState::DISABLED)
         shade = VERY_DARK;
     else
         shade = MEDIUM;
@@ -661,7 +661,7 @@ void CheckboxButton::draw(Point offset, InputMode) const {
             Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
                  tRect.bottom - kInterfaceHTop + 1);
 
-    if (state == ButtonState::ACTIVE) {
+    if (state() == ButtonState::ACTIVE) {
         shade = LIGHT;
         mDrawPuffUpRect(Rects(), uRect, hue(), shade);
         mDrawPuffUpRect(Rects(), vRect, hue(), shade);
@@ -669,14 +669,14 @@ void CheckboxButton::draw(Point offset, InputMode) const {
         wRect.inset(3, 3);
         mDrawPuffDownRect(Rects(), wRect, hue(), shade);
         wRect.inset(1, 1);
-        if (!on) {
+        if (!on()) {
             color = RgbColor::black();
         } else {
             color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
         }
         Rects().fill(wRect, color);
     } else {
-        if (state == ButtonState::DISABLED)
+        if (state() == ButtonState::DISABLED)
             shade = VERY_DARK;
         else
             shade = MEDIUM + kSlightlyLighterColor;
@@ -686,9 +686,9 @@ void CheckboxButton::draw(Point offset, InputMode) const {
         wRect.inset(3, 3);
         mDrawPuffDownRect(Rects(), wRect, hue(), shade);
         wRect.inset(1, 1);
-        if (!on) {
+        if (!on()) {
             color = RgbColor::black();
-        } else if (state == ButtonState::ENABLED) {
+        } else if (state() == ButtonState::ENABLED) {
             color = GetRGBTranslateColorShade(hue(), LIGHT);
         } else {
             color = GetRGBTranslateColorShade(hue(), MEDIUM);
@@ -700,7 +700,7 @@ void CheckboxButton::draw(Point offset, InputMode) const {
             Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                  tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-    if (state == ButtonState::ACTIVE)
+    if (state() == ButtonState::ACTIVE)
         shade = LIGHT;
     else
         shade = DARKEST + kSlightlyLighterColor;
@@ -710,9 +710,9 @@ void CheckboxButton::draw(Point offset, InputMode) const {
     color = GetRGBTranslateColorShade(hue(), shade);
     Rects().fill(uRect, color);
 
-    if (state == ButtonState::ACTIVE) {
+    if (state() == ButtonState::ACTIVE) {
         color = GetRGBTranslateColorShade(hue(), DARKEST);
-    } else if (state == ButtonState::DISABLED) {
+    } else if (state() == ButtonState::DISABLED) {
         color = GetRGBTranslateColorShade(hue(), DARK);
     } else {
         color = GetRGBTranslateColorShade(hue(), LIGHT);
@@ -758,7 +758,7 @@ void RadioButton::draw(Point offset, InputMode) const {
 
     // top border
 
-    if (state == ButtonState::DISABLED)
+    if (state() == ButtonState::DISABLED)
         shade = VERY_DARK;
     else
         shade = MEDIUM;
@@ -790,7 +790,7 @@ void RadioButton::draw(Point offset, InputMode) const {
                  // tRect.top + vcenter - kInterfaceVLipHeight + 1
                  tRect.bottom - kInterfaceHTop + 1);
 
-    if (state == ButtonState::ACTIVE) {
+    if (state() == ButtonState::ACTIVE) {
         shade = LIGHT;
         mDrawPuffUpRect(uRect, item.hue, shade, pix);
         mDrawPuffUpRect(vRect, item.hue, shade, pix);
@@ -806,14 +806,14 @@ void RadioButton::draw(Point offset, InputMode) const {
         mDrawPuffDownOval(wRect, item.hue, shade, pix);
         wRect.inset(1, 1);
 
-        if (!on) {
+        if (!on()) {
             PaintOval(pix, wRect, RgbColor::black());
         } else {
             const RgbColor color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
             PaintOval(pix, wRect, color);
         }
     } else {
-        if (state == ButtonState::DISABLED)
+        if (state() == ButtonState::DISABLED)
             shade = VERY_DARK;
         else
             shade = MEDIUM + kSlightlyLighterColor;
@@ -829,9 +829,9 @@ void RadioButton::draw(Point offset, InputMode) const {
         wRect.inset(3, 3);
         mDrawPuffDownOval(wRect, item.hue, shade, pix);
         wRect.inset(1, 1);
-        if (!on) {
+        if (!on()) {
             PaintOval(pix, wRect, RgbColor::black());
-        } else if (state == kActive) {
+        } else if (state() == kActive) {
             const RgbColor color = GetRGBTranslateColorShade(item.hue, LIGHT);
             PaintOval(pix, wRect, color);
         } else {
@@ -844,7 +844,7 @@ void RadioButton::draw(Point offset, InputMode) const {
             Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                  tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-    if (state == ButtonState::ACTIVE)
+    if (state() == ButtonState::ACTIVE)
         shade = LIGHT;
     else
         shade = DARKEST + kSlightlyLighterColor;
@@ -854,9 +854,9 @@ void RadioButton::draw(Point offset, InputMode) const {
     color = GetRGBTranslateColorShade(item.hue, shade);
     pix->view(uRect).fill(color);
 
-    if (state == ButtonState::ACTIVE) {
+    if (state() == ButtonState::ACTIVE) {
         color = GetRGBTranslateColorShade(item.hue, DARKEST);
-    } else if (state == ButtonState::DISABLED) {
+    } else if (state() == ButtonState::DISABLED) {
         color = GetRGBTranslateColorShade(item.hue, DARK);
     } else {
         color = GetRGBTranslateColorShade(item.hue, LIGHT);
@@ -944,7 +944,7 @@ void TabBoxButton::draw(Point offset, InputMode) const {
 
     // top border
 
-    if (state == ButtonState::DISABLED) {
+    if (state() == ButtonState::DISABLED) {
         shade = VERY_DARK;
     } else {
         shade = MEDIUM;
@@ -960,14 +960,14 @@ void TabBoxButton::draw(Point offset, InputMode) const {
     Rect right(
             tRect.right, tRect.top + kInterfaceHTop, tRect.right + h_border + 1,
             tRect.bottom - kInterfaceHTop + 1);
-    if (!on) {
+    if (!on()) {
         Rects rects;
-        if (state == ButtonState::ACTIVE) {
+        if (state() == ButtonState::ACTIVE) {
             shade = LIGHT;
             mDrawPuffUpRect(rects, left, hue(), shade);
             mDrawPuffUpRect(rects, right, hue(), shade);
         } else {
-            if (state == ButtonState::DISABLED) {
+            if (state() == ButtonState::DISABLED) {
                 shade = VERY_DARK;
             } else
                 shade = DARK;
@@ -988,9 +988,9 @@ void TabBoxButton::draw(Point offset, InputMode) const {
         rects.fill(Rect(left.left - 3, left.bottom + 3, right.right + 3, left.bottom + 4), darker);
     } else {
         Rects rects;
-        if (state == ButtonState::ACTIVE) {
+        if (state() == ButtonState::ACTIVE) {
             shade = LIGHT;
-        } else if (state == ButtonState::DISABLED) {
+        } else if (state() == ButtonState::DISABLED) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM;
@@ -1033,9 +1033,9 @@ void TabBoxButton::draw(Point offset, InputMode) const {
                 tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-        if (on) {
+        if (on()) {
             shade = MEDIUM;
-        } else if (state == ButtonState::ACTIVE) {
+        } else if (state() == ButtonState::ACTIVE) {
             shade = LIGHT;
         } else {
             shade = DARKER;  // DARKEST + kSlightlyLighterColor;
@@ -1047,10 +1047,10 @@ void TabBoxButton::draw(Point offset, InputMode) const {
         color = GetRGBTranslateColorShade(hue(), shade);
         Rects().fill(uRect, color);
 
-        if (!on) {
-            if (state == ButtonState::ACTIVE) {
+        if (!on()) {
+            if (state() == ButtonState::ACTIVE) {
                 color = GetRGBTranslateColorShade(hue(), DARKEST);
-            } else if (state == ButtonState::DISABLED) {
+            } else if (state() == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(hue(), VERY_DARK);
             } else {
                 color = GetRGBTranslateColorShade(hue(), LIGHT);
@@ -1066,9 +1066,9 @@ void TabBoxButton::draw(Point offset, InputMode) const {
         DrawInterfaceString(Point(swidth, sheight), s, style(), color);
     } else {
         // draw the key code
-        if (on) {
+        if (on()) {
             shade = MEDIUM + kLighterColor;
-        } else if (state == ButtonState::ACTIVE) {
+        } else if (state() == ButtonState::ACTIVE) {
             shade = VERY_LIGHT;
         } else {
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
@@ -1083,9 +1083,9 @@ void TabBoxButton::draw(Point offset, InputMode) const {
                 tRect.bottom - kInterfaceContentBuffer + 1);
         mDrawPuffUpRect(Rects(), uRect, hue(), shade);
 
-        if (on) {
+        if (on()) {
             shade = MEDIUM;
-        } else if (state == ButtonState::ACTIVE) {
+        } else if (state() == ButtonState::ACTIVE) {
             shade = VERY_LIGHT;
         } else {
             shade = DARKER;  // DARKEST + kSlightlyLighterColor;
@@ -1099,7 +1099,7 @@ void TabBoxButton::draw(Point offset, InputMode) const {
 
         swidth = GetInterfaceStringWidth(s, style());
         swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
-        if (state == ButtonState::DISABLED) {
+        if (state() == ButtonState::DISABLED) {
             color = GetRGBTranslateColorShade(hue(), VERY_DARK);
         } else {
             color = GetRGBTranslateColorShade(hue(), DARKEST);
@@ -1109,10 +1109,10 @@ void TabBoxButton::draw(Point offset, InputMode) const {
                 Point(swidth, uRect.top + GetInterfaceFontAscent(style())), s, style(), color);
 
         // draw the button title
-        if (!on) {
-            if (state == ButtonState::ACTIVE) {
+        if (!on()) {
+            if (state() == ButtonState::ACTIVE) {
                 color = GetRGBTranslateColorShade(hue(), DARKEST);
-            } else if (state == ButtonState::DISABLED) {
+            } else if (state() == ButtonState::DISABLED) {
                 color = GetRGBTranslateColorShade(hue(), VERY_DARK);
             } else {
                 color = GetRGBTranslateColorShade(hue(), LIGHT);

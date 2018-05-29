@@ -69,44 +69,44 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
 SoundControlScreen::~SoundControlScreen() {}
 
 void SoundControlScreen::adjust_interface() {
-    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on = sys.prefs->play_idle_music();
-    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on = sys.prefs->play_music_in_game();
-    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on  = sys.prefs->speech_on();
+    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on() = sys.prefs->play_idle_music();
+    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on() = sys.prefs->play_music_in_game();
+    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on()  = sys.prefs->speech_on();
 
     if (false) {  // TODO(sfiera): if speech available.
-        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).state = ButtonState::ENABLED;
+        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).state() = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).state = ButtonState::DISABLED;
+        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).state() = ButtonState::DISABLED;
     }
 
     if (sys.prefs->volume() > 0) {
-        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).state = ButtonState::ENABLED;
+        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).state() = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).state = ButtonState::DISABLED;
+        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).state() = ButtonState::DISABLED;
     }
 
     if (sys.prefs->volume() < kMaxVolumePreference) {
-        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).state = ButtonState::ENABLED;
+        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).state() = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).state = ButtonState::DISABLED;
+        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).state() = ButtonState::DISABLED;
     }
 }
 
 void SoundControlScreen::handle_button(Button& button) {
     switch (button.id()) {
         case GAME_MUSIC:
-            sys.prefs->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on());
             adjust_interface();
             break;
 
         case IDLE_MUSIC:
-            sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on());
             sys.music.sync();  // TODO(sfiera): do this in driver.
             adjust_interface();
             break;
 
         case SPEECH_ON:
-            sys.prefs->set_speech_on(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_speech_on(!dynamic_cast<CheckboxButton&>(button).on());
             adjust_interface();
             break;
 
@@ -249,9 +249,9 @@ void KeyControlScreen::adjust_interface() {
         int    key_num                                    = sys.prefs->key(key);
         dynamic_cast<PlainButton&>(mutable_item(i)).key() = key_num;
         if (key == _selected_key) {
-            dynamic_cast<Button&>(mutable_item(i)).state = ButtonState::ACTIVE;
+            dynamic_cast<Button&>(mutable_item(i)).state() = ButtonState::ACTIVE;
         } else {
-            dynamic_cast<Button&>(mutable_item(i)).state = ButtonState::ENABLED;
+            dynamic_cast<Button&>(mutable_item(i)).state() = ButtonState::ENABLED;
         }
         dynamic_cast<PlainButton&>(mutable_item(i)).hue() = Hue::AQUA;
     }
@@ -265,11 +265,11 @@ void KeyControlScreen::adjust_interface() {
     }
 
     if (_conflicts.empty()) {
-        dynamic_cast<Button&>(mutable_item(DONE)).state          = ButtonState::ENABLED;
-        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).state = ButtonState::ENABLED;
+        dynamic_cast<Button&>(mutable_item(DONE)).state()          = ButtonState::ENABLED;
+        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).state() = ButtonState::ENABLED;
     } else {
-        dynamic_cast<Button&>(mutable_item(DONE)).state          = ButtonState::DISABLED;
-        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).state = ButtonState::DISABLED;
+        dynamic_cast<Button&>(mutable_item(DONE)).state()          = ButtonState::DISABLED;
+        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).state() = ButtonState::DISABLED;
     }
 }
 
@@ -354,10 +354,10 @@ void KeyControlScreen::set_tab(Tab tab) {
     for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
         TabBoxButton& item = dynamic_cast<TabBoxButton&>(mutable_item(i));
         if (buttons[tab] == i) {
-            item.on = true;
+            item.on() = true;
             extend(item.content());
         } else {
-            item.on = false;
+            item.on() = false;
         }
     }
     _tab          = tab;

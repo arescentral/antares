@@ -88,17 +88,17 @@ class PictureRect : public Widget {
 
 class Button : public Widget {
   public:
-    ButtonState state = ButtonState::ENABLED;
-
     int64_t         id() const { return _id; }
     pn::string_view label() const { return _label; }
     int16_t         key() const { return _key; }
     int16_t         gamepad() const { return _gamepad; }
     Hue             hue() const { return _hue; }
     InterfaceStyle  style() const { return _style; }
+    ButtonState     state() const { return _state; }
 
-    int16_t& key() { return _key; }
-    Hue&     hue() { return _hue; }
+    int16_t&     key() { return _key; }
+    Hue&         hue() { return _hue; }
+    ButtonState& state() { return _state; }
 
   protected:
     Button(const ButtonData& data);
@@ -110,6 +110,7 @@ class Button : public Widget {
     int16_t        _gamepad;
     Hue            _hue   = Hue::GRAY;
     InterfaceStyle _style = InterfaceStyle::LARGE;
+    ButtonState    _state = ButtonState::ENABLED;
 };
 
 class PlainButton : public Button {
@@ -127,7 +128,9 @@ class PlainButton : public Button {
 class CheckboxButton : public Button {
   public:
     CheckboxButton(const CheckboxButtonData& data);
-    bool on = false;
+
+    bool  on() const { return _on; }
+    bool& on() { return _on; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -135,12 +138,15 @@ class CheckboxButton : public Button {
 
   private:
     Rect _inner_bounds;
+    bool _on = false;
 };
 
 class RadioButton : public Button {
   public:
     RadioButton(const RadioButtonData& data);
-    bool on = false;
+
+    bool  on() const { return _on; }
+    bool& on() { return _on; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -148,14 +154,16 @@ class RadioButton : public Button {
 
   private:
     Rect _inner_bounds;
+    bool _on = false;
 };
 
 class TabBoxButton : public Button {
   public:
     TabBoxButton(const TabBoxButtonData& data);
-    bool on = false;
 
     const std::vector<std::unique_ptr<InterfaceItemData>>& content() const { return _content; }
+    bool                                                   on() const { return _on; }
+    bool&                                                  on() { return _on; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -164,6 +172,7 @@ class TabBoxButton : public Button {
   private:
     Rect                                            _inner_bounds;
     std::vector<std::unique_ptr<InterfaceItemData>> _content;
+    bool                                            _on = false;
 };
 
 class TabBox : public Widget {
