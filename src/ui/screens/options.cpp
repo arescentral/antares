@@ -245,15 +245,15 @@ void KeyControlScreen::adjust_interface() {
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
-        size_t key                                   = kKeyIndices[_tab] + i - _key_start;
-        int    key_num                               = sys.prefs->key(key);
-        dynamic_cast<Button&>(mutable_item(i)).key() = key_num;
+        size_t key                                        = kKeyIndices[_tab] + i - _key_start;
+        int    key_num                                    = sys.prefs->key(key);
+        dynamic_cast<PlainButton&>(mutable_item(i)).key() = key_num;
         if (key == _selected_key) {
             dynamic_cast<Button&>(mutable_item(i)).state = ButtonState::ACTIVE;
         } else {
             dynamic_cast<Button&>(mutable_item(i)).state = ButtonState::ENABLED;
         }
-        dynamic_cast<Button&>(mutable_item(i)).hue() = Hue::AQUA;
+        dynamic_cast<PlainButton&>(mutable_item(i)).hue() = Hue::AQUA;
     }
 
     if (_flashed_on) {
@@ -387,11 +387,13 @@ void KeyControlScreen::update_conflicts() {
 
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
-        Button& item = dynamic_cast<Button&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
-        item.hue()   = Hue::GOLD;
+        PlainButton& item =
+                dynamic_cast<PlainButton&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
+        item.hue() = Hue::GOLD;
     } else {
-        Button& item = dynamic_cast<Button&>(mutable_item(SHIP_TAB + get_tab_num(key)));
-        item.hue()   = Hue::GOLD;
+        TabBoxButton& item =
+                dynamic_cast<TabBoxButton&>(mutable_item(SHIP_TAB + get_tab_num(key)));
+        item.hue() = Hue::GOLD;
     }
 }
 

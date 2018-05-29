@@ -387,9 +387,6 @@ Rect BoxRect::outer_bounds() const {
     return bounds;
 }
 
-BoxRectData*       BoxRect::item() { return &data; }
-const BoxRectData* BoxRect::item() const { return &data; }
-
 void TextRect::draw(Point offset, InputMode) const {
     Rect bounds = data.bounds;
     bounds.offset(offset.h, offset.v);
@@ -407,9 +404,6 @@ Rect TextRect::outer_bounds() const {
     return bounds;
 }
 
-TextRectData*       TextRect::item() { return &data; }
-const TextRectData* TextRect::item() const { return &data; }
-
 void PictureRect::draw(Point offset, InputMode) const {
     Rect bounds = data.bounds;
     bounds.offset(offset.h, offset.v);
@@ -426,9 +420,6 @@ Rect PictureRect::outer_bounds() const {
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
-
-PictureRectData*       PictureRect::item() { return &data; }
-const PictureRectData* PictureRect::item() const { return &data; }
 
 void PlainButton::draw(Point offset, InputMode mode) const {
     Rect     tRect, uRect, vRect;
@@ -597,7 +588,6 @@ Rect PlainButton::outer_bounds() const {
     return bounds;
 }
 
-PlainButtonData*       PlainButton::item() { return &data; }
 const PlainButtonData* PlainButton::item() const { return &data; }
 
 void CheckboxButton::draw(Point offset, InputMode) const {
@@ -723,7 +713,6 @@ Rect CheckboxButton::outer_bounds() const {
     return bounds;
 }
 
-CheckboxButtonData*       CheckboxButton::item() { return &data; }
 const CheckboxButtonData* CheckboxButton::item() const { return &data; }
 
 void RadioButton::draw(Point offset, InputMode) const {
@@ -868,7 +857,6 @@ Rect RadioButton::outer_bounds() const {
     return bounds;
 }
 
-RadioButtonData*       RadioButton::item() { return &data; }
 const RadioButtonData* RadioButton::item() const { return &data; }
 
 void TabBoxButton::draw(Point offset, InputMode) const {
@@ -1089,7 +1077,6 @@ Rect TabBoxButton::outer_bounds() const {
     return bounds;
 }
 
-TabBoxButtonData*       TabBoxButton::item() { return &data; }
 const TabBoxButtonData* TabBoxButton::item() const { return &data; }
 
 void TabBox::draw(Point offset, InputMode) const {
@@ -1178,8 +1165,5 @@ Rect TabBox::outer_bounds() const {
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
-
-TabBoxData*       TabBox::item() { return &data; }
-const TabBoxData* TabBox::item() const { return &data; }
 
 }  // namespace antares
