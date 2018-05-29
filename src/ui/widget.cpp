@@ -588,7 +588,11 @@ Rect PlainButton::outer_bounds() const {
     return bounds;
 }
 
-const PlainButtonData* PlainButton::item() const { return &data; }
+int64_t        PlainButton::id() const { return data.id; }
+int16_t        PlainButton::key() const { return data.key; }
+int16_t        PlainButton::gamepad() const { return data.gamepad; }
+Hue            PlainButton::hue() const { return data.hue; }
+InterfaceStyle PlainButton::style() const { return data.style; }
 
 void CheckboxButton::draw(Point offset, InputMode) const {
     Rect     tRect, uRect, vRect, wRect;
@@ -713,7 +717,11 @@ Rect CheckboxButton::outer_bounds() const {
     return bounds;
 }
 
-const CheckboxButtonData* CheckboxButton::item() const { return &data; }
+int64_t        CheckboxButton::id() const { return data.id; }
+int16_t        CheckboxButton::key() const { return data.key; }
+int16_t        CheckboxButton::gamepad() const { return data.gamepad; }
+Hue            CheckboxButton::hue() const { return data.hue; }
+InterfaceStyle CheckboxButton::style() const { return data.style; }
 
 void RadioButton::draw(Point offset, InputMode) const {
     /*
@@ -857,7 +865,11 @@ Rect RadioButton::outer_bounds() const {
     return bounds;
 }
 
-const RadioButtonData* RadioButton::item() const { return &data; }
+int64_t        RadioButton::id() const { return data.id; }
+int16_t        RadioButton::key() const { return data.key; }
+int16_t        RadioButton::gamepad() const { return data.gamepad; }
+Hue            RadioButton::hue() const { return data.hue; }
+InterfaceStyle RadioButton::style() const { return data.style; }
 
 void TabBoxButton::draw(Point offset, InputMode) const {
     Rect     tRect;
@@ -1077,7 +1089,11 @@ Rect TabBoxButton::outer_bounds() const {
     return bounds;
 }
 
-const TabBoxButtonData* TabBoxButton::item() const { return &data; }
+int64_t        TabBoxButton::id() const { return data.id; }
+int16_t        TabBoxButton::key() const { return data.key; }
+int16_t        TabBoxButton::gamepad() const { return data.gamepad; }
+Hue            TabBoxButton::hue() const { return data.hue; }
+InterfaceStyle TabBoxButton::style() const { return data.style; }
 
 void TabBox::draw(Point offset, InputMode) const {
     Rects          rects;

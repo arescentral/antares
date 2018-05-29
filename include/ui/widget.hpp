@@ -81,14 +81,11 @@ class Button : public Widget {
   public:
     ButtonState state = ButtonState::ENABLED;
 
-    int64_t        id() const { return item()->id; }
-    int16_t        key() const { return item()->key; }
-    int16_t        gamepad() const { return item()->gamepad; }
-    Hue            hue() const { return item()->hue; }
-    InterfaceStyle style() const { return item()->style; }
-
-  protected:
-    virtual const ButtonData* item() const = 0;
+    virtual int64_t        id() const      = 0;
+    virtual int16_t        key() const     = 0;
+    virtual int16_t        gamepad() const = 0;
+    virtual Hue            hue() const     = 0;
+    virtual InterfaceStyle style() const   = 0;
 };
 
 class PlainButton : public Button {
@@ -99,11 +96,14 @@ class PlainButton : public Button {
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
+    int64_t        id() const override;
+    int16_t        key() const override;
+    int16_t        gamepad() const override;
+    Hue            hue() const override;
+    InterfaceStyle style() const override;
+
     int16_t& key() { return data.key; }
     Hue&     hue() { return data.hue; }
-
-  protected:
-    const PlainButtonData* item() const override;
 
   private:
     PlainButtonData data;
@@ -118,8 +118,11 @@ class CheckboxButton : public Button {
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
-  protected:
-    const CheckboxButtonData* item() const override;
+    int64_t        id() const override;
+    int16_t        key() const override;
+    int16_t        gamepad() const override;
+    Hue            hue() const override;
+    InterfaceStyle style() const override;
 
   private:
     CheckboxButtonData data;
@@ -134,8 +137,11 @@ class RadioButton : public Button {
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
-  protected:
-    const RadioButtonData* item() const override;
+    int64_t        id() const override;
+    int16_t        key() const override;
+    int16_t        gamepad() const override;
+    Hue            hue() const override;
+    InterfaceStyle style() const override;
 
   private:
     RadioButtonData data;
@@ -155,8 +161,11 @@ class TabBoxButton : public Button {
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
-  protected:
-    const TabBoxButtonData* item() const override;
+    int64_t        id() const override;
+    int16_t        key() const override;
+    int16_t        gamepad() const override;
+    Hue            hue() const override;
+    InterfaceStyle style() const override;
 
   private:
     TabBoxButtonData data;
