@@ -29,12 +29,6 @@ namespace antares {
 
 class Font;
 
-enum class ButtonState {
-    DISABLED,
-    ENABLED,
-    ACTIVE,
-};
-
 const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
 

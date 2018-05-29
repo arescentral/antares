@@ -65,7 +65,7 @@ void PlayAgainScreen::become_front() {
 
 void PlayAgainScreen::adjust_interface() {
     // TODO(sfiera): disable if networked.
-    dynamic_cast<PlainButton&>(mutable_item(RESTART)).state() = ButtonState::ENABLED;
+    dynamic_cast<PlainButton&>(mutable_item(RESTART)).enabled() = true;
 }
 
 void PlayAgainScreen::handle_button(Button& button) {

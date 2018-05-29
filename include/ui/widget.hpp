@@ -94,11 +94,13 @@ class Button : public Widget {
     int16_t         gamepad() const { return _gamepad; }
     Hue             hue() const { return _hue; }
     InterfaceStyle  style() const { return _style; }
-    ButtonState     state() const { return _state; }
+    bool            active() const { return _active; }
+    bool            enabled() const { return _enabled; }
 
-    int16_t&     key() { return _key; }
-    Hue&         hue() { return _hue; }
-    ButtonState& state() { return _state; }
+    int16_t& key() { return _key; }
+    Hue&     hue() { return _hue; }
+    bool&    active() { return _active; }
+    bool&    enabled() { return _enabled; }
 
   protected:
     Button(const ButtonData& data);
@@ -108,9 +110,10 @@ class Button : public Widget {
     pn::string     _label;
     int16_t        _key;
     int16_t        _gamepad;
-    Hue            _hue   = Hue::GRAY;
-    InterfaceStyle _style = InterfaceStyle::LARGE;
-    ButtonState    _state = ButtonState::ENABLED;
+    Hue            _hue     = Hue::GRAY;
+    InterfaceStyle _style   = InterfaceStyle::LARGE;
+    bool           _enabled = true;
+    bool           _active  = false;
 };
 
 class PlainButton : public Button {

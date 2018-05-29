@@ -74,21 +74,21 @@ void SoundControlScreen::adjust_interface() {
     dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on()  = sys.prefs->speech_on();
 
     if (false) {  // TODO(sfiera): if speech available.
-        dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).state() = ButtonState::ENABLED;
+        dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).enabled() = true;
     } else {
-        dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).state() = ButtonState::DISABLED;
+        dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).enabled() = false;
     }
 
     if (sys.prefs->volume() > 0) {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN)).state() = ButtonState::ENABLED;
+        dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN)).enabled() = true;
     } else {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN)).state() = ButtonState::DISABLED;
+        dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN)).enabled() = false;
     }
 
     if (sys.prefs->volume() < kMaxVolumePreference) {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_UP)).state() = ButtonState::ENABLED;
+        dynamic_cast<PlainButton&>(mutable_item(VOLUME_UP)).enabled() = true;
     } else {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_UP)).state() = ButtonState::DISABLED;
+        dynamic_cast<PlainButton&>(mutable_item(VOLUME_UP)).enabled() = false;
     }
 }
 
@@ -249,9 +249,9 @@ void KeyControlScreen::adjust_interface() {
         int    key_num                                    = sys.prefs->key(key);
         dynamic_cast<PlainButton&>(mutable_item(i)).key() = key_num;
         if (key == _selected_key) {
-            dynamic_cast<PlainButton&>(mutable_item(i)).state() = ButtonState::ACTIVE;
+            dynamic_cast<PlainButton&>(mutable_item(i)).active() = true;
         } else {
-            dynamic_cast<PlainButton&>(mutable_item(i)).state() = ButtonState::ENABLED;
+            dynamic_cast<PlainButton&>(mutable_item(i)).active() = false;
         }
         dynamic_cast<PlainButton&>(mutable_item(i)).hue() = Hue::AQUA;
     }
@@ -265,11 +265,11 @@ void KeyControlScreen::adjust_interface() {
     }
 
     if (_conflicts.empty()) {
-        dynamic_cast<PlainButton&>(mutable_item(DONE)).state()          = ButtonState::ENABLED;
-        dynamic_cast<PlainButton&>(mutable_item(SOUND_CONTROL)).state() = ButtonState::ENABLED;
+        dynamic_cast<PlainButton&>(mutable_item(DONE)).enabled()          = true;
+        dynamic_cast<PlainButton&>(mutable_item(SOUND_CONTROL)).enabled() = true;
     } else {
-        dynamic_cast<PlainButton&>(mutable_item(DONE)).state()          = ButtonState::DISABLED;
-        dynamic_cast<PlainButton&>(mutable_item(SOUND_CONTROL)).state() = ButtonState::DISABLED;
+        dynamic_cast<PlainButton&>(mutable_item(DONE)).enabled()          = false;
+        dynamic_cast<PlainButton&>(mutable_item(SOUND_CONTROL)).enabled() = false;
     }
 }
 
