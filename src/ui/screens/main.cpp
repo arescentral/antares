@@ -136,8 +136,8 @@ void MainScreen::adjust_interface() {
     }
 }
 
-void MainScreen::handle_button(::antares::Button& button) {
-    switch (button.id()) {
+void MainScreen::handle_button(int64_t id) {
+    switch (id) {
         case QUIT:
             // 1-second fade-out.
             _state = QUITTING;

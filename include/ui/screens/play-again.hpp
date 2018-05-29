@@ -41,7 +41,7 @@ class PlayAgainScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(Button& button);
+    virtual void handle_button(int64_t id);
 
   private:
     enum State {

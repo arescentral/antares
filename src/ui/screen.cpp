@@ -188,7 +188,7 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         Rect bounds           = _hit_button->outer_bounds();
         _hit_button->active() = false;
         if (bounds.contains(where)) {
-            handle_button(*_hit_button);
+            handle_button(_hit_button->id());
         }
     }
 }
@@ -222,7 +222,7 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
             b->on() = true;
         }
-        handle_button(*_hit_button);
+        handle_button(_hit_button->id());
     }
 }
 
@@ -248,7 +248,7 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
             b->on() = true;
         }
-        handle_button(*_hit_button);
+        handle_button(_hit_button->id());
     }
 }
 

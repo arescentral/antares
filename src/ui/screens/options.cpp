@@ -92,21 +92,23 @@ void SoundControlScreen::adjust_interface() {
     }
 }
 
-void SoundControlScreen::handle_button(Button& button) {
-    switch (button.id()) {
+void SoundControlScreen::handle_button(int64_t id) {
+    switch (id) {
         case GAME_MUSIC:
-            sys.prefs->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on());
+            sys.prefs->set_play_music_in_game(
+                    !dynamic_cast<const CheckboxButton&>(item(GAME_MUSIC)).on());
             adjust_interface();
             break;
 
         case IDLE_MUSIC:
-            sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on());
+            sys.prefs->set_play_idle_music(
+                    !dynamic_cast<const CheckboxButton&>(item(IDLE_MUSIC)).on());
             sys.music.sync();  // TODO(sfiera): do this in driver.
             adjust_interface();
             break;
 
         case SPEECH_ON:
-            sys.prefs->set_speech_on(!dynamic_cast<CheckboxButton&>(button).on());
+            sys.prefs->set_speech_on(!dynamic_cast<const CheckboxButton&>(item(SPEECH_ON)).on());
             adjust_interface();
             break;
 
@@ -125,12 +127,11 @@ void SoundControlScreen::handle_button(Button& button) {
         case DONE:
         case CANCEL:
         case KEY_CONTROL:
-            *_state = button_state(button.id());
+            *_state = button_state(id);
             stack()->pop(this);
             break;
 
-        default:
-            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id()).c_str());
+        default: throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
     }
 }
 
@@ -273,12 +274,12 @@ void KeyControlScreen::adjust_interface() {
     }
 }
 
-void KeyControlScreen::handle_button(Button& button) {
-    switch (button.id()) {
+void KeyControlScreen::handle_button(int64_t id) {
+    switch (id) {
         case DONE:
         case CANCEL:
         case SOUND_CONTROL:
-            *_state = button_state(button.id());
+            *_state = button_state(id);
             stack()->pop(this);
             break;
 
@@ -287,18 +288,17 @@ void KeyControlScreen::handle_button(Button& button) {
         case SHORTCUT_TAB:
         case UTILITY_TAB:
         case HOT_KEY_TAB:
-            set_tab(button_tab(button.id()));
+            set_tab(button_tab(id));
             adjust_interface();
             break;
 
         default: {
-            size_t key = kKeyIndices[_tab] + button.id() - _key_start;
+            size_t key = kKeyIndices[_tab] + id - _key_start;
             if ((kKeyIndices[_tab] <= key) && (key < kKeyIndices[_tab + 1])) {
                 _selected_key = key;
                 adjust_interface();
             } else {
-                throw std::runtime_error(
-                        pn::format("Got unknown button {0}.", button.id()).c_str());
+                throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
             }
             break;
         }
