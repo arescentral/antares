@@ -61,9 +61,7 @@ struct EmplaceBackVisitor : InterfaceItemData::Visitor {
     void visit_picture_rect(const PictureRectData& data) const override {
         auto copy = data.copy();
         copy.bounds.offset(offset.h, offset.v);
-        PictureRect picture{std::move(copy)};
-        picture.texture = Resource::texture(data.picture);
-        vec->emplace_back(new PictureRect{std::move(picture)});
+        vec->emplace_back(new PictureRect{std::move(copy)});
     }
 
     void visit_plain_button(const PlainButtonData& data) const override {

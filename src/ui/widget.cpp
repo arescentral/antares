@@ -20,6 +20,7 @@
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
+#include "data/resource.hpp"
 #include "drawing/interface.hpp"
 #include "drawing/text.hpp"
 
@@ -198,18 +199,144 @@ static void mDrawPuffUpTBorder(
             darker);
 }
 
-template <typename T>
-static void draw_plain_rect(Point origin, const T& item) {
+static Rect initialize_bounds(Rect bounds) {
+    bounds.left -= kInterfaceContentBuffer;
+    bounds.top -= kInterfaceContentBuffer;
+    bounds.right += kInterfaceContentBuffer + 1;
+    bounds.bottom += kInterfaceContentBuffer + 1;
+    return bounds;
+}
+
+static int h_border(InterfaceStyle style) {
+    return style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
+}
+
+BoxRect::BoxRect(const BoxRectData& data)
+        : _inner_bounds{data.bounds},
+          _label{data.label.has_value() ? sfz::make_optional<pn::string>(data.label->copy())
+                                        : sfz::nullopt},
+          _hue{data.hue},
+          _style{data.style} {}
+
+void BoxRect::draw(Point offset, InputMode) const {
+    if (_label.has_value()) {
+        draw_labeled_box(offset);
+    } else {
+        draw_plain_rect(offset);
+    }
+}
+
+void BoxRect::draw_labeled_box(Point origin) const {
+    Rect     tRect, uRect;
+    int16_t  vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t  shade;
+    RgbColor color;
+
+    if (_style == InterfaceStyle::LARGE) {
+        thisHBorder = kInterfaceLargeHBorder;
+    }
+    tRect = _inner_bounds;
+    tRect.offset(origin.h, origin.v);
+    tRect.left -= kInterfaceContentBuffer;
+    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(_style) +
+                 kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
+    tRect.right += kInterfaceContentBuffer;
+    tRect.bottom += kInterfaceContentBuffer;
+
+    shade = DARK;
+
+    mDrawPuffUpTopBorder(Rects(), tRect, _hue, shade, thisHBorder);
+    // bottom border
+
+    mDrawPuffUpBottomBorder(Rects(), tRect, _hue, shade, thisHBorder);
+
+    // draw the string
+
+    pn::string_view s = *_label;
+    swidth            = GetInterfaceStringWidth(s, _style) + kInterfaceTextHBuffer * 2;
+    swidth            = (tRect.right - tRect.left) - swidth;
+    sheight           = GetInterfaceFontHeight(_style) + kInterfaceTextVBuffer * 2;
+
+    uRect =
+            Rect(tRect.left + kInterfaceTextHBuffer - 1, tRect.top + kInterfaceHTop,
+                 tRect.right - swidth - kInterfaceTextHBuffer + 1,
+                 tRect.top + sheight - kInterfaceHTop);
+    color = GetRGBTranslateColorShade(_hue, VERY_DARK);
+    Rects().fill(uRect, color);
+
+    color = GetRGBTranslateColorShade(_hue, LIGHT);
+
+    DrawInterfaceString(
+            Point(tRect.left + kInterfaceTextHBuffer,
+                  tRect.top + GetInterfaceFontAscent(_style) + kInterfaceTextVBuffer),
+            s, _style, color);
+
+    // string left border
+
+    shade   = MEDIUM;
+    vcenter = sheight / 2;
+
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
+                 tRect.top + sheight - kInterfaceHTop + 1);
+    mDrawPuffUpRect(Rects(), uRect, _hue, shade);
+
+    // string right border
+
+    shade = MEDIUM;
+    uRect =
+            Rect(tRect.right - swidth, tRect.top + kInterfaceHTop, tRect.right - 2,
+                 tRect.top + sheight - kInterfaceHTop + 1);
+    mDrawPuffUpRect(Rects(), uRect, _hue, shade);
+    uRect =
+            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                 tRect.top + sheight - kInterfaceHTop + 1);
+    mDrawPuffUpRect(Rects(), uRect, _hue, shade);
+
+    // string bottom border
+
+    mDrawPuffUpTBorder(Rects(), tRect, _hue, DARK, sheight, thisHBorder);
+
+    // main part left border
+
+    tRect.top += sheight + kLabelBottomHeight;
+
+    vcenter = (tRect.bottom - tRect.top) / 2;
+
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
+                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
+    mDrawPuffUpRect(Rects(), uRect, _hue, DARKER);
+
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.bottom - vcenter + kInterfaceVLipHeight,
+                 tRect.left + 1, tRect.bottom - kInterfaceHTop + 1);
+    mDrawPuffUpRect(Rects(), uRect, _hue, VERY_DARK);
+
+    // right border
+
+    uRect =
+            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
+    mDrawPuffUpRect(Rects(), uRect, _hue, DARKER);
+
+    uRect =
+            Rect(tRect.right, tRect.bottom - vcenter + kInterfaceVLipHeight,
+                 tRect.right + thisHBorder + 1, tRect.bottom - kInterfaceHTop + 1);
+    mDrawPuffUpRect(Rects(), uRect, _hue, VERY_DARK);
+}
+
+void BoxRect::draw_plain_rect(Point origin) const {
     Rects          rects;
     Rect           tRect, uRect;
     int16_t        vcenter, thisHBorder = kInterfaceSmallHBorder;
-    Hue            color = item.hue;
-    InterfaceStyle style = item.style;
+    Hue            color = _hue;
+    InterfaceStyle style = _style;
 
     if (style == InterfaceStyle::LARGE) {
         thisHBorder = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds;
+    tRect = _inner_bounds;
     tRect.offset(origin.h, origin.v);
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -249,136 +376,14 @@ static void draw_plain_rect(Point origin, const T& item) {
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
-static void draw_labeled_box(Point origin, const BoxRectData& item) {
-    Rect     tRect, uRect;
-    int16_t  vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    uint8_t  shade;
-    RgbColor color;
-
-    if (item.style == InterfaceStyle::LARGE) {
-        thisHBorder = kInterfaceLargeHBorder;
-    }
-    tRect = item.bounds;
-    tRect.offset(origin.h, origin.v);
-    tRect.left -= kInterfaceContentBuffer;
-    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(item.style) +
-                 kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
-    tRect.right += kInterfaceContentBuffer;
-    tRect.bottom += kInterfaceContentBuffer;
-
-    shade = DARK;
-
-    mDrawPuffUpTopBorder(Rects(), tRect, item.hue, shade, thisHBorder);
-    // bottom border
-
-    mDrawPuffUpBottomBorder(Rects(), tRect, item.hue, shade, thisHBorder);
-
-    // draw the string
-
-    pn::string_view s = *item.label;
-    swidth            = GetInterfaceStringWidth(s, item.style) + kInterfaceTextHBuffer * 2;
-    swidth            = (tRect.right - tRect.left) - swidth;
-    sheight           = GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2;
-
-    uRect =
-            Rect(tRect.left + kInterfaceTextHBuffer - 1, tRect.top + kInterfaceHTop,
-                 tRect.right - swidth - kInterfaceTextHBuffer + 1,
-                 tRect.top + sheight - kInterfaceHTop);
-    color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
-    Rects().fill(uRect, color);
-
-    color = GetRGBTranslateColorShade(item.hue, LIGHT);
-
-    DrawInterfaceString(
-            Point(tRect.left + kInterfaceTextHBuffer,
-                  tRect.top + GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer),
-            s, item.style, color);
-
-    // string left border
-
-    shade   = MEDIUM;
-    vcenter = sheight / 2;
-
-    uRect =
-            Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
-                 tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
-
-    // string right border
-
-    shade = MEDIUM;
-    uRect =
-            Rect(tRect.right - swidth, tRect.top + kInterfaceHTop, tRect.right - 2,
-                 tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
-    uRect =
-            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-                 tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
-
-    // string bottom border
-
-    mDrawPuffUpTBorder(Rects(), tRect, item.hue, DARK, sheight, thisHBorder);
-
-    // main part left border
-
-    tRect.top += sheight + kLabelBottomHeight;
-
-    vcenter = (tRect.bottom - tRect.top) / 2;
-
-    uRect =
-            Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
-                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect(Rects(), uRect, item.hue, DARKER);
-
-    uRect =
-            Rect(tRect.left - thisHBorder, tRect.bottom - vcenter + kInterfaceVLipHeight,
-                 tRect.left + 1, tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
-
-    // right border
-
-    uRect =
-            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect(Rects(), uRect, item.hue, DARKER);
-
-    uRect =
-            Rect(tRect.right, tRect.bottom - vcenter + kInterfaceVLipHeight,
-                 tRect.right + thisHBorder + 1, tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
-}
-
-static Rect initialize_bounds(const InterfaceItemData& item) {
-    Rect bounds = item.bounds;
-    bounds.left -= kInterfaceContentBuffer;
-    bounds.top -= kInterfaceContentBuffer;
-    bounds.right += kInterfaceContentBuffer + 1;
-    bounds.bottom += kInterfaceContentBuffer + 1;
-    return bounds;
-}
-
-template <typename T>
-static int h_border(T& t) {
-    return t.style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
-}
-
-void BoxRect::draw(Point offset, InputMode) const {
-    if (data.label.has_value()) {
-        draw_labeled_box(offset, data);
-    } else {
-        draw_plain_rect(offset, data);
-    }
-}
-
-Rect BoxRect::inner_bounds() const { return data.bounds; }
+Rect BoxRect::inner_bounds() const { return _inner_bounds; }
 
 Rect BoxRect::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
-    bounds.left -= h_border(data);
-    bounds.right += h_border(data);
-    if (data.label.has_value()) {
-        bounds.top -= GetInterfaceFontHeight(data.style) + kInterfaceTextVBuffer * 2 +
+    Rect bounds = initialize_bounds(_inner_bounds);
+    bounds.left -= h_border(_style);
+    bounds.right += h_border(_style);
+    if (_label.has_value()) {
+        bounds.top -= GetInterfaceFontHeight(_style) + kInterfaceTextVBuffer * 2 +
                       kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     } else {
         bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
@@ -387,39 +392,58 @@ Rect BoxRect::outer_bounds() const {
     return bounds;
 }
 
+TextRect::TextRect(const TextRectData& data)
+        : _inner_bounds{data.bounds},
+          _text{data.text.copy()},
+          _hue{data.hue},
+          _style{data.style} {}
+
 void TextRect::draw(Point offset, InputMode) const {
-    Rect bounds = data.bounds;
+    Rect bounds = _inner_bounds;
     bounds.offset(offset.h, offset.v);
-    draw_text_in_rect(bounds, data.text, data.style, data.hue);
+    draw_text_in_rect(bounds, _text, _style, _hue);
 }
 
-Rect TextRect::inner_bounds() const { return data.bounds; }
+Rect TextRect::inner_bounds() const { return _inner_bounds; }
 
 Rect TextRect::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
-    bounds.left -= h_border(data);
-    bounds.right += h_border(data);
+    Rect bounds = initialize_bounds(_inner_bounds);
+    bounds.left -= h_border(_style);
+    bounds.right += h_border(_style);
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
 
+PictureRect::PictureRect(const PictureRectData& data)
+        : _inner_bounds(data.bounds), _texture{Resource::texture(data.picture)} {}
+
 void PictureRect::draw(Point offset, InputMode) const {
-    Rect bounds = data.bounds;
+    Rect bounds = _inner_bounds;
     bounds.offset(offset.h, offset.v);
-    texture.draw(bounds.left, bounds.top);
+    _texture.draw(bounds.left, bounds.top);
 }
 
-Rect PictureRect::inner_bounds() const { return data.bounds; }
+Rect PictureRect::inner_bounds() const { return _inner_bounds; }
 
 Rect PictureRect::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
+    Rect bounds = initialize_bounds(_inner_bounds);
     bounds.left -= kInterfaceSmallHBorder;
     bounds.right += kInterfaceSmallHBorder;
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
+
+Button::Button(const ButtonData& data)
+        : _id{data.id},
+          _label{data.label.copy()},
+          _key{data.key},
+          _gamepad{data.gamepad},
+          _hue{data.hue},
+          _style{data.style} {}
+
+PlainButton::PlainButton(const PlainButtonData& data) : Button{data}, _inner_bounds{data.bounds} {}
 
 void PlainButton::draw(Point offset, InputMode mode) const {
     Rect     tRect, uRect, vRect;
@@ -429,10 +453,10 @@ void PlainButton::draw(Point offset, InputMode mode) const {
 
     {
         Rects rects;
-        if (data.style == InterfaceStyle::LARGE) {
+        if (style() == InterfaceStyle::LARGE) {
             thisHBorder = kInterfaceLargeHBorder;
         }
-        tRect = data.bounds;
+        tRect = _inner_bounds;
         tRect.offset(offset.h, offset.v);
 
         uRect = tRect;
@@ -452,10 +476,10 @@ void PlainButton::draw(Point offset, InputMode mode) const {
             shade = MEDIUM;
         }
 
-        mDrawPuffUpTopBorder(rects, tRect, data.hue, shade, thisHBorder);
+        mDrawPuffUpTopBorder(rects, tRect, hue(), shade, thisHBorder);
         // bottom border
 
-        mDrawPuffUpBottomBorder(rects, tRect, data.hue, shade, thisHBorder);
+        mDrawPuffUpBottomBorder(rects, tRect, hue(), shade, thisHBorder);
 
         // side border top
 
@@ -467,27 +491,27 @@ void PlainButton::draw(Point offset, InputMode mode) const {
                      tRect.bottom - kInterfaceHTop + 1);
         if (state == ButtonState::ACTIVE) {
             shade = LIGHT;
-            mDrawPuffUpRect(rects, uRect, data.hue, shade);
-            mDrawPuffUpRect(rects, vRect, data.hue, shade);
+            mDrawPuffUpRect(rects, uRect, hue(), shade);
+            mDrawPuffUpRect(rects, vRect, hue(), shade);
         } else {
             if (state == ButtonState::DISABLED) {
                 shade = VERY_DARK;
             } else {
                 shade = MEDIUM + kSlightlyLighterColor;
             }
-            mDrawPuffUpRect(rects, uRect, data.hue, shade);
-            mDrawPuffUpRect(rects, vRect, data.hue, shade);
+            mDrawPuffUpRect(rects, uRect, hue(), shade);
+            mDrawPuffUpRect(rects, vRect, hue(), shade);
         }
     }
 
     bool       draw_shortcut = false;
     pn::string shortcut_text;
-    if ((mode == KEYBOARD_MOUSE) && data.key) {
+    if ((mode == KEYBOARD_MOUSE) && key()) {
         draw_shortcut = true;
-        GetKeyNumName(data.key, shortcut_text);
-    } else if ((mode == GAMEPAD) && data.gamepad) {
+        GetKeyNumName(key(), shortcut_text);
+    } else if ((mode == GAMEPAD) && gamepad()) {
         draw_shortcut = true;
-        Gamepad::name(data.gamepad, shortcut_text);
+        Gamepad::name(gamepad(), shortcut_text);
     }
 
     if (!draw_shortcut) {
@@ -504,20 +528,20 @@ void PlainButton::draw(Point offset, InputMode mode) const {
                      tRect.right - kInterfaceContentBuffer + 1,
                      tRect.bottom - kInterfaceContentBuffer + 1);
 
-        color = GetRGBTranslateColorShade(data.hue, shade);
+        color = GetRGBTranslateColorShade(hue(), shade);
         Rects().fill(uRect, color);
 
         if (state == ButtonState::ACTIVE) {
-            color = GetRGBTranslateColorShade(data.hue, DARKEST);
+            color = GetRGBTranslateColorShade(hue(), DARKEST);
         } else if (state == ButtonState::DISABLED) {
-            color = GetRGBTranslateColorShade(data.hue, VERY_DARK);
+            color = GetRGBTranslateColorShade(hue(), VERY_DARK);
         } else {
-            color = GetRGBTranslateColorShade(data.hue, LIGHTER);
+            color = GetRGBTranslateColorShade(hue(), LIGHTER);
         }
-        swidth  = GetInterfaceStringWidth(data.label, data.style);
+        swidth  = GetInterfaceStringWidth(label(), style());
         swidth  = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(data.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), data.label, data.style, color);
+        sheight = GetInterfaceFontAscent(style()) + kInterfaceTextVBuffer + tRect.top;
+        DrawInterfaceString(Point(swidth, sheight), label(), style(), color);
     } else {
         // draw the key code
         {
@@ -526,13 +550,13 @@ void PlainButton::draw(Point offset, InputMode mode) const {
                 shade = VERY_DARK;
             else
                 shade = LIGHT;
-            swidth = GetInterfaceFontWidth(data.style) * kMaxKeyNameLength;
+            swidth = GetInterfaceFontWidth(style()) * kMaxKeyNameLength;
 
             uRect = Rect(
                     tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-            mDrawPuffUpRect(rects, uRect, data.hue, shade);
+            mDrawPuffUpRect(rects, uRect, hue(), shade);
 
             if (state == ButtonState::ACTIVE)
                 shade = LIGHT;
@@ -542,57 +566,54 @@ void PlainButton::draw(Point offset, InputMode mode) const {
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
                     tRect.top + kInterfaceContentBuffer, tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-            color = GetRGBTranslateColorShade(data.hue, shade);
+            color = GetRGBTranslateColorShade(hue(), shade);
             rects.fill(vRect, color);
 
-            swidth = GetInterfaceStringWidth(shortcut_text, data.style);
+            swidth = GetInterfaceStringWidth(shortcut_text, style());
             swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
             if (state == ButtonState::DISABLED) {
-                color = GetRGBTranslateColorShade(data.hue, VERY_DARK);
+                color = GetRGBTranslateColorShade(hue(), VERY_DARK);
             } else {
-                color = GetRGBTranslateColorShade(data.hue, DARKEST);
+                color = GetRGBTranslateColorShade(hue(), DARKEST);
             }
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(data.style)), shortcut_text,
-                data.style, color);
+                Point(swidth, uRect.top + GetInterfaceFontAscent(style())), shortcut_text, style(),
+                color);
 
         // draw the button title
         {
             if (state == ButtonState::ACTIVE) {
-                color = GetRGBTranslateColorShade(data.hue, DARKEST);
+                color = GetRGBTranslateColorShade(hue(), DARKEST);
             } else if (state == ButtonState::DISABLED) {
-                color = GetRGBTranslateColorShade(data.hue, DARKEST + kSlightlyLighterColor);
+                color = GetRGBTranslateColorShade(hue(), DARKEST + kSlightlyLighterColor);
             } else {
-                color = GetRGBTranslateColorShade(data.hue, LIGHTER);
+                color = GetRGBTranslateColorShade(hue(), LIGHTER);
             }
 
-            pn::string_view s = data.label;
-            swidth            = GetInterfaceStringWidth(s, data.style);
+            pn::string_view s = label();
+            swidth            = GetInterfaceStringWidth(s, style());
             swidth            = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
-            sheight = GetInterfaceFontAscent(data.style) + kInterfaceTextVBuffer + tRect.top;
-            DrawInterfaceString(Point(swidth, sheight), s, data.style, color);
+            sheight = GetInterfaceFontAscent(style()) + kInterfaceTextVBuffer + tRect.top;
+            DrawInterfaceString(Point(swidth, sheight), s, style(), color);
         }
     }
 }
 
-Rect PlainButton::inner_bounds() const { return data.bounds; }
+Rect PlainButton::inner_bounds() const { return _inner_bounds; }
 
 Rect PlainButton::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
-    bounds.left -= h_border(data);
-    bounds.right += h_border(data);
+    Rect bounds = initialize_bounds(_inner_bounds);
+    bounds.left -= h_border(style());
+    bounds.right += h_border(style());
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
 
-int64_t        PlainButton::id() const { return data.id; }
-int16_t        PlainButton::key() const { return data.key; }
-int16_t        PlainButton::gamepad() const { return data.gamepad; }
-Hue            PlainButton::hue() const { return data.hue; }
-InterfaceStyle PlainButton::style() const { return data.style; }
+CheckboxButton::CheckboxButton(const CheckboxButtonData& data)
+        : Button{data}, _inner_bounds{data.bounds} {}
 
 void CheckboxButton::draw(Point offset, InputMode) const {
     Rect     tRect, uRect, vRect, wRect;
@@ -600,9 +621,9 @@ void CheckboxButton::draw(Point offset, InputMode) const {
     uint8_t  shade;
     RgbColor color;
 
-    if (data.style == InterfaceStyle::LARGE)
+    if (style() == InterfaceStyle::LARGE)
         thisHBorder = kInterfaceLargeHBorder;
-    tRect = data.bounds;
+    tRect = _inner_bounds;
     tRect.offset(offset.h, offset.v);
 
     tRect.left -= kInterfaceContentBuffer;
@@ -617,10 +638,10 @@ void CheckboxButton::draw(Point offset, InputMode) const {
     else
         shade = MEDIUM;
 
-    mDrawPuffUpTopBorder(Rects(), tRect, data.hue, shade, thisHBorder);
+    mDrawPuffUpTopBorder(Rects(), tRect, hue(), shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder(Rects(), tRect, data.hue, shade, thisHBorder);
+    mDrawPuffUpBottomBorder(Rects(), tRect, hue(), shade, thisHBorder);
 
     // side border top
 
@@ -642,16 +663,16 @@ void CheckboxButton::draw(Point offset, InputMode) const {
 
     if (state == ButtonState::ACTIVE) {
         shade = LIGHT;
-        mDrawPuffUpRect(Rects(), uRect, data.hue, shade);
-        mDrawPuffUpRect(Rects(), vRect, data.hue, shade);
-        mDrawPuffUpRect(Rects(), wRect, data.hue, shade);
+        mDrawPuffUpRect(Rects(), uRect, hue(), shade);
+        mDrawPuffUpRect(Rects(), vRect, hue(), shade);
+        mDrawPuffUpRect(Rects(), wRect, hue(), shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect(Rects(), wRect, data.hue, shade);
+        mDrawPuffDownRect(Rects(), wRect, hue(), shade);
         wRect.inset(1, 1);
         if (!on) {
             color = RgbColor::black();
         } else {
-            color = GetRGBTranslateColorShade(data.hue, VERY_LIGHT);
+            color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
         }
         Rects().fill(wRect, color);
     } else {
@@ -659,18 +680,18 @@ void CheckboxButton::draw(Point offset, InputMode) const {
             shade = VERY_DARK;
         else
             shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect(Rects(), uRect, data.hue, shade);
-        mDrawPuffUpRect(Rects(), vRect, data.hue, shade);
-        mDrawPuffUpRect(Rects(), wRect, data.hue, shade);
+        mDrawPuffUpRect(Rects(), uRect, hue(), shade);
+        mDrawPuffUpRect(Rects(), vRect, hue(), shade);
+        mDrawPuffUpRect(Rects(), wRect, hue(), shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect(Rects(), wRect, data.hue, shade);
+        mDrawPuffDownRect(Rects(), wRect, hue(), shade);
         wRect.inset(1, 1);
         if (!on) {
             color = RgbColor::black();
         } else if (state == ButtonState::ENABLED) {
-            color = GetRGBTranslateColorShade(data.hue, LIGHT);
+            color = GetRGBTranslateColorShade(hue(), LIGHT);
         } else {
-            color = GetRGBTranslateColorShade(data.hue, MEDIUM);
+            color = GetRGBTranslateColorShade(hue(), MEDIUM);
         }
         Rects().fill(wRect, color);
     }
@@ -686,42 +707,38 @@ void CheckboxButton::draw(Point offset, InputMode) const {
     uRect = Rect(
             tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
             tRect.right - kInterfaceContentBuffer + 1, tRect.bottom - kInterfaceContentBuffer + 1);
-    color = GetRGBTranslateColorShade(data.hue, shade);
+    color = GetRGBTranslateColorShade(hue(), shade);
     Rects().fill(uRect, color);
 
     if (state == ButtonState::ACTIVE) {
-        color = GetRGBTranslateColorShade(data.hue, DARKEST);
+        color = GetRGBTranslateColorShade(hue(), DARKEST);
     } else if (state == ButtonState::DISABLED) {
-        color = GetRGBTranslateColorShade(data.hue, DARK);
+        color = GetRGBTranslateColorShade(hue(), DARK);
     } else {
-        color = GetRGBTranslateColorShade(data.hue, LIGHT);
+        color = GetRGBTranslateColorShade(hue(), LIGHT);
     }
 
-    pn::string_view s = data.label;
-    swidth            = GetInterfaceStringWidth(s, data.style);
+    pn::string_view s = label();
+    swidth            = GetInterfaceStringWidth(s, style());
     swidth            = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
-    sheight           = GetInterfaceFontAscent(data.style) + kInterfaceTextVBuffer + tRect.top;
-    DrawInterfaceString(Point(swidth, sheight), s, data.style, color);
+    sheight           = GetInterfaceFontAscent(style()) + kInterfaceTextVBuffer + tRect.top;
+    DrawInterfaceString(Point(swidth, sheight), s, style(), color);
 }
 
-Rect CheckboxButton::inner_bounds() const { return data.bounds; }
+Rect CheckboxButton::inner_bounds() const { return _inner_bounds; }
 
 Rect CheckboxButton::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
+    Rect bounds = initialize_bounds(_inner_bounds);
     bounds.left -= bounds.bottom - bounds.top + 2 * kInterfaceVEdgeHeight +
-                   2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(data) +
+                   2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(style()) +
                    kCheckIndicatorHOffset;
-    bounds.right += h_border(data);
+    bounds.right += h_border(style());
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
 
-int64_t        CheckboxButton::id() const { return data.id; }
-int16_t        CheckboxButton::key() const { return data.key; }
-int16_t        CheckboxButton::gamepad() const { return data.gamepad; }
-Hue            CheckboxButton::hue() const { return data.hue; }
-InterfaceStyle CheckboxButton::style() const { return data.style; }
+RadioButton::RadioButton(const RadioButtonData& data) : Button{data}, _inner_bounds{data.bounds} {}
 
 void RadioButton::draw(Point offset, InputMode) const {
     /*
@@ -852,24 +869,61 @@ void RadioButton::draw(Point offset, InputMode) const {
     */
 }
 
-Rect RadioButton::inner_bounds() const { return data.bounds; }
+Rect RadioButton::inner_bounds() const { return _inner_bounds; }
 
 Rect RadioButton::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
+    Rect bounds = initialize_bounds(_inner_bounds);
     bounds.left -= bounds.bottom - bounds.top + 2 * kInterfaceVEdgeHeight +
-                   2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(data) +
+                   2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(style()) +
                    kRadioIndicatorHOffset;
-    bounds.right += h_border(data);
+    bounds.right += h_border(style());
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
 
-int64_t        RadioButton::id() const { return data.id; }
-int16_t        RadioButton::key() const { return data.key; }
-int16_t        RadioButton::gamepad() const { return data.gamepad; }
-Hue            RadioButton::hue() const { return data.hue; }
-InterfaceStyle RadioButton::style() const { return data.style; }
+TabBoxButton::TabBoxButton(const TabBoxButtonData& data)
+        : Button{data}, _inner_bounds{data.bounds} {
+    struct EmplaceBackVisitor : InterfaceItemData::Visitor {
+        std::vector<std::unique_ptr<InterfaceItemData>>* vec;
+        EmplaceBackVisitor(std::vector<std::unique_ptr<InterfaceItemData>>* v) : vec{v} {}
+
+        void visit_box_rect(const BoxRectData& data) const override {
+            vec->emplace_back(new BoxRectData{data.copy()});
+        }
+
+        void visit_text_rect(const TextRectData& data) const override {
+            vec->emplace_back(new TextRectData{data.copy()});
+        }
+
+        void visit_picture_rect(const PictureRectData& data) const override {
+            vec->emplace_back(new PictureRectData{data.copy()});
+        }
+
+        void visit_plain_button(const PlainButtonData& data) const override {
+            vec->emplace_back(new PlainButtonData{data.copy()});
+        }
+
+        void visit_radio_button(const RadioButtonData& data) const override {
+            vec->emplace_back(new RadioButtonData{data.copy()});
+        }
+
+        void visit_checkbox_button(const CheckboxButtonData& data) const override {
+            vec->emplace_back(new CheckboxButtonData{data.copy()});
+        }
+
+        void visit_tab_box(const TabBoxData& data) const override {
+            vec->emplace_back(new TabBoxData{data.copy()});
+        }
+
+        void visit_tab_box_button(const TabBoxButtonData& data) const override {
+            vec->emplace_back(new TabBoxButtonData{data.copy()});
+        }
+    };
+    for (const auto& item : data.content) {
+        item->accept(EmplaceBackVisitor{&_content});
+    }
+}
 
 void TabBoxButton::draw(Point offset, InputMode) const {
     Rect     tRect;
@@ -877,10 +931,10 @@ void TabBoxButton::draw(Point offset, InputMode) const {
     uint8_t  shade;
     RgbColor color;
 
-    if (data.style == InterfaceStyle::LARGE) {
+    if (style() == InterfaceStyle::LARGE) {
         h_border = kInterfaceLargeHBorder;
     }
-    tRect = data.bounds;
+    tRect = _inner_bounds;
     tRect.offset(offset.h, offset.v);
 
     tRect.left -= kInterfaceContentBuffer;
@@ -896,7 +950,7 @@ void TabBoxButton::draw(Point offset, InputMode) const {
         shade = MEDIUM;
     }
 
-    mDrawPuffUpTopBorder(Rects(), tRect, data.hue, shade, h_border);
+    mDrawPuffUpTopBorder(Rects(), tRect, hue(), shade, h_border);
 
     // side border top
 
@@ -910,27 +964,27 @@ void TabBoxButton::draw(Point offset, InputMode) const {
         Rects rects;
         if (state == ButtonState::ACTIVE) {
             shade = LIGHT;
-            mDrawPuffUpRect(rects, left, data.hue, shade);
-            mDrawPuffUpRect(rects, right, data.hue, shade);
+            mDrawPuffUpRect(rects, left, hue(), shade);
+            mDrawPuffUpRect(rects, right, hue(), shade);
         } else {
             if (state == ButtonState::DISABLED) {
                 shade = VERY_DARK;
             } else
                 shade = DARK;
-            mDrawPuffUpRect(rects, left, data.hue, shade);
-            mDrawPuffUpRect(rects, right, data.hue, shade);
+            mDrawPuffUpRect(rects, left, hue(), shade);
+            mDrawPuffUpRect(rects, right, hue(), shade);
         }
         left  = Rect(left.left, left.bottom, left.right, left.bottom + 3);
         right = Rect(right.left, right.bottom, right.right, right.bottom + 3);
         rects.fill(left, RgbColor::black());
         rects.fill(right, RgbColor::black());
         shade = MEDIUM;
-        color = GetRGBTranslateColorShade(data.hue, shade);
+        color = GetRGBTranslateColorShade(hue(), shade);
         rects.fill(Rect(left.left - 3, left.bottom, right.right + 3, left.bottom + 3), color);
 
-        const RgbColor lighter = GetRGBTranslateColorShade(data.hue, shade + kLighterColor);
+        const RgbColor lighter = GetRGBTranslateColorShade(hue(), shade + kLighterColor);
         rects.fill(Rect(left.left - 3, left.bottom - 1, right.right + 3, left.bottom), lighter);
-        const RgbColor darker = GetRGBTranslateColorShade(data.hue, shade + kDarkerColor);
+        const RgbColor darker = GetRGBTranslateColorShade(hue(), shade + kDarkerColor);
         rects.fill(Rect(left.left - 3, left.bottom + 3, right.right + 3, left.bottom + 4), darker);
     } else {
         Rects rects;
@@ -943,11 +997,11 @@ void TabBoxButton::draw(Point offset, InputMode) const {
         }
         left.bottom += 7;
         right.bottom += 7;
-        color = GetRGBTranslateColorShade(data.hue, shade);
+        color = GetRGBTranslateColorShade(hue(), shade);
         rects.fill(left, color);
         rects.fill(right, color);
 
-        const RgbColor lighter = GetRGBTranslateColorShade(data.hue, shade + kLighterColor);
+        const RgbColor lighter = GetRGBTranslateColorShade(hue(), shade + kLighterColor);
         rects.fill(Rect(left.left, left.top, left.right - 1, left.top + 1), lighter);
         rects.fill(Rect(left.left, left.top, left.left + 1, left.bottom - 5), lighter);
         rects.fill(Rect(left.left - 3, left.bottom - 5, left.left + 1, left.bottom - 4), lighter);
@@ -956,14 +1010,14 @@ void TabBoxButton::draw(Point offset, InputMode) const {
                 Rect(right.right, right.bottom - 5, right.right + 3, right.bottom - 4), lighter);
         rects.fill(Rect(right.left, right.top, right.left + 1, right.bottom - 1), lighter);
 
-        const RgbColor darker = GetRGBTranslateColorShade(data.hue, shade + kDarkerColor);
+        const RgbColor darker = GetRGBTranslateColorShade(hue(), shade + kDarkerColor);
         rects.fill(Rect(left.left - 3, left.bottom - 1, left.right, left.bottom), darker);
         rects.fill(Rect(left.right - 1, left.top, left.right, left.bottom), darker);
         rects.fill(Rect(right.right - 1, right.top, right.right, right.bottom - 4), darker);
         rects.fill(Rect(right.left, right.bottom - 1, right.right + 3, right.bottom), darker);
 
         Rect           uRect(left.left - 3, left.bottom - 4, left.right - 1, left.bottom - 1);
-        const RgbColor color = GetRGBTranslateColorShade(data.hue, shade);
+        const RgbColor color = GetRGBTranslateColorShade(hue(), shade);
         rects.fill(uRect, color);
         Rect vRect(right.left + 1, right.bottom - 4, right.right + 3, right.bottom - 1);
         rects.fill(vRect, color);
@@ -974,7 +1028,7 @@ void TabBoxButton::draw(Point offset, InputMode) const {
         rects.fill(uRect, RgbColor::black());
     }
 
-    if (data.key == 0) {
+    if (key() == 0) {
         Rect uRect(
                 tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
@@ -990,26 +1044,26 @@ void TabBoxButton::draw(Point offset, InputMode) const {
                 Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                      tRect.right - kInterfaceContentBuffer + 1,
                      tRect.bottom - kInterfaceContentBuffer + 1);
-        color = GetRGBTranslateColorShade(data.hue, shade);
+        color = GetRGBTranslateColorShade(hue(), shade);
         Rects().fill(uRect, color);
 
         if (!on) {
             if (state == ButtonState::ACTIVE) {
-                color = GetRGBTranslateColorShade(data.hue, DARKEST);
+                color = GetRGBTranslateColorShade(hue(), DARKEST);
             } else if (state == ButtonState::DISABLED) {
-                color = GetRGBTranslateColorShade(data.hue, VERY_DARK);
+                color = GetRGBTranslateColorShade(hue(), VERY_DARK);
             } else {
-                color = GetRGBTranslateColorShade(data.hue, LIGHT);
+                color = GetRGBTranslateColorShade(hue(), LIGHT);
             }
         } else {
-            color = GetRGBTranslateColorShade(data.hue, VERY_LIGHT);
+            color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
         }
 
-        pn::string_view s = data.label;
-        swidth            = GetInterfaceStringWidth(s, data.style);
+        pn::string_view s = label();
+        swidth            = GetInterfaceStringWidth(s, style());
         swidth            = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
-        sheight           = GetInterfaceFontAscent(data.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), s, data.style, color);
+        sheight           = GetInterfaceFontAscent(style()) + kInterfaceTextVBuffer + tRect.top;
+        DrawInterfaceString(Point(swidth, sheight), s, style(), color);
     } else {
         // draw the key code
         if (on) {
@@ -1020,14 +1074,14 @@ void TabBoxButton::draw(Point offset, InputMode) const {
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
         }
         pn::string s;
-        GetKeyNumName(data.key, s);
-        swidth = GetInterfaceFontWidth(data.style) * kMaxKeyNameLength;
+        GetKeyNumName(key(), s);
+        swidth = GetInterfaceFontWidth(style()) * kMaxKeyNameLength;
 
         Rect uRect(
                 tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect(Rects(), uRect, data.hue, shade);
+        mDrawPuffUpRect(Rects(), uRect, hue(), shade);
 
         if (on) {
             shade = MEDIUM;
@@ -1040,71 +1094,70 @@ void TabBoxButton::draw(Point offset, InputMode) const {
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
                 tRect.top + kInterfaceContentBuffer, tRect.right - kInterfaceContentBuffer + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        color = GetRGBTranslateColorShade(data.hue, shade);
+        color = GetRGBTranslateColorShade(hue(), shade);
         Rects().fill(vRect, color);
 
-        swidth = GetInterfaceStringWidth(s, data.style);
+        swidth = GetInterfaceStringWidth(s, style());
         swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
         if (state == ButtonState::DISABLED) {
-            color = GetRGBTranslateColorShade(data.hue, VERY_DARK);
+            color = GetRGBTranslateColorShade(hue(), VERY_DARK);
         } else {
-            color = GetRGBTranslateColorShade(data.hue, DARKEST);
+            color = GetRGBTranslateColorShade(hue(), DARKEST);
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(data.style)), s, data.style,
-                color);
+                Point(swidth, uRect.top + GetInterfaceFontAscent(style())), s, style(), color);
 
         // draw the button title
         if (!on) {
             if (state == ButtonState::ACTIVE) {
-                color = GetRGBTranslateColorShade(data.hue, DARKEST);
+                color = GetRGBTranslateColorShade(hue(), DARKEST);
             } else if (state == ButtonState::DISABLED) {
-                color = GetRGBTranslateColorShade(data.hue, VERY_DARK);
+                color = GetRGBTranslateColorShade(hue(), VERY_DARK);
             } else {
-                color = GetRGBTranslateColorShade(data.hue, LIGHT);
+                color = GetRGBTranslateColorShade(hue(), LIGHT);
             }
         } else {
-            color = GetRGBTranslateColorShade(data.hue, VERY_LIGHT);
+            color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
         }
 
         {
-            pn::string_view s = data.label;
-            swidth            = GetInterfaceStringWidth(s, data.style);
+            pn::string_view s = label();
+            swidth            = GetInterfaceStringWidth(s, style());
             swidth            = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
-            sheight = GetInterfaceFontAscent(data.style) + kInterfaceTextVBuffer + tRect.top;
-            DrawInterfaceString(Point(swidth, sheight), s, data.style, color);
+            sheight = GetInterfaceFontAscent(style()) + kInterfaceTextVBuffer + tRect.top;
+            DrawInterfaceString(Point(swidth, sheight), s, style(), color);
         }
     }
 }
 
-Rect TabBoxButton::inner_bounds() const { return data.bounds; }
+Rect TabBoxButton::inner_bounds() const { return _inner_bounds; }
 
 Rect TabBoxButton::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
-    bounds.left -= h_border(data) + 5;
-    bounds.right += h_border(data) + 5;
+    Rect bounds = initialize_bounds(_inner_bounds);
+    bounds.left -= h_border(style()) + 5;
+    bounds.right += h_border(style()) + 5;
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 2;
     return bounds;
 }
 
-int64_t        TabBoxButton::id() const { return data.id; }
-int16_t        TabBoxButton::key() const { return data.key; }
-int16_t        TabBoxButton::gamepad() const { return data.gamepad; }
-Hue            TabBoxButton::hue() const { return data.hue; }
-InterfaceStyle TabBoxButton::style() const { return data.style; }
+TabBox::TabBox(const TabBoxData& data)
+        : _inner_bounds{data.bounds},
+          _top_right_border_size{data.top_right_border_size},
+          _hue{data.hue},
+          _style{data.style} {}
 
 void TabBox::draw(Point offset, InputMode) const {
     Rects          rects;
     Rect           uRect;
     int16_t        vcenter, h_border = kInterfaceSmallHBorder;
     uint8_t        shade;
-    Hue            color                 = data.hue;
-    InterfaceStyle style                 = data.style;
-    int16_t        top_right_border_size = data.top_right_border_size;
+    Hue            color                 = _hue;
+    InterfaceStyle style                 = _style;
+    int16_t        top_right_border_size = _top_right_border_size;
 
-    Rect r = data.bounds;
+    Rect r = _inner_bounds;
     r.offset(offset.h, offset.v);
     if (style == InterfaceStyle::LARGE)
         h_border = kInterfaceLargeHBorder;
@@ -1171,12 +1224,12 @@ void TabBox::draw(Point offset, InputMode) const {
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
-Rect TabBox::inner_bounds() const { return data.bounds; }
+Rect TabBox::inner_bounds() const { return _inner_bounds; }
 
 Rect TabBox::outer_bounds() const {
-    Rect bounds = initialize_bounds(data);
-    bounds.left -= h_border(data);
-    bounds.right += h_border(data);
+    Rect bounds = initialize_bounds(_inner_bounds);
+    bounds.left -= h_border(_style);
+    bounds.right += h_border(_style);
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 2;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;

@@ -36,151 +36,149 @@ class Widget {
 
 class BoxRect : public Widget {
   public:
-    BoxRect(BoxRectData data) : data{std::move(data)} {}
+    BoxRect(const BoxRectData& data);
 
-    Hue            hue() const { return data.hue; }
-    InterfaceStyle style() const { return data.style; }
+    Hue            hue() const { return _hue; }
+    InterfaceStyle style() const { return _style; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    BoxRectData data;
+    void draw_labeled_box(Point origin) const;
+    void draw_plain_rect(Point origin) const;
+
+    Rect                      _inner_bounds;
+    sfz::optional<pn::string> _label;
+    Hue                       _hue   = Hue::GRAY;
+    InterfaceStyle            _style = InterfaceStyle::LARGE;
 };
 
 class TextRect : public Widget {
   public:
-    TextRect(TextRectData data) : data{std::move(data)} {}
+    TextRect(const TextRectData& data);
 
-    Hue            hue() const { return data.hue; }
-    InterfaceStyle style() const { return data.style; }
+    Hue            hue() const { return _hue; }
+    InterfaceStyle style() const { return _style; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    TextRectData data;
+    Rect           _inner_bounds;
+    pn::string     _text;
+    Hue            _hue   = Hue::GRAY;
+    InterfaceStyle _style = InterfaceStyle::LARGE;
 };
 
 class PictureRect : public Widget {
   public:
-    PictureRect(PictureRectData data) : data{std::move(data)} {}
-    Texture texture;
+    PictureRect(const PictureRectData& data);
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    PictureRectData data;
+    Rect    _inner_bounds;
+    Texture _texture;
 };
 
 class Button : public Widget {
   public:
     ButtonState state = ButtonState::ENABLED;
 
-    virtual int64_t        id() const      = 0;
-    virtual int16_t        key() const     = 0;
-    virtual int16_t        gamepad() const = 0;
-    virtual Hue            hue() const     = 0;
-    virtual InterfaceStyle style() const   = 0;
+    int64_t         id() const { return _id; }
+    pn::string_view label() const { return _label; }
+    int16_t         key() const { return _key; }
+    int16_t         gamepad() const { return _gamepad; }
+    Hue             hue() const { return _hue; }
+    InterfaceStyle  style() const { return _style; }
+
+    int16_t& key() { return _key; }
+    Hue&     hue() { return _hue; }
+
+  protected:
+    Button(const ButtonData& data);
+
+  private:
+    int64_t        _id;
+    pn::string     _label;
+    int16_t        _key;
+    int16_t        _gamepad;
+    Hue            _hue   = Hue::GRAY;
+    InterfaceStyle _style = InterfaceStyle::LARGE;
 };
 
 class PlainButton : public Button {
   public:
-    PlainButton(PlainButtonData data) : data{std::move(data)} {}
+    PlainButton(const PlainButtonData& data);
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
-    int64_t        id() const override;
-    int16_t        key() const override;
-    int16_t        gamepad() const override;
-    Hue            hue() const override;
-    InterfaceStyle style() const override;
-
-    int16_t& key() { return data.key; }
-    Hue&     hue() { return data.hue; }
-
   private:
-    PlainButtonData data;
+    Rect _inner_bounds;
 };
 
 class CheckboxButton : public Button {
   public:
-    CheckboxButton(CheckboxButtonData data) : data{std::move(data)} {}
+    CheckboxButton(const CheckboxButtonData& data);
     bool on = false;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
-    int64_t        id() const override;
-    int16_t        key() const override;
-    int16_t        gamepad() const override;
-    Hue            hue() const override;
-    InterfaceStyle style() const override;
-
   private:
-    CheckboxButtonData data;
+    Rect _inner_bounds;
 };
 
 class RadioButton : public Button {
   public:
-    RadioButton(RadioButtonData data) : data{std::move(data)} {}
+    RadioButton(const RadioButtonData& data);
     bool on = false;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
-    int64_t        id() const override;
-    int16_t        key() const override;
-    int16_t        gamepad() const override;
-    Hue            hue() const override;
-    InterfaceStyle style() const override;
-
   private:
-    RadioButtonData data;
+    Rect _inner_bounds;
 };
 
 class TabBoxButton : public Button {
   public:
-    TabBoxButton(TabBoxButtonData data) : data{std::move(data)} {}
+    TabBoxButton(const TabBoxButtonData& data);
     bool on = false;
 
-    const std::vector<std::unique_ptr<InterfaceItemData>>& content() const { return data.content; }
-
-    int16_t& key() { return data.key; }
-    Hue&     hue() { return data.hue; }
+    const std::vector<std::unique_ptr<InterfaceItemData>>& content() const { return _content; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
-    int64_t        id() const override;
-    int16_t        key() const override;
-    int16_t        gamepad() const override;
-    Hue            hue() const override;
-    InterfaceStyle style() const override;
-
   private:
-    TabBoxButtonData data;
+    Rect                                            _inner_bounds;
+    std::vector<std::unique_ptr<InterfaceItemData>> _content;
 };
 
 class TabBox : public Widget {
   public:
-    TabBox(TabBoxData data) : data{std::move(data)} {}
+    TabBox(const TabBoxData& data);
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    TabBoxData data;
+    Rect           _inner_bounds;
+    int64_t        _top_right_border_size = 0;
+    Hue            _hue                   = Hue::GRAY;
+    InterfaceStyle _style                 = InterfaceStyle::LARGE;
 };
 
 }  // namespace antares
