@@ -121,13 +121,10 @@ void InterfaceScreen::become_front() {
 void InterfaceScreen::resign_front() { become_normal(); }
 
 void InterfaceScreen::become_normal() {
-    _state      = NORMAL;
-    _hit_button = nullptr;
-    for (auto& item : _items) {
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->active()) {
-            button->active() = false;
-        }
+    _state = NORMAL;
+    if (_hit_button) {
+        _hit_button->active() = false;
+        _hit_button           = nullptr;
     }
 }
 
