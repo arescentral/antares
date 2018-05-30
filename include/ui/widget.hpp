@@ -29,9 +29,11 @@ namespace antares {
 
 class Widget {
   public:
-    virtual void draw(Point origin, InputMode mode) const = 0;
-    virtual Rect inner_bounds() const                     = 0;
-    virtual Rect outer_bounds() const                     = 0;
+    virtual int64_t id() const;
+    virtual void    deactivate();
+    virtual void    draw(Point origin, InputMode mode) const = 0;
+    virtual Rect    inner_bounds() const                     = 0;
+    virtual Rect    outer_bounds() const                     = 0;
 };
 
 class BoxRect : public Widget {
@@ -88,7 +90,9 @@ class PictureRect : public Widget {
 
 class Button : public Widget {
   public:
-    int64_t         id() const { return _id; }
+    int64_t id() const override { return _id; }
+    void    deactivate() override { _active = false; }
+
     pn::string_view label() const { return _label; }
     int16_t         key() const { return _key; }
     int16_t         gamepad() const { return _gamepad; }

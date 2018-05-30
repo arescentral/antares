@@ -211,6 +211,9 @@ static int h_border(InterfaceStyle style) {
     return style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
 }
 
+int64_t Widget::id() const { return -1; }
+void    Widget::deactivate() {}
+
 BoxRect::BoxRect(const BoxRectData& data)
         : _inner_bounds{data.bounds},
           _label{data.label.has_value() ? sfz::make_optional<pn::string>(data.label->copy())

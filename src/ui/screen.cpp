@@ -98,8 +98,7 @@ struct EmplaceBackVisitor : InterfaceItemData::Visitor {
 
 }  // namespace
 
-InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds)
-        : _state(NORMAL), _bounds(bounds), _hit_button(nullptr) {
+InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bounds(bounds) {
     try {
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
@@ -122,9 +121,9 @@ void InterfaceScreen::resign_front() { become_normal(); }
 
 void InterfaceScreen::become_normal() {
     _state = NORMAL;
-    if (_hit_button) {
-        _hit_button->active() = false;
-        _hit_button           = nullptr;
+    if (_active_widget) {
+        _active_widget->deactivate();
+        _active_widget = nullptr;
     }
 }
 
@@ -169,7 +168,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
             _state           = MOUSE_DOWN;
             button->active() = true;
             sys.sound.select();
-            _hit_button = button;
+            _active_widget = button;
             return;
         }
     }
@@ -184,11 +183,11 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        _state                = NORMAL;
-        Rect bounds           = _hit_button->outer_bounds();
-        _hit_button->active() = false;
+        _state      = NORMAL;
+        Rect bounds = _active_widget->outer_bounds();
+        _active_widget->deactivate();
         if (bounds.contains(where)) {
-            handle_button(_hit_button->id());
+            handle_button(_active_widget->id());
         }
     }
 }
@@ -207,8 +206,8 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
             _state           = KEY_DOWN;
             button->active() = true;
             sys.sound.select();
-            _hit_button = button;
-            _pressed    = key_code;
+            _active_widget = button;
+            _pressed       = key_code;
             return;
         }
     }
@@ -217,12 +216,12 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
     const int32_t key_code = event.key() + 1;
     if ((_state == KEY_DOWN) && (_pressed == key_code)) {
-        _state                = NORMAL;
-        _hit_button->active() = false;
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
+        _state = NORMAL;
+        _active_widget->deactivate();
+        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_active_widget)) {
             b->on() = true;
         }
-        handle_button(_hit_button->id());
+        handle_button(_active_widget->id());
     }
 }
 
@@ -234,8 +233,8 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
             _state           = GAMEPAD_DOWN;
             button->active() = true;
             sys.sound.select();
-            _hit_button = button;
-            _pressed    = event.button;
+            _active_widget = button;
+            _pressed       = event.button;
             return;
         }
     }
@@ -243,12 +242,12 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
-        _state                = NORMAL;
-        _hit_button->active() = false;
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
+        _state = NORMAL;
+        _active_widget->deactivate();
+        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_active_widget)) {
             b->on() = true;
         }
-        handle_button(_hit_button->id());
+        handle_button(_active_widget->id());
     }
 }
 

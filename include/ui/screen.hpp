@@ -68,7 +68,7 @@ class InterfaceScreen : public Card {
         KEY_DOWN,
         GAMEPAD_DOWN,
     };
-    State _state;
+    State _state = NORMAL;
 
     pn::value load_pn(pn::string_view id);
     void      become_normal();
@@ -76,7 +76,7 @@ class InterfaceScreen : public Card {
     const Rect                           _bounds;
     bool                                 _full_screen = false;
     std::vector<std::unique_ptr<Widget>> _items;
-    Button*                              _hit_button;
+    Widget*                              _active_widget = nullptr;
     uint32_t                             _pressed;
     Cursor                               _cursor;
 };
