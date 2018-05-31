@@ -1233,7 +1233,7 @@ Rect TabBox::outer_bounds() const {
     Rect bounds = initialize_bounds(_inner_bounds);
     bounds.left -= h_border(_style);
     bounds.right += h_border(_style);
-    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 2;
+    bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 20;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
 }
