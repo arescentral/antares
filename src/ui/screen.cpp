@@ -161,9 +161,8 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
         return;
     }
     for (auto& item : _items) {
-        Rect    bounds = item->outer_bounds();
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->enabled() && bounds.contains(where)) {
+        if (item->accept_click(where)) {
+            Button* button = dynamic_cast<Button*>(item.get());
             become_normal();
             _state           = MOUSE_DOWN;
             button->active() = true;
@@ -200,8 +199,8 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
     for (auto& item : _items) {
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->enabled() && (button->key() == key_code)) {
+        if (item->accept_key(key_code)) {
+            Button* button = dynamic_cast<Button*>(item.get());
             become_normal();
             _state           = KEY_DOWN;
             button->active() = true;
@@ -218,17 +217,14 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     if ((_state == KEY_DOWN) && (_pressed == key_code)) {
         _state = NORMAL;
         _active_widget->deactivate();
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_active_widget)) {
-            b->on() = true;
-        }
         handle_button(_active_widget->id());
     }
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& item : _items) {
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->enabled() && (button->gamepad() == event.button)) {
+        if (item->accept_button(event.button)) {
+            Button* button = dynamic_cast<Button*>(item.get());
             become_normal();
             _state           = GAMEPAD_DOWN;
             button->active() = true;
@@ -244,9 +240,6 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
         _state = NORMAL;
         _active_widget->deactivate();
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_active_widget)) {
-            b->on() = true;
-        }
         handle_button(_active_widget->id());
     }
 }

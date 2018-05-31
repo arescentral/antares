@@ -29,6 +29,10 @@ namespace antares {
 
 class Widget {
   public:
+    virtual Widget* accept_click(Point where);
+    virtual Widget* accept_key(int64_t which);
+    virtual Widget* accept_button(int64_t which);
+
     virtual int64_t id() const;
     virtual void    deactivate();
     virtual void    draw(Point origin, InputMode mode) const = 0;
@@ -90,6 +94,10 @@ class PictureRect : public Widget {
 
 class Button : public Widget {
   public:
+    Widget* accept_click(Point where) override;
+    Widget* accept_key(int64_t which) override;
+    Widget* accept_button(int64_t which) override;
+
     int64_t id() const override { return _id; }
     void    deactivate() override { _active = false; }
 

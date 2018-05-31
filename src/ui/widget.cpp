@@ -211,6 +211,10 @@ static int h_border(InterfaceStyle style) {
     return style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
 }
 
+Widget* Widget::accept_click(Point where) { return nullptr; }
+Widget* Widget::accept_key(int64_t which) { return nullptr; }
+Widget* Widget::accept_button(int64_t which) { return nullptr; }
+
 int64_t Widget::id() const { return -1; }
 void    Widget::deactivate() {}
 
@@ -445,6 +449,27 @@ Button::Button(const ButtonData& data)
           _gamepad{data.gamepad},
           _hue{data.hue},
           _style{data.style} {}
+
+Widget* Button::accept_click(Point where) {
+    if (_enabled && (outer_bounds().contains(where))) {
+        return this;
+    }
+    return nullptr;
+}
+
+Widget* Button::accept_key(int64_t which) {
+    if (_enabled && (_key == which)) {
+        return this;
+    }
+    return nullptr;
+}
+
+Widget* Button::accept_button(int64_t which) {
+    if (_enabled && (_gamepad == which)) {
+        return this;
+    }
+    return nullptr;
+}
 
 PlainButton::PlainButton(const PlainButtonData& data) : Button{data}, _inner_bounds{data.bounds} {}
 
