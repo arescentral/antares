@@ -41,56 +41,38 @@ namespace {
 
 struct EmplaceBackVisitor : InterfaceItemData::Visitor {
     std::vector<std::unique_ptr<Widget>>* vec;
-    Point                                 offset;
 
-    EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v, Point offset)
-            : vec{v}, offset{offset} {}
+    EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
 
     void visit_box_rect(const BoxRectData& data) const override {
-        auto copy = data.copy();
-        copy.bounds.offset(offset.h, offset.v);
-        vec->emplace_back(new BoxRect{std::move(copy)});
+        vec->emplace_back(new BoxRect{data});
     }
 
     void visit_text_rect(const TextRectData& data) const override {
-        auto copy = data.copy();
-        copy.bounds.offset(offset.h, offset.v);
-        vec->emplace_back(new TextRect{std::move(copy)});
+        vec->emplace_back(new TextRect{data});
     }
 
     void visit_picture_rect(const PictureRectData& data) const override {
-        auto copy = data.copy();
-        copy.bounds.offset(offset.h, offset.v);
-        vec->emplace_back(new PictureRect{std::move(copy)});
+        vec->emplace_back(new PictureRect{data});
     }
 
     void visit_plain_button(const PlainButtonData& data) const override {
-        auto copy = data.copy();
-        copy.bounds.offset(offset.h, offset.v);
-        vec->emplace_back(new PlainButton{std::move(copy)});
+        vec->emplace_back(new PlainButton{data});
     }
 
     void visit_radio_button(const RadioButtonData& data) const override {
-        auto copy = data.copy();
-        copy.bounds.offset(offset.h, offset.v);
-        vec->emplace_back(new RadioButton{std::move(copy)});
+        vec->emplace_back(new RadioButton{data});
     }
 
     void visit_checkbox_button(const CheckboxButtonData& data) const override {
-        auto copy = data.copy();
-        copy.bounds.offset(offset.h, offset.v);
-        vec->emplace_back(new CheckboxButton{std::move(copy)});
+        vec->emplace_back(new CheckboxButton{data});
     }
 
     void visit_tab_box(const TabBoxData& data) const override {
-        auto copy = data.copy();
-        copy.bounds.offset(offset.h, offset.v);
         for (const auto& button : data.buttons) {
-            auto copy = button.copy();
-            copy.bounds.offset(offset.h, offset.v);
-            vec->emplace_back(new TabBoxButton{std::move(copy)});
+            vec->emplace_back(new TabBoxButton{button.copy()});
         }
-        vec->emplace_back(new TabBox{std::move(copy)});
+        vec->emplace_back(new TabBox{data.copy()});
     }
 
     void visit_tab_box_button(const TabBoxButtonData& data) const override {}
@@ -103,7 +85,7 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bo
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
         for (auto& item : data.items) {
-            item->accept(EmplaceBackVisitor{&_items, bounds.origin()});
+            item->accept(EmplaceBackVisitor{&_items});
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
@@ -128,8 +110,7 @@ void InterfaceScreen::become_normal() {
 }
 
 void InterfaceScreen::draw() const {
-    Point off = offset();
-    Rect  copy_area;
+    Rect copy_area;
     if (_full_screen) {
         copy_area = _bounds;
     } else {
@@ -139,6 +120,7 @@ void InterfaceScreen::draw() const {
             copy_area.enlarge_to(item->outer_bounds());
         }
     }
+    Point off = offset();
     copy_area.offset(off.h, off.v);
 
     Rects().fill(copy_area, RgbColor::black());
@@ -155,8 +137,7 @@ void InterfaceScreen::draw() const {
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     Point where = event.where();
     Point off   = offset();
-    where.h -= off.h;
-    where.v -= off.v;
+    where.offset(-off.h, -off.v);
     if (event.button() != 0) {
         return;
     }
@@ -176,8 +157,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
 void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
     Point where = event.where();
     Point off   = offset();
-    where.h -= _bounds.left + off.h;
-    where.v -= _bounds.top + off.v;
+    where.offset(-off.h, -off.v);
     if (event.button() != 0) {
         return;
     }
@@ -256,17 +236,15 @@ void InterfaceScreen::truncate(size_t size) {
 }
 
 void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items) {
-    const int offset_x = (_bounds.width() / 2) - 320;
-    const int offset_y = (_bounds.height() / 2) - 240;
     for (const auto& item : items) {
-        item->accept(EmplaceBackVisitor{&_items, {offset_x, offset_y}});
+        item->accept(EmplaceBackVisitor{&_items});
     }
 }
 
 Point InterfaceScreen::offset() const {
-    Rect bounds = {0, 0, 640, 480};
-    bounds.center_in(sys.video->screen_size().as_rect());
-    return bounds.origin();
+    Rect screen = {0, 0, 640, 480};
+    screen.center_in(sys.video->screen_size().as_rect());
+    return {_bounds.left + screen.left, _bounds.top + screen.top};
 }
 
 size_t InterfaceScreen::size() const { return _items.size(); }
