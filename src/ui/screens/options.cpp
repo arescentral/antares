@@ -64,21 +64,25 @@ void OptionsScreen::become_front() {
 }
 
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
-        : InterfaceScreen("options/sound", {0, 0, 640, 480}), _state(state) {}
+        : InterfaceScreen("options/sound", {0, 0, 640, 480}), _state(state) {
+    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC))
+            .bind({
+                    [] { return sys.prefs->play_idle_music(); },
+                    [](bool on) {
+                        sys.prefs->set_play_idle_music(on);
+                        sys.music.sync();
+                    },
+            });
+    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC))
+            .bind({
+                    [] { return sys.prefs->play_music_in_game(); },
+                    [](bool on) { sys.prefs->set_play_music_in_game(on); },
+            });
+}
 
 SoundControlScreen::~SoundControlScreen() {}
 
 void SoundControlScreen::adjust_interface() {
-    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on() = sys.prefs->play_idle_music();
-    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on() = sys.prefs->play_music_in_game();
-    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on()  = sys.prefs->speech_on();
-
-    if (false) {  // TODO(sfiera): if speech available.
-        dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).enabled() = true;
-    } else {
-        dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).enabled() = false;
-    }
-
     if (sys.prefs->volume() > 0) {
         dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN)).enabled() = true;
     } else {
@@ -94,45 +98,26 @@ void SoundControlScreen::adjust_interface() {
 
 void SoundControlScreen::handle_button(int64_t id) {
     switch (id) {
-        case GAME_MUSIC:
-            sys.prefs->set_play_music_in_game(
-                    !dynamic_cast<const CheckboxButton&>(item(GAME_MUSIC)).on());
-            adjust_interface();
-            break;
-
-        case IDLE_MUSIC:
-            sys.prefs->set_play_idle_music(
-                    !dynamic_cast<const CheckboxButton&>(item(IDLE_MUSIC)).on());
-            sys.music.sync();  // TODO(sfiera): do this in driver.
-            adjust_interface();
-            break;
-
-        case SPEECH_ON:
-            sys.prefs->set_speech_on(!dynamic_cast<const CheckboxButton&>(item(SPEECH_ON)).on());
-            adjust_interface();
-            break;
-
         case VOLUME_DOWN:
             sys.prefs->set_volume(sys.prefs->volume() - 1);
             sys.audio->set_global_volume(sys.prefs->volume());
             adjust_interface();
-            break;
+            return;
 
         case VOLUME_UP:
             sys.prefs->set_volume(sys.prefs->volume() + 1);
             sys.audio->set_global_volume(sys.prefs->volume());
             adjust_interface();
-            break;
+            return;
 
         case DONE:
         case CANCEL:
         case KEY_CONTROL:
             *_state = button_state(id);
             stack()->pop(this);
-            break;
-
-        default: throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
+            return;
     }
+    InterfaceScreen::handle_button(id);
 }
 
 void SoundControlScreen::overlay() const {

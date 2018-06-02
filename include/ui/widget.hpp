@@ -142,18 +142,26 @@ class PlainButton : public Button {
 
 class CheckboxButton : public Button {
   public:
+    struct Value {
+        std::function<bool()>     get;
+        std::function<void(bool)> set;
+        std::function<bool()>     modifiable;
+    };
+
     CheckboxButton(const CheckboxButtonData& data);
 
-    bool  on() const { return _on; }
-    bool& on() { return _on; }
+    void bind(Value v);
+    bool get() const;
+    void set(bool on);
+    bool enabled() const;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    Rect _inner_bounds;
-    bool _on = false;
+    Rect  _inner_bounds;
+    Value _value;
 };
 
 class RadioButton : public Button {

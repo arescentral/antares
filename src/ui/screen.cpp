@@ -228,6 +228,15 @@ void InterfaceScreen::overlay() const {}
 
 void InterfaceScreen::adjust_interface() {}
 
+void InterfaceScreen::handle_button(int64_t id) {
+    if (!((0 <= id) && (id < _items.size()))) {
+        return;
+    }
+    if (CheckboxButton* checkbox = dynamic_cast<CheckboxButton*>(&mutable_item(id))) {
+        checkbox->set(!checkbox->get());
+    }
+}
+
 void InterfaceScreen::truncate(size_t size) {
     if (size > _items.size()) {
         throw std::runtime_error("");

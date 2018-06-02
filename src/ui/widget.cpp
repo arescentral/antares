@@ -643,6 +643,19 @@ Rect PlainButton::outer_bounds() const {
 CheckboxButton::CheckboxButton(const CheckboxButtonData& data)
         : Button{data}, _inner_bounds{data.bounds} {}
 
+void CheckboxButton::bind(Value v) { _value = v; }
+bool CheckboxButton::get() const { return _value.get && _value.get(); }
+void CheckboxButton::set(bool on) { _value.set(on); }
+bool CheckboxButton::enabled() const {
+    if (!_value.get) {
+        return false;
+    } else if (!_value.modifiable) {
+        return true;
+    } else {
+        return _value.modifiable();
+    }
+}
+
 void CheckboxButton::draw(Point offset, InputMode) const {
     Rect     tRect, uRect, vRect, wRect;
     int16_t  swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
@@ -697,7 +710,7 @@ void CheckboxButton::draw(Point offset, InputMode) const {
         wRect.inset(3, 3);
         mDrawPuffDownRect(Rects(), wRect, hue(), shade);
         wRect.inset(1, 1);
-        if (!on()) {
+        if (!get()) {
             color = RgbColor::black();
         } else {
             color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
@@ -714,7 +727,7 @@ void CheckboxButton::draw(Point offset, InputMode) const {
         wRect.inset(3, 3);
         mDrawPuffDownRect(Rects(), wRect, hue(), shade);
         wRect.inset(1, 1);
-        if (!on()) {
+        if (!get()) {
             color = RgbColor::black();
         } else if (enabled()) {
             color = GetRGBTranslateColorShade(hue(), LIGHT);
