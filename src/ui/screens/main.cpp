@@ -47,7 +47,60 @@ const int  kTitleTextScrollWidth = 450;
 MainScreen::MainScreen()
         : InterfaceScreen("main", {0, 0, 640, 480}),
           _state(NORMAL),
-          _replays(Resource::list_replays()) {}
+          _replays(Resource::list_replays()) {
+    dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME))
+            .bind({
+                    [this] { stack()->push(new SoloGame); },
+                    [] { return plug.chapters.find(1) != plug.chapters.end(); },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME))
+            .bind({
+                    [] { throw std::runtime_error("Networked games not yet implemented."); },
+                    [] { return false; },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(REPLAY_INTRO))
+            .bind({
+                    [this] {
+                        stack()->push(new ScrollTextScreen(
+                                *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
+                    },
+                    [] { return plug.info.intro.has_value(); },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(DEMO))
+            .bind({
+                    [this] {
+                        stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
+                    },
+                    [this] { return !_replays.empty(); },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(ABOUT_ARES))
+            .bind({
+                    [this] {
+                        stack()->push(
+                                new ScrollTextScreen(*plug.info.about, 540, kFastScrollInterval));
+                    },
+                    [] { return plug.info.about.has_value(); },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(OPTIONS))
+            .bind({
+                    [this] { stack()->push(new OptionsScreen); },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(QUIT))
+            .bind({
+                    [this] {
+                        // 1-second fade-out.
+                        _state = QUITTING;
+                        stack()->push(new ColorFade(
+                                ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+                    },
+            });
+}
 
 MainScreen::~MainScreen() {}
 
@@ -113,57 +166,6 @@ void MainScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     InterfaceScreen::gamepad_button_up(event);
     _next_timer = (now() + kMainDemoTimeOutTime);
-}
-
-void MainScreen::adjust_interface() {
-    if (plug.chapters.find(1) == plug.chapters.end()) {
-        dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).enabled() = false;
-    }
-
-    // TODO(sfiera): switch on whether or not network games are available.
-    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).enabled() = false;
-
-    if (!plug.info.intro.has_value()) {
-        dynamic_cast<PlainButton&>(mutable_item(REPLAY_INTRO)).enabled() = false;
-    }
-
-    if (_replays.size() == 0) {
-        dynamic_cast<PlainButton&>(mutable_item(DEMO)).enabled() = false;
-    }
-
-    if (!plug.info.about.has_value()) {
-        dynamic_cast<PlainButton&>(mutable_item(ABOUT_ARES)).enabled() = false;
-    }
-}
-
-void MainScreen::handle_button(int64_t id) {
-    switch (id) {
-        case QUIT:
-            // 1-second fade-out.
-            _state = QUITTING;
-            stack()->push(
-                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-            break;
-
-        case DEMO: stack()->push(new ReplayGame(_replays.at(rand() % _replays.size()))); break;
-
-        case REPLAY_INTRO:
-            stack()->push(new ScrollTextScreen(
-                    *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
-            break;
-
-        case START_NEW_GAME: stack()->push(new SoloGame); break;
-
-        case START_NETWORK_GAME:
-            throw std::runtime_error("Networked games not yet implemented.");
-            break;
-
-        case ABOUT_ARES:
-            stack()->push(new ScrollTextScreen(*plug.info.about, 540, kFastScrollInterval));
-            break;
-
-        case OPTIONS: stack()->push(new OptionsScreen); break;
-    }
 }
 
 }  // namespace antares

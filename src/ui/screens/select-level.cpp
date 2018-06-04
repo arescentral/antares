@@ -49,6 +49,41 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
     Ledger::ledger()->unlocked_chapters(&_chapters);
     _index  = _chapters.size() - 1;
     *_level = Level::get(_chapters[_index]);
+
+    dynamic_cast<PlainButton&>(mutable_item(OK)).bind({[this] {
+        _state      = FADING_OUT;
+        *_cancelled = false;
+        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+    }});
+
+    dynamic_cast<PlainButton&>(mutable_item(CANCEL)).bind({[this] {
+        *_cancelled = true;
+        stack()->pop(this);
+    }});
+
+    dynamic_cast<PlainButton&>(mutable_item(PREVIOUS))
+            .bind({
+                    [this] {
+                        if (_index > 0) {
+                            --_index;
+                            *_level = Level::get(_chapters[_index]);
+                        }
+                        adjust_interface();
+                    },
+                    [this] { return _index > 0; },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(NEXT))
+            .bind({
+                    [this] {
+                        if (_index < _chapters.size() - 1) {
+                            ++_index;
+                            *_level = Level::get(_chapters[_index]);
+                        }
+                        adjust_interface();
+                    },
+                    [this] { return _index < _chapters.size() - 1; },
+            });
 }
 
 SelectLevelScreen::~SelectLevelScreen() {}
@@ -111,53 +146,6 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
         case FADING_OUT: return;
     }
     InterfaceScreen::key_down(event);
-}
-
-void SelectLevelScreen::adjust_interface() {
-    if (_index > 0) {
-        dynamic_cast<PlainButton&>(mutable_item(PREVIOUS)).enabled() = true;
-    } else {
-        dynamic_cast<PlainButton&>(mutable_item(PREVIOUS)).enabled() = false;
-    }
-    if (_index < _chapters.size() - 1) {
-        dynamic_cast<PlainButton&>(mutable_item(NEXT)).enabled() = true;
-    } else {
-        dynamic_cast<PlainButton&>(mutable_item(NEXT)).enabled() = false;
-    }
-}
-
-void SelectLevelScreen::handle_button(int64_t id) {
-    switch (id) {
-        case OK:
-            _state      = FADING_OUT;
-            *_cancelled = false;
-            stack()->push(
-                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-            break;
-
-        case CANCEL:
-            *_cancelled = true;
-            stack()->pop(this);
-            break;
-
-        case PREVIOUS:
-            if (_index > 0) {
-                --_index;
-                *_level = Level::get(_chapters[_index]);
-            }
-            adjust_interface();
-            break;
-
-        case NEXT:
-            if (_index < _chapters.size() - 1) {
-                ++_index;
-                *_level = Level::get(_chapters[_index]);
-            }
-            adjust_interface();
-            break;
-
-        default: throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
-    }
 }
 
 void SelectLevelScreen::overlay() const { draw_level_name(); }

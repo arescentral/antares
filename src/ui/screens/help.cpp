@@ -44,6 +44,8 @@ HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sy
     _text.set_back_color(back);
     _text.set_retro_text(text);
     _text.wrap_to(item(BOX).inner_bounds().width(), 0, 0);
+
+    dynamic_cast<PlainButton&>(mutable_item(DONE)).bind({[this] { stack()->pop(this); }});
 }
 
 HelpScreen::~HelpScreen() {}
@@ -53,14 +55,6 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
         stack()->pop(this);
     } else {
         InterfaceScreen::key_down(event);
-    }
-}
-
-void HelpScreen::handle_button(int64_t id) {
-    switch (id) {
-        case DONE: stack()->pop(this); break;
-
-        default: throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
     }
 }
 

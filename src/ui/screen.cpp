@@ -232,8 +232,14 @@ void InterfaceScreen::handle_button(int64_t id) {
     if (!((0 <= id) && (id < _items.size()))) {
         return;
     }
+
+    if (PlainButton* button = dynamic_cast<PlainButton*>(&mutable_item(id))) {
+        button->action();
+        return;
+    }
     if (CheckboxButton* checkbox = dynamic_cast<CheckboxButton*>(&mutable_item(id))) {
         checkbox->set(!checkbox->get());
+        return;
     }
 }
 

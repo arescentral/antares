@@ -73,52 +73,53 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
                         sys.music.sync();
                     },
             });
+
     dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC))
             .bind({
                     [] { return sys.prefs->play_music_in_game(); },
                     [](bool on) { sys.prefs->set_play_music_in_game(on); },
             });
+
+    dynamic_cast<PlainButton&>(mutable_item(VOLUME_UP))
+            .bind({[] {
+                       sys.prefs->set_volume(sys.prefs->volume() + 1);
+                       sys.audio->set_global_volume(sys.prefs->volume());
+                   },
+                   [] { return sys.prefs->volume() < kMaxVolumePreference; }});
+
+    dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN))
+            .bind({[] {
+                       sys.prefs->set_volume(sys.prefs->volume() - 1);
+                       sys.audio->set_global_volume(sys.prefs->volume());
+                   },
+                   [] { return sys.prefs->volume() > 0; }});
+
+    dynamic_cast<PlainButton&>(mutable_item(DONE))
+            .bind({
+                    [this] {
+                        *_state = OptionsScreen::ACCEPT;
+                        stack()->pop(this);
+                    },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(CANCEL))
+            .bind({
+                    [this] {
+                        *_state = OptionsScreen::CANCEL;
+                        stack()->pop(this);
+                    },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(KEY_CONTROL))
+            .bind({
+                    [this] {
+                        *_state = OptionsScreen::KEY_CONTROL;
+                        stack()->pop(this);
+                    },
+            });
 }
 
 SoundControlScreen::~SoundControlScreen() {}
-
-void SoundControlScreen::adjust_interface() {
-    if (sys.prefs->volume() > 0) {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN)).enabled() = true;
-    } else {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_DOWN)).enabled() = false;
-    }
-
-    if (sys.prefs->volume() < kMaxVolumePreference) {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_UP)).enabled() = true;
-    } else {
-        dynamic_cast<PlainButton&>(mutable_item(VOLUME_UP)).enabled() = false;
-    }
-}
-
-void SoundControlScreen::handle_button(int64_t id) {
-    switch (id) {
-        case VOLUME_DOWN:
-            sys.prefs->set_volume(sys.prefs->volume() - 1);
-            sys.audio->set_global_volume(sys.prefs->volume());
-            adjust_interface();
-            return;
-
-        case VOLUME_UP:
-            sys.prefs->set_volume(sys.prefs->volume() + 1);
-            sys.audio->set_global_volume(sys.prefs->volume());
-            adjust_interface();
-            return;
-
-        case DONE:
-        case CANCEL:
-        case KEY_CONTROL:
-            *_state = button_state(id);
-            stack()->pop(this);
-            return;
-    }
-    InterfaceScreen::handle_button(id);
-}
 
 void SoundControlScreen::overlay() const {
     const int volume = sys.prefs->volume();
@@ -141,17 +142,6 @@ void SoundControlScreen::overlay() const {
         const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, 2 * (i + 1));
         rects.fill(notch, color);
         notch.offset(notch_width, 0);
-    }
-}
-
-OptionsScreen::State SoundControlScreen::button_state(int button) {
-    switch (button) {
-        case DONE: return OptionsScreen::ACCEPT;
-        case CANCEL: return OptionsScreen::CANCEL;
-        case KEY_CONTROL: return OptionsScreen::KEY_CONTROL;
-        default:
-            throw std::runtime_error(
-                    pn::format("unknown sound control button {0}", button).c_str());
     }
 }
 
@@ -179,6 +169,32 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
           _tabs(2009),
           _keys(2005) {
     set_tab(SHIP);
+
+    dynamic_cast<PlainButton&>(mutable_item(DONE))
+            .bind({
+                    [this] {
+                        *_state = OptionsScreen::ACCEPT;
+                        stack()->pop(this);
+                    },
+                    [this] { return _conflicts.empty(); },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(CANCEL))
+            .bind({
+                    [this] {
+                        *_state = OptionsScreen::CANCEL;
+                        stack()->pop(this);
+                    },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(SOUND_CONTROL))
+            .bind({
+                    [this] {
+                        *_state = OptionsScreen::SOUND_CONTROL;
+                        stack()->pop(this);
+                    },
+                    [this] { return _conflicts.empty(); },
+            });
 }
 
 KeyControlScreen::~KeyControlScreen() {}
@@ -249,25 +265,10 @@ void KeyControlScreen::adjust_interface() {
             flash_on(it->second);
         }
     }
-
-    if (_conflicts.empty()) {
-        dynamic_cast<PlainButton&>(mutable_item(DONE)).enabled()          = true;
-        dynamic_cast<PlainButton&>(mutable_item(SOUND_CONTROL)).enabled() = true;
-    } else {
-        dynamic_cast<PlainButton&>(mutable_item(DONE)).enabled()          = false;
-        dynamic_cast<PlainButton&>(mutable_item(SOUND_CONTROL)).enabled() = false;
-    }
 }
 
 void KeyControlScreen::handle_button(int64_t id) {
     switch (id) {
-        case DONE:
-        case CANCEL:
-        case SOUND_CONTROL:
-            *_state = button_state(id);
-            stack()->pop(this);
-            break;
-
         case SHIP_TAB:
         case COMMAND_TAB:
         case SHORTCUT_TAB:
@@ -275,19 +276,9 @@ void KeyControlScreen::handle_button(int64_t id) {
         case HOT_KEY_TAB:
             set_tab(button_tab(id));
             adjust_interface();
-            break;
-
-        default: {
-            size_t key = kKeyIndices[_tab] + id - _key_start;
-            if ((kKeyIndices[_tab] <= key) && (key < kKeyIndices[_tab + 1])) {
-                _selected_key = key;
-                adjust_interface();
-            } else {
-                throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
-            }
-            break;
-        }
+            return;
     }
+    InterfaceScreen::handle_button(id);
 }
 
 void KeyControlScreen::overlay() const {
@@ -305,16 +296,6 @@ void KeyControlScreen::overlay() const {
         Point           off    = offset();
         bounds.offset(off.h, off.v);
         draw_text_in_rect(bounds, text, box.style(), box.hue());
-    }
-}
-
-OptionsScreen::State KeyControlScreen::button_state(int button) {
-    switch (button) {
-        case DONE: return OptionsScreen::ACCEPT;
-        case CANCEL: return OptionsScreen::CANCEL;
-        case SOUND_CONTROL: return OptionsScreen::SOUND_CONTROL;
-        default:
-            throw std::runtime_error(pn::format("unknown key control button {0}", button).c_str());
     }
 }
 
@@ -341,6 +322,14 @@ void KeyControlScreen::set_tab(Tab tab) {
         if (buttons[tab] == i) {
             item.on() = true;
             extend(item.content());
+
+            for (int i = 0; i < item.content().size(); ++i) {
+                int key = kKeyIndices[tab] + i;
+                dynamic_cast<PlainButton&>(mutable_item(_key_start + i)).bind({[this, key] {
+                    _selected_key = key;
+                    adjust_interface();
+                }});
+            }
         } else {
             item.on() = false;
         }

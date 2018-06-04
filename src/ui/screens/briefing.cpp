@@ -199,6 +199,30 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         star.location.v = _bounds.top + Randomize(_bounds.height());
         _system_stars.push_back(star);
     }
+
+    dynamic_cast<PlainButton&>(mutable_item(DONE)).bind({[this] { stack()->pop(this); }});
+
+    dynamic_cast<PlainButton&>(mutable_item(PREVIOUS))
+            .bind({
+                    [this] {
+                        if (_briefing_point > _briefing_point_start) {
+                            --_briefing_point;
+                        }
+                        build_brief_point();
+                    },
+                    [this] { return _briefing_point > _briefing_point_start; },
+            });
+
+    dynamic_cast<PlainButton&>(mutable_item(NEXT))
+            .bind({
+                    [this] {
+                        if (_briefing_point < _briefing_point_end - 1) {
+                            ++_briefing_point;
+                        }
+                        build_brief_point();
+                    },
+                    [this] { return _briefing_point < _briefing_point_end - 1; },
+            });
 }
 
 BriefingScreen::~BriefingScreen() {}
@@ -281,43 +305,6 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
         case Gamepad::UP: return show_object_data(0, event);
         case Gamepad::DOWN: return show_object_data(1, event);
         default: { return InterfaceScreen::gamepad_button_down(event); }
-    }
-}
-
-void BriefingScreen::adjust_interface() {
-    if (_briefing_point > _briefing_point_start) {
-        dynamic_cast<PlainButton&>(mutable_item(PREVIOUS)).enabled() = true;
-    } else {
-        dynamic_cast<PlainButton&>(mutable_item(PREVIOUS)).enabled() = false;
-    }
-    if (_briefing_point < _briefing_point_end - 1) {
-        dynamic_cast<PlainButton&>(mutable_item(NEXT)).enabled() = true;
-    } else {
-        dynamic_cast<PlainButton&>(mutable_item(NEXT)).enabled() = false;
-    }
-}
-
-void BriefingScreen::handle_button(int64_t id) {
-    switch (id) {
-        case DONE: stack()->pop(this); break;
-
-        case PREVIOUS:
-            if (_briefing_point > _briefing_point_start) {
-                --_briefing_point;
-            }
-            adjust_interface();
-            build_brief_point();
-            break;
-
-        case NEXT:
-            if (_briefing_point < _briefing_point_end - 1) {
-                ++_briefing_point;
-            }
-            adjust_interface();
-            build_brief_point();
-            break;
-
-        default: throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
     }
 }
 

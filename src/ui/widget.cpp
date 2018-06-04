@@ -451,27 +451,43 @@ Button::Button(const ButtonData& data)
           _style{data.style} {}
 
 Widget* Button::accept_click(Point where) {
-    if (_enabled && (outer_bounds().contains(where))) {
+    if (enabled() && (outer_bounds().contains(where))) {
         return this;
     }
     return nullptr;
 }
 
 Widget* Button::accept_key(int64_t which) {
-    if (_enabled && (_key == which)) {
+    if (enabled() && (_key == which)) {
         return this;
     }
     return nullptr;
 }
 
 Widget* Button::accept_button(int64_t which) {
-    if (_enabled && (_gamepad == which)) {
+    if (enabled() && (_gamepad == which)) {
         return this;
     }
     return nullptr;
 }
 
 PlainButton::PlainButton(const PlainButtonData& data) : Button{data}, _inner_bounds{data.bounds} {}
+
+void PlainButton::bind(Action a) { _action = a; }
+void PlainButton::action() const {
+    if (_action.perform) {
+        _action.perform();
+    }
+}
+bool PlainButton::enabled() const {
+    if (!_action.perform) {
+        return false;
+    } else if (!_action.possible) {
+        return true;
+    } else {
+        return _action.possible();
+    }
+}
 
 void PlainButton::draw(Point offset, InputMode mode) const {
     Rect     tRect, uRect, vRect;

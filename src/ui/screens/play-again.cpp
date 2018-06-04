@@ -51,7 +51,34 @@ const char* interface_id(bool allow_resume, bool allow_skip) {
 PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed)
         : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}),
           _state(ASKING),
-          _button_pressed(button_pressed) {}
+          _button_pressed(button_pressed) {
+    dynamic_cast<PlainButton&>(mutable_item(RESTART))
+            .bind({[this] {
+                       _state           = FADING_OUT;
+                       *_button_pressed = Item::RESTART;
+                       stack()->push(new ColorFade(
+                               ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+                   },
+                   [] {
+                       // TODO(sfiera): disable if networked.
+                       return true;
+                   }});
+
+    dynamic_cast<PlainButton&>(mutable_item(QUIT)).bind({[this] {
+        *_button_pressed = Item::QUIT;
+        stack()->pop(this);
+    }});
+
+    dynamic_cast<PlainButton&>(mutable_item(RESUME)).bind({[this] {
+        *_button_pressed = Item::RESUME;
+        stack()->pop(this);
+    }});
+
+    dynamic_cast<PlainButton&>(mutable_item(SKIP)).bind({[this] {
+        *_button_pressed = Item::SKIP;
+        stack()->pop(this);
+    }});
+}
 
 PlayAgainScreen::~PlayAgainScreen() {}
 
@@ -60,31 +87,6 @@ void PlayAgainScreen::become_front() {
         case ASKING: InterfaceScreen::become_front(); break;
 
         case FADING_OUT: stack()->pop(this); break;
-    }
-}
-
-void PlayAgainScreen::adjust_interface() {
-    // TODO(sfiera): disable if networked.
-    dynamic_cast<PlainButton&>(mutable_item(RESTART)).enabled() = true;
-}
-
-void PlayAgainScreen::handle_button(int64_t id) {
-    switch (id) {
-        case RESTART:
-            _state           = FADING_OUT;
-            *_button_pressed = static_cast<Item>(id);
-            stack()->push(
-                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-            break;
-
-        case QUIT:
-        case RESUME:
-        case SKIP:
-            *_button_pressed = static_cast<Item>(id);
-            stack()->pop(this);
-            break;
-
-        default: throw std::runtime_error(pn::format("Got unknown button {0}.", id).c_str());
     }
 }
 

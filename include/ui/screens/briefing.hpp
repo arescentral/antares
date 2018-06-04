@@ -42,10 +42,6 @@ class BriefingScreen : public InterfaceScreen {
     virtual void key_down(const KeyDownEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(int64_t id);
-
   private:
     enum Item {
         // Buttons:
