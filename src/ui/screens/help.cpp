@@ -45,7 +45,7 @@ HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sy
     _text.set_retro_text(text);
     _text.wrap_to(widget(BOX)->inner_bounds().width(), 0, 0);
 
-    dynamic_cast<PlainButton&>(*widget(DONE)).bind({[this] { stack()->pop(this); }});
+    button(DONE)->bind({[this] { stack()->pop(this); }});
 }
 
 HelpScreen::~HelpScreen() {}

@@ -65,8 +65,8 @@ void OptionsScreen::become_front() {
 
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
         : InterfaceScreen("options/sound", {0, 0, 640, 480}), _state(state) {
-    dynamic_cast<CheckboxButton&>(*widget(IDLE_MUSIC))
-            .bind({
+    checkbox(IDLE_MUSIC)
+            ->bind({
                     [] { return sys.prefs->play_idle_music(); },
                     [](bool on) {
                         sys.prefs->set_play_idle_music(on);
@@ -74,44 +74,45 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
                     },
             });
 
-    dynamic_cast<CheckboxButton&>(*widget(GAME_MUSIC))
-            .bind({
+    checkbox(GAME_MUSIC)
+            ->bind({
                     [] { return sys.prefs->play_music_in_game(); },
                     [](bool on) { sys.prefs->set_play_music_in_game(on); },
             });
 
-    dynamic_cast<PlainButton&>(*widget(VOLUME_UP))
-            .bind({[] {
-                       sys.prefs->set_volume(sys.prefs->volume() + 1);
-                       sys.audio->set_global_volume(sys.prefs->volume());
-                   },
-                   [] { return sys.prefs->volume() < kMaxVolumePreference; }});
+    button(VOLUME_UP)->bind({
+            [] {
+                sys.prefs->set_volume(sys.prefs->volume() + 1);
+                sys.audio->set_global_volume(sys.prefs->volume());
+            },
+            [] { return sys.prefs->volume() < kMaxVolumePreference; },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(VOLUME_DOWN))
-            .bind({[] {
-                       sys.prefs->set_volume(sys.prefs->volume() - 1);
-                       sys.audio->set_global_volume(sys.prefs->volume());
-                   },
-                   [] { return sys.prefs->volume() > 0; }});
-
-    dynamic_cast<PlainButton&>(*widget(DONE))
-            .bind({
-                    [this] {
-                        *_state = OptionsScreen::ACCEPT;
-                        stack()->pop(this);
+    button(VOLUME_DOWN)
+            ->bind({
+                    [] {
+                        sys.prefs->set_volume(sys.prefs->volume() - 1);
+                        sys.audio->set_global_volume(sys.prefs->volume());
                     },
+                    [] { return sys.prefs->volume() > 0; },
             });
 
-    dynamic_cast<PlainButton&>(*widget(CANCEL))
-            .bind({
-                    [this] {
-                        *_state = OptionsScreen::CANCEL;
-                        stack()->pop(this);
-                    },
-            });
+    button(DONE)->bind({
+            [this] {
+                *_state = OptionsScreen::ACCEPT;
+                stack()->pop(this);
+            },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(KEY_CONTROL))
-            .bind({
+    button(CANCEL)->bind({
+            [this] {
+                *_state = OptionsScreen::CANCEL;
+                stack()->pop(this);
+            },
+    });
+
+    button(KEY_CONTROL)
+            ->bind({
                     [this] {
                         *_state = OptionsScreen::KEY_CONTROL;
                         stack()->pop(this);
@@ -170,25 +171,23 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
           _keys(2005) {
     set_tab(SHIP);
 
-    dynamic_cast<PlainButton&>(*widget(DONE))
-            .bind({
-                    [this] {
-                        *_state = OptionsScreen::ACCEPT;
-                        stack()->pop(this);
-                    },
-                    [this] { return _conflicts.empty(); },
-            });
+    button(DONE)->bind({
+            [this] {
+                *_state = OptionsScreen::ACCEPT;
+                stack()->pop(this);
+            },
+            [this] { return _conflicts.empty(); },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(CANCEL))
-            .bind({
-                    [this] {
-                        *_state = OptionsScreen::CANCEL;
-                        stack()->pop(this);
-                    },
-            });
+    button(CANCEL)->bind({
+            [this] {
+                *_state = OptionsScreen::CANCEL;
+                stack()->pop(this);
+            },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(SOUND_CONTROL))
-            .bind({
+    button(SOUND_CONTROL)
+            ->bind({
                     [this] {
                         *_state = OptionsScreen::SOUND_CONTROL;
                         stack()->pop(this);
@@ -247,15 +246,15 @@ void KeyControlScreen::adjust_interface() {
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
-        size_t key                                   = kKeyIndices[_tab] + i - _key_start;
-        int    key_num                               = sys.prefs->key(key);
-        dynamic_cast<PlainButton&>(*widget(i)).key() = key_num;
+        size_t key       = kKeyIndices[_tab] + i - _key_start;
+        int    key_num   = sys.prefs->key(key);
+        button(i)->key() = key_num;
         if (key == _selected_key) {
-            dynamic_cast<PlainButton&>(*widget(i)).active() = true;
+            button(i)->active() = true;
         } else {
-            dynamic_cast<PlainButton&>(*widget(i)).active() = false;
+            button(i)->active() = false;
         }
-        dynamic_cast<PlainButton&>(*widget(i)).hue() = Hue::AQUA;
+        button(i)->hue() = Hue::AQUA;
     }
 
     if (_flashed_on) {
@@ -325,7 +324,7 @@ void KeyControlScreen::set_tab(Tab tab) {
 
             for (int i = 0; i < item.content().size(); ++i) {
                 int key = kKeyIndices[tab] + i;
-                dynamic_cast<PlainButton&>(*widget(_key_start + i)).bind({[this, key] {
+                button(_key_start + i)->bind({[this, key] {
                     _selected_key = key;
                     adjust_interface();
                 }});
@@ -361,12 +360,11 @@ void KeyControlScreen::update_conflicts() {
 
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
-        PlainButton& item =
-                dynamic_cast<PlainButton&>(*widget(key - kKeyIndices[_tab] + _key_start));
-        item.hue() = Hue::GOLD;
+        PlainButton* item = button(key - kKeyIndices[_tab] + _key_start);
+        item->hue()       = Hue::GOLD;
     } else {
-        TabBoxButton& item = dynamic_cast<TabBoxButton&>(*widget(SHIP_TAB + get_tab_num(key)));
-        item.hue()         = Hue::GOLD;
+        TabBoxButton* item = dynamic_cast<TabBoxButton*>(widget(SHIP_TAB + get_tab_num(key)));
+        item->hue()        = Hue::GOLD;
     }
 }
 

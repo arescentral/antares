@@ -52,32 +52,32 @@ PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* butto
         : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}),
           _state(ASKING),
           _button_pressed(button_pressed) {
-    dynamic_cast<PlainButton&>(*widget(RESTART))
-            .bind({[this] {
-                       _state           = FADING_OUT;
-                       *_button_pressed = Item::RESTART;
-                       stack()->push(new ColorFade(
-                               ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-                   },
-                   [] {
-                       // TODO(sfiera): disable if networked.
-                       return true;
-                   }});
+    button(RESTART)->bind(
+            {[this] {
+                 _state           = FADING_OUT;
+                 *_button_pressed = Item::RESTART;
+                 stack()->push(new ColorFade(
+                         ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+             },
+             [] {
+                 // TODO(sfiera): disable if networked.
+                 return true;
+             }});
 
-    dynamic_cast<PlainButton&>(*widget(QUIT)).bind({[this] {
+    button(QUIT)->bind({[this] {
         *_button_pressed = Item::QUIT;
         stack()->pop(this);
     }});
 
-    if (widget(RESUME)) {
-        dynamic_cast<PlainButton&>(*widget(RESUME)).bind({[this] {
+    if (button(RESUME)) {
+        button(RESUME)->bind({[this] {
             *_button_pressed = Item::RESUME;
             stack()->pop(this);
         }});
     }
 
-    if (widget(SKIP)) {
-        dynamic_cast<PlainButton&>(*widget(SKIP)).bind({[this] {
+    if (button(SKIP)) {
+        button(SKIP)->bind({[this] {
             *_button_pressed = Item::SKIP;
             stack()->pop(this);
         }});

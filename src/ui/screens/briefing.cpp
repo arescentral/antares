@@ -200,29 +200,27 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         _system_stars.push_back(star);
     }
 
-    dynamic_cast<PlainButton&>(*widget(DONE)).bind({[this] { stack()->pop(this); }});
+    button(DONE)->bind({[this] { stack()->pop(this); }});
 
-    dynamic_cast<PlainButton&>(*widget(PREVIOUS))
-            .bind({
-                    [this] {
-                        if (_briefing_point > _briefing_point_start) {
-                            --_briefing_point;
-                        }
-                        build_brief_point();
-                    },
-                    [this] { return _briefing_point > _briefing_point_start; },
-            });
+    button(PREVIOUS)->bind({
+            [this] {
+                if (_briefing_point > _briefing_point_start) {
+                    --_briefing_point;
+                }
+                build_brief_point();
+            },
+            [this] { return _briefing_point > _briefing_point_start; },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(NEXT))
-            .bind({
-                    [this] {
-                        if (_briefing_point < _briefing_point_end - 1) {
-                            ++_briefing_point;
-                        }
-                        build_brief_point();
-                    },
-                    [this] { return _briefing_point < _briefing_point_end - 1; },
-            });
+    button(NEXT)->bind({
+            [this] {
+                if (_briefing_point < _briefing_point_end - 1) {
+                    ++_briefing_point;
+                }
+                build_brief_point();
+            },
+            [this] { return _briefing_point < _briefing_point_end - 1; },
+    });
 }
 
 BriefingScreen::~BriefingScreen() {}

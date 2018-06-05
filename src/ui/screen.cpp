@@ -87,13 +87,7 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bo
         for (auto& item : data.items) {
             item->accept(EmplaceBackVisitor{&_widgets});
         }
-
-        _widgets_by_id.clear();
-        for (const auto& widget : _widgets) {
-            if (widget->id().has_value()) {
-                _widgets_by_id[*widget->id()] = widget.get();
-            }
-        }
+        rebuild_maps();
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
     }
@@ -113,6 +107,15 @@ void InterfaceScreen::become_normal() {
     if (_active_widget) {
         _active_widget->deactivate();
         _active_widget = nullptr;
+    }
+}
+
+void InterfaceScreen::rebuild_maps() {
+    _widgets_by_id.clear();
+    for (const auto& widget : _widgets) {
+        if (widget->id().has_value()) {
+            _widgets_by_id[*widget->id()] = widget.get();
+        }
     }
 }
 
@@ -237,12 +240,12 @@ void InterfaceScreen::overlay() const {}
 void InterfaceScreen::adjust_interface() {}
 
 void InterfaceScreen::handle_button(int64_t id) {
-    if (PlainButton* button = dynamic_cast<PlainButton*>(widget(id))) {
-        button->action();
+    if (PlainButton* b = button(id)) {
+        b->action();
         return;
     }
-    if (CheckboxButton* checkbox = dynamic_cast<CheckboxButton*>(widget(id))) {
-        checkbox->set(!checkbox->get());
+    if (CheckboxButton* c = checkbox(id)) {
+        c->set(!c->get());
         return;
     }
 }
@@ -252,26 +255,14 @@ void InterfaceScreen::truncate(size_t size) {
         throw std::runtime_error("");
     }
     _widgets.resize(size);
-
-    _widgets_by_id.clear();
-    for (const auto& widget : _widgets) {
-        if (widget->id().has_value()) {
-            _widgets_by_id[*widget->id()] = widget.get();
-        }
-    }
+    rebuild_maps();
 }
 
 void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items) {
     for (const auto& item : items) {
         item->accept(EmplaceBackVisitor{&_widgets});
     }
-
-    _widgets_by_id.clear();
-    for (const auto& widget : _widgets) {
-        if (widget->id().has_value()) {
-            _widgets_by_id[*widget->id()] = widget.get();
-        }
-    }
+    rebuild_maps();
 }
 
 Point InterfaceScreen::offset() const {
@@ -290,6 +281,20 @@ const Widget* InterfaceScreen::widget(int id) const {
 Widget* InterfaceScreen::widget(int id) {
     auto it = _widgets_by_id.find(id);
     return (it != _widgets_by_id.end()) ? it->second : nullptr;
+}
+
+const PlainButton* InterfaceScreen::button(int id) const {
+    return dynamic_cast<const PlainButton*>(widget(id));
+}
+
+PlainButton* InterfaceScreen::button(int id) { return dynamic_cast<PlainButton*>(widget(id)); }
+
+const CheckboxButton* InterfaceScreen::checkbox(int id) const {
+    return dynamic_cast<const CheckboxButton*>(widget(id));
+}
+
+CheckboxButton* InterfaceScreen::checkbox(int id) {
+    return dynamic_cast<CheckboxButton*>(widget(id));
 }
 
 }  // namespace antares

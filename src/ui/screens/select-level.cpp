@@ -50,40 +50,38 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
     _index  = _chapters.size() - 1;
     *_level = Level::get(_chapters[_index]);
 
-    dynamic_cast<PlainButton&>(*widget(OK)).bind({[this] {
+    button(OK)->bind({[this] {
         _state      = FADING_OUT;
         *_cancelled = false;
         stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
     }});
 
-    dynamic_cast<PlainButton&>(*widget(CANCEL)).bind({[this] {
+    button(CANCEL)->bind({[this] {
         *_cancelled = true;
         stack()->pop(this);
     }});
 
-    dynamic_cast<PlainButton&>(*widget(PREVIOUS))
-            .bind({
-                    [this] {
-                        if (_index > 0) {
-                            --_index;
-                            *_level = Level::get(_chapters[_index]);
-                        }
-                        adjust_interface();
-                    },
-                    [this] { return _index > 0; },
-            });
+    button(PREVIOUS)->bind({
+            [this] {
+                if (_index > 0) {
+                    --_index;
+                    *_level = Level::get(_chapters[_index]);
+                }
+                adjust_interface();
+            },
+            [this] { return _index > 0; },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(NEXT))
-            .bind({
-                    [this] {
-                        if (_index < _chapters.size() - 1) {
-                            ++_index;
-                            *_level = Level::get(_chapters[_index]);
-                        }
-                        adjust_interface();
-                    },
-                    [this] { return _index < _chapters.size() - 1; },
-            });
+    button(NEXT)->bind({
+            [this] {
+                if (_index < _chapters.size() - 1) {
+                    ++_index;
+                    *_level = Level::get(_chapters[_index]);
+                }
+                adjust_interface();
+            },
+            [this] { return _index < _chapters.size() - 1; },
+    });
 }
 
 SelectLevelScreen::~SelectLevelScreen() {}

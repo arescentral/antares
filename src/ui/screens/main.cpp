@@ -48,20 +48,20 @@ MainScreen::MainScreen()
         : InterfaceScreen("main", {0, 0, 640, 480}),
           _state(NORMAL),
           _replays(Resource::list_replays()) {
-    dynamic_cast<PlainButton&>(*widget(START_NEW_GAME))
-            .bind({
+    button(START_NEW_GAME)
+            ->bind({
                     [this] { stack()->push(new SoloGame); },
                     [] { return plug.chapters.find(1) != plug.chapters.end(); },
             });
 
-    dynamic_cast<PlainButton&>(*widget(START_NETWORK_GAME))
-            .bind({
+    button(START_NETWORK_GAME)
+            ->bind({
                     [] { throw std::runtime_error("Networked games not yet implemented."); },
                     [] { return false; },
             });
 
-    dynamic_cast<PlainButton&>(*widget(REPLAY_INTRO))
-            .bind({
+    button(REPLAY_INTRO)
+            ->bind({
                     [this] {
                         stack()->push(new ScrollTextScreen(
                                 *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
@@ -69,16 +69,13 @@ MainScreen::MainScreen()
                     [] { return plug.info.intro.has_value(); },
             });
 
-    dynamic_cast<PlainButton&>(*widget(DEMO))
-            .bind({
-                    [this] {
-                        stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
-                    },
-                    [this] { return !_replays.empty(); },
-            });
+    button(DEMO)->bind({
+            [this] { stack()->push(new ReplayGame(_replays.at(rand() % _replays.size()))); },
+            [this] { return !_replays.empty(); },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(ABOUT_ARES))
-            .bind({
+    button(ABOUT_ARES)
+            ->bind({
                     [this] {
                         stack()->push(
                                 new ScrollTextScreen(*plug.info.about, 540, kFastScrollInterval));
@@ -86,20 +83,18 @@ MainScreen::MainScreen()
                     [] { return plug.info.about.has_value(); },
             });
 
-    dynamic_cast<PlainButton&>(*widget(OPTIONS))
-            .bind({
-                    [this] { stack()->push(new OptionsScreen); },
-            });
+    button(OPTIONS)->bind({
+            [this] { stack()->push(new OptionsScreen); },
+    });
 
-    dynamic_cast<PlainButton&>(*widget(QUIT))
-            .bind({
-                    [this] {
-                        // 1-second fade-out.
-                        _state = QUITTING;
-                        stack()->push(new ColorFade(
-                                ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-                    },
-            });
+    button(QUIT)->bind({
+            [this] {
+                // 1-second fade-out.
+                _state = QUITTING;
+                stack()->push(new ColorFade(
+                        ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            },
+    });
 }
 
 MainScreen::~MainScreen() {}

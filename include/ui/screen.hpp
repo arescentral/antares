@@ -56,10 +56,14 @@ class InterfaceScreen : public Card {
     void truncate(size_t size);
     void extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items);
 
-    Point         offset() const;
-    size_t        size() const;
-    const Widget* widget(int id) const;
-    Widget*       widget(int id);
+    Point                 offset() const;
+    size_t                size() const;
+    const PlainButton*    button(int id) const;
+    PlainButton*          button(int id);
+    const CheckboxButton* checkbox(int id) const;
+    CheckboxButton*       checkbox(int id);
+    const Widget*         widget(int id) const;
+    Widget*               widget(int id);
 
   private:
     enum State {
@@ -72,6 +76,7 @@ class InterfaceScreen : public Card {
 
     pn::value load_pn(pn::string_view id);
     void      become_normal();
+    void      rebuild_maps();
 
     const Rect                           _bounds;
     bool                                 _full_screen = false;
