@@ -69,15 +69,19 @@ PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* butto
         stack()->pop(this);
     }});
 
-    dynamic_cast<PlainButton&>(*widget(RESUME)).bind({[this] {
-        *_button_pressed = Item::RESUME;
-        stack()->pop(this);
-    }});
+    if (widget(RESUME)) {
+        dynamic_cast<PlainButton&>(*widget(RESUME)).bind({[this] {
+            *_button_pressed = Item::RESUME;
+            stack()->pop(this);
+        }});
+    }
 
-    dynamic_cast<PlainButton&>(*widget(SKIP)).bind({[this] {
-        *_button_pressed = Item::SKIP;
-        stack()->pop(this);
-    }});
+    if (widget(SKIP)) {
+        dynamic_cast<PlainButton&>(*widget(SKIP)).bind({[this] {
+            *_button_pressed = Item::SKIP;
+            stack()->pop(this);
+        }});
+    }
 }
 
 PlayAgainScreen::~PlayAgainScreen() {}
@@ -96,7 +100,6 @@ const char* stringify(PlayAgainScreen::Item item) {
         case PlayAgainScreen::QUIT: return "QUIT";
         case PlayAgainScreen::RESUME: return "RESUME";
         case PlayAgainScreen::SKIP: return "SKIP";
-        case PlayAgainScreen::BOX: return "BOX";
     }
     return "?";
 }

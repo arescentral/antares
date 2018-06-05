@@ -30,8 +30,6 @@ class PlayAgainScreen : public InterfaceScreen {
         QUIT    = 1,
         RESUME  = 4,
         SKIP    = 5,
-
-        BOX = 3,
     };
 
     PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed);
