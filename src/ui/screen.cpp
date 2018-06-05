@@ -69,10 +69,10 @@ struct EmplaceBackVisitor : InterfaceItemData::Visitor {
     }
 
     void visit_tab_box(const TabBoxData& data) const override {
+        vec->emplace_back(new TabBox{data.copy()});
         for (const auto& button : data.buttons) {
             vec->emplace_back(new TabBoxButton{button.copy()});
         }
-        vec->emplace_back(new TabBox{data.copy()});
     }
 
     void visit_tab_box_button(const TabBoxButtonData& data) const override {}
