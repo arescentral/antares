@@ -244,10 +244,8 @@ void KeyControlScreen::adjust_interface() {
         dynamic_cast<TabBoxButton&>(*widget(i)).hue() = Hue::AQUA;
     }
 
-    const TabBoxButton& tab = dynamic_cast<const TabBoxButton&>(*widget(SHIP_TAB + _tab));
-    for (size_t i = 0; i < tab.content().size(); ++i) {
-        PlainButton* b       = button(i + 15);
-        size_t       key     = kKeyIndices[_tab] + i;
+    for (int key = kKeyIndices[_tab]; key < kKeyIndices[_tab + 1]; ++key) {
+        PlainButton* b       = button(key + 15);
         int          key_num = sys.prefs->key(key);
         b->key()             = key_num;
         if (key == _selected_key) {
@@ -323,9 +321,8 @@ void KeyControlScreen::set_tab(Tab tab) {
             item->on() = true;
             extend(item->content());
 
-            for (int i = 0; i < item->content().size(); ++i) {
-                int key = kKeyIndices[tab] + i;
-                button(i + 15)->bind({[this, key] {
+            for (int key = kKeyIndices[tab]; key < kKeyIndices[tab + 1]; ++key) {
+                button(key + 15)->bind({[this, key] {
                     _selected_key = key;
                     adjust_interface();
                 }});
@@ -361,7 +358,7 @@ void KeyControlScreen::update_conflicts() {
 
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
-        PlainButton* item = button(key - kKeyIndices[_tab] + 15);
+        PlainButton* item = button(key + 15);
         item->hue()       = Hue::GOLD;
     } else {
         TabBoxButton* item = dynamic_cast<TabBoxButton*>(widget(SHIP_TAB + get_tab_num(key)));
