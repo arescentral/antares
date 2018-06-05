@@ -52,7 +52,7 @@ PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* butto
         : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}),
           _state(ASKING),
           _button_pressed(button_pressed) {
-    dynamic_cast<PlainButton&>(mutable_item(RESTART))
+    dynamic_cast<PlainButton&>(*widget(RESTART))
             .bind({[this] {
                        _state           = FADING_OUT;
                        *_button_pressed = Item::RESTART;
@@ -64,17 +64,17 @@ PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* butto
                        return true;
                    }});
 
-    dynamic_cast<PlainButton&>(mutable_item(QUIT)).bind({[this] {
+    dynamic_cast<PlainButton&>(*widget(QUIT)).bind({[this] {
         *_button_pressed = Item::QUIT;
         stack()->pop(this);
     }});
 
-    dynamic_cast<PlainButton&>(mutable_item(RESUME)).bind({[this] {
+    dynamic_cast<PlainButton&>(*widget(RESUME)).bind({[this] {
         *_button_pressed = Item::RESUME;
         stack()->pop(this);
     }});
 
-    dynamic_cast<PlainButton&>(mutable_item(SKIP)).bind({[this] {
+    dynamic_cast<PlainButton&>(*widget(SKIP)).bind({[this] {
         *_button_pressed = Item::SKIP;
         stack()->pop(this);
     }});

@@ -215,11 +215,11 @@ Widget* Widget::accept_click(Point where) { return nullptr; }
 Widget* Widget::accept_key(int64_t which) { return nullptr; }
 Widget* Widget::accept_button(int64_t which) { return nullptr; }
 
-int64_t Widget::id() const { return -1; }
-void    Widget::deactivate() {}
+void Widget::deactivate() {}
 
 BoxRect::BoxRect(const BoxRectData& data)
         : _inner_bounds{data.bounds},
+          _id{data.id},
           _label{data.label.has_value() ? sfz::make_optional<pn::string>(data.label->copy())
                                         : sfz::nullopt},
           _hue{data.hue},
@@ -401,6 +401,7 @@ Rect BoxRect::outer_bounds() const {
 
 TextRect::TextRect(const TextRectData& data)
         : _inner_bounds{data.bounds},
+          _id{data.id},
           _text{data.text.copy()},
           _hue{data.hue},
           _style{data.style} {}
@@ -423,7 +424,7 @@ Rect TextRect::outer_bounds() const {
 }
 
 PictureRect::PictureRect(const PictureRectData& data)
-        : _inner_bounds(data.bounds), _texture{Resource::texture(data.picture)} {}
+        : _inner_bounds(data.bounds), _id{data.id}, _texture{Resource::texture(data.picture)} {}
 
 void PictureRect::draw(Point offset, InputMode) const {
     Rect bounds = _inner_bounds;
@@ -1201,6 +1202,7 @@ Rect TabBoxButton::outer_bounds() const {
 
 TabBox::TabBox(const TabBoxData& data)
         : _inner_bounds{data.bounds},
+          _id{data.id},
           _top_right_border_size{data.top_right_border_size},
           _hue{data.hue},
           _style{data.style} {}

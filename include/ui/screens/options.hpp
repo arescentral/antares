@@ -105,7 +105,6 @@ class KeyControlScreen : public InterfaceScreen {
         HOT_KEY_TAB  = 7,
 
         CONFLICT_TEXT = 10,
-        TAB_BOX       = 8,
     };
 
     enum Tab {

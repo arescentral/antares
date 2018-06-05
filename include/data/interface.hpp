@@ -55,7 +55,8 @@ struct InterfaceItemData {
 
     virtual void accept(const Visitor& visitor) const = 0;
 
-    Rect bounds;
+    Rect                   bounds;
+    sfz::optional<int64_t> id;
 };
 
 InterfaceData interface(path_value x);
@@ -86,7 +87,6 @@ struct PictureRectData : public InterfaceItemData {
 };
 
 struct ButtonData : public InterfaceItemData {
-    int64_t        id = -1;
     pn::string     label;
     int16_t        key     = 0;
     int16_t        gamepad = 0;

@@ -200,9 +200,9 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         _system_stars.push_back(star);
     }
 
-    dynamic_cast<PlainButton&>(mutable_item(DONE)).bind({[this] { stack()->pop(this); }});
+    dynamic_cast<PlainButton&>(*widget(DONE)).bind({[this] { stack()->pop(this); }});
 
-    dynamic_cast<PlainButton&>(mutable_item(PREVIOUS))
+    dynamic_cast<PlainButton&>(*widget(PREVIOUS))
             .bind({
                     [this] {
                         if (_briefing_point > _briefing_point_start) {
@@ -213,7 +213,7 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
                     [this] { return _briefing_point > _briefing_point_start; },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(NEXT))
+    dynamic_cast<PlainButton&>(*widget(NEXT))
             .bind({
                     [this] {
                         if (_briefing_point < _briefing_point_end - 1) {
@@ -313,7 +313,7 @@ void BriefingScreen::build_star_map() {
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
-    _bounds.center_in(item(MAP_RECT).inner_bounds());
+    _bounds.center_in(widget(MAP_RECT)->inner_bounds());
 
     if (_level.starmap.has_value()) {
         _star_rect = *_level.starmap;
@@ -337,7 +337,7 @@ void BriefingScreen::build_brief_point() {
     if (_briefing_point >= 0) {
         coordPointType corner;
         int32_t        scale;
-        Rect           map_rect = item(MAP_RECT).inner_bounds();
+        Rect           map_rect = widget(MAP_RECT)->inner_bounds();
         GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;

@@ -73,7 +73,8 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
         return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
                 x, {
                            {"type", nullptr},
-                           {"bounds", {&BoxRectData::bounds, required_rect}},
+                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                           {"id", {&InterfaceItemData::id, optional_int}},
                            {"label", {&BoxRectData::label, optional_string_copy}},
                            {"hue", {&BoxRectData::hue, required_hue}},
                            {"style", {&BoxRectData::style, required_interface_style}},
@@ -84,8 +85,8 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
                         x,
                         {
                                 {"type", nullptr},
-                                {"id", {&PlainButtonData::id, required_int}},
-                                {"bounds", {&PlainButtonData::bounds, required_rect}},
+                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                {"id", {&InterfaceItemData::id, optional_int}},
                                 {"label", {&PlainButtonData::label, required_string_copy}},
                                 {"key", {&PlainButtonData::key, optional_key_num}},
                                 {"gamepad", {&PlainButtonData::gamepad, optional_gamepad_button}},
@@ -98,8 +99,8 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
                         x,
                         {
                                 {"type", nullptr},
-                                {"id", {&CheckboxButtonData::id, required_int}},
-                                {"bounds", {&CheckboxButtonData::bounds, required_rect}},
+                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                {"id", {&InterfaceItemData::id, optional_int}},
                                 {"label", {&CheckboxButtonData::label, required_string_copy}},
                                 {"key", {&CheckboxButtonData::key, optional_key_num}},
                                 {"gamepad",
@@ -113,8 +114,8 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
                         x,
                         {
                                 {"type", nullptr},
-                                {"id", {&RadioButtonData::id, required_int}},
-                                {"bounds", {&RadioButtonData::bounds, required_rect}},
+                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                {"id", {&InterfaceItemData::id, optional_int}},
                                 {"label", {&RadioButtonData::label, required_string_copy}},
                                 {"key", {&RadioButtonData::key, optional_key_num}},
                                 {"gamepad", {&RadioButtonData::gamepad, optional_gamepad_button}},
@@ -126,14 +127,16 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
                 new PictureRectData(required_struct<PictureRectData>(
                         x, {
                                    {"type", nullptr},
-                                   {"bounds", {&PictureRectData::bounds, required_rect}},
+                                   {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                   {"id", {&InterfaceItemData::id, optional_int}},
                                    {"picture", {&PictureRectData::picture, required_string_copy}},
                            })));
     } else if (type == "text") {
         return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
                 x, {
                            {"type", nullptr},
-                           {"bounds", {&TextRectData::bounds, required_rect}},
+                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                           {"id", {&InterfaceItemData::id, optional_int}},
                            {"text", {&TextRectData::text, optional_string, ""}},
                            {"hue", {&TextRectData::hue, required_hue}},
                            {"style", {&TextRectData::style, required_interface_style}},
@@ -142,7 +145,8 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
         TabBoxData tab_box = required_struct<TabBoxData>(
                 x, {
                            {"type", nullptr},
-                           {"bounds", {&TabBoxData::bounds, required_rect}},
+                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                           {"id", {&InterfaceItemData::id, optional_int}},
                            {"hue", {&TabBoxData::hue, required_hue}},
                            {"style", {&TabBoxData::style, required_interface_style}},
                            {"tabs", nullptr},
@@ -154,7 +158,7 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
         path_value tabs = x.get("tabs");
         for (auto i : range(tabs.value().as_array().size())) {
             struct Tab {
-                int64_t                                         id;
+                sfz::optional<int64_t>                          id;
                 int64_t                                         width;
                 pn::string                                      label;
                 std::vector<std::unique_ptr<InterfaceItemData>> content;
@@ -163,7 +167,7 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
             auto tab = required_struct<Tab>(
                     tabs.get(i),
                     {
-                            {"id", {&Tab::id, required_int}},
+                            {"id", {&Tab::id, optional_int}},
                             {"width", {&Tab::width, required_int}},
                             {"label", {&Tab::label, required_string_copy}},
                             {"content",

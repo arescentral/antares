@@ -29,20 +29,23 @@ namespace antares {
 
 class Widget {
   public:
+    virtual sfz::optional<int64_t> id() const = 0;
+
     virtual Widget* accept_click(Point where);
     virtual Widget* accept_key(int64_t which);
     virtual Widget* accept_button(int64_t which);
 
-    virtual int64_t id() const;
-    virtual void    deactivate();
-    virtual void    draw(Point origin, InputMode mode) const = 0;
-    virtual Rect    inner_bounds() const                     = 0;
-    virtual Rect    outer_bounds() const                     = 0;
+    virtual void deactivate();
+    virtual void draw(Point origin, InputMode mode) const = 0;
+    virtual Rect inner_bounds() const                     = 0;
+    virtual Rect outer_bounds() const                     = 0;
 };
 
 class BoxRect : public Widget {
   public:
     BoxRect(const BoxRectData& data);
+
+    sfz::optional<int64_t> id() const override { return _id; }
 
     Hue            hue() const { return _hue; }
     InterfaceStyle style() const { return _style; }
@@ -56,6 +59,7 @@ class BoxRect : public Widget {
     void draw_plain_rect(Point origin) const;
 
     Rect                      _inner_bounds;
+    sfz::optional<int64_t>    _id;
     sfz::optional<pn::string> _label;
     Hue                       _hue   = Hue::GRAY;
     InterfaceStyle            _style = InterfaceStyle::LARGE;
@@ -65,6 +69,8 @@ class TextRect : public Widget {
   public:
     TextRect(const TextRectData& data);
 
+    sfz::optional<int64_t> id() const override { return _id; }
+
     Hue            hue() const { return _hue; }
     InterfaceStyle style() const { return _style; }
 
@@ -73,33 +79,38 @@ class TextRect : public Widget {
     Rect outer_bounds() const override;
 
   private:
-    Rect           _inner_bounds;
-    pn::string     _text;
-    Hue            _hue   = Hue::GRAY;
-    InterfaceStyle _style = InterfaceStyle::LARGE;
+    Rect                   _inner_bounds;
+    sfz::optional<int64_t> _id;
+    pn::string             _text;
+    Hue                    _hue   = Hue::GRAY;
+    InterfaceStyle         _style = InterfaceStyle::LARGE;
 };
 
 class PictureRect : public Widget {
   public:
     PictureRect(const PictureRectData& data);
 
+    sfz::optional<int64_t> id() const override { return _id; }
+
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    Rect    _inner_bounds;
-    Texture _texture;
+    Rect                   _inner_bounds;
+    sfz::optional<int64_t> _id;
+    Texture                _texture;
 };
 
 class Button : public Widget {
   public:
+    sfz::optional<int64_t> id() const override { return _id; }
+
     Widget* accept_click(Point where) override;
     Widget* accept_key(int64_t which) override;
     Widget* accept_button(int64_t which) override;
 
-    int64_t id() const override { return _id; }
-    void    deactivate() override { _active = false; }
+    void deactivate() override { _active = false; }
 
     pn::string_view label() const { return _label; }
     int16_t         key() const { return _key; }
@@ -117,13 +128,13 @@ class Button : public Widget {
     Button(const ButtonData& data);
 
   private:
-    int64_t        _id;
-    pn::string     _label;
-    int16_t        _key;
-    int16_t        _gamepad;
-    Hue            _hue    = Hue::GRAY;
-    InterfaceStyle _style  = InterfaceStyle::LARGE;
-    bool           _active = false;
+    sfz::optional<int64_t> _id;
+    pn::string             _label;
+    int16_t                _key;
+    int16_t                _gamepad;
+    Hue                    _hue    = Hue::GRAY;
+    InterfaceStyle         _style  = InterfaceStyle::LARGE;
+    bool                   _active = false;
 };
 
 class PlainButton : public Button {
@@ -212,15 +223,18 @@ class TabBox : public Widget {
   public:
     TabBox(const TabBoxData& data);
 
+    sfz::optional<int64_t> id() const override { return _id; }
+
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    Rect           _inner_bounds;
-    int64_t        _top_right_border_size = 0;
-    Hue            _hue                   = Hue::GRAY;
-    InterfaceStyle _style                 = InterfaceStyle::LARGE;
+    Rect                   _inner_bounds;
+    sfz::optional<int64_t> _id;
+    int64_t                _top_right_border_size = 0;
+    Hue                    _hue                   = Hue::GRAY;
+    InterfaceStyle         _style                 = InterfaceStyle::LARGE;
 };
 
 }  // namespace antares

@@ -50,18 +50,18 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
     _index  = _chapters.size() - 1;
     *_level = Level::get(_chapters[_index]);
 
-    dynamic_cast<PlainButton&>(mutable_item(OK)).bind({[this] {
+    dynamic_cast<PlainButton&>(*widget(OK)).bind({[this] {
         _state      = FADING_OUT;
         *_cancelled = false;
         stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
     }});
 
-    dynamic_cast<PlainButton&>(mutable_item(CANCEL)).bind({[this] {
+    dynamic_cast<PlainButton&>(*widget(CANCEL)).bind({[this] {
         *_cancelled = true;
         stack()->pop(this);
     }});
 
-    dynamic_cast<PlainButton&>(mutable_item(PREVIOUS))
+    dynamic_cast<PlainButton&>(*widget(PREVIOUS))
             .bind({
                     [this] {
                         if (_index > 0) {
@@ -73,7 +73,7 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
                     [this] { return _index > 0; },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(NEXT))
+    dynamic_cast<PlainButton&>(*widget(NEXT))
             .bind({
                     [this] {
                         if (_index < _chapters.size() - 1) {
@@ -153,7 +153,7 @@ void SelectLevelScreen::overlay() const { draw_level_name(); }
 void SelectLevelScreen::draw_level_name() const {
     const pn::string_view chapter_name = (*_level)->name;
 
-    const Widget& i = item(NAME);
+    const Widget& i = *widget(NAME);
 
     RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);

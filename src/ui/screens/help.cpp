@@ -43,9 +43,9 @@ HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sy
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(item(BOX).inner_bounds().width(), 0, 0);
+    _text.wrap_to(widget(BOX)->inner_bounds().width(), 0, 0);
 
-    dynamic_cast<PlainButton&>(mutable_item(DONE)).bind({[this] { stack()->pop(this); }});
+    dynamic_cast<PlainButton&>(*widget(DONE)).bind({[this] { stack()->pop(this); }});
 }
 
 HelpScreen::~HelpScreen() {}
@@ -59,7 +59,7 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
 }
 
 void HelpScreen::overlay() const {
-    Rect  bounds = item(BOX).inner_bounds();
+    Rect  bounds = widget(BOX)->inner_bounds();
     Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);

@@ -48,19 +48,19 @@ MainScreen::MainScreen()
         : InterfaceScreen("main", {0, 0, 640, 480}),
           _state(NORMAL),
           _replays(Resource::list_replays()) {
-    dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME))
+    dynamic_cast<PlainButton&>(*widget(START_NEW_GAME))
             .bind({
                     [this] { stack()->push(new SoloGame); },
                     [] { return plug.chapters.find(1) != plug.chapters.end(); },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME))
+    dynamic_cast<PlainButton&>(*widget(START_NETWORK_GAME))
             .bind({
                     [] { throw std::runtime_error("Networked games not yet implemented."); },
                     [] { return false; },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(REPLAY_INTRO))
+    dynamic_cast<PlainButton&>(*widget(REPLAY_INTRO))
             .bind({
                     [this] {
                         stack()->push(new ScrollTextScreen(
@@ -69,7 +69,7 @@ MainScreen::MainScreen()
                     [] { return plug.info.intro.has_value(); },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(DEMO))
+    dynamic_cast<PlainButton&>(*widget(DEMO))
             .bind({
                     [this] {
                         stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
@@ -77,7 +77,7 @@ MainScreen::MainScreen()
                     [this] { return !_replays.empty(); },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(ABOUT_ARES))
+    dynamic_cast<PlainButton&>(*widget(ABOUT_ARES))
             .bind({
                     [this] {
                         stack()->push(
@@ -86,12 +86,12 @@ MainScreen::MainScreen()
                     [] { return plug.info.about.has_value(); },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(OPTIONS))
+    dynamic_cast<PlainButton&>(*widget(OPTIONS))
             .bind({
                     [this] { stack()->push(new OptionsScreen); },
             });
 
-    dynamic_cast<PlainButton&>(mutable_item(QUIT))
+    dynamic_cast<PlainButton&>(*widget(QUIT))
             .bind({
                     [this] {
                         // 1-second fade-out.

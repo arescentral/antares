@@ -58,8 +58,8 @@ class InterfaceScreen : public Card {
 
     Point         offset() const;
     size_t        size() const;
-    const Widget& item(int index) const;
-    Widget&       mutable_item(int index);
+    const Widget* widget(int id) const;
+    Widget*       widget(int id);
 
   private:
     enum State {
@@ -75,7 +75,8 @@ class InterfaceScreen : public Card {
 
     const Rect                           _bounds;
     bool                                 _full_screen = false;
-    std::vector<std::unique_ptr<Widget>> _items;
+    std::vector<std::unique_ptr<Widget>> _widgets;
+    std::map<int, Widget*>               _widgets_by_id;
     Widget*                              _active_widget = nullptr;
     uint32_t                             _pressed;
     Cursor                               _cursor;

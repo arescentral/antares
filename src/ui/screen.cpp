@@ -85,7 +85,14 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bo
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
         for (auto& item : data.items) {
-            item->accept(EmplaceBackVisitor{&_items});
+            item->accept(EmplaceBackVisitor{&_widgets});
+        }
+
+        _widgets_by_id.clear();
+        for (const auto& widget : _widgets) {
+            if (widget->id().has_value()) {
+                _widgets_by_id[*widget->id()] = widget.get();
+            }
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
@@ -115,8 +122,8 @@ void InterfaceScreen::draw() const {
         copy_area = _bounds;
     } else {
         next()->draw();
-        copy_area = _items[0]->outer_bounds();
-        for (const auto& item : _items) {
+        copy_area = _widgets[0]->outer_bounds();
+        for (const auto& item : _widgets) {
             copy_area.enlarge_to(item->outer_bounds());
         }
     }
@@ -125,7 +132,7 @@ void InterfaceScreen::draw() const {
 
     Rects().fill(copy_area, RgbColor::black());
 
-    for (const auto& item : _items) {
+    for (const auto& item : _widgets) {
         item->draw(off, sys.video->input_mode());
     }
     overlay();
@@ -141,7 +148,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     if (event.button() != 0) {
         return;
     }
-    for (auto& item : _items) {
+    for (auto& item : _widgets) {
         if (item->accept_click(where)) {
             Button* button = dynamic_cast<Button*>(item.get());
             become_normal();
@@ -165,8 +172,8 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         _state      = NORMAL;
         Rect bounds = _active_widget->outer_bounds();
         _active_widget->deactivate();
-        if (bounds.contains(where)) {
-            handle_button(_active_widget->id());
+        if (bounds.contains(where) && _active_widget->id().has_value()) {
+            handle_button(*_active_widget->id());
         }
     }
 }
@@ -178,7 +185,7 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
-    for (auto& item : _items) {
+    for (auto& item : _widgets) {
         if (item->accept_key(key_code)) {
             Button* button = dynamic_cast<Button*>(item.get());
             become_normal();
@@ -194,15 +201,15 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
     const int32_t key_code = event.key() + 1;
-    if ((_state == KEY_DOWN) && (_pressed == key_code)) {
+    if ((_state == KEY_DOWN) && (_pressed == key_code) && _active_widget->id().has_value()) {
         _state = NORMAL;
         _active_widget->deactivate();
-        handle_button(_active_widget->id());
+        handle_button(*_active_widget->id());
     }
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    for (auto& item : _items) {
+    for (auto& item : _widgets) {
         if (item->accept_button(event.button)) {
             Button* button = dynamic_cast<Button*>(item.get());
             become_normal();
@@ -217,10 +224,11 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 }
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
+    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button) &&
+        _active_widget->id().has_value()) {
         _state = NORMAL;
         _active_widget->deactivate();
-        handle_button(_active_widget->id());
+        handle_button(*_active_widget->id());
     }
 }
 
@@ -229,30 +237,40 @@ void InterfaceScreen::overlay() const {}
 void InterfaceScreen::adjust_interface() {}
 
 void InterfaceScreen::handle_button(int64_t id) {
-    if (!((0 <= id) && (id < _items.size()))) {
-        return;
-    }
-
-    if (PlainButton* button = dynamic_cast<PlainButton*>(&mutable_item(id))) {
+    if (PlainButton* button = dynamic_cast<PlainButton*>(widget(id))) {
         button->action();
         return;
     }
-    if (CheckboxButton* checkbox = dynamic_cast<CheckboxButton*>(&mutable_item(id))) {
+    if (CheckboxButton* checkbox = dynamic_cast<CheckboxButton*>(widget(id))) {
         checkbox->set(!checkbox->get());
         return;
     }
 }
 
 void InterfaceScreen::truncate(size_t size) {
-    if (size > _items.size()) {
+    if (size > _widgets.size()) {
         throw std::runtime_error("");
     }
-    _items.resize(size);
+    _widgets.resize(size);
+
+    _widgets_by_id.clear();
+    for (const auto& widget : _widgets) {
+        if (widget->id().has_value()) {
+            _widgets_by_id[*widget->id()] = widget.get();
+        }
+    }
 }
 
 void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items) {
     for (const auto& item : items) {
-        item->accept(EmplaceBackVisitor{&_items});
+        item->accept(EmplaceBackVisitor{&_widgets});
+    }
+
+    _widgets_by_id.clear();
+    for (const auto& widget : _widgets) {
+        if (widget->id().has_value()) {
+            _widgets_by_id[*widget->id()] = widget.get();
+        }
     }
 }
 
@@ -262,10 +280,16 @@ Point InterfaceScreen::offset() const {
     return {_bounds.left + screen.left, _bounds.top + screen.top};
 }
 
-size_t InterfaceScreen::size() const { return _items.size(); }
+size_t InterfaceScreen::size() const { return _widgets.size(); }
 
-const Widget& InterfaceScreen::item(int i) const { return *_items[i]; }
+const Widget* InterfaceScreen::widget(int id) const {
+    auto it = _widgets_by_id.find(id);
+    return (it != _widgets_by_id.end()) ? it->second : nullptr;
+}
 
-Widget& InterfaceScreen::mutable_item(int i) { return *_items[i]; }
+Widget* InterfaceScreen::widget(int id) {
+    auto it = _widgets_by_id.find(id);
+    return (it != _widgets_by_id.end()) ? it->second : nullptr;
+}
 
 }  // namespace antares
