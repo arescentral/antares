@@ -39,6 +39,9 @@ class Widget {
     virtual void draw(Point origin, InputMode mode) const = 0;
     virtual Rect inner_bounds() const                     = 0;
     virtual Rect outer_bounds() const                     = 0;
+
+    virtual std::vector<const Widget*> children() const;
+    virtual std::vector<Widget*>       children();
 };
 
 class BoxRect : public Widget {
@@ -229,12 +232,16 @@ class TabBox : public Widget {
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
+    std::vector<const Widget*> children() const override;
+    std::vector<Widget*>       children() override;
+
   private:
-    Rect                   _inner_bounds;
-    sfz::optional<int64_t> _id;
-    int64_t                _top_right_border_size = 0;
-    Hue                    _hue                   = Hue::GRAY;
-    InterfaceStyle         _style                 = InterfaceStyle::LARGE;
+    Rect                                 _inner_bounds;
+    sfz::optional<int64_t>               _id;
+    int64_t                              _top_right_border_size = 0;
+    Hue                                  _hue                   = Hue::GRAY;
+    InterfaceStyle                       _style                 = InterfaceStyle::LARGE;
+    std::vector<std::unique_ptr<Widget>> _tabs;
 };
 
 }  // namespace antares

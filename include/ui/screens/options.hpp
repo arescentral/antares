@@ -123,7 +123,6 @@ class KeyControlScreen : public InterfaceScreen {
     OptionsScreen::State* const _state;
 
     Tab                                    _tab;
-    const size_t                           _key_start;
     int32_t                                _selected_key;
     std::vector<std::pair<size_t, size_t>> _conflicts;
 

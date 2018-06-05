@@ -69,10 +69,7 @@ struct EmplaceBackVisitor : InterfaceItemData::Visitor {
     }
 
     void visit_tab_box(const TabBoxData& data) const override {
-        vec->emplace_back(new TabBox{data.copy()});
-        for (const auto& button : data.buttons) {
-            vec->emplace_back(new TabBoxButton{button.copy()});
-        }
+        vec->emplace_back(new TabBox{data});
     }
 
     void visit_tab_box_button(const TabBoxButtonData& data) const override {}
@@ -87,7 +84,6 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bo
         for (auto& item : data.items) {
             item->accept(EmplaceBackVisitor{&_widgets});
         }
-        rebuild_maps();
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
     }
@@ -110,12 +106,19 @@ void InterfaceScreen::become_normal() {
     }
 }
 
-void InterfaceScreen::rebuild_maps() {
-    _widgets_by_id.clear();
-    for (const auto& widget : _widgets) {
-        if (widget->id().has_value()) {
-            _widgets_by_id[*widget->id()] = widget.get();
-        }
+template <typename Widgets>
+static void enlarge_to_outer_bounds(Rect* r, const Widgets& widgets) {
+    for (const auto& w : widgets) {
+        r->enlarge_to(w->outer_bounds());
+        enlarge_to_outer_bounds(r, w->children());
+    }
+}
+
+template <typename Widgets>
+static void draw_recursive(const Widgets& widgets, Point offset, InputMode mode) {
+    for (const auto& w : widgets) {
+        w->draw(offset, mode);
+        draw_recursive(w->children(), offset, mode);
     }
 }
 
@@ -126,22 +129,30 @@ void InterfaceScreen::draw() const {
     } else {
         next()->draw();
         copy_area = _widgets[0]->outer_bounds();
-        for (const auto& item : _widgets) {
-            copy_area.enlarge_to(item->outer_bounds());
-        }
+        enlarge_to_outer_bounds(&copy_area, _widgets);
     }
     Point off = offset();
     copy_area.offset(off.h, off.v);
 
     Rects().fill(copy_area, RgbColor::black());
 
-    for (const auto& item : _widgets) {
-        item->draw(off, sys.video->input_mode());
-    }
+    draw_recursive(_widgets, off, sys.video->input_mode());
     overlay();
     if (stack()->top() == this) {
         _cursor.draw();
     }
+}
+
+template <typename Vector>
+static Widget* find_click(const Vector& v, Point where) {
+    for (auto& widget : v) {
+        if (widget->accept_click(where)) {
+            return &*widget;
+        } else if (auto in_children = find_click(widget->children(), where)) {
+            return in_children;
+        }
+    }
+    return nullptr;
 }
 
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
@@ -151,16 +162,14 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     if (event.button() != 0) {
         return;
     }
-    for (auto& item : _widgets) {
-        if (item->accept_click(where)) {
-            Button* button = dynamic_cast<Button*>(item.get());
-            become_normal();
-            _state           = MOUSE_DOWN;
-            button->active() = true;
-            sys.sound.select();
-            _active_widget = button;
-            return;
-        }
+    if (Widget* item = find_click(_widgets, where)) {
+        Button* button = dynamic_cast<Button*>(item);
+        become_normal();
+        _state           = MOUSE_DOWN;
+        button->active() = true;
+        sys.sound.select();
+        _active_widget = button;
+        return;
     }
 }
 
@@ -186,19 +195,29 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
     static_cast<void>(event);
 }
 
+template <typename Vector>
+static Widget* find_key(const Vector& v, int32_t key) {
+    for (auto& widget : v) {
+        if (widget->accept_key(key)) {
+            return &*widget;
+        } else if (auto in_children = find_key(widget->children(), key)) {
+            return in_children;
+        }
+    }
+    return nullptr;
+}
+
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
-    for (auto& item : _widgets) {
-        if (item->accept_key(key_code)) {
-            Button* button = dynamic_cast<Button*>(item.get());
-            become_normal();
-            _state           = KEY_DOWN;
-            button->active() = true;
-            sys.sound.select();
-            _active_widget = button;
-            _pressed       = key_code;
-            return;
-        }
+    if (Widget* item = find_key(_widgets, key_code)) {
+        Button* button = dynamic_cast<Button*>(item);
+        become_normal();
+        _state           = KEY_DOWN;
+        button->active() = true;
+        sys.sound.select();
+        _active_widget = button;
+        _pressed       = key_code;
+        return;
     }
 }
 
@@ -211,18 +230,28 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     }
 }
 
-void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    for (auto& item : _widgets) {
-        if (item->accept_button(event.button)) {
-            Button* button = dynamic_cast<Button*>(item.get());
-            become_normal();
-            _state           = GAMEPAD_DOWN;
-            button->active() = true;
-            sys.sound.select();
-            _active_widget = button;
-            _pressed       = event.button;
-            return;
+template <typename Vector>
+static Widget* find_button(const Vector& v, int32_t button) {
+    for (auto& widget : v) {
+        if (widget->accept_button(button)) {
+            return &*widget;
+        } else if (auto in_children = find_button(widget->children(), button)) {
+            return in_children;
         }
+    }
+    return nullptr;
+}
+
+void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    if (Widget* item = find_button(_widgets, event.button)) {
+        Button* button = dynamic_cast<Button*>(item);
+        become_normal();
+        _state           = GAMEPAD_DOWN;
+        button->active() = true;
+        sys.sound.select();
+        _active_widget = button;
+        _pressed       = event.button;
+        return;
     }
 }
 
@@ -255,14 +284,12 @@ void InterfaceScreen::truncate(size_t size) {
         throw std::runtime_error("");
     }
     _widgets.resize(size);
-    rebuild_maps();
 }
 
 void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items) {
     for (const auto& item : items) {
         item->accept(EmplaceBackVisitor{&_widgets});
     }
-    rebuild_maps();
 }
 
 Point InterfaceScreen::offset() const {
@@ -273,15 +300,23 @@ Point InterfaceScreen::offset() const {
 
 size_t InterfaceScreen::size() const { return _widgets.size(); }
 
-const Widget* InterfaceScreen::widget(int id) const {
-    auto it = _widgets_by_id.find(id);
-    return (it != _widgets_by_id.end()) ? it->second : nullptr;
+template <typename Vector>
+static Widget* find_id(const Vector& v, int64_t id) {
+    for (auto& widget : v) {
+        if (widget->id().has_value() && (*widget->id() == id)) {
+            return &*widget;
+        }
+        auto in_children = find_id(widget->children(), id);
+        if (in_children) {
+            return in_children;
+        }
+    }
+    return nullptr;
 }
 
-Widget* InterfaceScreen::widget(int id) {
-    auto it = _widgets_by_id.find(id);
-    return (it != _widgets_by_id.end()) ? it->second : nullptr;
-}
+const Widget* InterfaceScreen::widget(int id) const { return find_id(_widgets, id); }
+
+Widget* InterfaceScreen::widget(int id) { return find_id(_widgets, id); }
 
 const PlainButton* InterfaceScreen::button(int id) const {
     return dynamic_cast<const PlainButton*>(widget(id));

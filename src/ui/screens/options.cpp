@@ -164,7 +164,6 @@ static size_t get_tab_num(size_t key) {
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
         : InterfaceScreen("options/keys", {0, 0, 640, 480}),
           _state(state),
-          _key_start(size()),
           _selected_key(-1),
           _flashed_on(false),
           _tabs(2009),
@@ -245,16 +244,18 @@ void KeyControlScreen::adjust_interface() {
         dynamic_cast<TabBoxButton&>(*widget(i)).hue() = Hue::AQUA;
     }
 
-    for (size_t i = _key_start; i < size(); ++i) {
-        size_t key       = kKeyIndices[_tab] + i - _key_start;
-        int    key_num   = sys.prefs->key(key);
-        button(i)->key() = key_num;
+    const TabBoxButton& tab = dynamic_cast<const TabBoxButton&>(*widget(SHIP_TAB + _tab));
+    for (size_t i = 0; i < tab.content().size(); ++i) {
+        PlainButton* b       = button(i + 15);
+        size_t       key     = kKeyIndices[_tab] + i;
+        int          key_num = sys.prefs->key(key);
+        b->key()             = key_num;
         if (key == _selected_key) {
-            button(i)->active() = true;
+            b->active() = true;
         } else {
-            button(i)->active() = false;
+            b->active() = false;
         }
-        button(i)->hue() = Hue::AQUA;
+        b->hue() = Hue::AQUA;
     }
 
     if (_flashed_on) {
@@ -315,22 +316,22 @@ void KeyControlScreen::set_tab(Tab tab) {
             SHIP_TAB, COMMAND_TAB, SHORTCUT_TAB, UTILITY_TAB, HOT_KEY_TAB,
     };
 
-    truncate(_key_start);
+    truncate(10);
     for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        TabBoxButton& item = dynamic_cast<TabBoxButton&>(*widget(i));
+        TabBoxButton* item = dynamic_cast<TabBoxButton*>(widget(i));
         if (buttons[tab] == i) {
-            item.on() = true;
-            extend(item.content());
+            item->on() = true;
+            extend(item->content());
 
-            for (int i = 0; i < item.content().size(); ++i) {
+            for (int i = 0; i < item->content().size(); ++i) {
                 int key = kKeyIndices[tab] + i;
-                button(_key_start + i)->bind({[this, key] {
+                button(i + 15)->bind({[this, key] {
                     _selected_key = key;
                     adjust_interface();
                 }});
             }
         } else {
-            item.on() = false;
+            item->on() = false;
         }
     }
     _tab          = tab;
@@ -360,7 +361,7 @@ void KeyControlScreen::update_conflicts() {
 
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
-        PlainButton* item = button(key - kKeyIndices[_tab] + _key_start);
+        PlainButton* item = button(key - kKeyIndices[_tab] + 15);
         item->hue()       = Hue::GOLD;
     } else {
         TabBoxButton* item = dynamic_cast<TabBoxButton*>(widget(SHIP_TAB + get_tab_num(key)));

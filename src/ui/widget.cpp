@@ -217,6 +217,9 @@ Widget* Widget::accept_button(int64_t which) { return nullptr; }
 
 void Widget::deactivate() {}
 
+std::vector<const Widget*> Widget::children() const { return std::vector<const Widget*>{}; }
+std::vector<Widget*>       Widget::children() { return std::vector<Widget*>{}; }
+
 BoxRect::BoxRect(const BoxRectData& data)
         : _inner_bounds{data.bounds},
           _id{data.id},
@@ -1205,7 +1208,11 @@ TabBox::TabBox(const TabBoxData& data)
           _id{data.id},
           _top_right_border_size{data.top_right_border_size},
           _hue{data.hue},
-          _style{data.style} {}
+          _style{data.style} {
+    for (const auto& button : data.buttons) {
+        _tabs.emplace_back(new TabBoxButton{button.copy()});
+    }
+}
 
 void TabBox::draw(Point offset, InputMode) const {
     Rects          rects;
@@ -1292,6 +1299,22 @@ Rect TabBox::outer_bounds() const {
     bounds.top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight + 20;
     bounds.bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     return bounds;
+}
+
+std::vector<const Widget*> TabBox::children() const {
+    std::vector<const Widget*> children;
+    for (const auto& child : _tabs) {
+        children.push_back(child.get());
+    }
+    return children;
+}
+
+std::vector<Widget*> TabBox::children() {
+    std::vector<Widget*> children;
+    for (const auto& child : _tabs) {
+        children.push_back(child.get());
+    }
+    return children;
 }
 
 }  // namespace antares

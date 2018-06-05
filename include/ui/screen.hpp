@@ -76,12 +76,10 @@ class InterfaceScreen : public Card {
 
     pn::value load_pn(pn::string_view id);
     void      become_normal();
-    void      rebuild_maps();
 
     const Rect                           _bounds;
     bool                                 _full_screen = false;
     std::vector<std::unique_ptr<Widget>> _widgets;
-    std::map<int, Widget*>               _widgets_by_id;
     Widget*                              _active_widget = nullptr;
     uint32_t                             _pressed;
     Cursor                               _cursor;
