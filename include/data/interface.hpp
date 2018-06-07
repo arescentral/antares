@@ -62,7 +62,6 @@ struct InterfaceItemData {
 InterfaceData interface(path_value x);
 
 struct BoxRectData : public InterfaceItemData {
-    BoxRectData  copy() const;
     virtual void accept(const Visitor& visitor) const;
 
     sfz::optional<pn::string> label;
@@ -71,7 +70,6 @@ struct BoxRectData : public InterfaceItemData {
 };
 
 struct TextRectData : public InterfaceItemData {
-    TextRectData copy() const;
     virtual void accept(const Visitor& visitor) const;
 
     pn::string     text;
@@ -80,8 +78,7 @@ struct TextRectData : public InterfaceItemData {
 };
 
 struct PictureRectData : public InterfaceItemData {
-    PictureRectData copy() const;
-    virtual void    accept(const Visitor& visitor) const;
+    virtual void accept(const Visitor& visitor) const;
 
     pn::string picture;
 };
@@ -95,35 +92,30 @@ struct ButtonData : public InterfaceItemData {
 };
 
 struct PlainButtonData : public ButtonData {
-    PlainButtonData copy() const;
-    virtual void    accept(const Visitor& visitor) const;
+    virtual void accept(const Visitor& visitor) const;
 };
 
 struct CheckboxButtonData : public ButtonData {
-    CheckboxButtonData copy() const;
-    virtual void       accept(const Visitor& visitor) const;
+    virtual void accept(const Visitor& visitor) const;
 };
 
 struct RadioButtonData : public ButtonData {
-    RadioButtonData copy() const;
-    virtual void    accept(const Visitor& visitor) const;
-};
-
-struct TabBoxButtonData : public ButtonData {
-    TabBoxButtonData copy() const;
-    virtual void     accept(const Visitor& visitor) const;
-
-    std::vector<std::unique_ptr<InterfaceItemData>> content;
+    virtual void accept(const Visitor& visitor) const;
 };
 
 struct TabBoxData : public InterfaceItemData {
-    TabBoxData   copy() const;
     virtual void accept(const Visitor& visitor) const;
 
-    Hue                           hue                   = Hue::GRAY;
-    InterfaceStyle                style                 = InterfaceStyle::LARGE;
-    int16_t                       top_right_border_size = 0;
-    std::vector<TabBoxButtonData> buttons;
+    Hue            hue   = Hue::GRAY;
+    InterfaceStyle style = InterfaceStyle::LARGE;
+
+    struct Tab {
+        sfz::optional<int64_t>                          id;
+        int64_t                                         width;
+        pn::string                                      label;
+        std::vector<std::unique_ptr<InterfaceItemData>> content;
+    };
+    std::vector<Tab> tabs;
 };
 
 class InterfaceItemData::Visitor {
@@ -136,7 +128,6 @@ class InterfaceItemData::Visitor {
     virtual void visit_radio_button(const RadioButtonData&) const       = 0;
     virtual void visit_checkbox_button(const CheckboxButtonData&) const = 0;
     virtual void visit_tab_box(const TabBoxData&) const                 = 0;
-    virtual void visit_tab_box_button(const TabBoxButtonData&) const    = 0;
 };
 
 }  // namespace antares

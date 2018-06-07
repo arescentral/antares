@@ -27,6 +27,8 @@
 
 namespace antares {
 
+class TabBox;
+
 class Widget {
   public:
     virtual sfz::optional<int64_t> id() const = 0;
@@ -203,23 +205,25 @@ class RadioButton : public Button {
     bool _on = false;
 };
 
-class TabBoxButton : public Button {
+class TabButton : public Button {
   public:
-    TabBoxButton(const TabBoxButtonData& data);
+    TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds);
 
-    const std::vector<std::unique_ptr<InterfaceItemData>>& content() const { return _content; }
-    bool                                                   on() const { return _on; }
-    bool&                                                  on() { return _on; }
-    bool enabled() const override { return true; }
+    TabBox*                                     parent() const { return _parent; }
+    const std::vector<std::unique_ptr<Widget>>& content() const { return _content; }
+    bool                                        on() const { return _on; }
+    bool&                                       on() { return _on; }
+    bool                                        enabled() const override { return true; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    Rect                                            _inner_bounds;
-    std::vector<std::unique_ptr<InterfaceItemData>> _content;
-    bool                                            _on = false;
+    TabBox*                              _parent = nullptr;
+    Rect                                 _inner_bounds;
+    std::vector<std::unique_ptr<Widget>> _content;
+    bool                                 _on = false;
 };
 
 class TabBox : public Widget {
@@ -228,6 +232,10 @@ class TabBox : public Widget {
 
     sfz::optional<int64_t> id() const override { return _id; }
 
+    Widget* accept_click(Point where) override;
+    Widget* accept_key(int64_t which) override;
+    Widget* accept_button(int64_t which) override;
+
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
@@ -235,13 +243,23 @@ class TabBox : public Widget {
     std::vector<const Widget*> children() const override;
     std::vector<Widget*>       children() override;
 
+    int            current_tab() const { return _current_tab; }
+    Hue            hue() const { return _hue; }
+    InterfaceStyle style() const { return _style; }
+
+    void select(const TabButton& tab);
+
   private:
-    Rect                                 _inner_bounds;
-    sfz::optional<int64_t>               _id;
-    int64_t                              _top_right_border_size = 0;
-    Hue                                  _hue                   = Hue::GRAY;
-    InterfaceStyle                       _style                 = InterfaceStyle::LARGE;
-    std::vector<std::unique_ptr<Widget>> _tabs;
+    template <typename MaybeConstWidget>
+    std::vector<MaybeConstWidget*> children() const;
+
+    Rect                                    _inner_bounds;
+    sfz::optional<int64_t>                  _id;
+    int                                     _current_tab           = 0;
+    int64_t                                 _top_right_border_size = 0;
+    Hue                                     _hue                   = Hue::GRAY;
+    InterfaceStyle                          _style                 = InterfaceStyle::LARGE;
+    std::vector<std::unique_ptr<TabButton>> _tabs;
 };
 
 }  // namespace antares

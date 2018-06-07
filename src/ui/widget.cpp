@@ -943,42 +943,49 @@ Rect RadioButton::outer_bounds() const {
     return bounds;
 }
 
-TabBoxButton::TabBoxButton(const TabBoxButtonData& data)
-        : Button{data}, _inner_bounds{data.bounds} {
+static PlainButtonData tab_button_data(
+        const TabBox& box, const TabBoxData::Tab& tab, Rect bounds) {
+    PlainButtonData button;
+    button.id     = tab.id;
+    button.bounds = bounds;
+    button.label  = tab.label.copy();
+    button.hue    = box.hue();
+    button.style  = box.style();
+    return button;
+}
+
+TabButton::TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds)
+        : Button{tab_button_data(*box, data, bounds)}, _parent(box), _inner_bounds{bounds} {
     struct EmplaceBackVisitor : InterfaceItemData::Visitor {
-        std::vector<std::unique_ptr<InterfaceItemData>>* vec;
-        EmplaceBackVisitor(std::vector<std::unique_ptr<InterfaceItemData>>* v) : vec{v} {}
+        std::vector<std::unique_ptr<Widget>>* vec;
+        EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
 
         void visit_box_rect(const BoxRectData& data) const override {
-            vec->emplace_back(new BoxRectData{data.copy()});
+            vec->emplace_back(new BoxRect{data});
         }
 
         void visit_text_rect(const TextRectData& data) const override {
-            vec->emplace_back(new TextRectData{data.copy()});
+            vec->emplace_back(new TextRect{data});
         }
 
         void visit_picture_rect(const PictureRectData& data) const override {
-            vec->emplace_back(new PictureRectData{data.copy()});
+            vec->emplace_back(new PictureRect{data});
         }
 
         void visit_plain_button(const PlainButtonData& data) const override {
-            vec->emplace_back(new PlainButtonData{data.copy()});
+            vec->emplace_back(new PlainButton{data});
         }
 
         void visit_radio_button(const RadioButtonData& data) const override {
-            vec->emplace_back(new RadioButtonData{data.copy()});
+            vec->emplace_back(new RadioButton{data});
         }
 
         void visit_checkbox_button(const CheckboxButtonData& data) const override {
-            vec->emplace_back(new CheckboxButtonData{data.copy()});
+            vec->emplace_back(new CheckboxButton{data});
         }
 
         void visit_tab_box(const TabBoxData& data) const override {
-            vec->emplace_back(new TabBoxData{data.copy()});
-        }
-
-        void visit_tab_box_button(const TabBoxButtonData& data) const override {
-            vec->emplace_back(new TabBoxButtonData{data.copy()});
+            vec->emplace_back(new TabBox{data});
         }
     };
     for (const auto& item : data.content) {
@@ -986,7 +993,7 @@ TabBoxButton::TabBoxButton(const TabBoxButtonData& data)
     }
 }
 
-void TabBoxButton::draw(Point offset, InputMode) const {
+void TabButton::draw(Point offset, InputMode) const {
     Rect     tRect;
     int16_t  swidth, sheight, h_border = kInterfaceSmallHBorder;
     uint8_t  shade;
@@ -1192,9 +1199,9 @@ void TabBoxButton::draw(Point offset, InputMode) const {
     }
 }
 
-Rect TabBoxButton::inner_bounds() const { return _inner_bounds; }
+Rect TabButton::inner_bounds() const { return _inner_bounds; }
 
-Rect TabBoxButton::outer_bounds() const {
+Rect TabButton::outer_bounds() const {
     Rect bounds = initialize_bounds(_inner_bounds);
     bounds.left -= h_border(style()) + 5;
     bounds.right += h_border(style()) + 5;
@@ -1206,15 +1213,63 @@ Rect TabBoxButton::outer_bounds() const {
 TabBox::TabBox(const TabBoxData& data)
         : _inner_bounds{data.bounds},
           _id{data.id},
-          _top_right_border_size{data.top_right_border_size},
+          _current_tab{0},
           _hue{data.hue},
           _style{data.style} {
-    for (const auto& button : data.buttons) {
-        _tabs.emplace_back(new TabBoxButton{button.copy()});
+    Rect button_bounds = {_inner_bounds.left + 22, _inner_bounds.top - 20, 0,
+                          _inner_bounds.top - 10};
+    for (const auto& tab : data.tabs) {
+        button_bounds.right = button_bounds.left + tab.width;
+        _tabs.emplace_back(new TabButton{this, tab, button_bounds});
+        button_bounds.left = button_bounds.right + 37;
     }
+    _tabs[0]->on()         = true;
+    _top_right_border_size = (data.bounds.right - 17) - button_bounds.right;
 }
 
-void TabBox::draw(Point offset, InputMode) const {
+Widget* TabBox::accept_click(Point where) {
+    for (const std::unique_ptr<TabButton>& tab : _tabs) {
+        if (Widget* w = tab->accept_click(where)) {
+            return w;
+        }
+    }
+    for (const std::unique_ptr<Widget>& widget : _tabs[_current_tab]->content()) {
+        if (Widget* w = widget->accept_click(where)) {
+            return w;
+        }
+    }
+    return nullptr;
+}
+
+Widget* TabBox::accept_key(int64_t which) {
+    for (const std::unique_ptr<TabButton>& tab : _tabs) {
+        if (Widget* w = tab->accept_key(which)) {
+            return w;
+        }
+    }
+    for (const std::unique_ptr<Widget>& widget : _tabs[_current_tab]->content()) {
+        if (Widget* w = widget->accept_key(which)) {
+            return w;
+        }
+    }
+    return nullptr;
+}
+
+Widget* TabBox::accept_button(int64_t which) {
+    for (const std::unique_ptr<TabButton>& tab : _tabs) {
+        if (Widget* w = tab->accept_button(which)) {
+            return w;
+        }
+    }
+    for (const std::unique_ptr<Widget>& widget : _tabs[_current_tab]->content()) {
+        if (Widget* w = widget->accept_button(which)) {
+            return w;
+        }
+    }
+    return nullptr;
+}
+
+void TabBox::draw(Point offset, InputMode mode) const {
     Rects          rects;
     Rect           uRect;
     int16_t        vcenter, h_border = kInterfaceSmallHBorder;
@@ -1288,6 +1343,13 @@ void TabBox::draw(Point offset, InputMode) const {
             Rect(r.right, r.bottom - vcenter + kInterfaceVLipHeight, outer.right + 1,
                  r.bottom - kInterfaceHTop + 1);
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
+
+    for (const auto& tab : _tabs) {
+        tab->draw(offset, mode);
+    }
+    for (const auto& widget : _tabs[_current_tab]->content()) {
+        widget->draw(offset, mode);
+    }
 }
 
 Rect TabBox::inner_bounds() const { return _inner_bounds; }
@@ -1301,20 +1363,30 @@ Rect TabBox::outer_bounds() const {
     return bounds;
 }
 
-std::vector<const Widget*> TabBox::children() const {
-    std::vector<const Widget*> children;
-    for (const auto& child : _tabs) {
-        children.push_back(child.get());
+std::vector<const Widget*> TabBox::children() const { return children<const Widget>(); }
+std::vector<Widget*>       TabBox::children() { return children<Widget>(); }
+
+template <typename MaybeConstWidget>
+std::vector<MaybeConstWidget*> TabBox::children() const {
+    std::vector<MaybeConstWidget*> children;
+    for (const std::unique_ptr<TabButton>& tab : _tabs) {
+        children.push_back(tab.get());
+        for (const std::unique_ptr<Widget>& widget : tab->content()) {
+            children.push_back(widget.get());
+        }
     }
     return children;
 }
 
-std::vector<Widget*> TabBox::children() {
-    std::vector<Widget*> children;
-    for (const auto& child : _tabs) {
-        children.push_back(child.get());
+void TabBox::select(const TabButton& tab) {
+    for (const auto& t : _tabs) {
+        if (t.get() == &tab) {
+            t->on()      = true;
+            _current_tab = &t - _tabs.data();
+        } else {
+            t->on() = false;
+        }
     }
-    return children;
 }
 
 }  // namespace antares

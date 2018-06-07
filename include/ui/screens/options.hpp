@@ -90,7 +90,6 @@ class KeyControlScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int64_t id);
 
   private:
     enum Item {
@@ -103,6 +102,7 @@ class KeyControlScreen : public InterfaceScreen {
         SHORTCUT_TAB = 5,
         UTILITY_TAB  = 6,
         HOT_KEY_TAB  = 7,
+        TAB_BOX      = 8,
 
         CONFLICT_TEXT = 10,
     };
@@ -115,14 +115,11 @@ class KeyControlScreen : public InterfaceScreen {
         HOT_KEY,
     };
 
-    Tab  button_tab(int button);
-    void set_tab(Tab tab);
     void update_conflicts();
     void flash_on(size_t key);
 
     OptionsScreen::State* const _state;
 
-    Tab                                    _tab;
     int32_t                                _selected_key;
     std::vector<std::pair<size_t, size_t>> _conflicts;
 

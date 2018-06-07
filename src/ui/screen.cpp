@@ -71,8 +71,6 @@ struct EmplaceBackVisitor : InterfaceItemData::Visitor {
     void visit_tab_box(const TabBoxData& data) const override {
         vec->emplace_back(new TabBox{data});
     }
-
-    void visit_tab_box_button(const TabBoxButtonData& data) const override {}
 };
 
 }  // namespace
@@ -114,14 +112,6 @@ static void enlarge_to_outer_bounds(Rect* r, const Widgets& widgets) {
     }
 }
 
-template <typename Widgets>
-static void draw_recursive(const Widgets& widgets, Point offset, InputMode mode) {
-    for (const auto& w : widgets) {
-        w->draw(offset, mode);
-        draw_recursive(w->children(), offset, mode);
-    }
-}
-
 void InterfaceScreen::draw() const {
     Rect copy_area;
     if (_full_screen) {
@@ -136,23 +126,13 @@ void InterfaceScreen::draw() const {
 
     Rects().fill(copy_area, RgbColor::black());
 
-    draw_recursive(_widgets, off, sys.video->input_mode());
+    for (const auto& w : _widgets) {
+        w->draw(off, sys.video->input_mode());
+    }
     overlay();
     if (stack()->top() == this) {
         _cursor.draw();
     }
-}
-
-template <typename Vector>
-static Widget* find_click(const Vector& v, Point where) {
-    for (auto& widget : v) {
-        if (widget->accept_click(where)) {
-            return &*widget;
-        } else if (auto in_children = find_click(widget->children(), where)) {
-            return in_children;
-        }
-    }
-    return nullptr;
 }
 
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
@@ -162,14 +142,16 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     if (event.button() != 0) {
         return;
     }
-    if (Widget* item = find_click(_widgets, where)) {
-        Button* button = dynamic_cast<Button*>(item);
-        become_normal();
-        _state           = MOUSE_DOWN;
-        button->active() = true;
-        sys.sound.select();
-        _active_widget = button;
-        return;
+    for (auto& widget : _widgets) {
+        if (Widget* item = widget->accept_click(where)) {
+            Button* button = dynamic_cast<Button*>(item);
+            become_normal();
+            _state           = MOUSE_DOWN;
+            button->active() = true;
+            sys.sound.select();
+            _active_widget = button;
+            return;
+        }
     }
 }
 
@@ -185,7 +167,7 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         Rect bounds = _active_widget->outer_bounds();
         _active_widget->deactivate();
         if (bounds.contains(where) && _active_widget->id().has_value()) {
-            handle_button(*_active_widget->id());
+            handle_button(_active_widget);
         }
     }
 }
@@ -195,29 +177,19 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
     static_cast<void>(event);
 }
 
-template <typename Vector>
-static Widget* find_key(const Vector& v, int32_t key) {
-    for (auto& widget : v) {
-        if (widget->accept_key(key)) {
-            return &*widget;
-        } else if (auto in_children = find_key(widget->children(), key)) {
-            return in_children;
-        }
-    }
-    return nullptr;
-}
-
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
-    if (Widget* item = find_key(_widgets, key_code)) {
-        Button* button = dynamic_cast<Button*>(item);
-        become_normal();
-        _state           = KEY_DOWN;
-        button->active() = true;
-        sys.sound.select();
-        _active_widget = button;
-        _pressed       = key_code;
-        return;
+    for (auto& widget : _widgets) {
+        if (Widget* item = widget->accept_key(key_code)) {
+            Button* button = dynamic_cast<Button*>(item);
+            become_normal();
+            _state           = KEY_DOWN;
+            button->active() = true;
+            sys.sound.select();
+            _active_widget = button;
+            _pressed       = key_code;
+            return;
+        }
     }
 }
 
@@ -226,32 +198,22 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     if ((_state == KEY_DOWN) && (_pressed == key_code) && _active_widget->id().has_value()) {
         _state = NORMAL;
         _active_widget->deactivate();
-        handle_button(*_active_widget->id());
+        handle_button(_active_widget);
     }
-}
-
-template <typename Vector>
-static Widget* find_button(const Vector& v, int32_t button) {
-    for (auto& widget : v) {
-        if (widget->accept_button(button)) {
-            return &*widget;
-        } else if (auto in_children = find_button(widget->children(), button)) {
-            return in_children;
-        }
-    }
-    return nullptr;
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    if (Widget* item = find_button(_widgets, event.button)) {
-        Button* button = dynamic_cast<Button*>(item);
-        become_normal();
-        _state           = GAMEPAD_DOWN;
-        button->active() = true;
-        sys.sound.select();
-        _active_widget = button;
-        _pressed       = event.button;
-        return;
+    for (auto& widget : _widgets) {
+        if (Widget* item = widget->accept_button(event.button)) {
+            Button* button = dynamic_cast<Button*>(item);
+            become_normal();
+            _state           = GAMEPAD_DOWN;
+            button->active() = true;
+            sys.sound.select();
+            _active_widget = button;
+            _pressed       = event.button;
+            return;
+        }
     }
 }
 
@@ -260,7 +222,7 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
         _active_widget->id().has_value()) {
         _state = NORMAL;
         _active_widget->deactivate();
-        handle_button(*_active_widget->id());
+        handle_button(_active_widget);
     }
 }
 
@@ -268,27 +230,18 @@ void InterfaceScreen::overlay() const {}
 
 void InterfaceScreen::adjust_interface() {}
 
-void InterfaceScreen::handle_button(int64_t id) {
-    if (PlainButton* b = button(id)) {
+void InterfaceScreen::handle_button(Widget* widget) {
+    if (auto* b = dynamic_cast<PlainButton*>(widget)) {
         b->action();
         return;
     }
-    if (CheckboxButton* c = checkbox(id)) {
-        c->set(!c->get());
+    if (auto* b = dynamic_cast<CheckboxButton*>(widget)) {
+        b->set(!b->get());
         return;
     }
-}
-
-void InterfaceScreen::truncate(size_t size) {
-    if (size > _widgets.size()) {
-        throw std::runtime_error("");
-    }
-    _widgets.resize(size);
-}
-
-void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items) {
-    for (const auto& item : items) {
-        item->accept(EmplaceBackVisitor{&_widgets});
+    if (auto* b = dynamic_cast<TabButton*>(widget)) {
+        b->parent()->select(*b);
+        return;
     }
 }
 
