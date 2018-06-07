@@ -25,6 +25,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/interface.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
@@ -166,8 +167,8 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
           _state(state),
           _selected_key(-1),
           _flashed_on(false),
-          _tabs(2009),
-          _keys(2005) {
+          _tabs(Resource::strings(2009)),
+          _keys(Resource::strings(2005)) {
     button(DONE)->bind({
             [this] {
                 *_state = OptionsScreen::ACCEPT;
