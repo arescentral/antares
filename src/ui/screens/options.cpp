@@ -198,6 +198,8 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
             adjust_interface();
         }});
     }
+
+    adjust_interface();
 }
 
 KeyControlScreen::~KeyControlScreen() {}
@@ -219,7 +221,6 @@ void KeyControlScreen::key_down(const KeyDownEvent& event) {
                 if (old_tab != new_tab) {
                     _selected_key = -1;
                 }
-                adjust_interface();
                 break;
         }
         update_conflicts();

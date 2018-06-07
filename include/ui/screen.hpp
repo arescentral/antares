@@ -50,7 +50,6 @@ class InterfaceScreen : public Card {
 
   protected:
     virtual void overlay() const;
-    virtual void adjust_interface();
 
     void truncate(size_t size);
     void extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items);

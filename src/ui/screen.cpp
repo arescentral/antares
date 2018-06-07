@@ -90,7 +90,6 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bo
 InterfaceScreen::~InterfaceScreen() {}
 
 void InterfaceScreen::become_front() {
-    this->adjust_interface();
     // half-second fade from black.
 }
 
@@ -227,8 +226,6 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
 }
 
 void InterfaceScreen::overlay() const {}
-
-void InterfaceScreen::adjust_interface() {}
 
 void InterfaceScreen::handle_button(Widget* widget) {
     if (auto* b = dynamic_cast<PlainButton*>(widget)) {

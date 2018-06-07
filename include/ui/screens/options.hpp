@@ -88,10 +88,9 @@ class KeyControlScreen : public InterfaceScreen {
 
     virtual void overlay() const;
 
-  protected:
-    virtual void adjust_interface();
-
   private:
+    void adjust_interface();
+
     enum Item {
         CANCEL        = 0,
         DONE          = 1,

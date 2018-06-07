@@ -67,7 +67,6 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
                     --_index;
                     *_level = Level::get(_chapters[_index]);
                 }
-                adjust_interface();
             },
             [this] { return _index > 0; },
     });
@@ -78,7 +77,6 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
                     ++_index;
                     *_level = Level::get(_chapters[_index]);
                 }
-                adjust_interface();
             },
             [this] { return _index < _chapters.size() - 1; },
     });
@@ -137,7 +135,6 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
                 _index = std::find(_chapters.begin(), _chapters.end(), _unlock_chapter) -
                          _chapters.begin();
                 *_level = Level::get(_chapters[_index]);
-                adjust_interface();
             }
             return;
         } break;
