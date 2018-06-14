@@ -51,12 +51,8 @@ class InterfaceScreen : public Card {
   protected:
     virtual void overlay() const;
 
-    void truncate(size_t size);
-    void extend(const std::vector<std::unique_ptr<InterfaceItemData>>& items);
-    void handle_button(Widget* widget);
+    Point offset() const;
 
-    Point                 offset() const;
-    size_t                size() const;
     const PlainButton*    button(int id) const;
     PlainButton*          button(int id);
     const CheckboxButton* checkbox(int id) const;

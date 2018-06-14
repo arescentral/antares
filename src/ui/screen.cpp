@@ -166,7 +166,7 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         Rect bounds = _active_widget->outer_bounds();
         _active_widget->deactivate();
         if (bounds.contains(where) && _active_widget->id().has_value()) {
-            handle_button(_active_widget);
+            _active_widget->action();
         }
     }
 }
@@ -197,7 +197,7 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     if ((_state == KEY_DOWN) && (_pressed == key_code) && _active_widget->id().has_value()) {
         _state = NORMAL;
         _active_widget->deactivate();
-        handle_button(_active_widget);
+        _active_widget->action();
     }
 }
 
@@ -221,34 +221,17 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
         _active_widget->id().has_value()) {
         _state = NORMAL;
         _active_widget->deactivate();
-        handle_button(_active_widget);
+        _active_widget->action();
     }
 }
 
 void InterfaceScreen::overlay() const {}
-
-void InterfaceScreen::handle_button(Widget* widget) {
-    if (auto* b = dynamic_cast<PlainButton*>(widget)) {
-        b->action();
-        return;
-    }
-    if (auto* b = dynamic_cast<CheckboxButton*>(widget)) {
-        b->set(!b->get());
-        return;
-    }
-    if (auto* b = dynamic_cast<TabButton*>(widget)) {
-        b->parent()->select(*b);
-        return;
-    }
-}
 
 Point InterfaceScreen::offset() const {
     Rect screen = {0, 0, 640, 480};
     screen.center_in(sys.video->screen_size().as_rect());
     return {_bounds.left + screen.left, _bounds.top + screen.top};
 }
-
-size_t InterfaceScreen::size() const { return _widgets.size(); }
 
 template <typename Vector>
 static Widget* find_id(const Vector& v, int64_t id) {

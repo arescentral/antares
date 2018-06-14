@@ -214,6 +214,7 @@ static int h_border(InterfaceStyle style) {
 Widget* Widget::accept_click(Point where) { return nullptr; }
 Widget* Widget::accept_key(int64_t which) { return nullptr; }
 Widget* Widget::accept_button(int64_t which) { return nullptr; }
+void    Widget::action() {}
 
 void Widget::deactivate() {}
 
@@ -478,11 +479,13 @@ Widget* Button::accept_button(int64_t which) {
 PlainButton::PlainButton(const PlainButtonData& data) : Button{data}, _inner_bounds{data.bounds} {}
 
 void PlainButton::bind(Action a) { _action = a; }
-void PlainButton::action() const {
+
+void PlainButton::action() {
     if (_action.perform) {
         _action.perform();
     }
 }
+
 bool PlainButton::enabled() const {
     if (!_action.perform) {
         return false;
@@ -675,6 +678,8 @@ bool CheckboxButton::enabled() const {
         return _value.modifiable();
     }
 }
+
+void CheckboxButton::action() { set(!get()); }
 
 void CheckboxButton::draw(Point offset, InputMode) const {
     Rect     tRect, uRect, vRect, wRect;
@@ -992,6 +997,8 @@ TabButton::TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds)
         item->accept(EmplaceBackVisitor{&_content});
     }
 }
+
+void TabButton::action() { parent()->select(*this); }
 
 void TabButton::draw(Point offset, InputMode) const {
     Rect     tRect;

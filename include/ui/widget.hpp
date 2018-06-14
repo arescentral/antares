@@ -36,6 +36,7 @@ class Widget {
     virtual Widget* accept_click(Point where);
     virtual Widget* accept_key(int64_t which);
     virtual Widget* accept_button(int64_t which);
+    virtual void    action();
 
     virtual void deactivate();
     virtual void draw(Point origin, InputMode mode) const = 0;
@@ -152,7 +153,7 @@ class PlainButton : public Button {
     PlainButton(const PlainButtonData& data);
 
     void bind(Action a);
-    void action() const;
+    void action() override;
     bool enabled() const override;
 
     void draw(Point origin, InputMode mode) const override;
@@ -174,10 +175,11 @@ class CheckboxButton : public Button {
 
     CheckboxButton(const CheckboxButtonData& data);
 
-    void bind(Value v);
-    bool get() const;
-    void set(bool on);
-    bool enabled() const override;
+    void         bind(Value v);
+    bool         get() const;
+    void         set(bool on);
+    bool         enabled() const override;
+    virtual void action() override;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
@@ -214,6 +216,7 @@ class TabButton : public Button {
     bool                                        on() const { return _on; }
     bool&                                       on() { return _on; }
     bool                                        enabled() const override { return true; }
+    virtual void                                action() override;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
