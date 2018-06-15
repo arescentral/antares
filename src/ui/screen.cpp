@@ -93,13 +93,23 @@ void InterfaceScreen::become_front() {
     // half-second fade from black.
 }
 
-void InterfaceScreen::resign_front() { become_normal(); }
+void InterfaceScreen::resign_front() { set_state(NORMAL); }
 
-void InterfaceScreen::become_normal() {
-    _state = NORMAL;
-    if (_active_widget) {
-        _active_widget->deactivate();
-        _active_widget = nullptr;
+void InterfaceScreen::set_state(State state, Widget* widget, uint32_t pressed) {
+    _state   = state;
+    _pressed = pressed;
+    if (widget) {  // Even if already the active widget.
+        sys.sound.select();
+    }
+    if (widget != _active_widget) {
+        if (_active_widget) {
+            _active_widget->deactivate();
+            _active_widget = nullptr;
+        }
+        if (widget) {
+            widget->activate();
+            _active_widget = widget;
+        }
     }
 }
 
@@ -143,12 +153,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     }
     for (auto& widget : _widgets) {
         if (Widget* item = widget->accept_click(where)) {
-            Button* button = dynamic_cast<Button*>(item);
-            become_normal();
-            _state           = MOUSE_DOWN;
-            button->active() = true;
-            sys.sound.select();
-            _active_widget = button;
+            set_state(MOUSE_DOWN, item);
             return;
         }
     }
@@ -162,11 +167,12 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        _state      = NORMAL;
-        Rect bounds = _active_widget->outer_bounds();
-        _active_widget->deactivate();
-        if (bounds.contains(where) && _active_widget->id().has_value()) {
-            _active_widget->action();
+        if (_active_widget->accept_click(where)) {
+            Widget* w = _active_widget;
+            set_state(NORMAL);
+            w->action();
+        } else {
+            set_state(NORMAL);
         }
     }
 }
@@ -180,48 +186,34 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
     for (auto& widget : _widgets) {
         if (Widget* item = widget->accept_key(key_code)) {
-            Button* button = dynamic_cast<Button*>(item);
-            become_normal();
-            _state           = KEY_DOWN;
-            button->active() = true;
-            sys.sound.select();
-            _active_widget = button;
-            _pressed       = key_code;
+            set_state(KEY_DOWN, item, event.key());
             return;
         }
     }
 }
 
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
-    const int32_t key_code = event.key() + 1;
-    if ((_state == KEY_DOWN) && (_pressed == key_code) && _active_widget->id().has_value()) {
-        _state = NORMAL;
-        _active_widget->deactivate();
-        _active_widget->action();
+    if ((_state == KEY_DOWN) && (_pressed == event.key())) {
+        Widget* w = _active_widget;
+        set_state(NORMAL);
+        w->action();
     }
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& widget : _widgets) {
         if (Widget* item = widget->accept_button(event.button)) {
-            Button* button = dynamic_cast<Button*>(item);
-            become_normal();
-            _state           = GAMEPAD_DOWN;
-            button->active() = true;
-            sys.sound.select();
-            _active_widget = button;
-            _pressed       = event.button;
+            set_state(GAMEPAD_DOWN, item, event.button);
             return;
         }
     }
 }
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button) &&
-        _active_widget->id().has_value()) {
-        _state = NORMAL;
-        _active_widget->deactivate();
-        _active_widget->action();
+    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
+        Widget* w = _active_widget;
+        set_state(NORMAL);
+        w->action();
     }
 }
 

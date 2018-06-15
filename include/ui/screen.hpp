@@ -70,7 +70,7 @@ class InterfaceScreen : public Card {
     State _state = NORMAL;
 
     pn::value load_pn(pn::string_view id);
-    void      become_normal();
+    void      set_state(State state, Widget* widget = nullptr, uint32_t pressed = 0);
 
     const Rect                           _bounds;
     bool                                 _full_screen = false;

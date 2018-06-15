@@ -216,6 +216,7 @@ Widget* Widget::accept_key(int64_t which) { return nullptr; }
 Widget* Widget::accept_button(int64_t which) { return nullptr; }
 void    Widget::action() {}
 
+void Widget::activate() {}
 void Widget::deactivate() {}
 
 std::vector<const Widget*> Widget::children() const { return std::vector<const Widget*>{}; }

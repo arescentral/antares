@@ -258,9 +258,9 @@ void KeyControlScreen::adjust_interface() {
         int          key_num = sys.prefs->key(key);
         b->key()             = key_num;
         if (key == _selected_key) {
-            b->active() = true;
+            b->activate();
         } else {
-            b->active() = false;
+            b->deactivate();
         }
         b->hue() = Hue::AQUA;
     }

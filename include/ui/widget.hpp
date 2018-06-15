@@ -38,6 +38,7 @@ class Widget {
     virtual Widget* accept_button(int64_t which);
     virtual void    action();
 
+    virtual void activate();
     virtual void deactivate();
     virtual void draw(Point origin, InputMode mode) const = 0;
     virtual Rect inner_bounds() const                     = 0;
@@ -116,6 +117,7 @@ class Button : public Widget {
     Widget* accept_key(int64_t which) override;
     Widget* accept_button(int64_t which) override;
 
+    void activate() override { _active = true; }
     void deactivate() override { _active = false; }
 
     pn::string_view label() const { return _label; }
@@ -128,7 +130,6 @@ class Button : public Widget {
 
     int16_t& key() { return _key; }
     Hue&     hue() { return _hue; }
-    bool&    active() { return _active; }
 
   protected:
     Button(const ButtonData& data);
