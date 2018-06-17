@@ -34,8 +34,7 @@
 
 namespace antares {
 
-HelpScreen::HelpScreen()
-        : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
+HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sys.fonts.computer) {
     pn::string text = Resource::text(6002);
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
@@ -44,7 +43,9 @@ HelpScreen::HelpScreen()
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(item(BOX).bounds.width(), 0, 0);
+    _text.wrap_to(widget(BOX)->inner_bounds().width(), 0, 0);
+
+    button(DONE)->bind({[this] { stack()->pop(this); }});
 }
 
 HelpScreen::~HelpScreen() {}
@@ -57,17 +58,8 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
     }
 }
 
-void HelpScreen::handle_button(Button& button) {
-    switch (button.id) {
-        case DONE: stack()->pop(this); break;
-
-        default:
-            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
-    }
-}
-
 void HelpScreen::overlay() const {
-    Rect  bounds = item(BOX).bounds;
+    Rect  bounds = widget(BOX)->inner_bounds();
     Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);

@@ -52,11 +52,10 @@ class SoloGame : public Card {
     void debriefing_done();
     void epilogue_done();
 
-    bool                  _cancelled;
-    const Level*          _level;
-    GameResult            _game_result;
-    PlayAgainScreen::Item _play_again;
-    RealInputSource       _input_source;
+    bool            _cancelled;
+    const Level*    _level;
+    GameResult      _game_result;
+    RealInputSource _input_source;
 };
 
 }  // namespace antares

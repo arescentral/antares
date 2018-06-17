@@ -21,6 +21,7 @@
 
 #include <pn/array>
 #include <pn/string>
+#include <sfz/sfz.hpp>
 
 #include "data/enums.hpp"
 #include "math/geometry.hpp"
@@ -29,8 +30,7 @@
 namespace antares {
 
 class path_value;
-
-enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
+struct InterfaceItemData;
 
 enum class InterfaceStyle { LARGE, SMALL };
 
@@ -39,116 +39,95 @@ struct interfaceLabelType {
     int64_t stringNumber;
 };
 
-class InterfaceItem {
+struct InterfaceData {
+    bool                                            fullscreen = false;
+    std::vector<std::unique_ptr<InterfaceItemData>> items;
+};
+
+struct InterfaceItemData {
   public:
     class Visitor;
 
-    InterfaceItem()                = default;
-    InterfaceItem(InterfaceItem&&) = default;
-    InterfaceItem& operator=(InterfaceItem&&) = default;
-    virtual ~InterfaceItem() {}
+    InterfaceItemData()                    = default;
+    InterfaceItemData(InterfaceItemData&&) = default;
+    InterfaceItemData& operator=(InterfaceItemData&&) = default;
+    virtual ~InterfaceItemData() {}
 
-    virtual std::unique_ptr<InterfaceItem> copy() const                         = 0;
-    virtual void                           accept(const Visitor& visitor) const = 0;
+    virtual void accept(const Visitor& visitor) const = 0;
 
-    int  id = -1;
-    Rect bounds;
+    Rect                   bounds;
+    sfz::optional<int64_t> id;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value x);
+InterfaceData interface(path_value x);
 
-struct PlainRect : public InterfaceItem {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
+struct BoxRectData : public InterfaceItemData {
+    virtual void accept(const Visitor& visitor) const;
 
-    Hue            hue   = Hue::GRAY;
-    InterfaceStyle style = InterfaceStyle::LARGE;
+    sfz::optional<pn::string> label;
+    Hue                       hue   = Hue::GRAY;
+    InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
-struct LabeledItem : public InterfaceItem {
-    pn::string label;
-};
-
-struct LabeledRect : public LabeledItem {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
-
-    Hue            hue   = Hue::GRAY;
-    InterfaceStyle style = InterfaceStyle::LARGE;
-};
-
-struct TextRect : public InterfaceItem {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
+struct TextRectData : public InterfaceItemData {
+    virtual void accept(const Visitor& visitor) const;
 
     pn::string     text;
     Hue            hue   = Hue::GRAY;
     InterfaceStyle style = InterfaceStyle::LARGE;
 };
 
-struct PictureRect : public InterfaceItem {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
+struct PictureRectData : public InterfaceItemData {
+    virtual void accept(const Visitor& visitor) const;
 
-    Texture texture;
+    pn::string picture;
 };
 
-struct Button : public LabeledItem {
-    int16_t                 key     = 0;
-    int16_t                 gamepad = 0;
-    Hue                     hue     = Hue::GRAY;
-    InterfaceStyle          style   = InterfaceStyle::LARGE;
-    interfaceItemStatusType status  = kActive;
+struct ButtonData : public InterfaceItemData {
+    pn::string     label;
+    int16_t        key     = 0;
+    int16_t        gamepad = 0;
+    Hue            hue     = Hue::GRAY;
+    InterfaceStyle style   = InterfaceStyle::LARGE;
 };
 
-struct PlainButton : public Button {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
+struct PlainButtonData : public ButtonData {
+    virtual void accept(const Visitor& visitor) const;
 };
 
-struct CheckboxButton : public Button {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
-
-    bool on = false;
+struct CheckboxButtonData : public ButtonData {
+    virtual void accept(const Visitor& visitor) const;
 };
 
-struct RadioButton : public Button {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
-
-    bool on = false;
+struct RadioButtonData : public ButtonData {
+    virtual void accept(const Visitor& visitor) const;
 };
 
-struct TabBoxButton : public Button {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
+struct TabBoxData : public InterfaceItemData {
+    virtual void accept(const Visitor& visitor) const;
 
-    bool                                        on = false;
-    std::vector<std::unique_ptr<InterfaceItem>> tab_content;
+    Hue            hue   = Hue::GRAY;
+    InterfaceStyle style = InterfaceStyle::LARGE;
+
+    struct Tab {
+        sfz::optional<int64_t>                          id;
+        int64_t                                         width;
+        pn::string                                      label;
+        std::vector<std::unique_ptr<InterfaceItemData>> content;
+    };
+    std::vector<Tab> tabs;
 };
 
-struct TabBox : public InterfaceItem {
-    virtual std::unique_ptr<InterfaceItem> copy() const;
-    virtual void                           accept(const Visitor& visitor) const;
-
-    Hue            hue                   = Hue::GRAY;
-    InterfaceStyle style                 = InterfaceStyle::LARGE;
-    int16_t        top_right_border_size = 0;
-};
-
-class InterfaceItem::Visitor {
+class InterfaceItemData::Visitor {
   public:
     ~Visitor();
-    virtual void visit_plain_rect(const PlainRect&) const           = 0;
-    virtual void visit_labeled_rect(const LabeledRect&) const       = 0;
-    virtual void visit_text_rect(const TextRect&) const             = 0;
-    virtual void visit_picture_rect(const PictureRect&) const       = 0;
-    virtual void visit_plain_button(const PlainButton&) const       = 0;
-    virtual void visit_radio_button(const RadioButton&) const       = 0;
-    virtual void visit_checkbox_button(const CheckboxButton&) const = 0;
-    virtual void visit_tab_box(const TabBox&) const                 = 0;
-    virtual void visit_tab_box_button(const TabBoxButton&) const    = 0;
+    virtual void visit_box_rect(const BoxRectData&) const               = 0;
+    virtual void visit_text_rect(const TextRectData&) const             = 0;
+    virtual void visit_picture_rect(const PictureRectData&) const       = 0;
+    virtual void visit_plain_button(const PlainButtonData&) const       = 0;
+    virtual void visit_radio_button(const RadioButtonData&) const       = 0;
+    virtual void visit_checkbox_button(const CheckboxButtonData&) const = 0;
+    virtual void visit_tab_box(const TabBoxData&) const                 = 0;
 };
 
 }  // namespace antares

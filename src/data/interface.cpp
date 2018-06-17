@@ -63,253 +63,134 @@ static int16_t optional_gamepad_button(path_value x) {
     return i;
 }
 
-Texture required_texture(path_value x) { return Resource::texture(required_string(x)); }
-
-struct Tab {
-    int64_t    width;
-    pn::string label;
-};
-
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value x) {
-    if (!x.value().is_array()) {
-        throw std::runtime_error(pn::format("{0}must be array", x.prefix()).c_str());
+static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}must be a map", x.prefix()).c_str());
     }
 
-    std::vector<std::unique_ptr<InterfaceItem>> items;
-    int                                         id = id0;
-    for (auto i : range(x.value().as_array().size())) {
-        path_value item = x.get(i);
+    pn::string_view type = required_string(x.get("type"));
+    if (type == "rect") {
+        return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
+                x, {
+                           {"type", nullptr},
+                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                           {"id", {&InterfaceItemData::id, optional_int}},
+                           {"label", {&BoxRectData::label, optional_string_copy}},
+                           {"hue", {&BoxRectData::hue, required_hue}},
+                           {"style", {&BoxRectData::style, required_interface_style}},
+                   })));
+    } else if (type == "button") {
+        return std::unique_ptr<InterfaceItemData>(
+                new PlainButtonData(required_struct<PlainButtonData>(
+                        x,
+                        {
+                                {"type", nullptr},
+                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                {"id", {&InterfaceItemData::id, optional_int}},
+                                {"label", {&PlainButtonData::label, required_string_copy}},
+                                {"key", {&PlainButtonData::key, optional_key_num}},
+                                {"gamepad", {&PlainButtonData::gamepad, optional_gamepad_button}},
+                                {"hue", {&PlainButtonData::hue, required_hue}},
+                                {"style", {&PlainButtonData::style, required_interface_style}},
+                        })));
+    } else if (type == "checkbox") {
+        return std::unique_ptr<InterfaceItemData>(
+                new CheckboxButtonData(required_struct<CheckboxButtonData>(
+                        x,
+                        {
+                                {"type", nullptr},
+                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                {"id", {&InterfaceItemData::id, optional_int}},
+                                {"label", {&CheckboxButtonData::label, required_string_copy}},
+                                {"key", {&CheckboxButtonData::key, optional_key_num}},
+                                {"gamepad",
+                                 {&CheckboxButtonData::gamepad, optional_gamepad_button}},
+                                {"hue", {&CheckboxButtonData::hue, required_hue}},
+                                {"style", {&CheckboxButtonData::style, required_interface_style}},
+                        })));
+    } else if (type == "radio") {
+        return std::unique_ptr<InterfaceItemData>(
+                new RadioButtonData(required_struct<RadioButtonData>(
+                        x,
+                        {
+                                {"type", nullptr},
+                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                {"id", {&InterfaceItemData::id, optional_int}},
+                                {"label", {&RadioButtonData::label, required_string_copy}},
+                                {"key", {&RadioButtonData::key, optional_key_num}},
+                                {"gamepad", {&RadioButtonData::gamepad, optional_gamepad_button}},
+                                {"hue", {&RadioButtonData::hue, required_hue}},
+                                {"style", {&RadioButtonData::style, required_interface_style}},
+                        })));
+    } else if (type == "picture") {
+        return std::unique_ptr<InterfaceItemData>(
+                new PictureRectData(required_struct<PictureRectData>(
+                        x, {
+                                   {"type", nullptr},
+                                   {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                                   {"id", {&InterfaceItemData::id, optional_int}},
+                                   {"picture", {&PictureRectData::picture, required_string_copy}},
+                           })));
+    } else if (type == "text") {
+        return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
+                x, {
+                           {"type", nullptr},
+                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                           {"id", {&InterfaceItemData::id, optional_int}},
+                           {"text", {&TextRectData::text, optional_string, ""}},
+                           {"hue", {&TextRectData::hue, required_hue}},
+                           {"style", {&TextRectData::style, required_interface_style}},
+                   })));
+    } else if (type == "tab-box") {
+        TabBoxData tab_box = required_struct<TabBoxData>(
+                x, {
+                           {"type", nullptr},
+                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                           {"id", {&InterfaceItemData::id, optional_int}},
+                           {"hue", {&TabBoxData::hue, required_hue}},
+                           {"style", {&TabBoxData::style, required_interface_style}},
+                           {"tabs", nullptr},
+                   });
 
-        pn::string_view type = required_string(item.get("type"));
-        if (type == "rect") {
-            if (item.get("label").value().is_null()) {
-                items.emplace_back(new PlainRect(required_struct<PlainRect>(
-                        item, {
-                                      {"type", nullptr},
-                                      {"bounds", {&PlainRect::bounds, required_rect}},
-                                      {"hue", {&PlainRect::hue, required_hue}},
-                                      {"style", {&PlainRect::style, required_interface_style}},
-                              })));
-            } else {
-                items.emplace_back(new LabeledRect(required_struct<LabeledRect>(
-                        item, {
-                                      {"type", nullptr},
-                                      {"bounds", {&LabeledRect::bounds, required_rect}},
-                                      {"label", {&LabeledRect::label, required_string_copy}},
-                                      {"hue", {&LabeledRect::hue, required_hue}},
-                                      {"style", {&LabeledRect::style, required_interface_style}},
-                              })));
-            }
-            items.back()->id = id++;
-        } else if (type == "button") {
-            items.emplace_back(new PlainButton(required_struct<PlainButton>(
-                    item, {
-                                  {"type", nullptr},
-                                  {"bounds", {&PlainButton::bounds, required_rect}},
-                                  {"label", {&PlainButton::label, required_string_copy}},
-                                  {"key", {&PlainButton::key, optional_key_num}},
-                                  {"gamepad", {&PlainButton::gamepad, optional_gamepad_button}},
-                                  {"hue", {&PlainButton::hue, required_hue}},
-                                  {"style", {&PlainButton::style, required_interface_style}},
-                          })));
-            items.back()->id = id++;
-        } else if (type == "checkbox") {
-            items.emplace_back(new CheckboxButton(required_struct<CheckboxButton>(
-                    item, {
-                                  {"type", nullptr},
-                                  {"bounds", {&CheckboxButton::bounds, required_rect}},
-                                  {"label", {&CheckboxButton::label, required_string_copy}},
-                                  {"key", {&CheckboxButton::key, optional_key_num}},
-                                  {"gamepad", {&CheckboxButton::gamepad, optional_gamepad_button}},
-                                  {"hue", {&CheckboxButton::hue, required_hue}},
-                                  {"style", {&CheckboxButton::style, required_interface_style}},
-                          })));
-            items.back()->id = id++;
-        } else if (type == "radio") {
-            items.emplace_back(new RadioButton(required_struct<RadioButton>(
-                    item, {
-                                  {"type", nullptr},
-                                  {"bounds", {&RadioButton::bounds, required_rect}},
-                                  {"label", {&RadioButton::label, required_string_copy}},
-                                  {"key", {&RadioButton::key, optional_key_num}},
-                                  {"gamepad", {&RadioButton::gamepad, optional_gamepad_button}},
-                                  {"hue", {&RadioButton::hue, required_hue}},
-                                  {"style", {&RadioButton::style, required_interface_style}},
-                          })));
-            items.back()->id = id++;
-        } else if (type == "picture") {
-            items.emplace_back(new PictureRect(required_struct<PictureRect>(
-                    item, {
-                                  {"type", nullptr},
-                                  {"bounds", {&PictureRect::bounds, required_rect}},
-                                  {"id", {&PictureRect::texture, required_texture}},
-                          })));
-            items.back()->id = id++;
-        } else if (type == "text") {
-            items.emplace_back(new TextRect(required_struct<TextRect>(
-                    item, {
-                                  {"type", nullptr},
-                                  {"bounds", {&TextRect::bounds, required_rect}},
-                                  {"text", {&TextRect::text, optional_string, ""}},
-                                  {"hue", {&TextRect::hue, required_hue}},
-                                  {"style", {&TextRect::style, required_interface_style}},
-                          })));
-            items.back()->id = id++;
-        } else if (type == "tab-box") {
-            TabBox tab_box = required_struct<TabBox>(
-                    item, {
-                                  {"type", nullptr},
-                                  {"bounds", {&TabBox::bounds, required_rect}},
-                                  {"hue", {&TabBox::hue, required_hue}},
-                                  {"style", {&TabBox::style, required_interface_style}},
-                                  {"tabs", nullptr},
-                          });
-            Rect button_bounds = {
-                    tab_box.bounds.left + 22, tab_box.bounds.top - 20, 0, tab_box.bounds.top - 10,
-            };
-
-            path_value tabs = item.get("tabs");
-            for (auto i : range(tabs.value().as_array().size())) {
-                auto tab = required_struct<Tab>(
-                        tabs.get(i), {
-                                             {"width", {&Tab::width, required_int}},
-                                             {"label", {&Tab::label, required_string_copy}},
-                                             {"content", nullptr},
-                                     });
-                button_bounds.right = button_bounds.left + tab.width;
-                TabBoxButton button;
-                button.bounds      = button_bounds;
-                button.label       = std::move(tab.label);
-                button.hue         = tab_box.hue;
-                button.style       = tab_box.style;
-                button.tab_content = interface_items(0, tabs.get(i).get("content"));
-                button.id          = id++;
-                items.emplace_back(new TabBoxButton(std::move(button)));
-                button_bounds.left = button_bounds.right + 37;
-            }
-
-            tab_box.top_right_border_size = tab_box.bounds.right - button_bounds.right - 17;
-            tab_box.id                    = id++;
-            items.emplace_back(new TabBox(std::move(tab_box)));
-        } else {
-            throw std::runtime_error(
-                    pn::format("{0}: unknown type: {1}", item.path(), type).c_str());
+        path_value tabs = x.get("tabs");
+        for (auto i : range(tabs.value().as_array().size())) {
+            using Tab = TabBoxData::Tab;
+            tab_box.tabs.emplace_back(required_struct<Tab>(
+                    tabs.get(i),
+                    {
+                            {"id", {&Tab::id, optional_int}},
+                            {"width", {&Tab::width, required_int}},
+                            {"label", {&Tab::label, required_string_copy}},
+                            {"content",
+                             {&Tab::content,
+                              required_array<std::unique_ptr<InterfaceItemData>, interface_item>}},
+                    }));
         }
+
+        return std::unique_ptr<InterfaceItemData>(new TabBoxData(std::move(tab_box)));
+    } else {
+        throw std::runtime_error(pn::format("{0}: unknown type: {1}", x.path(), type).c_str());
     }
-    return items;
 }
 
-std::unique_ptr<InterfaceItem> PlainRect::copy() const {
-    std::unique_ptr<PlainRect> copy(new PlainRect);
-    copy->bounds = bounds;
-    copy->id     = id;
-    copy->hue    = hue;
-    copy->style  = style;
-    return std::move(copy);
+InterfaceData interface(path_value x) {
+    return required_struct<InterfaceData>(
+            x, {{"fullscreen", {&InterfaceData::fullscreen, required_bool}},
+                {"items",
+                 {&InterfaceData::items,
+                  required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
 }
 
-std::unique_ptr<InterfaceItem> LabeledRect::copy() const {
-    std::unique_ptr<LabeledRect> copy(new LabeledRect);
-    copy->bounds = bounds;
-    copy->id     = id;
-    copy->label  = label.copy();
-    copy->hue    = hue;
-    copy->style  = style;
-    return std::move(copy);
+void BoxRectData::accept(const Visitor& visitor) const { visitor.visit_box_rect(*this); }
+void TextRectData::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
+void PictureRectData::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
+void PlainButtonData::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }
+void CheckboxButtonData::accept(const Visitor& visitor) const {
+    visitor.visit_checkbox_button(*this);
 }
+void RadioButtonData::accept(const Visitor& visitor) const { visitor.visit_radio_button(*this); }
+void TabBoxData::accept(const Visitor& visitor) const { visitor.visit_tab_box(*this); }
 
-std::unique_ptr<InterfaceItem> TextRect::copy() const {
-    std::unique_ptr<TextRect> copy(new TextRect);
-    copy->bounds = bounds;
-    copy->id     = id;
-    copy->text   = text.copy();
-    copy->hue    = hue;
-    copy->style  = style;
-    return std::move(copy);
-}
-
-std::unique_ptr<InterfaceItem> PictureRect::copy() const {
-    std::unique_ptr<PictureRect> copy(new PictureRect);
-    copy->bounds = bounds;
-    copy->id     = id;
-    return std::move(copy);
-}
-
-std::unique_ptr<InterfaceItem> PlainButton::copy() const {
-    std::unique_ptr<PlainButton> copy(new PlainButton);
-    copy->bounds  = bounds;
-    copy->id      = id;
-    copy->label   = label.copy();
-    copy->key     = key;
-    copy->gamepad = gamepad;
-    copy->hue     = hue;
-    copy->style   = style;
-    copy->status  = status;
-    return std::move(copy);
-}
-
-std::unique_ptr<InterfaceItem> CheckboxButton::copy() const {
-    std::unique_ptr<CheckboxButton> copy(new CheckboxButton);
-    copy->bounds  = bounds;
-    copy->id      = id;
-    copy->label   = label.copy();
-    copy->key     = key;
-    copy->gamepad = gamepad;
-    copy->hue     = hue;
-    copy->style   = style;
-    copy->status  = status;
-    copy->on      = on;
-    return std::move(copy);
-}
-
-std::unique_ptr<InterfaceItem> RadioButton::copy() const {
-    std::unique_ptr<RadioButton> copy(new RadioButton);
-    copy->bounds  = bounds;
-    copy->id      = id;
-    copy->label   = label.copy();
-    copy->key     = key;
-    copy->gamepad = gamepad;
-    copy->hue     = hue;
-    copy->style   = style;
-    copy->status  = status;
-    copy->on      = on;
-    return std::move(copy);
-}
-
-std::unique_ptr<InterfaceItem> TabBoxButton::copy() const {
-    std::unique_ptr<TabBoxButton> copy(new TabBoxButton);
-    copy->bounds  = bounds;
-    copy->id      = id;
-    copy->label   = label.copy();
-    copy->key     = key;
-    copy->gamepad = gamepad;
-    copy->hue     = hue;
-    copy->style   = style;
-    copy->status  = status;
-    copy->on      = on;
-    return std::move(copy);
-}
-
-std::unique_ptr<InterfaceItem> TabBox::copy() const {
-    std::unique_ptr<TabBox> copy(new TabBox);
-    copy->bounds                = bounds;
-    copy->id                    = id;
-    copy->hue                   = hue;
-    copy->style                 = style;
-    copy->top_right_border_size = top_right_border_size;
-    return std::move(copy);
-}
-
-void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(*this); }
-void LabeledRect::accept(const Visitor& visitor) const { visitor.visit_labeled_rect(*this); }
-void TextRect::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
-void PictureRect::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
-void PlainButton::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }
-void CheckboxButton::accept(const Visitor& visitor) const { visitor.visit_checkbox_button(*this); }
-void RadioButton::accept(const Visitor& visitor) const { visitor.visit_radio_button(*this); }
-void TabBoxButton::accept(const Visitor& visitor) const { visitor.visit_tab_box_button(*this); }
-void TabBox::accept(const Visitor& visitor) const { visitor.visit_tab_box(*this); }
-
-InterfaceItem::Visitor::~Visitor() {}
+InterfaceItemData::Visitor::~Visitor() {}
 
 }  // namespace antares

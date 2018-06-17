@@ -30,18 +30,12 @@ class PlayAgainScreen : public InterfaceScreen {
         QUIT    = 1,
         RESUME  = 4,
         SKIP    = 5,
-
-        BOX = 3,
     };
 
     PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed);
     ~PlayAgainScreen();
 
     virtual void become_front();
-
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button);
 
   private:
     enum State {

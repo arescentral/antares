@@ -26,12 +26,13 @@
 #include "game/cursor.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
+#include "ui/widget.hpp"
 
 namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen);
+    InterfaceScreen(pn::string_view name, const Rect& bounds);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -49,16 +50,15 @@ class InterfaceScreen : public Card {
 
   protected:
     virtual void overlay() const;
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button) = 0;
 
-    void truncate(size_t size);
-    void extend(const std::vector<std::unique_ptr<InterfaceItem>>& items);
+    Point offset() const;
 
-    Point                offset() const;
-    size_t               size() const;
-    const InterfaceItem& item(int index) const;
-    InterfaceItem&       mutable_item(int index);
+    const PlainButton*    button(int id) const;
+    PlainButton*          button(int id);
+    const CheckboxButton* checkbox(int id) const;
+    CheckboxButton*       checkbox(int id);
+    const Widget*         widget(int id) const;
+    Widget*               widget(int id);
 
   private:
     enum State {
@@ -67,17 +67,17 @@ class InterfaceScreen : public Card {
         KEY_DOWN,
         GAMEPAD_DOWN,
     };
-    State _state;
+    State _state = NORMAL;
 
     pn::value load_pn(pn::string_view id);
-    void      become_normal();
+    void      set_state(State state, Widget* widget = nullptr, uint32_t pressed = 0);
 
-    const Rect                                  _bounds;
-    const bool                                  _full_screen;
-    std::vector<std::unique_ptr<InterfaceItem>> _items;
-    Button*                                     _hit_button;
-    uint32_t                                    _pressed;
-    Cursor                                      _cursor;
+    const Rect                           _bounds;
+    bool                                 _full_screen = false;
+    std::vector<std::unique_ptr<Widget>> _widgets;
+    Widget*                              _active_widget = nullptr;
+    uint32_t                             _pressed;
+    Cursor                               _cursor;
 };
 
 }  // namespace antares

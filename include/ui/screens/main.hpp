@@ -44,10 +44,6 @@ class MainScreen : public InterfaceScreen {
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(antares::Button& button);
-
   private:
     enum Button {
         START_NEW_GAME     = 0,

@@ -109,11 +109,8 @@ void SoloGame::handle_game_result() {
             become_front();
             break;
 
-        default:
-            throw std::runtime_error(pn::format(
-                                             "_play_again was invalid after PLAY_AGAIN ({0})",
-                                             stringify(_play_again))
-                                             .c_str());
+        case LOSE_GAME: throw std::runtime_error("_game_result was invalid (LOSE_GAME)");
+        case NO_GAME: throw std::runtime_error("_game_result was invalid (NO_GAME)");
     }
 }
 

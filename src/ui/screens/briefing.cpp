@@ -64,25 +64,6 @@ static const int32_t kMissionDataBottomBuffer = 15;
 static const int32_t kMissionDataHBuffer      = 41;
 static const int32_t kMissionLineHJog         = 10;
 
-static LabeledRect data_item(const InterfaceItem& map_rect) {
-    Rect bounds(0, 0, 200, 200);
-    bounds.center_in(map_rect.bounds);
-    LabeledRect r;
-    r.id     = 0;
-    r.bounds = bounds;
-    r.hue    = Hue::GOLD;
-    r.style  = InterfaceStyle::LARGE;
-    return r;
-}
-
-static const Font& interface_font(InterfaceStyle style) {
-    if (style == InterfaceStyle::SMALL) {
-        return sys.fonts.small_button;
-    } else {
-        return sys.fonts.button;
-    }
-}
-
 static vector<inlinePictType> populate_inline_picts(
         Rect rect, pn::string_view text, InterfaceStyle style) {
     StyledText interface_text(interface_font(style));
@@ -99,114 +80,117 @@ static vector<inlinePictType> populate_inline_picts(
     return result;
 }
 
-static void update_mission_brief_point(
-        LabeledRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
-        int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
-        vector<pair<Point, Point>>& lines, pn::string_ref text) {
+static BoxRect update_mission_brief_point(
+        int32_t whichBriefPoint, const Level& level, const coordPointType& corner, int32_t scale,
+        const Rect& bounds, vector<inlinePictType>* inlinePict, Rect* highlight_rect,
+        vector<pair<Point, Point>>* lines, pn::string_ref text) {
     if (whichBriefPoint < 0) {
         // No longer handled here.
-        return;
+        return BoxRect{{}};
     }
 
-    Rect       hiliteBounds;
-    pn::string header;
-    BriefPoint_Data_Get(
-            whichBriefPoint, level, header, text, &hiliteBounds, corner, scale, 16, 32, bounds);
-    hiliteBounds.offset(bounds->left, bounds->top);
+    BoxRectData data;
+    data.hue   = Hue::GOLD;
+    data.style = InterfaceStyle::LARGE;
 
-    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
-    if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->bounds.left =
-                (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
-        dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
-        dataItem->bounds.top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
-        highlight_rect          = Rect();
+    auto info = BriefPoint_Data_Get(whichBriefPoint, level, corner, scale, 32, bounds);
+    text      = std::move(info.content);
+    data.label.emplace(std::move(info.header));
+    Rect hiliteBounds = info.highlight;
+    hiliteBounds.offset(bounds.left, bounds.top);
+    *inlinePict     = populate_inline_picts(data.bounds, text, data.style);
+    *highlight_rect = Rect{};
+
+    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, data.style, kMissionDataWidth);
+
+    if (hiliteBounds.empty()) {
+        data.bounds = {Point{(bounds.width() / 2) - (kMissionDataWidth / 2) + bounds.left,
+                             (bounds.height() / 2) - (textHeight / 2) + bounds.top},
+                       Size{kMissionDataWidth, textHeight}};
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
-            (bounds->left + (bounds->right - bounds->left) / 2)) {
-            dataItem->bounds.right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->bounds.left  = dataItem->bounds.right - kMissionDataWidth;
+            (bounds.left + (bounds.right - bounds.left) / 2)) {
+            data.bounds.right = hiliteBounds.left - kMissionDataHBuffer;
+            data.bounds.left  = data.bounds.right - kMissionDataWidth;
         } else {
-            dataItem->bounds.left  = hiliteBounds.right + kMissionDataHBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+            data.bounds.left  = hiliteBounds.right + kMissionDataHBuffer;
+            data.bounds.right = data.bounds.left + kMissionDataWidth;
         }
 
-        dataItem->bounds.top =
+        data.bounds.top =
                 hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 - textHeight / 2;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
-        if (dataItem->bounds.top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->bounds.top    = bounds->top + kMissionDataTopBuffer;
-            dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        data.bounds.bottom = data.bounds.top + textHeight;
+        if (data.bounds.top < (bounds.top + kMissionDataTopBuffer)) {
+            data.bounds.top    = bounds.top + kMissionDataTopBuffer;
+            data.bounds.bottom = data.bounds.top + textHeight;
         }
-        if (dataItem->bounds.bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
-            dataItem->bounds.bottom = bounds->bottom - kMissionDataBottomBuffer;
-            dataItem->bounds.top    = dataItem->bounds.bottom - textHeight;
-        }
-
-        if (dataItem->bounds.left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->bounds.left  = bounds->left + kMissionDataVBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
-        }
-        if (dataItem->bounds.right > (bounds->right - kMissionDataVBuffer)) {
-            dataItem->bounds.right = bounds->right - kMissionDataVBuffer;
-            dataItem->bounds.left  = dataItem->bounds.right - kMissionDataWidth;
+        if (data.bounds.bottom > (bounds.bottom - kMissionDataBottomBuffer)) {
+            data.bounds.bottom = bounds.bottom - kMissionDataBottomBuffer;
+            data.bounds.top    = data.bounds.bottom - textHeight;
         }
 
+        if (data.bounds.left < (bounds.left + kMissionDataVBuffer)) {
+            data.bounds.left  = bounds.left + kMissionDataVBuffer;
+            data.bounds.right = data.bounds.left + kMissionDataWidth;
+        }
+        if (data.bounds.right > (bounds.right - kMissionDataVBuffer)) {
+            data.bounds.right = bounds.right - kMissionDataVBuffer;
+            data.bounds.left  = data.bounds.right - kMissionDataWidth;
+        }
+    }
+
+    BoxRect box_rect{std::move(data)};
+    lines->clear();
+    if (!hiliteBounds.empty()) {
         hiliteBounds.right++;
         hiliteBounds.bottom++;
-        highlight_rect = hiliteBounds;
-        Rect newRect;
-        GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-        lines.clear();
-        if (dataItem->bounds.right < hiliteBounds.left) {
+        *highlight_rect = hiliteBounds;
+        Rect newRect    = box_rect.outer_bounds();
+        if (data.bounds.right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
             Point p4(newRect.right + 2, newRect.top);
-            lines.push_back(make_pair(p1, p2));
-            lines.push_back(make_pair(p2, p3));
-            lines.push_back(make_pair(p3, p4));
+            lines->push_back(make_pair(p1, p2));
+            lines->push_back(make_pair(p2, p3));
+            lines->push_back(make_pair(p3, p4));
 
             Point p5(hiliteBounds.left, hiliteBounds.bottom - 1);
             Point p6(newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
             Point p7(newRect.right + kMissionLineHJog, newRect.bottom - 1);
             Point p8(newRect.right + 2, newRect.bottom - 1);
-            lines.push_back(make_pair(p5, p6));
-            lines.push_back(make_pair(p6, p7));
-            lines.push_back(make_pair(p7, p8));
+            lines->push_back(make_pair(p5, p6));
+            lines->push_back(make_pair(p6, p7));
+            lines->push_back(make_pair(p7, p8));
         } else {
             Point p1(hiliteBounds.right, hiliteBounds.top);
             Point p2(newRect.left - kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.left - kMissionLineHJog, newRect.top);
             Point p4(newRect.left - 3, newRect.top);
-            lines.push_back(make_pair(p1, p2));
-            lines.push_back(make_pair(p2, p3));
-            lines.push_back(make_pair(p3, p4));
+            lines->push_back(make_pair(p1, p2));
+            lines->push_back(make_pair(p2, p3));
+            lines->push_back(make_pair(p3, p4));
 
             Point p5(hiliteBounds.right, hiliteBounds.bottom - 1);
             Point p6(newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
             Point p7(newRect.left - kMissionLineHJog, newRect.bottom - 1);
             Point p8(newRect.left - 3, newRect.bottom - 1);
-            lines.push_back(make_pair(p5, p6));
-            lines.push_back(make_pair(p6, p7));
-            lines.push_back(make_pair(p7, p8));
+            lines->push_back(make_pair(p5, p6));
+            lines->push_back(make_pair(p6, p7));
+            lines->push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label = std::move(header);
-    Rect newRect;
-    GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    inlinePict = populate_inline_picts(dataItem->bounds, text, dataItem->style);
+    return box_rect;
 }
 
 BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
-        : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
+        : InterfaceScreen("briefing", {0, 0, 640, 480}),
           _level(level),
           _cancelled(cancelled),
           _briefing_point(_level.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
           _briefing_point_start(_briefing_point),
           _briefing_point_end(_level.briefings.size()),
-          _data_item(data_item(item(MAP_RECT))) {
+          _data_item{{}} {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
         Star star;
@@ -215,6 +199,28 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         star.location.v = _bounds.top + Randomize(_bounds.height());
         _system_stars.push_back(star);
     }
+
+    button(DONE)->bind({[this] { stack()->pop(this); }});
+
+    button(PREVIOUS)->bind({
+            [this] {
+                if (_briefing_point > _briefing_point_start) {
+                    --_briefing_point;
+                }
+                build_brief_point();
+            },
+            [this] { return _briefing_point > _briefing_point_start; },
+    });
+
+    button(NEXT)->bind({
+            [this] {
+                if (_briefing_point < _briefing_point_end - 1) {
+                    ++_briefing_point;
+                }
+                build_brief_point();
+            },
+            [this] { return _briefing_point < _briefing_point_end - 1; },
+    });
 }
 
 BriefingScreen::~BriefingScreen() {}
@@ -300,50 +306,12 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     }
 }
 
-void BriefingScreen::adjust_interface() {
-    if (_briefing_point > _briefing_point_start) {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kActive;
-    } else {
-        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kDimmed;
-    }
-    if (_briefing_point < _briefing_point_end - 1) {
-        dynamic_cast<Button&>(mutable_item(NEXT)).status = kActive;
-    } else {
-        dynamic_cast<Button&>(mutable_item(NEXT)).status = kDimmed;
-    }
-}
-
-void BriefingScreen::handle_button(Button& button) {
-    switch (button.id) {
-        case DONE: stack()->pop(this); break;
-
-        case PREVIOUS:
-            if (_briefing_point > _briefing_point_start) {
-                --_briefing_point;
-            }
-            adjust_interface();
-            build_brief_point();
-            break;
-
-        case NEXT:
-            if (_briefing_point < _briefing_point_end - 1) {
-                ++_briefing_point;
-            }
-            adjust_interface();
-            build_brief_point();
-            break;
-
-        default:
-            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
-    }
-}
-
 void BriefingScreen::build_star_map() {
     Rect pix_bounds = plug.starmap.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
-    _bounds.center_in(item(MAP_RECT).bounds);
+    _bounds.center_in(widget(MAP_RECT)->inner_bounds());
 
     if (_level.starmap.has_value()) {
         _star_rect = *_level.starmap;
@@ -367,14 +335,14 @@ void BriefingScreen::build_brief_point() {
     if (_briefing_point >= 0) {
         coordPointType corner;
         int32_t        scale;
-        Rect           map_rect = item(MAP_RECT).bounds;
+        Rect           map_rect = widget(MAP_RECT)->inner_bounds();
         GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
 
-        update_mission_brief_point(
-                &_data_item, _briefing_point, _level, &corner, scale, &map_rect, inline_pict,
-                _highlight_rect, _highlight_lines, _text);
+        _data_item = update_mission_brief_point(
+                _briefing_point, _level, corner, scale, map_rect, &inline_pict, &_highlight_rect,
+                &_highlight_lines, _text);
         swap(inline_pict, _inline_pict);
     }
 }
@@ -445,14 +413,13 @@ void BriefingScreen::draw_brief_point() const {
         }
     }
 
-    Rect bounds;
-    GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
+    Rect bounds = _data_item.outer_bounds();
     bounds.offset(off.h, off.v);
     Rects().fill(bounds, RgbColor::black());
-    draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
-    bounds = _data_item.bounds;
+    _data_item.draw(off, KEYBOARD_MOUSE);
+    bounds = _data_item.inner_bounds();
     bounds.offset(off.h, off.v);
-    draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue);
+    draw_text_in_rect(bounds, _text, _data_item.style(), _data_item.hue());
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {

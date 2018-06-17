@@ -32,9 +32,6 @@ class HelpScreen : public InterfaceScreen {
     virtual void key_down(const KeyDownEvent& event);
     virtual void overlay() const;
 
-  protected:
-    virtual void handle_button(Button& button);
-
   private:
     enum Item {
         DONE = 0,

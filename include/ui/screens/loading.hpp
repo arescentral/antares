@@ -44,7 +44,6 @@ class LoadingScreen : public InterfaceScreen {
     void update(int32_t current, int32_t max);
 
   protected:
-    virtual void handle_button(Button& button);
     virtual void overlay() const;
 
   private:

@@ -42,10 +42,6 @@ class BriefingScreen : public InterfaceScreen {
     virtual void key_down(const KeyDownEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button);
-
   private:
     enum Item {
         // Buttons:
@@ -67,12 +63,12 @@ class BriefingScreen : public InterfaceScreen {
     void show_object_data(int index, const GamepadButtonDownEvent& event);
     void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
 
-    const Level&        _level;
-    bool* const         _cancelled;
-    int                 _briefing_point;
-    const int           _briefing_point_start;
-    const int           _briefing_point_end;
-    mutable LabeledRect _data_item;
+    const Level&    _level;
+    bool* const     _cancelled;
+    int             _briefing_point;
+    const int       _briefing_point_start;
+    const int       _briefing_point_end;
+    mutable BoxRect _data_item;
 
     Rect _bounds;
     Rect _star_rect;

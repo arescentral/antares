@@ -37,8 +37,6 @@ class SelectLevelScreen : public InterfaceScreen {
     virtual void key_down(const KeyDownEvent& event);
 
   protected:
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button);
     virtual void overlay() const;
 
   private:

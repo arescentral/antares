@@ -52,10 +52,6 @@ class SoundControlScreen : public InterfaceScreen {
 
     virtual void overlay() const;
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button);
-
   private:
     enum Item {
         // Checkboxes
@@ -76,8 +72,6 @@ class SoundControlScreen : public InterfaceScreen {
         VOLUME_BOX = 13,
     };
 
-    OptionsScreen::State button_state(int button);
-
     OptionsScreen::State* const _state;
 };
 
@@ -94,11 +88,9 @@ class KeyControlScreen : public InterfaceScreen {
 
     virtual void overlay() const;
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button);
-
   private:
+    void adjust_interface();
+
     enum Item {
         CANCEL        = 0,
         DONE          = 1,
@@ -109,9 +101,9 @@ class KeyControlScreen : public InterfaceScreen {
         SHORTCUT_TAB = 5,
         UTILITY_TAB  = 6,
         HOT_KEY_TAB  = 7,
+        TAB_BOX      = 8,
 
         CONFLICT_TEXT = 10,
-        TAB_BOX       = 8,
     };
 
     enum Tab {
@@ -122,16 +114,11 @@ class KeyControlScreen : public InterfaceScreen {
         HOT_KEY,
     };
 
-    OptionsScreen::State button_state(int button);
-    Tab                  button_tab(int button);
-    void                 set_tab(Tab tab);
-    void                 update_conflicts();
-    void                 flash_on(size_t key);
+    void update_conflicts();
+    void flash_on(size_t key);
 
     OptionsScreen::State* const _state;
 
-    Tab                                    _tab;
-    const size_t                           _key_start;
     int32_t                                _selected_key;
     std::vector<std::pair<size_t, size_t>> _conflicts;
 

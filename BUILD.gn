@@ -334,6 +334,7 @@ source_set("libantares-ui") {
     "include/ui/screens/play-again.hpp",
     "include/ui/screens/scroll-text.hpp",
     "include/ui/screens/select-level.hpp",
+    "include/ui/widget.hpp",
     "src/ui/card.cpp",
     "src/ui/event-scheduler.cpp",
     "src/ui/event.cpp",
@@ -352,6 +353,7 @@ source_set("libantares-ui") {
     "src/ui/screens/play-again.cpp",
     "src/ui/screens/scroll-text.cpp",
     "src/ui/screens/select-level.cpp",
+    "src/ui/widget.cpp",
   ]
   public_deps = [
     ":libantares-data",
