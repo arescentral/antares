@@ -33,26 +33,26 @@ struct Point {
     int32_t v;
 
     // Creates a point at (0, 0).
-    Point();
+    constexpr Point() : h{0}, v{0} {}
 
     // Creates a point at (x, y).
     // @param [in] x        The desired value of `h`.
     // @param [in] y        The desired value of `v`.
-    Point(int x, int y);
+    constexpr Point(int x, int y) : h{x}, v{y} {}
 
     // Translates this Point by `(x, y)`.
     //
     // @param [in] x        Added to `h`.
     // @param [in] y        Added to `v`.
-    void offset(int32_t x, int32_t y);
+    void offset(int32_t x, int32_t y) { h += x, v += y; }
 
     // Move the point to the nearest point within `rect`.
     // @param [in] rect     The rectangle to clamp to.
     void clamp_to(const Rect& rect);
 };
 
-bool operator==(const Point& lhs, const Point& rhs);
-bool operator!=(const Point& lhs, const Point& rhs);
+inline bool operator==(const Point& x, const Point& y) { return (x.h == y.h) && (x.v == y.v); }
+inline bool operator!=(const Point& x, const Point& y) { return (x.h != y.h) || (x.v != y.v); }
 
 // A size (width, height) in two-dimensional space.
 struct Size {
@@ -60,17 +60,17 @@ struct Size {
     int32_t height;
 
     // Creates an empty size.
-    Size();
+    constexpr Size() : width{0}, height{0} {}
 
     // Creates a size of (width, height).
-    Size(int32_t width, int32_t height);
+    constexpr Size(int32_t width, int32_t height) : width{width}, height{height} {}
 
     // Returns a rect with origin (0, 0) and this size.
     Rect as_rect() const;
 };
 
-bool operator==(Size x, Size y);
-bool operator!=(Size x, Size y);
+inline bool operator==(Size x, Size y) { return (x.width == y.width) && (x.height == y.height); }
+inline bool operator!=(Size x, Size y) { return (x.width != y.width) || (x.height != y.height); }
 
 // A rectangle in two-dimensional space.
 //
@@ -88,38 +88,40 @@ struct Rect {
     int32_t bottom;
 
     // Creates a zero-area rect at (0, 0).
-    Rect();
+    constexpr Rect() : left{0}, top{0}, right{0}, bottom{0} {}
 
     // Creates a rect with the four given parameters.
     // @param [in] left     The desired value of `left`.
     // @param [in] top      The desired value of `top`.
     // @param [in] right    The desired value of `right`.
     // @param [in] bottom   The desired value of `bottom`.
-    Rect(int32_t left, int32_t top, int32_t right, int32_t bottom);
+    constexpr Rect(int32_t left, int32_t top, int32_t right, int32_t bottom)
+            : left{left}, top{top}, right{right}, bottom{bottom} {}
 
     // Creates a rect width the two given parameters.
-    Rect(Point origin, Size size);
+    constexpr Rect(Point origin, Size size)
+            : left{origin.h}, top{origin.v}, right{left + size.width}, bottom{top + size.height} {}
 
     // @returns             True iff the rect is empty (width or height not positive).
-    bool empty() const;
+    bool empty() const { return (width() <= 0) || (height() <= 0); }
 
     // @returns             The width of the rectangle, which is `right - left`.
-    int32_t width() const;
+    int32_t width() const { return right - left; }
 
     // @returns             The height of the rectangle, which is `bottom - top`.
-    int32_t height() const;
+    int32_t height() const { return bottom - top; }
 
     // @returns             The origin of the rectangle, ``(left, top)``.
-    Point origin() const;
+    Point origin() const { return Point{left, top}; }
 
     // @returns             The center of the rectangle, ``((left - right)/2, (top + bottom)/2)``.
     Point center() const;
 
     // @returns             The size of the rectangle, ``(width, height)``.
-    Size size() const;
+    Size size() const { return Size{width(), height()}; }
 
     // @returns             The area of the rectangle, which is `width() * height()`.
-    int32_t area() const;
+    int32_t area() const { return width() * height(); }
 
     // Returns true if this Rect contains `p`.
     //
@@ -194,7 +196,7 @@ struct coordPointType {
 };
 
 inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
-inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
+inline bool operator!=(coordPointType x, coordPointType y) { return (x.h != y.h) || (x.v != y.v); }
 
 }  // namespace antares
 
