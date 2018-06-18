@@ -20,10 +20,17 @@
 
 #include <gmock/gmock.h>
 
+using testing::Eq;
+using testing::Ge;
+using testing::Gt;
+using testing::Le;
+using testing::Lt;
+using testing::Ne;
+
 namespace antares {
 namespace {
 
-typedef testing::Test FixedTest;
+using FixedTest = testing::Test;
 
 TEST_F(FixedTest, Print) {
     EXPECT_EQ("0.0", stringify(Fixed::from_val(0)));
@@ -120,6 +127,34 @@ TEST_F(FixedTest, FixedToFloat) {
     EXPECT_FLOAT_EQ(8388607.996, mFixedToFloat(Fixed::from_val(2147483647)));
     EXPECT_FLOAT_EQ(-8388607.996, mFixedToFloat(Fixed::from_val(-2147483647)));
     EXPECT_FLOAT_EQ(-8388608.0, mFixedToFloat(Fixed::from_val(-2147483648)));
+}
+
+TEST_F(FixedTest, Comparison) {
+    EXPECT_THAT(Fixed::from_long(1), Eq(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(1), Ne(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1), Lt(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1), Le(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(2), Gt(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(2), Ge(Fixed::from_long(1)));
+}
+
+TEST_F(FixedTest, Math) {
+    EXPECT_THAT(Fixed::from_long(1) + Fixed::from_long(2), Eq(Fixed::from_long(3)));
+    EXPECT_THAT(Fixed::from_long(3) - Fixed::from_long(2), Eq(Fixed::from_long(1)));
+
+    EXPECT_THAT(Fixed::from_long(1) * 2, Eq(Fixed::from_long(2)));
+    EXPECT_THAT(2 * Fixed::from_long(1), Eq(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1) * 2, Eq(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1) * Fixed::from_long(2), Eq(Fixed::from_long(2)));
+
+    EXPECT_THAT(Fixed::from_long(3) / 2, Eq(Fixed::from_float(1.5)));
+    EXPECT_THAT(Fixed::from_long(3) / Fixed::from_long(2), Eq(Fixed::from_float(1.5)));
+
+    EXPECT_THAT(Fixed::from_long(5) % 2, Eq(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(5) % Fixed::from_long(2), Eq(Fixed::from_long(1)));
+
+    EXPECT_THAT(Fixed::from_long(2) >> 1, Eq(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(2) << 1, Eq(Fixed::from_long(4)));
 }
 
 }  // namespace

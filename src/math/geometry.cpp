@@ -23,15 +23,6 @@
 
 namespace antares {
 
-Point::Point() : h(0), v(0) {}
-
-Point::Point(int x, int y) : h(x), v(y) {}
-
-void Point::offset(int32_t x, int32_t y) {
-    h += x;
-    v += y;
-}
-
 void Point::clamp_to(const Rect& rect) {
     h = std::max(h, rect.left);
     v = std::max(v, rect.top);
@@ -39,43 +30,9 @@ void Point::clamp_to(const Rect& rect) {
     v = std::min(v, rect.bottom - 1);
 }
 
-bool operator==(const Point& lhs, const Point& rhs) {
-    return (lhs.h == rhs.h) && (lhs.v == rhs.v);
-}
-
-bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
-
-Size::Size() : width(0), height(0) {}
-
-Size::Size(int32_t width, int32_t height) : width(width), height(height) {}
-
 Rect Size::as_rect() const { return Rect(0, 0, width, height); }
 
-bool operator==(Size x, Size y) { return (x.width == y.width) && (x.height == y.height); }
-
-bool operator!=(Size x, Size y) { return !(x == y); }
-
-Rect::Rect() : left(0), top(0), right(0), bottom(0) {}
-
-Rect::Rect(int32_t left, int32_t top, int32_t right, int32_t bottom)
-        : left(left), top(top), right(right), bottom(bottom) {}
-
-Rect::Rect(Point origin, Size size)
-        : left(origin.h), top(origin.v), right(left + size.width), bottom(top + size.height) {}
-
-bool Rect::empty() const { return (width() <= 0) || (height() <= 0); }
-
-int32_t Rect::width() const { return right - left; }
-
-int32_t Rect::height() const { return bottom - top; }
-
-Point Rect::origin() const { return Point(left, top); }
-
 Point Rect::center() const { return Point((left + right) / 2, (top + bottom) / 2); }
-
-Size Rect::size() const { return Size(width(), height()); }
-
-int32_t Rect::area() const { return width() * height(); }
 
 bool Rect::contains(const Point& p) const {
     return left <= p.h && p.h < right && top <= p.v && p.v < bottom;
