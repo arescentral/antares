@@ -466,8 +466,7 @@ static Action pay_action(path_value x) {
 
 static PushAction::Kind required_push_kind(path_value x) {
     return required_enum<PushAction::Kind>(
-            x, {{"stop", PushAction::Kind::STOP},
-                {"collide", PushAction::Kind::COLLIDE},
+            x, {{"collide", PushAction::Kind::COLLIDE},
                 {"decelerate", PushAction::Kind::DECELERATE},
                 {"boost", PushAction::Kind::BOOST},
                 {"set", PushAction::Kind::SET},

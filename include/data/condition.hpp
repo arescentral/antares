@@ -20,6 +20,7 @@
 #define ANTARES_DATA_CONDITION_HPP_
 
 #include <memory>
+#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/enums.hpp"
@@ -85,8 +86,8 @@ struct BuildingCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct ComputerCondition : ConditionBase {
-    Screen  screen;
-    int64_t line;
+    Screen                 screen;
+    sfz::optional<int64_t> line;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE

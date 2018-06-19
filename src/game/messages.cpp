@@ -344,8 +344,8 @@ void Messages::autopilot(bool on) {
 void Messages::shields_low() { set_status("WARNING: Shields Low", kStatusWarnColor); }
 void Messages::max_ships_built() { set_status("Maximum number of ships built", Hue::ORANGE); }
 
-int16_t Messages::current() {
-    return long_message_data->start_id + long_message_data->current_page_index;
+std::pair<int, int> Messages::current() {
+    return {long_message_data->start_id, long_message_data->current_page_index};
 }
 
 //

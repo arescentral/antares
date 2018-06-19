@@ -147,7 +147,7 @@ static Condition computer_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"player", nullptr},
                 {"screen", {&ComputerCondition::screen, required_screen}},
-                {"line", {&ComputerCondition::line, optional_int, -1}}});
+                {"line", {&ComputerCondition::line, optional_int}}});
 }
 
 static Condition counter_condition(path_value x) {

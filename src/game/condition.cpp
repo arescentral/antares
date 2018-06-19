@@ -74,12 +74,12 @@ static bool is_true(const BuildingCondition& c) {
 }
 
 static bool is_true(const ComputerCondition& c) {
-    if (c.line < 0) {
-        return op_eq(c.op, g.mini.currentScreen, c.screen);
-    } else {
+    if (c.line.has_value()) {
         return op_eq(
                 c.op, std::pair<Screen, int>(g.mini.currentScreen, g.mini.selectLine),
-                std::pair<Screen, int>(c.screen, c.line));
+                std::pair<Screen, int>(c.screen, *c.line));
+    } else {
+        return op_eq(c.op, g.mini.currentScreen, c.screen);
     }
 }
 
@@ -96,15 +96,9 @@ static bool is_true(const DistanceCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     auto dObject = GetObjectFromInitialNumber(c.object);
     if (sObject.get() && dObject.get()) {
-        int32_t  difference = ABS<int>(sObject->location.h - dObject->location.h);
-        uint32_t dcalc      = difference;
-        difference          = ABS<int>(sObject->location.v - dObject->location.v);
-        uint32_t distance   = difference;
-
-        if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
-            distance = distance * distance + dcalc * dcalc;
-            return op_compare(c.op, distance, c.value);
-        }
+        int64_t xdist = ABS<int>(sObject->location.h - dObject->location.h);
+        int64_t ydist = ABS<int>(sObject->location.v - dObject->location.v);
+        return op_compare(c.op, (ydist * ydist) + (xdist * xdist), c.value);
     }
     return false;
 }
@@ -120,7 +114,7 @@ static bool is_true(const HealthCondition& c) {
 }
 
 static bool is_true(const MessageCondition& c) {
-    return op_eq(c.op, Messages::current(), c.id + c.page - 1);
+    return op_eq(c.op, Messages::current(), std::pair<int, int>{c.id, c.page - 1});
 }
 
 static bool is_true(const OrderedCondition& c) {
@@ -158,16 +152,16 @@ static bool is_true(const SubjectCondition& c) {
 }
 
 static bool is_true(const TimeCondition& c) {
-    // Tricky: the original code for handling startTime counted g.time in major ticks,
-    // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
-    // (game start) counts as 1/3 towards time conditions to preserve old behavior.
-    game_ticks t;
-    if (!c.legacy_start_time) {
-        t = game_ticks{c.duration};
-    } else if ((3 * c.duration) < g.level->startTime) {
-        t = game_ticks{(3 * c.duration) - g.level->startTime};
-    } else {
-        t = game_ticks{c.duration - (g.level->startTime / 3)};
+    game_ticks t = game_ticks{c.duration};
+    if (c.legacy_start_time) {
+        // Tricky: the original code for handling startTime counted g.time in major ticks,
+        // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
+        // (game start) counts as 1/3 towards time conditions to preserve old behavior.
+        if ((3 * c.duration) < g.level->startTime) {
+            t = game_ticks{(3 * c.duration) - g.level->startTime};
+        } else {
+            t = game_ticks{c.duration - (g.level->startTime / 3)};
+        }
     }
     return op_compare(c.op, g.time, t);
 }
