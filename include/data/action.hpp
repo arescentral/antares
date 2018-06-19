@@ -221,7 +221,6 @@ struct PayAction : public ActionBase {
 
 struct PushAction : public ActionBase {
     enum class Kind {
-        STOP,        // set focus’s velocity to 0
         COLLIDE,     // impart velocity from subject like a collision (capped)
         DECELERATE,  // decrease focus’s velocity (capped)
         SET,         // set focus’s velocity to value in subject’s direction
