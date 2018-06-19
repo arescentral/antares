@@ -64,16 +64,16 @@ static bool op_eq(ConditionOp op, const X& x, const Y& y) {
     }
 }
 
-bool is_true(const AutopilotCondition& c) {
+static bool is_true(const AutopilotCondition& c) {
     return op_eq(c.op, IsPlayerShipOnAutoPilot(), c.value);
 }
 
-bool is_true(const BuildingCondition& c) {
+static bool is_true(const BuildingCondition& c) {
     auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
     return buildAtObject.get() && op_eq(c.op, buildAtObject->totalBuildTime > ticks(0), c.value);
 }
 
-bool is_true(const ComputerCondition& c) {
+static bool is_true(const ComputerCondition& c) {
     if (c.line < 0) {
         return op_eq(c.op, g.mini.currentScreen, c.screen);
     } else {
@@ -83,16 +83,16 @@ bool is_true(const ComputerCondition& c) {
     }
 }
 
-bool is_true(const CounterCondition& c) {
+static bool is_true(const CounterCondition& c) {
     return op_compare(c.op, GetAdmiralScore(c.player, c.counter), c.value);
 }
 
-bool is_true(const DestroyedCondition& c) {
+static bool is_true(const DestroyedCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.initial);
     return op_eq(c.op, !sObject.get(), c.value);
 }
 
-bool is_true(const DistanceCondition& c) {
+static bool is_true(const DistanceCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     auto dObject = GetObjectFromInitialNumber(c.object);
     if (sObject.get() && dObject.get()) {
@@ -109,7 +109,7 @@ bool is_true(const DistanceCondition& c) {
     return false;
 }
 
-bool is_true(const HealthCondition& c) {
+static bool is_true(const HealthCondition& c) {
     auto   sObject = GetObjectFromInitialNumber(c.subject);
     double health  = 0.0;
     if (sObject.get()) {
@@ -119,11 +119,11 @@ bool is_true(const HealthCondition& c) {
     return op_compare(c.op, health, c.value);
 }
 
-bool is_true(const MessageCondition& c) {
+static bool is_true(const MessageCondition& c) {
     return op_eq(c.op, Messages::current(), c.id + c.page - 1);
 }
 
-bool is_true(const OrderedCondition& c) {
+static bool is_true(const OrderedCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     auto dObject = GetObjectFromInitialNumber(c.object);
     return sObject.get() && dObject.get() &&
@@ -131,22 +131,22 @@ bool is_true(const OrderedCondition& c) {
                  std::make_pair(dObject, dObject->id));
 }
 
-bool is_true(const OwnerCondition& c) {
+static bool is_true(const OwnerCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
 }
 
-bool is_true(const ShipsCondition& c) {
+static bool is_true(const ShipsCondition& c) {
     return op_compare(c.op, GetAdmiralShipsLeft(c.player), c.value);
 }
 
-bool is_true(const SpeedCondition& c) {
+static bool is_true(const SpeedCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     return sObject.get() &&
            op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
 }
 
-bool is_true(const SubjectCondition& c) {
+static bool is_true(const SubjectCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     switch (c.value) {
         case SubjectCondition::Value::CONTROL:
@@ -157,7 +157,7 @@ bool is_true(const SubjectCondition& c) {
     }
 }
 
-bool is_true(const TimeCondition& c) {
+static bool is_true(const TimeCondition& c) {
     // Tricky: the original code for handling startTime counted g.time in major ticks,
     // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
     // (game start) counts as 1/3 towards time conditions to preserve old behavior.
@@ -172,9 +172,9 @@ bool is_true(const TimeCondition& c) {
     return op_compare(c.op, g.time, t);
 }
 
-bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.value); }
+static bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.value); }
 
-bool is_true(const Condition& c) {
+static bool is_true(const Condition& c) {
     switch (c.type()) {
         case Condition::Type::AUTOPILOT: return is_true(c.autopilot);
         case Condition::Type::BUILDING: return is_true(c.building);
