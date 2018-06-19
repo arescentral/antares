@@ -60,7 +60,7 @@ class Starfield {
     Starfield(const Starfield&) = delete;
     Starfield& operator=(const Starfield&) = delete;
 
-    void reset(Handle<SpaceObject> which_object);
+    void reset();
     void make_sparks(
             int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, Hue hue, Point* location);
     void prepare_to_move();

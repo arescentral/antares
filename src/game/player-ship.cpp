@@ -113,7 +113,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, Hue::YELLOW);
     g.target_label  = Label::add(0, 0, 0, -20, SpaceObject::none(), true, Hue::SKY_BLUE);
     g.send_label    = Label::add(200, 200, 0, 30, SpaceObject::none(), false, Hue::GREEN);
-    globals()->starfield.reset(g.ship);
+    globals()->starfield.reset();
     globals()->next_klaxon = game_ticks();
     g.key_mask             = 0;
     g.zoom                 = Zoom::FOE;
@@ -832,7 +832,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
         flagship->attributes &= ~kIsPlayerShip;
         if (newShip != g.ship) {
             g.ship = newShip;
-            globals()->starfield.reset(newShip);
+            globals()->starfield.reset();
         }
 
         flagship = g.ship;

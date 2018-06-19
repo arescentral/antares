@@ -55,11 +55,7 @@ Starfield::Starfield() : _last_clip_bottom(viewport().bottom), _warp_stars(false
     }
 }
 
-void Starfield::reset(Handle<SpaceObject> which_object) {
-    if (!g.ship.get()) {
-        return;
-    }
-
+void Starfield::reset() {
     for (scrollStarType* star : range(_stars, _stars + kScrollStarNum)) {
         star->location.h       = Randomize(play_screen().width()) + viewport().left;
         star->location.v       = Randomize(play_screen().height()) + viewport().top;
