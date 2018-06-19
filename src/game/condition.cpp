@@ -114,7 +114,7 @@ static bool is_true(const HealthCondition& c) {
 }
 
 static bool is_true(const MessageCondition& c) {
-    return op_eq(c.op, Messages::current(), c.id + c.page - 1);
+    return op_eq(c.op, Messages::current(), std::pair<int, int>{c.id, c.page - 1});
 }
 
 static bool is_true(const OrderedCondition& c) {
