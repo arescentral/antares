@@ -175,7 +175,7 @@ static void apply(
     }
 }
 
-void apply(
+static void apply(
         const PlayAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     pn::string_view pick;
@@ -193,7 +193,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const SparkAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Point location;
@@ -220,7 +220,7 @@ void apply(
     globals()->starfield.make_sparks(a.count, a.decay, a.velocity, a.hue, &location);
 }
 
-void apply(
+static void apply(
         const KillAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     bool destroy = false;
@@ -258,7 +258,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const HoldPositionAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     focus->targetObject   = SpaceObject::none();
@@ -266,19 +266,19 @@ void apply(
     focus->lastTarget     = SpaceObject::none();
 }
 
-void apply(
+static void apply(
         const HealAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     focus->alter_health(a.value);
 }
 
-void apply(
+static void apply(
         const EnergizeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     focus->alter_energy(a.value);
 }
 
-void apply(
+static void apply(
         const RevealAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     for (auto i : a.initial) {
@@ -286,13 +286,13 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const CloakAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     focus->set_cloak(true);
 }
 
-void apply(
+static void apply(
         const SpinAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (focus->attributes & kCanTurn) {
@@ -307,7 +307,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const DisableAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Fixed f  = a.value.begin + focus->randomSeed.next(a.value.range());
@@ -350,7 +350,7 @@ void cap_velocity(Handle<SpaceObject> object) {
     }
 }
 
-void apply(
+static void apply(
         const PushAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (!subject.get()) {
@@ -414,7 +414,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const CapSpeedAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (a.value.has_value()) {
@@ -424,14 +424,14 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const ThrustAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Fixed f       = a.value.begin + focus->randomSeed.next(a.value.range());
     focus->thrust = f;
 }
 
-void apply(
+static void apply(
         const MorphAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (focus.get()) {
@@ -439,7 +439,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const CaptureAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (!focus.get()) {
@@ -459,7 +459,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const ConditionAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     for (auto c : a.enable) {
@@ -470,7 +470,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const OccupyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (focus.get()) {
@@ -478,7 +478,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const PayAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Handle<Admiral> admiral;
@@ -494,7 +494,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const AgeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     ticks t = a.value.begin + focus->randomSeed.next(a.value.range());
@@ -512,7 +512,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const MoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     coordPointType newLocation;
@@ -550,7 +550,7 @@ static void alter_weapon(
     }
 }
 
-void apply(
+static void apply(
         const EquipAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     switch (a.which) {
@@ -560,7 +560,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const LandAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     // even though this is never a reflexive verb, we only effect ourselves
@@ -572,7 +572,7 @@ void apply(
     subject->presence.landing.scale = sprite_scale(*subject->base);
 }
 
-void apply(
+static void apply(
         const WarpAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     subject->presenceState             = kWarpInPresence;
@@ -585,7 +585,7 @@ void apply(
             Admiral::none(), 0, sfz::nullopt);
 }
 
-void apply(
+static void apply(
         const ScoreAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Handle<Admiral> admiral;
@@ -599,7 +599,7 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const WinAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Handle<Admiral> admiral;
@@ -615,13 +615,13 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const MessageAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Messages::start(a.id, &a.pages);
 }
 
-void apply(
+static void apply(
         const OrderAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     uint32_t save_attributes = subject->attributes;
@@ -630,7 +630,7 @@ void apply(
     subject->attributes = save_attributes;
 }
 
-void apply(
+static void apply(
         const FireAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     switch (a.which) {
@@ -658,19 +658,19 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const FlashAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     globals()->transitions.start_boolean(a.length, GetTranslateColorShade(a.hue, a.shade));
 }
 
-void apply(
+static void apply(
         const KeyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     g.key_mask = (g.key_mask & ~a.enable) | a.disable;
 }
 
-void apply(
+static void apply(
         const ZoomAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (a.value != g.zoom) {
@@ -680,13 +680,13 @@ void apply(
     }
 }
 
-void apply(
+static void apply(
         const SelectAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     MiniComputer_SetScreenAndLineHack(a.screen, a.line);
 }
 
-void apply(
+static void apply(
         const AssumeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     Handle<Admiral> player1(0);
