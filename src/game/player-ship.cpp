@@ -108,8 +108,7 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
 
 }  // namespace
 
-void ResetPlayerShip(Handle<SpaceObject> which) {
-    g.ship          = which;
+void ResetPlayerShip() {
     g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, Hue::YELLOW);
     g.target_label  = Label::add(0, 0, 0, -20, SpaceObject::none(), true, Hue::SKY_BLUE);
     g.send_label    = Label::add(200, 200, 0, 30, SpaceObject::none(), false, Hue::GREEN);
