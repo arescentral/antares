@@ -74,12 +74,12 @@ static bool is_true(const BuildingCondition& c) {
 }
 
 static bool is_true(const ComputerCondition& c) {
-    if (c.line < 0) {
-        return op_eq(c.op, g.mini.currentScreen, c.screen);
-    } else {
+    if (c.line.has_value()) {
         return op_eq(
                 c.op, std::pair<Screen, int>(g.mini.currentScreen, g.mini.selectLine),
-                std::pair<Screen, int>(c.screen, c.line));
+                std::pair<Screen, int>(c.screen, *c.line));
+    } else {
+        return op_eq(c.op, g.mini.currentScreen, c.screen);
     }
 }
 
