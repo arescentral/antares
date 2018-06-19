@@ -96,12 +96,9 @@ static bool is_true(const DistanceCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     auto dObject = GetObjectFromInitialNumber(c.object);
     if (sObject.get() && dObject.get()) {
-        uint32_t xdist = ABS<int>(sObject->location.h - dObject->location.h);
-        uint32_t ydist = ABS<int>(sObject->location.v - dObject->location.v);
-
-        if ((xdist < kMaximumRelevantDistance) && (ydist < kMaximumRelevantDistance)) {
-            return op_compare(c.op, (ydist * ydist) + (xdist * xdist), c.value);
-        }
+        int64_t xdist = ABS<int>(sObject->location.h - dObject->location.h);
+        int64_t ydist = ABS<int>(sObject->location.v - dObject->location.v);
+        return op_compare(c.op, (ydist * ydist) + (xdist * xdist), c.value);
     }
     return false;
 }
