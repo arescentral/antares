@@ -921,6 +921,9 @@ void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
         if (flagship->owner.get()) {
             flagship->owner->set_flagship(SpaceObject::none());
         }
+        if (flagship == g.ship) {
+            g.ship = SpaceObject::none();
+        }
     }
 }
 
