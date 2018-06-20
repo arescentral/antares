@@ -809,6 +809,9 @@ void SpaceObject::free() {
             adm->set_flagship(SpaceObject::none());
         }
     }
+    if (g.ship.get() == this) {
+        g.ship = SpaceObject::none();
+    }
 }
 
 void SpaceObject::create_floating_player_body() {
