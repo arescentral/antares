@@ -147,7 +147,8 @@ static bool is_true(const SubjectCondition& c) {
             return sObject.get() && op_eq(c.op, sObject, g.admiral->control());
         case SubjectCondition::Value::TARGET:
             return sObject.get() && op_eq(c.op, sObject, g.admiral->target());
-        case SubjectCondition::Value::PLAYER: return sObject.get() && op_eq(c.op, sObject, g.ship);
+        case SubjectCondition::Value::PLAYER:
+            return sObject.get() && op_eq(c.op, sObject, g.admiral->flagship());
     }
 }
 
