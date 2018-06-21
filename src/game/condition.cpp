@@ -131,14 +131,6 @@ static bool is_true(const MessageCondition& c) {
     return op_eq(c.op, Messages::current(), std::pair<int, int>{c.id, c.page - 1});
 }
 
-static bool is_true(const OrderedCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
-    auto dObject = GetObjectFromInitialNumber(c.object);
-    return sObject.get() && dObject.get() &&
-           op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
-                 std::make_pair(dObject, dObject->id));
-}
-
 static bool is_true(const OwnerCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
@@ -164,6 +156,14 @@ static bool is_true(const SubjectCondition& c) {
         case SubjectCondition::Value::TARGET: return op_eq(c.op, o, c.player->target());
         case SubjectCondition::Value::PLAYER: return op_eq(c.op, o, c.player->flagship());
     }
+}
+
+static bool is_true(const TargetCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto dObject = GetObjectFromInitialNumber(c.object);
+    return sObject.get() && dObject.get() &&
+           op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
+                 std::make_pair(dObject, dObject->id));
 }
 
 static bool is_true(const TimeCondition& c) {
@@ -193,11 +193,11 @@ static bool is_true(const Condition& c) {
         case Condition::Type::DISTANCE: return is_true(c.distance);
         case Condition::Type::HEALTH: return is_true(c.health);
         case Condition::Type::MESSAGE: return is_true(c.message);
-        case Condition::Type::ORDERED: return is_true(c.ordered);
         case Condition::Type::OWNER: return is_true(c.owner);
         case Condition::Type::SHIPS: return is_true(c.ships);
         case Condition::Type::SPEED: return is_true(c.speed);
         case Condition::Type::SUBJECT: return is_true(c.subject);
+        case Condition::Type::TARGET: return is_true(c.target);
         case Condition::Type::TIME: return is_true(c.time);
         case Condition::Type::ZOOM: return is_true(c.zoom);
     }
