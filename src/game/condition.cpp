@@ -65,12 +65,26 @@ static bool op_eq(ConditionOp op, const X& x, const Y& y) {
 }
 
 static bool is_true(const AutopilotCondition& c) {
-    return op_eq(c.op, IsPlayerShipOnAutoPilot(), c.value);
+    if (!c.player.get()) {
+        return false;
+    }
+    auto flagship = c.player->flagship();
+    if (!flagship.get()) {
+        return false;
+    }
+    bool on_autopilot = flagship->attributes & kOnAutoPilot;
+    return op_eq(c.op, on_autopilot, c.value);
 }
 
 static bool is_true(const BuildingCondition& c) {
-    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-    return buildAtObject.get() && op_eq(c.op, buildAtObject->totalBuildTime > ticks(0), c.value);
+    if (!c.player.get()) {
+        return false;
+    }
+    auto build_object = GetAdmiralBuildAtObject(c.player);
+    if (!build_object.get()) {
+        return false;
+    }
+    return op_eq(c.op, build_object->totalBuildTime > ticks(0), c.value);
 }
 
 static bool is_true(const ComputerCondition& c) {
@@ -117,14 +131,6 @@ static bool is_true(const MessageCondition& c) {
     return op_eq(c.op, Messages::current(), std::pair<int, int>{c.id, c.page - 1});
 }
 
-static bool is_true(const OrderedCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
-    auto dObject = GetObjectFromInitialNumber(c.object);
-    return sObject.get() && dObject.get() &&
-           op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
-                 std::make_pair(dObject, dObject->id));
-}
-
 static bool is_true(const OwnerCondition& c) {
     auto sObject = GetObjectFromInitialNumber(c.subject);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
@@ -141,15 +147,23 @@ static bool is_true(const SpeedCondition& c) {
 }
 
 static bool is_true(const SubjectCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
-    switch (c.value) {
-        case SubjectCondition::Value::CONTROL:
-            return sObject.get() && op_eq(c.op, sObject, g.admiral->control());
-        case SubjectCondition::Value::TARGET:
-            return sObject.get() && op_eq(c.op, sObject, g.admiral->target());
-        case SubjectCondition::Value::PLAYER:
-            return sObject.get() && op_eq(c.op, sObject, g.admiral->flagship());
+    auto o = GetObjectFromInitialNumber(c.subject);
+    if (!(c.player.get() && o.get())) {
+        return false;
     }
+    switch (c.value) {
+        case SubjectCondition::Value::CONTROL: return op_eq(c.op, o, c.player->control());
+        case SubjectCondition::Value::TARGET: return op_eq(c.op, o, c.player->target());
+        case SubjectCondition::Value::PLAYER: return op_eq(c.op, o, c.player->flagship());
+    }
+}
+
+static bool is_true(const TargetCondition& c) {
+    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto dObject = GetObjectFromInitialNumber(c.object);
+    return sObject.get() && dObject.get() &&
+           op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
+                 std::make_pair(dObject, dObject->id));
 }
 
 static bool is_true(const TimeCondition& c) {
@@ -179,11 +193,11 @@ static bool is_true(const Condition& c) {
         case Condition::Type::DISTANCE: return is_true(c.distance);
         case Condition::Type::HEALTH: return is_true(c.health);
         case Condition::Type::MESSAGE: return is_true(c.message);
-        case Condition::Type::ORDERED: return is_true(c.ordered);
         case Condition::Type::OWNER: return is_true(c.owner);
         case Condition::Type::SHIPS: return is_true(c.ships);
         case Condition::Type::SPEED: return is_true(c.speed);
         case Condition::Type::SUBJECT: return is_true(c.subject);
+        case Condition::Type::TARGET: return is_true(c.target);
         case Condition::Type::TIME: return is_true(c.time);
         case Condition::Type::ZOOM: return is_true(c.zoom);
     }

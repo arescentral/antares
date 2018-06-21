@@ -43,11 +43,11 @@ enum class ConditionType {
     DISTANCE,
     HEALTH,
     MESSAGE,
-    ORDERED,
     OWNER,
     SHIPS,
     SPEED,
     SUBJECT,
+    TARGET,
     TIME,
     ZOOM,
 };
@@ -65,20 +65,18 @@ struct ConditionBase {
 };
 
 // Ops: EQ, NE
-// Compares local player’s autopilot state (on = true; off = false) to `value`.
-//
-// Warning: not net-safe.
+// Compares player’s autopilot state (on = true; off = false) to `value`.
 struct AutopilotCondition : ConditionBase {
-    bool value;
+    Handle<Admiral> player;
+    bool            value;
 };
 
 // Ops: EQ, NE
-// Precondition: local player has a build object.
-// Compares local player’s build object state (building = true; not building = false) to `value`.
-//
-// Warning: not net-safe.
+// Precondition: player has a build object.
+// Compares player’s build object state (building = true; not building = false) to `value`.
 struct BuildingCondition : ConditionBase {
-    bool value;
+    Handle<Admiral> player;
+    bool            value;
 };
 
 // Ops: EQ, NE
@@ -138,11 +136,6 @@ struct MessageCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
-// Precondition: `subject` and `object` exist.
-// Compares target of `subject` to `object`.
-struct OrderedCondition : ConditionBase {};
-
-// Ops: EQ, NE
 // Precondition: `subject` exists.
 // Compares owner of `subject` to `player`.
 struct OwnerCondition : ConditionBase {
@@ -165,14 +158,18 @@ struct SpeedCondition : ConditionBase {
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `subject` exists.
-// Compares `subject` to the control, target, or flagship of the local player, per `value`.
-//
-// Warning: not net-safe.
+// Compares `subject` to the control, target, or flagship of the player, per `value`.
 struct SubjectCondition : ConditionBase {
     enum class Value { CONTROL, TARGET, PLAYER };
 
-    Value value;
+    Handle<Admiral> player;
+    Value           value;
 };
+
+// Ops: EQ, NE
+// Precondition: `subject` and `object` exist.
+// Compares target of `subject` to `object`.
+struct TargetCondition : ConditionBase {};
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Compares `subject` to the control, target, or flagship of the local player, per `value`.
@@ -208,11 +205,11 @@ union Condition {
     DistanceCondition  distance;
     HealthCondition    health;
     MessageCondition   message;
-    OrderedCondition   ordered;
     OwnerCondition     owner;
     ShipsCondition     ships;
     SpeedCondition     speed;
     SubjectCondition   subject;
+    TargetCondition    target;
     TimeCondition      time;
     ZoomCondition      zoom;
 
@@ -224,11 +221,11 @@ union Condition {
     Condition(DistanceCondition c);
     Condition(HealthCondition c);
     Condition(MessageCondition c);
-    Condition(OrderedCondition c);
     Condition(OwnerCondition c);
     Condition(ShipsCondition c);
     Condition(SpeedCondition c);
     Condition(SubjectCondition c);
+    Condition(TargetCondition c);
     Condition(TimeCondition c);
     Condition(ZoomCondition c);
 

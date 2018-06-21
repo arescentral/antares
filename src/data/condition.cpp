@@ -45,11 +45,11 @@ Condition::Condition(DestroyedCondition a) : destroyed(std::move(a)) {}
 Condition::Condition(DistanceCondition a) : distance(std::move(a)) {}
 Condition::Condition(HealthCondition a) : health(std::move(a)) {}
 Condition::Condition(MessageCondition a) : message(std::move(a)) {}
-Condition::Condition(OrderedCondition a) : ordered(std::move(a)) {}
 Condition::Condition(OwnerCondition a) : owner(std::move(a)) {}
 Condition::Condition(ShipsCondition a) : ships(std::move(a)) {}
 Condition::Condition(SpeedCondition a) : speed(std::move(a)) {}
 Condition::Condition(SubjectCondition a) : subject(std::move(a)) {}
+Condition::Condition(TargetCondition a) : target(std::move(a)) {}
 Condition::Condition(TimeCondition a) : time(std::move(a)) {}
 Condition::Condition(ZoomCondition a) : zoom(std::move(a)) {}
 
@@ -63,7 +63,7 @@ Condition::Condition(Condition&& a) {
         case Condition::Type::DISTANCE: new (this) Condition(std::move(a.distance)); break;
         case Condition::Type::HEALTH: new (this) Condition(std::move(a.health)); break;
         case Condition::Type::MESSAGE: new (this) Condition(std::move(a.message)); break;
-        case Condition::Type::ORDERED: new (this) Condition(std::move(a.ordered)); break;
+        case Condition::Type::TARGET: new (this) Condition(std::move(a.target)); break;
         case Condition::Type::OWNER: new (this) Condition(std::move(a.owner)); break;
         case Condition::Type::SHIPS: new (this) Condition(std::move(a.ships)); break;
         case Condition::Type::SPEED: new (this) Condition(std::move(a.speed)); break;
@@ -89,11 +89,11 @@ Condition::~Condition() {
         case Condition::Type::DISTANCE: distance.~DistanceCondition(); break;
         case Condition::Type::HEALTH: health.~HealthCondition(); break;
         case Condition::Type::MESSAGE: message.~MessageCondition(); break;
-        case Condition::Type::ORDERED: ordered.~OrderedCondition(); break;
         case Condition::Type::OWNER: owner.~OwnerCondition(); break;
         case Condition::Type::SHIPS: ships.~ShipsCondition(); break;
         case Condition::Type::SPEED: speed.~SpeedCondition(); break;
         case Condition::Type::SUBJECT: subject.~SubjectCondition(); break;
+        case Condition::Type::TARGET: target.~TargetCondition(); break;
         case Condition::Type::TIME: time.~TimeCondition(); break;
         case Condition::Type::ZOOM: zoom.~ZoomCondition(); break;
     }
@@ -109,11 +109,11 @@ static Condition::Type required_condition_type(path_value x) {
                 {"distance", Condition::Type::DISTANCE},
                 {"health", Condition::Type::HEALTH},
                 {"message", Condition::Type::MESSAGE},
-                {"ordered", Condition::Type::ORDERED},
                 {"owner", Condition::Type::OWNER},
                 {"ships", Condition::Type::SHIPS},
                 {"speed", Condition::Type::SPEED},
                 {"subject", Condition::Type::SUBJECT},
+                {"target", Condition::Type::TARGET},
                 {"time", Condition::Type::TIME},
                 {"zoom", Condition::Type::ZOOM}});
 }
@@ -131,14 +131,14 @@ static ConditionOp required_condition_op(path_value x) {
 static Condition autopilot_condition(path_value x) {
     return required_struct<AutopilotCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
+                {"player", {&AutopilotCondition::player, required_admiral}},
                 {"value", {&AutopilotCondition::value, required_bool}}});
 }
 
 static Condition building_condition(path_value x) {
     return required_struct<BuildingCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
+                {"player", {&BuildingCondition::player, required_admiral}},
                 {"value", {&BuildingCondition::value, required_bool}}});
 }
 
@@ -167,9 +167,7 @@ static Condition destroyed_condition(path_value x) {
 
 static Condition distance_condition(path_value x) {
     return required_struct<DistanceCondition>(
-            x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
-                {"value", {&DistanceCondition::value, required_int}}});
+            x, {COMMON_CONDITION_FIELDS, {"value", {&DistanceCondition::value, required_int}}});
 }
 
 static Condition health_condition(path_value x) {
@@ -183,11 +181,6 @@ static Condition message_condition(path_value x) {
                 {"player", nullptr},
                 {"id", {&MessageCondition::id, required_int}},
                 {"page", {&MessageCondition::page, required_int}}});
-}
-
-static Condition ordered_condition(path_value x) {
-    return required_struct<OrderedCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"player", nullptr}, {"value", nullptr}});
 }
 
 static Condition owner_condition(path_value x) {
@@ -217,8 +210,12 @@ static SubjectCondition::Value required_subject_value(path_value x) {
 static Condition subject_condition(path_value x) {
     return required_struct<SubjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
+                {"player", {&SubjectCondition::player, required_admiral}},
                 {"value", {&SubjectCondition::value, required_subject_value}}});
+}
+
+static Condition target_condition(path_value x) {
+    return required_struct<TargetCondition>(x, {COMMON_CONDITION_FIELDS});
 }
 
 static Condition time_condition(path_value x) {
@@ -249,7 +246,7 @@ Condition condition(path_value x) {
         case Condition::Type::DISTANCE: return distance_condition(x);
         case Condition::Type::HEALTH: return health_condition(x);
         case Condition::Type::MESSAGE: return message_condition(x);
-        case Condition::Type::ORDERED: return ordered_condition(x);
+        case Condition::Type::TARGET: return target_condition(x);
         case Condition::Type::OWNER: return owner_condition(x);
         case Condition::Type::SHIPS: return ships_condition(x);
         case Condition::Type::SPEED: return speed_condition(x);
