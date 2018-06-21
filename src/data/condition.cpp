@@ -167,9 +167,7 @@ static Condition destroyed_condition(path_value x) {
 
 static Condition distance_condition(path_value x) {
     return required_struct<DistanceCondition>(
-            x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
-                {"value", {&DistanceCondition::value, required_int}}});
+            x, {COMMON_CONDITION_FIELDS, {"value", {&DistanceCondition::value, required_int}}});
 }
 
 static Condition health_condition(path_value x) {
