@@ -138,7 +138,7 @@ static Condition autopilot_condition(path_value x) {
 static Condition building_condition(path_value x) {
     return required_struct<BuildingCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
+                {"player", {&BuildingCondition::player, required_admiral}},
                 {"value", {&BuildingCondition::value, required_bool}}});
 }
 

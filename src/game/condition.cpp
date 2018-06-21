@@ -77,8 +77,14 @@ static bool is_true(const AutopilotCondition& c) {
 }
 
 static bool is_true(const BuildingCondition& c) {
-    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-    return buildAtObject.get() && op_eq(c.op, buildAtObject->totalBuildTime > ticks(0), c.value);
+    if (!c.player.get()) {
+        return false;
+    }
+    auto build_object = GetAdmiralBuildAtObject(c.player);
+    if (!build_object.get()) {
+        return false;
+    }
+    return op_eq(c.op, build_object->totalBuildTime > ticks(0), c.value);
 }
 
 static bool is_true(const ComputerCondition& c) {

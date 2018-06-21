@@ -72,12 +72,11 @@ struct AutopilotCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
-// Precondition: local player has a build object.
-// Compares local player’s build object state (building = true; not building = false) to `value`.
-//
-// Warning: not net-safe.
+// Precondition: player has a build object.
+// Compares player’s build object state (building = true; not building = false) to `value`.
 struct BuildingCondition : ConditionBase {
-    bool value;
+    Handle<Admiral> player;
+    bool            value;
 };
 
 // Ops: EQ, NE
