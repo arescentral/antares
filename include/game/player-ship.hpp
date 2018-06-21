@@ -78,7 +78,7 @@ class PlayerShip : public EventReceiver {
     GameCursor   _cursor;
 };
 
-void ResetPlayerShip(Handle<SpaceObject> which);
+void ResetPlayerShip();
 void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip(
         Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);

@@ -81,7 +81,8 @@ void create_initial(Handle<const Initial> initial) {
     if ((anObject->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
-            ResetPlayerShip(anObject);
+            g.ship = anObject;
+            ResetPlayerShip();
         }
     }
 
@@ -185,7 +186,8 @@ void UnhideInitialObject(Handle<const Initial> initial) {
     if ((anObject->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
-            ResetPlayerShip(anObject);
+            g.ship = anObject;
+            ResetPlayerShip();
         }
     }
 

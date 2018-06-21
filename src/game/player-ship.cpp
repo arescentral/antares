@@ -108,12 +108,11 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
 
 }  // namespace
 
-void ResetPlayerShip(Handle<SpaceObject> which) {
-    g.ship          = which;
+void ResetPlayerShip() {
     g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, Hue::YELLOW);
     g.target_label  = Label::add(0, 0, 0, -20, SpaceObject::none(), true, Hue::SKY_BLUE);
     g.send_label    = Label::add(200, 200, 0, 30, SpaceObject::none(), false, Hue::GREEN);
-    globals()->starfield.reset(g.ship);
+    globals()->starfield.reset();
     globals()->next_klaxon = game_ticks();
     g.key_mask             = 0;
     g.zoom                 = Zoom::FOE;
@@ -832,7 +831,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
         flagship->attributes &= ~kIsPlayerShip;
         if (newShip != g.ship) {
             g.ship = newShip;
-            globals()->starfield.reset(newShip);
+            globals()->starfield.reset();
         }
 
         flagship = g.ship;
@@ -921,6 +920,9 @@ void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
         }
         if (flagship->owner.get()) {
             flagship->owner->set_flagship(SpaceObject::none());
+        }
+        if (flagship == g.ship) {
+            g.ship = SpaceObject::none();
         }
     }
 }
