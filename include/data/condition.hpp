@@ -163,13 +163,12 @@ struct SpeedCondition : ConditionBase {
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `subject` exists.
-// Compares `subject` to the control, target, or flagship of the local player, per `value`.
-//
-// Warning: not net-safe.
+// Compares `subject` to the control, target, or flagship of the player, per `value`.
 struct SubjectCondition : ConditionBase {
     enum class Value { CONTROL, TARGET, PLAYER };
 
-    Value value;
+    Handle<Admiral> player;
+    Value           value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE

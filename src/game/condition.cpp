@@ -155,14 +155,14 @@ static bool is_true(const SpeedCondition& c) {
 }
 
 static bool is_true(const SubjectCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto o = GetObjectFromInitialNumber(c.subject);
+    if (!(c.player.get() && o.get())) {
+        return false;
+    }
     switch (c.value) {
-        case SubjectCondition::Value::CONTROL:
-            return sObject.get() && op_eq(c.op, sObject, g.admiral->control());
-        case SubjectCondition::Value::TARGET:
-            return sObject.get() && op_eq(c.op, sObject, g.admiral->target());
-        case SubjectCondition::Value::PLAYER:
-            return sObject.get() && op_eq(c.op, sObject, g.admiral->flagship());
+        case SubjectCondition::Value::CONTROL: return op_eq(c.op, o, c.player->control());
+        case SubjectCondition::Value::TARGET: return op_eq(c.op, o, c.player->target());
+        case SubjectCondition::Value::PLAYER: return op_eq(c.op, o, c.player->flagship());
     }
 }
 

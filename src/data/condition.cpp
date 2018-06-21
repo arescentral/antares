@@ -217,7 +217,7 @@ static SubjectCondition::Value required_subject_value(path_value x) {
 static Condition subject_condition(path_value x) {
     return required_struct<SubjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
+                {"player", {&SubjectCondition::player, required_admiral}},
                 {"value", {&SubjectCondition::value, required_subject_value}}});
 }
 
