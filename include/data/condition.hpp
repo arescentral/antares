@@ -65,11 +65,10 @@ struct ConditionBase {
 };
 
 // Ops: EQ, NE
-// Compares local player’s autopilot state (on = true; off = false) to `value`.
-//
-// Warning: not net-safe.
+// Compares player’s autopilot state (on = true; off = false) to `value`.
 struct AutopilotCondition : ConditionBase {
-    bool value;
+    Handle<Admiral> player;
+    bool            value;
 };
 
 // Ops: EQ, NE

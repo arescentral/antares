@@ -131,7 +131,7 @@ static ConditionOp required_condition_op(path_value x) {
 static Condition autopilot_condition(path_value x) {
     return required_struct<AutopilotCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"player", nullptr},
+                {"player", {&AutopilotCondition::player, required_admiral}},
                 {"value", {&AutopilotCondition::value, required_bool}}});
 }
 

@@ -65,7 +65,15 @@ static bool op_eq(ConditionOp op, const X& x, const Y& y) {
 }
 
 static bool is_true(const AutopilotCondition& c) {
-    return op_eq(c.op, IsPlayerShipOnAutoPilot(), c.value);
+    if (!c.player.get()) {
+        return false;
+    }
+    auto flagship = c.player->flagship();
+    if (!flagship.get()) {
+        return false;
+    }
+    bool on_autopilot = flagship->attributes & kOnAutoPilot;
+    return op_eq(c.op, on_autopilot, c.value);
 }
 
 static bool is_true(const BuildingCondition& c) {
