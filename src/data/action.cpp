@@ -296,6 +296,11 @@ static Action::Type required_action_type(path_value x) {
                 {"zoom", Action::Type::ZOOM}});
 }
 
+static Within required_within(path_value x) {
+    return optional_enum<Within>(x, {{"circle", Within::CIRCLE}, {"square", Within::SQUARE}})
+            .value_or(Within::CIRCLE);
+}
+
 static Action age_action(path_value x) {
     return required_struct<AgeAction>(
             x, {COMMON_ACTION_FIELDS,
@@ -337,6 +342,7 @@ static Action create_action(path_value x) {
                 {"relative_velocity", {&CreateAction::relative_velocity, optional_bool, false}},
                 {"relative_direction", {&CreateAction::relative_direction, optional_bool, false}},
                 {"distance", {&CreateAction::distance, optional_int, 0}},
+                {"within", {&CreateAction::within, required_within}},
                 {"inherit", {&CreateAction::inherit, optional_bool, false}},
                 {"legacy_random", {&CreateAction::legacy_random, optional_bool, false}}});
 }
@@ -446,7 +452,8 @@ static Action move_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"origin", {&MoveAction::origin, optional_origin, MoveAction::Origin::LEVEL}},
                 {"to", {&MoveAction::to, optional_coord_point, coordPointType{0, 0}}},
-                {"distance", {&MoveAction::distance, optional_int, 0}}});
+                {"distance", {&MoveAction::distance, optional_int, 0}},
+                {"within", {&MoveAction::within, required_within}}});
 }
 
 static Action occupy_action(path_value x) {

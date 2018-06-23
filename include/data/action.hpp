@@ -77,6 +77,8 @@ enum class ActionType {
     ZOOM,
 };
 
+enum class Within { CIRCLE, SQUARE };
+
 struct ActionBase {
     ActionType type;
 
@@ -130,7 +132,8 @@ struct CreateAction : public ActionBase {
     Range<int64_t>                count              = {1, 2};  // # to make randomly
     bool                          relative_velocity  = false;   // is velocity relative to creator?
     bool                          relative_direction = false;   // determines initial heading
-    int64_t                       distance = 0;      // create at this distance in random direction
+    int64_t                       distance = 0;  // create at this distance in random direction
+    Within                        within   = Within::CIRCLE;
     bool                          inherit  = false;  // if false, gets creator as target
                                                      // if true, gets creator’s target as target
     bool legacy_random = false;                      // if true, consume a random number from
@@ -207,6 +210,7 @@ struct MoveAction : public ActionBase {
     } origin;
     coordPointType to;
     int64_t        distance;
+    Within         within;
 };
 
 struct OccupyAction : public ActionBase {

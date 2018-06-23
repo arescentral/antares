@@ -97,8 +97,16 @@ bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) 
     return true;
 }
 
-static Point random_within(Random* r, int32_t distance) {
-    return {r->next(distance * 2) - distance, r->next(distance * 2) - distance};
+static Point random_point_in_square(Random* r, int32_t distance) {
+    Point p = {r->next(distance * 2) - distance, r->next(distance * 2) - distance};
+    return p;
+}
+
+static Point random_point(Random* r, int32_t distance, Within within) {
+    switch (within) {
+        case Within::CIRCLE: throw std::runtime_error("within: \"circle\" not implemented");
+        case Within::SQUARE: return random_point_in_square(r, distance);
+    }
 }
 
 static void apply(
@@ -133,7 +141,7 @@ static void apply(
         }
 
         if (a.distance > 0) {
-            Point p = random_within(&subject->randomSeed, a.distance);
+            Point p = random_point(&subject->randomSeed, a.distance, a.within);
             at.h += p.h;
             at.v += p.v;
         }
@@ -526,7 +534,7 @@ static void apply(
         case MoveAction::Origin::SUBJECT: newLocation = subject->location; break;
         case MoveAction::Origin::OBJECT: newLocation = object->location; break;
     }
-    Point p = random_within(&focus->randomSeed, a.distance);
+    Point p = random_point(&focus->randomSeed, a.distance, a.within);
     newLocation.h += p.h;
     newLocation.v += p.v;
     focus->location.h = newLocation.h;
