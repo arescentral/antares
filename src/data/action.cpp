@@ -53,7 +53,7 @@ Action::Action(EquipAction a) : equip(std::move(a)) {}
 Action::Action(FireAction a) : fire(std::move(a)) {}
 Action::Action(FlashAction a) : flash(std::move(a)) {}
 Action::Action(HealAction a) : heal(std::move(a)) {}
-Action::Action(HoldPositionAction a) : hold_position(std::move(a)) {}
+Action::Action(HoldAction a) : hold(std::move(a)) {}
 Action::Action(KeyAction a) : key(std::move(a)) {}
 Action::Action(KillAction a) : kill(std::move(a)) {}
 Action::Action(LandAction a) : land(std::move(a)) {}
@@ -90,7 +90,7 @@ Action::Action(Action&& a) {
         case Action::Type::FIRE: new (this) Action(std::move(a.fire)); break;
         case Action::Type::FLASH: new (this) Action(std::move(a.flash)); break;
         case Action::Type::HEAL: new (this) Action(std::move(a.heal)); break;
-        case Action::Type::HOLD: new (this) Action(std::move(a.hold_position)); break;
+        case Action::Type::HOLD: new (this) Action(std::move(a.hold)); break;
         case Action::Type::KEY: new (this) Action(std::move(a.key)); break;
         case Action::Type::KILL: new (this) Action(std::move(a.kill)); break;
         case Action::Type::LAND: new (this) Action(std::move(a.land)); break;
@@ -135,7 +135,7 @@ Action::~Action() {
         case Action::Type::FIRE: fire.~FireAction(); break;
         case Action::Type::FLASH: flash.~FlashAction(); break;
         case Action::Type::HEAL: heal.~HealAction(); break;
-        case Action::Type::HOLD: hold_position.~HoldPositionAction(); break;
+        case Action::Type::HOLD: hold.~HoldAction(); break;
         case Action::Type::KEY: key.~KeyAction(); break;
         case Action::Type::KILL: kill.~KillAction(); break;
         case Action::Type::LAND: land.~LandAction(); break;
@@ -390,7 +390,7 @@ static Action heal_action(path_value x) {
 }
 
 static Action hold_action(path_value x) {
-    return required_struct<HoldPositionAction>(x, {COMMON_ACTION_FIELDS});
+    return required_struct<HoldAction>(x, {COMMON_ACTION_FIELDS});
 }
 
 static Action key_action(path_value x) {

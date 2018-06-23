@@ -281,7 +281,7 @@ static void apply(
 }
 
 static void apply(
-        const HoldPositionAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
+        const HoldAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     focus->targetObject   = SpaceObject::none();
     focus->targetObjectID = kNoShip;
@@ -731,7 +731,7 @@ static void apply(
         case Action::Type::FIRE: apply(a.fire, subject, focus, object, offset); break;
         case Action::Type::FLASH: apply(a.flash, subject, focus, object, offset); break;
         case Action::Type::HEAL: apply(a.heal, subject, focus, object, offset); break;
-        case Action::Type::HOLD: apply(a.hold_position, subject, focus, object, offset); break;
+        case Action::Type::HOLD: apply(a.hold, subject, focus, object, offset); break;
         case Action::Type::KEY: apply(a.key, subject, focus, object, offset); break;
         case Action::Type::KILL: apply(a.kill, subject, focus, object, offset); break;
         case Action::Type::LAND: apply(a.land, subject, focus, object, offset); break;

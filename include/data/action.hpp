@@ -167,7 +167,7 @@ struct HealAction : public ActionBase {
     int64_t value;
 };
 
-struct HoldPositionAction : public ActionBase {};
+struct HoldAction : public ActionBase {};
 
 struct KeyAction : public ActionBase {
     uint32_t disable = 0;  // keys to disable
@@ -297,40 +297,40 @@ union Action {
     ActionBase base;
     Type       type() const;
 
-    AgeAction          age;
-    AssumeAction       assume;
-    CapSpeedAction     cap_speed;
-    CaptureAction      capture;
-    CloakAction        cloak;
-    ConditionAction    condition;
-    CreateAction       create;
-    DisableAction      disable;
-    EnergizeAction     energize;
-    EquipAction        equip;
-    FireAction         fire;
-    FlashAction        flash;
-    HealAction         heal;
-    HoldPositionAction hold_position;
-    KeyAction          key;
-    KillAction         kill;
-    LandAction         land;
-    MessageAction      message;
-    MorphAction        morph;
-    MoveAction         move;
-    OccupyAction       occupy;
-    OrderAction        order;
-    PayAction          pay;
-    PushAction         push;
-    RevealAction       reveal;
-    ScoreAction        score;
-    SelectAction       select;
-    PlayAction         play;
-    SparkAction        spark;
-    SpinAction         spin;
-    ThrustAction       thrust;
-    WarpAction         warp;
-    WinAction          win;
-    ZoomAction         zoom;
+    AgeAction       age;
+    AssumeAction    assume;
+    CapSpeedAction  cap_speed;
+    CaptureAction   capture;
+    CloakAction     cloak;
+    ConditionAction condition;
+    CreateAction    create;
+    DisableAction   disable;
+    EnergizeAction  energize;
+    EquipAction     equip;
+    FireAction      fire;
+    FlashAction     flash;
+    HealAction      heal;
+    HoldAction      hold;
+    KeyAction       key;
+    KillAction      kill;
+    LandAction      land;
+    MessageAction   message;
+    MorphAction     morph;
+    MoveAction      move;
+    OccupyAction    occupy;
+    OrderAction     order;
+    PayAction       pay;
+    PushAction      push;
+    RevealAction    reveal;
+    ScoreAction     score;
+    SelectAction    select;
+    PlayAction      play;
+    SparkAction     spark;
+    SpinAction      spin;
+    ThrustAction    thrust;
+    WarpAction      warp;
+    WinAction       win;
+    ZoomAction      zoom;
 
     Action(AgeAction a);
     Action(AssumeAction a);
@@ -345,7 +345,7 @@ union Action {
     Action(FireAction a);
     Action(FlashAction a);
     Action(HealAction a);
-    Action(HoldPositionAction a);
+    Action(HoldAction a);
     Action(KeyAction a);
     Action(KillAction a);
     Action(LandAction a);
