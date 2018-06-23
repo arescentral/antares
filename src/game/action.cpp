@@ -97,6 +97,10 @@ bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) 
     return true;
 }
 
+static Point random_within(Random* r, int32_t distance) {
+    return {r->next(distance * 2) - distance, r->next(distance * 2) - distance};
+}
+
 static void apply(
         const CreateAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
@@ -129,8 +133,9 @@ static void apply(
         }
 
         if (a.distance > 0) {
-            at.h += subject->randomSeed.next(a.distance * 2) - a.distance;
-            at.v += subject->randomSeed.next(a.distance * 2) - a.distance;
+            Point p = random_within(&subject->randomSeed, a.distance);
+            at.h += p.h;
+            at.v += p.v;
         }
 
         auto product = CreateAnySpaceObject(
@@ -521,8 +526,9 @@ static void apply(
         case MoveAction::Origin::SUBJECT: newLocation = subject->location; break;
         case MoveAction::Origin::OBJECT: newLocation = object->location; break;
     }
-    newLocation.h += focus->randomSeed.next(a.distance << 1) - a.distance;
-    newLocation.v += focus->randomSeed.next(a.distance << 1) - a.distance;
+    Point p = random_within(&focus->randomSeed, a.distance);
+    newLocation.h += p.h;
+    newLocation.v += p.v;
     focus->location.h = newLocation.h;
     focus->location.v = newLocation.v;
 }
