@@ -97,6 +97,15 @@ bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) 
     return true;
 }
 
+static Point random_point_in_circle(Random* r, int32_t distance) {
+    int32_t angle  = r->next(ROT_POS);
+    int32_t radius = std::max(r->next(distance + 1), r->next(distance + 1));
+    Fixed   x, y;
+    GetRotPoint(&x, &y, angle);
+    Point p = {mFixedToLong(x * radius), mFixedToLong(y * radius)};
+    return p;
+}
+
 static Point random_point_in_square(Random* r, int32_t distance) {
     Point p = {r->next(distance * 2) - distance, r->next(distance * 2) - distance};
     return p;
@@ -104,7 +113,7 @@ static Point random_point_in_square(Random* r, int32_t distance) {
 
 static Point random_point(Random* r, int32_t distance, Within within) {
     switch (within) {
-        case Within::CIRCLE: throw std::runtime_error("within: \"circle\" not implemented");
+        case Within::CIRCLE: return random_point_in_circle(r, distance);
         case Within::SQUARE: return random_point_in_square(r, distance);
     }
 }
