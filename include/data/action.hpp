@@ -80,7 +80,8 @@ enum class ActionType {
 struct ActionBase {
     ActionType type;
 
-    bool reflexive;  // does it apply to object executing verb?
+    bool reflexive        = false;  // does it apply to object executing verb?
+    bool check_conditions = false;  // re-check conditions after executing?
 
     struct Filter {
         uint32_t                   attributes = 0;

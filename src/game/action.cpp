@@ -735,7 +735,7 @@ static void apply(
 static void execute_actions(
         const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
         const Handle<SpaceObject> original_object, Point* offset, bool allowDelay) {
-    bool checkConditions = false;
+    bool check_conditions = false;
 
     for (const Action* curr : sfz::range(begin, end)) {
         const Action& action = *curr;
@@ -777,15 +777,10 @@ static void execute_actions(
         }
 
         apply(action, subject, focus, object, offset);
-
-        switch (action.type()) {
-            case Action::Type::SCORE:
-            case Action::Type::MESSAGE: checkConditions = true; break;
-            default: break;
-        }
+        check_conditions = check_conditions || action.base.check_conditions;
     }
 
-    if (checkConditions) {
+    if (check_conditions) {
         CheckLevelConditions();
     }
 }

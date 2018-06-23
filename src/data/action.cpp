@@ -34,7 +34,8 @@ namespace antares {
             {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                        \
             {"if", {&ActionBase::filter, optional_action_filter}},                                \
             {"delay", {&ActionBase::delay, optional_ticks, ticks(0)}},                            \
-            {"override", {&ActionBase::override_, optional_action_override}}
+            {"override", {&ActionBase::override_, optional_action_override}},                     \
+            {"check_conditions", {&ActionBase::check_conditions, optional_bool, false}}
 // clang-format on
 
 Action::Type Action::type() const { return base.type; }
