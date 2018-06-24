@@ -222,7 +222,7 @@ struct LandAction : public ActionBase {
 };
 
 struct MessageAction : public ActionBase {
-    int64_t                 id;     // identifies the message to a "message" condition
+    sfz::optional<int64_t>  id;     // identifies the message to a "message" condition
     std::vector<pn::string> pages;  // pages of message bodies to show
 };
 

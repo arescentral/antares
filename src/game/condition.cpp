@@ -128,7 +128,13 @@ static bool is_true(const HealthCondition& c) {
 }
 
 static bool is_true(const MessageCondition& c) {
-    return op_eq(c.op, Messages::current(), std::pair<int, int>{c.id, c.page - 1});
+    auto current = Messages::current();
+    if (!current.first.has_value()) {
+        return false;
+    }
+    return op_eq(
+            c.op, std::pair<int64_t, int64_t>(*current.first, current.second),
+            std::make_pair(c.id, c.page - 1));
 }
 
 static bool is_true(const OwnerCondition& c) {

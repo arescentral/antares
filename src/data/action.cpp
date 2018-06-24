@@ -454,7 +454,7 @@ static Action land_action(path_value x) {
 static Action message_action(path_value x) {
     return required_struct<MessageAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"id", {&MessageAction::id, required_int}},
+                {"id", {&MessageAction::id, optional_int}},
                 {"pages",
                  {&MessageAction::pages, required_array<pn::string, required_string_copy>}}});
 }

@@ -83,9 +83,9 @@ enum longMessageStageType {
 }  // namespace
 
 struct Messages::longMessageType {
-    longMessageStageType           stage              = kNoStage;
-    ticks                          charDelayCount     = ticks(0);
-    int16_t                        start_id           = -1;
+    longMessageStageType           stage          = kNoStage;
+    ticks                          charDelayCount = ticks(0);
+    sfz::optional<int64_t>         start_id;
     const std::vector<pn::string>* pages              = nullptr;
     int16_t                        current_page_index = -1;
     int16_t                        last_page_index    = -1;
@@ -153,7 +153,7 @@ void Messages::clear() {
 
 void Messages::add(pn::string_view message) { message_data.emplace(message.copy()); }
 
-void Messages::start(int16_t start_id, const std::vector<pn::string>* pages) {
+void Messages::start(sfz::optional<int64_t> start_id, const std::vector<pn::string>* pages) {
     longMessageType* m = long_message_data;
     if (!m->have_current()) {
         m->retro_text.reset();
@@ -344,7 +344,7 @@ void Messages::autopilot(bool on) {
 void Messages::shields_low() { set_status("WARNING: Shields Low", kStatusWarnColor); }
 void Messages::max_ships_built() { set_status("Maximum number of ships built", Hue::ORANGE); }
 
-std::pair<int, int> Messages::current() {
+std::pair<sfz::optional<int64_t>, int> Messages::current() {
     return {long_message_data->start_id, long_message_data->current_page_index};
 }
 
