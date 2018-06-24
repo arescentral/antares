@@ -686,7 +686,12 @@ static void apply(
 static void apply(
         const KeyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
-    g.key_mask = (g.key_mask & ~a.enable) | a.disable;
+    for (KeyAction::Key key : a.enable) {
+        g.key_mask = g.key_mask & ~(1 << static_cast<int32_t>(key));
+    }
+    for (KeyAction::Key key : a.disable) {
+        g.key_mask = g.key_mask | (1 << static_cast<int32_t>(key));
+    }
 }
 
 static void apply(

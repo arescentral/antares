@@ -397,11 +397,41 @@ static Action hold_action(path_value x) {
     return required_struct<HoldAction>(x, {COMMON_ACTION_FIELDS});
 }
 
+static KeyAction::Key required_key(path_value x) {
+    return required_enum<KeyAction::Key>(
+            x, {{"up", KeyAction::Key::UP},
+                {"down", KeyAction::Key::DOWN},
+                {"left", KeyAction::Key::LEFT},
+                {"right", KeyAction::Key::RIGHT},
+                {"fire_1", KeyAction::Key::FIRE_1},
+                {"fire_2", KeyAction::Key::FIRE_2},
+                {"fire_s", KeyAction::Key::FIRE_S},
+                {"warp", KeyAction::Key::WARP},
+                {"select_friend", KeyAction::Key::SELECT_FRIEND},
+                {"select_foe", KeyAction::Key::SELECT_FOE},
+                {"select_base", KeyAction::Key::SELECT_BASE},
+                {"target", KeyAction::Key::TARGET},
+                {"order", KeyAction::Key::ORDER},
+                {"zoom_in", KeyAction::Key::ZOOM_IN},
+                {"zoom_out", KeyAction::Key::ZOOM_OUT},
+                {"comp_up", KeyAction::Key::COMP_UP},
+                {"comp_down", KeyAction::Key::COMP_DOWN},
+                {"comp_accept", KeyAction::Key::COMP_ACCEPT},
+                {"comp_back", KeyAction::Key::COMP_BACK},
+
+                {"comp_message", KeyAction::Key::COMP_MESSAGE},
+                {"comp_special", KeyAction::Key::COMP_SPECIAL},
+                {"comp_build", KeyAction::Key::COMP_BUILD},
+                {"zoom_shortcut", KeyAction::Key::ZOOM_SHORTCUT},
+                {"send_message", KeyAction::Key::SEND_MESSAGE},
+                {"mouse", KeyAction::Key::MOUSE}});
+}
+
 static Action key_action(path_value x) {
     return required_struct<KeyAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable", {&KeyAction::enable, optional_keys}},
-                {"disable", {&KeyAction::disable, optional_keys}}});
+                {"enable", {&KeyAction::enable, optional_array<KeyAction::Key, required_key>}},
+                {"disable", {&KeyAction::disable, optional_array<KeyAction::Key, required_key>}}});
 }
 
 static KillAction::Kind required_kill_kind(path_value x) {

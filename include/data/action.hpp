@@ -170,8 +170,37 @@ struct HealAction : public ActionBase {
 struct HoldAction : public ActionBase {};
 
 struct KeyAction : public ActionBase {
-    uint32_t disable = 0;  // keys to disable
-    uint32_t enable  = 0;  // keys to enable
+    enum class Key {
+        UP            = 0,
+        DOWN          = 1,
+        LEFT          = 2,
+        RIGHT         = 3,
+        FIRE_1        = 4,
+        FIRE_2        = 5,
+        FIRE_S        = 6,
+        WARP          = 0,
+        SELECT_FRIEND = 8,
+        SELECT_FOE    = 9,
+        SELECT_BASE   = 10,
+        TARGET        = 11,
+        ORDER         = 12,
+        ZOOM_IN       = 13,
+        ZOOM_OUT      = 14,
+        COMP_UP       = 15,
+        COMP_DOWN     = 16,
+        COMP_ACCEPT   = 17,
+        COMP_BACK     = 18,
+
+        COMP_MESSAGE  = 26,
+        COMP_SPECIAL  = 27,
+        COMP_BUILD    = 28,
+        ZOOM_SHORTCUT = 29,
+        SEND_MESSAGE  = 30,
+        MOUSE         = 31,
+    };
+
+    std::vector<Key> disable;  // keys to disable
+    std::vector<Key> enable;   // keys to enable
 };
 
 struct KillAction : public ActionBase {

@@ -126,8 +126,6 @@ Hue                required_hue(path_value x);
 Screen             required_screen(path_value x);
 Zoom               required_zoom(path_value x);
 
-uint32_t optional_keys(path_value x);
-
 template <typename T, int N>
 sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
     if (x.value().is_null()) {

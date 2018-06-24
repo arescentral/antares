@@ -592,36 +592,6 @@ Hue required_hue(path_value x) {
                 {"gray", Hue::GRAY}});
 }
 
-static int required_key(path_value x) {
-    return required_enum<int>(
-            x, {{"up", 0},
-                {"down", 1},
-                {"left", 2},
-                {"right", 3},
-                {"fire_1", 4},
-                {"fire_2", 5},
-                {"fire_s", 6},
-                {"warp", 0},
-                {"select_friend", 8},
-                {"select_foe", 9},
-                {"select_base", 10},
-                {"target", 11},
-                {"order", 12},
-                {"zoom_in", 13},
-                {"zoom_out", 14},
-                {"comp_up", 15},
-                {"comp_down", 16},
-                {"comp_accept", 17},
-                {"comp_back", 18},
-
-                {"comp_message", 26},
-                {"comp_special", 27},
-                {"comp_build", 28},
-                {"zoom_shortcut", 29},
-                {"send_message", 30},
-                {"mouse", 31}});
-}
-
 Screen required_screen(path_value x) {
     return required_enum<Screen>(
             x, {{"main", Screen::MAIN},
@@ -641,22 +611,6 @@ Zoom required_zoom(path_value x) {
                 {"foe", Zoom::FOE},
                 {"object", Zoom::OBJECT},
                 {"all", Zoom::ALL}});
-}
-
-uint32_t optional_keys(path_value x) {
-    if (x.value().is_null()) {
-        return 0x00000000;
-    } else if (x.value().is_array()) {
-        pn::array_cref a      = x.value().as_array();
-        uint32_t       result = 0x00000000;
-        for (int i = 0; i < a.size(); ++i) {
-            int key = required_key(x.get(i));
-            result |= (0x1 << key);
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or list", x.path()).c_str());
-    }
 }
 
 pn::string required_string_copy(path_value x) { return required_string(x).copy(); }
