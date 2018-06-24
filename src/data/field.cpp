@@ -378,6 +378,10 @@ Handle<const Initial> required_initial(path_value x) {
     }
 }
 
+Handle<const Condition> required_condition(path_value x) {
+    return Handle<const Condition>(required_int(x));
+}
+
 sfz::optional<NamedHandle<const Level>> optional_level(path_value x) {
     sfz::optional<pn::string_view> s = optional_string(x);
     if (s.has_value()) {
@@ -488,20 +492,6 @@ Range<ticks> required_ticks_range(path_value x) {
     } else {
         throw std::runtime_error(pn::format("{0}: must be string or map", x.path()).c_str());
     }
-}
-
-HandleList<const Condition> optional_condition_range(path_value x) {
-    auto range = optional_int_range(x);
-    if (range.has_value()) {
-        return HandleList<const Condition>(range->begin, range->end);
-    } else {
-        return {-1, -1};
-    }
-}
-
-HandleList<const Initial> required_initial_range(path_value x) {
-    auto range = required_int_range(x);
-    return HandleList<const Initial>(range.begin, range.end);
 }
 
 static int32_t required_int32(path_value x) {

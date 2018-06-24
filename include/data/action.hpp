@@ -123,8 +123,8 @@ struct CaptureAction : public ActionBase {
 struct CloakAction : public ActionBase {};
 
 struct ConditionAction : public ActionBase {
-    HandleList<const Condition> enable;
-    HandleList<const Condition> disable;
+    std::vector<Handle<const Condition>> enable;
+    std::vector<Handle<const Condition>> disable;
 };
 
 struct CreateAction : public ActionBase {
@@ -236,7 +236,7 @@ struct PushAction : public ActionBase {
 };
 
 struct RevealAction : public ActionBase {
-    HandleList<const Initial> initial;
+    std::vector<Handle<const Initial>> initial;
 };
 
 struct ScoreAction : public ActionBase {

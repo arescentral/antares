@@ -330,8 +330,12 @@ static Action cloak_action(path_value x) {
 static Action condition_action(path_value x) {
     return required_struct<ConditionAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable", {&ConditionAction::enable, optional_condition_range}},
-                {"disable", {&ConditionAction::disable, optional_condition_range}}});
+                {"enable",
+                 {&ConditionAction::enable,
+                  optional_array<Handle<const Condition>, required_condition>}},
+                {"disable",
+                 {&ConditionAction::disable,
+                  optional_array<Handle<const Condition>, required_condition>}}});
 }
 
 static Action create_action(path_value x) {
@@ -491,7 +495,9 @@ static Action push_action(path_value x) {
 static Action reveal_action(path_value x) {
     return required_struct<RevealAction>(
             x,
-            {COMMON_ACTION_FIELDS, {"which", {&RevealAction::initial, required_initial_range}}});
+            {COMMON_ACTION_FIELDS,
+             {"which",
+              {&RevealAction::initial, required_array<Handle<const Initial>, required_initial>}}});
 }
 
 static Action score_action(path_value x) {
