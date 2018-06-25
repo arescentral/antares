@@ -537,15 +537,19 @@ static void apply(
         Handle<SpaceObject> object, Point* offset) {
     coordPointType newLocation;
     switch (a.origin) {
-        case MoveAction::Origin::LEVEL:
-            newLocation = Translate_Coord_To_Level_Rotation(a.to.h, a.to.v);
-            break;
+        case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
         case MoveAction::Origin::SUBJECT: newLocation = subject->location; break;
         case MoveAction::Origin::OBJECT: newLocation = object->location; break;
     }
-    Point p = random_point(&focus->randomSeed, a.distance, a.within);
-    newLocation.h += p.h;
-    newLocation.v += p.v;
+
+    coordPointType off = Translate_Coord_To_Level_Rotation(a.to.h, a.to.v);
+    newLocation.h += off.h - kUniversalCenter;
+    newLocation.v += off.v - kUniversalCenter;
+
+    Point random = random_point(&focus->randomSeed, a.distance, a.within);
+    newLocation.h += random.h;
+    newLocation.v += random.v;
+
     focus->location.h = newLocation.h;
     focus->location.v = newLocation.v;
 }
