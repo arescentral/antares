@@ -523,7 +523,7 @@ static Action reveal_action(path_value x) {
     return required_struct<RevealAction>(
             x,
             {COMMON_ACTION_FIELDS,
-             {"which",
+             {"initial",
               {&RevealAction::initial, required_array<Handle<const Initial>, required_initial>}}});
 }
 
