@@ -378,14 +378,11 @@ static Action fire_action(path_value x) {
             x, {COMMON_ACTION_FIELDS, {"which", {&FireAction::which, required_weapon}}});
 }
 
-static uint8_t required_shade(path_value x) { return required_int(x, {1, 17}); }
-
 static Action flash_action(path_value x) {
     return required_struct<FlashAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"length", {&FlashAction::length, required_int}},
-                {"hue", {&FlashAction::hue, required_hue}},
-                {"shade", {&FlashAction::shade, required_shade}}});
+                {"duration", {&FlashAction::duration, required_ticks}},
+                {"color", {&FlashAction::color, required_color}}});
 }
 
 static Action heal_action(path_value x) {

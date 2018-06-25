@@ -680,9 +680,7 @@ static void apply(
 static void apply(
         const FlashAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
-    RgbColor color = GetRGBTranslateColorShade(a.hue, a.shade);
-    color.alpha /= 2;
-    globals()->transitions.start_boolean(ticks{510 / a.length}, color);
+    globals()->transitions.start_boolean(a.duration, a.color);
 }
 
 static void apply(

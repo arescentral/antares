@@ -28,6 +28,7 @@
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/range.hpp"
+#include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -158,9 +159,8 @@ struct FireAction : public ActionBase {
 };
 
 struct FlashAction : public ActionBase {
-    int64_t length;  // length of color flash
-    Hue     hue;     // hue of flash
-    uint8_t shade;   // brightness of flash
+    ticks    duration;  // length of flash
+    RgbColor color;     // color of flash
 };
 
 struct HealAction : public ActionBase {
