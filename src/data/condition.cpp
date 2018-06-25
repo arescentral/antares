@@ -204,7 +204,7 @@ static SubjectCondition::Value required_subject_value(path_value x) {
     return required_enum<SubjectCondition::Value>(
             x, {{"control", SubjectCondition::Value::CONTROL},
                 {"target", SubjectCondition::Value::TARGET},
-                {"player", SubjectCondition::Value::PLAYER}});
+                {"flagship", SubjectCondition::Value::FLAGSHIP}});
 }
 
 static Condition subject_condition(path_value x) {

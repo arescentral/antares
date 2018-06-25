@@ -160,7 +160,7 @@ struct SpeedCondition : ConditionBase {
 // Precondition: `subject` exists.
 // Compares `subject` to the control, target, or flagship of the player, per `value`.
 struct SubjectCondition : ConditionBase {
-    enum class Value { CONTROL, TARGET, PLAYER };
+    enum class Value { CONTROL, TARGET, FLAGSHIP };
 
     Handle<Admiral> player;
     Value           value;
