@@ -36,16 +36,13 @@ class Transitions {
     ~Transitions();
 
     void reset();
-    void start_boolean(int32_t speed, RgbColor goal_color);
+    void start_boolean(ticks duration, RgbColor goal_color);
     void update_boolean(ticks time_passed);
     void draw() const;
 
   private:
-    bool     _active;
-    int32_t  _step;
-    int32_t  _in_speed;
-    int32_t  _out_speed;
-    RgbColor _color;
+    game_ticks _end = game_ticks{ticks{0}};
+    RgbColor   _color;
 };
 
 class ColorFade : public Card {

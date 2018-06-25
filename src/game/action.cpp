@@ -682,7 +682,7 @@ static void apply(
         Handle<SpaceObject> object, Point* offset) {
     RgbColor color = GetRGBTranslateColorShade(a.hue, a.shade);
     color.alpha /= 2;
-    globals()->transitions.start_boolean(a.length, color);
+    globals()->transitions.start_boolean(ticks{510 / a.length}, color);
 }
 
 static void apply(

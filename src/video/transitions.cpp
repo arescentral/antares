@@ -31,42 +31,20 @@
 
 namespace antares {
 
-namespace {
-
-const int32_t kStartAnimation = -255;
-const int32_t kEndAnimation   = 255;
-
-}  // namespace
-
-Transitions::Transitions() : _active(false) {}
+Transitions::Transitions() {}
 Transitions::~Transitions() {}
 
-void Transitions::reset() { _active = false; }
+void Transitions::reset() { _end = game_ticks{ticks{0}}; }
 
-void Transitions::start_boolean(int32_t speed, RgbColor goal_color) {
-    _step      = kStartAnimation;
-    _in_speed  = speed;
-    _out_speed = speed;
-    _color     = goal_color;
-    if (!_active) {
-        _active = true;
-    }
+void Transitions::start_boolean(ticks duration, RgbColor goal_color) {
+    _end   = g.time + duration;
+    _color = goal_color;
 }
 
-void Transitions::update_boolean(ticks time_passed) {
-    if (_active) {
-        if (_step < 0) {
-            _step += _in_speed * time_passed.count();
-        } else if ((_step + _out_speed * time_passed.count()) < kEndAnimation) {
-            _step += _out_speed * time_passed.count();
-        } else {
-            _active = false;
-        }
-    }
-}
+void Transitions::update_boolean(ticks time_passed) {}
 
 void Transitions::draw() const {
-    if (_active) {
+    if (g.time < _end) {
         Rects().fill(world(), _color);
     }
 }

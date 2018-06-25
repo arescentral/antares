@@ -59,7 +59,8 @@ const int32_t kWeaponRatio        = 2;
 const int32_t kEnergyChunk        = kHealthRatio + (kWeaponRatio * 3);
 const int32_t kWarpInEnergyFactor = 3;
 
-static const RgbColor kCollideColor = rgba(255, 255, 255, 127);
+static const ticks    kCollideFlashDuration = ticks{3};
+static const RgbColor kCollideFlashColor    = rgba(255, 255, 255, 127);
 
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject);
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject);
@@ -1527,7 +1528,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
 
     if (anObject->owner == g.admiral && (anObject->attributes & kIsPlayerShip) &&
         (sObject->base->collide.damage > 0)) {
-        globals()->transitions.start_boolean(128, kCollideColor);
+        globals()->transitions.start_boolean(kCollideFlashDuration, kCollideFlashColor);
     }
 }
 
