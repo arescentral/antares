@@ -43,12 +43,11 @@ Transitions::~Transitions() {}
 
 void Transitions::reset() { _active = false; }
 
-void Transitions::start_boolean(int32_t speed, uint8_t goal_color) {
-    _step        = kStartAnimation;
-    _in_speed    = speed;
-    _out_speed   = speed;
-    _color       = GetRGBTranslateColor(goal_color);
-    _color.alpha = 127;
+void Transitions::start_boolean(int32_t speed, RgbColor goal_color) {
+    _step      = kStartAnimation;
+    _in_speed  = speed;
+    _out_speed = speed;
+    _color     = goal_color;
     if (!_active) {
         _active = true;
     }
