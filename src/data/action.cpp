@@ -34,7 +34,8 @@ namespace antares {
             {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                        \
             {"if", {&ActionBase::filter, optional_action_filter}},                                \
             {"delay", {&ActionBase::delay, optional_ticks, ticks(0)}},                            \
-            {"override", {&ActionBase::override_, optional_action_override}}
+            {"override", {&ActionBase::override_, optional_action_override}},                     \
+            {"check_conditions", {&ActionBase::check_conditions, optional_bool, false}}
 // clang-format on
 
 Action::Type Action::type() const { return base.type; }
@@ -52,7 +53,7 @@ Action::Action(EquipAction a) : equip(std::move(a)) {}
 Action::Action(FireAction a) : fire(std::move(a)) {}
 Action::Action(FlashAction a) : flash(std::move(a)) {}
 Action::Action(HealAction a) : heal(std::move(a)) {}
-Action::Action(HoldPositionAction a) : hold_position(std::move(a)) {}
+Action::Action(HoldAction a) : hold(std::move(a)) {}
 Action::Action(KeyAction a) : key(std::move(a)) {}
 Action::Action(KillAction a) : kill(std::move(a)) {}
 Action::Action(LandAction a) : land(std::move(a)) {}
@@ -89,7 +90,7 @@ Action::Action(Action&& a) {
         case Action::Type::FIRE: new (this) Action(std::move(a.fire)); break;
         case Action::Type::FLASH: new (this) Action(std::move(a.flash)); break;
         case Action::Type::HEAL: new (this) Action(std::move(a.heal)); break;
-        case Action::Type::HOLD: new (this) Action(std::move(a.hold_position)); break;
+        case Action::Type::HOLD: new (this) Action(std::move(a.hold)); break;
         case Action::Type::KEY: new (this) Action(std::move(a.key)); break;
         case Action::Type::KILL: new (this) Action(std::move(a.kill)); break;
         case Action::Type::LAND: new (this) Action(std::move(a.land)); break;
@@ -134,7 +135,7 @@ Action::~Action() {
         case Action::Type::FIRE: fire.~FireAction(); break;
         case Action::Type::FLASH: flash.~FlashAction(); break;
         case Action::Type::HEAL: heal.~HealAction(); break;
-        case Action::Type::HOLD: hold_position.~HoldPositionAction(); break;
+        case Action::Type::HOLD: hold.~HoldAction(); break;
         case Action::Type::KEY: key.~KeyAction(); break;
         case Action::Type::KILL: kill.~KillAction(); break;
         case Action::Type::LAND: land.~LandAction(); break;
@@ -295,6 +296,11 @@ static Action::Type required_action_type(path_value x) {
                 {"zoom", Action::Type::ZOOM}});
 }
 
+static Within required_within(path_value x) {
+    return optional_enum<Within>(x, {{"circle", Within::CIRCLE}, {"square", Within::SQUARE}})
+            .value_or(Within::CIRCLE);
+}
+
 static Action age_action(path_value x) {
     return required_struct<AgeAction>(
             x, {COMMON_ACTION_FIELDS,
@@ -324,8 +330,12 @@ static Action cloak_action(path_value x) {
 static Action condition_action(path_value x) {
     return required_struct<ConditionAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable", {&ConditionAction::enable, optional_condition_range}},
-                {"disable", {&ConditionAction::disable, optional_condition_range}}});
+                {"enable",
+                 {&ConditionAction::enable,
+                  optional_array<Handle<const Condition>, required_condition>}},
+                {"disable",
+                 {&ConditionAction::disable,
+                  optional_array<Handle<const Condition>, required_condition>}}});
 }
 
 static Action create_action(path_value x) {
@@ -336,6 +346,7 @@ static Action create_action(path_value x) {
                 {"relative_velocity", {&CreateAction::relative_velocity, optional_bool, false}},
                 {"relative_direction", {&CreateAction::relative_direction, optional_bool, false}},
                 {"distance", {&CreateAction::distance, optional_int, 0}},
+                {"within", {&CreateAction::within, required_within}},
                 {"inherit", {&CreateAction::inherit, optional_bool, false}},
                 {"legacy_random", {&CreateAction::legacy_random, optional_bool, false}}});
 }
@@ -367,14 +378,11 @@ static Action fire_action(path_value x) {
             x, {COMMON_ACTION_FIELDS, {"which", {&FireAction::which, required_weapon}}});
 }
 
-static uint8_t required_shade(path_value x) { return required_int(x, {1, 17}); }
-
 static Action flash_action(path_value x) {
     return required_struct<FlashAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"length", {&FlashAction::length, required_int}},
-                {"hue", {&FlashAction::hue, required_hue}},
-                {"shade", {&FlashAction::shade, required_shade}}});
+                {"duration", {&FlashAction::duration, required_ticks}},
+                {"color", {&FlashAction::color, required_color}}});
 }
 
 static Action heal_action(path_value x) {
@@ -383,14 +391,44 @@ static Action heal_action(path_value x) {
 }
 
 static Action hold_action(path_value x) {
-    return required_struct<HoldPositionAction>(x, {COMMON_ACTION_FIELDS});
+    return required_struct<HoldAction>(x, {COMMON_ACTION_FIELDS});
+}
+
+static KeyAction::Key required_key(path_value x) {
+    return required_enum<KeyAction::Key>(
+            x, {{"up", KeyAction::Key::UP},
+                {"down", KeyAction::Key::DOWN},
+                {"left", KeyAction::Key::LEFT},
+                {"right", KeyAction::Key::RIGHT},
+                {"fire_1", KeyAction::Key::FIRE_1},
+                {"fire_2", KeyAction::Key::FIRE_2},
+                {"fire_s", KeyAction::Key::FIRE_S},
+                {"warp", KeyAction::Key::WARP},
+                {"select_friend", KeyAction::Key::SELECT_FRIEND},
+                {"select_foe", KeyAction::Key::SELECT_FOE},
+                {"select_base", KeyAction::Key::SELECT_BASE},
+                {"target", KeyAction::Key::TARGET},
+                {"order", KeyAction::Key::ORDER},
+                {"zoom_in", KeyAction::Key::ZOOM_IN},
+                {"zoom_out", KeyAction::Key::ZOOM_OUT},
+                {"comp_up", KeyAction::Key::COMP_UP},
+                {"comp_down", KeyAction::Key::COMP_DOWN},
+                {"comp_accept", KeyAction::Key::COMP_ACCEPT},
+                {"comp_back", KeyAction::Key::COMP_BACK},
+
+                {"comp_message", KeyAction::Key::COMP_MESSAGE},
+                {"comp_special", KeyAction::Key::COMP_SPECIAL},
+                {"comp_build", KeyAction::Key::COMP_BUILD},
+                {"zoom_shortcut", KeyAction::Key::ZOOM_SHORTCUT},
+                {"send_message", KeyAction::Key::SEND_MESSAGE},
+                {"mouse", KeyAction::Key::MOUSE}});
 }
 
 static Action key_action(path_value x) {
     return required_struct<KeyAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable", {&KeyAction::enable, optional_keys}},
-                {"disable", {&KeyAction::disable, optional_keys}}});
+                {"enable", {&KeyAction::enable, optional_array<KeyAction::Key, required_key>}},
+                {"disable", {&KeyAction::disable, optional_array<KeyAction::Key, required_key>}}});
 }
 
 static KillAction::Kind required_kill_kind(path_value x) {
@@ -413,7 +451,7 @@ static Action land_action(path_value x) {
 static Action message_action(path_value x) {
     return required_struct<MessageAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"id", {&MessageAction::id, required_int}},
+                {"id", {&MessageAction::id, optional_int}},
                 {"pages",
                  {&MessageAction::pages, required_array<pn::string, required_string_copy>}}});
 }
@@ -445,7 +483,8 @@ static Action move_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"origin", {&MoveAction::origin, optional_origin, MoveAction::Origin::LEVEL}},
                 {"to", {&MoveAction::to, optional_coord_point, coordPointType{0, 0}}},
-                {"distance", {&MoveAction::distance, optional_int, 0}}});
+                {"distance", {&MoveAction::distance, optional_int, 0}},
+                {"within", {&MoveAction::within, required_within}}});
 }
 
 static Action occupy_action(path_value x) {
@@ -483,7 +522,9 @@ static Action push_action(path_value x) {
 static Action reveal_action(path_value x) {
     return required_struct<RevealAction>(
             x,
-            {COMMON_ACTION_FIELDS, {"which", {&RevealAction::initial, required_initial_range}}});
+            {COMMON_ACTION_FIELDS,
+             {"initial",
+              {&RevealAction::initial, required_array<Handle<const Initial>, required_initial>}}});
 }
 
 static Action score_action(path_value x) {

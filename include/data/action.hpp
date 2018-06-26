@@ -28,6 +28,7 @@
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/range.hpp"
+#include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -77,10 +78,13 @@ enum class ActionType {
     ZOOM,
 };
 
+enum class Within { CIRCLE, SQUARE };
+
 struct ActionBase {
     ActionType type;
 
-    bool reflexive;  // does it apply to object executing verb?
+    bool reflexive        = false;  // does it apply to object executing verb?
+    bool check_conditions = false;  // re-check conditions after executing?
 
     struct Filter {
         uint32_t                   attributes = 0;
@@ -120,8 +124,8 @@ struct CaptureAction : public ActionBase {
 struct CloakAction : public ActionBase {};
 
 struct ConditionAction : public ActionBase {
-    HandleList<const Condition> enable;
-    HandleList<const Condition> disable;
+    std::vector<Handle<const Condition>> enable;
+    std::vector<Handle<const Condition>> disable;
 };
 
 struct CreateAction : public ActionBase {
@@ -129,7 +133,8 @@ struct CreateAction : public ActionBase {
     Range<int64_t>                count              = {1, 2};  // # to make randomly
     bool                          relative_velocity  = false;   // is velocity relative to creator?
     bool                          relative_direction = false;   // determines initial heading
-    int64_t                       distance = 0;      // create at this distance in random direction
+    int64_t                       distance = 0;  // create at this distance in random direction
+    Within                        within   = Within::CIRCLE;
     bool                          inherit  = false;  // if false, gets creator as target
                                                      // if true, gets creator’s target as target
     bool legacy_random = false;                      // if true, consume a random number from
@@ -154,20 +159,48 @@ struct FireAction : public ActionBase {
 };
 
 struct FlashAction : public ActionBase {
-    int64_t length;  // length of color flash
-    Hue     hue;     // hue of flash
-    uint8_t shade;   // brightness of flash
+    ticks    duration;  // length of flash
+    RgbColor color;     // color of flash
 };
 
 struct HealAction : public ActionBase {
     int64_t value;
 };
 
-struct HoldPositionAction : public ActionBase {};
+struct HoldAction : public ActionBase {};
 
 struct KeyAction : public ActionBase {
-    uint32_t disable = 0;  // keys to disable
-    uint32_t enable  = 0;  // keys to enable
+    enum class Key {
+        UP            = 0,
+        DOWN          = 1,
+        LEFT          = 2,
+        RIGHT         = 3,
+        FIRE_1        = 4,
+        FIRE_2        = 5,
+        FIRE_S        = 6,
+        WARP          = 0,
+        SELECT_FRIEND = 8,
+        SELECT_FOE    = 9,
+        SELECT_BASE   = 10,
+        TARGET        = 11,
+        ORDER         = 12,
+        ZOOM_IN       = 13,
+        ZOOM_OUT      = 14,
+        COMP_UP       = 15,
+        COMP_DOWN     = 16,
+        COMP_ACCEPT   = 17,
+        COMP_BACK     = 18,
+
+        COMP_MESSAGE  = 26,
+        COMP_SPECIAL  = 27,
+        COMP_BUILD    = 28,
+        ZOOM_SHORTCUT = 29,
+        SEND_MESSAGE  = 30,
+        MOUSE         = 31,
+    };
+
+    std::vector<Key> disable;  // keys to disable
+    std::vector<Key> enable;   // keys to enable
 };
 
 struct KillAction : public ActionBase {
@@ -189,7 +222,7 @@ struct LandAction : public ActionBase {
 };
 
 struct MessageAction : public ActionBase {
-    int64_t                 id;     // identifies the message to a "message" condition
+    sfz::optional<int64_t>  id;     // identifies the message to a "message" condition
     std::vector<pn::string> pages;  // pages of message bodies to show
 };
 
@@ -206,6 +239,7 @@ struct MoveAction : public ActionBase {
     } origin;
     coordPointType to;
     int64_t        distance;
+    Within         within;
 };
 
 struct OccupyAction : public ActionBase {
@@ -231,7 +265,7 @@ struct PushAction : public ActionBase {
 };
 
 struct RevealAction : public ActionBase {
-    HandleList<const Initial> initial;
+    std::vector<Handle<const Initial>> initial;
 };
 
 struct ScoreAction : public ActionBase {
@@ -292,40 +326,40 @@ union Action {
     ActionBase base;
     Type       type() const;
 
-    AgeAction          age;
-    AssumeAction       assume;
-    CapSpeedAction     cap_speed;
-    CaptureAction      capture;
-    CloakAction        cloak;
-    ConditionAction    condition;
-    CreateAction       create;
-    DisableAction      disable;
-    EnergizeAction     energize;
-    EquipAction        equip;
-    FireAction         fire;
-    FlashAction        flash;
-    HealAction         heal;
-    HoldPositionAction hold_position;
-    KeyAction          key;
-    KillAction         kill;
-    LandAction         land;
-    MessageAction      message;
-    MorphAction        morph;
-    MoveAction         move;
-    OccupyAction       occupy;
-    OrderAction        order;
-    PayAction          pay;
-    PushAction         push;
-    RevealAction       reveal;
-    ScoreAction        score;
-    SelectAction       select;
-    PlayAction         play;
-    SparkAction        spark;
-    SpinAction         spin;
-    ThrustAction       thrust;
-    WarpAction         warp;
-    WinAction          win;
-    ZoomAction         zoom;
+    AgeAction       age;
+    AssumeAction    assume;
+    CapSpeedAction  cap_speed;
+    CaptureAction   capture;
+    CloakAction     cloak;
+    ConditionAction condition;
+    CreateAction    create;
+    DisableAction   disable;
+    EnergizeAction  energize;
+    EquipAction     equip;
+    FireAction      fire;
+    FlashAction     flash;
+    HealAction      heal;
+    HoldAction      hold;
+    KeyAction       key;
+    KillAction      kill;
+    LandAction      land;
+    MessageAction   message;
+    MorphAction     morph;
+    MoveAction      move;
+    OccupyAction    occupy;
+    OrderAction     order;
+    PayAction       pay;
+    PushAction      push;
+    RevealAction    reveal;
+    ScoreAction     score;
+    SelectAction    select;
+    PlayAction      play;
+    SparkAction     spark;
+    SpinAction      spin;
+    ThrustAction    thrust;
+    WarpAction      warp;
+    WinAction       win;
+    ZoomAction      zoom;
 
     Action(AgeAction a);
     Action(AssumeAction a);
@@ -340,7 +374,7 @@ union Action {
     Action(FireAction a);
     Action(FlashAction a);
     Action(HealAction a);
-    Action(HoldPositionAction a);
+    Action(HoldAction a);
     Action(KeyAction a);
     Action(KillAction a);
     Action(LandAction a);

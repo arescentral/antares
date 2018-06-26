@@ -100,6 +100,7 @@ Handle<Admiral>                         required_admiral(path_value x);
 NamedHandle<const BaseObject>           required_base(path_value x);
 sfz::optional<Handle<const Initial>>    optional_initial(path_value x);
 Handle<const Initial>                   required_initial(path_value x);
+Handle<const Condition>                 required_condition(path_value x);
 sfz::optional<NamedHandle<const Level>> optional_level(path_value x);
 sfz::optional<Owner>                    optional_owner(path_value x);
 Owner                                   required_owner(path_value x);
@@ -111,8 +112,6 @@ sfz::optional<Range<Fixed>>   optional_fixed_range(path_value x);
 Range<Fixed>                  required_fixed_range(path_value x);
 sfz::optional<Range<ticks>>   optional_ticks_range(path_value x);
 Range<ticks>                  required_ticks_range(path_value x);
-HandleList<const Condition>   optional_condition_range(path_value x);
-HandleList<const Initial>     required_initial_range(path_value x);
 
 sfz::optional<Point> optional_point(path_value x);
 Point                required_point(path_value x);
@@ -126,8 +125,6 @@ sfz::optional<Hue> optional_hue(path_value x);
 Hue                required_hue(path_value x);
 Screen             required_screen(path_value x);
 Zoom               required_zoom(path_value x);
-
-uint32_t optional_keys(path_value x);
 
 template <typename T, int N>
 sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
