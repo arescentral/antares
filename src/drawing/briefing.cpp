@@ -433,12 +433,12 @@ BriefPointInfo BriefPoint_Data_Get(
     info.content   = brief.content.copy();
     info.highlight = Rect{};
 
-    if (brief.object.get()) {
+    if (brief.initial.get()) {
         Point   where;
         Rect    spriteRect;
         int32_t thisScale;
         GetInitialObjectSpriteData(
-                brief.object, maxSize, bounds, corner, scale, &thisScale, &where, &spriteRect);
+                brief.initial, maxSize, bounds, corner, scale, &thisScale, &where, &spriteRect);
         info.highlight = spriteRect;
         info.highlight.inset(-2, -2);
     }

@@ -26,7 +26,7 @@ namespace antares {
 Briefing briefing(path_value x) {
     return required_struct<Briefing>(
             x, {
-                       {"object", {&Briefing::object, optional_initial, Initial::none()}},
+                       {"initial", {&Briefing::initial, optional_initial, Initial::none()}},
                        {"title", {&Briefing::title, required_string_copy}},
                        {"content", {&Briefing::content, required_string_copy}},
                });
