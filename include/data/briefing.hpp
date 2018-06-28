@@ -29,7 +29,7 @@ class path_value;
 struct Initial;
 
 struct Briefing {
-    Handle<const Initial> object;   // Object to focus on, or none for freestanding.
+    Handle<const Initial> initial;  // Object to focus on, or none for freestanding.
     pn::string            title;    // Plain text, used for title bar.
     pn::string            content;  // Styled text, used for body.
 };
