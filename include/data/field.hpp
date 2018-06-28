@@ -36,7 +36,7 @@ namespace antares {
 
 struct Level;
 struct Initial;
-union Condition;
+struct Condition;
 struct Race;
 
 class path_value {

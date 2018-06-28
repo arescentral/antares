@@ -189,35 +189,35 @@ static bool is_true(const TimeCondition& c) {
 
 static bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.value); }
 
-static bool is_true(const Condition& c) {
+static bool is_true(const Condition::When& c) {
     switch (c.type()) {
-        case Condition::Type::AUTOPILOT: return is_true(c.autopilot);
-        case Condition::Type::BUILDING: return is_true(c.building);
-        case Condition::Type::COMPUTER: return is_true(c.computer);
-        case Condition::Type::COUNTER: return is_true(c.counter);
-        case Condition::Type::DESTROYED: return is_true(c.destroyed);
-        case Condition::Type::DISTANCE: return is_true(c.distance);
-        case Condition::Type::HEALTH: return is_true(c.health);
-        case Condition::Type::MESSAGE: return is_true(c.message);
-        case Condition::Type::OWNER: return is_true(c.owner);
-        case Condition::Type::SHIPS: return is_true(c.ships);
-        case Condition::Type::SPEED: return is_true(c.speed);
-        case Condition::Type::SUBJECT: return is_true(c.subject);
-        case Condition::Type::TARGET: return is_true(c.target);
-        case Condition::Type::TIME: return is_true(c.time);
-        case Condition::Type::ZOOM: return is_true(c.zoom);
+        case Condition::When::Type::AUTOPILOT: return is_true(c.autopilot);
+        case Condition::When::Type::BUILDING: return is_true(c.building);
+        case Condition::When::Type::COMPUTER: return is_true(c.computer);
+        case Condition::When::Type::COUNTER: return is_true(c.counter);
+        case Condition::When::Type::DESTROYED: return is_true(c.destroyed);
+        case Condition::When::Type::DISTANCE: return is_true(c.distance);
+        case Condition::When::Type::HEALTH: return is_true(c.health);
+        case Condition::When::Type::MESSAGE: return is_true(c.message);
+        case Condition::When::Type::OWNER: return is_true(c.owner);
+        case Condition::When::Type::SHIPS: return is_true(c.ships);
+        case Condition::When::Type::SPEED: return is_true(c.speed);
+        case Condition::When::Type::SUBJECT: return is_true(c.subject);
+        case Condition::When::Type::TARGET: return is_true(c.target);
+        case Condition::When::Type::TIME: return is_true(c.time);
+        case Condition::When::Type::ZOOM: return is_true(c.zoom);
     }
 }
 
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {
         int index = (&c - g.level->conditions.data());
-        if ((g.condition_enabled[index] || c.base.persistent) && is_true(c)) {
+        if ((g.condition_enabled[index] || c.persistent) && is_true(c.when)) {
             g.condition_enabled[index] = false;
-            auto  sObject              = GetObjectFromInitialNumber(c.base.subject);
-            auto  dObject              = GetObjectFromInitialNumber(c.base.object);
+            auto  sObject              = GetObjectFromInitialNumber(c.subject);
+            auto  dObject              = GetObjectFromInitialNumber(c.object);
             Point offset;
-            exec(c.base.action, sObject, dObject, &offset);
+            exec(c.action, sObject, dObject, &offset);
         }
     }
 }

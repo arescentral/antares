@@ -55,13 +55,8 @@ enum class ConditionType {
 enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
 
 struct ConditionBase {
-    ConditionType         type;
-    ConditionOp           op         = ConditionOp::EQ;
-    bool                  disabled   = false;
-    bool                  persistent = false;
-    Handle<const Initial> subject;
-    Handle<const Initial> object;
-    std::vector<Action>   action;
+    ConditionType type;
+    ConditionOp   op = ConditionOp::EQ;
 };
 
 // Ops: EQ, NE
@@ -199,47 +194,57 @@ struct ZoomCondition : ConditionBase {
     Zoom value;
 };
 
-union Condition {
-    using Type = ConditionType;
+struct Condition {
+    bool disabled   = false;
+    bool persistent = false;
 
-    ConditionBase base;
-    ConditionType type() const;
+    union When {
+        using Type = ConditionType;
 
-    AutopilotCondition autopilot;
-    BuildingCondition  building;
-    ComputerCondition  computer;
-    CounterCondition   counter;
-    DestroyedCondition destroyed;
-    DistanceCondition  distance;
-    HealthCondition    health;
-    MessageCondition   message;
-    OwnerCondition     owner;
-    ShipsCondition     ships;
-    SpeedCondition     speed;
-    SubjectCondition   subject;
-    TargetCondition    target;
-    TimeCondition      time;
-    ZoomCondition      zoom;
+        ConditionBase base;
+        ConditionType type() const;
 
-    Condition(AutopilotCondition c);
-    Condition(BuildingCondition c);
-    Condition(ComputerCondition c);
-    Condition(CounterCondition c);
-    Condition(DestroyedCondition c);
-    Condition(DistanceCondition c);
-    Condition(HealthCondition c);
-    Condition(MessageCondition c);
-    Condition(OwnerCondition c);
-    Condition(ShipsCondition c);
-    Condition(SpeedCondition c);
-    Condition(SubjectCondition c);
-    Condition(TargetCondition c);
-    Condition(TimeCondition c);
-    Condition(ZoomCondition c);
+        AutopilotCondition autopilot;
+        BuildingCondition  building;
+        ComputerCondition  computer;
+        CounterCondition   counter;
+        DestroyedCondition destroyed;
+        DistanceCondition  distance;
+        HealthCondition    health;
+        MessageCondition   message;
+        OwnerCondition     owner;
+        ShipsCondition     ships;
+        SpeedCondition     speed;
+        SubjectCondition   subject;
+        TargetCondition    target;
+        TimeCondition      time;
+        ZoomCondition      zoom;
 
-    ~Condition();
-    Condition(Condition&&);
-    Condition& operator=(Condition&&);
+        When();
+        When(AutopilotCondition c);
+        When(BuildingCondition c);
+        When(ComputerCondition c);
+        When(CounterCondition c);
+        When(DestroyedCondition c);
+        When(DistanceCondition c);
+        When(HealthCondition c);
+        When(MessageCondition c);
+        When(OwnerCondition c);
+        When(ShipsCondition c);
+        When(SpeedCondition c);
+        When(SubjectCondition c);
+        When(TargetCondition c);
+        When(TimeCondition c);
+        When(ZoomCondition c);
+
+        ~When();
+        When(When&&);
+        When& operator=(When&&);
+    } when;
+
+    Handle<const Initial> subject;
+    Handle<const Initial> object;
+    std::vector<Action>   action;
 
     static const Condition*            get(int n);
     static HandleList<const Condition> all();

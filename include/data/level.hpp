@@ -35,7 +35,7 @@
 namespace antares {
 
 struct Briefing;
-union Condition;
+struct Condition;
 struct Initial;
 struct Race;
 
