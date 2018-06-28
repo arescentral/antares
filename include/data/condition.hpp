@@ -108,22 +108,24 @@ struct DestroyedCondition : ConditionBase {
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `subject` and `object` exist; `subject` and `object` are not “extremely” distant.
-// Compares distance between `subject` and `object` to `value`.
+// Precondition: `from` and `to` exist.
+// Compares distance between `from` and `to` to `value`.
 //
-// TODO(sfiera): provide a definition of “distance” in this context, and especially what
-// “extremely” distant means.
+// TODO(sfiera): provide a definition of “distance” in this context.
 struct DistanceCondition : ConditionBase {
-    int64_t value;
+    Handle<const Initial> from;
+    Handle<const Initial> to;
+    int64_t               value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Compares health fraction of `subject` (e.g. 0.5 for half health) to `value`.
+// Compares health fraction of `initial` (e.g. 0.5 for half health) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
-    double value;
+    Handle<const Initial> initial;
+    double                value;
 };
 
 // Ops: EQ, NE
@@ -136,10 +138,11 @@ struct MessageCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
-// Precondition: `subject` exists.
-// Compares owner of `subject` to `player`.
+// Precondition: `initial` exists.
+// Compares owner of `initial` to `player`.
 struct OwnerCondition : ConditionBase {
-    Handle<Admiral> player;
+    Handle<const Initial> initial;
+    Handle<Admiral>       player;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -150,29 +153,34 @@ struct ShipsCondition : ConditionBase {
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `subject` exists.
-// Compares speed of `subject` to `value`.
+// Precondition: `initial` exists.
+// Compares speed of `initial` to `value`.
 struct SpeedCondition : ConditionBase {
-    Fixed value;
+    Handle<const Initial> initial;
+    Fixed                 value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `subject` exists.
-// Compares `subject` to the control, target, or flagship of the player, per `value`.
+// Precondition: `initial` exists.
+// Compares `initial` to the control, target, or flagship of the player, per `value`.
 struct SubjectCondition : ConditionBase {
     enum class Value { CONTROL, TARGET, FLAGSHIP };
 
-    Handle<Admiral> player;
-    Value           value;
+    Handle<const Initial> initial;
+    Handle<Admiral>       player;
+    Value                 value;
 };
 
 // Ops: EQ, NE
-// Precondition: `subject` and `object` exist.
-// Compares target of `subject` to `object`.
-struct TargetCondition : ConditionBase {};
+// Precondition: `initial` and `target` exist.
+// Compares target of `initial` to `target`.
+struct TargetCondition : ConditionBase {
+    Handle<const Initial> initial;
+    Handle<const Initial> target;
+};
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Compares `subject` to the control, target, or flagship of the local player, per `value`.
+// Compares `initial` to the control, target, or flagship of the local player, per `value`.
 //
 // Note: On a level that specifies a `start_time`, the setup time counts for only 1/3 as much as
 // time after the

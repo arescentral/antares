@@ -107,8 +107,8 @@ static bool is_true(const DestroyedCondition& c) {
 }
 
 static bool is_true(const DistanceCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
-    auto dObject = GetObjectFromInitialNumber(c.object);
+    auto sObject = GetObjectFromInitialNumber(c.from);
+    auto dObject = GetObjectFromInitialNumber(c.to);
     if (sObject.get() && dObject.get()) {
         int64_t xdist = ABS<int>(sObject->location.h - dObject->location.h);
         int64_t ydist = ABS<int>(sObject->location.v - dObject->location.v);
@@ -118,7 +118,7 @@ static bool is_true(const DistanceCondition& c) {
 }
 
 static bool is_true(const HealthCondition& c) {
-    auto   sObject = GetObjectFromInitialNumber(c.subject);
+    auto   sObject = GetObjectFromInitialNumber(c.initial);
     double health  = 0.0;
     if (sObject.get()) {
         health = sObject->health();
@@ -138,7 +138,7 @@ static bool is_true(const MessageCondition& c) {
 }
 
 static bool is_true(const OwnerCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto sObject = GetObjectFromInitialNumber(c.initial);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
 }
 
@@ -147,13 +147,13 @@ static bool is_true(const ShipsCondition& c) {
 }
 
 static bool is_true(const SpeedCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto sObject = GetObjectFromInitialNumber(c.initial);
     return sObject.get() &&
            op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
 }
 
 static bool is_true(const SubjectCondition& c) {
-    auto o = GetObjectFromInitialNumber(c.subject);
+    auto o = GetObjectFromInitialNumber(c.initial);
     if (!(c.player.get() && o.get())) {
         return false;
     }
@@ -165,8 +165,8 @@ static bool is_true(const SubjectCondition& c) {
 }
 
 static bool is_true(const TargetCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
-    auto dObject = GetObjectFromInitialNumber(c.object);
+    auto sObject = GetObjectFromInitialNumber(c.initial);
+    auto dObject = GetObjectFromInitialNumber(c.target);
     return sObject.get() && dObject.get() &&
            op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
                  std::make_pair(dObject, dObject->id));

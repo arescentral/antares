@@ -167,12 +167,17 @@ static Condition destroyed_condition(path_value x) {
 
 static Condition distance_condition(path_value x) {
     return required_struct<DistanceCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"value", {&DistanceCondition::value, required_int}}});
+            x, {COMMON_CONDITION_FIELDS,
+                {"value", {&DistanceCondition::value, required_int}},
+                {"from", {&DistanceCondition::from, required_initial}},
+                {"to", {&DistanceCondition::to, required_initial}}});
 }
 
 static Condition health_condition(path_value x) {
     return required_struct<HealthCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"value", {&HealthCondition::value, required_double}}});
+            x, {COMMON_CONDITION_FIELDS,
+                {"value", {&HealthCondition::value, required_double}},
+                {"initial", {&HealthCondition::initial, required_initial}}});
 }
 
 static Condition message_condition(path_value x) {
@@ -185,7 +190,9 @@ static Condition message_condition(path_value x) {
 
 static Condition owner_condition(path_value x) {
     return required_struct<OwnerCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"player", {&OwnerCondition::player, required_admiral}}});
+            x, {COMMON_CONDITION_FIELDS,
+                {"player", {&OwnerCondition::player, required_admiral}},
+                {"initial", {&OwnerCondition::initial, required_initial}}});
 }
 
 static Condition ships_condition(path_value x) {
@@ -197,7 +204,9 @@ static Condition ships_condition(path_value x) {
 
 static Condition speed_condition(path_value x) {
     return required_struct<SpeedCondition>(
-            x, {COMMON_CONDITION_FIELDS, {"value", {&SpeedCondition::value, required_fixed}}});
+            x, {COMMON_CONDITION_FIELDS,
+                {"value", {&SpeedCondition::value, required_fixed}},
+                {"initial", {&SpeedCondition::initial, required_initial}}});
 }
 
 static SubjectCondition::Value required_subject_value(path_value x) {
@@ -210,12 +219,16 @@ static SubjectCondition::Value required_subject_value(path_value x) {
 static Condition subject_condition(path_value x) {
     return required_struct<SubjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"initial", {&SubjectCondition::initial, required_initial}},
                 {"player", {&SubjectCondition::player, required_admiral}},
                 {"value", {&SubjectCondition::value, required_subject_value}}});
 }
 
 static Condition target_condition(path_value x) {
-    return required_struct<TargetCondition>(x, {COMMON_CONDITION_FIELDS});
+    return required_struct<TargetCondition>(
+            x, {COMMON_CONDITION_FIELDS,
+                {"initial", {&TargetCondition::initial, required_initial}},
+                {"target", {&TargetCondition::target, required_initial}}});
 }
 
 static Condition time_condition(path_value x) {
