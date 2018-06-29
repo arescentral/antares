@@ -24,53 +24,6 @@
 
 namespace antares {
 
-static ObjectRef required_object_ref(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
-    }
-
-    pn::map_cref m = x.value().as_map();
-    if (m.size() != 1) {
-        throw std::runtime_error(pn::format("{0}must have single element", x.prefix()).c_str());
-    }
-    pn::key_value_cref kv = *m.begin();
-
-    ObjectRef o;
-    if (kv.key() == "initial") {
-        o.type = ObjectRef::Type::INITIAL;
-    } else if (kv.key() == "flagship") {
-        o.type = ObjectRef::Type::FLAGSHIP;
-    } else if (kv.key() == "control") {
-        o.type = ObjectRef::Type::CONTROL;
-    } else if (kv.key() == "target") {
-        o.type = ObjectRef::Type::TARGET;
-    } else {
-        throw std::runtime_error(pn::format(
-                                         "{0}key must be one of [\"initial\", \"flagship\", "
-                                         "\"control\", \"target\"]",
-                                         x.prefix())
-                                         .c_str());
-    }
-
-    switch (o.type) {
-        case ObjectRef::Type::INITIAL: o.initial = required_initial(m.get("initial")); break;
-        case ObjectRef::Type::FLAGSHIP: o.admiral = required_admiral(m.get("flagship")); break;
-        case ObjectRef::Type::CONTROL: o.admiral = required_admiral(m.get("control")); break;
-        case ObjectRef::Type::TARGET: o.admiral = required_admiral(m.get("target")); break;
-    }
-    return o;
-}
-
-static sfz::optional<ObjectRef> optional_object_ref(path_value x) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_map()) {
-        return sfz::make_optional(required_object_ref(x));
-    } else {
-        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
-    }
-}
-
 // clang-format off
 #define COMMON_CONDITION_FIELDS                                                                   \
             {"type", {&ConditionBase::type, required_condition_type}},                            \

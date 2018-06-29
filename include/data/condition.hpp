@@ -25,6 +25,7 @@
 
 #include "data/enums.hpp"
 #include "data/handle.hpp"
+#include "data/object-ref.hpp"
 #include "math/fixed.hpp"
 #include "math/units.hpp"
 
@@ -33,12 +34,6 @@ namespace antares {
 union Action;
 struct Initial;
 class path_value;
-
-struct ObjectRef {
-    enum class Type { INITIAL, FLAGSHIP, CONTROL, TARGET } type;
-    Handle<const Initial> initial;
-    Handle<Admiral>       admiral;
-};
 
 enum class ConditionType {
     AUTOPILOT,

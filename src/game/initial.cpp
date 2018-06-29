@@ -215,4 +215,21 @@ Handle<SpaceObject> GetObjectFromInitialNumber(Handle<const Initial> initial) {
     return SpaceObject::none();
 }
 
+Handle<SpaceObject> resolve_object_ref(const ObjectRef& ref) {
+    switch (ref.type) {
+        case ObjectRef::Type::INITIAL: return GetObjectFromInitialNumber(ref.initial);
+        case ObjectRef::Type::FLAGSHIP: return ref.admiral->flagship();
+        case ObjectRef::Type::CONTROL: return ref.admiral->control();
+        case ObjectRef::Type::TARGET: return ref.admiral->target();
+    }
+}
+
+Handle<SpaceObject> resolve_object_ref(const sfz::optional<ObjectRef>& ref) {
+    if (ref.has_value()) {
+        return resolve_object_ref(*ref);
+    } else {
+        return SpaceObject::none();
+    }
+}
+
 }  // namespace antares

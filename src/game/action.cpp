@@ -777,11 +777,11 @@ static void execute_actions(
 
         auto subject = original_subject;
         if (action.base.override_.subject.has_value()) {
-            subject = GetObjectFromInitialNumber(*action.base.override_.subject);
+            subject = resolve_object_ref(*action.base.override_.subject);
         }
         auto object = original_object;
         if (action.base.override_.object.has_value()) {
-            object = GetObjectFromInitialNumber(*action.base.override_.object);
+            object = resolve_object_ref(*action.base.override_.object);
         }
 
         if ((action.base.delay > ticks(0)) && allowDelay) {

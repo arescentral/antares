@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2016-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,25 +16,27 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_GAME_INITIAL_HPP_
-#define ANTARES_GAME_INITIAL_HPP_
-
-#include <sfz/sfz.hpp>
+#ifndef ANTARES_DATA_OBJECT_REF_HPP_
+#define ANTARES_DATA_OBJECT_REF_HPP_
 
 #include "data/handle.hpp"
+
+#include <sfz/sfz.hpp>
 
 namespace antares {
 
 struct Initial;
-struct ObjectRef;
+class path_value;
 
-void                create_initial(Handle<const Initial> initial);
-void                set_initial_destination(Handle<const Initial> initial, bool preserve);
-void                UnhideInitialObject(Handle<const Initial> initial);
-Handle<SpaceObject> GetObjectFromInitialNumber(Handle<const Initial> initial);
-Handle<SpaceObject> resolve_object_ref(const ObjectRef& ref);
-Handle<SpaceObject> resolve_object_ref(const sfz::optional<ObjectRef>& ref);
+struct ObjectRef {
+    enum class Type { INITIAL, FLAGSHIP, CONTROL, TARGET } type;
+    Handle<const Initial> initial;
+    Handle<Admiral>       admiral;
+};
+
+ObjectRef                required_object_ref(path_value x);
+sfz::optional<ObjectRef> optional_object_ref(path_value x);
 
 }  // namespace antares
 
-#endif  // ANTARES_GAME_INITIAL_HPP_
+#endif  // ANTARES_DATA_OBJECT_REF_HPP_
