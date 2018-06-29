@@ -35,9 +35,9 @@ struct Initial;
 class path_value;
 
 struct ObjectRef {
-    enum class Type { INITIAL, FLAGSHIP } type;
+    enum class Type { INITIAL, FLAGSHIP, CONTROL, TARGET } type;
     Handle<const Initial> initial;
-    Handle<Admiral>       flagship;
+    Handle<Admiral>       admiral;
 };
 
 enum class ConditionType {
@@ -49,10 +49,10 @@ enum class ConditionType {
     DISTANCE,
     HEALTH,
     MESSAGE,
+    OBJECT,
     OWNER,
     SHIPS,
     SPEED,
-    SUBJECT,
     TARGET,
     TIME,
     ZOOM,
@@ -139,6 +139,13 @@ struct MessageCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
+// Precondition: `a` and `b` exist.
+// Compares `a` to `b`.
+struct ObjectCondition : ConditionBase {
+    ObjectRef a, b;
+};
+
+// Ops: EQ, NE
 // Precondition: `initial` exists.
 // Compares owner of `initial` to `player`.
 struct OwnerCondition : ConditionBase {
@@ -159,17 +166,6 @@ struct ShipsCondition : ConditionBase {
 struct SpeedCondition : ConditionBase {
     ObjectRef initial;
     Fixed     value;
-};
-
-// Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `initial` exists.
-// Compares `initial` to the control, target, or flagship of the player, per `value`.
-struct SubjectCondition : ConditionBase {
-    enum class Value { CONTROL, TARGET, FLAGSHIP };
-
-    ObjectRef       initial;
-    Handle<Admiral> player;
-    Value           value;
 };
 
 // Ops: EQ, NE
@@ -218,10 +214,10 @@ struct Condition {
         DistanceCondition  distance;
         HealthCondition    health;
         MessageCondition   message;
+        ObjectCondition    object;
         OwnerCondition     owner;
         ShipsCondition     ships;
         SpeedCondition     speed;
-        SubjectCondition   subject;
         TargetCondition    target;
         TimeCondition      time;
         ZoomCondition      zoom;
@@ -235,10 +231,10 @@ struct Condition {
         When(DistanceCondition c);
         When(HealthCondition c);
         When(MessageCondition c);
+        When(ObjectCondition c);
         When(OwnerCondition c);
         When(ShipsCondition c);
         When(SpeedCondition c);
-        When(SubjectCondition c);
         When(TargetCondition c);
         When(TimeCondition c);
         When(ZoomCondition c);

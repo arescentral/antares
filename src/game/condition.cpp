@@ -46,7 +46,9 @@ HandleList<const Condition> Condition::all() {
 static Handle<SpaceObject> resolve_object_ref(const ObjectRef& ref) {
     switch (ref.type) {
         case ObjectRef::Type::INITIAL: return GetObjectFromInitialNumber(ref.initial);
-        case ObjectRef::Type::FLAGSHIP: return ref.flagship->flagship();
+        case ObjectRef::Type::FLAGSHIP: return ref.admiral->flagship();
+        case ObjectRef::Type::CONTROL: return ref.admiral->control();
+        case ObjectRef::Type::TARGET: return ref.admiral->target();
     }
 }
 
@@ -152,6 +154,15 @@ static bool is_true(const MessageCondition& c) {
             std::make_pair(c.id, c.page - 1));
 }
 
+static bool is_true(const ObjectCondition& c) {
+    auto a = resolve_object_ref(c.a);
+    auto b = resolve_object_ref(c.b);
+    if (!(a.get() && b.get())) {
+        return false;
+    }
+    return op_eq(c.op, a, b);
+}
+
 static bool is_true(const OwnerCondition& c) {
     auto sObject = resolve_object_ref(c.initial);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
@@ -165,18 +176,6 @@ static bool is_true(const SpeedCondition& c) {
     auto sObject = resolve_object_ref(c.initial);
     return sObject.get() &&
            op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
-}
-
-static bool is_true(const SubjectCondition& c) {
-    auto o = resolve_object_ref(c.initial);
-    if (!(c.player.get() && o.get())) {
-        return false;
-    }
-    switch (c.value) {
-        case SubjectCondition::Value::CONTROL: return op_eq(c.op, o, c.player->control());
-        case SubjectCondition::Value::TARGET: return op_eq(c.op, o, c.player->target());
-        case SubjectCondition::Value::FLAGSHIP: return op_eq(c.op, o, c.player->flagship());
-    }
 }
 
 static bool is_true(const TargetCondition& c) {
@@ -214,10 +213,10 @@ static bool is_true(const Condition::When& c) {
         case Condition::When::Type::DISTANCE: return is_true(c.distance);
         case Condition::When::Type::HEALTH: return is_true(c.health);
         case Condition::When::Type::MESSAGE: return is_true(c.message);
+        case Condition::When::Type::OBJECT: return is_true(c.object);
         case Condition::When::Type::OWNER: return is_true(c.owner);
         case Condition::When::Type::SHIPS: return is_true(c.ships);
         case Condition::When::Type::SPEED: return is_true(c.speed);
-        case Condition::When::Type::SUBJECT: return is_true(c.subject);
         case Condition::When::Type::TARGET: return is_true(c.target);
         case Condition::When::Type::TIME: return is_true(c.time);
         case Condition::When::Type::ZOOM: return is_true(c.zoom);

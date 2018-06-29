@@ -25,33 +25,40 @@
 namespace antares {
 
 static ObjectRef required_object_ref(path_value x) {
-    if (x.value().is_map()) {
-        pn::map_cref m = x.value().as_map();
-        if (m.size() != 1) {
-            throw std::runtime_error(
-                    pn::format("{0}must have single element", x.prefix()).c_str());
-        }
-        pn::key_value_cref kv = *m.begin();
-        ObjectRef          o;
-        if (kv.key() == "initial") {
-            o.type = ObjectRef::Type::INITIAL;
-        } else if (kv.key() == "flagship") {
-            o.type = ObjectRef::Type::FLAGSHIP;
-        } else {
-            throw std::runtime_error(
-                    pn::format("{0}key must be one of [\"initial\", \"flagship\"]", x.prefix())
-                            .c_str());
-        }
-        switch (o.type) {
-            case ObjectRef::Type::INITIAL: o.initial = required_initial(m.get("initial")); break;
-            case ObjectRef::Type::FLAGSHIP:
-                o.flagship = required_admiral(m.get("flagship"));
-                break;
-        }
-        return o;
-    } else {
+    if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
     }
+
+    pn::map_cref m = x.value().as_map();
+    if (m.size() != 1) {
+        throw std::runtime_error(pn::format("{0}must have single element", x.prefix()).c_str());
+    }
+    pn::key_value_cref kv = *m.begin();
+
+    ObjectRef o;
+    if (kv.key() == "initial") {
+        o.type = ObjectRef::Type::INITIAL;
+    } else if (kv.key() == "flagship") {
+        o.type = ObjectRef::Type::FLAGSHIP;
+    } else if (kv.key() == "control") {
+        o.type = ObjectRef::Type::CONTROL;
+    } else if (kv.key() == "target") {
+        o.type = ObjectRef::Type::TARGET;
+    } else {
+        throw std::runtime_error(pn::format(
+                                         "{0}key must be one of "
+                                         "[\"initial\", \"flagship\", \"control\", \"target\"]",
+                                         x.prefix())
+                                         .c_str());
+    }
+
+    switch (o.type) {
+        case ObjectRef::Type::INITIAL: o.initial = required_initial(m.get("initial")); break;
+        case ObjectRef::Type::FLAGSHIP: o.admiral = required_admiral(m.get("flagship")); break;
+        case ObjectRef::Type::CONTROL: o.admiral = required_admiral(m.get("control")); break;
+        case ObjectRef::Type::TARGET: o.admiral = required_admiral(m.get("target")); break;
+    }
+    return o;
 }
 
 static sfz::optional<ObjectRef> optional_object_ref(path_value x) {
@@ -81,10 +88,10 @@ Condition::When::When(DestroyedCondition a) : destroyed(std::move(a)) {}
 Condition::When::When(DistanceCondition a) : distance(std::move(a)) {}
 Condition::When::When(HealthCondition a) : health(std::move(a)) {}
 Condition::When::When(MessageCondition a) : message(std::move(a)) {}
+Condition::When::When(ObjectCondition a) : object(std::move(a)) {}
 Condition::When::When(OwnerCondition a) : owner(std::move(a)) {}
 Condition::When::When(ShipsCondition a) : ships(std::move(a)) {}
 Condition::When::When(SpeedCondition a) : speed(std::move(a)) {}
-Condition::When::When(SubjectCondition a) : subject(std::move(a)) {}
 Condition::When::When(TargetCondition a) : target(std::move(a)) {}
 Condition::When::When(TimeCondition a) : time(std::move(a)) {}
 Condition::When::When(ZoomCondition a) : zoom(std::move(a)) {}
@@ -100,10 +107,10 @@ Condition::When::When(When&& a) {
         case Condition::When::Type::HEALTH: new (this) When(std::move(a.health)); break;
         case Condition::When::Type::MESSAGE: new (this) When(std::move(a.message)); break;
         case Condition::When::Type::TARGET: new (this) When(std::move(a.target)); break;
+        case Condition::When::Type::OBJECT: new (this) When(std::move(a.object)); break;
         case Condition::When::Type::OWNER: new (this) When(std::move(a.owner)); break;
         case Condition::When::Type::SHIPS: new (this) When(std::move(a.ships)); break;
         case Condition::When::Type::SPEED: new (this) When(std::move(a.speed)); break;
-        case Condition::When::Type::SUBJECT: new (this) When(std::move(a.subject)); break;
         case Condition::When::Type::TIME: new (this) When(std::move(a.time)); break;
         case Condition::When::Type::ZOOM: new (this) When(std::move(a.zoom)); break;
     }
@@ -125,10 +132,10 @@ Condition::When::~When() {
         case Condition::When::Type::DISTANCE: distance.~DistanceCondition(); break;
         case Condition::When::Type::HEALTH: health.~HealthCondition(); break;
         case Condition::When::Type::MESSAGE: message.~MessageCondition(); break;
+        case Condition::When::Type::OBJECT: object.~ObjectCondition(); break;
         case Condition::When::Type::OWNER: owner.~OwnerCondition(); break;
         case Condition::When::Type::SHIPS: ships.~ShipsCondition(); break;
         case Condition::When::Type::SPEED: speed.~SpeedCondition(); break;
-        case Condition::When::Type::SUBJECT: subject.~SubjectCondition(); break;
         case Condition::When::Type::TARGET: target.~TargetCondition(); break;
         case Condition::When::Type::TIME: time.~TimeCondition(); break;
         case Condition::When::Type::ZOOM: zoom.~ZoomCondition(); break;
@@ -148,7 +155,7 @@ static Condition::When::Type required_condition_type(path_value x) {
                 {"owner", Condition::When::Type::OWNER},
                 {"ships", Condition::When::Type::SHIPS},
                 {"speed", Condition::When::Type::SPEED},
-                {"subject", Condition::When::Type::SUBJECT},
+                {"object", Condition::When::Type::OBJECT},
                 {"target", Condition::When::Type::TARGET},
                 {"time", Condition::When::Type::TIME},
                 {"zoom", Condition::When::Type::ZOOM}});
@@ -245,19 +252,11 @@ static Condition::When speed_condition(path_value x) {
                 {"initial", {&SpeedCondition::initial, required_object_ref}}});
 }
 
-static SubjectCondition::Value required_subject_value(path_value x) {
-    return required_enum<SubjectCondition::Value>(
-            x, {{"control", SubjectCondition::Value::CONTROL},
-                {"target", SubjectCondition::Value::TARGET},
-                {"flagship", SubjectCondition::Value::FLAGSHIP}});
-}
-
-static Condition::When subject_condition(path_value x) {
-    return required_struct<SubjectCondition>(
+static Condition::When object_condition(path_value x) {
+    return required_struct<ObjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"initial", {&SubjectCondition::initial, required_object_ref}},
-                {"player", {&SubjectCondition::player, required_admiral}},
-                {"value", {&SubjectCondition::value, required_subject_value}}});
+                {"a", {&ObjectCondition::a, required_object_ref}},
+                {"b", {&ObjectCondition::b, required_object_ref}}});
 }
 
 static Condition::When target_condition(path_value x) {
@@ -296,10 +295,10 @@ static Condition::When when(path_value x) {
         case Condition::When::Type::HEALTH: return health_condition(x);
         case Condition::When::Type::MESSAGE: return message_condition(x);
         case Condition::When::Type::TARGET: return target_condition(x);
+        case Condition::When::Type::OBJECT: return object_condition(x);
         case Condition::When::Type::OWNER: return owner_condition(x);
         case Condition::When::Type::SHIPS: return ships_condition(x);
         case Condition::When::Type::SPEED: return speed_condition(x);
-        case Condition::When::Type::SUBJECT: return subject_condition(x);
         case Condition::When::Type::TIME: return time_condition(x);
         case Condition::When::Type::ZOOM: return zoom_condition(x);
     }
