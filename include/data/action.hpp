@@ -179,7 +179,7 @@ struct KeyAction : public ActionBase {
         FIRE_1        = 4,
         FIRE_2        = 5,
         FIRE_S        = 6,
-        WARP          = 0,
+        WARP          = 7,
         SELECT_FRIEND = 8,
         SELECT_FOE    = 9,
         SELECT_BASE   = 10,
