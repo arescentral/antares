@@ -57,12 +57,12 @@ enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
 
 struct ConditionBase {
     ConditionType type;
-    ConditionOp   op = ConditionOp::EQ;
 };
 
 // Ops: EQ, NE
 // Compares player’s autopilot state (on = true; off = false) to `value`.
 struct AutopilotCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
     bool            value;
 };
@@ -71,6 +71,7 @@ struct AutopilotCondition : ConditionBase {
 // Precondition: player has a build object.
 // Compares player’s build object state (building = true; not building = false) to `value`.
 struct BuildingCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
     bool            value;
 };
@@ -80,6 +81,7 @@ struct BuildingCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct ComputerCondition : ConditionBase {
+    ConditionOp            op = ConditionOp::EQ;
     Screen                 screen;
     sfz::optional<int64_t> line;
 };
@@ -87,6 +89,7 @@ struct ComputerCondition : ConditionBase {
 // Ops: EQ, NE, LT, GT, LE, GE
 // Compares given counter of given admiral to `value`.
 struct CounterCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
     int64_t         counter;
     int64_t         value;
@@ -97,8 +100,9 @@ struct CounterCondition : ConditionBase {
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
-    ObjectRef what;
-    bool      value;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   what;
+    bool        value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -107,9 +111,10 @@ struct DestroyedCondition : ConditionBase {
 //
 // TODO(sfiera): provide a definition of “distance” in this context.
 struct DistanceCondition : ConditionBase {
-    ObjectRef from;
-    ObjectRef to;
-    int64_t   value;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   from;
+    ObjectRef   to;
+    int64_t     value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -118,8 +123,9 @@ struct DistanceCondition : ConditionBase {
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
-    ObjectRef what;
-    double    value;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   what;
+    double      value;
 };
 
 // Ops: EQ, NE
@@ -127,21 +133,24 @@ struct HealthCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct MessageCondition : ConditionBase {
-    int64_t id;
-    int64_t page;
+    ConditionOp op = ConditionOp::EQ;
+    int64_t     id;
+    int64_t     page;
 };
 
 // Ops: EQ, NE
 // Precondition: `a` and `b` exist.
 // Compares `a` to `b`.
 struct ObjectCondition : ConditionBase {
-    ObjectRef a, b;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   a, b;
 };
 
 // Ops: EQ, NE
 // Precondition: `what` exists.
 // Compares owner of `what` to `player`.
 struct OwnerCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
     ObjectRef       what;
     Handle<Admiral> player;
 };
@@ -149,6 +158,7 @@ struct OwnerCondition : ConditionBase {
 // Ops: EQ, NE, LT, GT, LE, GE
 // Compares ship count of `player` to `value`.
 struct ShipsCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
     int64_t         value;
 };
@@ -157,16 +167,18 @@ struct ShipsCondition : ConditionBase {
 // Precondition: `what` exists.
 // Compares speed of `what` to `value`.
 struct SpeedCondition : ConditionBase {
-    ObjectRef what;
-    Fixed     value;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   what;
+    Fixed       value;
 };
 
 // Ops: EQ, NE
 // Precondition: `what` and `target` exist.
 // Compares target of `what` to `target`.
 struct TargetCondition : ConditionBase {
-    ObjectRef what;
-    ObjectRef target;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   what;
+    ObjectRef   target;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -175,8 +187,9 @@ struct TargetCondition : ConditionBase {
 // `legacy_start_time` specifies an alternate mode where the setup time counts for only 1/3 as much
 // as time after the setup finishes.
 struct TimeCondition : ConditionBase {
-    ticks duration;
-    bool  legacy_start_time;
+    ConditionOp op = ConditionOp::EQ;
+    ticks       duration;
+    bool        legacy_start_time;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -184,7 +197,8 @@ struct TimeCondition : ConditionBase {
 //
 // Warning: not net-safe.
 struct ZoomCondition : ConditionBase {
-    Zoom value;
+    ConditionOp op = ConditionOp::EQ;
+    Zoom        value;
 };
 
 struct Condition {

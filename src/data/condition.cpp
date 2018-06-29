@@ -26,8 +26,7 @@ namespace antares {
 
 // clang-format off
 #define COMMON_CONDITION_FIELDS                                                                   \
-            {"type", {&ConditionBase::type, required_condition_type}},                            \
-            {"op", {&ConditionBase::op, required_condition_op}}
+            {"type", {&ConditionBase::type, required_condition_type}}
 // clang-format on
 
 Condition::When::Type Condition::When::type() const { return base.type; }
@@ -127,6 +126,7 @@ static ConditionOp required_condition_op(path_value x) {
 static Condition::When autopilot_condition(path_value x) {
     return required_struct<AutopilotCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&AutopilotCondition::op, required_condition_op}},
                 {"player", {&AutopilotCondition::player, required_admiral}},
                 {"value", {&AutopilotCondition::value, required_bool}}});
 }
@@ -134,6 +134,7 @@ static Condition::When autopilot_condition(path_value x) {
 static Condition::When building_condition(path_value x) {
     return required_struct<BuildingCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&BuildingCondition::op, required_condition_op}},
                 {"player", {&BuildingCondition::player, required_admiral}},
                 {"value", {&BuildingCondition::value, required_bool}}});
 }
@@ -141,6 +142,7 @@ static Condition::When building_condition(path_value x) {
 static Condition::When computer_condition(path_value x) {
     return required_struct<ComputerCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&ComputerCondition::op, required_condition_op}},
                 {"player", nullptr},
                 {"screen", {&ComputerCondition::screen, required_screen}},
                 {"line", {&ComputerCondition::line, optional_int}}});
@@ -149,6 +151,7 @@ static Condition::When computer_condition(path_value x) {
 static Condition::When counter_condition(path_value x) {
     return required_struct<CounterCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&CounterCondition::op, required_condition_op}},
                 {"player", {&CounterCondition::player, required_admiral}},
                 {"counter", {&CounterCondition::counter, required_int}},
                 {"value", {&CounterCondition::value, required_int}}});
@@ -157,6 +160,7 @@ static Condition::When counter_condition(path_value x) {
 static Condition::When destroyed_condition(path_value x) {
     return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&DestroyedCondition::op, required_condition_op}},
                 {"what", {&DestroyedCondition::what, required_object_ref}},
                 {"value", {&DestroyedCondition::value, required_bool}}});
 }
@@ -164,6 +168,7 @@ static Condition::When destroyed_condition(path_value x) {
 static Condition::When distance_condition(path_value x) {
     return required_struct<DistanceCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&DistanceCondition::op, required_condition_op}},
                 {"value", {&DistanceCondition::value, required_int}},
                 {"from", {&DistanceCondition::from, required_object_ref}},
                 {"to", {&DistanceCondition::to, required_object_ref}}});
@@ -172,6 +177,7 @@ static Condition::When distance_condition(path_value x) {
 static Condition::When health_condition(path_value x) {
     return required_struct<HealthCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&HealthCondition::op, required_condition_op}},
                 {"value", {&HealthCondition::value, required_double}},
                 {"what", {&HealthCondition::what, required_object_ref}}});
 }
@@ -179,6 +185,7 @@ static Condition::When health_condition(path_value x) {
 static Condition::When message_condition(path_value x) {
     return required_struct<MessageCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&MessageCondition::op, required_condition_op}},
                 {"player", nullptr},
                 {"id", {&MessageCondition::id, required_int}},
                 {"page", {&MessageCondition::page, required_int}}});
@@ -187,6 +194,7 @@ static Condition::When message_condition(path_value x) {
 static Condition::When owner_condition(path_value x) {
     return required_struct<OwnerCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&OwnerCondition::op, required_condition_op}},
                 {"player", {&OwnerCondition::player, required_admiral}},
                 {"what", {&OwnerCondition::what, required_object_ref}}});
 }
@@ -194,6 +202,7 @@ static Condition::When owner_condition(path_value x) {
 static Condition::When ships_condition(path_value x) {
     return required_struct<ShipsCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&ShipsCondition::op, required_condition_op}},
                 {"player", {&ShipsCondition::player, required_admiral}},
                 {"value", {&ShipsCondition::value, required_int}}});
 }
@@ -201,6 +210,7 @@ static Condition::When ships_condition(path_value x) {
 static Condition::When speed_condition(path_value x) {
     return required_struct<SpeedCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&SpeedCondition::op, required_condition_op}},
                 {"value", {&SpeedCondition::value, required_fixed}},
                 {"what", {&SpeedCondition::what, required_object_ref}}});
 }
@@ -208,6 +218,7 @@ static Condition::When speed_condition(path_value x) {
 static Condition::When object_condition(path_value x) {
     return required_struct<ObjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&ObjectCondition::op, required_condition_op}},
                 {"a", {&ObjectCondition::a, required_object_ref}},
                 {"b", {&ObjectCondition::b, required_object_ref}}});
 }
@@ -215,6 +226,7 @@ static Condition::When object_condition(path_value x) {
 static Condition::When target_condition(path_value x) {
     return required_struct<TargetCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&TargetCondition::op, required_condition_op}},
                 {"what", {&TargetCondition::what, required_object_ref}},
                 {"target", {&TargetCondition::target, required_object_ref}}});
 }
@@ -222,6 +234,7 @@ static Condition::When target_condition(path_value x) {
 static Condition::When time_condition(path_value x) {
     return required_struct<TimeCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&TimeCondition::op, required_condition_op}},
                 {"duration", {&TimeCondition::duration, required_ticks}},
                 {"legacy_start_time", {&TimeCondition::legacy_start_time, optional_bool, false}}});
 }
@@ -229,6 +242,7 @@ static Condition::When time_condition(path_value x) {
 static Condition::When zoom_condition(path_value x) {
     return required_struct<ZoomCondition>(
             x, {COMMON_CONDITION_FIELDS,
+                {"op", {&ZoomCondition::op, required_condition_op}},
                 {"player", nullptr},
                 {"value", {&ZoomCondition::value, required_zoom}}});
 }
