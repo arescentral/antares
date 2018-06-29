@@ -123,10 +123,14 @@ static ConditionOp required_condition_op(path_value x) {
                 {"ge", ConditionOp::GE}});
 }
 
+static ConditionEqOp required_condition_eq_op(path_value x) {
+    return required_enum<ConditionEqOp>(x, {{"eq", ConditionEqOp::EQ}, {"ne", ConditionEqOp::NE}});
+}
+
 static Condition::When autopilot_condition(path_value x) {
     return required_struct<AutopilotCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&AutopilotCondition::op, required_condition_op}},
+                {"op", {&AutopilotCondition::op, required_condition_eq_op}},
                 {"player", {&AutopilotCondition::player, required_admiral}},
                 {"value", {&AutopilotCondition::value, required_bool}}});
 }
@@ -134,7 +138,7 @@ static Condition::When autopilot_condition(path_value x) {
 static Condition::When building_condition(path_value x) {
     return required_struct<BuildingCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&BuildingCondition::op, required_condition_op}},
+                {"op", {&BuildingCondition::op, required_condition_eq_op}},
                 {"player", {&BuildingCondition::player, required_admiral}},
                 {"value", {&BuildingCondition::value, required_bool}}});
 }
@@ -142,7 +146,7 @@ static Condition::When building_condition(path_value x) {
 static Condition::When computer_condition(path_value x) {
     return required_struct<ComputerCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&ComputerCondition::op, required_condition_op}},
+                {"op", {&ComputerCondition::op, required_condition_eq_op}},
                 {"player", nullptr},
                 {"screen", {&ComputerCondition::screen, required_screen}},
                 {"line", {&ComputerCondition::line, optional_int}}});
@@ -160,7 +164,7 @@ static Condition::When counter_condition(path_value x) {
 static Condition::When destroyed_condition(path_value x) {
     return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&DestroyedCondition::op, required_condition_op}},
+                {"op", {&DestroyedCondition::op, required_condition_eq_op}},
                 {"what", {&DestroyedCondition::what, required_object_ref}},
                 {"value", {&DestroyedCondition::value, required_bool}}});
 }
@@ -185,7 +189,7 @@ static Condition::When health_condition(path_value x) {
 static Condition::When message_condition(path_value x) {
     return required_struct<MessageCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&MessageCondition::op, required_condition_op}},
+                {"op", {&MessageCondition::op, required_condition_eq_op}},
                 {"player", nullptr},
                 {"id", {&MessageCondition::id, required_int}},
                 {"page", {&MessageCondition::page, required_int}}});
@@ -194,7 +198,7 @@ static Condition::When message_condition(path_value x) {
 static Condition::When owner_condition(path_value x) {
     return required_struct<OwnerCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&OwnerCondition::op, required_condition_op}},
+                {"op", {&OwnerCondition::op, required_condition_eq_op}},
                 {"player", {&OwnerCondition::player, required_admiral}},
                 {"what", {&OwnerCondition::what, required_object_ref}}});
 }
@@ -218,7 +222,7 @@ static Condition::When speed_condition(path_value x) {
 static Condition::When object_condition(path_value x) {
     return required_struct<ObjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&ObjectCondition::op, required_condition_op}},
+                {"op", {&ObjectCondition::op, required_condition_eq_op}},
                 {"a", {&ObjectCondition::a, required_object_ref}},
                 {"b", {&ObjectCondition::b, required_object_ref}}});
 }
@@ -226,7 +230,7 @@ static Condition::When object_condition(path_value x) {
 static Condition::When target_condition(path_value x) {
     return required_struct<TargetCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&TargetCondition::op, required_condition_op}},
+                {"op", {&TargetCondition::op, required_condition_eq_op}},
                 {"what", {&TargetCondition::what, required_object_ref}},
                 {"target", {&TargetCondition::target, required_object_ref}}});
 }

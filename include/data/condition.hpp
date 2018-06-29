@@ -54,39 +54,36 @@ enum class ConditionType {
 };
 
 enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
+enum class ConditionEqOp { EQ, NE };
 
 struct ConditionBase {
     ConditionType type;
 };
 
-// Ops: EQ, NE
 // Compares player’s autopilot state (on = true; off = false) to `value`.
 struct AutopilotCondition : ConditionBase {
-    ConditionOp     op = ConditionOp::EQ;
+    ConditionEqOp   op = ConditionEqOp::EQ;
     Handle<Admiral> player;
     bool            value;
 };
 
-// Ops: EQ, NE
 // Precondition: player has a build object.
 // Compares player’s build object state (building = true; not building = false) to `value`.
 struct BuildingCondition : ConditionBase {
-    ConditionOp     op = ConditionOp::EQ;
+    ConditionEqOp   op = ConditionEqOp::EQ;
     Handle<Admiral> player;
     bool            value;
 };
 
-// Ops: EQ, NE
 // Compares local player’s (screen, line), or just screen if line < 0.
 //
 // Warning: not net-safe.
 struct ComputerCondition : ConditionBase {
-    ConditionOp            op = ConditionOp::EQ;
+    ConditionEqOp          op = ConditionEqOp::EQ;
     Screen                 screen;
     sfz::optional<int64_t> line;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares given counter of given admiral to `value`.
 struct CounterCondition : ConditionBase {
     ConditionOp     op = ConditionOp::EQ;
@@ -95,17 +92,15 @@ struct CounterCondition : ConditionBase {
     int64_t         value;
 };
 
-// Ops: EQ, NE
 // Compares state of given object (destroyed = true; alive = false) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
-    ConditionOp op = ConditionOp::EQ;
-    ObjectRef   what;
-    bool        value;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     what;
+    bool          value;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `from` and `to` exist.
 // Compares distance between `from` and `to` to `value`.
 //
@@ -117,7 +112,6 @@ struct DistanceCondition : ConditionBase {
     int64_t     value;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
@@ -128,34 +122,30 @@ struct HealthCondition : ConditionBase {
     double      value;
 };
 
-// Ops: EQ, NE
 // Compares (id, page) of local player’s current message to (id, page).
 //
 // Warning: not net-safe.
 struct MessageCondition : ConditionBase {
-    ConditionOp op = ConditionOp::EQ;
-    int64_t     id;
-    int64_t     page;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    int64_t       id;
+    int64_t       page;
 };
 
-// Ops: EQ, NE
 // Precondition: `a` and `b` exist.
 // Compares `a` to `b`.
 struct ObjectCondition : ConditionBase {
-    ConditionOp op = ConditionOp::EQ;
-    ObjectRef   a, b;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     a, b;
 };
 
-// Ops: EQ, NE
 // Precondition: `what` exists.
 // Compares owner of `what` to `player`.
 struct OwnerCondition : ConditionBase {
-    ConditionOp     op = ConditionOp::EQ;
+    ConditionEqOp   op = ConditionEqOp::EQ;
     ObjectRef       what;
     Handle<Admiral> player;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares ship count of `player` to `value`.
 struct ShipsCondition : ConditionBase {
     ConditionOp     op = ConditionOp::EQ;
@@ -163,7 +153,6 @@ struct ShipsCondition : ConditionBase {
     int64_t         value;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `what` exists.
 // Compares speed of `what` to `value`.
 struct SpeedCondition : ConditionBase {
@@ -172,16 +161,14 @@ struct SpeedCondition : ConditionBase {
     Fixed       value;
 };
 
-// Ops: EQ, NE
 // Precondition: `what` and `target` exist.
 // Compares target of `what` to `target`.
 struct TargetCondition : ConditionBase {
-    ConditionOp op = ConditionOp::EQ;
-    ObjectRef   what;
-    ObjectRef   target;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     what;
+    ObjectRef     target;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares the game time to `duration`. Zero is the start of play; setup time is negative.
 //
 // `legacy_start_time` specifies an alternate mode where the setup time counts for only 1/3 as much
@@ -192,7 +179,6 @@ struct TimeCondition : ConditionBase {
     bool        legacy_start_time;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares zoom level of the local player to `value`.
 //
 // Warning: not net-safe.

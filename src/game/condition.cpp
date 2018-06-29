@@ -56,11 +56,10 @@ static bool op_compare(ConditionOp op, const X& x, const Y& y) {
 }
 
 template <typename X, typename Y>
-static bool op_eq(ConditionOp op, const X& x, const Y& y) {
+static bool op_eq(ConditionEqOp op, const X& x, const Y& y) {
     switch (op) {
-        case ConditionOp::EQ: return (x == y);
-        case ConditionOp::NE: return (x != y);
-        default: return false;
+        case ConditionEqOp::EQ: return (x == y);
+        case ConditionEqOp::NE: return (x != y);
     }
 }
 
