@@ -119,7 +119,7 @@ static bool is_true(const CounterCondition& c) {
 }
 
 static bool is_true(const DestroyedCondition& c) {
-    auto sObject = resolve_object_ref(c.initial);
+    auto sObject = resolve_object_ref(c.what);
     return op_eq(c.op, !sObject.get(), c.value);
 }
 
@@ -135,7 +135,7 @@ static bool is_true(const DistanceCondition& c) {
 }
 
 static bool is_true(const HealthCondition& c) {
-    auto   sObject = resolve_object_ref(c.initial);
+    auto   sObject = resolve_object_ref(c.what);
     double health  = 0.0;
     if (sObject.get()) {
         health = sObject->health();
@@ -164,7 +164,7 @@ static bool is_true(const ObjectCondition& c) {
 }
 
 static bool is_true(const OwnerCondition& c) {
-    auto sObject = resolve_object_ref(c.initial);
+    auto sObject = resolve_object_ref(c.what);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
 }
 
@@ -173,13 +173,13 @@ static bool is_true(const ShipsCondition& c) {
 }
 
 static bool is_true(const SpeedCondition& c) {
-    auto sObject = resolve_object_ref(c.initial);
+    auto sObject = resolve_object_ref(c.what);
     return sObject.get() &&
            op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
 }
 
 static bool is_true(const TargetCondition& c) {
-    auto sObject = resolve_object_ref(c.initial);
+    auto sObject = resolve_object_ref(c.what);
     auto dObject = resolve_object_ref(c.target);
     return sObject.get() && dObject.get() &&
            op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),

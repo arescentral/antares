@@ -46,8 +46,8 @@ static ObjectRef required_object_ref(path_value x) {
         o.type = ObjectRef::Type::TARGET;
     } else {
         throw std::runtime_error(pn::format(
-                                         "{0}key must be one of "
-                                         "[\"initial\", \"flagship\", \"control\", \"target\"]",
+                                         "{0}key must be one of [\"initial\", \"flagship\", "
+                                         "\"control\", \"target\"]",
                                          x.prefix())
                                          .c_str());
     }
@@ -204,7 +204,7 @@ static Condition::When counter_condition(path_value x) {
 static Condition::When destroyed_condition(path_value x) {
     return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"initial", {&DestroyedCondition::initial, required_object_ref}},
+                {"what", {&DestroyedCondition::what, required_object_ref}},
                 {"value", {&DestroyedCondition::value, required_bool}}});
 }
 
@@ -220,7 +220,7 @@ static Condition::When health_condition(path_value x) {
     return required_struct<HealthCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"value", {&HealthCondition::value, required_double}},
-                {"initial", {&HealthCondition::initial, required_object_ref}}});
+                {"what", {&HealthCondition::what, required_object_ref}}});
 }
 
 static Condition::When message_condition(path_value x) {
@@ -235,7 +235,7 @@ static Condition::When owner_condition(path_value x) {
     return required_struct<OwnerCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", {&OwnerCondition::player, required_admiral}},
-                {"initial", {&OwnerCondition::initial, required_object_ref}}});
+                {"what", {&OwnerCondition::what, required_object_ref}}});
 }
 
 static Condition::When ships_condition(path_value x) {
@@ -249,7 +249,7 @@ static Condition::When speed_condition(path_value x) {
     return required_struct<SpeedCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"value", {&SpeedCondition::value, required_fixed}},
-                {"initial", {&SpeedCondition::initial, required_object_ref}}});
+                {"what", {&SpeedCondition::what, required_object_ref}}});
 }
 
 static Condition::When object_condition(path_value x) {
@@ -262,7 +262,7 @@ static Condition::When object_condition(path_value x) {
 static Condition::When target_condition(path_value x) {
     return required_struct<TargetCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"initial", {&TargetCondition::initial, required_object_ref}},
+                {"what", {&TargetCondition::what, required_object_ref}},
                 {"target", {&TargetCondition::target, required_object_ref}}});
 }
 

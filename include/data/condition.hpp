@@ -98,13 +98,11 @@ struct CounterCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
-// Compares state of given initial (destroyed = true; alive = false) to `value`.
+// Compares state of given object (destroyed = true; alive = false) to `value`.
 //
-// Note: the initial object referenced here can be (and usually is) different from either `subject`
-// or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
-    ObjectRef initial;
+    ObjectRef what;
     bool      value;
 };
 
@@ -120,12 +118,12 @@ struct DistanceCondition : ConditionBase {
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Compares health fraction of `initial` (e.g. 0.5 for half health) to `value`.
+// Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
-    ObjectRef initial;
+    ObjectRef what;
     double    value;
 };
 
@@ -146,10 +144,10 @@ struct ObjectCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
-// Precondition: `initial` exists.
-// Compares owner of `initial` to `player`.
+// Precondition: `what` exists.
+// Compares owner of `what` to `player`.
 struct OwnerCondition : ConditionBase {
-    ObjectRef       initial;
+    ObjectRef       what;
     Handle<Admiral> player;
 };
 
@@ -161,28 +159,26 @@ struct ShipsCondition : ConditionBase {
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `initial` exists.
-// Compares speed of `initial` to `value`.
+// Precondition: `what` exists.
+// Compares speed of `what` to `value`.
 struct SpeedCondition : ConditionBase {
-    ObjectRef initial;
+    ObjectRef what;
     Fixed     value;
 };
 
 // Ops: EQ, NE
-// Precondition: `initial` and `target` exist.
-// Compares target of `initial` to `target`.
+// Precondition: `what` and `target` exist.
+// Compares target of `what` to `target`.
 struct TargetCondition : ConditionBase {
-    ObjectRef initial;
+    ObjectRef what;
     ObjectRef target;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Compares `initial` to the control, target, or flagship of the local player, per `value`.
+// Compares the game time to `duration`. Zero is the start of play; setup time is negative.
 //
-// Note: On a level that specifies a `start_time`, the setup time counts for only 1/3 as much as
-// time after the
-//
-// TODO(sfiera): provide a way to specify game time “normally”
+// `legacy_start_time` specifies an alternate mode where the setup time counts for only 1/3 as much
+// as time after the setup finishes.
 struct TimeCondition : ConditionBase {
     ticks duration;
     bool  legacy_start_time;
