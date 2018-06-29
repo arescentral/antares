@@ -43,6 +43,23 @@ HandleList<const Condition> Condition::all() {
     return HandleList<const Condition>(0, g.level->conditions.size());
 }
 
+static Handle<SpaceObject> resolve_object_ref(const ObjectRef& ref) {
+    switch (ref.type) {
+        case ObjectRef::Type::INITIAL: return GetObjectFromInitialNumber(ref.initial);
+        case ObjectRef::Type::FLAGSHIP: return ref.admiral->flagship();
+        case ObjectRef::Type::CONTROL: return ref.admiral->control();
+        case ObjectRef::Type::TARGET: return ref.admiral->target();
+    }
+}
+
+static Handle<SpaceObject> resolve_object_ref(const sfz::optional<ObjectRef>& ref) {
+    if (ref.has_value()) {
+        return resolve_object_ref(*ref);
+    } else {
+        return SpaceObject::none();
+    }
+}
+
 template <typename X, typename Y>
 static bool op_compare(ConditionOp op, const X& x, const Y& y) {
     switch (op) {
@@ -102,13 +119,13 @@ static bool is_true(const CounterCondition& c) {
 }
 
 static bool is_true(const DestroyedCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.initial);
+    auto sObject = resolve_object_ref(c.what);
     return op_eq(c.op, !sObject.get(), c.value);
 }
 
 static bool is_true(const DistanceCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
-    auto dObject = GetObjectFromInitialNumber(c.object);
+    auto sObject = resolve_object_ref(c.from);
+    auto dObject = resolve_object_ref(c.to);
     if (sObject.get() && dObject.get()) {
         int64_t xdist = ABS<int>(sObject->location.h - dObject->location.h);
         int64_t ydist = ABS<int>(sObject->location.v - dObject->location.v);
@@ -118,7 +135,7 @@ static bool is_true(const DistanceCondition& c) {
 }
 
 static bool is_true(const HealthCondition& c) {
-    auto   sObject = GetObjectFromInitialNumber(c.subject);
+    auto   sObject = resolve_object_ref(c.what);
     double health  = 0.0;
     if (sObject.get()) {
         health = sObject->health();
@@ -137,8 +154,17 @@ static bool is_true(const MessageCondition& c) {
             std::make_pair(c.id, c.page - 1));
 }
 
+static bool is_true(const ObjectCondition& c) {
+    auto a = resolve_object_ref(c.a);
+    auto b = resolve_object_ref(c.b);
+    if (!(a.get() && b.get())) {
+        return false;
+    }
+    return op_eq(c.op, a, b);
+}
+
 static bool is_true(const OwnerCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto sObject = resolve_object_ref(c.what);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
 }
 
@@ -147,26 +173,14 @@ static bool is_true(const ShipsCondition& c) {
 }
 
 static bool is_true(const SpeedCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
+    auto sObject = resolve_object_ref(c.what);
     return sObject.get() &&
            op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
 }
 
-static bool is_true(const SubjectCondition& c) {
-    auto o = GetObjectFromInitialNumber(c.subject);
-    if (!(c.player.get() && o.get())) {
-        return false;
-    }
-    switch (c.value) {
-        case SubjectCondition::Value::CONTROL: return op_eq(c.op, o, c.player->control());
-        case SubjectCondition::Value::TARGET: return op_eq(c.op, o, c.player->target());
-        case SubjectCondition::Value::FLAGSHIP: return op_eq(c.op, o, c.player->flagship());
-    }
-}
-
 static bool is_true(const TargetCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.subject);
-    auto dObject = GetObjectFromInitialNumber(c.object);
+    auto sObject = resolve_object_ref(c.what);
+    auto dObject = resolve_object_ref(c.target);
     return sObject.get() && dObject.get() &&
            op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
                  std::make_pair(dObject, dObject->id));
@@ -189,35 +203,35 @@ static bool is_true(const TimeCondition& c) {
 
 static bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.value); }
 
-static bool is_true(const Condition& c) {
+static bool is_true(const Condition::When& c) {
     switch (c.type()) {
-        case Condition::Type::AUTOPILOT: return is_true(c.autopilot);
-        case Condition::Type::BUILDING: return is_true(c.building);
-        case Condition::Type::COMPUTER: return is_true(c.computer);
-        case Condition::Type::COUNTER: return is_true(c.counter);
-        case Condition::Type::DESTROYED: return is_true(c.destroyed);
-        case Condition::Type::DISTANCE: return is_true(c.distance);
-        case Condition::Type::HEALTH: return is_true(c.health);
-        case Condition::Type::MESSAGE: return is_true(c.message);
-        case Condition::Type::OWNER: return is_true(c.owner);
-        case Condition::Type::SHIPS: return is_true(c.ships);
-        case Condition::Type::SPEED: return is_true(c.speed);
-        case Condition::Type::SUBJECT: return is_true(c.subject);
-        case Condition::Type::TARGET: return is_true(c.target);
-        case Condition::Type::TIME: return is_true(c.time);
-        case Condition::Type::ZOOM: return is_true(c.zoom);
+        case Condition::When::Type::AUTOPILOT: return is_true(c.autopilot);
+        case Condition::When::Type::BUILDING: return is_true(c.building);
+        case Condition::When::Type::COMPUTER: return is_true(c.computer);
+        case Condition::When::Type::COUNTER: return is_true(c.counter);
+        case Condition::When::Type::DESTROYED: return is_true(c.destroyed);
+        case Condition::When::Type::DISTANCE: return is_true(c.distance);
+        case Condition::When::Type::HEALTH: return is_true(c.health);
+        case Condition::When::Type::MESSAGE: return is_true(c.message);
+        case Condition::When::Type::OBJECT: return is_true(c.object);
+        case Condition::When::Type::OWNER: return is_true(c.owner);
+        case Condition::When::Type::SHIPS: return is_true(c.ships);
+        case Condition::When::Type::SPEED: return is_true(c.speed);
+        case Condition::When::Type::TARGET: return is_true(c.target);
+        case Condition::When::Type::TIME: return is_true(c.time);
+        case Condition::When::Type::ZOOM: return is_true(c.zoom);
     }
 }
 
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {
         int index = (&c - g.level->conditions.data());
-        if ((g.condition_enabled[index] || c.base.persistent) && is_true(c)) {
+        if ((g.condition_enabled[index] || c.persistent) && is_true(c.when)) {
             g.condition_enabled[index] = false;
-            auto  sObject              = GetObjectFromInitialNumber(c.base.subject);
-            auto  dObject              = GetObjectFromInitialNumber(c.base.object);
+            auto  sObject              = resolve_object_ref(c.subject);
+            auto  dObject              = resolve_object_ref(c.object);
             Point offset;
-            exec(c.base.action, sObject, dObject, &offset);
+            exec(c.action, sObject, dObject, &offset);
         }
     }
 }

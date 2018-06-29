@@ -34,6 +34,12 @@ union Action;
 struct Initial;
 class path_value;
 
+struct ObjectRef {
+    enum class Type { INITIAL, FLAGSHIP, CONTROL, TARGET } type;
+    Handle<const Initial> initial;
+    Handle<Admiral>       admiral;
+};
+
 enum class ConditionType {
     AUTOPILOT,
     BUILDING,
@@ -43,10 +49,10 @@ enum class ConditionType {
     DISTANCE,
     HEALTH,
     MESSAGE,
+    OBJECT,
     OWNER,
     SHIPS,
     SPEED,
-    SUBJECT,
     TARGET,
     TIME,
     ZOOM,
@@ -55,13 +61,8 @@ enum class ConditionType {
 enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
 
 struct ConditionBase {
-    ConditionType         type;
-    ConditionOp           op         = ConditionOp::EQ;
-    bool                  disabled   = false;
-    bool                  persistent = false;
-    Handle<const Initial> subject;
-    Handle<const Initial> object;
-    std::vector<Action>   action;
+    ConditionType type;
+    ConditionOp   op = ConditionOp::EQ;
 };
 
 // Ops: EQ, NE
@@ -97,33 +98,33 @@ struct CounterCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
-// Compares state of given initial (destroyed = true; alive = false) to `value`.
+// Compares state of given object (destroyed = true; alive = false) to `value`.
 //
-// Note: the initial object referenced here can be (and usually is) different from either `subject`
-// or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
-    Handle<const Initial> initial;
-    bool                  value;
+    ObjectRef what;
+    bool      value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `subject` and `object` exist; `subject` and `object` are not “extremely” distant.
-// Compares distance between `subject` and `object` to `value`.
+// Precondition: `from` and `to` exist.
+// Compares distance between `from` and `to` to `value`.
 //
-// TODO(sfiera): provide a definition of “distance” in this context, and especially what
-// “extremely” distant means.
+// TODO(sfiera): provide a definition of “distance” in this context.
 struct DistanceCondition : ConditionBase {
-    int64_t value;
+    ObjectRef from;
+    ObjectRef to;
+    int64_t   value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Compares health fraction of `subject` (e.g. 0.5 for half health) to `value`.
+// Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
-    double value;
+    ObjectRef what;
+    double    value;
 };
 
 // Ops: EQ, NE
@@ -136,9 +137,17 @@ struct MessageCondition : ConditionBase {
 };
 
 // Ops: EQ, NE
-// Precondition: `subject` exists.
-// Compares owner of `subject` to `player`.
+// Precondition: `a` and `b` exist.
+// Compares `a` to `b`.
+struct ObjectCondition : ConditionBase {
+    ObjectRef a, b;
+};
+
+// Ops: EQ, NE
+// Precondition: `what` exists.
+// Compares owner of `what` to `player`.
 struct OwnerCondition : ConditionBase {
+    ObjectRef       what;
     Handle<Admiral> player;
 };
 
@@ -150,34 +159,26 @@ struct ShipsCondition : ConditionBase {
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `subject` exists.
-// Compares speed of `subject` to `value`.
+// Precondition: `what` exists.
+// Compares speed of `what` to `value`.
 struct SpeedCondition : ConditionBase {
-    Fixed value;
-};
-
-// Ops: EQ, NE, LT, GT, LE, GE
-// Precondition: `subject` exists.
-// Compares `subject` to the control, target, or flagship of the player, per `value`.
-struct SubjectCondition : ConditionBase {
-    enum class Value { CONTROL, TARGET, FLAGSHIP };
-
-    Handle<Admiral> player;
-    Value           value;
+    ObjectRef what;
+    Fixed     value;
 };
 
 // Ops: EQ, NE
-// Precondition: `subject` and `object` exist.
-// Compares target of `subject` to `object`.
-struct TargetCondition : ConditionBase {};
+// Precondition: `what` and `target` exist.
+// Compares target of `what` to `target`.
+struct TargetCondition : ConditionBase {
+    ObjectRef what;
+    ObjectRef target;
+};
 
 // Ops: EQ, NE, LT, GT, LE, GE
-// Compares `subject` to the control, target, or flagship of the local player, per `value`.
+// Compares the game time to `duration`. Zero is the start of play; setup time is negative.
 //
-// Note: On a level that specifies a `start_time`, the setup time counts for only 1/3 as much as
-// time after the
-//
-// TODO(sfiera): provide a way to specify game time “normally”
+// `legacy_start_time` specifies an alternate mode where the setup time counts for only 1/3 as much
+// as time after the setup finishes.
 struct TimeCondition : ConditionBase {
     ticks duration;
     bool  legacy_start_time;
@@ -191,47 +192,57 @@ struct ZoomCondition : ConditionBase {
     Zoom value;
 };
 
-union Condition {
-    using Type = ConditionType;
+struct Condition {
+    bool disabled   = false;
+    bool persistent = false;
 
-    ConditionBase base;
-    ConditionType type() const;
+    union When {
+        using Type = ConditionType;
 
-    AutopilotCondition autopilot;
-    BuildingCondition  building;
-    ComputerCondition  computer;
-    CounterCondition   counter;
-    DestroyedCondition destroyed;
-    DistanceCondition  distance;
-    HealthCondition    health;
-    MessageCondition   message;
-    OwnerCondition     owner;
-    ShipsCondition     ships;
-    SpeedCondition     speed;
-    SubjectCondition   subject;
-    TargetCondition    target;
-    TimeCondition      time;
-    ZoomCondition      zoom;
+        ConditionBase base;
+        ConditionType type() const;
 
-    Condition(AutopilotCondition c);
-    Condition(BuildingCondition c);
-    Condition(ComputerCondition c);
-    Condition(CounterCondition c);
-    Condition(DestroyedCondition c);
-    Condition(DistanceCondition c);
-    Condition(HealthCondition c);
-    Condition(MessageCondition c);
-    Condition(OwnerCondition c);
-    Condition(ShipsCondition c);
-    Condition(SpeedCondition c);
-    Condition(SubjectCondition c);
-    Condition(TargetCondition c);
-    Condition(TimeCondition c);
-    Condition(ZoomCondition c);
+        AutopilotCondition autopilot;
+        BuildingCondition  building;
+        ComputerCondition  computer;
+        CounterCondition   counter;
+        DestroyedCondition destroyed;
+        DistanceCondition  distance;
+        HealthCondition    health;
+        MessageCondition   message;
+        ObjectCondition    object;
+        OwnerCondition     owner;
+        ShipsCondition     ships;
+        SpeedCondition     speed;
+        TargetCondition    target;
+        TimeCondition      time;
+        ZoomCondition      zoom;
 
-    ~Condition();
-    Condition(Condition&&);
-    Condition& operator=(Condition&&);
+        When();
+        When(AutopilotCondition c);
+        When(BuildingCondition c);
+        When(ComputerCondition c);
+        When(CounterCondition c);
+        When(DestroyedCondition c);
+        When(DistanceCondition c);
+        When(HealthCondition c);
+        When(MessageCondition c);
+        When(ObjectCondition c);
+        When(OwnerCondition c);
+        When(ShipsCondition c);
+        When(SpeedCondition c);
+        When(TargetCondition c);
+        When(TimeCondition c);
+        When(ZoomCondition c);
+
+        ~When();
+        When(When&&);
+        When& operator=(When&&);
+    } when;
+
+    sfz::optional<ObjectRef> subject;
+    sfz::optional<ObjectRef> object;
+    std::vector<Action>      action;
 
     static const Condition*            get(int n);
     static HandleList<const Condition> all();
