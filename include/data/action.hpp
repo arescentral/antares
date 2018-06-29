@@ -27,6 +27,7 @@
 
 #include "data/enums.hpp"
 #include "data/handle.hpp"
+#include "data/object-ref.hpp"
 #include "data/range.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
@@ -95,8 +96,8 @@ struct ActionBase {
     ticks delay = ticks(0);
 
     struct Override {
-        sfz::optional<Handle<const Initial>> subject;
-        sfz::optional<Handle<const Initial>> object;
+        sfz::optional<ObjectRef> subject;
+        sfz::optional<ObjectRef> object;
     } override_;
 };
 

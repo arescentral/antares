@@ -19,14 +19,21 @@
 #ifndef ANTARES_GAME_INITIAL_HPP_
 #define ANTARES_GAME_INITIAL_HPP_
 
-#include "data/level.hpp"
+#include <sfz/sfz.hpp>
+
+#include "data/handle.hpp"
 
 namespace antares {
+
+struct Initial;
+struct ObjectRef;
 
 void                create_initial(Handle<const Initial> initial);
 void                set_initial_destination(Handle<const Initial> initial, bool preserve);
 void                UnhideInitialObject(Handle<const Initial> initial);
 Handle<SpaceObject> GetObjectFromInitialNumber(Handle<const Initial> initial);
+Handle<SpaceObject> resolve_object_ref(const ObjectRef& ref);
+Handle<SpaceObject> resolve_object_ref(const sfz::optional<ObjectRef>& ref);
 
 }  // namespace antares
 

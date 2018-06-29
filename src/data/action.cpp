@@ -233,28 +233,10 @@ static ActionBase::Filter optional_action_filter(path_value x) {
             .value_or(ActionBase::Filter{});
 }
 
-static sfz::optional<Handle<const Initial>> optional_initial_override(path_value x) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_map()) {
-        struct InitialNumber {
-            int64_t number;
-        };
-        auto i = required_struct<InitialNumber>(
-                x, {{"initial", {&InitialNumber::number, required_int}}});
-        return sfz::make_optional(Handle<const Initial>(i.number));
-    } else if (x.value().as_string() == "player") {
-        return sfz::make_optional(Handle<const Initial>(-2));
-    } else {
-        throw std::runtime_error(
-                pn::format("{0}: must be null, map, or \"player\"", x.path()).c_str());
-    }
-}
-
 static ActionBase::Override optional_action_override(path_value x) {
     return optional_struct<ActionBase::Override>(
-                   x, {{"subject", {&ActionBase::Override::subject, optional_initial_override}},
-                       {"object", {&ActionBase::Override::object, optional_initial_override}}})
+                   x, {{"subject", {&ActionBase::Override::subject, optional_object_ref}},
+                       {"object", {&ActionBase::Override::object, optional_object_ref}}})
             .value_or(ActionBase::Override{});
 }
 

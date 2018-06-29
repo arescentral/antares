@@ -43,23 +43,6 @@ HandleList<const Condition> Condition::all() {
     return HandleList<const Condition>(0, g.level->conditions.size());
 }
 
-static Handle<SpaceObject> resolve_object_ref(const ObjectRef& ref) {
-    switch (ref.type) {
-        case ObjectRef::Type::INITIAL: return GetObjectFromInitialNumber(ref.initial);
-        case ObjectRef::Type::FLAGSHIP: return ref.admiral->flagship();
-        case ObjectRef::Type::CONTROL: return ref.admiral->control();
-        case ObjectRef::Type::TARGET: return ref.admiral->target();
-    }
-}
-
-static Handle<SpaceObject> resolve_object_ref(const sfz::optional<ObjectRef>& ref) {
-    if (ref.has_value()) {
-        return resolve_object_ref(*ref);
-    } else {
-        return SpaceObject::none();
-    }
-}
-
 template <typename X, typename Y>
 static bool op_compare(ConditionOp op, const X& x, const Y& y) {
     switch (op) {
