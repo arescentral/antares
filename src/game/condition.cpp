@@ -43,6 +43,21 @@ HandleList<const Condition> Condition::all() {
     return HandleList<const Condition>(0, g.level->conditions.size());
 }
 
+static Handle<SpaceObject> resolve_object_ref(const ObjectRef& ref) {
+    switch (ref.type) {
+        case ObjectRef::Type::INITIAL: return GetObjectFromInitialNumber(ref.initial);
+        case ObjectRef::Type::FLAGSHIP: return ref.flagship->flagship();
+    }
+}
+
+static Handle<SpaceObject> resolve_object_ref(const sfz::optional<ObjectRef>& ref) {
+    if (ref.has_value()) {
+        return resolve_object_ref(*ref);
+    } else {
+        return SpaceObject::none();
+    }
+}
+
 template <typename X, typename Y>
 static bool op_compare(ConditionOp op, const X& x, const Y& y) {
     switch (op) {
@@ -102,13 +117,13 @@ static bool is_true(const CounterCondition& c) {
 }
 
 static bool is_true(const DestroyedCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.initial);
+    auto sObject = resolve_object_ref(c.initial);
     return op_eq(c.op, !sObject.get(), c.value);
 }
 
 static bool is_true(const DistanceCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.from);
-    auto dObject = GetObjectFromInitialNumber(c.to);
+    auto sObject = resolve_object_ref(c.from);
+    auto dObject = resolve_object_ref(c.to);
     if (sObject.get() && dObject.get()) {
         int64_t xdist = ABS<int>(sObject->location.h - dObject->location.h);
         int64_t ydist = ABS<int>(sObject->location.v - dObject->location.v);
@@ -118,7 +133,7 @@ static bool is_true(const DistanceCondition& c) {
 }
 
 static bool is_true(const HealthCondition& c) {
-    auto   sObject = GetObjectFromInitialNumber(c.initial);
+    auto   sObject = resolve_object_ref(c.initial);
     double health  = 0.0;
     if (sObject.get()) {
         health = sObject->health();
@@ -138,7 +153,7 @@ static bool is_true(const MessageCondition& c) {
 }
 
 static bool is_true(const OwnerCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.initial);
+    auto sObject = resolve_object_ref(c.initial);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
 }
 
@@ -147,13 +162,13 @@ static bool is_true(const ShipsCondition& c) {
 }
 
 static bool is_true(const SpeedCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.initial);
+    auto sObject = resolve_object_ref(c.initial);
     return sObject.get() &&
            op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
 }
 
 static bool is_true(const SubjectCondition& c) {
-    auto o = GetObjectFromInitialNumber(c.initial);
+    auto o = resolve_object_ref(c.initial);
     if (!(c.player.get() && o.get())) {
         return false;
     }
@@ -165,8 +180,8 @@ static bool is_true(const SubjectCondition& c) {
 }
 
 static bool is_true(const TargetCondition& c) {
-    auto sObject = GetObjectFromInitialNumber(c.initial);
-    auto dObject = GetObjectFromInitialNumber(c.target);
+    auto sObject = resolve_object_ref(c.initial);
+    auto dObject = resolve_object_ref(c.target);
     return sObject.get() && dObject.get() &&
            op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
                  std::make_pair(dObject, dObject->id));
@@ -214,8 +229,8 @@ void CheckLevelConditions() {
         int index = (&c - g.level->conditions.data());
         if ((g.condition_enabled[index] || c.persistent) && is_true(c.when)) {
             g.condition_enabled[index] = false;
-            auto  sObject              = GetObjectFromInitialNumber(c.subject);
-            auto  dObject              = GetObjectFromInitialNumber(c.object);
+            auto  sObject              = resolve_object_ref(c.subject);
+            auto  dObject              = resolve_object_ref(c.object);
             Point offset;
             exec(c.action, sObject, dObject, &offset);
         }

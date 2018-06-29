@@ -24,6 +24,46 @@
 
 namespace antares {
 
+static ObjectRef required_object_ref(path_value x) {
+    if (x.value().is_map()) {
+        pn::map_cref m = x.value().as_map();
+        if (m.size() != 1) {
+            throw std::runtime_error(
+                    pn::format("{0}must have single element", x.prefix()).c_str());
+        }
+        pn::key_value_cref kv = *m.begin();
+        ObjectRef          o;
+        if (kv.key() == "initial") {
+            o.type = ObjectRef::Type::INITIAL;
+        } else if (kv.key() == "flagship") {
+            o.type = ObjectRef::Type::FLAGSHIP;
+        } else {
+            throw std::runtime_error(
+                    pn::format("{0}key must be one of [\"initial\", \"flagship\"]", x.prefix())
+                            .c_str());
+        }
+        switch (o.type) {
+            case ObjectRef::Type::INITIAL: o.initial = required_initial(m.get("initial")); break;
+            case ObjectRef::Type::FLAGSHIP:
+                o.flagship = required_admiral(m.get("flagship"));
+                break;
+        }
+        return o;
+    } else {
+        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
+    }
+}
+
+static sfz::optional<ObjectRef> optional_object_ref(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        return sfz::make_optional(required_object_ref(x));
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
+    }
+}
+
 // clang-format off
 #define COMMON_CONDITION_FIELDS                                                                   \
             {"type", {&ConditionBase::type, required_condition_type}},                            \
@@ -157,7 +197,7 @@ static Condition::When counter_condition(path_value x) {
 static Condition::When destroyed_condition(path_value x) {
     return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"initial", {&DestroyedCondition::initial, required_initial}},
+                {"initial", {&DestroyedCondition::initial, required_object_ref}},
                 {"value", {&DestroyedCondition::value, required_bool}}});
 }
 
@@ -165,15 +205,15 @@ static Condition::When distance_condition(path_value x) {
     return required_struct<DistanceCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"value", {&DistanceCondition::value, required_int}},
-                {"from", {&DistanceCondition::from, required_initial}},
-                {"to", {&DistanceCondition::to, required_initial}}});
+                {"from", {&DistanceCondition::from, required_object_ref}},
+                {"to", {&DistanceCondition::to, required_object_ref}}});
 }
 
 static Condition::When health_condition(path_value x) {
     return required_struct<HealthCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"value", {&HealthCondition::value, required_double}},
-                {"initial", {&HealthCondition::initial, required_initial}}});
+                {"initial", {&HealthCondition::initial, required_object_ref}}});
 }
 
 static Condition::When message_condition(path_value x) {
@@ -188,7 +228,7 @@ static Condition::When owner_condition(path_value x) {
     return required_struct<OwnerCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"player", {&OwnerCondition::player, required_admiral}},
-                {"initial", {&OwnerCondition::initial, required_initial}}});
+                {"initial", {&OwnerCondition::initial, required_object_ref}}});
 }
 
 static Condition::When ships_condition(path_value x) {
@@ -202,7 +242,7 @@ static Condition::When speed_condition(path_value x) {
     return required_struct<SpeedCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"value", {&SpeedCondition::value, required_fixed}},
-                {"initial", {&SpeedCondition::initial, required_initial}}});
+                {"initial", {&SpeedCondition::initial, required_object_ref}}});
 }
 
 static SubjectCondition::Value required_subject_value(path_value x) {
@@ -215,7 +255,7 @@ static SubjectCondition::Value required_subject_value(path_value x) {
 static Condition::When subject_condition(path_value x) {
     return required_struct<SubjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"initial", {&SubjectCondition::initial, required_initial}},
+                {"initial", {&SubjectCondition::initial, required_object_ref}},
                 {"player", {&SubjectCondition::player, required_admiral}},
                 {"value", {&SubjectCondition::value, required_subject_value}}});
 }
@@ -223,8 +263,8 @@ static Condition::When subject_condition(path_value x) {
 static Condition::When target_condition(path_value x) {
     return required_struct<TargetCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"initial", {&TargetCondition::initial, required_initial}},
-                {"target", {&TargetCondition::target, required_initial}}});
+                {"initial", {&TargetCondition::initial, required_object_ref}},
+                {"target", {&TargetCondition::target, required_object_ref}}});
 }
 
 static Condition::When time_condition(path_value x) {
@@ -270,8 +310,8 @@ Condition condition(path_value x) {
             x, {{"persistent", {&Condition::persistent, optional_bool, false}},
                 {"disabled", {&Condition::disabled, optional_bool, false}},
                 {"when", {&Condition::when, when}},
-                {"subject", {&Condition::subject, optional_initial, Initial::none()}},
-                {"object", {&Condition::object, optional_initial, Initial::none()}},
+                {"subject", {&Condition::subject, optional_object_ref}},
+                {"object", {&Condition::object, optional_object_ref}},
                 {"action", {&Condition::action, required_array<Action, action>}}});
 }
 

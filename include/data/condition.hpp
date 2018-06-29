@@ -34,6 +34,12 @@ union Action;
 struct Initial;
 class path_value;
 
+struct ObjectRef {
+    enum class Type { INITIAL, FLAGSHIP } type;
+    Handle<const Initial> initial;
+    Handle<Admiral>       flagship;
+};
+
 enum class ConditionType {
     AUTOPILOT,
     BUILDING,
@@ -98,8 +104,8 @@ struct CounterCondition : ConditionBase {
 // or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
-    Handle<const Initial> initial;
-    bool                  value;
+    ObjectRef initial;
+    bool      value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -108,9 +114,9 @@ struct DestroyedCondition : ConditionBase {
 //
 // TODO(sfiera): provide a definition of “distance” in this context.
 struct DistanceCondition : ConditionBase {
-    Handle<const Initial> from;
-    Handle<const Initial> to;
-    int64_t               value;
+    ObjectRef from;
+    ObjectRef to;
+    int64_t   value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -119,8 +125,8 @@ struct DistanceCondition : ConditionBase {
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
-    Handle<const Initial> initial;
-    double                value;
+    ObjectRef initial;
+    double    value;
 };
 
 // Ops: EQ, NE
@@ -136,8 +142,8 @@ struct MessageCondition : ConditionBase {
 // Precondition: `initial` exists.
 // Compares owner of `initial` to `player`.
 struct OwnerCondition : ConditionBase {
-    Handle<const Initial> initial;
-    Handle<Admiral>       player;
+    ObjectRef       initial;
+    Handle<Admiral> player;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -151,8 +157,8 @@ struct ShipsCondition : ConditionBase {
 // Precondition: `initial` exists.
 // Compares speed of `initial` to `value`.
 struct SpeedCondition : ConditionBase {
-    Handle<const Initial> initial;
-    Fixed                 value;
+    ObjectRef initial;
+    Fixed     value;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -161,17 +167,17 @@ struct SpeedCondition : ConditionBase {
 struct SubjectCondition : ConditionBase {
     enum class Value { CONTROL, TARGET, FLAGSHIP };
 
-    Handle<const Initial> initial;
-    Handle<Admiral>       player;
-    Value                 value;
+    ObjectRef       initial;
+    Handle<Admiral> player;
+    Value           value;
 };
 
 // Ops: EQ, NE
 // Precondition: `initial` and `target` exist.
 // Compares target of `initial` to `target`.
 struct TargetCondition : ConditionBase {
-    Handle<const Initial> initial;
-    Handle<const Initial> target;
+    ObjectRef initial;
+    ObjectRef target;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -242,9 +248,9 @@ struct Condition {
         When& operator=(When&&);
     } when;
 
-    Handle<const Initial> subject;
-    Handle<const Initial> object;
-    std::vector<Action>   action;
+    sfz::optional<ObjectRef> subject;
+    sfz::optional<ObjectRef> object;
+    std::vector<Action>      action;
 
     static const Condition*            get(int n);
     static HandleList<const Condition> all();

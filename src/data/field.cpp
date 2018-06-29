@@ -360,21 +360,16 @@ sfz::optional<Handle<const Initial>> optional_initial(path_value x) {
         return sfz::nullopt;
     } else if (x.value().is_int()) {
         return sfz::make_optional(Handle<const Initial>(x.value().as_int()));
-    } else if (x.value().as_string() == "player") {
-        return sfz::make_optional(Handle<const Initial>(-2));
     } else {
-        throw std::runtime_error(
-                pn::format("{0}: must be null, int, or \"player\"", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or int", x.path()).c_str());
     }
 }
 
 Handle<const Initial> required_initial(path_value x) {
     if (x.value().is_int()) {
         return Handle<const Initial>(x.value().as_int());
-    } else if (x.value().as_string() == "player") {
-        return Handle<const Initial>(-2);
     } else {
-        throw std::runtime_error(pn::format("{0}: must be int, or \"player\"", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be int", x.path()).c_str());
     }
 }
 
