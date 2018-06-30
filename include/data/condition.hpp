@@ -40,6 +40,7 @@ enum class ConditionType {
     NONE = 0,
     AUTOPILOT,
     BUILDING,
+    CASH,
     COMPUTER,
     COUNT,
     COUNTER,
@@ -76,6 +77,15 @@ struct BuildingCondition : ConditionBase {
     ConditionEqOp   op = ConditionEqOp::EQ;
     Handle<Admiral> player;
     bool            value;
+};
+
+// Compares player’s cash reserves to `value`.
+//
+// Warning: not net-safe.
+struct CashCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
+    Handle<Admiral> player;
+    Fixed           value;
 };
 
 // Compares local player’s (screen, line), or just screen if line < 0.
@@ -205,6 +215,7 @@ union ConditionWhen {
 
     AutopilotCondition autopilot;
     BuildingCondition  building;
+    CashCondition      cash;
     ComputerCondition  computer;
     CountCondition     count;
     CounterCondition   counter;
@@ -223,6 +234,7 @@ union ConditionWhen {
     ConditionWhen();
     ConditionWhen(AutopilotCondition c);
     ConditionWhen(BuildingCondition c);
+    ConditionWhen(CashCondition c);
     ConditionWhen(ComputerCondition c);
     ConditionWhen(CountCondition c);
     ConditionWhen(CounterCondition c);

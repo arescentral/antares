@@ -36,6 +36,7 @@ ConditionWhen::Type ConditionWhen::type() const { return base.type; }
 ConditionWhen::ConditionWhen() : base{} {}
 ConditionWhen::ConditionWhen(AutopilotCondition a) : autopilot(std::move(a)) {}
 ConditionWhen::ConditionWhen(BuildingCondition a) : building(std::move(a)) {}
+ConditionWhen::ConditionWhen(CashCondition a) : cash(std::move(a)) {}
 ConditionWhen::ConditionWhen(ComputerCondition a) : computer(std::move(a)) {}
 ConditionWhen::ConditionWhen(CountCondition a) : count(std::move(a)) {}
 ConditionWhen::ConditionWhen(CounterCondition a) : counter(std::move(a)) {}
@@ -58,6 +59,7 @@ ConditionWhen::ConditionWhen(ConditionWhen&& a) {
             new (this) ConditionWhen(std::move(a.autopilot));
             break;
         case ConditionWhen::Type::BUILDING: new (this) ConditionWhen(std::move(a.building)); break;
+        case ConditionWhen::Type::CASH: new (this) ConditionWhen(std::move(a.cash)); break;
         case ConditionWhen::Type::COMPUTER: new (this) ConditionWhen(std::move(a.computer)); break;
         case ConditionWhen::Type::COUNT: new (this) ConditionWhen(std::move(a.count)); break;
         case ConditionWhen::Type::COUNTER: new (this) ConditionWhen(std::move(a.counter)); break;
@@ -88,6 +90,7 @@ ConditionWhen::~ConditionWhen() {
         case ConditionWhen::Type::NONE: base.~ConditionBase(); break;
         case ConditionWhen::Type::AUTOPILOT: autopilot.~AutopilotCondition(); break;
         case ConditionWhen::Type::BUILDING: building.~BuildingCondition(); break;
+        case ConditionWhen::Type::CASH: cash.~CashCondition(); break;
         case ConditionWhen::Type::COMPUTER: computer.~ComputerCondition(); break;
         case ConditionWhen::Type::COUNT: count.~CountCondition(); break;
         case ConditionWhen::Type::COUNTER: counter.~CounterCondition(); break;
@@ -109,6 +112,7 @@ static ConditionWhen::Type required_condition_type(path_value x) {
     return required_enum<ConditionWhen::Type>(
             x, {{"autopilot", ConditionWhen::Type::AUTOPILOT},
                 {"building", ConditionWhen::Type::BUILDING},
+                {"cash", ConditionWhen::Type::CASH},
                 {"computer", ConditionWhen::Type::COMPUTER},
                 {"count", ConditionWhen::Type::COUNT},
                 {"counter", ConditionWhen::Type::COUNTER},
@@ -153,6 +157,14 @@ static ConditionWhen building_condition(path_value x) {
                 {"op", {&BuildingCondition::op, required_condition_eq_op}},
                 {"player", {&BuildingCondition::player, required_admiral}},
                 {"value", {&BuildingCondition::value, required_bool}}});
+}
+
+static ConditionWhen cash_condition(path_value x) {
+    return required_struct<CashCondition>(
+            x, {COMMON_CONDITION_FIELDS,
+                {"op", {&CashCondition::op, required_condition_op}},
+                {"player", {&CashCondition::player, required_admiral}},
+                {"value", {&CashCondition::value, required_fixed}}});
 }
 
 static ConditionWhen computer_condition(path_value x) {
@@ -280,6 +292,7 @@ static ConditionWhen when(path_value x) {
         case ConditionWhen::Type::NONE: throw std::runtime_error("condition type none?");
         case ConditionWhen::Type::AUTOPILOT: return autopilot_condition(x);
         case ConditionWhen::Type::BUILDING: return building_condition(x);
+        case ConditionWhen::Type::CASH: return cash_condition(x);
         case ConditionWhen::Type::COMPUTER: return computer_condition(x);
         case ConditionWhen::Type::COUNT: return count_condition(x);
         case ConditionWhen::Type::COUNTER: return counter_condition(x);

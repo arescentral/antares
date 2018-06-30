@@ -88,6 +88,8 @@ static bool is_true(const BuildingCondition& c) {
     return op_eq(c.op, build_object->totalBuildTime > ticks(0), c.value);
 }
 
+static bool is_true(const CashCondition& c) { return op_compare(c.op, c.player->cash(), c.value); }
+
 static bool is_true(const ComputerCondition& c) {
     if (c.line.has_value()) {
         return op_eq(
@@ -202,6 +204,7 @@ static bool is_true(const ConditionWhen& c) {
         case ConditionWhen::Type::NONE: return false;
         case ConditionWhen::Type::AUTOPILOT: return is_true(c.autopilot);
         case ConditionWhen::Type::BUILDING: return is_true(c.building);
+        case ConditionWhen::Type::CASH: return is_true(c.cash);
         case ConditionWhen::Type::COMPUTER: return is_true(c.computer);
         case ConditionWhen::Type::COUNT: return is_true(c.count);
         case ConditionWhen::Type::COUNTER: return is_true(c.counter);
