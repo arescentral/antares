@@ -775,6 +775,12 @@ static void execute_actions(
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
+        if ((action.base.delay > ticks(0)) && allowDelay) {
+            queue_action(curr, end, action.base.delay, original_subject, original_object, offset);
+            return;
+        }
+        allowDelay = true;
+
         auto subject = original_subject;
         if (action.base.override_.subject.has_value()) {
             subject = resolve_object_ref(*action.base.override_.subject);
@@ -783,12 +789,6 @@ static void execute_actions(
         if (action.base.override_.object.has_value()) {
             object = resolve_object_ref(*action.base.override_.object);
         }
-
-        if ((action.base.delay > ticks(0)) && allowDelay) {
-            queue_action(curr, end, action.base.delay, subject, object, offset);
-            return;
-        }
-        allowDelay = true;
 
         auto focus = object;
         if (action.base.reflexive || !focus.get()) {
