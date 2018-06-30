@@ -32,6 +32,8 @@
 
 namespace antares {
 
+static bool is_true(const ConditionWhen& c);
+
 const Condition* Condition::get(int number) {
     if ((0 <= number) && (number < g.level->conditions.size())) {
         return &g.level->conditions[number];
@@ -56,11 +58,10 @@ static bool op_compare(ConditionOp op, const X& x, const Y& y) {
 }
 
 template <typename X, typename Y>
-static bool op_eq(ConditionOp op, const X& x, const Y& y) {
+static bool op_eq(ConditionEqOp op, const X& x, const Y& y) {
     switch (op) {
-        case ConditionOp::EQ: return (x == y);
-        case ConditionOp::NE: return (x != y);
-        default: return false;
+        case ConditionEqOp::EQ: return (x == y);
+        case ConditionEqOp::NE: return (x != y);
     }
 }
 
@@ -87,6 +88,8 @@ static bool is_true(const BuildingCondition& c) {
     return op_eq(c.op, build_object->totalBuildTime > ticks(0), c.value);
 }
 
+static bool is_true(const CashCondition& c) { return op_compare(c.op, c.player->cash(), c.value); }
+
 static bool is_true(const ComputerCondition& c) {
     if (c.line.has_value()) {
         return op_eq(
@@ -95,6 +98,16 @@ static bool is_true(const ComputerCondition& c) {
     } else {
         return op_eq(c.op, g.mini.currentScreen, c.screen);
     }
+}
+
+static bool is_true(const CountCondition& c) {
+    int count = 0;
+    for (const ConditionWhen& sub : c.of) {
+        if (is_true(sub)) {
+            ++count;
+        }
+    }
+    return op_compare(c.op, count, c.value);
 }
 
 static bool is_true(const CounterCondition& c) {
@@ -186,23 +199,26 @@ static bool is_true(const TimeCondition& c) {
 
 static bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.value); }
 
-static bool is_true(const Condition::When& c) {
+static bool is_true(const ConditionWhen& c) {
     switch (c.type()) {
-        case Condition::When::Type::AUTOPILOT: return is_true(c.autopilot);
-        case Condition::When::Type::BUILDING: return is_true(c.building);
-        case Condition::When::Type::COMPUTER: return is_true(c.computer);
-        case Condition::When::Type::COUNTER: return is_true(c.counter);
-        case Condition::When::Type::DESTROYED: return is_true(c.destroyed);
-        case Condition::When::Type::DISTANCE: return is_true(c.distance);
-        case Condition::When::Type::HEALTH: return is_true(c.health);
-        case Condition::When::Type::MESSAGE: return is_true(c.message);
-        case Condition::When::Type::OBJECT: return is_true(c.object);
-        case Condition::When::Type::OWNER: return is_true(c.owner);
-        case Condition::When::Type::SHIPS: return is_true(c.ships);
-        case Condition::When::Type::SPEED: return is_true(c.speed);
-        case Condition::When::Type::TARGET: return is_true(c.target);
-        case Condition::When::Type::TIME: return is_true(c.time);
-        case Condition::When::Type::ZOOM: return is_true(c.zoom);
+        case ConditionWhen::Type::NONE: return false;
+        case ConditionWhen::Type::AUTOPILOT: return is_true(c.autopilot);
+        case ConditionWhen::Type::BUILDING: return is_true(c.building);
+        case ConditionWhen::Type::CASH: return is_true(c.cash);
+        case ConditionWhen::Type::COMPUTER: return is_true(c.computer);
+        case ConditionWhen::Type::COUNT: return is_true(c.count);
+        case ConditionWhen::Type::COUNTER: return is_true(c.counter);
+        case ConditionWhen::Type::DESTROYED: return is_true(c.destroyed);
+        case ConditionWhen::Type::DISTANCE: return is_true(c.distance);
+        case ConditionWhen::Type::HEALTH: return is_true(c.health);
+        case ConditionWhen::Type::MESSAGE: return is_true(c.message);
+        case ConditionWhen::Type::OBJECT: return is_true(c.object);
+        case ConditionWhen::Type::OWNER: return is_true(c.owner);
+        case ConditionWhen::Type::SHIPS: return is_true(c.ships);
+        case ConditionWhen::Type::SPEED: return is_true(c.speed);
+        case ConditionWhen::Type::TARGET: return is_true(c.target);
+        case ConditionWhen::Type::TIME: return is_true(c.time);
+        case ConditionWhen::Type::ZOOM: return is_true(c.zoom);
     }
 }
 

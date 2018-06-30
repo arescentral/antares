@@ -32,13 +32,17 @@
 namespace antares {
 
 union Action;
+union ConditionWhen;
 struct Initial;
 class path_value;
 
 enum class ConditionType {
+    NONE = 0,
     AUTOPILOT,
     BUILDING,
+    CASH,
     COMPUTER,
+    COUNT,
     COUNTER,
     DESTROYED,
     DISTANCE,
@@ -54,186 +58,208 @@ enum class ConditionType {
 };
 
 enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
+enum class ConditionEqOp { EQ, NE };
 
 struct ConditionBase {
-    ConditionType type;
-    ConditionOp   op = ConditionOp::EQ;
+    ConditionType type = ConditionType::NONE;
 };
 
-// Ops: EQ, NE
 // Compares player’s autopilot state (on = true; off = false) to `value`.
 struct AutopilotCondition : ConditionBase {
+    ConditionEqOp   op = ConditionEqOp::EQ;
     Handle<Admiral> player;
     bool            value;
 };
 
-// Ops: EQ, NE
 // Precondition: player has a build object.
 // Compares player’s build object state (building = true; not building = false) to `value`.
 struct BuildingCondition : ConditionBase {
+    ConditionEqOp   op = ConditionEqOp::EQ;
     Handle<Admiral> player;
     bool            value;
 };
 
-// Ops: EQ, NE
+// Compares player’s cash reserves to `value`.
+//
+// Warning: not net-safe.
+struct CashCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
+    Handle<Admiral> player;
+    Fixed           value;
+};
+
 // Compares local player’s (screen, line), or just screen if line < 0.
 //
 // Warning: not net-safe.
 struct ComputerCondition : ConditionBase {
+    ConditionEqOp          op = ConditionEqOp::EQ;
     Screen                 screen;
     sfz::optional<int64_t> line;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
+// Compares the number of true sub-conditions to `value`.
+struct CountCondition : ConditionBase {
+    ConditionOp                op = ConditionOp::EQ;
+    int64_t                    value;
+    std::vector<ConditionWhen> of;
+};
+
 // Compares given counter of given admiral to `value`.
 struct CounterCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
     int64_t         counter;
     int64_t         value;
 };
 
-// Ops: EQ, NE
 // Compares state of given object (destroyed = true; alive = false) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
-    ObjectRef what;
-    bool      value;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     what;
+    bool          value;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `from` and `to` exist.
 // Compares distance between `from` and `to` to `value`.
 //
 // TODO(sfiera): provide a definition of “distance” in this context.
 struct DistanceCondition : ConditionBase {
-    ObjectRef from;
-    ObjectRef to;
-    int64_t   value;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   from;
+    ObjectRef   to;
+    int64_t     value;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
-    ObjectRef what;
-    double    value;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   what;
+    double      value;
 };
 
-// Ops: EQ, NE
 // Compares (id, page) of local player’s current message to (id, page).
 //
 // Warning: not net-safe.
 struct MessageCondition : ConditionBase {
-    int64_t id;
-    int64_t page;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    int64_t       id;
+    int64_t       page;
 };
 
-// Ops: EQ, NE
 // Precondition: `a` and `b` exist.
 // Compares `a` to `b`.
 struct ObjectCondition : ConditionBase {
-    ObjectRef a, b;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     a, b;
 };
 
-// Ops: EQ, NE
 // Precondition: `what` exists.
 // Compares owner of `what` to `player`.
 struct OwnerCondition : ConditionBase {
+    ConditionEqOp   op = ConditionEqOp::EQ;
     ObjectRef       what;
     Handle<Admiral> player;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares ship count of `player` to `value`.
 struct ShipsCondition : ConditionBase {
+    ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
     int64_t         value;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `what` exists.
 // Compares speed of `what` to `value`.
 struct SpeedCondition : ConditionBase {
-    ObjectRef what;
-    Fixed     value;
+    ConditionOp op = ConditionOp::EQ;
+    ObjectRef   what;
+    Fixed       value;
 };
 
-// Ops: EQ, NE
 // Precondition: `what` and `target` exist.
 // Compares target of `what` to `target`.
 struct TargetCondition : ConditionBase {
-    ObjectRef what;
-    ObjectRef target;
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     what;
+    ObjectRef     target;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares the game time to `duration`. Zero is the start of play; setup time is negative.
 //
 // `legacy_start_time` specifies an alternate mode where the setup time counts for only 1/3 as much
 // as time after the setup finishes.
 struct TimeCondition : ConditionBase {
-    ticks duration;
-    bool  legacy_start_time;
+    ConditionOp op = ConditionOp::EQ;
+    ticks       duration;
+    bool        legacy_start_time;
 };
 
-// Ops: EQ, NE, LT, GT, LE, GE
 // Compares zoom level of the local player to `value`.
 //
 // Warning: not net-safe.
 struct ZoomCondition : ConditionBase {
-    Zoom value;
+    ConditionOp op = ConditionOp::EQ;
+    Zoom        value;
+};
+
+union ConditionWhen {
+    using Type = ConditionType;
+
+    ConditionBase base;
+    ConditionType type() const;
+
+    AutopilotCondition autopilot;
+    BuildingCondition  building;
+    CashCondition      cash;
+    ComputerCondition  computer;
+    CountCondition     count;
+    CounterCondition   counter;
+    DestroyedCondition destroyed;
+    DistanceCondition  distance;
+    HealthCondition    health;
+    MessageCondition   message;
+    ObjectCondition    object;
+    OwnerCondition     owner;
+    ShipsCondition     ships;
+    SpeedCondition     speed;
+    TargetCondition    target;
+    TimeCondition      time;
+    ZoomCondition      zoom;
+
+    ConditionWhen();
+    ConditionWhen(AutopilotCondition c);
+    ConditionWhen(BuildingCondition c);
+    ConditionWhen(CashCondition c);
+    ConditionWhen(ComputerCondition c);
+    ConditionWhen(CountCondition c);
+    ConditionWhen(CounterCondition c);
+    ConditionWhen(DestroyedCondition c);
+    ConditionWhen(DistanceCondition c);
+    ConditionWhen(HealthCondition c);
+    ConditionWhen(MessageCondition c);
+    ConditionWhen(ObjectCondition c);
+    ConditionWhen(OwnerCondition c);
+    ConditionWhen(ShipsCondition c);
+    ConditionWhen(SpeedCondition c);
+    ConditionWhen(TargetCondition c);
+    ConditionWhen(TimeCondition c);
+    ConditionWhen(ZoomCondition c);
+
+    ~ConditionWhen();
+    ConditionWhen(ConditionWhen&&);
+    ConditionWhen& operator=(ConditionWhen&&);
 };
 
 struct Condition {
     bool disabled   = false;
     bool persistent = false;
 
-    union When {
-        using Type = ConditionType;
-
-        ConditionBase base;
-        ConditionType type() const;
-
-        AutopilotCondition autopilot;
-        BuildingCondition  building;
-        ComputerCondition  computer;
-        CounterCondition   counter;
-        DestroyedCondition destroyed;
-        DistanceCondition  distance;
-        HealthCondition    health;
-        MessageCondition   message;
-        ObjectCondition    object;
-        OwnerCondition     owner;
-        ShipsCondition     ships;
-        SpeedCondition     speed;
-        TargetCondition    target;
-        TimeCondition      time;
-        ZoomCondition      zoom;
-
-        When();
-        When(AutopilotCondition c);
-        When(BuildingCondition c);
-        When(ComputerCondition c);
-        When(CounterCondition c);
-        When(DestroyedCondition c);
-        When(DistanceCondition c);
-        When(HealthCondition c);
-        When(MessageCondition c);
-        When(ObjectCondition c);
-        When(OwnerCondition c);
-        When(ShipsCondition c);
-        When(SpeedCondition c);
-        When(TargetCondition c);
-        When(TimeCondition c);
-        When(ZoomCondition c);
-
-        ~When();
-        When(When&&);
-        When& operator=(When&&);
-    } when;
+    ConditionWhen when;
 
     sfz::optional<ObjectRef> subject;
     sfz::optional<ObjectRef> object;
