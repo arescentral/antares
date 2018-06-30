@@ -36,6 +36,7 @@ struct Initial;
 class path_value;
 
 enum class ConditionType {
+    NONE = 0,
     AUTOPILOT,
     BUILDING,
     COMPUTER,
@@ -57,7 +58,7 @@ enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
 enum class ConditionEqOp { EQ, NE };
 
 struct ConditionBase {
-    ConditionType type;
+    ConditionType type = ConditionType::NONE;
 };
 
 // Compares player’s autopilot state (on = true; off = false) to `value`.

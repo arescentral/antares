@@ -187,6 +187,7 @@ static bool is_true(const ZoomCondition& c) { return op_compare(c.op, g.zoom, c.
 
 static bool is_true(const ConditionWhen& c) {
     switch (c.type()) {
+        case ConditionWhen::Type::NONE: return false;
         case ConditionWhen::Type::AUTOPILOT: return is_true(c.autopilot);
         case ConditionWhen::Type::BUILDING: return is_true(c.building);
         case ConditionWhen::Type::COMPUTER: return is_true(c.computer);

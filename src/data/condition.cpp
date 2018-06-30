@@ -50,6 +50,7 @@ ConditionWhen::ConditionWhen(ZoomCondition a) : zoom(std::move(a)) {}
 
 ConditionWhen::ConditionWhen(ConditionWhen&& a) {
     switch (a.type()) {
+        case ConditionWhen::Type::NONE: new (this) ConditionWhen(); break;
         case ConditionWhen::Type::AUTOPILOT:
             new (this) ConditionWhen(std::move(a.autopilot));
             break;
@@ -80,6 +81,7 @@ ConditionWhen& ConditionWhen::operator=(ConditionWhen&& a) {
 
 ConditionWhen::~ConditionWhen() {
     switch (type()) {
+        case ConditionWhen::Type::NONE: base.~ConditionBase(); break;
         case ConditionWhen::Type::AUTOPILOT: autopilot.~AutopilotCondition(); break;
         case ConditionWhen::Type::BUILDING: building.~BuildingCondition(); break;
         case ConditionWhen::Type::COMPUTER: computer.~ComputerCondition(); break;
@@ -261,6 +263,7 @@ static ConditionWhen when(path_value x) {
     }
 
     switch (required_condition_type(x.get("type"))) {
+        case ConditionWhen::Type::NONE: throw std::runtime_error("condition type none?");
         case ConditionWhen::Type::AUTOPILOT: return autopilot_condition(x);
         case ConditionWhen::Type::BUILDING: return building_condition(x);
         case ConditionWhen::Type::COMPUTER: return computer_condition(x);
