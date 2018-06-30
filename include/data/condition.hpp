@@ -32,6 +32,7 @@
 namespace antares {
 
 union Action;
+union ConditionWhen;
 struct Initial;
 class path_value;
 
@@ -40,6 +41,7 @@ enum class ConditionType {
     AUTOPILOT,
     BUILDING,
     COMPUTER,
+    COUNT,
     COUNTER,
     DESTROYED,
     DISTANCE,
@@ -83,6 +85,13 @@ struct ComputerCondition : ConditionBase {
     ConditionEqOp          op = ConditionEqOp::EQ;
     Screen                 screen;
     sfz::optional<int64_t> line;
+};
+
+// Compares the number of true sub-conditions to `value`.
+struct CountCondition : ConditionBase {
+    ConditionOp                op = ConditionOp::EQ;
+    int64_t                    value;
+    std::vector<ConditionWhen> of;
 };
 
 // Compares given counter of given admiral to `value`.
@@ -197,6 +206,7 @@ union ConditionWhen {
     AutopilotCondition autopilot;
     BuildingCondition  building;
     ComputerCondition  computer;
+    CountCondition     count;
     CounterCondition   counter;
     DestroyedCondition destroyed;
     DistanceCondition  distance;
@@ -214,6 +224,7 @@ union ConditionWhen {
     ConditionWhen(AutopilotCondition c);
     ConditionWhen(BuildingCondition c);
     ConditionWhen(ComputerCondition c);
+    ConditionWhen(CountCondition c);
     ConditionWhen(CounterCondition c);
     ConditionWhen(DestroyedCondition c);
     ConditionWhen(DistanceCondition c);

@@ -24,6 +24,8 @@
 
 namespace antares {
 
+static ConditionWhen when(path_value x);
+
 // clang-format off
 #define COMMON_CONDITION_FIELDS                                                                   \
             {"type", {&ConditionBase::type, required_condition_type}}
@@ -35,6 +37,7 @@ ConditionWhen::ConditionWhen() : base{} {}
 ConditionWhen::ConditionWhen(AutopilotCondition a) : autopilot(std::move(a)) {}
 ConditionWhen::ConditionWhen(BuildingCondition a) : building(std::move(a)) {}
 ConditionWhen::ConditionWhen(ComputerCondition a) : computer(std::move(a)) {}
+ConditionWhen::ConditionWhen(CountCondition a) : count(std::move(a)) {}
 ConditionWhen::ConditionWhen(CounterCondition a) : counter(std::move(a)) {}
 ConditionWhen::ConditionWhen(DestroyedCondition a) : destroyed(std::move(a)) {}
 ConditionWhen::ConditionWhen(DistanceCondition a) : distance(std::move(a)) {}
@@ -56,6 +59,7 @@ ConditionWhen::ConditionWhen(ConditionWhen&& a) {
             break;
         case ConditionWhen::Type::BUILDING: new (this) ConditionWhen(std::move(a.building)); break;
         case ConditionWhen::Type::COMPUTER: new (this) ConditionWhen(std::move(a.computer)); break;
+        case ConditionWhen::Type::COUNT: new (this) ConditionWhen(std::move(a.count)); break;
         case ConditionWhen::Type::COUNTER: new (this) ConditionWhen(std::move(a.counter)); break;
         case ConditionWhen::Type::DESTROYED:
             new (this) ConditionWhen(std::move(a.destroyed));
@@ -85,6 +89,7 @@ ConditionWhen::~ConditionWhen() {
         case ConditionWhen::Type::AUTOPILOT: autopilot.~AutopilotCondition(); break;
         case ConditionWhen::Type::BUILDING: building.~BuildingCondition(); break;
         case ConditionWhen::Type::COMPUTER: computer.~ComputerCondition(); break;
+        case ConditionWhen::Type::COUNT: count.~CountCondition(); break;
         case ConditionWhen::Type::COUNTER: counter.~CounterCondition(); break;
         case ConditionWhen::Type::DESTROYED: destroyed.~DestroyedCondition(); break;
         case ConditionWhen::Type::DISTANCE: distance.~DistanceCondition(); break;
@@ -105,6 +110,7 @@ static ConditionWhen::Type required_condition_type(path_value x) {
             x, {{"autopilot", ConditionWhen::Type::AUTOPILOT},
                 {"building", ConditionWhen::Type::BUILDING},
                 {"computer", ConditionWhen::Type::COMPUTER},
+                {"count", ConditionWhen::Type::COUNT},
                 {"counter", ConditionWhen::Type::COUNTER},
                 {"destroyed", ConditionWhen::Type::DESTROYED},
                 {"distance", ConditionWhen::Type::DISTANCE},
@@ -156,6 +162,14 @@ static ConditionWhen computer_condition(path_value x) {
                 {"player", nullptr},
                 {"screen", {&ComputerCondition::screen, required_screen}},
                 {"line", {&ComputerCondition::line, optional_int}}});
+}
+
+static ConditionWhen count_condition(path_value x) {
+    return required_struct<CountCondition>(
+            x, {COMMON_CONDITION_FIELDS,
+                {"op", {&CountCondition::op, required_condition_op}},
+                {"value", {&CountCondition::value, required_int}},
+                {"of", {&CountCondition::of, required_array<ConditionWhen, when>}}});
 }
 
 static ConditionWhen counter_condition(path_value x) {
@@ -267,6 +281,7 @@ static ConditionWhen when(path_value x) {
         case ConditionWhen::Type::AUTOPILOT: return autopilot_condition(x);
         case ConditionWhen::Type::BUILDING: return building_condition(x);
         case ConditionWhen::Type::COMPUTER: return computer_condition(x);
+        case ConditionWhen::Type::COUNT: return count_condition(x);
         case ConditionWhen::Type::COUNTER: return counter_condition(x);
         case ConditionWhen::Type::DESTROYED: return destroyed_condition(x);
         case ConditionWhen::Type::DISTANCE: return distance_condition(x);

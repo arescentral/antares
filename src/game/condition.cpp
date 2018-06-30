@@ -32,6 +32,8 @@
 
 namespace antares {
 
+static bool is_true(const ConditionWhen& c);
+
 const Condition* Condition::get(int number) {
     if ((0 <= number) && (number < g.level->conditions.size())) {
         return &g.level->conditions[number];
@@ -94,6 +96,16 @@ static bool is_true(const ComputerCondition& c) {
     } else {
         return op_eq(c.op, g.mini.currentScreen, c.screen);
     }
+}
+
+static bool is_true(const CountCondition& c) {
+    int count = 0;
+    for (const ConditionWhen& sub : c.of) {
+        if (is_true(sub)) {
+            ++count;
+        }
+    }
+    return op_compare(c.op, count, c.value);
 }
 
 static bool is_true(const CounterCondition& c) {
@@ -191,6 +203,7 @@ static bool is_true(const ConditionWhen& c) {
         case ConditionWhen::Type::AUTOPILOT: return is_true(c.autopilot);
         case ConditionWhen::Type::BUILDING: return is_true(c.building);
         case ConditionWhen::Type::COMPUTER: return is_true(c.computer);
+        case ConditionWhen::Type::COUNT: return is_true(c.count);
         case ConditionWhen::Type::COUNTER: return is_true(c.counter);
         case ConditionWhen::Type::DESTROYED: return is_true(c.destroyed);
         case ConditionWhen::Type::DISTANCE: return is_true(c.distance);
