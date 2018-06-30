@@ -187,53 +187,55 @@ struct ZoomCondition : ConditionBase {
     Zoom        value;
 };
 
+union ConditionWhen {
+    using Type = ConditionType;
+
+    ConditionBase base;
+    ConditionType type() const;
+
+    AutopilotCondition autopilot;
+    BuildingCondition  building;
+    ComputerCondition  computer;
+    CounterCondition   counter;
+    DestroyedCondition destroyed;
+    DistanceCondition  distance;
+    HealthCondition    health;
+    MessageCondition   message;
+    ObjectCondition    object;
+    OwnerCondition     owner;
+    ShipsCondition     ships;
+    SpeedCondition     speed;
+    TargetCondition    target;
+    TimeCondition      time;
+    ZoomCondition      zoom;
+
+    ConditionWhen();
+    ConditionWhen(AutopilotCondition c);
+    ConditionWhen(BuildingCondition c);
+    ConditionWhen(ComputerCondition c);
+    ConditionWhen(CounterCondition c);
+    ConditionWhen(DestroyedCondition c);
+    ConditionWhen(DistanceCondition c);
+    ConditionWhen(HealthCondition c);
+    ConditionWhen(MessageCondition c);
+    ConditionWhen(ObjectCondition c);
+    ConditionWhen(OwnerCondition c);
+    ConditionWhen(ShipsCondition c);
+    ConditionWhen(SpeedCondition c);
+    ConditionWhen(TargetCondition c);
+    ConditionWhen(TimeCondition c);
+    ConditionWhen(ZoomCondition c);
+
+    ~ConditionWhen();
+    ConditionWhen(ConditionWhen&&);
+    ConditionWhen& operator=(ConditionWhen&&);
+};
+
 struct Condition {
     bool disabled   = false;
     bool persistent = false;
 
-    union When {
-        using Type = ConditionType;
-
-        ConditionBase base;
-        ConditionType type() const;
-
-        AutopilotCondition autopilot;
-        BuildingCondition  building;
-        ComputerCondition  computer;
-        CounterCondition   counter;
-        DestroyedCondition destroyed;
-        DistanceCondition  distance;
-        HealthCondition    health;
-        MessageCondition   message;
-        ObjectCondition    object;
-        OwnerCondition     owner;
-        ShipsCondition     ships;
-        SpeedCondition     speed;
-        TargetCondition    target;
-        TimeCondition      time;
-        ZoomCondition      zoom;
-
-        When();
-        When(AutopilotCondition c);
-        When(BuildingCondition c);
-        When(ComputerCondition c);
-        When(CounterCondition c);
-        When(DestroyedCondition c);
-        When(DistanceCondition c);
-        When(HealthCondition c);
-        When(MessageCondition c);
-        When(ObjectCondition c);
-        When(OwnerCondition c);
-        When(ShipsCondition c);
-        When(SpeedCondition c);
-        When(TargetCondition c);
-        When(TimeCondition c);
-        When(ZoomCondition c);
-
-        ~When();
-        When(When&&);
-        When& operator=(When&&);
-    } when;
+    ConditionWhen when;
 
     sfz::optional<ObjectRef> subject;
     sfz::optional<ObjectRef> object;
