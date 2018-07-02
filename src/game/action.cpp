@@ -309,6 +309,12 @@ static void apply(
 }
 
 static void apply(
+        const CheckAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
+        Handle<SpaceObject> object, Point* offset) {
+    CheckLevelConditions();
+}
+
+static void apply(
         const CloakAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     focus->set_cloak(true);
@@ -731,6 +737,7 @@ static void apply(
         case Action::Type::ASSUME: apply(a.assume, subject, focus, object, offset); break;
         case Action::Type::CAP_SPEED: apply(a.cap_speed, subject, focus, object, offset); break;
         case Action::Type::CAPTURE: apply(a.capture, subject, focus, object, offset); break;
+        case Action::Type::CHECK: apply(a.check, subject, focus, object, offset); break;
         case Action::Type::CLOAK: apply(a.cloak, subject, focus, object, offset); break;
         case Action::Type::CONDITION: apply(a.condition, subject, focus, object, offset); break;
         case Action::Type::CREATE: apply(a.create, subject, focus, object, offset); break;
@@ -767,8 +774,6 @@ static void apply(
 static void execute_actions(
         const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
         const Handle<SpaceObject> original_object, Point* offset, bool allowDelay) {
-    bool check_conditions = false;
-
     for (const Action* curr : sfz::range(begin, end)) {
         const Action& action = *curr;
 #ifdef DATA_COVERAGE
@@ -809,11 +814,6 @@ static void execute_actions(
         }
 
         apply(action, subject, focus, object, offset);
-        check_conditions = check_conditions || action.base.check_conditions;
-    }
-
-    if (check_conditions) {
-        CheckLevelConditions();
     }
 }
 
