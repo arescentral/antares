@@ -33,9 +33,7 @@ namespace antares {
             {"type", {&ActionBase::type, required_action_type}},                                  \
             {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                        \
             {"if", {&ActionBase::filter, optional_action_filter}},                                \
-            {"delay", {&ActionBase::delay, optional_ticks, ticks(0)}},                            \
-            {"override", {&ActionBase::override_, optional_action_override}},                     \
-            {"check_conditions", {&ActionBase::check_conditions, optional_bool, false}}
+            {"override", {&ActionBase::override_, optional_action_override}}
 // clang-format on
 
 Action::Type Action::type() const { return base.type; }
@@ -44,9 +42,11 @@ Action::Action(AgeAction a) : age(std::move(a)) {}
 Action::Action(AssumeAction a) : assume(std::move(a)) {}
 Action::Action(CapSpeedAction a) : cap_speed(std::move(a)) {}
 Action::Action(CaptureAction a) : capture(std::move(a)) {}
+Action::Action(CheckAction a) : check(std::move(a)) {}
 Action::Action(CloakAction a) : cloak(std::move(a)) {}
 Action::Action(ConditionAction a) : condition(std::move(a)) {}
 Action::Action(CreateAction a) : create(std::move(a)) {}
+Action::Action(DelayAction a) : delay(std::move(a)) {}
 Action::Action(DisableAction a) : disable(std::move(a)) {}
 Action::Action(EnergizeAction a) : energize(std::move(a)) {}
 Action::Action(EquipAction a) : equip(std::move(a)) {}
@@ -81,9 +81,11 @@ Action::Action(Action&& a) {
         case Action::Type::ASSUME: new (this) Action(std::move(a.assume)); break;
         case Action::Type::CAP_SPEED: new (this) Action(std::move(a.cap_speed)); break;
         case Action::Type::CAPTURE: new (this) Action(std::move(a.capture)); break;
+        case Action::Type::CHECK: new (this) Action(std::move(a.check)); break;
         case Action::Type::CLOAK: new (this) Action(std::move(a.cloak)); break;
         case Action::Type::CONDITION: new (this) Action(std::move(a.condition)); break;
         case Action::Type::CREATE: new (this) Action(std::move(a.create)); break;
+        case Action::Type::DELAY: new (this) Action(std::move(a.delay)); break;
         case Action::Type::DISABLE: new (this) Action(std::move(a.disable)); break;
         case Action::Type::ENERGIZE: new (this) Action(std::move(a.energize)); break;
         case Action::Type::EQUIP: new (this) Action(std::move(a.equip)); break;
@@ -126,9 +128,11 @@ Action::~Action() {
         case Action::Type::ASSUME: assume.~AssumeAction(); break;
         case Action::Type::CAP_SPEED: cap_speed.~CapSpeedAction(); break;
         case Action::Type::CAPTURE: capture.~CaptureAction(); break;
+        case Action::Type::CHECK: check.~CheckAction(); break;
         case Action::Type::CLOAK: cloak.~CloakAction(); break;
         case Action::Type::CONDITION: condition.~ConditionAction(); break;
         case Action::Type::CREATE: create.~CreateAction(); break;
+        case Action::Type::DELAY: delay.~DelayAction(); break;
         case Action::Type::DISABLE: disable.~DisableAction(); break;
         case Action::Type::ENERGIZE: energize.~EnergizeAction(); break;
         case Action::Type::EQUIP: equip.~EquipAction(); break;
@@ -246,9 +250,11 @@ static Action::Type required_action_type(path_value x) {
                 {"assume", Action::Type::ASSUME},
                 {"cap-speed", Action::Type::CAP_SPEED},
                 {"capture", Action::Type::CAPTURE},
+                {"check", Action::Type::CHECK},
                 {"cloak", Action::Type::CLOAK},
                 {"condition", Action::Type::CONDITION},
                 {"create", Action::Type::CREATE},
+                {"delay", Action::Type::DELAY},
                 {"disable", Action::Type::DISABLE},
                 {"energize", Action::Type::ENERGIZE},
                 {"equip", Action::Type::EQUIP},
@@ -305,6 +311,10 @@ static Action capture_action(path_value x) {
             x, {COMMON_ACTION_FIELDS, {"player", {&CaptureAction::player, optional_admiral}}});
 }
 
+static Action check_action(path_value x) {
+    return required_struct<CheckAction>(x, {COMMON_ACTION_FIELDS});
+}
+
 static Action cloak_action(path_value x) {
     return required_struct<CloakAction>(x, {COMMON_ACTION_FIELDS});
 }
@@ -331,6 +341,11 @@ static Action create_action(path_value x) {
                 {"within", {&CreateAction::within, required_within}},
                 {"inherit", {&CreateAction::inherit, optional_bool, false}},
                 {"legacy_random", {&CreateAction::legacy_random, optional_bool, false}}});
+}
+
+static Action delay_action(path_value x) {
+    return required_struct<DelayAction>(
+            x, {COMMON_ACTION_FIELDS, {"duration", {&DelayAction::duration, required_ticks}}});
 }
 
 static Action disable_action(path_value x) {
@@ -590,9 +605,11 @@ Action action(path_value x) {
         case Action::Type::ASSUME: return assume_action(x);
         case Action::Type::CAP_SPEED: return cap_speed_action(x);
         case Action::Type::CAPTURE: return capture_action(x);
+        case Action::Type::CHECK: return check_action(x);
         case Action::Type::CLOAK: return cloak_action(x);
         case Action::Type::CONDITION: return condition_action(x);
         case Action::Type::CREATE: return create_action(x);
+        case Action::Type::DELAY: return delay_action(x);
         case Action::Type::DISABLE: return disable_action(x);
         case Action::Type::ENERGIZE: return energize_action(x);
         case Action::Type::EQUIP: return equip_action(x);

@@ -47,9 +47,11 @@ enum class ActionType {
     ASSUME,
     CAP_SPEED,
     CAPTURE,
+    CHECK,
     CLOAK,
     CONDITION,
     CREATE,
+    DELAY,
     DISABLE,
     ENERGIZE,
     EQUIP,
@@ -84,16 +86,13 @@ enum class Within { CIRCLE, SQUARE };
 struct ActionBase {
     ActionType type;
 
-    bool reflexive        = false;  // does it apply to object executing verb?
-    bool check_conditions = false;  // re-check conditions after executing?
+    bool reflexive = false;  // does it apply to object executing verb?
 
     struct Filter {
         uint32_t                   attributes = 0;
         std::map<pn::string, bool> tags;
         Owner                      owner = Owner::ANY;
     } filter;
-
-    ticks delay = ticks(0);
 
     struct Override {
         sfz::optional<ObjectRef> subject;
@@ -122,6 +121,8 @@ struct CaptureAction : public ActionBase {
                      // if absent and non-reflexive, set object’s owner to subject’s
 };
 
+struct CheckAction : public ActionBase {};
+
 struct CloakAction : public ActionBase {};
 
 struct ConditionAction : public ActionBase {
@@ -140,6 +141,10 @@ struct CreateAction : public ActionBase {
                                                      // if true, gets creator’s target as target
     bool legacy_random = false;                      // if true, consume a random number from
                                                      // subject even if not necessary
+};
+
+struct DelayAction : public ActionBase {
+    ticks duration;
 };
 
 struct DisableAction : public ActionBase {
@@ -331,9 +336,11 @@ union Action {
     AssumeAction    assume;
     CapSpeedAction  cap_speed;
     CaptureAction   capture;
+    CheckAction     check;
     CloakAction     cloak;
     ConditionAction condition;
     CreateAction    create;
+    DelayAction     delay;
     DisableAction   disable;
     EnergizeAction  energize;
     EquipAction     equip;
@@ -366,9 +373,11 @@ union Action {
     Action(AssumeAction a);
     Action(CapSpeedAction a);
     Action(CaptureAction a);
+    Action(CheckAction a);
     Action(CloakAction a);
     Action(ConditionAction a);
     Action(CreateAction a);
+    Action(DelayAction a);
     Action(DisableAction a);
     Action(EnergizeAction a);
     Action(EquipAction a);
