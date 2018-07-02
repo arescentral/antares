@@ -51,6 +51,7 @@ enum class ActionType {
     CLOAK,
     CONDITION,
     CREATE,
+    DELAY,
     DISABLE,
     ENERGIZE,
     EQUIP,
@@ -92,8 +93,6 @@ struct ActionBase {
         std::map<pn::string, bool> tags;
         Owner                      owner = Owner::ANY;
     } filter;
-
-    ticks delay = ticks(0);
 
     struct Override {
         sfz::optional<ObjectRef> subject;
@@ -142,6 +141,10 @@ struct CreateAction : public ActionBase {
                                                      // if true, gets creator’s target as target
     bool legacy_random = false;                      // if true, consume a random number from
                                                      // subject even if not necessary
+};
+
+struct DelayAction : public ActionBase {
+    ticks duration;
 };
 
 struct DisableAction : public ActionBase {
@@ -337,6 +340,7 @@ union Action {
     CloakAction     cloak;
     ConditionAction condition;
     CreateAction    create;
+    DelayAction     delay;
     DisableAction   disable;
     EnergizeAction  energize;
     EquipAction     equip;
@@ -373,6 +377,7 @@ union Action {
     Action(CloakAction a);
     Action(ConditionAction a);
     Action(CreateAction a);
+    Action(DelayAction a);
     Action(DisableAction a);
     Action(EnergizeAction a);
     Action(EquipAction a);

@@ -741,6 +741,7 @@ static void apply(
         case Action::Type::CLOAK: apply(a.cloak, subject, focus, object, offset); break;
         case Action::Type::CONDITION: apply(a.condition, subject, focus, object, offset); break;
         case Action::Type::CREATE: apply(a.create, subject, focus, object, offset); break;
+        case Action::Type::DELAY: throw std::runtime_error("delay shouldn’t get here");
         case Action::Type::DISABLE: apply(a.disable, subject, focus, object, offset); break;
         case Action::Type::ENERGIZE: apply(a.energize, subject, focus, object, offset); break;
         case Action::Type::EQUIP: apply(a.equip, subject, focus, object, offset); break;
@@ -773,18 +774,19 @@ static void apply(
 
 static void execute_actions(
         const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
-        const Handle<SpaceObject> original_object, Point* offset, bool allowDelay) {
+        const Handle<SpaceObject> original_object, Point* offset) {
     for (const Action* curr : sfz::range(begin, end)) {
         const Action& action = *curr;
 #ifdef DATA_COVERAGE
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-        if ((action.base.delay > ticks(0)) && allowDelay) {
-            queue_action(curr, end, action.base.delay, original_subject, original_object, offset);
+        if (action.type() == ActionType::DELAY) {
+            queue_action(
+                    curr + 1, end, action.delay.duration, original_subject, original_object,
+                    offset);
             return;
         }
-        allowDelay = true;
 
         auto subject = original_subject;
         if (action.base.override_.subject.has_value()) {
@@ -820,8 +822,7 @@ static void execute_actions(
 void exec(
         const std::vector<Action>& actions, Handle<SpaceObject> sObject,
         Handle<SpaceObject> dObject, Point* offset) {
-    execute_actions(
-            actions.data(), actions.data() + actions.size(), sObject, dObject, offset, true);
+    execute_actions(actions.data(), actions.data() + actions.size(), sObject, dObject, offset);
 }
 
 void reset_action_queue() {
@@ -917,7 +918,7 @@ void execute_action_queue() {
             execute_actions(
                     gFirstActionQueue->actionBegin, gFirstActionQueue->actionEnd,
                     gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
-                    &gFirstActionQueue->offset, false);
+                    &gFirstActionQueue->offset);
         }
 
         gFirstActionQueue->actionBegin = gFirstActionQueue->actionEnd = nullptr;
