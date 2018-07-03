@@ -28,8 +28,6 @@ static int32_t required_int32(path_value x) {
     return required_int(x, {-0x80000000ll, 0x80000000ll});
 }
 
-static uint32_t required_uint32(path_value x) { return required_int(x, {0, 0x100000000ull}); }
-
 static uint8_t required_uint8(path_value x) { return required_int(x, {0, 0x100}); }
 
 static fixedPointType required_fixed_point(path_value x) {
@@ -526,6 +524,12 @@ static BaseObject::AI optional_ai(path_value x) {
             .value_or(BaseObject::AI{});
 }
 
+uint32_t warp_out_distance(path_value x) {
+    double d = required_double(x);
+    d        = floor(pow(d, 2));
+    return d;
+}
+
 BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
             path_value{x0},
@@ -540,7 +544,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"portrait", {&BaseObject::portrait, optional_string_copy}},
 
                     {"price", {&BaseObject::price, required_int32}},
-                    {"warp_out_distance", {&BaseObject::warpOutDistance, required_uint32}},
+                    {"warp_out_distance", {&BaseObject::warpOutDistance, warp_out_distance}},
                     {"health", {&BaseObject::health, required_int32}},
                     {"energy", {&BaseObject::energy, required_int32}},
                     {"occupy_count", {&BaseObject::occupy_count, required_int32}},
