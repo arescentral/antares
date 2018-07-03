@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <map>
 #include <pn/string>
+#include <vector>
 
 #include "data/enums.hpp"
 #include "data/handle.hpp"
@@ -38,7 +39,8 @@ struct Race {
     pn::string                                          plural;
     pn::string                                          military;
     pn::string                                          homeworld;
-    Hue                                                 apparentColor;
+    Hue                                                 hue;
+    std::vector<Hue>                                    not_hue;
     Fixed                                               advantage;
     std::map<pn::string, NamedHandle<const BaseObject>> ships;
 
