@@ -52,8 +52,8 @@ Race race(path_value x) {
                 {"plural", {&Race::plural, required_string_copy}},
                 {"military", {&Race::military, required_string_copy}},
                 {"homeworld", {&Race::homeworld, required_string_copy}},
-                {"apparent_color", {&Race::apparentColor, required_hue}},
-                {"illegal_colors", nullptr},
+                {"hue", {&Race::hue, required_hue}},
+                {"not_hue", {&Race::not_hue, optional_array<Hue, required_hue>}},
                 {"advantage", {&Race::advantage, required_fixed}},
                 {"ships", {&Race::ships, optional_ships}}});
 }
