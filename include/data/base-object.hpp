@@ -195,7 +195,7 @@ class BaseObject {
     } activate;
 
     struct Arrive {
-        int32_t             distance;
+        uint32_t            distance;
         std::vector<Action> action;
     } arrive;
 
