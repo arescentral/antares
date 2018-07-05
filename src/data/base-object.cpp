@@ -38,6 +38,12 @@ static fixedPointType required_fixed_point(path_value x) {
                });
 }
 
+static uint32_t distance(path_value x) {
+    double d = required_double(x);
+    d        = floor(pow(d, 2));
+    return d;
+}
+
 static std::map<pn::string, bool> optional_tags(path_value x) {
     if (x.value().is_null()) {
         return {};
@@ -428,7 +434,7 @@ static BaseObject::Arrive optional_arrive(path_value x) {
     return optional_struct<BaseObject::Arrive>(
                    x,
                    {
-                           {"distance", {&BaseObject::Arrive::distance, required_int32}},
+                           {"distance", {&BaseObject::Arrive::distance, distance}},
                            {"action",
                             {&BaseObject::Arrive::action, optional_array<Action, action>}},
                    })
@@ -524,12 +530,6 @@ static BaseObject::AI optional_ai(path_value x) {
             .value_or(BaseObject::AI{});
 }
 
-uint32_t warp_out_distance(path_value x) {
-    double d = required_double(x);
-    d        = floor(pow(d, 2));
-    return d;
-}
-
 BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
             path_value{x0},
@@ -544,7 +544,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"portrait", {&BaseObject::portrait, optional_string_copy}},
 
                     {"price", {&BaseObject::price, required_int32}},
-                    {"warp_out_distance", {&BaseObject::warpOutDistance, warp_out_distance}},
+                    {"warp_out_distance", {&BaseObject::warpOutDistance, distance}},
                     {"health", {&BaseObject::health, required_int32}},
                     {"energy", {&BaseObject::energy, required_int32}},
                     {"occupy_count", {&BaseObject::occupy_count, required_int32}},
