@@ -559,7 +559,7 @@ BaseObject base_object(pn::value_cref x0) {
 
                     {"shield_color", {&BaseObject::shieldColor, optional_color}},
 
-                    {"initial_velocity", {&BaseObject::initial_velocity, required_fixed_range}},
+                    {"initial_velocity", {&BaseObject::initial_velocity, optional_fixed_range}},
                     {"initial_direction", {&BaseObject::initial_direction, required_int_range}},
                     {"autotarget", {&BaseObject::autotarget, required_bool}},
 

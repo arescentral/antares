@@ -261,9 +261,12 @@ SpaceObject::SpaceObject(
         mAddAngle(direction, randomSeed.next(base->initial_direction.range()));
     }
 
-    Fixed f = base->initial_velocity.begin;
-    if (base->initial_velocity.range() > Fixed::from_val(1)) {
-        f += randomSeed.next(base->initial_velocity.range());
+    Fixed f = base->maxVelocity;
+    if (base->initial_velocity.has_value()) {
+        f = base->initial_velocity->begin;
+        if (base->initial_velocity->range() > Fixed::from_val(1)) {
+            f += randomSeed.next(base->initial_velocity->range());
+        }
     }
     GetRotPoint(&velocity.h, &velocity.v, direction);
     velocity.h = (velocity.h * f);

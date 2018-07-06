@@ -120,8 +120,9 @@ class BaseObject {
     int32_t health;  // starting health
     int32_t energy;  // starting energy for material objects
 
-    Range<Fixed>   initial_velocity;   // initial random velocity (usually relative)
-    Range<int64_t> initial_direction;  // initial random direction (usually relative)
+    sfz::optional<Range<Fixed>> initial_velocity;  // initial random velocity (usually relative)
+                                                   // Default: max velocity
+    Range<int64_t> initial_direction;              // initial random direction (usually relative)
     bool           autotarget = false;
 
     int32_t occupy_count;  // size of occupying force
