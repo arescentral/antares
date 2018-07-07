@@ -163,7 +163,7 @@ void CreateObjectDataText(pn::string& text, const BaseObject& object) {
     find_replace(data, 0, keys.at(kMaxSpeedStringNum), stringify(Fixed(object.maxVelocity)));
 
     // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object.maxThrust)));
+    find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object.thrust)));
 
     // par turn
     find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed(object.turn_rate)));

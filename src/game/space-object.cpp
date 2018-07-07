@@ -278,7 +278,7 @@ SpaceObject::SpaceObject(
     }
 
     if (!(attributes & (kCanThink | kRemoteOrHuman))) {
-        thrust = base->maxThrust;
+        thrust = base->thrust;
     }
 
     if (attributes & kIsSelfAnimated) {

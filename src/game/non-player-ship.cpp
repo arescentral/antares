@@ -343,10 +343,10 @@ void NonplayerShipThink() {
         if (o->keysDown & kUpKey) {
             if ((o->presenceState != kWarpInPresence) && (o->presenceState != kWarpingPresence) &&
                 (o->presenceState != kWarpOutPresence)) {
-                o->thrust = baseObject->maxThrust;
+                o->thrust = baseObject->thrust;
             }
         } else if (o->keysDown & kDownKey) {
-            o->thrust = -baseObject->maxThrust;
+            o->thrust = -baseObject->thrust;
         } else {
             o->thrust = Fixed::zero();
         }
@@ -376,9 +376,9 @@ void NonplayerShipThink() {
         if ((o->keysDown & kWarpKey) && (baseObject->warpSpeed > Fixed::zero()) &&
             (o->energy() > 0)) {
             if (o->presenceState == kWarpingPresence) {
-                o->thrust = baseObject->maxThrust * o->presence.warping;
+                o->thrust = baseObject->thrust * o->presence.warping;
             } else if (o->presenceState == kWarpOutPresence) {
-                o->thrust = baseObject->maxThrust * o->presence.warp_out;
+                o->thrust = baseObject->thrust * o->presence.warp_out;
             } else if (
                     (o->presenceState == kNormalPresence) &&
                     (o->energy() > (o->max_energy() >> kWarpInEnergyFactor))) {
@@ -392,7 +392,7 @@ void NonplayerShipThink() {
             } else if (o->presenceState == kWarpingPresence) {
                 o->presenceState = kWarpOutPresence;
             } else if (o->presenceState == kWarpOutPresence) {
-                o->thrust = baseObject->maxThrust * o->presence.warp_out;
+                o->thrust = baseObject->thrust * o->presence.warp_out;
             }
         }
     }

@@ -115,7 +115,7 @@ class BaseObject {
 
     Fixed mass;       // how quickly thrust acheives max
     Fixed turn_rate;  // max rate at which object can turn
-    Fixed maxThrust;  // maximum amount of thrust
+    Fixed thrust;     // maximum amount of thrust
 
     int32_t health;  // starting health
     int32_t energy;  // starting energy for material objects

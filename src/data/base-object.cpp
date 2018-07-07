@@ -553,7 +553,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"warp_speed", {&BaseObject::warpSpeed, required_fixed}},
                     {"mass", {&BaseObject::mass, required_fixed}},
                     {"turn_rate", {&BaseObject::turn_rate, required_fixed}},
-                    {"max_thrust", {&BaseObject::maxThrust, required_fixed}},
+                    {"thrust", {&BaseObject::thrust, required_fixed}},
 
                     {"build_time", {&BaseObject::buildTime, required_ticks}},
 
