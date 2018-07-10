@@ -115,13 +115,14 @@ class BaseObject {
 
     Fixed mass;       // how quickly thrust acheives max
     Fixed turn_rate;  // max rate at which object can turn
-    Fixed maxThrust;  // maximum amount of thrust
+    Fixed thrust;     // maximum amount of thrust
 
     int32_t health;  // starting health
     int32_t energy;  // starting energy for material objects
 
-    Range<Fixed>   initial_velocity;   // initial random velocity (usually relative)
-    Range<int64_t> initial_direction;  // initial random direction (usually relative)
+    sfz::optional<Range<Fixed>> initial_velocity;  // initial random velocity (usually relative)
+                                                   // Default: max velocity
+    Range<int64_t> initial_direction;              // initial random direction (usually relative)
     bool           autotarget = false;
 
     int32_t occupy_count;  // size of occupying force

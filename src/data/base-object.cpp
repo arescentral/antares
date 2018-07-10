@@ -553,13 +553,13 @@ BaseObject base_object(pn::value_cref x0) {
                     {"warp_speed", {&BaseObject::warpSpeed, required_fixed}},
                     {"mass", {&BaseObject::mass, required_fixed}},
                     {"turn_rate", {&BaseObject::turn_rate, required_fixed}},
-                    {"max_thrust", {&BaseObject::maxThrust, required_fixed}},
+                    {"thrust", {&BaseObject::thrust, required_fixed}},
 
                     {"build_time", {&BaseObject::buildTime, required_ticks}},
 
                     {"shield_color", {&BaseObject::shieldColor, optional_color}},
 
-                    {"initial_velocity", {&BaseObject::initial_velocity, required_fixed_range}},
+                    {"initial_velocity", {&BaseObject::initial_velocity, optional_fixed_range}},
                     {"initial_direction", {&BaseObject::initial_direction, required_int_range}},
                     {"autotarget", {&BaseObject::autotarget, required_bool}},
 
