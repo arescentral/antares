@@ -44,24 +44,6 @@ static uint32_t distance(path_value x) {
     return d;
 }
 
-static std::map<pn::string, bool> optional_tags(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_map()) {
-        pn::map_cref               m = x.value().as_map();
-        std::map<pn::string, bool> result;
-        for (const auto& kv : m) {
-            auto v = optional_bool(x.get(kv.key()));
-            if (v.has_value()) {
-                result[kv.key().copy()] = *v;
-            }
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
-}
-
 static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
     return optional_struct<BaseObject::Weapon>(
             x, {

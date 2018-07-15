@@ -95,6 +95,8 @@ sfz::optional<ticks> optional_ticks(path_value x);
 ticks                required_ticks(path_value x);
 sfz::optional<secs>  optional_secs(path_value x);
 
+std::map<pn::string, bool> optional_tags(path_value x);
+
 sfz::optional<Handle<Admiral>>          optional_admiral(path_value x);
 Handle<Admiral>                         required_admiral(path_value x);
 NamedHandle<const BaseObject>           required_base(path_value x);

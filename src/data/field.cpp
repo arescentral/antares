@@ -340,6 +340,24 @@ sfz::optional<secs> optional_secs(path_value x) {
     }
 }
 
+std::map<pn::string, bool> optional_tags(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_map()) {
+        pn::map_cref               m = x.value().as_map();
+        std::map<pn::string, bool> result;
+        for (const auto& kv : m) {
+            auto v = optional_bool(x.get(kv.key()));
+            if (v.has_value()) {
+                result[kv.key().copy()] = *v;
+            }
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
 sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
     sfz::optional<int64_t> i = optional_int(x);
     if (i.has_value()) {
