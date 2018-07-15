@@ -27,24 +27,15 @@ static BuildableObject required_buildable_object(path_value x) {
 }
 
 static std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref a = x.value().as_array();
-        if (a.size() > kMaxShipCanBuild) {
-            throw std::runtime_error(pn::format(
-                                             "{0}has {1} elements, more than max of {2}",
-                                             x.prefix(), a.size(), kMaxShipCanBuild)
-                                             .c_str());
-        }
-        std::vector<BuildableObject> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_buildable_object(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    std::vector<BuildableObject> objects =
+            optional_array<BuildableObject, required_buildable_object>(x);
+    if (objects.size() > kMaxShipCanBuild) {
+        throw std::runtime_error(pn::format(
+                                         "{0}has {1} elements, more than max of {2}", x.prefix(),
+                                         objects.size(), kMaxShipCanBuild)
+                                         .c_str());
     }
+    return objects;
 }
 
 static Initial::Override optional_override(path_value x) {

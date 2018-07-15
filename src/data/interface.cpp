@@ -34,6 +34,8 @@ using sfz::range;
 
 namespace antares {
 
+static std::unique_ptr<InterfaceItemData> interface_item(path_value x);
+
 static InterfaceStyle required_interface_style(path_value x) {
     return required_enum<InterfaceStyle>(
             x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
@@ -61,6 +63,16 @@ static int16_t optional_gamepad_button(path_value x) {
         throw std::runtime_error(pn::format("{0}: must be a gamepad button", x.path()).c_str());
     }
     return i;
+}
+
+static TabBoxData::Tab required_tab(path_value x) {
+    return required_struct<TabBoxData::Tab>(
+            x, {{"id", {&TabBoxData::Tab::id, optional_int}},
+                {"width", {&TabBoxData::Tab::width, required_int}},
+                {"label", {&TabBoxData::Tab::label, required_string_copy}},
+                {"content",
+                 {&TabBoxData::Tab::content,
+                  required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
 }
 
 static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
@@ -142,32 +154,16 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
                            {"style", {&TextRectData::style, required_interface_style}},
                    })));
     } else if (type == "tab-box") {
-        TabBoxData tab_box = required_struct<TabBoxData>(
+        return std::unique_ptr<InterfaceItemData>(new TabBoxData(required_struct<TabBoxData>(
                 x, {
                            {"type", nullptr},
                            {"bounds", {&InterfaceItemData::bounds, required_rect}},
                            {"id", {&InterfaceItemData::id, optional_int}},
                            {"hue", {&TabBoxData::hue, required_hue}},
                            {"style", {&TabBoxData::style, required_interface_style}},
-                           {"tabs", nullptr},
-                   });
-
-        path_value tabs = x.get("tabs");
-        for (auto i : range(tabs.value().as_array().size())) {
-            using Tab = TabBoxData::Tab;
-            tab_box.tabs.emplace_back(required_struct<Tab>(
-                    tabs.get(i),
-                    {
-                            {"id", {&Tab::id, optional_int}},
-                            {"width", {&Tab::width, required_int}},
-                            {"label", {&Tab::label, required_string_copy}},
-                            {"content",
-                             {&Tab::content,
-                              required_array<std::unique_ptr<InterfaceItemData>, interface_item>}},
-                    }));
-        }
-
-        return std::unique_ptr<InterfaceItemData>(new TabBoxData(std::move(tab_box)));
+                           {"tabs",
+                            {&TabBoxData::tabs, required_array<TabBoxData::Tab, required_tab>}},
+                   })));
     } else {
         throw std::runtime_error(pn::format("{0}: unknown type: {1}", x.path(), type).c_str());
     }
