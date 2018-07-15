@@ -349,7 +349,7 @@ static BaseObject::Destroy optional_destroy(path_value x) {
     return optional_struct<BaseObject::Destroy>(
                    x,
                    {
-                           {"dont_die", {&BaseObject::Destroy::dont_die, required_bool}},
+                           {"die", {&BaseObject::Destroy::die, required_bool}},
                            {"neutralize", {&BaseObject::Destroy::neutralize, required_bool}},
                            {"release_energy",
                             {&BaseObject::Destroy::release_energy, required_bool}},
@@ -376,7 +376,7 @@ static BaseObject::Expire optional_expire(path_value x) {
                    x,
                    {
                            {"after", {&BaseObject::Expire::after, optional_expire_after}},
-                           {"dont_die", {&BaseObject::Expire::dont_die, required_bool}},
+                           {"die", {&BaseObject::Expire::die, required_bool}},
                            {"action",
                             {&BaseObject::Expire::action, optional_array<Action, action>}},
                    })

@@ -160,7 +160,7 @@ class BaseObject {
     } weapons;
 
     struct Destroy {
-        bool                dont_die;
+        bool                die;
         bool                neutralize;
         bool                release_energy;
         std::vector<Action> action;
@@ -171,7 +171,7 @@ class BaseObject {
             Range<ticks> age;  // starting random age
             bool         animation = false;
         } after;
-        bool                dont_die;
+        bool                die;
         std::vector<Action> action;
     } expire;
 
