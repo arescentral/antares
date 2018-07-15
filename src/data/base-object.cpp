@@ -111,12 +111,8 @@ static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value 
 }
 
 static BaseObject::Ray::To required_ray_to(path_value x) {
-    if (x.value() == pn::value{"object"}) {
-        return BaseObject::Ray::To::OBJECT;
-    } else if (x.value() == pn::value{"coord"}) {
-        return BaseObject::Ray::To::COORD;
-    }
-    throw std::runtime_error(pn::format("{0}: must be \"object\" or \"coord\"", x.path()).c_str());
+    return required_enum<BaseObject::Ray::To>(
+            x, {{"object", BaseObject::Ray::To::OBJECT}, {"coord", BaseObject::Ray::To::COORD}});
 }
 
 static sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
@@ -146,12 +142,9 @@ static BaseObject::Device::Usage optional_usage(path_value x) {
 }
 
 static BaseObject::Device::Direction required_device_direction(path_value x) {
-    if (x.value() == pn::value{"fore"}) {
-        return BaseObject::Device::Direction::FORE;
-    } else if (x.value() == pn::value{"omni"}) {
-        return BaseObject::Device::Direction::OMNI;
-    }
-    throw std::runtime_error(pn::format("{0}: must be \"fore\" or \"omni\"", x.path()).c_str());
+    return required_enum<BaseObject::Device::Direction>(
+            x, {{"fore", BaseObject::Device::Direction::FORE},
+                {"omni", BaseObject::Device::Direction::OMNI}});
 }
 
 static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
