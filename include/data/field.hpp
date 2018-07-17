@@ -169,6 +169,14 @@ T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) 
 }
 
 template <typename T>
+T required_object_type(path_value x, T (*get_type)(path_value x)) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+    return get_type(x.get("type"));
+}
+
+template <typename T>
 struct field {
     std::function<void(T* t, path_value x)> set;
 

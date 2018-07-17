@@ -162,11 +162,7 @@ static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
 }
 
 static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}must be a map", x.prefix()).c_str());
-    }
-
-    switch (required_interface_item_type(x.get("type"))) {
+    switch (required_object_type(x, required_interface_item_type)) {
         case InterfaceItemData::Type::RECT: return rect_interface_item(x);
         case InterfaceItemData::Type::BUTTON: return button_interface_item(x);
         case InterfaceItemData::Type::CHECKBOX: return checkbox_interface_item(x);

@@ -578,11 +578,7 @@ static Action zoom_action(path_value x) {
 }
 
 Action action(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    switch (required_action_type(x.get("type"))) {
+    switch (required_object_type(x, required_action_type)) {
         case Action::Type::AGE: return age_action(x);
         case Action::Type::ASSUME: return assume_action(x);
         case Action::Type::CAP_SPEED: return cap_speed_action(x);

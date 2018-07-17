@@ -290,11 +290,7 @@ static ConditionWhen zoom_condition(path_value x) {
 }
 
 static ConditionWhen when(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    switch (required_condition_type(x.get("type"))) {
+    switch (required_object_type(x, required_condition_type)) {
         case ConditionWhen::Type::NONE: throw std::runtime_error("condition type none?");
         case ConditionWhen::Type::AUTOPILOT: return autopilot_condition(x);
         case ConditionWhen::Type::BUILDING: return building_condition(x);

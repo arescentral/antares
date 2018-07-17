@@ -184,10 +184,7 @@ static Level net_level(path_value x) {
 
 Level level(pn::value_cref x0) {
     path_value x{x0};
-    if (!x.value().is_map()) {
-        throw std::runtime_error("must be map");
-    }
-    switch (required_level_type(x.get("type"))) {
+    switch (required_object_type(x, required_level_type)) {
         case Level::Type::DEMO: return demo_level(x);
         case Level::Type::SOLO: return solo_level(x);
         case Level::Type::NET: return net_level(x);
