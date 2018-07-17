@@ -75,6 +75,81 @@ static TabBoxData::Tab required_tab(path_value x) {
                   required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
 }
 
+static std::unique_ptr<InterfaceItemData> rect_interface_item(path_value x) {
+    return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
+            x, {{"type", nullptr},
+                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                {"id", {&InterfaceItemData::id, optional_int}},
+                {"label", {&BoxRectData::label, optional_string_copy}},
+                {"hue", {&BoxRectData::hue, required_hue}},
+                {"style", {&BoxRectData::style, required_interface_style}}})));
+}
+
+static std::unique_ptr<InterfaceItemData> button_interface_item(path_value x) {
+    return std::unique_ptr<InterfaceItemData>(new PlainButtonData(required_struct<PlainButtonData>(
+            x, {{"type", nullptr},
+                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                {"id", {&InterfaceItemData::id, optional_int}},
+                {"label", {&PlainButtonData::label, required_string_copy}},
+                {"key", {&PlainButtonData::key, optional_key_num}},
+                {"gamepad", {&PlainButtonData::gamepad, optional_gamepad_button}},
+                {"hue", {&PlainButtonData::hue, required_hue}},
+                {"style", {&PlainButtonData::style, required_interface_style}}})));
+}
+
+static std::unique_ptr<InterfaceItemData> checkbox_interface_item(path_value x) {
+    return std::unique_ptr<InterfaceItemData>(
+            new CheckboxButtonData(required_struct<CheckboxButtonData>(
+                    x, {{"type", nullptr},
+                        {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                        {"id", {&InterfaceItemData::id, optional_int}},
+                        {"label", {&CheckboxButtonData::label, required_string_copy}},
+                        {"key", {&CheckboxButtonData::key, optional_key_num}},
+                        {"gamepad", {&CheckboxButtonData::gamepad, optional_gamepad_button}},
+                        {"hue", {&CheckboxButtonData::hue, required_hue}},
+                        {"style", {&CheckboxButtonData::style, required_interface_style}}})));
+}
+
+static std::unique_ptr<InterfaceItemData> radio_interface_item(path_value x) {
+    return std::unique_ptr<InterfaceItemData>(new RadioButtonData(required_struct<RadioButtonData>(
+            x, {{"type", nullptr},
+                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                {"id", {&InterfaceItemData::id, optional_int}},
+                {"label", {&RadioButtonData::label, required_string_copy}},
+                {"key", {&RadioButtonData::key, optional_key_num}},
+                {"gamepad", {&RadioButtonData::gamepad, optional_gamepad_button}},
+                {"hue", {&RadioButtonData::hue, required_hue}},
+                {"style", {&RadioButtonData::style, required_interface_style}}})));
+}
+
+static std::unique_ptr<InterfaceItemData> picture_interface_item(path_value x) {
+    return std::unique_ptr<InterfaceItemData>(new PictureRectData(required_struct<PictureRectData>(
+            x, {{"type", nullptr},
+                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                {"id", {&InterfaceItemData::id, optional_int}},
+                {"picture", {&PictureRectData::picture, required_string_copy}}})));
+}
+
+static std::unique_ptr<InterfaceItemData> text_interface_item(path_value x) {
+    return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
+            x, {{"type", nullptr},
+                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                {"id", {&InterfaceItemData::id, optional_int}},
+                {"text", {&TextRectData::text, optional_string, ""}},
+                {"hue", {&TextRectData::hue, required_hue}},
+                {"style", {&TextRectData::style, required_interface_style}}})));
+}
+
+static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
+    return std::unique_ptr<InterfaceItemData>(new TabBoxData(required_struct<TabBoxData>(
+            x, {{"type", nullptr},
+                {"bounds", {&InterfaceItemData::bounds, required_rect}},
+                {"id", {&InterfaceItemData::id, optional_int}},
+                {"hue", {&TabBoxData::hue, required_hue}},
+                {"style", {&TabBoxData::style, required_interface_style}},
+                {"tabs", {&TabBoxData::tabs, required_array<TabBoxData::Tab, required_tab>}}})));
+}
+
 static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
     if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}must be a map", x.prefix()).c_str());
@@ -82,88 +157,19 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
 
     pn::string_view type = required_string(x.get("type"));
     if (type == "rect") {
-        return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
-                x, {
-                           {"type", nullptr},
-                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                           {"id", {&InterfaceItemData::id, optional_int}},
-                           {"label", {&BoxRectData::label, optional_string_copy}},
-                           {"hue", {&BoxRectData::hue, required_hue}},
-                           {"style", {&BoxRectData::style, required_interface_style}},
-                   })));
+        return rect_interface_item(x);
     } else if (type == "button") {
-        return std::unique_ptr<InterfaceItemData>(
-                new PlainButtonData(required_struct<PlainButtonData>(
-                        x,
-                        {
-                                {"type", nullptr},
-                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                {"id", {&InterfaceItemData::id, optional_int}},
-                                {"label", {&PlainButtonData::label, required_string_copy}},
-                                {"key", {&PlainButtonData::key, optional_key_num}},
-                                {"gamepad", {&PlainButtonData::gamepad, optional_gamepad_button}},
-                                {"hue", {&PlainButtonData::hue, required_hue}},
-                                {"style", {&PlainButtonData::style, required_interface_style}},
-                        })));
+        return button_interface_item(x);
     } else if (type == "checkbox") {
-        return std::unique_ptr<InterfaceItemData>(
-                new CheckboxButtonData(required_struct<CheckboxButtonData>(
-                        x,
-                        {
-                                {"type", nullptr},
-                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                {"id", {&InterfaceItemData::id, optional_int}},
-                                {"label", {&CheckboxButtonData::label, required_string_copy}},
-                                {"key", {&CheckboxButtonData::key, optional_key_num}},
-                                {"gamepad",
-                                 {&CheckboxButtonData::gamepad, optional_gamepad_button}},
-                                {"hue", {&CheckboxButtonData::hue, required_hue}},
-                                {"style", {&CheckboxButtonData::style, required_interface_style}},
-                        })));
+        return checkbox_interface_item(x);
     } else if (type == "radio") {
-        return std::unique_ptr<InterfaceItemData>(
-                new RadioButtonData(required_struct<RadioButtonData>(
-                        x,
-                        {
-                                {"type", nullptr},
-                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                {"id", {&InterfaceItemData::id, optional_int}},
-                                {"label", {&RadioButtonData::label, required_string_copy}},
-                                {"key", {&RadioButtonData::key, optional_key_num}},
-                                {"gamepad", {&RadioButtonData::gamepad, optional_gamepad_button}},
-                                {"hue", {&RadioButtonData::hue, required_hue}},
-                                {"style", {&RadioButtonData::style, required_interface_style}},
-                        })));
+        return radio_interface_item(x);
     } else if (type == "picture") {
-        return std::unique_ptr<InterfaceItemData>(
-                new PictureRectData(required_struct<PictureRectData>(
-                        x, {
-                                   {"type", nullptr},
-                                   {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                   {"id", {&InterfaceItemData::id, optional_int}},
-                                   {"picture", {&PictureRectData::picture, required_string_copy}},
-                           })));
+        return picture_interface_item(x);
     } else if (type == "text") {
-        return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
-                x, {
-                           {"type", nullptr},
-                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                           {"id", {&InterfaceItemData::id, optional_int}},
-                           {"text", {&TextRectData::text, optional_string, ""}},
-                           {"hue", {&TextRectData::hue, required_hue}},
-                           {"style", {&TextRectData::style, required_interface_style}},
-                   })));
+        return text_interface_item(x);
     } else if (type == "tab-box") {
-        return std::unique_ptr<InterfaceItemData>(new TabBoxData(required_struct<TabBoxData>(
-                x, {
-                           {"type", nullptr},
-                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                           {"id", {&InterfaceItemData::id, optional_int}},
-                           {"hue", {&TabBoxData::hue, required_hue}},
-                           {"style", {&TabBoxData::style, required_interface_style}},
-                           {"tabs",
-                            {&TabBoxData::tabs, required_array<TabBoxData::Tab, required_tab>}},
-                   })));
+        return tab_box_interface_item(x);
     } else {
         throw std::runtime_error(pn::format("{0}: unknown type: {1}", x.path(), type).c_str());
     }
