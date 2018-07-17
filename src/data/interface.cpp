@@ -65,6 +65,17 @@ static int16_t optional_gamepad_button(path_value x) {
     return i;
 }
 
+static InterfaceItemData::Type required_interface_item_type(path_value x) {
+    return required_enum<InterfaceItemData::Type>(
+            x, {{"rect", InterfaceItemData::Type::RECT},
+                {"button", InterfaceItemData::Type::BUTTON},
+                {"checkbox", InterfaceItemData::Type::CHECKBOX},
+                {"radio", InterfaceItemData::Type::RADIO},
+                {"picture", InterfaceItemData::Type::PICTURE},
+                {"text", InterfaceItemData::Type::TEXT},
+                {"tab-box", InterfaceItemData::Type::TAB_BOX}});
+}
+
 static TabBoxData::Tab required_tab(path_value x) {
     return required_struct<TabBoxData::Tab>(
             x, {{"id", {&TabBoxData::Tab::id, optional_int}},
@@ -77,7 +88,7 @@ static TabBoxData::Tab required_tab(path_value x) {
 
 static std::unique_ptr<InterfaceItemData> rect_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
-            x, {{"type", nullptr},
+            x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
                 {"bounds", {&InterfaceItemData::bounds, required_rect}},
                 {"id", {&InterfaceItemData::id, optional_int}},
                 {"label", {&BoxRectData::label, optional_string_copy}},
@@ -87,7 +98,7 @@ static std::unique_ptr<InterfaceItemData> rect_interface_item(path_value x) {
 
 static std::unique_ptr<InterfaceItemData> button_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new PlainButtonData(required_struct<PlainButtonData>(
-            x, {{"type", nullptr},
+            x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
                 {"bounds", {&InterfaceItemData::bounds, required_rect}},
                 {"id", {&InterfaceItemData::id, optional_int}},
                 {"label", {&PlainButtonData::label, required_string_copy}},
@@ -100,7 +111,7 @@ static std::unique_ptr<InterfaceItemData> button_interface_item(path_value x) {
 static std::unique_ptr<InterfaceItemData> checkbox_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(
             new CheckboxButtonData(required_struct<CheckboxButtonData>(
-                    x, {{"type", nullptr},
+                    x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
                         {"bounds", {&InterfaceItemData::bounds, required_rect}},
                         {"id", {&InterfaceItemData::id, optional_int}},
                         {"label", {&CheckboxButtonData::label, required_string_copy}},
@@ -112,7 +123,7 @@ static std::unique_ptr<InterfaceItemData> checkbox_interface_item(path_value x) 
 
 static std::unique_ptr<InterfaceItemData> radio_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new RadioButtonData(required_struct<RadioButtonData>(
-            x, {{"type", nullptr},
+            x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
                 {"bounds", {&InterfaceItemData::bounds, required_rect}},
                 {"id", {&InterfaceItemData::id, optional_int}},
                 {"label", {&RadioButtonData::label, required_string_copy}},
@@ -124,7 +135,7 @@ static std::unique_ptr<InterfaceItemData> radio_interface_item(path_value x) {
 
 static std::unique_ptr<InterfaceItemData> picture_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new PictureRectData(required_struct<PictureRectData>(
-            x, {{"type", nullptr},
+            x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
                 {"bounds", {&InterfaceItemData::bounds, required_rect}},
                 {"id", {&InterfaceItemData::id, optional_int}},
                 {"picture", {&PictureRectData::picture, required_string_copy}}})));
@@ -132,7 +143,7 @@ static std::unique_ptr<InterfaceItemData> picture_interface_item(path_value x) {
 
 static std::unique_ptr<InterfaceItemData> text_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
-            x, {{"type", nullptr},
+            x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
                 {"bounds", {&InterfaceItemData::bounds, required_rect}},
                 {"id", {&InterfaceItemData::id, optional_int}},
                 {"text", {&TextRectData::text, optional_string, ""}},
@@ -142,7 +153,7 @@ static std::unique_ptr<InterfaceItemData> text_interface_item(path_value x) {
 
 static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new TabBoxData(required_struct<TabBoxData>(
-            x, {{"type", nullptr},
+            x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
                 {"bounds", {&InterfaceItemData::bounds, required_rect}},
                 {"id", {&InterfaceItemData::id, optional_int}},
                 {"hue", {&TabBoxData::hue, required_hue}},
@@ -155,23 +166,14 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
         throw std::runtime_error(pn::format("{0}must be a map", x.prefix()).c_str());
     }
 
-    pn::string_view type = required_string(x.get("type"));
-    if (type == "rect") {
-        return rect_interface_item(x);
-    } else if (type == "button") {
-        return button_interface_item(x);
-    } else if (type == "checkbox") {
-        return checkbox_interface_item(x);
-    } else if (type == "radio") {
-        return radio_interface_item(x);
-    } else if (type == "picture") {
-        return picture_interface_item(x);
-    } else if (type == "text") {
-        return text_interface_item(x);
-    } else if (type == "tab-box") {
-        return tab_box_interface_item(x);
-    } else {
-        throw std::runtime_error(pn::format("{0}: unknown type: {1}", x.path(), type).c_str());
+    switch (required_interface_item_type(x.get("type"))) {
+        case InterfaceItemData::Type::RECT: return rect_interface_item(x);
+        case InterfaceItemData::Type::BUTTON: return button_interface_item(x);
+        case InterfaceItemData::Type::CHECKBOX: return checkbox_interface_item(x);
+        case InterfaceItemData::Type::RADIO: return radio_interface_item(x);
+        case InterfaceItemData::Type::PICTURE: return picture_interface_item(x);
+        case InterfaceItemData::Type::TEXT: return text_interface_item(x);
+        case InterfaceItemData::Type::TAB_BOX: return tab_box_interface_item(x);
     }
 }
 

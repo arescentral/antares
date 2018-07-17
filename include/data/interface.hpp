@@ -48,6 +48,16 @@ struct InterfaceItemData {
   public:
     class Visitor;
 
+    enum Type {
+        RECT,
+        BUTTON,
+        CHECKBOX,
+        RADIO,
+        PICTURE,
+        TEXT,
+        TAB_BOX,
+    };
+
     InterfaceItemData()                    = default;
     InterfaceItemData(InterfaceItemData&&) = default;
     InterfaceItemData& operator=(InterfaceItemData&&) = default;
@@ -55,6 +65,7 @@ struct InterfaceItemData {
 
     virtual void accept(const Visitor& visitor) const = 0;
 
+    Type                   type;
     Rect                   bounds;
     sfz::optional<int64_t> id;
 };
