@@ -78,9 +78,9 @@ static InterfaceItemData::Type required_interface_item_type(path_value x) {
 
 static TabBoxData::Tab required_tab(path_value x) {
     return required_struct<TabBoxData::Tab>(
-            x, {{"id", {&TabBoxData::Tab::id, optional_int}},
-                {"width", {&TabBoxData::Tab::width, required_int}},
-                {"label", {&TabBoxData::Tab::label, required_string_copy}},
+            x, {{"id", &TabBoxData::Tab::id},
+                {"width", &TabBoxData::Tab::width},
+                {"label", &TabBoxData::Tab::label},
                 {"content",
                  {&TabBoxData::Tab::content,
                   required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
@@ -89,22 +89,22 @@ static TabBoxData::Tab required_tab(path_value x) {
 static std::unique_ptr<InterfaceItemData> rect_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
             x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
-                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                {"id", {&InterfaceItemData::id, optional_int}},
-                {"label", {&BoxRectData::label, optional_string_copy}},
-                {"hue", {&BoxRectData::hue, required_hue}},
+                {"bounds", &InterfaceItemData::bounds},
+                {"id", &InterfaceItemData::id},
+                {"label", &BoxRectData::label},
+                {"hue", &BoxRectData::hue},
                 {"style", {&BoxRectData::style, required_interface_style}}})));
 }
 
 static std::unique_ptr<InterfaceItemData> button_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new PlainButtonData(required_struct<PlainButtonData>(
             x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
-                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                {"id", {&InterfaceItemData::id, optional_int}},
-                {"label", {&PlainButtonData::label, required_string_copy}},
+                {"bounds", &InterfaceItemData::bounds},
+                {"id", &InterfaceItemData::id},
+                {"label", &PlainButtonData::label},
                 {"key", {&PlainButtonData::key, optional_key_num}},
                 {"gamepad", {&PlainButtonData::gamepad, optional_gamepad_button}},
-                {"hue", {&PlainButtonData::hue, required_hue}},
+                {"hue", &PlainButtonData::hue},
                 {"style", {&PlainButtonData::style, required_interface_style}}})));
 }
 
@@ -112,51 +112,51 @@ static std::unique_ptr<InterfaceItemData> checkbox_interface_item(path_value x) 
     return std::unique_ptr<InterfaceItemData>(
             new CheckboxButtonData(required_struct<CheckboxButtonData>(
                     x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
-                        {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                        {"id", {&InterfaceItemData::id, optional_int}},
-                        {"label", {&CheckboxButtonData::label, required_string_copy}},
+                        {"bounds", &InterfaceItemData::bounds},
+                        {"id", &InterfaceItemData::id},
+                        {"label", &CheckboxButtonData::label},
                         {"key", {&CheckboxButtonData::key, optional_key_num}},
                         {"gamepad", {&CheckboxButtonData::gamepad, optional_gamepad_button}},
-                        {"hue", {&CheckboxButtonData::hue, required_hue}},
+                        {"hue", &CheckboxButtonData::hue},
                         {"style", {&CheckboxButtonData::style, required_interface_style}}})));
 }
 
 static std::unique_ptr<InterfaceItemData> radio_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new RadioButtonData(required_struct<RadioButtonData>(
             x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
-                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                {"id", {&InterfaceItemData::id, optional_int}},
-                {"label", {&RadioButtonData::label, required_string_copy}},
+                {"bounds", &InterfaceItemData::bounds},
+                {"id", &InterfaceItemData::id},
+                {"label", &RadioButtonData::label},
                 {"key", {&RadioButtonData::key, optional_key_num}},
                 {"gamepad", {&RadioButtonData::gamepad, optional_gamepad_button}},
-                {"hue", {&RadioButtonData::hue, required_hue}},
+                {"hue", &RadioButtonData::hue},
                 {"style", {&RadioButtonData::style, required_interface_style}}})));
 }
 
 static std::unique_ptr<InterfaceItemData> picture_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new PictureRectData(required_struct<PictureRectData>(
             x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
-                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                {"id", {&InterfaceItemData::id, optional_int}},
-                {"picture", {&PictureRectData::picture, required_string_copy}}})));
+                {"bounds", &InterfaceItemData::bounds},
+                {"id", &InterfaceItemData::id},
+                {"picture", &PictureRectData::picture}})));
 }
 
 static std::unique_ptr<InterfaceItemData> text_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
             x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
-                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                {"id", {&InterfaceItemData::id, optional_int}},
+                {"bounds", &InterfaceItemData::bounds},
+                {"id", &InterfaceItemData::id},
                 {"text", {&TextRectData::text, optional_string, ""}},
-                {"hue", {&TextRectData::hue, required_hue}},
+                {"hue", &TextRectData::hue},
                 {"style", {&TextRectData::style, required_interface_style}}})));
 }
 
 static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new TabBoxData(required_struct<TabBoxData>(
             x, {{"type", {&InterfaceItemData::type, required_interface_item_type}},
-                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                {"id", {&InterfaceItemData::id, optional_int}},
-                {"hue", {&TabBoxData::hue, required_hue}},
+                {"bounds", &InterfaceItemData::bounds},
+                {"id", &InterfaceItemData::id},
+                {"hue", &TabBoxData::hue},
                 {"style", {&TabBoxData::style, required_interface_style}},
                 {"tabs", {&TabBoxData::tabs, required_array<TabBoxData::Tab, required_tab>}}})));
 }
@@ -175,7 +175,7 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
 
 InterfaceData interface(path_value x) {
     return required_struct<InterfaceData>(
-            x, {{"fullscreen", {&InterfaceData::fullscreen, required_bool}},
+            x, {{"fullscreen", &InterfaceData::fullscreen},
                 {"items",
                  {&InterfaceData::items,
                   required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});

@@ -59,8 +59,8 @@ static Level::Player::Type required_player_type(path_value x) {
 template <>
 Level::Player required_player<Level::Type::DEMO>(path_value x) {
     return required_struct<Level::Player>(
-            x, {{"name", {&Level::Player::name, required_string_copy}},
-                {"race", {&Level::Player::playerRace, required_race}},
+            x, {{"name", &Level::Player::name},
+                {"race", &Level::Player::playerRace},
                 {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
 }
 
@@ -68,8 +68,8 @@ template <>
 Level::Player required_player<Level::Type::SOLO>(path_value x) {
     return required_struct<Level::Player>(
             x, {{"type", {&Level::Player::playerType, required_player_type}},
-                {"name", {&Level::Player::name, required_string_copy}},
-                {"race", {&Level::Player::playerRace, required_race}},
+                {"name", &Level::Player::name},
+                {"race", &Level::Player::playerRace},
                 {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
                 {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
 }
@@ -89,8 +89,8 @@ static Level::Par optional_par(path_value x) {
                    x,
                    {
                            {"time", {&Level::Par::time, required_game_ticks}},
-                           {"kills", {&Level::Par::kills, required_int}},
-                           {"losses", {&Level::Par::losses, required_int}},
+                           {"kills", &Level::Par::kills},
+                           {"losses", &Level::Par::losses},
                    })
             .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
 }
@@ -98,8 +98,8 @@ static Level::Par optional_par(path_value x) {
 static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(path_value x) {
     return optional_struct<Level::StatusLine::Counter>(
             x, {
-                       {"player", {&Level::StatusLine::Counter::player, required_int}},
-                       {"which", {&Level::StatusLine::Counter::which, required_int}},
+                       {"player", &Level::StatusLine::Counter::player},
+                       {"which", &Level::StatusLine::Counter::which},
                        {"fixed", {&Level::StatusLine::Counter::fixed, optional_bool, false}},
                });
 };
@@ -107,17 +107,17 @@ static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(pa
 static Level::StatusLine required_status_line(path_value x) {
     return required_struct<Level::StatusLine>(
             x, {
-                       {"text", {&Level::StatusLine::text, optional_string_copy}},
-                       {"prefix", {&Level::StatusLine::prefix, optional_string_copy}},
+                       {"text", &Level::StatusLine::text},
+                       {"prefix", &Level::StatusLine::prefix},
 
-                       {"condition", {&Level::StatusLine::condition, optional_int}},
-                       {"true", {&Level::StatusLine::true_, optional_string_copy}},
-                       {"false", {&Level::StatusLine::false_, optional_string_copy}},
+                       {"condition", &Level::StatusLine::condition},
+                       {"true", &Level::StatusLine::true_},
+                       {"false", &Level::StatusLine::false_},
 
-                       {"minuend", {&Level::StatusLine::minuend, optional_fixed}},
+                       {"minuend", &Level::StatusLine::minuend},
                        {"counter", {&Level::StatusLine::counter, optional_status_line_counter}},
 
-                       {"suffix", {&Level::StatusLine::suffix, optional_string_copy}},
+                       {"suffix", &Level::StatusLine::suffix},
                        {"underline", {&Level::StatusLine::underline, optional_bool, false}},
                });
 };
@@ -125,17 +125,17 @@ static Level::StatusLine required_status_line(path_value x) {
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
             {"type", {&Level::type, required_level_type}},                                       \
-            {"chapter", {&Level::chapter, optional_int}},                                        \
-            {"title", {&Level::name, required_string_copy}},                                     \
+            {"chapter", &Level::chapter},                                                        \
+            {"title", &Level::name},                                                             \
             {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
             {"conditions", {&Level::conditions, optional_array<Condition, condition>}},          \
             {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
-            {"starmap", {&Level::starmap, optional_rect}},                                       \
-            {"song", {&Level::song, optional_string_copy}},                                      \
+            {"starmap", &Level::starmap},                                                        \
+            {"song", &Level::song},                                                              \
             {"status",                                                                           \
              {&Level::status, optional_array<Level::StatusLine, required_status_line>}},         \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
-            {"skip", {&Level::skip, optional_level}},                                            \
+            {"skip", &Level::skip},                                                              \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \
             {"par", {&Level::par, optional_par}}
 // clang-format on

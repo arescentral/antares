@@ -275,22 +275,22 @@ static Action age_action(path_value x) {
     return required_struct<AgeAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"relative", {&AgeAction::relative, optional_bool, false}},
-                {"value", {&AgeAction::value, required_ticks_range}}});
+                {"value", &AgeAction::value}});
 }
 
 static Action assume_action(path_value x) {
     return required_struct<AssumeAction>(
-            x, {COMMON_ACTION_FIELDS, {"which", {&AssumeAction::which, required_int}}});
+            x, {COMMON_ACTION_FIELDS, {"which", &AssumeAction::which}});
 }
 
 static Action cap_speed_action(path_value x) {
     return required_struct<CapSpeedAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&CapSpeedAction::value, optional_fixed}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &CapSpeedAction::value}});
 }
 
 static Action capture_action(path_value x) {
     return required_struct<CaptureAction>(
-            x, {COMMON_ACTION_FIELDS, {"player", {&CaptureAction::player, optional_admiral}}});
+            x, {COMMON_ACTION_FIELDS, {"player", &CaptureAction::player}});
 }
 
 static Action check_action(path_value x) {
@@ -315,7 +315,7 @@ static Action condition_action(path_value x) {
 static Action create_action(path_value x) {
     return required_struct<CreateAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"base", {&CreateAction::base, required_base}},
+                {"base", &CreateAction::base},
                 {"count", {&CreateAction::count, optional_int_range, Range<int64_t>{1, 2}}},
                 {"relative_velocity", {&CreateAction::relative_velocity, optional_bool, false}},
                 {"relative_direction", {&CreateAction::relative_direction, optional_bool, false}},
@@ -327,17 +327,17 @@ static Action create_action(path_value x) {
 
 static Action delay_action(path_value x) {
     return required_struct<DelayAction>(
-            x, {COMMON_ACTION_FIELDS, {"duration", {&DelayAction::duration, required_ticks}}});
+            x, {COMMON_ACTION_FIELDS, {"duration", &DelayAction::duration}});
 }
 
 static Action disable_action(path_value x) {
     return required_struct<DisableAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&DisableAction::value, required_fixed_range}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &DisableAction::value}});
 }
 
 static Action energize_action(path_value x) {
     return required_struct<EnergizeAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&EnergizeAction::value, required_int}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &EnergizeAction::value}});
 }
 
 static Weapon required_weapon(path_value x) {
@@ -349,7 +349,7 @@ static Action equip_action(path_value x) {
     return required_struct<EquipAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"which", {&EquipAction::which, required_weapon}},
-                {"base", {&EquipAction::base, required_base}}});
+                {"base", &EquipAction::base}});
 }
 
 static Action fire_action(path_value x) {
@@ -360,13 +360,12 @@ static Action fire_action(path_value x) {
 static Action flash_action(path_value x) {
     return required_struct<FlashAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"duration", {&FlashAction::duration, required_ticks}},
-                {"color", {&FlashAction::color, required_color}}});
+                {"duration", &FlashAction::duration},
+                {"color", &FlashAction::color}});
 }
 
 static Action heal_action(path_value x) {
-    return required_struct<HealAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&HealAction::value, required_int}}});
+    return required_struct<HealAction>(x, {COMMON_ACTION_FIELDS, {"value", &HealAction::value}});
 }
 
 static Action hold_action(path_value x) {
@@ -423,14 +422,13 @@ static Action kill_action(path_value x) {
 }
 
 static Action land_action(path_value x) {
-    return required_struct<LandAction>(
-            x, {COMMON_ACTION_FIELDS, {"speed", {&LandAction::speed, required_int}}});
+    return required_struct<LandAction>(x, {COMMON_ACTION_FIELDS, {"speed", &LandAction::speed}});
 }
 
 static Action message_action(path_value x) {
     return required_struct<MessageAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"id", {&MessageAction::id, optional_int}},
+                {"id", &MessageAction::id},
                 {"pages",
                  {&MessageAction::pages, required_array<pn::string, required_string_copy>}}});
 }
@@ -438,7 +436,7 @@ static Action message_action(path_value x) {
 static Action morph_action(path_value x) {
     return required_struct<MorphAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"base", {&MorphAction::base, required_base}},
+                {"base", &MorphAction::base},
                 {"keep_ammo", {&MorphAction::keep_ammo, optional_bool, false}}});
 }
 
@@ -468,7 +466,7 @@ static Action move_action(path_value x) {
 
 static Action occupy_action(path_value x) {
     return required_struct<OccupyAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&OccupyAction::value, required_int}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &OccupyAction::value}});
 }
 
 static Action order_action(path_value x) {
@@ -477,9 +475,8 @@ static Action order_action(path_value x) {
 
 static Action pay_action(path_value x) {
     return required_struct<PayAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"value", {&PayAction::value, required_fixed}},
-                {"player", {&PayAction::player, optional_admiral}}});
+            x,
+            {COMMON_ACTION_FIELDS, {"value", &PayAction::value}, {"player", &PayAction::player}});
 }
 
 static PushAction::Kind required_push_kind(path_value x) {
@@ -509,21 +506,20 @@ static Action reveal_action(path_value x) {
 static Action score_action(path_value x) {
     return required_struct<ScoreAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"player", {&ScoreAction::player, optional_admiral}},
-                {"which", {&ScoreAction::which, required_int}},
-                {"value", {&ScoreAction::value, required_int}}});
+                {"player", &ScoreAction::player},
+                {"which", &ScoreAction::which},
+                {"value", &ScoreAction::value}});
 }
 
 static Action select_action(path_value x) {
     return required_struct<SelectAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"screen", {&SelectAction::screen, required_screen}},
-                {"line", {&SelectAction::line, required_int}}});
+                {"screen", &SelectAction::screen},
+                {"line", &SelectAction::line}});
 }
 
 static PlayAction::Sound required_sound(path_value x) {
-    return required_struct<PlayAction::Sound>(
-            x, {{"sound", {&PlayAction::Sound::sound, required_string_copy}}});
+    return required_struct<PlayAction::Sound>(x, {{"sound", &PlayAction::Sound::sound}});
 }
 
 static uint8_t required_sound_priority(path_value x) { return required_int(x, {0, 6}); }
@@ -532,32 +528,29 @@ static Action play_action(path_value x) {
     return required_struct<PlayAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"priority", {&PlayAction::priority, required_sound_priority}},
-                {"persistence", {&PlayAction::persistence, required_ticks}},
+                {"persistence", &PlayAction::persistence},
                 {"absolute", {&PlayAction::absolute, optional_bool, false}},
-                {"volume", {&PlayAction::volume, required_int}},
-                {"sound", {&PlayAction::sound, optional_string_copy}},
+                {"volume", &PlayAction::volume},
+                {"sound", &PlayAction::sound},
                 {"any", {&PlayAction::any, optional_array<PlayAction::Sound, required_sound>}}});
 }
 
 static Action spark_action(path_value x) {
     return required_struct<SparkAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"count", {&SparkAction::count, required_int}},
-                {"hue", {&SparkAction::hue, required_hue}},
-                {"decay", {&SparkAction::decay, required_int}},
-                {"velocity", {&SparkAction::velocity, required_fixed}}});
+                {"count", &SparkAction::count},
+                {"hue", &SparkAction::hue},
+                {"decay", &SparkAction::decay},
+                {"velocity", &SparkAction::velocity}});
 }
 
 static Action spin_action(path_value x) {
-    return required_struct<SpinAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&SpinAction::value, required_fixed_range}}});
+    return required_struct<SpinAction>(x, {COMMON_ACTION_FIELDS, {"value", &SpinAction::value}});
 }
 
 static Action thrust_action(path_value x) {
     return required_struct<ThrustAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"value", {&ThrustAction::value, required_fixed_range}},
-                {"relative", nullptr}});
+            x, {COMMON_ACTION_FIELDS, {"value", &ThrustAction::value}, {"relative", nullptr}});
 }
 
 static Action warp_action(path_value x) {
@@ -567,14 +560,13 @@ static Action warp_action(path_value x) {
 static Action win_action(path_value x) {
     return required_struct<WinAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"player", {&WinAction::player, optional_admiral}},
-                {"next", {&WinAction::next, optional_level}},
-                {"text", {&WinAction::text, required_string_copy}}});
+                {"player", &WinAction::player},
+                {"next", &WinAction::next},
+                {"text", &WinAction::text}});
 }
 
 static Action zoom_action(path_value x) {
-    return required_struct<ZoomAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&ZoomAction::value, required_zoom}}});
+    return required_struct<ZoomAction>(x, {COMMON_ACTION_FIELDS, {"value", &ZoomAction::value}});
 }
 
 Action action(path_value x) {

@@ -27,7 +27,7 @@ SpriteData sprite_data(pn::value_cref x) {
             path_value{x},
             {{"rows", {&SpriteData::rows, optional_int, 1}},
              {"cols", {&SpriteData::cols, optional_int, 1}},
-             {"center", {&SpriteData::center, required_point}},
+             {"center", &SpriteData::center},
              {"frames", {&SpriteData::frames, required_array<Rect, required_rect>}}});
 }
 

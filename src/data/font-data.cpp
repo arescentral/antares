@@ -38,9 +38,9 @@ static std::map<pn::rune, Rect> required_glyphs(path_value x) {
 
 FontData font_data(pn::value_cref x) {
     return required_struct<FontData>(
-            path_value{x}, {{"logical-width", {&FontData::logical_width, required_int}},
-                            {"height", {&FontData::height, required_int}},
-                            {"ascent", {&FontData::ascent, required_int}},
+            path_value{x}, {{"logical-width", &FontData::logical_width},
+                            {"height", &FontData::height},
+                            {"ascent", &FontData::ascent},
                             {"glyphs", {&FontData::glyphs, required_glyphs}}});
 }
 

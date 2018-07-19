@@ -57,21 +57,21 @@ static Info fill_identifier(Info info) {
 
 Info info(path_value x) {
     return fill_identifier(required_struct<Info>(
-            x, {{"title", {&Info::title, required_string_copy}},
+            x, {{"title", &Info::title},
                 {"identifier", {&Info::identifier, optional_identifier, ""}},
-                {"format", {&Info::format, required_int}},
-                {"download_url", {&Info::download_url, optional_string_copy}},
-                {"author", {&Info::author, required_string_copy}},
-                {"author_url", {&Info::author_url, optional_string_copy}},
-                {"version", {&Info::version, required_string_copy}},
-                {"warp_in_flare", {&Info::warpInFlareID, required_base}},
-                {"warp_out_flare", {&Info::warpOutFlareID, required_base}},
-                {"player_body", {&Info::playerBodyID, required_base}},
-                {"energy_blob", {&Info::energyBlobID, required_base}},
-                {"intro", {&Info::intro, optional_string_copy}},
-                {"about", {&Info::about, optional_string_copy}},
-                {"splash", {&Info::splash_screen, required_string_copy}},
-                {"starmap", {&Info::starmap, required_string_copy}}}));
+                {"format", &Info::format},
+                {"download_url", &Info::download_url},
+                {"author", &Info::author},
+                {"author_url", &Info::author_url},
+                {"version", &Info::version},
+                {"warp_in_flare", &Info::warpInFlareID},
+                {"warp_out_flare", &Info::warpOutFlareID},
+                {"player_body", &Info::playerBodyID},
+                {"energy_blob", &Info::energyBlobID},
+                {"intro", &Info::intro},
+                {"about", &Info::about},
+                {"splash", &Info::splash_screen},
+                {"starmap", &Info::starmap}}));
 }
 
 }  // namespace antares

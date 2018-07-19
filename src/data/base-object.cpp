@@ -32,10 +32,7 @@ static uint8_t required_uint8(path_value x) { return required_int(x, {0, 0x100})
 
 static fixedPointType required_fixed_point(path_value x) {
     return required_struct<fixedPointType>(
-            x, {
-                       {"x", {&fixedPointType::h, required_fixed}},
-                       {"y", {&fixedPointType::v, required_fixed}},
-               });
+            x, {{"x", &fixedPointType::h}, {"y", &fixedPointType::v}});
 }
 
 static uint32_t distance(path_value x) {
@@ -47,7 +44,7 @@ static uint32_t distance(path_value x) {
 static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
     return optional_struct<BaseObject::Weapon>(
             x, {
-                       {"base", {&BaseObject::Weapon::base, required_base}},
+                       {"base", &BaseObject::Weapon::base},
                        {"positions",
                         {&BaseObject::Weapon::positions,
                          optional_array<fixedPointType, required_fixed_point>}},
@@ -62,10 +59,10 @@ static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x)
     using Rotation = BaseObject::Rotation;
     return optional_struct<Rotation>(
             x, {
-                       {"sprite", {&Rotation::sprite, required_string_copy}},
+                       {"sprite", &Rotation::sprite},
                        {"layer", {&Rotation::layer, required_layer}},
                        {"scale", {&Rotation::scale, required_scale}},
-                       {"frames", {&Rotation::frames, required_int_range}},
+                       {"frames", &Rotation::frames},
                });
 }
 
@@ -82,13 +79,13 @@ static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value 
     using Animation = BaseObject::Animation;
     return optional_struct<Animation>(
             x, {
-                       {"sprite", {&Animation::sprite, required_string_copy}},
+                       {"sprite", &Animation::sprite},
                        {"layer", {&Animation::layer, required_layer}},
                        {"scale", {&Animation::scale, required_scale}},
-                       {"frames", {&Animation::frames, required_fixed_range}},
+                       {"frames", &Animation::frames},
                        {"direction", {&Animation::direction, required_animation_direction}},
-                       {"speed", {&Animation::speed, required_fixed}},
-                       {"first", {&Animation::first, required_fixed_range}},
+                       {"speed", &Animation::speed},
+                       {"first", &Animation::first},
                });
 }
 
@@ -101,9 +98,9 @@ static sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
     using Ray = BaseObject::Ray;
     return optional_struct<Ray>(
             x, {
-                       {"hue", {&Ray::hue, optional_hue}},
+                       {"hue", &Ray::hue},
                        {"to", {&Ray::to, required_ray_to}},
-                       {"lightning", {&Ray::lightning, required_bool}},
+                       {"lightning", &Ray::lightning},
                        {"accuracy", {&Ray::accuracy, required_int32}},
                        {"range", {&Ray::range, required_int32}},
                });
@@ -111,7 +108,7 @@ static sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
 
 static sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
     using Bolt = BaseObject::Bolt;
-    return optional_struct<Bolt>(x, {{"color", {&Bolt::color, required_color}}});
+    return optional_struct<Bolt>(x, {{"color", &Bolt::color}});
 }
 
 static BaseObject::Device::Usage optional_usage(path_value x) {
@@ -136,10 +133,10 @@ static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
                        {"usage", {&Device::usage, optional_usage}},
                        {"direction", {&Device::direction, required_device_direction}},
                        {"energy_cost", {&Device::energyCost, required_int32}},
-                       {"fire_time", {&Device::fireTime, required_ticks}},
+                       {"fire_time", &Device::fireTime},
                        {"ammo", {&Device::ammo, required_int32}},
                        {"range", {&Device::range, required_int32}},
-                       {"inverse_speed", {&Device::inverseSpeed, required_fixed}},
+                       {"inverse_speed", &Device::inverseSpeed},
                        {"restock_cost", {&Device::restockCost, required_int32}},
                });
 }
@@ -157,19 +154,19 @@ static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
     return optional_struct<BaseObject::Icon>(
             x, {
                        {"shape", {&BaseObject::Icon::shape, required_icon_shape}},
-                       {"size", {&BaseObject::Icon::size, required_int}},
+                       {"size", &BaseObject::Icon::size},
                });
 }
 
 static BaseObject::Targeting required_targeting(path_value x) {
     return required_struct<BaseObject::Targeting>(
             x, {
-                       {"base", {&BaseObject::Targeting::base, required_bool}},
-                       {"hide", {&BaseObject::Targeting::hide, required_bool}},
-                       {"radar", {&BaseObject::Targeting::radar, required_bool}},
-                       {"order", {&BaseObject::Targeting::order, required_bool}},
-                       {"select", {&BaseObject::Targeting::select, required_bool}},
-                       {"lock", {&BaseObject::Targeting::lock, required_bool}},
+                       {"base", &BaseObject::Targeting::base},
+                       {"hide", &BaseObject::Targeting::hide},
+                       {"radar", &BaseObject::Targeting::radar},
+                       {"order", &BaseObject::Targeting::order},
+                       {"select", &BaseObject::Targeting::select},
+                       {"lock", &BaseObject::Targeting::lock},
                });
 }
 
@@ -324,10 +321,9 @@ static BaseObject::Destroy optional_destroy(path_value x) {
     return optional_struct<BaseObject::Destroy>(
                    x,
                    {
-                           {"die", {&BaseObject::Destroy::die, required_bool}},
-                           {"neutralize", {&BaseObject::Destroy::neutralize, required_bool}},
-                           {"release_energy",
-                            {&BaseObject::Destroy::release_energy, required_bool}},
+                           {"die", &BaseObject::Destroy::die},
+                           {"neutralize", &BaseObject::Destroy::neutralize},
+                           {"release_energy", &BaseObject::Destroy::release_energy},
                            {"action",
                             {&BaseObject::Destroy::action, optional_array<Action, action>}},
                    })
@@ -341,7 +337,7 @@ static BaseObject::Expire::After optional_expire_after(path_value x) {
                            {"age",
                             {&BaseObject::Expire::After::age, optional_ticks_range,
                              Range<ticks>{ticks(-1), ticks(-1)}}},
-                           {"animation", {&BaseObject::Expire::After::animation, required_bool}},
+                           {"animation", &BaseObject::Expire::After::animation},
                    })
             .value_or(BaseObject::Expire::After{});
 }
@@ -351,7 +347,7 @@ static BaseObject::Expire optional_expire(path_value x) {
                    x,
                    {
                            {"after", {&BaseObject::Expire::after, optional_expire_after}},
-                           {"die", {&BaseObject::Expire::die, required_bool}},
+                           {"die", &BaseObject::Expire::die},
                            {"action",
                             {&BaseObject::Expire::action, optional_array<Action, action>}},
                    })
@@ -372,8 +368,8 @@ static BaseObject::Collide::As optional_collide_as(path_value x) {
     return optional_struct<BaseObject::Collide::As>(
                    x,
                    {
-                           {"subject", {&BaseObject::Collide::As::subject, required_bool}},
-                           {"object", {&BaseObject::Collide::As::object, required_bool}},
+                           {"subject", &BaseObject::Collide::As::subject},
+                           {"object", &BaseObject::Collide::As::object},
                    })
             .value_or(BaseObject::Collide::As{});
 }
@@ -384,8 +380,8 @@ static BaseObject::Collide optional_collide(path_value x) {
                    {
                            {"as", {&BaseObject::Collide::as, optional_collide_as}},
                            {"damage", {&BaseObject::Collide::damage, required_int32}},
-                           {"solid", {&BaseObject::Collide::solid, required_bool}},
-                           {"edge", {&BaseObject::Collide::edge, required_bool}},
+                           {"solid", &BaseObject::Collide::solid},
+                           {"edge", &BaseObject::Collide::edge},
                            {"action",
                             {&BaseObject::Collide::action, optional_array<Action, action>}},
                    })
@@ -432,14 +428,14 @@ static BaseObject::AI::Combat optional_ai_combat(path_value x) {
     return optional_struct<Combat>(
                    x,
                    {
-                           {"hated", {&Combat::hated, required_bool}},
-                           {"guided", {&Combat::guided, required_bool}},
-                           {"engages", {&Combat::engages, required_bool}},
+                           {"hated", &Combat::hated},
+                           {"guided", &Combat::guided},
+                           {"engages", &Combat::engages},
                            {"engages_if", {&Combat::engages_if, optional_tags}},
-                           {"engaged", {&Combat::engaged, required_bool}},
+                           {"engaged", &Combat::engaged},
                            {"engaged_if", {&Combat::engaged_if, optional_tags}},
-                           {"evades", {&Combat::evades, required_bool}},
-                           {"evaded", {&Combat::evaded, required_bool}},
+                           {"evades", &Combat::evades},
+                           {"evaded", &Combat::evaded},
                            {"skill", {&Combat::skill, optional_ai_combat_skill}},
                    })
             .value_or(Combat{});
@@ -450,9 +446,9 @@ static BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
     return optional_struct<Filter>(
                    x,
                    {
-                           {"base", {&Filter::base, optional_bool}},
-                           {"local", {&Filter::local, optional_bool}},
-                           {"owner", {&Filter::owner, required_owner}},
+                           {"base", &Filter::base},
+                           {"local", &Filter::local},
+                           {"owner", &Filter::owner},
                            {"tags", {&Filter::tags, optional_tags}},
                    })
             .value_or(Filter{});
@@ -475,8 +471,8 @@ static BaseObject::AI::Escort optional_ai_escort(path_value x) {
                    x,
                    {
                            {"class", {&Escort::class_, required_int32}},
-                           {"power", {&Escort::power, required_fixed}},
-                           {"need", {&Escort::need, required_fixed}},
+                           {"power", &Escort::power},
+                           {"need", &Escort::need},
                    })
             .value_or(Escort{});
 }
@@ -486,9 +482,9 @@ static BaseObject::AI::Build optional_ai_build(path_value x) {
     return optional_struct<Build>(
                    x,
                    {
-                           {"ratio", {&Build::ratio, required_fixed}},
-                           {"needs_escort", {&Build::needs_escort, required_bool}},
-                           {"legacy_non_builder", {&Build::legacy_non_builder, required_bool}},
+                           {"ratio", &Build::ratio},
+                           {"needs_escort", &Build::needs_escort},
+                           {"legacy_non_builder", &Build::legacy_non_builder},
                    })
             .value_or(Build{});
 }
@@ -509,14 +505,14 @@ BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
             path_value{x0},
             {
-                    {"long_name", {&BaseObject::name, required_string_copy}},
-                    {"short_name", {&BaseObject::short_name, required_string_copy}},
+                    {"long_name", &BaseObject::name},
+                    {"short_name", &BaseObject::short_name},
 
                     {"notes", nullptr},
                     {"class", nullptr},
                     {"race", nullptr},
 
-                    {"portrait", {&BaseObject::portrait, optional_string_copy}},
+                    {"portrait", &BaseObject::portrait},
 
                     {"price", {&BaseObject::price, required_int32}},
                     {"warp_out_distance", {&BaseObject::warpOutDistance, distance}},
@@ -524,19 +520,19 @@ BaseObject base_object(pn::value_cref x0) {
                     {"energy", {&BaseObject::energy, required_int32}},
                     {"occupy_count", {&BaseObject::occupy_count, required_int32}},
 
-                    {"max_velocity", {&BaseObject::maxVelocity, required_fixed}},
-                    {"warp_speed", {&BaseObject::warpSpeed, required_fixed}},
-                    {"mass", {&BaseObject::mass, required_fixed}},
-                    {"turn_rate", {&BaseObject::turn_rate, required_fixed}},
-                    {"thrust", {&BaseObject::thrust, required_fixed}},
+                    {"max_velocity", &BaseObject::maxVelocity},
+                    {"warp_speed", &BaseObject::warpSpeed},
+                    {"mass", &BaseObject::mass},
+                    {"turn_rate", &BaseObject::turn_rate},
+                    {"thrust", &BaseObject::thrust},
 
-                    {"build_time", {&BaseObject::buildTime, required_ticks}},
+                    {"build_time", &BaseObject::buildTime},
 
-                    {"shield_color", {&BaseObject::shieldColor, optional_color}},
+                    {"shield_color", &BaseObject::shieldColor},
 
-                    {"initial_velocity", {&BaseObject::initial_velocity, optional_fixed_range}},
-                    {"initial_direction", {&BaseObject::initial_direction, required_int_range}},
-                    {"autotarget", {&BaseObject::autotarget, required_bool}},
+                    {"initial_velocity", &BaseObject::initial_velocity},
+                    {"initial_direction", &BaseObject::initial_direction},
+                    {"autotarget", &BaseObject::autotarget},
 
                     {"destroy", {&BaseObject::destroy, optional_destroy}},
                     {"expire", {&BaseObject::expire, optional_expire}},

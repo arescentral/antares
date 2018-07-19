@@ -27,8 +27,8 @@ Briefing briefing(path_value x) {
     return required_struct<Briefing>(
             x, {
                        {"initial", {&Briefing::initial, optional_initial, Initial::none()}},
-                       {"title", {&Briefing::title, required_string_copy}},
-                       {"content", {&Briefing::content, required_string_copy}},
+                       {"title", &Briefing::title},
+                       {"content", &Briefing::content},
                });
 }
 

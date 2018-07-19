@@ -40,8 +40,7 @@ static std::vector<BuildableObject> optional_buildable_object_array(path_value x
 
 static Initial::Override optional_override(path_value x) {
     return optional_struct<Initial::Override>(
-                   x, {{"name", {&Initial::Override::name, optional_string_copy}},
-                       {"sprite", {&Initial::Override::sprite, optional_string_copy}}})
+                   x, {{"name", &Initial::Override::name}, {"sprite", &Initial::Override::sprite}})
             .value_or(Initial::Override{});
 }
 
@@ -56,7 +55,7 @@ Initial initial(path_value x) {
     return required_struct<Initial>(
             x, {{"base", {&Initial::base, required_buildable_object}},
                 {"owner", {&Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
-                {"at", {&Initial::at, required_point}},
+                {"at", &Initial::at},
                 {"earning", {&Initial::earning, optional_fixed, Fixed::zero()}},
                 {"hide", {&Initial::hide, optional_bool, false}},
                 {"flagship", {&Initial::flagship, optional_bool, false}},

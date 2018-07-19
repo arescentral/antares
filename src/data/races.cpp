@@ -48,13 +48,13 @@ std::map<pn::string, NamedHandle<const BaseObject>> optional_ships(path_value x)
 Race race(path_value x) {
     return required_struct<Race>(
             x, {{"numeric", nullptr},
-                {"singular", {&Race::singular, required_string_copy}},
-                {"plural", {&Race::plural, required_string_copy}},
-                {"military", {&Race::military, required_string_copy}},
-                {"homeworld", {&Race::homeworld, required_string_copy}},
-                {"hue", {&Race::hue, required_hue}},
+                {"singular", &Race::singular},
+                {"plural", &Race::plural},
+                {"military", &Race::military},
+                {"homeworld", &Race::homeworld},
+                {"hue", &Race::hue},
                 {"not_hue", {&Race::not_hue, optional_array<Hue, required_hue>}},
-                {"advantage", {&Race::advantage, required_fixed}},
+                {"advantage", &Race::advantage},
                 {"ships", {&Race::ships, optional_ships}}});
 }
 
