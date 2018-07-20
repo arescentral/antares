@@ -37,6 +37,17 @@ struct ObjectRef {
 ObjectRef                required_object_ref(path_value x);
 sfz::optional<ObjectRef> optional_object_ref(path_value x);
 
+template <typename T>
+struct default_reader;
+template <>
+struct default_reader<ObjectRef> {
+    static ObjectRef read(path_value x);
+};
+template <>
+struct default_reader<sfz::optional<ObjectRef>> {
+    static sfz::optional<ObjectRef> read(path_value x);
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_DATA_OBJECT_REF_HPP_

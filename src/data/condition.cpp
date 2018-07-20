@@ -199,7 +199,7 @@ static ConditionWhen destroyed_condition(path_value x) {
     return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &DestroyedCondition::op},
-                {"what", {&DestroyedCondition::what, required_object_ref}},
+                {"what", &DestroyedCondition::what},
                 {"value", &DestroyedCondition::value}});
 }
 
@@ -214,8 +214,8 @@ static ConditionWhen distance_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &DistanceCondition::op},
                 {"value", {&DistanceCondition::value, distance}},
-                {"from", {&DistanceCondition::from, required_object_ref}},
-                {"to", {&DistanceCondition::to, required_object_ref}}});
+                {"from", &DistanceCondition::from},
+                {"to", &DistanceCondition::to}});
 }
 
 static ConditionWhen health_condition(path_value x) {
@@ -223,7 +223,7 @@ static ConditionWhen health_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &HealthCondition::op},
                 {"value", &HealthCondition::value},
-                {"what", {&HealthCondition::what, required_object_ref}}});
+                {"what", &HealthCondition::what}});
 }
 
 static ConditionWhen message_condition(path_value x) {
@@ -240,7 +240,7 @@ static ConditionWhen owner_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &OwnerCondition::op},
                 {"player", &OwnerCondition::player},
-                {"what", {&OwnerCondition::what, required_object_ref}}});
+                {"what", &OwnerCondition::what}});
 }
 
 static ConditionWhen ships_condition(path_value x) {
@@ -256,23 +256,23 @@ static ConditionWhen speed_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &SpeedCondition::op},
                 {"value", &SpeedCondition::value},
-                {"what", {&SpeedCondition::what, required_object_ref}}});
+                {"what", &SpeedCondition::what}});
 }
 
 static ConditionWhen object_condition(path_value x) {
     return required_struct<ObjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &ObjectCondition::op},
-                {"a", {&ObjectCondition::a, required_object_ref}},
-                {"b", {&ObjectCondition::b, required_object_ref}}});
+                {"a", &ObjectCondition::a},
+                {"b", &ObjectCondition::b}});
 }
 
 static ConditionWhen target_condition(path_value x) {
     return required_struct<TargetCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &TargetCondition::op},
-                {"what", {&TargetCondition::what, required_object_ref}},
-                {"target", {&TargetCondition::target, required_object_ref}}});
+                {"what", &TargetCondition::what},
+                {"target", &TargetCondition::target}});
 }
 
 static ConditionWhen time_condition(path_value x) {
@@ -319,8 +319,8 @@ Condition condition(path_value x) {
             x, {{"persistent", {&Condition::persistent, optional_bool, false}},
                 {"disabled", {&Condition::disabled, optional_bool, false}},
                 {"when", &Condition::when},
-                {"subject", {&Condition::subject, optional_object_ref}},
-                {"object", {&Condition::object, optional_object_ref}},
+                {"subject", &Condition::subject},
+                {"object", &Condition::object},
                 {"action", &Condition::action}});
 }
 

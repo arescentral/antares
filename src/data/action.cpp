@@ -222,8 +222,8 @@ DEFAULT_READER(ActionBase::Filter, optional_action_filter);
 
 static ActionBase::Override optional_action_override(path_value x) {
     return optional_struct<ActionBase::Override>(
-                   x, {{"subject", {&ActionBase::Override::subject, optional_object_ref}},
-                       {"object", {&ActionBase::Override::object, optional_object_ref}}})
+                   x, {{"subject", &ActionBase::Override::subject},
+                       {"object", &ActionBase::Override::object}})
             .value_or(ActionBase::Override{});
 }
 DEFAULT_READER(ActionBase::Override, optional_action_override);

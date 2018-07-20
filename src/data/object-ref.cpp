@@ -72,4 +72,10 @@ sfz::optional<ObjectRef> optional_object_ref(path_value x) {
     }
 }
 
+ObjectRef default_reader<ObjectRef>::read(path_value x) { return required_object_ref(x); }
+
+sfz::optional<ObjectRef> default_reader<sfz::optional<ObjectRef>>::read(path_value x) {
+    return optional_object_ref(x);
+}
+
 }  // namespace antares
