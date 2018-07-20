@@ -25,6 +25,7 @@ namespace antares {
 static BuildableObject required_buildable_object(path_value x) {
     return BuildableObject{required_string_copy(x)};
 }
+DEFAULT_READER(BuildableObject, required_buildable_object);
 
 static std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
     std::vector<BuildableObject> objects =
@@ -37,12 +38,14 @@ static std::vector<BuildableObject> optional_buildable_object_array(path_value x
     }
     return objects;
 }
+DEFAULT_READER(std::vector<BuildableObject>, optional_buildable_object_array);
 
 static Initial::Override optional_override(path_value x) {
     return optional_struct<Initial::Override>(
                    x, {{"name", &Initial::Override::name}, {"sprite", &Initial::Override::sprite}})
             .value_or(Initial::Override{});
 }
+DEFAULT_READER(Initial::Override, optional_override);
 
 static Initial::Target optional_target(path_value x) {
     return optional_struct<Initial::Target>(
@@ -50,18 +53,19 @@ static Initial::Target optional_target(path_value x) {
                        {"lock", {&Initial::Target::lock, optional_bool, false}}})
             .value_or(Initial::Target{});
 }
+DEFAULT_READER(Initial::Target, optional_target);
 
 Initial initial(path_value x) {
     return required_struct<Initial>(
-            x, {{"base", {&Initial::base, required_buildable_object}},
+            x, {{"base", &Initial::base},
                 {"owner", {&Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
                 {"at", &Initial::at},
                 {"earning", {&Initial::earning, optional_fixed, Fixed::zero()}},
                 {"hide", {&Initial::hide, optional_bool, false}},
                 {"flagship", {&Initial::flagship, optional_bool, false}},
-                {"override", {&Initial::override_, optional_override}},
-                {"target", {&Initial::target, optional_target}},
-                {"build", {&Initial::build, optional_buildable_object_array}}});
+                {"override", &Initial::override_},
+                {"target", &Initial::target},
+                {"build", &Initial::build}});
 }
 
 }  // namespace antares

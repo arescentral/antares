@@ -55,6 +55,7 @@ static Level::Player::Type required_player_type(path_value x) {
     return required_enum<Level::Player::Type>(
             x, {{"human", Level::Player::Type::HUMAN}, {"cpu", Level::Player::Type::CPU}});
 }
+DEFAULT_READER(Level::Player::Type, required_player_type);
 
 template <>
 Level::Player required_player<Level::Type::DEMO>(path_value x) {
@@ -67,7 +68,7 @@ Level::Player required_player<Level::Type::DEMO>(path_value x) {
 template <>
 Level::Player required_player<Level::Type::SOLO>(path_value x) {
     return required_struct<Level::Player>(
-            x, {{"type", {&Level::Player::playerType, required_player_type}},
+            x, {{"type", &Level::Player::playerType},
                 {"name", &Level::Player::name},
                 {"race", &Level::Player::playerRace},
                 {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
@@ -77,32 +78,33 @@ Level::Player required_player<Level::Type::SOLO>(path_value x) {
 template <>
 Level::Player required_player<Level::Type::NET>(path_value x) {
     return required_struct<Level::Player>(
-            x, {{"type", {&Level::Player::playerType, required_player_type}},
+            x, {{"type", &Level::Player::playerType},
                 {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
                 {"races", nullptr}});  // TODO(sfiera): populate field
 }
 
 static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
+DEFAULT_READER(game_ticks, required_game_ticks);
 
 static Level::Par optional_par(path_value x) {
     return optional_struct<Level::Par>(
                    x,
                    {
-                           {"time", {&Level::Par::time, required_game_ticks}},
+                           {"time", &Level::Par::time},
                            {"kills", &Level::Par::kills},
                            {"losses", &Level::Par::losses},
                    })
             .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
 }
+DEFAULT_READER(Level::Par, optional_par);
 
 static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(path_value x) {
     return optional_struct<Level::StatusLine::Counter>(
-            x, {
-                       {"player", &Level::StatusLine::Counter::player},
-                       {"which", &Level::StatusLine::Counter::which},
-                       {"fixed", {&Level::StatusLine::Counter::fixed, optional_bool, false}},
-               });
+            x, {{"player", &Level::StatusLine::Counter::player},
+                {"which", &Level::StatusLine::Counter::which},
+                {"fixed", {&Level::StatusLine::Counter::fixed, optional_bool, false}}});
 };
+DEFAULT_READER(sfz::optional<Level::StatusLine::Counter>, optional_status_line_counter);
 
 static Level::StatusLine required_status_line(path_value x) {
     return required_struct<Level::StatusLine>(
@@ -115,7 +117,7 @@ static Level::StatusLine required_status_line(path_value x) {
                        {"false", &Level::StatusLine::false_},
 
                        {"minuend", &Level::StatusLine::minuend},
-                       {"counter", {&Level::StatusLine::counter, optional_status_line_counter}},
+                       {"counter", &Level::StatusLine::counter},
 
                        {"suffix", &Level::StatusLine::suffix},
                        {"underline", {&Level::StatusLine::underline, optional_bool, false}},
@@ -124,7 +126,7 @@ static Level::StatusLine required_status_line(path_value x) {
 
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
-            {"type", {&Level::type, required_level_type}},                                       \
+            {"type", &Level::type},                                                              \
             {"chapter", &Level::chapter},                                                        \
             {"title", &Level::name},                                                             \
             {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
@@ -137,7 +139,7 @@ static Level::StatusLine required_status_line(path_value x) {
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"skip", &Level::skip},                                                              \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \
-            {"par", {&Level::par, optional_par}}
+            {"par", &Level::par}
 // clang-format on
 
 static Level::Type required_level_type(path_value x) {
@@ -145,6 +147,7 @@ static Level::Type required_level_type(path_value x) {
             x,
             {{"solo", Level::Type::SOLO}, {"net", Level::Type::NET}, {"demo", Level::Type::DEMO}});
 }
+DEFAULT_READER(Level::Type, required_level_type);
 
 static Level demo_level(path_value x) {
     return required_struct<Level>(

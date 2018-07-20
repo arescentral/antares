@@ -35,7 +35,6 @@ static std::map<pn::rune, Rect> required_glyphs(path_value x) {
         throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
     }
 }
-
 FontData font_data(pn::value_cref x) {
     return required_struct<FontData>(
             path_value{x}, {{"logical-width", &FontData::logical_width},
