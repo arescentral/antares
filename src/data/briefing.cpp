@@ -32,4 +32,6 @@ Briefing briefing(path_value x) {
                });
 }
 
+Briefing default_reader<Briefing>::read(path_value x) { return briefing(x); }
+
 }  // namespace antares

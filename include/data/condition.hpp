@@ -271,6 +271,13 @@ struct Condition {
 
 Condition condition(path_value x);
 
+template <typename T>
+struct default_reader;
+template <>
+struct default_reader<Condition> {
+    static Condition read(path_value x);
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_DATA_CONDITION_HPP_

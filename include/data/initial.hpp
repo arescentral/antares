@@ -64,6 +64,13 @@ struct Initial {
 
 Initial initial(path_value x);
 
+template <typename T>
+struct default_reader;
+template <>
+struct default_reader<Initial> {
+    static Initial read(path_value x);
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_DATA_LEVEL_HPP_

@@ -36,6 +36,13 @@ struct Briefing {
 
 Briefing briefing(path_value x);
 
+template <typename T>
+struct default_reader;
+template <>
+struct default_reader<Briefing> {
+    static Briefing read(path_value x);
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_DATA_BRIEFING_HPP_

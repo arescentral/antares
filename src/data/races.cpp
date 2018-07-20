@@ -53,7 +53,7 @@ Race race(path_value x) {
                 {"military", &Race::military},
                 {"homeworld", &Race::homeworld},
                 {"hue", &Race::hue},
-                {"not_hue", {&Race::not_hue, optional_array<Hue, required_hue>}},
+                {"not_hue", &Race::not_hue},
                 {"advantage", &Race::advantage},
                 {"ships", {&Race::ships, optional_ships}}});
 }

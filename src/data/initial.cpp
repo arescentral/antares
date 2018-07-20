@@ -68,4 +68,6 @@ Initial initial(path_value x) {
                 {"build", &Initial::build}});
 }
 
+Initial default_reader<Initial>::read(path_value x) { return initial(x); }
+
 }  // namespace antares

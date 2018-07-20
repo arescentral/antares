@@ -317,6 +317,13 @@ static std::vector<T> optional_array(path_value x) {
     }
 }
 
+template <typename T>
+struct default_reader<std::vector<T>> {
+    static std::vector<T> read(path_value x) {
+        return optional_array<T, default_reader<T>::read>(x);
+    }
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_DATA_FIELD_HPP_

@@ -36,6 +36,13 @@ namespace antares {
 
 static std::unique_ptr<InterfaceItemData> interface_item(path_value x);
 
+template <typename T>
+struct default_reader;
+template <>
+struct default_reader<std::unique_ptr<InterfaceItemData>> {
+    static std::unique_ptr<InterfaceItemData> read(path_value x) { return interface_item(x); }
+};
+
 static InterfaceStyle required_interface_style(path_value x) {
     return required_enum<InterfaceStyle>(
             x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
@@ -83,10 +90,9 @@ static TabBoxData::Tab required_tab(path_value x) {
             x, {{"id", &TabBoxData::Tab::id},
                 {"width", &TabBoxData::Tab::width},
                 {"label", &TabBoxData::Tab::label},
-                {"content",
-                 {&TabBoxData::Tab::content,
-                  required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
+                {"content", &TabBoxData::Tab::content}});
 }
+DEFAULT_READER(TabBoxData::Tab, required_tab);
 
 static std::unique_ptr<InterfaceItemData> rect_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
@@ -160,7 +166,7 @@ static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
                 {"id", &InterfaceItemData::id},
                 {"hue", &TabBoxData::hue},
                 {"style", &TabBoxData::style},
-                {"tabs", {&TabBoxData::tabs, required_array<TabBoxData::Tab, required_tab>}}})));
+                {"tabs", &TabBoxData::tabs}})));
 }
 
 static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
@@ -177,10 +183,7 @@ static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
 
 InterfaceData interface(path_value x) {
     return required_struct<InterfaceData>(
-            x, {{"fullscreen", &InterfaceData::fullscreen},
-                {"items",
-                 {&InterfaceData::items,
-                  required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
+            x, {{"fullscreen", &InterfaceData::fullscreen}, {"items", &InterfaceData::items}});
 }
 
 void BoxRectData::accept(const Visitor& visitor) const { visitor.visit_box_rect(*this); }

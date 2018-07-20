@@ -413,6 +413,13 @@ union Action {
 
 Action action(path_value x);
 
+template <typename T>
+struct default_reader;
+template <>
+struct default_reader<Action> {
+    static Action read(path_value x);
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_DATA_ACTION_HPP_

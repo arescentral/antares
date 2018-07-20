@@ -36,6 +36,7 @@ static fixedPointType required_fixed_point(path_value x) {
     return required_struct<fixedPointType>(
             x, {{"x", &fixedPointType::h}, {"y", &fixedPointType::v}});
 }
+DEFAULT_READER(fixedPointType, required_fixed_point);
 
 static uint32_t distance(path_value x) {
     double d = required_double(x);
@@ -45,10 +46,8 @@ static uint32_t distance(path_value x) {
 
 static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
     return optional_struct<BaseObject::Weapon>(
-            x, {{"base", &BaseObject::Weapon::base},
-                {"positions",
-                 {&BaseObject::Weapon::positions,
-                  optional_array<fixedPointType, required_fixed_point>}}});
+            x,
+            {{"base", &BaseObject::Weapon::base}, {"positions", &BaseObject::Weapon::positions}});
 }
 DEFAULT_READER(sfz::optional<BaseObject::Weapon>, optional_weapon);
 
@@ -321,7 +320,7 @@ static BaseObject::Destroy optional_destroy(path_value x) {
                    x, {{"die", &BaseObject::Destroy::die},
                        {"neutralize", &BaseObject::Destroy::neutralize},
                        {"release_energy", &BaseObject::Destroy::release_energy},
-                       {"action", {&BaseObject::Destroy::action, optional_array<Action, action>}}})
+                       {"action", &BaseObject::Destroy::action}})
             .value_or(BaseObject::Destroy{});
 }
 DEFAULT_READER(BaseObject::Destroy, optional_destroy);
@@ -340,14 +339,13 @@ static BaseObject::Expire optional_expire(path_value x) {
     return optional_struct<BaseObject::Expire>(
                    x, {{"after", &BaseObject::Expire::after},
                        {"die", &BaseObject::Expire::die},
-                       {"action", {&BaseObject::Expire::action, optional_array<Action, action>}}})
+                       {"action", &BaseObject::Expire::action}})
             .value_or(BaseObject::Expire{});
 }
 DEFAULT_READER(BaseObject::Expire, optional_expire);
 
 static BaseObject::Create optional_create(path_value x) {
-    return optional_struct<BaseObject::Create>(
-                   x, {{"action", {&BaseObject::Create::action, optional_array<Action, action>}}})
+    return optional_struct<BaseObject::Create>(x, {{"action", &BaseObject::Create::action}})
             .value_or(BaseObject::Create{});
 }
 DEFAULT_READER(BaseObject::Create, optional_create);
@@ -369,18 +367,17 @@ static BaseObject::Collide optional_collide(path_value x) {
                        {"damage", &BaseObject::Collide::damage},
                        {"solid", &BaseObject::Collide::solid},
                        {"edge", &BaseObject::Collide::edge},
-                       {"action", {&BaseObject::Collide::action, optional_array<Action, action>}}})
+                       {"action", &BaseObject::Collide::action}})
             .value_or(BaseObject::Collide{});
 }
 DEFAULT_READER(BaseObject::Collide, optional_collide);
 
 static BaseObject::Activate optional_activate(path_value x) {
     return optional_struct<BaseObject::Activate>(
-                   x,
-                   {{"period",
-                     {&BaseObject::Activate::period, optional_ticks_range,
-                      Range<ticks>{ticks(0), ticks(0)}}},
-                    {"action", {&BaseObject::Activate::action, optional_array<Action, action>}}})
+                   x, {{"period",
+                        {&BaseObject::Activate::period, optional_ticks_range,
+                         Range<ticks>{ticks(0), ticks(0)}}},
+                       {"action", &BaseObject::Activate::action}})
             .value_or(BaseObject::Activate{});
 }
 DEFAULT_READER(BaseObject::Activate, optional_activate);
@@ -388,7 +385,7 @@ DEFAULT_READER(BaseObject::Activate, optional_activate);
 static BaseObject::Arrive optional_arrive(path_value x) {
     return optional_struct<BaseObject::Arrive>(
                    x, {{"distance", {&BaseObject::Arrive::distance, distance}},
-                       {"action", {&BaseObject::Arrive::action, optional_array<Action, action>}}})
+                       {"action", &BaseObject::Arrive::action}})
             .value_or(BaseObject::Arrive{});
 }
 DEFAULT_READER(BaseObject::Arrive, optional_arrive);

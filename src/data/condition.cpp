@@ -183,7 +183,7 @@ static ConditionWhen count_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &CountCondition::op},
                 {"value", &CountCondition::value},
-                {"of", {&CountCondition::of, required_array<ConditionWhen, when>}}});
+                {"of", &CountCondition::of}});
 }
 
 static ConditionWhen counter_condition(path_value x) {
@@ -321,7 +321,9 @@ Condition condition(path_value x) {
                 {"when", &Condition::when},
                 {"subject", {&Condition::subject, optional_object_ref}},
                 {"object", {&Condition::object, optional_object_ref}},
-                {"action", {&Condition::action, required_array<Action, action>}}});
+                {"action", &Condition::action}});
 }
+
+Condition default_reader<Condition>::read(path_value x) { return condition(x); }
 
 }  // namespace antares

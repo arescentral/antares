@@ -308,12 +308,8 @@ static Action cloak_action(path_value x) {
 static Action condition_action(path_value x) {
     return required_struct<ConditionAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable",
-                 {&ConditionAction::enable,
-                  optional_array<Handle<const Condition>, required_condition>}},
-                {"disable",
-                 {&ConditionAction::disable,
-                  optional_array<Handle<const Condition>, required_condition>}}});
+                {"enable", &ConditionAction::enable},
+                {"disable", &ConditionAction::disable}});
 }
 
 static Action create_action(path_value x) {
@@ -404,12 +400,13 @@ static KeyAction::Key required_key(path_value x) {
                 {"send_message", KeyAction::Key::SEND_MESSAGE},
                 {"mouse", KeyAction::Key::MOUSE}});
 }
+DEFAULT_READER(KeyAction::Key, required_key);
 
 static Action key_action(path_value x) {
     return required_struct<KeyAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable", {&KeyAction::enable, optional_array<KeyAction::Key, required_key>}},
-                {"disable", {&KeyAction::disable, optional_array<KeyAction::Key, required_key>}}});
+                {"enable", &KeyAction::enable},
+                {"disable", &KeyAction::disable}});
 }
 
 static KillAction::Kind required_kill_kind(path_value x) {
@@ -430,10 +427,8 @@ static Action land_action(path_value x) {
 
 static Action message_action(path_value x) {
     return required_struct<MessageAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"id", &MessageAction::id},
-                {"pages",
-                 {&MessageAction::pages, required_array<pn::string, required_string_copy>}}});
+            x,
+            {COMMON_ACTION_FIELDS, {"id", &MessageAction::id}, {"pages", &MessageAction::pages}});
 }
 
 static Action morph_action(path_value x) {
@@ -501,10 +496,7 @@ static Action push_action(path_value x) {
 
 static Action reveal_action(path_value x) {
     return required_struct<RevealAction>(
-            x,
-            {COMMON_ACTION_FIELDS,
-             {"initial",
-              {&RevealAction::initial, required_array<Handle<const Initial>, required_initial>}}});
+            x, {COMMON_ACTION_FIELDS, {"initial", &RevealAction::initial}});
 }
 
 static Action score_action(path_value x) {
@@ -525,6 +517,7 @@ static Action select_action(path_value x) {
 static PlayAction::Sound required_sound(path_value x) {
     return required_struct<PlayAction::Sound>(x, {{"sound", &PlayAction::Sound::sound}});
 }
+DEFAULT_READER(PlayAction::Sound, required_sound);
 
 static uint8_t required_sound_priority(path_value x) { return required_int(x, {0, 6}); }
 
@@ -536,7 +529,7 @@ static Action play_action(path_value x) {
                 {"absolute", {&PlayAction::absolute, optional_bool, false}},
                 {"volume", &PlayAction::volume},
                 {"sound", &PlayAction::sound},
-                {"any", {&PlayAction::any, optional_array<PlayAction::Sound, required_sound>}}});
+                {"any", &PlayAction::any}});
 }
 
 static Action spark_action(path_value x) {
@@ -613,5 +606,7 @@ Action action(path_value x) {
         case Action::Type::ZOOM: return zoom_action(x);
     }
 }
+
+Action default_reader<Action>::read(path_value x) { return action(x); }
 
 }  // namespace antares

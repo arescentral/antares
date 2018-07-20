@@ -123,19 +123,19 @@ static Level::StatusLine required_status_line(path_value x) {
                        {"underline", {&Level::StatusLine::underline, optional_bool, false}},
                });
 };
+DEFAULT_READER(Level::StatusLine, required_status_line);
 
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
             {"type", &Level::type},                                                              \
             {"chapter", &Level::chapter},                                                        \
             {"title", &Level::name},                                                             \
-            {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
-            {"conditions", {&Level::conditions, optional_array<Condition, condition>}},          \
-            {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
+            {"initials", &Level::initials},                                                      \
+            {"conditions", &Level::conditions},                                                  \
+            {"briefings", &Level::briefings},                                                    \
             {"starmap", &Level::starmap},                                                        \
             {"song", &Level::song},                                                              \
-            {"status",                                                                           \
-             {&Level::status, optional_array<Level::StatusLine, required_status_line>}},         \
+            {"status", &Level::status},                                                          \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"skip", &Level::skip},                                                              \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \
