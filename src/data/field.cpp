@@ -418,12 +418,12 @@ Owner required_owner(path_value x) {
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
 
-template <typename T, T (*F)(path_value)>
+template <typename T>
 std::pair<T, T> range(path_value x) {
     struct Pair {
         T begin, end;
     };
-    Pair p = required_struct<Pair>(x, {{"begin", {&Pair::begin, F}}, {"end", {&Pair::end, F}}});
+    Pair p = required_struct<Pair>(x, {{"begin", &Pair::begin}, {"end", &Pair::end}});
     return {p.begin, p.end};
 }
 
@@ -434,7 +434,7 @@ sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
         int64_t begin = x.value().as_int();
         return sfz::make_optional(Range<int64_t>{begin, begin + 1});
     } else if (x.value().is_map()) {
-        auto r = range<int64_t, required_int>(x);
+        auto r = range<int64_t>(x);
         return sfz::make_optional(Range<int64_t>{r.first, r.second});
     } else {
         throw std::runtime_error(pn::format("{0}: must be null, int, or map", x.path()).c_str());
@@ -446,7 +446,7 @@ Range<int64_t> required_int_range(path_value x) {
         int64_t begin = x.value().as_int();
         return Range<int64_t>{begin, begin + 1};
     } else if (x.value().is_map()) {
-        auto r = range<int64_t, required_int>(x);
+        auto r = range<int64_t>(x);
         return {r.first, r.second};
     } else {
         throw std::runtime_error(pn::format("{0}: must be int or map", x.path()).c_str());
@@ -461,7 +461,7 @@ sfz::optional<Range<Fixed>> optional_fixed_range(path_value x) {
         Fixed end   = Fixed::from_val(begin.val() + 1);
         return sfz::make_optional(Range<Fixed>{begin, end});
     } else if (x.value().is_map()) {
-        auto r = range<Fixed, required_fixed>(x);
+        auto r = range<Fixed>(x);
         return sfz::make_optional(Range<Fixed>{r.first, r.second});
     } else {
         throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
@@ -474,7 +474,7 @@ Range<Fixed> required_fixed_range(path_value x) {
         Fixed end   = Fixed::from_val(begin.val() + 1);
         return {begin, end};
     } else if (x.value().is_map()) {
-        auto r = range<Fixed, required_fixed>(x);
+        auto r = range<Fixed>(x);
         return {r.first, r.second};
     } else {
         throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
@@ -488,7 +488,7 @@ sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
         ticks begin = required_ticks(x);
         return sfz::make_optional(Range<ticks>{begin, begin + ticks{1}});
     } else if (x.value().is_map()) {
-        auto r = range<ticks, required_ticks>(x);
+        auto r = range<ticks>(x);
         return sfz::make_optional(Range<ticks>{r.first, r.second});
     } else {
         throw std::runtime_error(pn::format("{0}: must be null, string or map", x.path()).c_str());
@@ -500,7 +500,7 @@ Range<ticks> required_ticks_range(path_value x) {
         ticks begin = required_ticks(x);
         return Range<ticks>{begin, begin + ticks{1}};
     } else if (x.value().is_map()) {
-        auto r = range<ticks, required_ticks>(x);
+        auto r = range<ticks>(x);
         return {r.first, r.second};
     } else {
         throw std::runtime_error(pn::format("{0}: must be string or map", x.path()).c_str());
@@ -510,35 +510,30 @@ Range<ticks> required_ticks_range(path_value x) {
 static int32_t required_int32(path_value x) {
     return required_int(x, {-0x80000000ll, 0x80000000ll});
 }
+DEFAULT_READER(int32_t, required_int32);
 
 sfz::optional<Point> optional_point(path_value x) {
-    return optional_struct<Point>(
-            x, {{"x", {&Point::h, required_int32}}, {"y", {&Point::v, required_int32}}});
+    return optional_struct<Point>(x, {{"x", &Point::h}, {"y", &Point::v}});
 }
 
 Point required_point(path_value x) {
-    return required_struct<Point>(
-            x, {{"x", {&Point::h, required_int32}}, {"y", {&Point::v, required_int32}}});
+    return required_struct<Point>(x, {{"x", &Point::h}, {"y", &Point::v}});
 }
 
 sfz::optional<Rect> optional_rect(path_value x) {
     return optional_struct<Rect>(
-            x, {
-                       {"left", {&Rect::left, required_int32}},
-                       {"top", {&Rect::top, required_int32}},
-                       {"right", {&Rect::right, required_int32}},
-                       {"bottom", {&Rect::bottom, required_int32}},
-               });
+            x, {{"left", &Rect::left},
+                {"top", &Rect::top},
+                {"right", &Rect::right},
+                {"bottom", &Rect::bottom}});
 }
 
 Rect required_rect(path_value x) {
     return required_struct<Rect>(
-            x, {
-                       {"left", {&Rect::left, required_int32}},
-                       {"top", {&Rect::top, required_int32}},
-                       {"right", {&Rect::right, required_int32}},
-                       {"bottom", {&Rect::bottom, required_int32}},
-               });
+            x, {{"left", &Rect::left},
+                {"top", &Rect::top},
+                {"right", &Rect::right},
+                {"bottom", &Rect::bottom}});
 }
 
 sfz::optional<RgbColor> optional_color(path_value x) {
@@ -551,17 +546,20 @@ sfz::optional<RgbColor> optional_color(path_value x) {
     }
 }
 
-static uint8_t                required_uint8(path_value x) { return required_int(x, {0, 256}); }
+static uint8_t required_uint8(path_value x) { return required_int(x, {0, 256}); }
+DEFAULT_READER(uint8_t, required_uint8);
+
 static sfz::optional<uint8_t> optional_uint8(path_value x) {
     auto i = optional_int(x, {0, 256});
     return i.has_value() ? sfz::make_optional<uint8_t>(*i) : sfz::nullopt;
 }
+DEFAULT_READER(sfz::optional<uint8_t>, optional_uint8);
 
 RgbColor required_color(path_value x) {
     return required_struct<RgbColor>(
-            x, {{"r", {&RgbColor::red, required_uint8}},
-                {"g", {&RgbColor::green, required_uint8}},
-                {"b", {&RgbColor::blue, required_uint8}},
+            x, {{"r", &RgbColor::red},
+                {"g", &RgbColor::green},
+                {"b", &RgbColor::blue},
                 {"a", {&RgbColor::alpha, optional_uint8, 255}}});
 }
 
