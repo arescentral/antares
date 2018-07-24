@@ -18,6 +18,8 @@
 
 #include "data/field.hpp"
 
+#include <set>
+
 #include "data/level.hpp"
 
 namespace antares {
@@ -555,12 +557,38 @@ static sfz::optional<uint8_t> optional_uint8(path_value x) {
 }
 DEFAULT_READER(sfz::optional<uint8_t>, optional_uint8);
 
+static bool is_rgb(pn::map_cref m) {
+    return (m.size() == 3) && m.has("r") && m.has("g") && m.has("b");
+}
+
+static bool is_rgba(pn::map_cref m) {
+    return (m.size() == 4) && m.has("r") && m.has("g") && m.has("b") && m.has("a");
+}
+
 RgbColor required_color(path_value x) {
-    return required_struct<RgbColor>(
-            x, {{"r", &RgbColor::red},
-                {"g", &RgbColor::green},
-                {"b", &RgbColor::blue},
-                {"a", {&RgbColor::alpha, optional_uint8, 255}}});
+    if (x.value().is_map()) {
+        const pn::map_cref m = x.value().as_map();
+        if (is_rgba(m)) {
+            return rgba(
+                    required_uint8(m.get("r")), required_uint8(m.get("g")),
+                    required_uint8(m.get("b")), required_uint8(m.get("a")));
+        } else if (is_rgb(m)) {
+            return rgb(
+                    required_uint8(m.get("r")), required_uint8(m.get("g")),
+                    required_uint8(m.get("b")));
+        }
+    } else if (x.value().is_string()) {
+        const pn::string_view s = x.value().as_string();
+        if (s == "white") {
+            return RgbColor::white();
+        } else if (s == "black") {
+            return RgbColor::black();
+        } else if (s == "clear") {
+            return RgbColor::clear();
+        }
+        // TODO(sfiera): hex colors.
+    }
+    throw std::runtime_error(pn::format("{0}must be color", x.prefix()).c_str());
 }
 
 sfz::optional<Hue> optional_hue(path_value x) {
