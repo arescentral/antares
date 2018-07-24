@@ -251,7 +251,7 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
 }
 
 static void load_initial(Handle<const Initial> initial, std::bitset<16> all_colors) {
-    Handle<Admiral>               owner           = initial->owner;
+    Handle<Admiral>               owner           = initial->owner.value_or(Admiral::none());
     const BuildableObject&        buildableObject = initial->base;
     NamedHandle<const BaseObject> baseObject;
     if (owner.get()) {

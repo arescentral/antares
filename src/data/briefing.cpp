@@ -25,11 +25,9 @@ namespace antares {
 
 Briefing briefing(path_value x) {
     return required_struct<Briefing>(
-            x, {
-                       {"initial", {&Briefing::initial, optional_initial, Initial::none()}},
-                       {"title", &Briefing::title},
-                       {"content", &Briefing::content},
-               });
+            x, {{"initial", &Briefing::initial},
+                {"title", &Briefing::title},
+                {"content", &Briefing::content}});
 }
 
 Briefing default_reader<Briefing>::read(path_value x) { return briefing(x); }
