@@ -119,7 +119,7 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
 
     a->_active        = true;
     a->_attributes    = attributes;
-    a->_earning_power = player.earningPower;
+    a->_earning_power = player.earningPower.value_or(Fixed::zero());
     a->_race          = player.playerRace.copy();
     a->_hue           = player.hue;
 

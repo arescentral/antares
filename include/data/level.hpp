@@ -50,7 +50,7 @@ struct Level {
         Type                    playerType = Type::CPU;
         NamedHandle<const Race> playerRace;
         pn::string              name;
-        Fixed                   earningPower = Fixed::zero();
+        sfz::optional<Fixed>    earningPower;
         int16_t                 netRaceFlags = 0;
         Hue                     hue          = Hue::GRAY;
     };

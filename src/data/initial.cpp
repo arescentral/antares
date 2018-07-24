@@ -60,7 +60,7 @@ Initial initial(path_value x) {
             x, {{"base", &Initial::base},
                 {"owner", {&Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
                 {"at", &Initial::at},
-                {"earning", {&Initial::earning, optional_fixed, Fixed::zero()}},
+                {"earning", &Initial::earning},
                 {"hide", &Initial::hide},
                 {"flagship", &Initial::flagship},
                 {"override", &Initial::override_},

@@ -62,7 +62,7 @@ Level::Player required_player<Level::Type::DEMO>(path_value x) {
     return required_struct<Level::Player>(
             x, {{"name", &Level::Player::name},
                 {"race", &Level::Player::playerRace},
-                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+                {"earning_power", &Level::Player::earningPower}});
 }
 
 template <>
@@ -72,14 +72,14 @@ Level::Player required_player<Level::Type::SOLO>(path_value x) {
                 {"name", &Level::Player::name},
                 {"race", &Level::Player::playerRace},
                 {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
-                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+                {"earning_power", &Level::Player::earningPower}});
 }
 
 template <>
 Level::Player required_player<Level::Type::NET>(path_value x) {
     return required_struct<Level::Player>(
             x, {{"type", &Level::Player::playerType},
-                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
+                {"earning_power", &Level::Player::earningPower},
                 {"races", nullptr}});  // TODO(sfiera): populate field
 }
 

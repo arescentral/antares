@@ -54,7 +54,7 @@ struct Initial {
         sfz::optional<pn::string> sprite;
     } override_;
 
-    Fixed                        earning = Fixed::zero();
+    sfz::optional<Fixed>         earning;
     std::vector<BuildableObject> build;
 
     static const Initial*            get(int n);

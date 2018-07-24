@@ -489,9 +489,7 @@ DEFAULT_READER(PushAction::Kind, required_push_kind);
 
 static Action push_action(path_value x) {
     return required_struct<PushAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"kind", &PushAction::kind},
-                {"value", {&PushAction::value, optional_fixed, Fixed::zero()}}});
+            x, {COMMON_ACTION_FIELDS, {"kind", &PushAction::kind}, {"value", &PushAction::value}});
 }
 
 static Action reveal_action(path_value x) {

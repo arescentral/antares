@@ -74,7 +74,8 @@ void create_initial(Handle<const Initial> initial) {
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
-                anObject, initial->build, initial->earning, initial->override_.name);
+                anObject, initial->build, initial->earning.value_or(Fixed::zero()),
+                initial->override_.name);
     }
     g.initial_ids[initial.number()] = anObject->id;
 
@@ -165,7 +166,8 @@ void UnhideInitialObject(Handle<const Initial> initial) {
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
-                anObject, initial->build, initial->earning, initial->override_.name);
+                anObject, initial->build, initial->earning.value_or(Fixed::zero()),
+                initial->override_.name);
 
         if (owner.get()) {
             if (initial->build.size() > 0) {
