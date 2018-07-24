@@ -215,7 +215,7 @@ static ActionBase::Filter optional_action_filter(path_value x) {
                    x,
                    {{"attributes", {&ActionBase::Filter::attributes, optional_object_attributes}},
                     {"tags", {&ActionBase::Filter::tags, optional_tags}},
-                    {"owner", {&ActionBase::Filter::owner, optional_owner, Owner::ANY}}})
+                    {"owner", &ActionBase::Filter::owner}})
             .value_or(ActionBase::Filter{});
 }
 DEFAULT_READER(ActionBase::Filter, optional_action_filter);
@@ -445,6 +445,7 @@ static sfz::optional<coordPointType> optional_coord_point(path_value x) {
     }
     return sfz::make_optional(coordPointType{(uint32_t)p->h, (uint32_t)p->v});
 }
+DEFAULT_READER(sfz::optional<coordPointType>, optional_coord_point);
 
 static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
     return optional_enum<MoveAction::Origin>(
@@ -452,12 +453,13 @@ static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
                 {"subject", MoveAction::Origin::SUBJECT},
                 {"object", MoveAction::Origin::OBJECT}});
 }
+DEFAULT_READER(sfz::optional<MoveAction::Origin>, optional_origin);
 
 static Action move_action(path_value x) {
     return required_struct<MoveAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"origin", {&MoveAction::origin, optional_origin, MoveAction::Origin::LEVEL}},
-                {"to", {&MoveAction::to, optional_coord_point, coordPointType{0, 0}}},
+                {"origin", &MoveAction::origin},
+                {"to", &MoveAction::to},
                 {"distance", &MoveAction::distance},
                 {"within", &MoveAction::within}});
 }

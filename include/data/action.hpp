@@ -91,7 +91,7 @@ struct ActionBase {
     struct Filter {
         uint32_t                   attributes = 0;
         std::map<pn::string, bool> tags;
-        Owner                      owner = Owner::ANY;
+        sfz::optional<Owner>       owner;
     } filter;
 
     struct Override {
@@ -242,10 +242,11 @@ struct MoveAction : public ActionBase {
         LEVEL,    // absolute coordinates, in level’s rotated frame of reference
         SUBJECT,  // relative to subject
         OBJECT,   // relative to object
-    } origin;
-    coordPointType         to;
-    sfz::optional<int64_t> distance;
-    Within                 within;
+    };
+    sfz::optional<Origin>         origin;
+    sfz::optional<coordPointType> to;
+    sfz::optional<int64_t>        distance;
+    Within                        within;
 };
 
 struct OccupyAction : public ActionBase {

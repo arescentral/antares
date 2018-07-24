@@ -543,13 +543,14 @@ static void apply(
         const MoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     coordPointType newLocation;
-    switch (a.origin) {
+    switch (a.origin.value_or(MoveAction::Origin::LEVEL)) {
         case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
         case MoveAction::Origin::SUBJECT: newLocation = subject->location; break;
         case MoveAction::Origin::OBJECT: newLocation = object->location; break;
     }
 
-    coordPointType off = Translate_Coord_To_Level_Rotation(a.to.h, a.to.v);
+    coordPointType off = a.to.value_or(coordPointType{0, 0});
+    off                = Translate_Coord_To_Level_Rotation(off.h, off.v);
     newLocation.h += off.h - kUniversalCenter;
     newLocation.v += off.v - kUniversalCenter;
 
@@ -803,10 +804,10 @@ static void execute_actions(
             focus = subject;
         }
 
+        auto owner_filter = action.base.filter.owner.value_or(Owner::ANY);
         if (object.get() && subject.get()) {
-            if (((action.base.filter.owner == Owner::DIFFERENT) &&
-                 (object->owner == subject->owner)) ||
-                ((action.base.filter.owner == Owner::SAME) && (object->owner != subject->owner))) {
+            if (((owner_filter == Owner::DIFFERENT) && (object->owner == subject->owner)) ||
+                ((owner_filter == Owner::SAME) && (object->owner != subject->owner))) {
                 continue;
             }
         }

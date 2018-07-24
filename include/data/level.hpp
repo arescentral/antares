@@ -52,7 +52,7 @@ struct Level {
         pn::string              name;
         sfz::optional<Fixed>    earningPower;
         int16_t                 netRaceFlags = 0;
-        Hue                     hue          = Hue::GRAY;
+        sfz::optional<Hue>      hue;
     };
 
     struct StatusLine {

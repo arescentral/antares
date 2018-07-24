@@ -66,7 +66,7 @@ Level::Player required_player<Level::Type::SOLO>(path_value x) {
             x, {{"type", &Level::Player::playerType},
                 {"name", &Level::Player::name},
                 {"race", &Level::Player::playerRace},
-                {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
+                {"hue", &Level::Player::hue},
                 {"earning_power", &Level::Player::earningPower}});
 }
 
