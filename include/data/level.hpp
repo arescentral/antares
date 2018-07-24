@@ -64,15 +64,15 @@ struct Level {
         sfz::optional<pn::string> false_;
 
         struct Counter {
-            int64_t player = 0;
-            int64_t which  = 0;
-            bool    fixed  = false;
+            int64_t             player = 0;
+            int64_t             which  = 0;
+            sfz::optional<bool> fixed;
         };
         sfz::optional<Fixed>   minuend;
         sfz::optional<Counter> counter;
 
         sfz::optional<pn::string> suffix;
-        bool                      underline = false;
+        sfz::optional<bool>       underline;
 
         StatusLine()                  = default;
         StatusLine(StatusLine&&)      = default;

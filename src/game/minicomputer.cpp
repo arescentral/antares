@@ -1064,7 +1064,7 @@ void MiniComputerSetStatusStrings() {
         // we have some data for this line to interpret
         const Level::StatusLine& l = g.level->status.at(count - kStatusMiniScreenFirstLine);
 
-        line->underline = l.underline;
+        line->underline = l.underline.value_or(false);
         if (l.text.has_value()) {
             line->statusType = kPlainTextStatus;
             line->value      = 0;
@@ -1082,7 +1082,7 @@ void MiniComputerSetStatusStrings() {
         } else if (l.counter.has_value()) {
             line->whichStatus  = l.counter->which;
             line->statusPlayer = Handle<Admiral>(l.counter->player);
-            if (l.counter->fixed) {
+            if (l.counter->fixed.value_or(false)) {
                 if (l.minuend.has_value()) {
                     line->statusType    = kSmallFixedMinusValue;
                     line->negativeValue = l.minuend->val();

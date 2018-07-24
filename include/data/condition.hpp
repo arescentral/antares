@@ -194,9 +194,9 @@ struct TargetCondition : ConditionBase {
 // `legacy_start_time` specifies an alternate mode where the setup time counts for only 1/3 as much
 // as time after the setup finishes.
 struct TimeCondition : ConditionBase {
-    ConditionOp op = ConditionOp::EQ;
-    ticks       duration;
-    bool        legacy_start_time;
+    ConditionOp         op = ConditionOp::EQ;
+    ticks               duration;
+    sfz::optional<bool> legacy_start_time;
 };
 
 // Compares zoom level of the local player to `value`.
@@ -256,8 +256,8 @@ union ConditionWhen {
 };
 
 struct Condition {
-    bool disabled   = false;
-    bool persistent = false;
+    sfz::optional<bool> disabled;
+    sfz::optional<bool> persistent;
 
     ConditionWhen when;
 

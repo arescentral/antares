@@ -102,7 +102,7 @@ static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(pa
     return optional_struct<Level::StatusLine::Counter>(
             x, {{"player", &Level::StatusLine::Counter::player},
                 {"which", &Level::StatusLine::Counter::which},
-                {"fixed", {&Level::StatusLine::Counter::fixed, optional_bool, false}}});
+                {"fixed", &Level::StatusLine::Counter::fixed}});
 };
 DEFAULT_READER(sfz::optional<Level::StatusLine::Counter>, optional_status_line_counter);
 
@@ -120,7 +120,7 @@ static Level::StatusLine required_status_line(path_value x) {
                        {"counter", &Level::StatusLine::counter},
 
                        {"suffix", &Level::StatusLine::suffix},
-                       {"underline", {&Level::StatusLine::underline, optional_bool, false}},
+                       {"underline", &Level::StatusLine::underline},
                });
 };
 DEFAULT_READER(Level::StatusLine, required_status_line);

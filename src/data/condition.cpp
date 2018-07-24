@@ -280,7 +280,7 @@ static ConditionWhen time_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &TimeCondition::op},
                 {"duration", &TimeCondition::duration},
-                {"legacy_start_time", {&TimeCondition::legacy_start_time, optional_bool, false}}});
+                {"legacy_start_time", &TimeCondition::legacy_start_time}});
 }
 
 static ConditionWhen zoom_condition(path_value x) {
@@ -316,8 +316,8 @@ static ConditionWhen when(path_value x) {
 
 Condition condition(path_value x) {
     return required_struct<Condition>(
-            x, {{"persistent", {&Condition::persistent, optional_bool, false}},
-                {"disabled", {&Condition::disabled, optional_bool, false}},
+            x, {{"persistent", &Condition::persistent},
+                {"disabled", &Condition::disabled},
                 {"when", &Condition::when},
                 {"subject", &Condition::subject},
                 {"object", &Condition::object},

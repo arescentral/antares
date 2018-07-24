@@ -38,15 +38,15 @@ struct BuildableObject {
 };
 
 struct Initial {
-    BuildableObject base;
-    Handle<Admiral> owner;
-    Point           at;
-    bool            hide     = false;
-    bool            flagship = false;
+    BuildableObject     base;
+    Handle<Admiral>     owner;
+    Point               at;
+    sfz::optional<bool> hide;
+    sfz::optional<bool> flagship;
 
     struct Target {
         Handle<const Initial> initial;
-        bool                  lock = false;
+        sfz::optional<bool>   lock;
     } target;
 
     struct Override {

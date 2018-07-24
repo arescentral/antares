@@ -124,7 +124,7 @@ static void apply(
     auto c = a.count.begin;
     if (a.count.range() > 1) {
         c += subject->randomSeed.next(a.count.range());
-    } else if (a.legacy_random) {
+    } else if (a.legacy_random.value_or(false)) {
         // It used to be that the range test above was >0 instead of >1. That worked for most
         // objects, which had ranges of 0. However, the Nastiroid shooter on Mothership Connection
         // specified a range of 1. This was meaningless as far as the actual object count went, but
@@ -134,13 +134,13 @@ static void apply(
     }
     for (int i = 0; i < c; ++i) {
         fixedPointType vel = {Fixed::zero(), Fixed::zero()};
-        if (a.relative_velocity) {
+        if (a.relative_velocity.value_or(false)) {
             vel = subject->velocity;
         }
         int32_t direction = 0;
         if (a.base->attributes & kAutoTarget) {
             direction = focus->targetAngle;
-        } else if (a.relative_direction) {
+        } else if (a.relative_direction.value_or(false)) {
             direction = subject->direction;
         }
         coordPointType at = subject->location;
@@ -165,14 +165,14 @@ static void apply(
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
-                if (a.reflexive) {
-                    if (!a.inherit) {
+                if (a.reflexive.value_or(false)) {
+                    if (!a.inherit.value_or(false)) {
                         OverrideObjectDestination(product, subject);
                     } else if (subject->destObject.get()) {
                         OverrideObjectDestination(product, subject->destObject);
                     }
                 }
-            } else if (a.reflexive) {
+            } else if (a.reflexive.value_or(false)) {
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
                 product->destObject       = subject;  // a->destinationObject;
@@ -208,7 +208,7 @@ static void apply(
     } else {
         return;
     }
-    if (a.absolute) {
+    if (a.absolute.value_or(false)) {
         sys.sound.play(pick, a.volume, a.persistence, a.priority);
     } else {
         sys.sound.play_at(pick, a.volume, a.persistence, a.priority, focus);
@@ -461,7 +461,7 @@ static void apply(
         const MorphAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
     if (focus.get()) {
-        focus->change_base_type(*a.base, sfz::nullopt, a.keep_ammo);
+        focus->change_base_type(*a.base, sfz::nullopt, a.keep_ammo.value_or(false));
     }
 }
 
@@ -477,7 +477,7 @@ static void apply(
         // if it's relative AND reflexive, we take the direct
         // object's owner, since relative & reflexive would
         // do nothing.
-        if (a.reflexive && object.get()) {
+        if (a.reflexive.value_or(false) && object.get()) {
             focus->set_owner(object->owner, true);
         } else {
             focus->set_owner(subject->owner, true);
@@ -525,7 +525,7 @@ static void apply(
         Handle<SpaceObject> object, Point* offset) {
     ticks t = a.value.begin + focus->randomSeed.next(a.value.range());
 
-    if (a.relative) {
+    if (a.relative.value_or(false)) {
         if (focus->expires) {
             focus->expire_after += t;
         } else {
@@ -798,7 +798,7 @@ static void execute_actions(
         }
 
         auto focus = object;
-        if (action.base.reflexive || !focus.get()) {
+        if (action.base.reflexive.value_or(false) || !focus.get()) {
             focus = subject;
         }
 

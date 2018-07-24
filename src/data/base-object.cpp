@@ -115,9 +115,9 @@ DEFAULT_READER(sfz::optional<BaseObject::Bolt>, optional_bolt_frame);
 static BaseObject::Device::Usage optional_usage(path_value x) {
     using Usage = BaseObject::Device::Usage;
     return optional_struct<Usage>(
-                   x, {{"attacking", {&Usage::attacking, optional_bool, false}},
-                       {"defense", {&Usage::defense, optional_bool, false}},
-                       {"transportation", {&Usage::transportation, optional_bool, false}}})
+                   x, {{"attacking", &Usage::attacking},
+                       {"defense", &Usage::defense},
+                       {"transportation", &Usage::transportation}})
             .value_or(Usage{});
 }
 DEFAULT_READER(BaseObject::Device::Usage, optional_usage);

@@ -292,7 +292,7 @@ static void load_condition(Handle<const Condition> condition, std::bitset<16> al
     for (const auto& action : condition->action) {
         AddActionMedia(action, all_colors);
     }
-    g.condition_enabled[condition.number()] = !condition->disabled;
+    g.condition_enabled[condition.number()] = !condition->disabled.value_or(false);
 }
 
 static void run_game_1s() {
@@ -390,7 +390,7 @@ void GetLevelFullScaleAndCorner(
 
     biggest = 0;
     for (const auto& initial : Initial::all()) {
-        if (!initial->hide) {
+        if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
             for (const auto& other : Initial::all()) {
@@ -416,7 +416,7 @@ void GetLevelFullScaleAndCorner(
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
     for (const auto& initial : Initial::all()) {
-        if (!initial->hide) {
+        if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {

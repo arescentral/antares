@@ -50,7 +50,7 @@ DEFAULT_READER(Initial::Override, optional_override);
 static Initial::Target optional_target(path_value x) {
     return optional_struct<Initial::Target>(
                    x, {{"initial", {&Initial::Target::initial, optional_initial, Initial::none()}},
-                       {"lock", {&Initial::Target::lock, optional_bool, false}}})
+                       {"lock", &Initial::Target::lock}})
             .value_or(Initial::Target{});
 }
 DEFAULT_READER(Initial::Target, optional_target);
@@ -61,8 +61,8 @@ Initial initial(path_value x) {
                 {"owner", {&Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
                 {"at", &Initial::at},
                 {"earning", {&Initial::earning, optional_fixed, Fixed::zero()}},
-                {"hide", {&Initial::hide, optional_bool, false}},
-                {"flagship", {&Initial::flagship, optional_bool, false}},
+                {"hide", &Initial::hide},
+                {"flagship", &Initial::flagship},
                 {"override", &Initial::override_},
                 {"target", &Initial::target},
                 {"build", &Initial::build}});

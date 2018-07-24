@@ -31,7 +31,7 @@ namespace antares {
 // clang-format off
 #define COMMON_ACTION_FIELDS                                                                      \
             {"type", &ActionBase::type},                                                          \
-            {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                        \
+            {"reflexive", &ActionBase::reflexive},                                                \
             {"if", &ActionBase::filter},                                                          \
             {"override", &ActionBase::override_}
 // clang-format on
@@ -278,7 +278,7 @@ DEFAULT_READER(Within, required_within);
 static Action age_action(path_value x) {
     return required_struct<AgeAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"relative", {&AgeAction::relative, optional_bool, false}},
+                {"relative", &AgeAction::relative},
                 {"value", &AgeAction::value}});
 }
 
@@ -317,12 +317,12 @@ static Action create_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"base", &CreateAction::base},
                 {"count", {&CreateAction::count, optional_int_range, Range<int64_t>{1, 2}}},
-                {"relative_velocity", {&CreateAction::relative_velocity, optional_bool, false}},
-                {"relative_direction", {&CreateAction::relative_direction, optional_bool, false}},
+                {"relative_velocity", &CreateAction::relative_velocity},
+                {"relative_direction", &CreateAction::relative_direction},
                 {"distance", {&CreateAction::distance, optional_int, 0}},
                 {"within", &CreateAction::within},
-                {"inherit", {&CreateAction::inherit, optional_bool, false}},
-                {"legacy_random", {&CreateAction::legacy_random, optional_bool, false}}});
+                {"inherit", &CreateAction::inherit},
+                {"legacy_random", &CreateAction::legacy_random}});
 }
 
 static Action delay_action(path_value x) {
@@ -435,7 +435,7 @@ static Action morph_action(path_value x) {
     return required_struct<MorphAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"base", &MorphAction::base},
-                {"keep_ammo", {&MorphAction::keep_ammo, optional_bool, false}}});
+                {"keep_ammo", &MorphAction::keep_ammo}});
 }
 
 static sfz::optional<coordPointType> optional_coord_point(path_value x) {
@@ -526,7 +526,7 @@ static Action play_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"priority", {&PlayAction::priority, required_sound_priority}},
                 {"persistence", &PlayAction::persistence},
-                {"absolute", {&PlayAction::absolute, optional_bool, false}},
+                {"absolute", &PlayAction::absolute},
                 {"volume", &PlayAction::volume},
                 {"sound", &PlayAction::sound},
                 {"any", &PlayAction::any}});

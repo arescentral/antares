@@ -39,7 +39,7 @@ HandleList<const Initial> Initial::all() {
 }
 
 void create_initial(Handle<const Initial> initial) {
-    if (initial->hide) {
+    if (initial->hide.value_or(false)) {
         g.initials[initial.number()] = SpaceObject::none();
         return;
     }
@@ -52,12 +52,12 @@ void create_initial(Handle<const Initial> initial) {
     }
 
     int32_t attributes = 0;
-    if (initial->flagship) {
+    if (initial->flagship.value_or(false)) {
         if ((owner == g.admiral) && !owner->flagship().get()) {
             attributes |= kIsPlayerShip;
         }
     }
-    if (initial->target.lock) {
+    if (initial->target.lock.value_or(false)) {
         attributes |= kStaticDestination;
     }
 
@@ -143,12 +143,12 @@ void UnhideInitialObject(Handle<const Initial> initial) {
     }
 
     uint32_t attributes = 0;
-    if (initial->flagship) {
+    if (initial->flagship.value_or(false)) {
         if ((owner == g.admiral) && !owner->flagship().get()) {
             attributes |= kIsPlayerShip;
         }
     }
-    if (initial->target.lock) {
+    if (initial->target.lock.value_or(false)) {
         attributes |= kStaticDestination;
     }
 

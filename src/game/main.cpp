@@ -210,7 +210,7 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            if (g.level->song) {
+            if (g.level->song.has_value()) {
                 sys.music.play(Music::IN_GAME, *g.level->song);
             }
 

@@ -86,7 +86,7 @@ enum class Within { CIRCLE, SQUARE };
 struct ActionBase {
     ActionType type;
 
-    bool reflexive = false;  // does it apply to object executing verb?
+    sfz::optional<bool> reflexive;  // does it apply to object executing verb?
 
     struct Filter {
         uint32_t                   attributes = 0;
@@ -101,8 +101,8 @@ struct ActionBase {
 };
 
 struct AgeAction : public ActionBase {
-    bool         relative;  // if true, add value to age; if false, set age to value
-    Range<ticks> value;     // age range
+    sfz::optional<bool> relative;  // if true, add value to age; if false, set age to value
+    Range<ticks>        value;     // age range
 };
 
 struct AssumeAction : public ActionBase {
@@ -131,16 +131,16 @@ struct ConditionAction : public ActionBase {
 };
 
 struct CreateAction : public ActionBase {
-    NamedHandle<const BaseObject> base;                         // what type
-    Range<int64_t>                count              = {1, 2};  // # to make randomly
-    bool                          relative_velocity  = false;   // is velocity relative to creator?
-    bool                          relative_direction = false;   // determines initial heading
+    NamedHandle<const BaseObject> base;                // what type
+    Range<int64_t>                count = {1, 2};      // # to make randomly
+    sfz::optional<bool>           relative_velocity;   // is velocity relative to creator?
+    sfz::optional<bool>           relative_direction;  // determines initial heading
     int64_t                       distance = 0;  // create at this distance in random direction
     Within                        within   = Within::CIRCLE;
-    bool                          inherit  = false;  // if false, gets creator as target
-                                                     // if true, gets creator’s target as target
-    bool legacy_random = false;                      // if true, consume a random number from
-                                                     // subject even if not necessary
+    sfz::optional<bool>           inherit;  // if false, gets creator as target
+                                            // if true, gets creator’s target as target
+    sfz::optional<bool> legacy_random;      // if true, consume a random number from
+                                            // subject even if not necessary
 };
 
 struct DelayAction : public ActionBase {
@@ -233,7 +233,7 @@ struct MessageAction : public ActionBase {
 };
 
 struct MorphAction : public ActionBase {
-    bool                          keep_ammo;
+    sfz::optional<bool>           keep_ammo;
     NamedHandle<const BaseObject> base;
 };
 
@@ -287,10 +287,10 @@ struct SelectAction : public ActionBase {
 };
 
 struct PlayAction : public ActionBase {
-    uint8_t priority;     // 1-5; takes over a channel playing a lower-priority sound
-    ticks   persistence;  // time before a lower-priority sound can take channel
-    bool    absolute;     // plays at same volume, regardless of distance from player
-    int64_t volume;       // 1-255; volume at focus
+    uint8_t             priority;     // 1-5; takes over a channel playing a lower-priority sound
+    ticks               persistence;  // time before a lower-priority sound can take channel
+    sfz::optional<bool> absolute;     // plays at same volume, regardless of distance from player
+    int64_t             volume;       // 1-255; volume at focus
 
     struct Sound {
         pn::string sound;
