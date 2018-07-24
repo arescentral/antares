@@ -250,9 +250,9 @@ SpaceObject::SpaceObject(
         continue;
     }
 
-    if (base->activate.period.begin != ticks(0)) {
+    if (base->activate.period.has_value()) {
         periodicTime =
-                base->activate.period.begin + randomSeed.next(base->activate.period.range());
+                base->activate.period->begin + randomSeed.next(base->activate.period->range());
     }
 
     direction = base->initial_direction.begin;
@@ -298,9 +298,9 @@ SpaceObject::SpaceObject(
         frame.animation.speed         = base->animation->speed;
     }
 
-    if (base->expire.after.age.begin >= ticks(1)) {
+    if (base->expire.after.age.has_value()) {
         expire_after =
-                base->expire.after.age.begin + randomSeed.next(base->expire.after.age.range());
+                base->expire.after.age->begin + randomSeed.next(base->expire.after.age->range());
         expires = true;
     } else {
         expires = false;
@@ -419,9 +419,9 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base.maxVelocity;
 
-    if (base.expire.after.age.begin >= ticks(1)) {
-        obj->expire_after =
-                base.expire.after.age.begin + obj->randomSeed.next(base.expire.after.age.range());
+    if (base.expire.after.age.has_value()) {
+        obj->expire_after = base.expire.after.age->begin +
+                            obj->randomSeed.next(base.expire.after.age->range());
         obj->expires = true;
     } else {
         obj->expires = false;
@@ -457,9 +457,9 @@ void SpaceObject::change_base_type(
 
     // check periodic time
     obj->periodicTime = ticks(0);
-    if (base.activate.period.begin != ticks(0)) {
+    if (base.activate.period.has_value()) {
         obj->periodicTime =
-                base.activate.period.begin + obj->randomSeed.next(base.activate.period.range());
+                base.activate.period->begin + obj->randomSeed.next(base.activate.period->range());
     }
 
     obj->pulse.base = base.weapons.pulse.has_value() ? base.weapons.pulse->base.get() : nullptr;

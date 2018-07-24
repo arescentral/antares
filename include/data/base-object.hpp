@@ -168,8 +168,8 @@ class BaseObject {
 
     struct Expire {
         struct After {
-            Range<ticks> age;  // starting random age
-            bool         animation = false;
+            sfz::optional<Range<ticks>> age;  // starting random age
+            bool                        animation = false;
         } after;
         bool                die;
         std::vector<Action> action;
@@ -191,8 +191,8 @@ class BaseObject {
     } collide;
 
     struct Activate {
-        Range<ticks>        period;
-        std::vector<Action> action;
+        sfz::optional<Range<ticks>> period;
+        std::vector<Action>         action;
     } activate;
 
     struct Arrive {

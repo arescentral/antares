@@ -121,9 +121,10 @@ static Point random_point(Random* r, int32_t distance, Within within) {
 static void apply(
         const CreateAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> object, Point* offset) {
-    auto c = a.count.begin;
-    if (a.count.range() > 1) {
-        c += subject->randomSeed.next(a.count.range());
+    auto count = a.count.value_or(Range<int64_t>{1, 2});
+    auto c     = count.begin;
+    if (count.range() > 1) {
+        c += subject->randomSeed.next(count.range());
     } else if (a.legacy_random.value_or(false)) {
         // It used to be that the range test above was >0 instead of >1. That worked for most
         // objects, which had ranges of 0. However, the Nastiroid shooter on Mothership Connection

@@ -132,7 +132,7 @@ struct ConditionAction : public ActionBase {
 
 struct CreateAction : public ActionBase {
     NamedHandle<const BaseObject> base;                // what type
-    Range<int64_t>                count = {1, 2};      // # to make randomly
+    sfz::optional<Range<int64_t>> count;               // # to make randomly
     sfz::optional<bool>           relative_velocity;   // is velocity relative to creator?
     sfz::optional<bool>           relative_direction;  // determines initial heading
     sfz::optional<int64_t>        distance;  // create at this distance in random direction

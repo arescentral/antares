@@ -327,9 +327,7 @@ DEFAULT_READER(BaseObject::Destroy, optional_destroy);
 
 static BaseObject::Expire::After optional_expire_after(path_value x) {
     return optional_struct<BaseObject::Expire::After>(
-                   x, {{"age",
-                        {&BaseObject::Expire::After::age, optional_ticks_range,
-                         Range<ticks>{ticks(-1), ticks(-1)}}},
+                   x, {{"age", &BaseObject::Expire::After::age},
                        {"animation", &BaseObject::Expire::After::animation}})
             .value_or(BaseObject::Expire::After{});
 }
@@ -374,9 +372,7 @@ DEFAULT_READER(BaseObject::Collide, optional_collide);
 
 static BaseObject::Activate optional_activate(path_value x) {
     return optional_struct<BaseObject::Activate>(
-                   x, {{"period",
-                        {&BaseObject::Activate::period, optional_ticks_range,
-                         Range<ticks>{ticks(0), ticks(0)}}},
+                   x, {{"period", &BaseObject::Activate::period},
                        {"action", &BaseObject::Activate::action}})
             .value_or(BaseObject::Activate{});
 }

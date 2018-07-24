@@ -316,7 +316,7 @@ static Action create_action(path_value x) {
     return required_struct<CreateAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"base", &CreateAction::base},
-                {"count", {&CreateAction::count, optional_int_range, Range<int64_t>{1, 2}}},
+                {"count", &CreateAction::count},
                 {"relative_velocity", &CreateAction::relative_velocity},
                 {"relative_direction", &CreateAction::relative_direction},
                 {"distance", &CreateAction::distance},
