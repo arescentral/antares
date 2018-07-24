@@ -43,11 +43,6 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-static sfz::optional<int32_t> optional_int32(path_value x) {
-    auto i = optional_int(x, {-0x80000000ll, 0x80000000ll});
-    return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
-}
-
 template <Level::Type T>
 static Level::Player required_player(path_value x);
 
@@ -136,9 +131,9 @@ DEFAULT_READER(Level::StatusLine, required_status_line);
             {"starmap", &Level::starmap},                                                        \
             {"song", &Level::song},                                                              \
             {"status", &Level::status},                                                          \
-            {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
+            {"start_time", &Level::start_time},                                                  \
             {"skip", &Level::skip},                                                              \
-            {"angle", {&Level::angle, optional_int32, -1}},                                      \
+            {"angle", &Level::angle},                                                            \
             {"par", &Level::par}
 // clang-format on
 

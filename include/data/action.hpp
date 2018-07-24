@@ -135,8 +135,8 @@ struct CreateAction : public ActionBase {
     Range<int64_t>                count = {1, 2};      // # to make randomly
     sfz::optional<bool>           relative_velocity;   // is velocity relative to creator?
     sfz::optional<bool>           relative_direction;  // determines initial heading
-    int64_t                       distance = 0;  // create at this distance in random direction
-    Within                        within   = Within::CIRCLE;
+    sfz::optional<int64_t>        distance;  // create at this distance in random direction
+    Within                        within = Within::CIRCLE;
     sfz::optional<bool>           inherit;  // if false, gets creator as target
                                             // if true, gets creator’s target as target
     sfz::optional<bool> legacy_random;      // if true, consume a random number from
@@ -243,9 +243,9 @@ struct MoveAction : public ActionBase {
         SUBJECT,  // relative to subject
         OBJECT,   // relative to object
     } origin;
-    coordPointType to;
-    int64_t        distance;
-    Within         within;
+    coordPointType         to;
+    sfz::optional<int64_t> distance;
+    Within                 within;
 };
 
 struct OccupyAction : public ActionBase {

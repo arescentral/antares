@@ -193,13 +193,10 @@ LoadState start_construct_level(const Level& level) {
 
     g.level = &level;
 
-    {
-        int32_t angle = g.level->angle;
-        if (angle < 0) {
-            g.angle = g.random.next(ROT_POS);
-        } else {
-            g.angle = angle;
-        }
+    if (g.level->angle.has_value()) {
+        g.angle = *g.level->angle;
+    } else {
+        g.angle = g.random.next(ROT_POS);
     }
 
     g.victor       = Admiral::none();
@@ -235,7 +232,7 @@ LoadState start_construct_level(const Level& level) {
 
     LoadState s;
     s.max = Initial::all().size() * 3L + 1 +
-            g.level->startTime.count();  // for each run through the initial num
+            g.level->start_time.value_or(secs(0)).count();  // for each run through the initial num
 
     return s;
 }
@@ -296,7 +293,7 @@ static void load_condition(Handle<const Condition> condition, std::bitset<16> al
 }
 
 static void run_game_1s() {
-    game_ticks start_time = game_ticks(-g.level->startTime);
+    game_ticks start_time = game_ticks(-g.level->start_time.value_or(secs(0)));
     do {
         g.time += kMajorTick;
         MoveSpaceObjects(kMajorTick);
@@ -344,7 +341,7 @@ void construct_level(LoadState* state) {
     } else if (step == (3 * Initial::all().size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
-        g.time = game_ticks(-g.level->startTime);
+        g.time = game_ticks(-g.level->start_time.value_or(secs(0)));
     } else {
         run_game_1s();
     }

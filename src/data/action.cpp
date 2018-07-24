@@ -319,7 +319,7 @@ static Action create_action(path_value x) {
                 {"count", {&CreateAction::count, optional_int_range, Range<int64_t>{1, 2}}},
                 {"relative_velocity", &CreateAction::relative_velocity},
                 {"relative_direction", &CreateAction::relative_direction},
-                {"distance", {&CreateAction::distance, optional_int, 0}},
+                {"distance", &CreateAction::distance},
                 {"within", &CreateAction::within},
                 {"inherit", &CreateAction::inherit},
                 {"legacy_random", &CreateAction::legacy_random}});
@@ -458,7 +458,7 @@ static Action move_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"origin", {&MoveAction::origin, optional_origin, MoveAction::Origin::LEVEL}},
                 {"to", {&MoveAction::to, optional_coord_point, coordPointType{0, 0}}},
-                {"distance", {&MoveAction::distance, optional_int, 0}},
+                {"distance", &MoveAction::distance},
                 {"within", &MoveAction::within}});
 }
 

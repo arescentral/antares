@@ -188,10 +188,10 @@ static bool is_true(const TimeCondition& c) {
         // Tricky: the original code for handling startTime counted g.time in major ticks,
         // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
         // (game start) counts as 1/3 towards time conditions to preserve old behavior.
-        if ((3 * c.duration) < g.level->startTime) {
-            t = game_ticks{(3 * c.duration) - g.level->startTime};
+        if ((3 * c.duration) < g.level->start_time.value_or(secs(0))) {
+            t = game_ticks{(3 * c.duration) - g.level->start_time.value_or(secs(0))};
         } else {
-            t = game_ticks{c.duration - (g.level->startTime / 3)};
+            t = game_ticks{c.duration - (g.level->start_time.value_or(secs(0)) / 3)};
         }
     }
     return op_compare(c.op, g.time, t);

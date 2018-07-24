@@ -44,21 +44,21 @@ NatePixTable::NatePixTable(pn::string_view name, Hue hue) {
     if (image.size() != overlay.size()) {
         throw std::runtime_error("size mismatch between image and overlay");
     }
-    if (image.size().width % data.cols) {
+    if (image.size().width % data.cols.value_or(1)) {
         throw std::runtime_error("sprite column count does not evenly split image");
     }
-    if (image.size().height % data.rows) {
+    if (image.size().height % data.rows.value_or(1)) {
         throw std::runtime_error("sprite row count does not evenly split image");
     }
-    if (data.frames.size() != (data.rows * data.cols)) {
+    if (data.frames.size() != (data.rows.value_or(1) * data.cols.value_or(1))) {
         throw std::runtime_error("frame count not equal to rows * cols");
     }
     for (Rect frame : data.frames) {
         const int  i           = _frames.size();
-        const int  col         = i % data.cols;
-        const int  row         = i / data.cols;
-        const int  cell_width  = image.size().width / data.cols;
-        const int  cell_height = image.size().height / data.rows;
+        const int  col         = i % data.cols.value_or(1);
+        const int  row         = i / data.cols.value_or(1);
+        const int  cell_width  = image.size().width / data.cols.value_or(1);
+        const int  cell_height = image.size().height / data.rows.value_or(1);
         const Rect cell(Point(cell_width * col, cell_height * row), Size(cell_width, cell_height));
         Rect       sprite = frame;
         sprite.offset(data.center.h, data.center.v);

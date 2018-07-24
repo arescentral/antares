@@ -149,8 +149,8 @@ static void apply(
             at.v += offset->v;
         }
 
-        if (a.distance > 0) {
-            Point p = random_point(&subject->randomSeed, a.distance, a.within);
+        if (a.distance.has_value()) {
+            Point p = random_point(&subject->randomSeed, *a.distance, a.within);
             at.h += p.h;
             at.v += p.v;
         }
@@ -552,7 +552,7 @@ static void apply(
     newLocation.h += off.h - kUniversalCenter;
     newLocation.v += off.v - kUniversalCenter;
 
-    Point random = random_point(&focus->randomSeed, a.distance, a.within);
+    Point random = random_point(&focus->randomSeed, a.distance.value_or(0), a.within);
     newLocation.h += random.h;
     newLocation.v += random.v;
 

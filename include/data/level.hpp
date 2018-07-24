@@ -85,9 +85,9 @@ struct Level {
     std::vector<StatusLine>                 status;
     sfz::optional<pn::string>               song;
     sfz::optional<Rect>                     starmap;
-    secs                                    startTime = secs(0);
+    sfz::optional<secs>                     start_time;
     sfz::optional<NamedHandle<const Level>> skip;
-    int32_t                                 angle = 0;
+    sfz::optional<int64_t>                  angle;
     struct Par {
         game_ticks time;
         int64_t    kills;
