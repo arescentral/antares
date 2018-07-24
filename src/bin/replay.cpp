@@ -93,8 +93,8 @@ class ReplayMaster : public Card {
                     pn::string path = pn::format("{0}/debriefing.txt", *_output_path);
                     sfz::makedirs(path::dirname(path), 0755);
                     pn::file outcome = pn::open(path, "w");
-                    if (!g.victory_text.empty()) {
-                        outcome.write(g.victory_text);
+                    if (g.victory_text.has_value()) {
+                        outcome.write(*g.victory_text);
                         if (_game_result == WIN_GAME) {
                             outcome.write("\n");
                             Handle<Admiral> player(0);

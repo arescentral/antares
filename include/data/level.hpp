@@ -98,11 +98,11 @@ struct Level {
     std::vector<Condition> conditions;
     std::vector<Briefing>  briefings;
 
-    pn::string prologue;           // SOLO
-    pn::string epilogue;           // SOLO
-    pn::string own_no_ships_text;  // SOLO, NET
-    pn::string foe_no_ships_text;  // NET
-    pn::string description;        // NET
+    sfz::optional<pn::string> prologue;           // SOLO
+    sfz::optional<pn::string> epilogue;           // SOLO
+    sfz::optional<pn::string> own_no_ships_text;  // SOLO, NET
+    sfz::optional<pn::string> foe_no_ships_text;  // NET
+    sfz::optional<pn::string> description;        // NET
 
     static const Level* get(int n);
     static const Level* get(pn::string_view n);

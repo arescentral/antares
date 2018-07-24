@@ -204,7 +204,7 @@ LoadState start_construct_level(const Level& level) {
 
     g.victor       = Admiral::none();
     g.next_level   = nullptr;
-    g.victory_text = "";
+    g.victory_text = sfz::nullopt;
 
     int i = 0;
     for (const auto& player : g.level->players) {
@@ -359,13 +359,13 @@ void DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::stri
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
         g.next_level   = nextLevel;
-        g.victory_text = text.copy();
+        g.victory_text = sfz::make_optional(text.copy());
         g.game_over    = true;
         g.game_over_at = g.time;
     } else {
         if (!g.victor.get()) {
             g.victor       = whichPlayer;
-            g.victory_text = text.copy();
+            g.victory_text = sfz::make_optional(text.copy());
             g.next_level   = nextLevel;
             if (!g.game_over) {
                 g.game_over    = true;

@@ -371,7 +371,7 @@ void GamePlay::become_front() {
                     *_game_result  = QUIT_GAME;
                     g.game_over    = true;
                     g.next_level   = nullptr;
-                    g.victory_text = "";
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
@@ -379,7 +379,7 @@ void GamePlay::become_front() {
                     *_game_result  = RESTART_GAME;
                     g.game_over    = true;
                     g.next_level   = nullptr;
-                    g.victory_text = "";
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
@@ -390,7 +390,7 @@ void GamePlay::become_front() {
                     g.game_over    = true;
                     g.victor       = g.admiral;
                     g.next_level   = g.level->skip->get();
-                    g.victory_text = "";
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
@@ -540,13 +540,13 @@ void GamePlay::fire_timer() {
         case RESTART_GAME: stack()->pop(this); break;
 
         case WIN_GAME:
-            if (_replay || g.victory_text.empty()) {
+            if (_replay || !g.victory_text.has_value()) {
                 stack()->pop(this);
             } else {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
                 stack()->push(new DebriefingScreen(
-                        g.victory_text, g.time, g.level->par.time, GetAdmiralLoss(a),
+                        *g.victory_text, g.time, g.level->par.time, GetAdmiralLoss(a),
                         g.level->par.losses, GetAdmiralKill(a), g.level->par.kills));
             }
             break;
@@ -555,12 +555,12 @@ void GamePlay::fire_timer() {
             if (_replay) {
                 *_game_result = QUIT_GAME;
                 stack()->pop(this);
-            } else if (g.victory_text.empty()) {
+            } else if (!g.victory_text.has_value()) {
                 _state = PLAY_AGAIN;
                 stack()->push(new PlayAgainScreen(false, false, &_play_again));
             } else {
                 _state = DEBRIEFING;
-                stack()->push(new DebriefingScreen(g.victory_text));
+                stack()->push(new DebriefingScreen(*g.victory_text));
             }
             break;
 

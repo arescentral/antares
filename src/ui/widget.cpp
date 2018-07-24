@@ -407,14 +407,14 @@ Rect BoxRect::outer_bounds() const {
 TextRect::TextRect(const TextRectData& data)
         : _inner_bounds{data.bounds},
           _id{data.id},
-          _text{data.text.copy()},
+          _text{data.text.has_value() ? sfz::make_optional(data.text->copy()) : sfz::nullopt},
           _hue{data.hue},
           _style{data.style} {}
 
 void TextRect::draw(Point offset, InputMode) const {
     Rect bounds = _inner_bounds;
     bounds.offset(offset.h, offset.v);
-    draw_text_in_rect(bounds, _text, _style, _hue);
+    draw_text_in_rect(bounds, _text.has_value() ? _text->copy() : pn::string_view{}, _style, _hue);
 }
 
 Rect TextRect::inner_bounds() const { return _inner_bounds; }

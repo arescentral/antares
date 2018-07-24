@@ -83,9 +83,9 @@ struct BoxRectData : public InterfaceItemData {
 struct TextRectData : public InterfaceItemData {
     virtual void accept(const Visitor& visitor) const;
 
-    pn::string     text;
-    Hue            hue   = Hue::GRAY;
-    InterfaceStyle style = InterfaceStyle::LARGE;
+    sfz::optional<pn::string> text;
+    Hue                       hue   = Hue::GRAY;
+    InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
 struct PictureRectData : public InterfaceItemData {

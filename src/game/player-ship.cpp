@@ -913,10 +913,15 @@ void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
             g.game_over    = true;
             g.game_over_at = g.time + secs(3);
         }
+        g.victory_text = sfz::nullopt;
         if (flagship->owner == g.admiral) {
-            g.victory_text = g.level->own_no_ships_text.copy();
+            if (g.level->own_no_ships_text.has_value()) {
+                g.victory_text.emplace(g.level->own_no_ships_text->copy());
+            }
         } else {
-            g.victory_text = g.level->foe_no_ships_text.copy();
+            if (g.level->foe_no_ships_text.has_value()) {
+                g.victory_text.emplace(g.level->foe_no_ships_text->copy());
+            }
         }
         if (flagship->owner.get()) {
             flagship->owner->set_flagship(SpaceObject::none());

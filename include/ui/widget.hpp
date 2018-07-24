@@ -86,11 +86,11 @@ class TextRect : public Widget {
     Rect outer_bounds() const override;
 
   private:
-    Rect                   _inner_bounds;
-    sfz::optional<int64_t> _id;
-    pn::string             _text;
-    Hue                    _hue   = Hue::GRAY;
-    InterfaceStyle         _style = InterfaceStyle::LARGE;
+    Rect                      _inner_bounds;
+    sfz::optional<int64_t>    _id;
+    sfz::optional<pn::string> _text;
+    Hue                       _hue   = Hue::GRAY;
+    InterfaceStyle            _style = InterfaceStyle::LARGE;
 };
 
 class PictureRect : public Widget {

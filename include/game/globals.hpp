@@ -90,7 +90,7 @@ struct GlobalState {
     game_ticks      game_over_at;          // The time to stop the game (ignored unless game_over).
     Handle<Admiral> victor;                // The winner (or none).
     const Level*    next_level = nullptr;  // Next level (or null for none).
-    pn::string      victory_text;          // Text to show in debriefing.
+    sfz::optional<pn::string> victory_text;  // Text to show in debriefing.
 
     ticks                    radar_count;  // Counts down to a radar pulse every 5/6 seconds.
     std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.

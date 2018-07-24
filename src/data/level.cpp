@@ -166,9 +166,9 @@ static Level solo_level(path_value x) {
                        {"players",
                         {&Level::players,
                          required_array<Level::Player, required_player<Level::Type::SOLO>>}},
-                       {"no_ships", {&Level::own_no_ships_text, optional_string, ""}},
-                       {"prologue", {&Level::prologue, optional_string, ""}},
-                       {"epilogue", {&Level::epilogue, optional_string, ""}},
+                       {"no_ships", &Level::own_no_ships_text},
+                       {"prologue", &Level::prologue},
+                       {"epilogue", &Level::epilogue},
                });
 }
 
@@ -179,9 +179,9 @@ static Level net_level(path_value x) {
                        {"players",
                         {&Level::players,
                          required_array<Level::Player, required_player<Level::Type::NET>>}},
-                       {"own_no_ships", {&Level::own_no_ships_text, optional_string, ""}},
-                       {"foe_no_ships", {&Level::foe_no_ships_text, optional_string, ""}},
-                       {"description", {&Level::description, optional_string, ""}},
+                       {"own_no_ships", &Level::own_no_ships_text},
+                       {"foe_no_ships", &Level::foe_no_ships_text},
+                       {"description", &Level::description},
                });
 }
 

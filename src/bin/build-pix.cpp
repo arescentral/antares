@@ -79,13 +79,13 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
 
 std::function<pn::string_view()> prologue(pn::string_view chapter) {
     return [chapter]() -> pn::string_view {
-        return plug.levels.find(chapter.copy())->second.prologue;
+        return *plug.levels.find(chapter.copy())->second.prologue;
     };
 }
 
 std::function<pn::string_view()> epilogue(pn::string_view chapter) {
     return [chapter]() -> pn::string_view {
-        return plug.levels.find(chapter.copy())->second.epilogue;
+        return *plug.levels.find(chapter.copy())->second.epilogue;
     };
 }
 

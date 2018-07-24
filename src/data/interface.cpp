@@ -154,7 +154,7 @@ static std::unique_ptr<InterfaceItemData> text_interface_item(path_value x) {
             x, {{"type", &InterfaceItemData::type},
                 {"bounds", &InterfaceItemData::bounds},
                 {"id", &InterfaceItemData::id},
-                {"text", {&TextRectData::text, optional_string, ""}},
+                {"text", &TextRectData::text},
                 {"hue", &TextRectData::hue},
                 {"style", &TextRectData::style}})));
 }
