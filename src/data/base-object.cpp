@@ -51,15 +51,22 @@ static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
 }
 DEFAULT_READER(sfz::optional<BaseObject::Weapon>, optional_weapon);
 
-static int16_t required_layer(path_value x) { return required_int(x, {1, 4}); }
-static int32_t required_scale(path_value x) { return required_fixed(x).val() << 4; }
+static BaseObject::Layer required_layer(path_value x) {
+    return static_cast<BaseObject::Layer>(required_int(x, {1, 4}));
+}
+DEFAULT_READER(BaseObject::Layer, required_layer);
+
+static BaseObject::Scale required_scale(path_value x) {
+    return BaseObject::Scale{required_fixed(x).val() << 4};
+}
+DEFAULT_READER(BaseObject::Scale, required_scale);
 
 static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
     using Rotation = BaseObject::Rotation;
     return optional_struct<Rotation>(
             x, {{"sprite", &Rotation::sprite},
-                {"layer", {&Rotation::layer, required_layer}},
-                {"scale", {&Rotation::scale, required_scale}},
+                {"layer", &Rotation::layer},
+                {"scale", &Rotation::scale},
                 {"frames", &Rotation::frames}});
 }
 DEFAULT_READER(sfz::optional<BaseObject::Rotation>, optional_rotation_frame);
@@ -78,8 +85,8 @@ static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value 
     using Animation = BaseObject::Animation;
     return optional_struct<Animation>(
             x, {{"sprite", &Animation::sprite},
-                {"layer", {&Animation::layer, required_layer}},
-                {"scale", {&Animation::scale, required_scale}},
+                {"layer", &Animation::layer},
+                {"scale", &Animation::scale},
                 {"frames", &Animation::frames},
                 {"direction", &Animation::direction},
                 {"speed", &Animation::speed},

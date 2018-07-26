@@ -115,11 +115,11 @@ static Handle<SpaceObject> next_free_space_object() {
 
 static uint8_t get_tiny_shade(const SpaceObject& o) {
     switch (o.layer) {
-        case kFirstSpriteLayer: return MEDIUM; break;
-        case kMiddleSpriteLayer: return LIGHT; break;
-        case kLastSpriteLayer: return VERY_LIGHT; break;
+        case BaseObject::Layer::NONE: return DARK; break;
+        case BaseObject::Layer::BASES: return MEDIUM; break;
+        case BaseObject::Layer::SHIPS: return LIGHT; break;
+        case BaseObject::Layer::SHOTS: return VERY_LIGHT; break;
     }
-    return DARK;
 }
 
 static Hue get_tiny_color(const SpaceObject& o) {
@@ -881,21 +881,21 @@ sfz::optional<pn::string_view> sprite_resource(const BaseObject& o) {
     }
 }
 
-int32_t sprite_layer(const BaseObject& o) {
+BaseObject::Layer sprite_layer(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
         return o.rotation->layer;
     } else if (o.attributes & kIsSelfAnimated) {
         return o.animation->layer;
     } else {
-        return 0;
+        return BaseObject::Layer::NONE;
     }
 }
 
 int32_t sprite_scale(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return o.rotation->scale;
+        return o.rotation->scale.factor;
     } else if (o.attributes & kIsSelfAnimated) {
-        return o.animation->scale;
+        return o.animation->scale.factor;
     } else {
         return SCALE_SCALE;
     }

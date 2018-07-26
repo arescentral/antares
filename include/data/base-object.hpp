@@ -200,11 +200,16 @@ class BaseObject {
         std::vector<Action> action;
     } arrive;
 
+    enum class Layer { NONE = 0, BASES = 1, SHIPS = 2, SHOTS = 3 };
+    struct Scale {
+        int64_t factor;  // sprite scale; 4096 = 100%
+    };
+
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
         pn::string sprite;  // ID of sprite resource
-        int16_t    layer;   // 0 = no layer 1->3 = back to front
-        int32_t    scale;   // sprite scale; 4096 = 100%
+        Layer      layer;
+        Scale      scale;
 
         Range<int64_t> frames;
     };
@@ -220,8 +225,8 @@ class BaseObject {
         };
 
         pn::string sprite;  // ID of sprite resource
-        int16_t    layer;   // 0 = no layer 1->3 = back to front
-        int32_t    scale;   // sprite scale; 4096 = 100%
+        Layer      layer;
+        Scale      scale;
 
         Range<Fixed> frames;     // range of frames from sprite
         Direction    direction;  // frame sequence

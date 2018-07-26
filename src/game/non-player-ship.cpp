@@ -176,11 +176,11 @@ static void tick_special(Handle<SpaceObject> subject, Handle<SpaceObject> target
 
 static uint8_t get_tiny_shade(const SpaceObject& o) {
     switch (o.layer) {
-        case kFirstSpriteLayer: return MEDIUM; break;
-        case kMiddleSpriteLayer: return LIGHT; break;
-        case kLastSpriteLayer: return VERY_LIGHT; break;
+        case BaseObject::Layer::NONE: return DARK; break;
+        case BaseObject::Layer::BASES: return MEDIUM; break;
+        case BaseObject::Layer::SHIPS: return LIGHT; break;
+        case BaseObject::Layer::SHOTS: return VERY_LIGHT; break;
     }
-    return DARK;
 }
 
 void NonplayerShipThink() {
