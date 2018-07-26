@@ -342,16 +342,16 @@ sfz::optional<secs> optional_secs(path_value x) {
     }
 }
 
-std::map<pn::string, bool> optional_tags(path_value x) {
+Tags optional_tags(path_value x) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_map()) {
-        pn::map_cref               m = x.value().as_map();
-        std::map<pn::string, bool> result;
+        pn::map_cref m = x.value().as_map();
+        Tags         result;
         for (const auto& kv : m) {
             auto v = optional_bool(x.get(kv.key()));
             if (v.has_value()) {
-                result[kv.key().copy()] = *v;
+                result.tags[kv.key().copy()] = *v;
             }
         }
         return result;

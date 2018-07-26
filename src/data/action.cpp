@@ -214,7 +214,7 @@ static ActionBase::Filter optional_action_filter(path_value x) {
     return optional_struct<ActionBase::Filter>(
                    x,
                    {{"attributes", {&ActionBase::Filter::attributes, optional_object_attributes}},
-                    {"tags", {&ActionBase::Filter::tags, optional_tags}},
+                    {"tags", &ActionBase::Filter::tags},
                     {"owner", &ActionBase::Filter::owner}})
             .value_or(ActionBase::Filter{});
 }

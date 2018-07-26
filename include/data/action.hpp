@@ -29,6 +29,7 @@
 #include "data/handle.hpp"
 #include "data/object-ref.hpp"
 #include "data/range.hpp"
+#include "data/tags.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -89,9 +90,9 @@ struct ActionBase {
     sfz::optional<bool> reflexive;  // does it apply to object executing verb?
 
     struct Filter {
-        uint32_t                   attributes = 0;
-        std::map<pn::string, bool> tags;
-        sfz::optional<Owner>       owner;
+        uint32_t             attributes = 0;
+        Tags                 tags;
+        sfz::optional<Owner> owner;
     } filter;
 
     struct Override {

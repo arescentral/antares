@@ -860,10 +860,10 @@ Fixed SpaceObject::turn_rate() const { return base->turn_rate; }
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
 
-bool tags_match(const BaseObject& o, const std::map<pn::string, bool>& query) {
-    for (const auto& kv : query) {
-        auto it      = o.tags.find(kv.first);
-        bool has_tag = ((it != o.tags.end()) && it->second);
+bool tags_match(const BaseObject& o, const Tags& query) {
+    for (const auto& kv : query.tags) {
+        auto it      = o.tags.tags.find(kv.first);
+        bool has_tag = ((it != o.tags.tags.end()) && it->second);
         if (kv.second != has_tag) {
             return false;
         }

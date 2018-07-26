@@ -812,7 +812,7 @@ static void execute_actions(
             }
         }
 
-        if ((action.base.filter.attributes || !action.base.filter.tags.empty()) &&
+        if ((action.base.filter.attributes || !action.base.filter.tags.tags.empty()) &&
             (!object.get() || !action_filter_applies_to(action, object))) {
             continue;
         }

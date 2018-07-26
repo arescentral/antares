@@ -278,7 +278,7 @@ NamedHandle<const BaseObject> get_buildable_object_handle(
 const BaseObject* get_buildable_object(
         const BuildableObject& o, const NamedHandle<const Race>& race);
 
-bool tags_match(const BaseObject& o, const std::map<pn::string, bool>& query);
+bool tags_match(const BaseObject& o, const Tags& query);
 
 sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
 BaseObject::Layer              sprite_layer(const BaseObject& o);

@@ -23,6 +23,7 @@
 
 #include "data/action.hpp"
 #include "data/range.hpp"
+#include "data/tags.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"
@@ -274,20 +275,20 @@ class BaseObject {
     };
     sfz::optional<Device> device;
 
-    uint32_t                   orderFlags = 0;
-    std::map<pn::string, bool> tags;
-    ticks                      buildTime;
+    uint32_t orderFlags = 0;
+    Tags     tags;
+    ticks    buildTime;
 
     struct AI {
         struct Combat {
-            bool                       hated   = false;
-            bool                       guided  = false;
-            bool                       engages = false;
-            std::map<pn::string, bool> engages_if;
-            bool                       engaged = false;
-            std::map<pn::string, bool> engaged_if;
-            bool                       evades = false;
-            bool                       evaded = false;
+            bool hated   = false;
+            bool guided  = false;
+            bool engages = false;
+            Tags engages_if;
+            bool engaged = false;
+            Tags engaged_if;
+            bool evades = false;
+            bool evaded = false;
             struct Skill {
                 uint8_t num;
                 uint8_t den;
@@ -296,10 +297,10 @@ class BaseObject {
 
         struct Target {
             struct Filter {
-                sfz::optional<bool>        base;
-                sfz::optional<bool>        local;
-                Owner                      owner;
-                std::map<pn::string, bool> tags;
+                sfz::optional<bool> base;
+                sfz::optional<bool> local;
+                Owner               owner;
+                Tags                tags;
             };
             Filter prefer;
             Filter force;

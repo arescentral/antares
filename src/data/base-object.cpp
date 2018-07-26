@@ -292,7 +292,7 @@ static BaseObject set_attributes(BaseObject o) {
     } else if (o.ai.target.prefer.owner == Owner::SAME) {
         o.orderFlags |= kSoftTargetIsFriend;
     }
-    if (!o.ai.target.prefer.tags.empty()) {
+    if (!o.ai.target.prefer.tags.tags.empty()) {
         o.orderFlags |= kSoftTargetMatchesTags;
     }
 
@@ -315,7 +315,7 @@ static BaseObject set_attributes(BaseObject o) {
     } else if (o.ai.target.force.owner == Owner::SAME) {
         o.orderFlags |= kHardTargetIsFriend;
     }
-    if (!o.ai.target.force.tags.empty()) {
+    if (!o.ai.target.force.tags.tags.empty()) {
         o.orderFlags |= kHardTargetMatchesTags;
     }
 
@@ -406,9 +406,9 @@ static BaseObject::AI::Combat optional_ai_combat(path_value x) {
                    x, {{"hated", &Combat::hated},
                        {"guided", &Combat::guided},
                        {"engages", &Combat::engages},
-                       {"engages_if", {&Combat::engages_if, optional_tags}},
+                       {"engages_if", &Combat::engages_if},
                        {"engaged", &Combat::engaged},
-                       {"engaged_if", {&Combat::engaged_if, optional_tags}},
+                       {"engaged_if", &Combat::engaged_if},
                        {"evades", &Combat::evades},
                        {"evaded", &Combat::evaded},
                        {"skill", &Combat::skill}})
@@ -422,7 +422,7 @@ static BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
                    x, {{"base", &Filter::base},
                        {"local", &Filter::local},
                        {"owner", &Filter::owner},
-                       {"tags", {&Filter::tags, optional_tags}}})
+                       {"tags", &Filter::tags}})
             .value_or(Filter{});
 }
 DEFAULT_READER(BaseObject::AI::Target::Filter, optional_ai_target_filter);
@@ -512,7 +512,7 @@ BaseObject base_object(pn::value_cref x0) {
                              {"bolt", &BaseObject::bolt},
                              {"device", &BaseObject::device},
 
-                             {"tags", {&BaseObject::tags, optional_tags}},
+                             {"tags", &BaseObject::tags},
                              {"ai", &BaseObject::ai}}));
 }
 

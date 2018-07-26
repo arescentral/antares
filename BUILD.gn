@@ -132,6 +132,7 @@ source_set("libantares-data") {
     "include/data/resource.hpp",
     "include/data/scenario-list.hpp",
     "include/data/sprite-data.hpp",
+    "include/data/tags.hpp",
     "src/data/action.cpp",
     "src/data/audio.cpp",
     "src/data/base-object.cpp",

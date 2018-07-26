@@ -27,6 +27,7 @@
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/range.hpp"
+#include "data/tags.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -95,7 +96,7 @@ sfz::optional<ticks> optional_ticks(path_value x);
 ticks                required_ticks(path_value x);
 sfz::optional<secs>  optional_secs(path_value x);
 
-std::map<pn::string, bool> optional_tags(path_value x);
+Tags optional_tags(path_value x);
 
 sfz::optional<Handle<Admiral>>          optional_admiral(path_value x);
 Handle<Admiral>                         required_admiral(path_value x);
@@ -199,6 +200,7 @@ DEFAULT_READER(pn::string, required_string_copy);
 DEFAULT_READER(sfz::optional<ticks>, optional_ticks);
 DEFAULT_READER(ticks, required_ticks);
 DEFAULT_READER(sfz::optional<secs>, optional_secs);
+DEFAULT_READER(Tags, optional_tags);
 DEFAULT_READER(sfz::optional<Handle<Admiral>>, optional_admiral);
 DEFAULT_READER(Handle<Admiral>, required_admiral);
 DEFAULT_READER(NamedHandle<const BaseObject>, required_base);
