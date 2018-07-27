@@ -60,6 +60,7 @@ static Key optional_key_num(path_value x) {
     }
     return i;
 }
+DEFAULT_READER(Key, optional_key_num);
 
 static Gamepad::Button optional_gamepad_button(path_value x) {
     auto k = optional_string(x);
@@ -72,6 +73,7 @@ static Gamepad::Button optional_gamepad_button(path_value x) {
     }
     return i;
 }
+DEFAULT_READER(Gamepad::Button, optional_gamepad_button);
 
 static InterfaceItemData::Type required_interface_item_type(path_value x) {
     return required_enum<InterfaceItemData::Type>(
@@ -110,8 +112,8 @@ static std::unique_ptr<InterfaceItemData> button_interface_item(path_value x) {
                 {"bounds", &InterfaceItemData::bounds},
                 {"id", &InterfaceItemData::id},
                 {"label", &PlainButtonData::label},
-                {"key", {&PlainButtonData::key, optional_key_num}},
-                {"gamepad", {&PlainButtonData::gamepad, optional_gamepad_button}},
+                {"key", &PlainButtonData::key},
+                {"gamepad", &PlainButtonData::gamepad},
                 {"hue", &PlainButtonData::hue},
                 {"style", &PlainButtonData::style}})));
 }
@@ -123,8 +125,8 @@ static std::unique_ptr<InterfaceItemData> checkbox_interface_item(path_value x) 
                         {"bounds", &InterfaceItemData::bounds},
                         {"id", &InterfaceItemData::id},
                         {"label", &CheckboxButtonData::label},
-                        {"key", {&CheckboxButtonData::key, optional_key_num}},
-                        {"gamepad", {&CheckboxButtonData::gamepad, optional_gamepad_button}},
+                        {"key", &CheckboxButtonData::key},
+                        {"gamepad", &CheckboxButtonData::gamepad},
                         {"hue", &CheckboxButtonData::hue},
                         {"style", &CheckboxButtonData::style}})));
 }
@@ -135,8 +137,8 @@ static std::unique_ptr<InterfaceItemData> radio_interface_item(path_value x) {
                 {"bounds", &InterfaceItemData::bounds},
                 {"id", &InterfaceItemData::id},
                 {"label", &RadioButtonData::label},
-                {"key", {&RadioButtonData::key, optional_key_num}},
-                {"gamepad", {&RadioButtonData::gamepad, optional_gamepad_button}},
+                {"key", &RadioButtonData::key},
+                {"gamepad", &RadioButtonData::gamepad},
                 {"hue", &RadioButtonData::hue},
                 {"style", &RadioButtonData::style}})));
 }
