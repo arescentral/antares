@@ -32,7 +32,9 @@ class ObjectDataScreen : public Card {
   public:
     enum Trigger { MOUSE, KEY, GAMEPAD };
 
-    ObjectDataScreen(Point origin, const BaseObject& object, Trigger trigger, int which);
+    ObjectDataScreen(
+            Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key,
+            int gamepad);
     ~ObjectDataScreen();
 
     virtual void become_front();
@@ -48,7 +50,9 @@ class ObjectDataScreen : public Card {
 
   private:
     const Trigger _trigger;
-    const int     _which;
+    const int     _mouse;
+    const Key     _key;
+    const int     _gamepad;
 
     enum State { TYPING, DONE };
     State     _state;

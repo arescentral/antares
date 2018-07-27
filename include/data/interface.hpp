@@ -96,7 +96,7 @@ struct PictureRectData : public InterfaceItemData {
 
 struct ButtonData : public InterfaceItemData {
     pn::string     label;
-    int16_t        key     = 0;
+    Key            key     = Key::NONE;
     int16_t        gamepad = 0;
     Hue            hue     = Hue::GRAY;
     InterfaceStyle style   = InterfaceStyle::LARGE;

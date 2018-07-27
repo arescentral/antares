@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 
+#include "config/keys.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
 
@@ -51,26 +52,13 @@ class Event {
 };
 
 // Superclass for events involving the keyboard (press, release).
-//
-// The value provided in `key()` is an ADB key-code, and is a horrible artifact of Ares' origins on
-// the classic MacOS.  For the time being, this means we are not tolerant of non-US keyboard
-// layouts, although it remains relatively easy to implement within Cocoa.
-//
-// We will eventually want to use a more cross-platform/international/sane numbering of keys, such
-// as perhaps the Cocoa numbering scheme, which uses part of the Unicode E000-F8FF "private use
-// area" to represent non-literal characters such as arrows.  It doesn't, however, seem to include
-// modifier keys, so maybe xkeysyms would be better, even though it collides with Unicode.
-//
-// Currently, the best documentation of ADB key-codes is on page 2-43 of "Macintosh Toolbox
-// Essentials", a PDF of which is available at http://developer.apple.com/legacy/mac/library/
-// documentation/mac/pdf/MacintoshToolboxEssentials.pdf
 class KeyEvent : public Event {
   public:
-    KeyEvent(wall_time at, uint32_t key) : Event(at), _key(key) {}
-    uint32_t key() const { return _key; }
+    KeyEvent(wall_time at, Key key) : Event(at), _key(key) {}
+    Key key() const { return _key; }
 
   private:
-    uint32_t _key;
+    Key _key;
 };
 
 // Generated when a key is pressed.
@@ -79,7 +67,7 @@ class KeyEvent : public Event {
 //  * key(): the key that was pressed, as described in KeyEvent.
 class KeyDownEvent : public KeyEvent {
   public:
-    KeyDownEvent(wall_time at, uint32_t key) : KeyEvent(at, key) {}
+    KeyDownEvent(wall_time at, Key key) : KeyEvent(at, key) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -89,7 +77,7 @@ class KeyDownEvent : public KeyEvent {
 //  * key(): the key that was released, as described in KeyEvent.
 class KeyUpEvent : public KeyEvent {
   public:
-    KeyUpEvent(wall_time at, uint32_t key) : KeyEvent(at, key) {}
+    KeyUpEvent(wall_time at, Key key) : KeyEvent(at, key) {}
     virtual void send(EventReceiver* receiver) const;
 };
 

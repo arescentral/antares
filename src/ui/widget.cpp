@@ -212,7 +212,7 @@ static int h_border(InterfaceStyle style) {
 }
 
 Widget* Widget::accept_click(Point where) { return nullptr; }
-Widget* Widget::accept_key(int64_t which) { return nullptr; }
+Widget* Widget::accept_key(Key which) { return nullptr; }
 Widget* Widget::accept_button(int64_t which) { return nullptr; }
 void    Widget::action() {}
 
@@ -463,7 +463,7 @@ Widget* Button::accept_click(Point where) {
     return nullptr;
 }
 
-Widget* Button::accept_key(int64_t which) {
+Widget* Button::accept_key(Key which) {
     if (enabled() && (_key == which)) {
         return this;
     }
@@ -558,7 +558,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
 
     bool       draw_shortcut = false;
     pn::string shortcut_text;
-    if ((mode == KEYBOARD_MOUSE) && key()) {
+    if ((mode == KEYBOARD_MOUSE) && (key() != Key::NONE)) {
         draw_shortcut = true;
         GetKeyNumName(key(), shortcut_text);
     } else if ((mode == GAMEPAD) && gamepad()) {
@@ -1104,7 +1104,7 @@ void TabButton::draw(Point offset, InputMode) const {
         rects.fill(uRect, RgbColor::black());
     }
 
-    if (key() == 0) {
+    if (key() == Key::NONE) {
         Rect uRect(
                 tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
@@ -1249,7 +1249,7 @@ Widget* TabBox::accept_click(Point where) {
     return nullptr;
 }
 
-Widget* TabBox::accept_key(int64_t which) {
+Widget* TabBox::accept_key(Key which) {
     for (const std::unique_ptr<TabButton>& tab : _tabs) {
         if (Widget* w = tab->accept_key(which)) {
             return w;

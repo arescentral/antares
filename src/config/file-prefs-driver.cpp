@@ -67,6 +67,14 @@ static bool get(pn::value_cref x, int& v) {
     return false;
 }
 
+static bool get(pn::value_cref x, Key& v) {
+    if (x.is_int()) {
+        v = static_cast<Key>(x.as_int());
+        return true;
+    }
+    return false;
+}
+
 template <typename ValueType, typename ValueKey, typename PrefsMethod>
 static void set_from(
         pn::map_cref x, const char* section_key, ValueKey value_key, Preferences& prefs,
@@ -106,7 +114,7 @@ FilePrefsDriver::FilePrefsDriver() {
     set_from<bool>(m, "sound", "game music", _current, &Preferences::play_music_in_game);
 
     for (auto i : range<size_t>(KEY_COUNT)) {
-        set_from<int>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
+        set_from<Key>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
     }
 }
 
@@ -115,7 +123,7 @@ void FilePrefsDriver::set(const Preferences& p) {
 
     pn::map keys;
     for (auto i : range<size_t>(KEY_COUNT)) {
-        keys[kKeyNames[i]] = p.keys[i];
+        keys[kKeyNames[i]] = static_cast<int>(p.keys[i]);
     }
 
     pn::string path = pn::format("{0}/config.pn", dirs().root);

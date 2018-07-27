@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "config/preferences.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/shapes.hpp"

@@ -109,14 +109,17 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
     switch (_state) {
         case SELECTING:
             switch (event.key()) {
-                case Keys::K8:
-                case Keys::N_TIMES:
+                case Key::K8:
+                case Key::N_TIMES:
                     _state          = UNLOCKING;
                     _unlock_chapter = 0;
                     _unlock_digits  = ndigits(plug.levels.size());
                     sys.sound.cloak_on();
                     return;
+                default: break;
             }
+            break;
+
         case UNLOCKING: {
             int digit = key_digit(event.key());
             if (digit < 0) {
@@ -138,6 +141,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             }
             return;
         } break;
+
         case FADING_OUT: return;
     }
     InterfaceScreen::key_down(event);

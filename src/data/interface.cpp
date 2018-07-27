@@ -49,12 +49,12 @@ static InterfaceStyle required_interface_style(path_value x) {
 }
 DEFAULT_READER(InterfaceStyle, required_interface_style);
 
-static int16_t optional_key_num(path_value x) {
+static Key optional_key_num(path_value x) {
     auto k = optional_string(x);
     if (!k.has_value()) {
-        return 0;
+        return Key::NONE;
     }
-    int i;
+    Key i;
     if (!GetKeyNameNum(*k, i)) {
         throw std::runtime_error(pn::format("{0}: must be a key", x.path()).c_str());
     }

@@ -122,12 +122,12 @@ struct CocoaVideoDriver::EventBridge {
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(_now(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyDownEvent(_now(), Key::CAPS_LOCK));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(_now(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyUpEvent(_now(), Key::CAPS_LOCK));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -150,14 +150,16 @@ struct CocoaVideoDriver::EventBridge {
         uint16_t scan_code = IOHIDElementGetUsage(element);
         if ((scan_code < 4) || (231 < scan_code)) {
             return;
-        } else if (scan_code == Keys::CAPS_LOCK) {
+        }
+        Key usb_key = static_cast<Key>(scan_code);
+        if (usb_key == Key::CAPS_LOCK) {
             return;
         }
 
         if (down) {
-            enqueue(new KeyDownEvent(_now(), scan_code));
+            enqueue(new KeyDownEvent(_now(), usb_key));
         } else {
-            enqueue(new KeyUpEvent(_now(), scan_code));
+            enqueue(new KeyUpEvent(_now(), usb_key));
         }
     }
 

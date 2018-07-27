@@ -293,7 +293,7 @@ class PauseScreen : public Card {
 
     virtual void key_up(const KeyUpEvent& event) {
         wake();
-        if (event.key() == Keys::CAPS_LOCK) {
+        if (event.key() == Key::CAPS_LOCK) {
             stack()->pop(this);
         }
     }
@@ -572,13 +572,13 @@ void GamePlay::fire_timer() {
 
 void GamePlay::key_down(const KeyDownEvent& event) {
     switch (event.key()) {
-        case Keys::CAPS_LOCK:
+        case Key::CAPS_LOCK:
             _state         = PAUSED;
             _player_paused = true;
             stack()->push(new PauseScreen);
             return;
 
-        case Keys::ESCAPE:
+        case Key::ESCAPE:
             if (_replay) {
                 break;
             } else {
@@ -589,7 +589,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             }
 
         default:
-            if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
+            if (event.key() == sys.prefs->key(kHelpKeyNum)) {
                 if (_replay) {
                     break;
                 } else {
@@ -598,20 +598,20 @@ void GamePlay::key_down(const KeyDownEvent& event) {
                     stack()->push(new HelpScreen);
                     return;
                 }
-            } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
-                sys.prefs->set_volume(sys.prefs->volume() - 1);
+            } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum)) {
+                sys.prefs->set_volume(sys.prefs->volume());
                 sys.audio->set_global_volume(sys.prefs->volume());
                 return;
-            } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum)) {
                 sys.prefs->set_volume(sys.prefs->volume() + 1);
                 sys.audio->set_global_volume(sys.prefs->volume());
                 return;
-            } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kActionMusicKeyNum)) {
                 if (sys.prefs->play_music_in_game()) {
                     sys.music.toggle();
                 }
                 return;
-            } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kFastMotionKeyNum)) {
                 _fast_motion = true;
                 return;
             }
@@ -621,7 +621,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
-    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kFastMotionKeyNum)) {
         _fast_motion = false;
         return;
     }

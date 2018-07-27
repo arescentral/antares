@@ -20,6 +20,7 @@
 
 #include <pn/file>
 
+#include "config/preferences.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -51,7 +52,7 @@ HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sy
 HelpScreen::~HelpScreen() {}
 
 void HelpScreen::key_down(const KeyDownEvent& event) {
-    if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kHelpKeyNum)) {
         stack()->pop(this);
     } else {
         InterfaceScreen::key_down(event);

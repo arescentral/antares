@@ -95,9 +95,10 @@ void InterfaceScreen::become_front() {
 
 void InterfaceScreen::resign_front() { set_state(NORMAL); }
 
-void InterfaceScreen::set_state(State state, Widget* widget, uint32_t pressed) {
-    _state   = state;
-    _pressed = pressed;
+void InterfaceScreen::set_state(State state, Widget* widget, Key key, int gamepad) {
+    _state           = state;
+    _key_pressed     = key;
+    _gamepad_pressed = gamepad;
     if (widget) {  // Even if already the active widget.
         sys.sound.select();
     }
@@ -183,9 +184,8 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 }
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
-    const int32_t key_code = event.key() + 1;
     for (auto& widget : _widgets) {
-        if (Widget* item = widget->accept_key(key_code)) {
+        if (Widget* item = widget->accept_key(event.key())) {
             set_state(KEY_DOWN, item, event.key());
             return;
         }
@@ -193,7 +193,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 }
 
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
-    if ((_state == KEY_DOWN) && (_pressed == event.key())) {
+    if ((_state == KEY_DOWN) && (_key_pressed == event.key())) {
         Widget* w = _active_widget;
         set_state(NORMAL);
         w->action();
@@ -203,14 +203,14 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& widget : _widgets) {
         if (Widget* item = widget->accept_button(event.button)) {
-            set_state(GAMEPAD_DOWN, item, event.button);
+            set_state(GAMEPAD_DOWN, item, Key::NONE, event.button);
             return;
         }
     }
 }
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
+    if ((_state == GAMEPAD_DOWN) && (_gamepad_pressed == event.button)) {
         Widget* w = _active_widget;
         set_state(NORMAL);
         w->action();

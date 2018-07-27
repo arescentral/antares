@@ -98,12 +98,13 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
         return space_object->name().copy();
     }
 
-    int keyNum = sys.prefs->key(h + kFirstHotKeyNum);
-    if (keyNum < 0) {
+    Key keyNum = sys.prefs->key(h + kFirstHotKeyNum);
+    if (keyNum == Key::NONE) {
         return space_object->name().copy();
     }
 
-    return pn::format("{0} < {1} >", space_object->name(), sys.key_long_names.at(keyNum - 1));
+    return pn::format(
+            "{0} < {1} >", space_object->name(), sys.key_long_names.at(static_cast<int>(keyNum)));
 };
 
 }  // namespace
@@ -135,19 +136,9 @@ PlayerShip::PlayerShip()
           _control_active(false),
           _control_direction(0) {}
 
-void PlayerShip::update_keys(const KeyMap& keys) {
-    for (int i = 0; i < 256; ++i) {
-        if (keys.get(i) && !_keys.get(i)) {
-            key_down(KeyDownEvent(now(), i));
-        } else if (_keys.get(i) && !keys.get(i)) {
-            key_up(KeyUpEvent(now(), i));
-        }
-    }
-}
-
-static int key_num(uint32_t key) {
+static int key_num(Key key) {
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-        if (key == (sys.prefs->key(i) - 1)) {
+        if (key == sys.prefs->key(i)) {
             return i;
         }
     }

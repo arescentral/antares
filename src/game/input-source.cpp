@@ -106,14 +106,14 @@ ReplayInputSource::ReplayInputSource(ReplayData* data)
     for (auto action : data->actions) {
         game_ticks at = game_ticks(ticks(action.at * 3));
         for (auto key : action.keys_down) {
-            int code = sys.prefs->key(key) - 1;
             _events.emplace(
-                    make_pair(0, at), unique_ptr<Event>(new KeyDownEvent(wall_time(), code)));
+                    make_pair(0, at),
+                    unique_ptr<Event>(new KeyDownEvent(wall_time(), sys.prefs->key(key))));
         }
         for (auto key : action.keys_up) {
-            int code = sys.prefs->key(key) - 1;
             _events.emplace(
-                    make_pair(0, at), unique_ptr<Event>(new KeyUpEvent(wall_time(), code)));
+                    make_pair(0, at),
+                    unique_ptr<Event>(new KeyUpEvent(wall_time(), sys.prefs->key(key))));
         }
     }
 }
