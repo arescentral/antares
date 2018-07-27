@@ -637,7 +637,7 @@ void GamePlay::mouse_move(const MouseMoveEvent& event) { _input_source->mouse_mo
 
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
-        case Gamepad::START:
+        case Gamepad::Button::START:
             if (_replay) {
                 break;
             } else {
@@ -646,6 +646,7 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
                 return;
             }
+        default: break;
     }
 
     _input_source->gamepad_button_down(event);

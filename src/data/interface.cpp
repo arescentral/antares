@@ -61,13 +61,13 @@ static Key optional_key_num(path_value x) {
     return i;
 }
 
-static int16_t optional_gamepad_button(path_value x) {
+static Gamepad::Button optional_gamepad_button(path_value x) {
     auto k = optional_string(x);
     if (!k.has_value()) {
-        return 0;
+        return Gamepad::Button::NONE;
     }
-    int i;
-    if (!(i = Gamepad::num(*k))) {
+    Gamepad::Button i = Gamepad::num(*k);
+    if (i == Gamepad::Button::NONE) {
         throw std::runtime_error(pn::format("{0}: must be a gamepad button", x.path()).c_str());
     }
     return i;

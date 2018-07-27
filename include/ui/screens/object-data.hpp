@@ -34,7 +34,7 @@ class ObjectDataScreen : public Card {
 
     ObjectDataScreen(
             Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key,
-            int gamepad);
+            Gamepad::Button gamepad);
     ~ObjectDataScreen();
 
     virtual void become_front();
@@ -49,10 +49,10 @@ class ObjectDataScreen : public Card {
     virtual void draw() const;
 
   private:
-    const Trigger _trigger;
-    const int     _mouse;
-    const Key     _key;
-    const int     _gamepad;
+    const Trigger         _trigger;
+    const int             _mouse;
+    const Key             _key;
+    const Gamepad::Button _gamepad;
 
     enum State { TYPING, DONE };
     State     _state;

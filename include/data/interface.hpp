@@ -23,9 +23,10 @@
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
+#include "config/gamepad.hpp"
+#include "config/keys.hpp"
 #include "data/enums.hpp"
 #include "math/geometry.hpp"
-#include "video/driver.hpp"
 
 namespace antares {
 
@@ -95,11 +96,11 @@ struct PictureRectData : public InterfaceItemData {
 };
 
 struct ButtonData : public InterfaceItemData {
-    pn::string     label;
-    Key            key     = Key::NONE;
-    int16_t        gamepad = 0;
-    Hue            hue     = Hue::GRAY;
-    InterfaceStyle style   = InterfaceStyle::LARGE;
+    pn::string      label;
+    Key             key     = Key::NONE;
+    Gamepad::Button gamepad = Gamepad::Button::NONE;
+    Hue             hue     = Hue::GRAY;
+    InterfaceStyle  style   = InterfaceStyle::LARGE;
 };
 
 struct PlainButtonData : public ButtonData {

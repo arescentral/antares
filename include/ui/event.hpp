@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 
+#include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -83,30 +84,31 @@ class KeyUpEvent : public KeyEvent {
 
 class GamepadButtonEvent : public Event {
   public:
-    GamepadButtonEvent(wall_time at, uint32_t button) : Event(at), button(button) {}
-    const uint32_t button;
+    GamepadButtonEvent(wall_time at, Gamepad::Button button) : Event(at), button(button) {}
+    const Gamepad::Button button;
 };
 
 class GamepadButtonDownEvent : public GamepadButtonEvent {
   public:
-    GamepadButtonDownEvent(wall_time at, uint32_t button) : GamepadButtonEvent(at, button) {}
+    GamepadButtonDownEvent(wall_time at, Gamepad::Button button)
+            : GamepadButtonEvent(at, button) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadButtonUpEvent : public GamepadButtonEvent {
   public:
-    GamepadButtonUpEvent(wall_time at, uint32_t button) : GamepadButtonEvent(at, button) {}
+    GamepadButtonUpEvent(wall_time at, Gamepad::Button button) : GamepadButtonEvent(at, button) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadStickEvent : public Event {
   public:
-    GamepadStickEvent(wall_time at, int stick, double x, double y)
+    GamepadStickEvent(wall_time at, Gamepad::Stick stick, double x, double y)
             : Event(at), stick(stick), x(x), y(y) {}
-    virtual void send(EventReceiver* receiver) const;
-    const int    stick;
-    const double x;
-    const double y;
+    virtual void         send(EventReceiver* receiver) const;
+    const Gamepad::Stick stick;
+    const double         x;
+    const double         y;
 };
 
 // Superclass for events involving the mouse (moved, button press, button release).

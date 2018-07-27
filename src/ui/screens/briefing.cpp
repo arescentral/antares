@@ -266,7 +266,7 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
         if (pict.bounds.contains(where) && pict.object) {
             stack()->push(new ObjectDataScreen(
                     event.where(), *pict.object, ObjectDataScreen::MOUSE, event.button(),
-                    Key::NONE, 0));
+                    Key::NONE, Gamepad::Button::NONE));
             return;
         }
     }
@@ -296,13 +296,13 @@ void BriefingScreen::key_down(const KeyDownEvent& event) {
 
 void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
-        case Gamepad::B: {
+        case Gamepad::Button::B: {
             *_cancelled = true;
             stack()->pop(this);
         }
             return;
-        case Gamepad::UP: return show_object_data(0, event);
-        case Gamepad::DOWN: return show_object_data(1, event);
+        case Gamepad::Button::UP: return show_object_data(0, event);
+        case Gamepad::Button::DOWN: return show_object_data(1, event);
         default: { return InterfaceScreen::gamepad_button_down(event); }
     }
 }
@@ -424,7 +424,7 @@ void BriefingScreen::draw_brief_point() const {
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {
-    show_object_data(index, ObjectDataScreen::KEY, 0, event.key(), 0);
+    show_object_data(index, ObjectDataScreen::KEY, 0, event.key(), Gamepad::Button::NONE);
 }
 
 void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& event) {
@@ -432,7 +432,8 @@ void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& e
 }
 
 void BriefingScreen::show_object_data(
-        int index, ObjectDataScreen::Trigger trigger, int mouse, Key key, int gamepad) {
+        int index, ObjectDataScreen::Trigger trigger, int mouse, Key key,
+        Gamepad::Button gamepad) {
     if (index < _inline_pict.size()) {
         auto obj = _inline_pict[index].object;
         if (obj) {

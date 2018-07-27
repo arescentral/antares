@@ -95,7 +95,7 @@ void InterfaceScreen::become_front() {
 
 void InterfaceScreen::resign_front() { set_state(NORMAL); }
 
-void InterfaceScreen::set_state(State state, Widget* widget, Key key, int gamepad) {
+void InterfaceScreen::set_state(State state, Widget* widget, Key key, Gamepad::Button gamepad) {
     _state           = state;
     _key_pressed     = key;
     _gamepad_pressed = gamepad;

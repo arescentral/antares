@@ -56,7 +56,8 @@ Rect object_data_bounds(Point origin, Size size) {
 }  // namespace
 
 ObjectDataScreen::ObjectDataScreen(
-        Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key, int gamepad)
+        Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key,
+        Gamepad::Button gamepad)
         : _trigger(trigger), _mouse(mouse), _key(key), _gamepad(gamepad), _state(TYPING) {
     pn::string text;
     CreateObjectDataText(text, object);

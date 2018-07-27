@@ -24,6 +24,7 @@
 #include "data/interface.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
@@ -35,7 +36,7 @@ class Widget {
 
     virtual Widget* accept_click(Point where);
     virtual Widget* accept_key(Key which);
-    virtual Widget* accept_button(int64_t which);
+    virtual Widget* accept_button(Gamepad::Button which);
     virtual void    action();
 
     virtual void activate();
@@ -115,14 +116,14 @@ class Button : public Widget {
 
     Widget* accept_click(Point where) override;
     Widget* accept_key(Key which) override;
-    Widget* accept_button(int64_t which) override;
+    Widget* accept_button(Gamepad::Button which) override;
 
     void activate() override { _active = true; }
     void deactivate() override { _active = false; }
 
     pn::string_view label() const { return _label; }
     Key             key() const { return _key; }
-    int16_t         gamepad() const { return _gamepad; }
+    Gamepad::Button gamepad() const { return _gamepad; }
     Hue             hue() const { return _hue; }
     InterfaceStyle  style() const { return _style; }
     bool            active() const { return _active; }
@@ -138,7 +139,7 @@ class Button : public Widget {
     sfz::optional<int64_t> _id;
     pn::string             _label;
     Key                    _key;
-    int16_t                _gamepad;
+    Gamepad::Button        _gamepad;
     Hue                    _hue    = Hue::GRAY;
     InterfaceStyle         _style  = InterfaceStyle::LARGE;
     bool                   _active = false;
@@ -238,7 +239,7 @@ class TabBox : public Widget {
 
     Widget* accept_click(Point where) override;
     Widget* accept_key(Key which) override;
-    Widget* accept_button(int64_t which) override;
+    Widget* accept_button(Gamepad::Button which) override;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;

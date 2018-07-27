@@ -213,7 +213,7 @@ static int h_border(InterfaceStyle style) {
 
 Widget* Widget::accept_click(Point where) { return nullptr; }
 Widget* Widget::accept_key(Key which) { return nullptr; }
-Widget* Widget::accept_button(int64_t which) { return nullptr; }
+Widget* Widget::accept_button(Gamepad::Button which) { return nullptr; }
 void    Widget::action() {}
 
 void Widget::activate() {}
@@ -470,7 +470,7 @@ Widget* Button::accept_key(Key which) {
     return nullptr;
 }
 
-Widget* Button::accept_button(int64_t which) {
+Widget* Button::accept_button(Gamepad::Button which) {
     if (enabled() && (_gamepad == which)) {
         return this;
     }
@@ -561,7 +561,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
     if ((mode == KEYBOARD_MOUSE) && (key() != Key::NONE)) {
         draw_shortcut = true;
         GetKeyNumName(key(), shortcut_text);
-    } else if ((mode == GAMEPAD) && gamepad()) {
+    } else if ((mode == GAMEPAD) && (gamepad() != Gamepad::Button::NONE)) {
         draw_shortcut = true;
         Gamepad::name(gamepad(), shortcut_text);
     }
@@ -1263,7 +1263,7 @@ Widget* TabBox::accept_key(Key which) {
     return nullptr;
 }
 
-Widget* TabBox::accept_button(int64_t which) {
+Widget* TabBox::accept_button(Gamepad::Button which) {
     for (const std::unique_ptr<TabButton>& tab : _tabs) {
         if (Widget* w = tab->accept_button(which)) {
             return w;
