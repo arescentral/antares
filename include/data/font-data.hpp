@@ -28,10 +28,14 @@
 namespace antares {
 
 struct FontData {
-    int64_t                  logical_width;
-    int64_t                  height;
-    int64_t                  ascent;
-    std::map<pn::rune, Rect> glyphs;
+    int64_t logical_width;
+    int64_t height;
+    int64_t ascent;
+
+    struct Glyphs {
+        std::map<pn::rune, Rect> map;
+    };
+    Glyphs glyphs;
 };
 
 FontData font_data(pn::value_cref x);

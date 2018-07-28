@@ -90,7 +90,10 @@ struct ActionBase {
     sfz::optional<bool> reflexive;  // does it apply to object executing verb?
 
     struct Filter {
-        uint32_t             attributes = 0;
+        struct Attributes {
+            uint32_t bits = 0;
+        };
+        Attributes           attributes;
         Tags                 tags;
         sfz::optional<Owner> owner;
     } filter;
@@ -289,7 +292,10 @@ struct SelectAction : public ActionBase {
 };
 
 struct PlayAction : public ActionBase {
-    uint8_t             priority;     // 1-5; takes over a channel playing a lower-priority sound
+    struct Priority {
+        int level;
+    };
+    Priority            priority;     // 1-5; takes over a channel playing a lower-priority sound
     ticks               persistence;  // time before a lower-priority sound can take channel
     sfz::optional<bool> absolute;     // plays at same volume, regardless of distance from player
     int64_t             volume;       // 1-255; volume at focus

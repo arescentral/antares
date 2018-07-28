@@ -31,19 +31,20 @@ namespace antares {
 
 Race* Race::get(pn::string_view name) { return &plug.races[name.copy()]; }
 
-std::map<pn::string, NamedHandle<const BaseObject>> optional_ships(path_value x) {
+Race::Ships optional_ships(path_value x) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_map()) {
-        std::map<pn::string, NamedHandle<const BaseObject>> ships;
+        Race::Ships ships;
         for (pn::key_value_cref kv : x.value().as_map()) {
-            ships.emplace(kv.key().copy(), required_base(x.get(kv.key())));
+            ships.map.emplace(kv.key().copy(), required_base(x.get(kv.key())));
         }
         return ships;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
+DEFAULT_READER(Race::Ships, optional_ships);
 
 Race race(path_value x) {
     return required_struct<Race>(
@@ -55,7 +56,7 @@ Race race(path_value x) {
                 {"hue", &Race::hue},
                 {"not_hue", &Race::not_hue},
                 {"advantage", &Race::advantage},
-                {"ships", {&Race::ships, optional_ships}}});
+                {"ships", &Race::ships}});
 }
 
 }  // namespace antares

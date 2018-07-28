@@ -88,8 +88,8 @@ BaseObject* BaseObject::get(pn::string_view name) {
 
 NamedHandle<const BaseObject> get_buildable_object_handle(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.find(o.name.copy());
-    if (it == race->ships.end()) {
+    auto it = race->ships.map.find(o.name.copy());
+    if (it == race->ships.map.end()) {
         return NamedHandle<const BaseObject>(o.name.copy());
     }
     return it->second.copy();
@@ -97,8 +97,8 @@ NamedHandle<const BaseObject> get_buildable_object_handle(
 
 const BaseObject* get_buildable_object(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.find(o.name.copy());
-    if (it == race->ships.end()) {
+    auto it = race->ships.map.find(o.name.copy());
+    if (it == race->ships.map.end()) {
         return BaseObject::get(o.name);
     }
     return BaseObject::get(it->second.name());

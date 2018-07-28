@@ -185,8 +185,9 @@ static uint32_t optional_flags(path_value x, const std::map<pn::string_view, int
     }
 }
 
-static uint32_t optional_object_attributes(path_value x) {
-    return optional_flags(
+static ActionBase::Filter::Attributes optional_object_attributes(path_value x) {
+    ActionBase::Filter::Attributes attributes;
+    attributes.bits = optional_flags(
             x, {{"can_be_engaged", 1},
                 {"does_bounce", 6},
                 {"can_be_destination", 10},
@@ -208,14 +209,15 @@ static uint32_t optional_object_attributes(path_value x) {
                 {"neutral_death", 27},
                 {"is_guided", 28},
                 {"appear_on_radar", 29}});
+    return attributes;
 }
+DEFAULT_READER(ActionBase::Filter::Attributes, optional_object_attributes);
 
 static ActionBase::Filter optional_action_filter(path_value x) {
     return optional_struct<ActionBase::Filter>(
-                   x,
-                   {{"attributes", {&ActionBase::Filter::attributes, optional_object_attributes}},
-                    {"tags", &ActionBase::Filter::tags},
-                    {"owner", &ActionBase::Filter::owner}})
+                   x, {{"attributes", &ActionBase::Filter::attributes},
+                       {"tags", &ActionBase::Filter::tags},
+                       {"owner", &ActionBase::Filter::owner}})
             .value_or(ActionBase::Filter{});
 }
 DEFAULT_READER(ActionBase::Filter, optional_action_filter);
@@ -519,12 +521,16 @@ static PlayAction::Sound required_sound(path_value x) {
 }
 DEFAULT_READER(PlayAction::Sound, required_sound);
 
-static uint8_t required_sound_priority(path_value x) { return required_int(x, {0, 6}); }
+static PlayAction::Priority required_sound_priority(path_value x) {
+    int level = required_int(x, {0, 6});
+    return PlayAction::Priority{level};
+}
+DEFAULT_READER(PlayAction::Priority, required_sound_priority);
 
 static Action play_action(path_value x) {
     return required_struct<PlayAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"priority", {&PlayAction::priority, required_sound_priority}},
+                {"priority", &PlayAction::priority},
                 {"persistence", &PlayAction::persistence},
                 {"absolute", &PlayAction::absolute},
                 {"volume", &PlayAction::volume},

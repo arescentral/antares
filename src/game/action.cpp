@@ -90,7 +90,7 @@ bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) 
         return false;
     }
 
-    if (action.base.filter.attributes & ~target->attributes) {
+    if (action.base.filter.attributes.bits & ~target->attributes) {
         return false;
     }
 
@@ -210,9 +210,9 @@ static void apply(
         return;
     }
     if (a.absolute.value_or(false)) {
-        sys.sound.play(pick, a.volume, a.persistence, a.priority);
+        sys.sound.play(pick, a.volume, a.persistence, a.priority.level);
     } else {
-        sys.sound.play_at(pick, a.volume, a.persistence, a.priority, focus);
+        sys.sound.play_at(pick, a.volume, a.persistence, a.priority.level, focus);
     }
 }
 
@@ -812,7 +812,7 @@ static void execute_actions(
             }
         }
 
-        if ((action.base.filter.attributes || !action.base.filter.tags.tags.empty()) &&
+        if ((action.base.filter.attributes.bits || !action.base.filter.tags.tags.empty()) &&
             (!object.get() || !action_filter_applies_to(action, object))) {
             continue;
         }
