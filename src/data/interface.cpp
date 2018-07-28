@@ -34,62 +34,48 @@ using sfz::range;
 
 namespace antares {
 
-DECLARE_FIELD_READER(InterfaceItemData);
+DECLARE_FIELD_READER(WidgetData);
 
-InterfaceItemData::Type InterfaceItemData::type() const { return base.type; }
+WidgetData::Type WidgetData::type() const { return base.type; }
 
-InterfaceItemData::InterfaceItemData() : base{} {}
-InterfaceItemData::InterfaceItemData(BoxRectData d) : rect(std::move(d)) {}
-InterfaceItemData::InterfaceItemData(TextRectData d) : text(std::move(d)) {}
-InterfaceItemData::InterfaceItemData(PictureRectData d) : picture(std::move(d)) {}
-InterfaceItemData::InterfaceItemData(PlainButtonData d) : button(std::move(d)) {}
-InterfaceItemData::InterfaceItemData(CheckboxButtonData d) : checkbox(std::move(d)) {}
-InterfaceItemData::InterfaceItemData(RadioButtonData d) : radio(std::move(d)) {}
-InterfaceItemData::InterfaceItemData(TabBoxData d) : tab_box(std::move(d)) {}
+WidgetData::WidgetData() : base{} {}
+WidgetData::WidgetData(BoxRectData d) : rect(std::move(d)) {}
+WidgetData::WidgetData(TextRectData d) : text(std::move(d)) {}
+WidgetData::WidgetData(PictureRectData d) : picture(std::move(d)) {}
+WidgetData::WidgetData(PlainButtonData d) : button(std::move(d)) {}
+WidgetData::WidgetData(CheckboxButtonData d) : checkbox(std::move(d)) {}
+WidgetData::WidgetData(RadioButtonData d) : radio(std::move(d)) {}
+WidgetData::WidgetData(TabBoxData d) : tab_box(std::move(d)) {}
 
-InterfaceItemData::InterfaceItemData(InterfaceItemData&& a) {
+WidgetData::WidgetData(WidgetData&& a) {
     switch (a.type()) {
-        case InterfaceItemDataBase::Type::NONE: new (this) InterfaceItemData(); break;
-        case InterfaceItemDataBase::Type::RECT:
-            new (this) InterfaceItemData(std::move(a.rect));
-            break;
-        case InterfaceItemDataBase::Type::TEXT:
-            new (this) InterfaceItemData(std::move(a.text));
-            break;
-        case InterfaceItemDataBase::Type::PICTURE:
-            new (this) InterfaceItemData(std::move(a.picture));
-            break;
-        case InterfaceItemDataBase::Type::BUTTON:
-            new (this) InterfaceItemData(std::move(a.button));
-            break;
-        case InterfaceItemDataBase::Type::CHECKBOX:
-            new (this) InterfaceItemData(std::move(a.checkbox));
-            break;
-        case InterfaceItemDataBase::Type::RADIO:
-            new (this) InterfaceItemData(std::move(a.radio));
-            break;
-        case InterfaceItemDataBase::Type::TAB_BOX:
-            new (this) InterfaceItemData(std::move(a.tab_box));
-            break;
+        case WidgetDataBase::Type::NONE: new (this) WidgetData(); break;
+        case WidgetDataBase::Type::RECT: new (this) WidgetData(std::move(a.rect)); break;
+        case WidgetDataBase::Type::TEXT: new (this) WidgetData(std::move(a.text)); break;
+        case WidgetDataBase::Type::PICTURE: new (this) WidgetData(std::move(a.picture)); break;
+        case WidgetDataBase::Type::BUTTON: new (this) WidgetData(std::move(a.button)); break;
+        case WidgetDataBase::Type::CHECKBOX: new (this) WidgetData(std::move(a.checkbox)); break;
+        case WidgetDataBase::Type::RADIO: new (this) WidgetData(std::move(a.radio)); break;
+        case WidgetDataBase::Type::TAB_BOX: new (this) WidgetData(std::move(a.tab_box)); break;
     }
 }
 
-InterfaceItemData& InterfaceItemData::operator=(InterfaceItemData&& a) {
-    this->~InterfaceItemData();
-    new (this) InterfaceItemData(std::move(a));
+WidgetData& WidgetData::operator=(WidgetData&& a) {
+    this->~WidgetData();
+    new (this) WidgetData(std::move(a));
     return *this;
 }
 
-InterfaceItemData::~InterfaceItemData() {
+WidgetData::~WidgetData() {
     switch (type()) {
-        case InterfaceItemDataBase::Type::NONE: base.~InterfaceItemDataBase(); break;
-        case InterfaceItemDataBase::Type::RECT: rect.~BoxRectData(); break;
-        case InterfaceItemDataBase::Type::TEXT: text.~TextRectData(); break;
-        case InterfaceItemDataBase::Type::PICTURE: picture.~PictureRectData(); break;
-        case InterfaceItemDataBase::Type::BUTTON: button.~PlainButtonData(); break;
-        case InterfaceItemDataBase::Type::CHECKBOX: checkbox.~CheckboxButtonData(); break;
-        case InterfaceItemDataBase::Type::RADIO: radio.~RadioButtonData(); break;
-        case InterfaceItemDataBase::Type::TAB_BOX: tab_box.~TabBoxData(); break;
+        case WidgetDataBase::Type::NONE: base.~WidgetDataBase(); break;
+        case WidgetDataBase::Type::RECT: rect.~BoxRectData(); break;
+        case WidgetDataBase::Type::TEXT: text.~TextRectData(); break;
+        case WidgetDataBase::Type::PICTURE: picture.~PictureRectData(); break;
+        case WidgetDataBase::Type::BUTTON: button.~PlainButtonData(); break;
+        case WidgetDataBase::Type::CHECKBOX: checkbox.~CheckboxButtonData(); break;
+        case WidgetDataBase::Type::RADIO: radio.~RadioButtonData(); break;
+        case WidgetDataBase::Type::TAB_BOX: tab_box.~TabBoxData(); break;
     }
 }
 
@@ -122,15 +108,15 @@ FIELD_READER(Gamepad::Button) {
     return i;
 }
 
-FIELD_READER(InterfaceItemData::Type) {
-    return required_enum<InterfaceItemData::Type>(
-            x, {{"rect", InterfaceItemData::Type::RECT},
-                {"button", InterfaceItemData::Type::BUTTON},
-                {"checkbox", InterfaceItemData::Type::CHECKBOX},
-                {"radio", InterfaceItemData::Type::RADIO},
-                {"picture", InterfaceItemData::Type::PICTURE},
-                {"text", InterfaceItemData::Type::TEXT},
-                {"tab-box", InterfaceItemData::Type::TAB_BOX}});
+FIELD_READER(WidgetData::Type) {
+    return required_enum<WidgetData::Type>(
+            x, {{"rect", WidgetData::Type::RECT},
+                {"button", WidgetData::Type::BUTTON},
+                {"checkbox", WidgetData::Type::CHECKBOX},
+                {"radio", WidgetData::Type::RADIO},
+                {"picture", WidgetData::Type::PICTURE},
+                {"text", WidgetData::Type::TEXT},
+                {"tab-box", WidgetData::Type::TAB_BOX}});
 }
 
 FIELD_READER(TabBoxData::Tab) {
@@ -141,21 +127,21 @@ FIELD_READER(TabBoxData::Tab) {
                 {"content", &TabBoxData::Tab::content}});
 }
 
-static InterfaceItemData rect_interface_item(path_value x) {
+static WidgetData rect_interface_item(path_value x) {
     return BoxRectData(required_struct<BoxRectData>(
-            x, {{"type", &InterfaceItemDataBase::type},
-                {"bounds", &InterfaceItemDataBase::bounds},
-                {"id", &InterfaceItemDataBase::id},
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
                 {"label", &BoxRectData::label},
                 {"hue", &BoxRectData::hue},
                 {"style", &BoxRectData::style}}));
 }
 
-static InterfaceItemData button_interface_item(path_value x) {
+static WidgetData button_interface_item(path_value x) {
     return required_struct<PlainButtonData>(
-            x, {{"type", &InterfaceItemDataBase::type},
-                {"bounds", &InterfaceItemDataBase::bounds},
-                {"id", &InterfaceItemDataBase::id},
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
                 {"label", &PlainButtonData::label},
                 {"key", &PlainButtonData::key},
                 {"gamepad", &PlainButtonData::gamepad},
@@ -163,11 +149,11 @@ static InterfaceItemData button_interface_item(path_value x) {
                 {"style", &PlainButtonData::style}});
 }
 
-static InterfaceItemData checkbox_interface_item(path_value x) {
+static WidgetData checkbox_interface_item(path_value x) {
     return required_struct<CheckboxButtonData>(
-            x, {{"type", &InterfaceItemDataBase::type},
-                {"bounds", &InterfaceItemDataBase::bounds},
-                {"id", &InterfaceItemDataBase::id},
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
                 {"label", &CheckboxButtonData::label},
                 {"key", &CheckboxButtonData::key},
                 {"gamepad", &CheckboxButtonData::gamepad},
@@ -175,11 +161,11 @@ static InterfaceItemData checkbox_interface_item(path_value x) {
                 {"style", &CheckboxButtonData::style}});
 }
 
-static InterfaceItemData radio_interface_item(path_value x) {
+static WidgetData radio_interface_item(path_value x) {
     return required_struct<RadioButtonData>(
-            x, {{"type", &InterfaceItemDataBase::type},
-                {"bounds", &InterfaceItemDataBase::bounds},
-                {"id", &InterfaceItemDataBase::id},
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
                 {"label", &RadioButtonData::label},
                 {"key", &RadioButtonData::key},
                 {"gamepad", &RadioButtonData::gamepad},
@@ -187,44 +173,44 @@ static InterfaceItemData radio_interface_item(path_value x) {
                 {"style", &RadioButtonData::style}});
 }
 
-static InterfaceItemData picture_interface_item(path_value x) {
+static WidgetData picture_interface_item(path_value x) {
     return required_struct<PictureRectData>(
-            x, {{"type", &InterfaceItemDataBase::type},
-                {"bounds", &InterfaceItemDataBase::bounds},
-                {"id", &InterfaceItemDataBase::id},
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
                 {"picture", &PictureRectData::picture}});
 }
 
-static InterfaceItemData text_interface_item(path_value x) {
+static WidgetData text_interface_item(path_value x) {
     return required_struct<TextRectData>(
-            x, {{"type", &InterfaceItemDataBase::type},
-                {"bounds", &InterfaceItemDataBase::bounds},
-                {"id", &InterfaceItemDataBase::id},
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
                 {"text", &TextRectData::text},
                 {"hue", &TextRectData::hue},
                 {"style", &TextRectData::style}});
 }
 
-static InterfaceItemData tab_box_interface_item(path_value x) {
+static WidgetData tab_box_interface_item(path_value x) {
     return required_struct<TabBoxData>(
-            x, {{"type", &InterfaceItemDataBase::type},
-                {"bounds", &InterfaceItemDataBase::bounds},
-                {"id", &InterfaceItemDataBase::id},
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
                 {"hue", &TabBoxData::hue},
                 {"style", &TabBoxData::style},
                 {"tabs", &TabBoxData::tabs}});
 }
 
-DEFINE_FIELD_READER(InterfaceItemData) {
-    switch (required_object_type(x, read_field<InterfaceItemData::Type>)) {
-        case InterfaceItemData::Type::NONE: throw std::runtime_error("interface item type none?");
-        case InterfaceItemData::Type::RECT: return rect_interface_item(x);
-        case InterfaceItemData::Type::BUTTON: return button_interface_item(x);
-        case InterfaceItemData::Type::CHECKBOX: return checkbox_interface_item(x);
-        case InterfaceItemData::Type::RADIO: return radio_interface_item(x);
-        case InterfaceItemData::Type::PICTURE: return picture_interface_item(x);
-        case InterfaceItemData::Type::TEXT: return text_interface_item(x);
-        case InterfaceItemData::Type::TAB_BOX: return tab_box_interface_item(x);
+DEFINE_FIELD_READER(WidgetData) {
+    switch (required_object_type(x, read_field<WidgetData::Type>)) {
+        case WidgetData::Type::NONE: throw std::runtime_error("interface item type none?");
+        case WidgetData::Type::RECT: return rect_interface_item(x);
+        case WidgetData::Type::BUTTON: return button_interface_item(x);
+        case WidgetData::Type::CHECKBOX: return checkbox_interface_item(x);
+        case WidgetData::Type::RADIO: return radio_interface_item(x);
+        case WidgetData::Type::PICTURE: return picture_interface_item(x);
+        case WidgetData::Type::TEXT: return text_interface_item(x);
+        case WidgetData::Type::TAB_BOX: return tab_box_interface_item(x);
     }
 }
 

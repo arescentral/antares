@@ -1365,22 +1365,20 @@ void TabBox::select(const TabButton& tab) {
     }
 }
 
-std::unique_ptr<Widget> Widget::from(const InterfaceItemData& data) {
+std::unique_ptr<Widget> Widget::from(const WidgetData& data) {
     switch (data.type()) {
-        case InterfaceItemDataBase::Type::NONE: return nullptr;
-        case InterfaceItemDataBase::Type::RECT:
-            return std::unique_ptr<Widget>(new BoxRect{data.rect});
-        case InterfaceItemDataBase::Type::TEXT:
-            return std::unique_ptr<Widget>(new TextRect{data.text});
-        case InterfaceItemDataBase::Type::PICTURE:
+        case WidgetDataBase::Type::NONE: return nullptr;
+        case WidgetDataBase::Type::RECT: return std::unique_ptr<Widget>(new BoxRect{data.rect});
+        case WidgetDataBase::Type::TEXT: return std::unique_ptr<Widget>(new TextRect{data.text});
+        case WidgetDataBase::Type::PICTURE:
             return std::unique_ptr<Widget>(new PictureRect{data.picture});
-        case InterfaceItemDataBase::Type::BUTTON:
+        case WidgetDataBase::Type::BUTTON:
             return std::unique_ptr<Widget>(new PlainButton{data.button});
-        case InterfaceItemDataBase::Type::CHECKBOX:
+        case WidgetDataBase::Type::CHECKBOX:
             return std::unique_ptr<Widget>(new CheckboxButton{data.checkbox});
-        case InterfaceItemDataBase::Type::RADIO:
+        case WidgetDataBase::Type::RADIO:
             return std::unique_ptr<Widget>(new RadioButton{data.radio});
-        case InterfaceItemDataBase::Type::TAB_BOX:
+        case WidgetDataBase::Type::TAB_BOX:
             return std::unique_ptr<Widget>(new TabBox{data.tab_box});
     }
 }

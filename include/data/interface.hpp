@@ -31,8 +31,8 @@
 namespace antares {
 
 class path_value;
-union InterfaceItemData;
-struct InterfaceItemDataBase;
+union WidgetData;
+struct WidgetDataBase;
 
 enum class InterfaceStyle { LARGE, SMALL };
 
@@ -42,11 +42,11 @@ struct interfaceLabelType {
 };
 
 struct InterfaceData {
-    bool                           fullscreen = false;
-    std::vector<InterfaceItemData> items;
+    bool                    fullscreen = false;
+    std::vector<WidgetData> items;
 };
 
-struct InterfaceItemDataBase {
+struct WidgetDataBase {
   public:
     class Visitor;
 
@@ -61,10 +61,10 @@ struct InterfaceItemDataBase {
         TAB_BOX,
     };
 
-    InterfaceItemDataBase()                        = default;
-    InterfaceItemDataBase(InterfaceItemDataBase&&) = default;
-    InterfaceItemDataBase& operator=(InterfaceItemDataBase&&) = default;
-    virtual ~InterfaceItemDataBase() {}
+    WidgetDataBase()                 = default;
+    WidgetDataBase(WidgetDataBase&&) = default;
+    WidgetDataBase& operator=(WidgetDataBase&&) = default;
+    virtual ~WidgetDataBase() {}
 
     Type                   type;
     Rect                   bounds;
@@ -73,23 +73,23 @@ struct InterfaceItemDataBase {
 
 InterfaceData interface(path_value x);
 
-struct BoxRectData : public InterfaceItemDataBase {
+struct BoxRectData : public WidgetDataBase {
     sfz::optional<pn::string> label;
     Hue                       hue   = Hue::GRAY;
     InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
-struct TextRectData : public InterfaceItemDataBase {
+struct TextRectData : public WidgetDataBase {
     sfz::optional<pn::string> text;
     Hue                       hue   = Hue::GRAY;
     InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
-struct PictureRectData : public InterfaceItemDataBase {
+struct PictureRectData : public WidgetDataBase {
     pn::string picture;
 };
 
-struct ButtonData : public InterfaceItemDataBase {
+struct ButtonData : public WidgetDataBase {
     pn::string      label;
     Key             key     = Key::NONE;
     Gamepad::Button gamepad = Gamepad::Button::NONE;
@@ -101,20 +101,20 @@ struct PlainButtonData : public ButtonData {};
 struct CheckboxButtonData : public ButtonData {};
 struct RadioButtonData : public ButtonData {};
 
-struct TabBoxData : public InterfaceItemDataBase {
+struct TabBoxData : public WidgetDataBase {
     Hue            hue   = Hue::GRAY;
     InterfaceStyle style = InterfaceStyle::LARGE;
 
     struct Tab {
-        sfz::optional<int64_t>         id;
-        int64_t                        width;
-        pn::string                     label;
-        std::vector<InterfaceItemData> content;
+        sfz::optional<int64_t>  id;
+        int64_t                 width;
+        pn::string              label;
+        std::vector<WidgetData> content;
     };
     std::vector<Tab> tabs;
 };
 
-class InterfaceItemDataBase::Visitor {
+class WidgetDataBase::Visitor {
   public:
     ~Visitor();
     virtual void visit_box_rect(const BoxRectData&) const               = 0;
@@ -126,11 +126,11 @@ class InterfaceItemDataBase::Visitor {
     virtual void visit_tab_box(const TabBoxData&) const                 = 0;
 };
 
-union InterfaceItemData {
-    using Type = InterfaceItemDataBase::Type;
+union WidgetData {
+    using Type = WidgetDataBase::Type;
 
-    InterfaceItemDataBase       base;
-    InterfaceItemDataBase::Type type() const;
+    WidgetDataBase       base;
+    WidgetDataBase::Type type() const;
 
     BoxRectData        rect;
     TextRectData       text;
@@ -140,18 +140,18 @@ union InterfaceItemData {
     RadioButtonData    radio;
     TabBoxData         tab_box;
 
-    InterfaceItemData();
-    InterfaceItemData(BoxRectData d);
-    InterfaceItemData(TextRectData d);
-    InterfaceItemData(PictureRectData d);
-    InterfaceItemData(PlainButtonData d);
-    InterfaceItemData(CheckboxButtonData d);
-    InterfaceItemData(RadioButtonData d);
-    InterfaceItemData(TabBoxData d);
+    WidgetData();
+    WidgetData(BoxRectData d);
+    WidgetData(TextRectData d);
+    WidgetData(PictureRectData d);
+    WidgetData(PlainButtonData d);
+    WidgetData(CheckboxButtonData d);
+    WidgetData(RadioButtonData d);
+    WidgetData(TabBoxData d);
 
-    ~InterfaceItemData();
-    InterfaceItemData(InterfaceItemData&&);
-    InterfaceItemData& operator=(InterfaceItemData&&);
+    ~WidgetData();
+    WidgetData(WidgetData&&);
+    WidgetData& operator=(WidgetData&&);
 };
 
 }  // namespace antares
