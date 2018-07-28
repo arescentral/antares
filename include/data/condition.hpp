@@ -270,8 +270,6 @@ struct Condition {
     static HandleList<const Condition> all();
 };
 
-Condition condition(path_value x);
-
 template <typename T>
 struct field_reader;
 template <>

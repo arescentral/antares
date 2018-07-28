@@ -23,13 +23,11 @@
 
 namespace antares {
 
-Briefing briefing(path_value x) {
+DEFINE_FIELD_READER(Briefing) {
     return required_struct<Briefing>(
             x, {{"initial", &Briefing::initial},
                 {"title", &Briefing::title},
                 {"content", &Briefing::content}});
 }
-
-Briefing field_reader<Briefing>::read(path_value x) { return briefing(x); }
 
 }  // namespace antares

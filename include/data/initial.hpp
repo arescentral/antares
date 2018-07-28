@@ -62,8 +62,6 @@ struct Initial {
     static HandleList<const Initial> all();
 };
 
-Initial initial(path_value x);
-
 template <typename T>
 struct field_reader;
 template <>

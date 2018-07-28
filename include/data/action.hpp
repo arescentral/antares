@@ -419,8 +419,6 @@ union Action {
     Action& operator=(Action&&);
 };
 
-Action action(path_value x);
-
 template <typename T>
 struct field_reader;
 template <>

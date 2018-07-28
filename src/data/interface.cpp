@@ -34,22 +34,14 @@ using sfz::range;
 
 namespace antares {
 
-static std::unique_ptr<InterfaceItemData> interface_item(path_value x);
+DECLARE_FIELD_READER(std::unique_ptr<InterfaceItemData>);
 
-template <typename T>
-struct field_reader;
-template <>
-struct field_reader<std::unique_ptr<InterfaceItemData>> {
-    static std::unique_ptr<InterfaceItemData> read(path_value x) { return interface_item(x); }
-};
-
-static InterfaceStyle required_interface_style(path_value x) {
+FIELD_READER(InterfaceStyle) {
     return required_enum<InterfaceStyle>(
             x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
 }
-DEFAULT_READER(InterfaceStyle, required_interface_style);
 
-static Key optional_key_num(path_value x) {
+FIELD_READER(Key) {
     auto k = read_field<sfz::optional<pn::string>>(x);
     if (!k.has_value()) {
         return Key::NONE;
@@ -60,9 +52,8 @@ static Key optional_key_num(path_value x) {
     }
     return i;
 }
-DEFAULT_READER(Key, optional_key_num);
 
-static Gamepad::Button optional_gamepad_button(path_value x) {
+FIELD_READER(Gamepad::Button) {
     auto k = read_field<sfz::optional<pn::string>>(x);
     if (!k.has_value()) {
         return Gamepad::Button::NONE;
@@ -73,9 +64,8 @@ static Gamepad::Button optional_gamepad_button(path_value x) {
     }
     return i;
 }
-DEFAULT_READER(Gamepad::Button, optional_gamepad_button);
 
-static InterfaceItemData::Type required_interface_item_type(path_value x) {
+FIELD_READER(InterfaceItemData::Type) {
     return required_enum<InterfaceItemData::Type>(
             x, {{"rect", InterfaceItemData::Type::RECT},
                 {"button", InterfaceItemData::Type::BUTTON},
@@ -85,16 +75,14 @@ static InterfaceItemData::Type required_interface_item_type(path_value x) {
                 {"text", InterfaceItemData::Type::TEXT},
                 {"tab-box", InterfaceItemData::Type::TAB_BOX}});
 }
-DEFAULT_READER(InterfaceItemData::Type, required_interface_item_type);
 
-static TabBoxData::Tab required_tab(path_value x) {
+FIELD_READER(TabBoxData::Tab) {
     return required_struct<TabBoxData::Tab>(
             x, {{"id", &TabBoxData::Tab::id},
                 {"width", &TabBoxData::Tab::width},
                 {"label", &TabBoxData::Tab::label},
                 {"content", &TabBoxData::Tab::content}});
 }
-DEFAULT_READER(TabBoxData::Tab, required_tab);
 
 static std::unique_ptr<InterfaceItemData> rect_interface_item(path_value x) {
     return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
@@ -171,7 +159,7 @@ static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
                 {"tabs", &TabBoxData::tabs}})));
 }
 
-static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
+DEFINE_FIELD_READER(std::unique_ptr<InterfaceItemData>) {
     switch (required_object_type(x, read_field<InterfaceItemData::Type>)) {
         case InterfaceItemData::Type::RECT: return rect_interface_item(x);
         case InterfaceItemData::Type::BUTTON: return button_interface_item(x);

@@ -24,8 +24,7 @@
 
 namespace antares {
 
-static ConditionWhen when(path_value x);
-DEFAULT_READER(ConditionWhen, when);
+DECLARE_FIELD_READER(ConditionWhen);
 
 #define COMMON_CONDITION_FIELDS \
     { "type", &ConditionBase::type }
@@ -107,7 +106,7 @@ ConditionWhen::~ConditionWhen() {
     }
 }
 
-static ConditionWhen::Type required_condition_type(path_value x) {
+FIELD_READER(ConditionWhen::Type) {
     return required_enum<ConditionWhen::Type>(
             x, {{"autopilot", ConditionWhen::Type::AUTOPILOT},
                 {"building", ConditionWhen::Type::BUILDING},
@@ -127,9 +126,8 @@ static ConditionWhen::Type required_condition_type(path_value x) {
                 {"time", ConditionWhen::Type::TIME},
                 {"zoom", ConditionWhen::Type::ZOOM}});
 }
-DEFAULT_READER(ConditionWhen::Type, required_condition_type);
 
-static ConditionOp required_condition_op(path_value x) {
+FIELD_READER(ConditionOp) {
     return required_enum<ConditionOp>(
             x, {{"eq", ConditionOp::EQ},
                 {"ne", ConditionOp::NE},
@@ -138,12 +136,10 @@ static ConditionOp required_condition_op(path_value x) {
                 {"le", ConditionOp::LE},
                 {"ge", ConditionOp::GE}});
 }
-DEFAULT_READER(ConditionOp, required_condition_op);
 
-static ConditionEqOp required_condition_eq_op(path_value x) {
+FIELD_READER(ConditionEqOp) {
     return required_enum<ConditionEqOp>(x, {{"eq", ConditionEqOp::EQ}, {"ne", ConditionEqOp::NE}});
 }
-DEFAULT_READER(ConditionEqOp, required_condition_eq_op);
 
 static ConditionWhen autopilot_condition(path_value x) {
     return required_struct<AutopilotCondition>(
@@ -285,7 +281,7 @@ static ConditionWhen zoom_condition(path_value x) {
                 {"value", &ZoomCondition::value}});
 }
 
-static ConditionWhen when(path_value x) {
+DEFINE_FIELD_READER(ConditionWhen) {
     switch (required_object_type(x, read_field<ConditionType>)) {
         case ConditionWhen::Type::NONE: throw std::runtime_error("condition type none?");
         case ConditionWhen::Type::AUTOPILOT: return autopilot_condition(x);
@@ -308,7 +304,7 @@ static ConditionWhen when(path_value x) {
     }
 }
 
-Condition condition(path_value x) {
+DEFINE_FIELD_READER(Condition) {
     return required_struct<Condition>(
             x, {{"persistent", &Condition::persistent},
                 {"disabled", &Condition::disabled},
@@ -317,7 +313,5 @@ Condition condition(path_value x) {
                 {"object", &Condition::object},
                 {"action", &Condition::action}});
 }
-
-Condition field_reader<Condition>::read(path_value x) { return condition(x); }
 
 }  // namespace antares

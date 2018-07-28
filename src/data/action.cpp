@@ -185,7 +185,7 @@ static uint32_t optional_flags(path_value x, const std::map<pn::string_view, int
     }
 }
 
-static ActionBase::Filter::Attributes optional_object_attributes(path_value x) {
+FIELD_READER(ActionBase::Filter::Attributes) {
     ActionBase::Filter::Attributes attributes;
     attributes.bits = optional_flags(
             x, {{"can_be_engaged", 1},
@@ -211,26 +211,23 @@ static ActionBase::Filter::Attributes optional_object_attributes(path_value x) {
                 {"appear_on_radar", 29}});
     return attributes;
 }
-DEFAULT_READER(ActionBase::Filter::Attributes, optional_object_attributes);
 
-static ActionBase::Filter optional_action_filter(path_value x) {
+FIELD_READER(ActionBase::Filter) {
     return optional_struct<ActionBase::Filter>(
                    x, {{"attributes", &ActionBase::Filter::attributes},
                        {"tags", &ActionBase::Filter::tags},
                        {"owner", &ActionBase::Filter::owner}})
             .value_or(ActionBase::Filter{});
 }
-DEFAULT_READER(ActionBase::Filter, optional_action_filter);
 
-static ActionBase::Override optional_action_override(path_value x) {
+FIELD_READER(ActionBase::Override) {
     return optional_struct<ActionBase::Override>(
                    x, {{"subject", &ActionBase::Override::subject},
                        {"object", &ActionBase::Override::object}})
             .value_or(ActionBase::Override{});
 }
-DEFAULT_READER(ActionBase::Override, optional_action_override);
 
-static Action::Type required_action_type(path_value x) {
+FIELD_READER(Action::Type) {
     return required_enum<Action::Type>(
             x, {{"age", Action::Type::AGE},
                 {"assume", Action::Type::ASSUME},
@@ -269,13 +266,11 @@ static Action::Type required_action_type(path_value x) {
                 {"win", Action::Type::WIN},
                 {"zoom", Action::Type::ZOOM}});
 }
-DEFAULT_READER(Action::Type, required_action_type);
 
-static Within required_within(path_value x) {
+FIELD_READER(Within) {
     return optional_enum<Within>(x, {{"circle", Within::CIRCLE}, {"square", Within::SQUARE}})
             .value_or(Within::CIRCLE);
 }
-DEFAULT_READER(Within, required_within);
 
 static Action age_action(path_value x) {
     return required_struct<AgeAction>(
@@ -342,11 +337,10 @@ static Action energize_action(path_value x) {
             x, {COMMON_ACTION_FIELDS, {"value", &EnergizeAction::value}});
 }
 
-static Weapon required_weapon(path_value x) {
+FIELD_READER(Weapon) {
     return required_enum<Weapon>(
             x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});
 }
-DEFAULT_READER(Weapon, required_weapon);
 
 static Action equip_action(path_value x) {
     return required_struct<EquipAction>(
@@ -373,7 +367,7 @@ static Action hold_action(path_value x) {
     return required_struct<HoldAction>(x, {COMMON_ACTION_FIELDS});
 }
 
-static KeyAction::Key required_key(path_value x) {
+FIELD_READER(KeyAction::Key) {
     return required_enum<KeyAction::Key>(
             x, {{"up", KeyAction::Key::UP},
                 {"down", KeyAction::Key::DOWN},
@@ -402,7 +396,6 @@ static KeyAction::Key required_key(path_value x) {
                 {"send_message", KeyAction::Key::SEND_MESSAGE},
                 {"mouse", KeyAction::Key::MOUSE}});
 }
-DEFAULT_READER(KeyAction::Key, required_key);
 
 static Action key_action(path_value x) {
     return required_struct<KeyAction>(
@@ -411,13 +404,12 @@ static Action key_action(path_value x) {
                 {"disable", &KeyAction::disable}});
 }
 
-static KillAction::Kind required_kill_kind(path_value x) {
+FIELD_READER(KillAction::Kind) {
     return required_enum<KillAction::Kind>(
             x, {{"none", KillAction::Kind::NONE},
                 {"expire", KillAction::Kind::EXPIRE},
                 {"destroy", KillAction::Kind::DESTROY}});
 }
-DEFAULT_READER(KillAction::Kind, required_kill_kind);
 
 static Action kill_action(path_value x) {
     return required_struct<KillAction>(x, {COMMON_ACTION_FIELDS, {"kind", &KillAction::kind}});
@@ -440,22 +432,20 @@ static Action morph_action(path_value x) {
                 {"keep_ammo", &MorphAction::keep_ammo}});
 }
 
-static sfz::optional<coordPointType> optional_coord_point(path_value x) {
+FIELD_READER(sfz::optional<coordPointType>) {
     auto p = read_field<sfz::optional<Point>>(x);
     if (!p.has_value()) {
         return sfz::nullopt;
     }
     return sfz::make_optional(coordPointType{(uint32_t)p->h, (uint32_t)p->v});
 }
-DEFAULT_READER(sfz::optional<coordPointType>, optional_coord_point);
 
-static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
+FIELD_READER(sfz::optional<MoveAction::Origin>) {
     return optional_enum<MoveAction::Origin>(
             x, {{"level", MoveAction::Origin::LEVEL},
                 {"subject", MoveAction::Origin::SUBJECT},
                 {"object", MoveAction::Origin::OBJECT}});
 }
-DEFAULT_READER(sfz::optional<MoveAction::Origin>, optional_origin);
 
 static Action move_action(path_value x) {
     return required_struct<MoveAction>(
@@ -481,7 +471,7 @@ static Action pay_action(path_value x) {
             {COMMON_ACTION_FIELDS, {"value", &PayAction::value}, {"player", &PayAction::player}});
 }
 
-static PushAction::Kind required_push_kind(path_value x) {
+FIELD_READER(PushAction::Kind) {
     return required_enum<PushAction::Kind>(
             x, {{"collide", PushAction::Kind::COLLIDE},
                 {"decelerate", PushAction::Kind::DECELERATE},
@@ -489,7 +479,6 @@ static PushAction::Kind required_push_kind(path_value x) {
                 {"set", PushAction::Kind::SET},
                 {"cruise", PushAction::Kind::CRUISE}});
 }
-DEFAULT_READER(PushAction::Kind, required_push_kind);
 
 static Action push_action(path_value x) {
     return required_struct<PushAction>(
@@ -516,16 +505,14 @@ static Action select_action(path_value x) {
                 {"line", &SelectAction::line}});
 }
 
-static PlayAction::Sound required_sound(path_value x) {
+FIELD_READER(PlayAction::Sound) {
     return required_struct<PlayAction::Sound>(x, {{"sound", &PlayAction::Sound::sound}});
 }
-DEFAULT_READER(PlayAction::Sound, required_sound);
 
-static PlayAction::Priority required_sound_priority(path_value x) {
+FIELD_READER(PlayAction::Priority) {
     int level = required_int(x, {0, 6});
     return PlayAction::Priority{level};
 }
-DEFAULT_READER(PlayAction::Priority, required_sound_priority);
 
 static Action play_action(path_value x) {
     return required_struct<PlayAction>(
@@ -572,7 +559,7 @@ static Action zoom_action(path_value x) {
     return required_struct<ZoomAction>(x, {COMMON_ACTION_FIELDS, {"value", &ZoomAction::value}});
 }
 
-Action action(path_value x) {
+DEFINE_FIELD_READER(Action) {
     switch (required_object_type(x, read_field<Action::Type>)) {
         case Action::Type::AGE: return age_action(x);
         case Action::Type::ASSUME: return assume_action(x);
@@ -612,7 +599,5 @@ Action action(path_value x) {
         case Action::Type::ZOOM: return zoom_action(x);
     }
 }
-
-Action field_reader<Action>::read(path_value x) { return action(x); }
 
 }  // namespace antares

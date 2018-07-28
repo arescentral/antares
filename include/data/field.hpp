@@ -74,60 +74,81 @@ class path_value {
     pn::value_cref    _value;
 };
 
-sfz::optional<bool> optional_bool(path_value x);
-bool                required_bool(path_value x);
+template <typename T>
+struct field_reader;
 
-sfz::optional<int64_t> optional_int(path_value x);
-int64_t                required_int(path_value x);
+template <typename T>
+T read_field(path_value x) {
+    return field_reader<T>::read(x);
+}
+
+#define DECLARE_FIELD_READER(T)      \
+    template <>                      \
+    struct field_reader<T> {         \
+        static T read(path_value x); \
+    }
+
+#define DEFINE_FIELD_READER(T) T field_reader<T>::read(path_value x)
+
+#define FIELD_READER(T)      \
+    DECLARE_FIELD_READER(T); \
+    DEFINE_FIELD_READER(T)
+
+DECLARE_FIELD_READER(bool);
+DECLARE_FIELD_READER(sfz::optional<bool>);
+DECLARE_FIELD_READER(int64_t);
+DECLARE_FIELD_READER(sfz::optional<int64_t>);
+DECLARE_FIELD_READER(uint8_t);
+DECLARE_FIELD_READER(int32_t);
+
 sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<int64_t>& ranges);
 int64_t                required_int(path_value x, const std::initializer_list<int64_t>& ranges);
 
-double required_double(path_value x);
+DECLARE_FIELD_READER(double);
+DECLARE_FIELD_READER(Fixed);
+DECLARE_FIELD_READER(sfz::optional<Fixed>);
 
-sfz::optional<Fixed> optional_fixed(path_value x);
-Fixed                required_fixed(path_value x);
+DECLARE_FIELD_READER(pn::string_view);
+DECLARE_FIELD_READER(sfz::optional<pn::string_view>);
+DECLARE_FIELD_READER(pn::string);
+DECLARE_FIELD_READER(sfz::optional<pn::string>);
 
-sfz::optional<pn::string_view> optional_string(path_value x);
-sfz::optional<pn::string>      optional_string_copy(path_value x);
-pn::string_view                required_string(path_value x);
-pn::string                     required_string_copy(path_value x);
+DECLARE_FIELD_READER(sfz::optional<ticks>);
+DECLARE_FIELD_READER(ticks);
+DECLARE_FIELD_READER(sfz::optional<secs>);
 
-sfz::optional<ticks> optional_ticks(path_value x);
-ticks                required_ticks(path_value x);
-sfz::optional<secs>  optional_secs(path_value x);
+DECLARE_FIELD_READER(Tags);
 
-Tags optional_tags(path_value x);
+DECLARE_FIELD_READER(sfz::optional<Handle<Admiral>>);
+DECLARE_FIELD_READER(Handle<Admiral>);
+DECLARE_FIELD_READER(NamedHandle<const BaseObject>);
+DECLARE_FIELD_READER(sfz::optional<Handle<const Initial>>);
+DECLARE_FIELD_READER(Handle<const Initial>);
+DECLARE_FIELD_READER(Handle<const Condition>);
+DECLARE_FIELD_READER(sfz::optional<NamedHandle<const Level>>);
+DECLARE_FIELD_READER(sfz::optional<Owner>);
+DECLARE_FIELD_READER(Owner);
+DECLARE_FIELD_READER(NamedHandle<const Race>);
 
-sfz::optional<Handle<Admiral>>          optional_admiral(path_value x);
-Handle<Admiral>                         required_admiral(path_value x);
-NamedHandle<const BaseObject>           required_base(path_value x);
-sfz::optional<Handle<const Initial>>    optional_initial(path_value x);
-Handle<const Initial>                   required_initial(path_value x);
-Handle<const Condition>                 required_condition(path_value x);
-sfz::optional<NamedHandle<const Level>> optional_level(path_value x);
-sfz::optional<Owner>                    optional_owner(path_value x);
-Owner                                   required_owner(path_value x);
-NamedHandle<const Race>                 required_race(path_value x);
+DECLARE_FIELD_READER(sfz::optional<Range<int64_t>>);
+DECLARE_FIELD_READER(Range<int64_t>);
+DECLARE_FIELD_READER(sfz::optional<Range<Fixed>>);
+DECLARE_FIELD_READER(Range<Fixed>);
+DECLARE_FIELD_READER(sfz::optional<Range<ticks>>);
+DECLARE_FIELD_READER(Range<ticks>);
 
-sfz::optional<Range<int64_t>> optional_int_range(path_value x);
-Range<int64_t>                required_int_range(path_value x);
-sfz::optional<Range<Fixed>>   optional_fixed_range(path_value x);
-Range<Fixed>                  required_fixed_range(path_value x);
-sfz::optional<Range<ticks>>   optional_ticks_range(path_value x);
-Range<ticks>                  required_ticks_range(path_value x);
+DECLARE_FIELD_READER(sfz::optional<Point>);
+DECLARE_FIELD_READER(Point);
+DECLARE_FIELD_READER(sfz::optional<Rect>);
+DECLARE_FIELD_READER(Rect);
 
-sfz::optional<Point> optional_point(path_value x);
-Point                required_point(path_value x);
-sfz::optional<Rect>  optional_rect(path_value x);
-Rect                 required_rect(path_value x);
+DECLARE_FIELD_READER(sfz::optional<RgbColor>);
+DECLARE_FIELD_READER(RgbColor);
 
-sfz::optional<RgbColor> optional_color(path_value x);
-RgbColor                required_color(path_value x);
-
-sfz::optional<Hue> optional_hue(path_value x);
-Hue                required_hue(path_value x);
-Screen             required_screen(path_value x);
-Zoom               required_zoom(path_value x);
+DECLARE_FIELD_READER(sfz::optional<Hue>);
+DECLARE_FIELD_READER(Hue);
+DECLARE_FIELD_READER(Screen);
+DECLARE_FIELD_READER(Zoom);
 
 template <typename T, int N>
 sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
@@ -176,62 +197,6 @@ T required_object_type(path_value x, T (*get_type)(path_value x)) {
     }
     return get_type(x.get("type"));
 }
-
-template <typename T>
-struct field_reader;
-
-template <typename T>
-T read_field(path_value x) {
-    return field_reader<T>::read(x);
-}
-
-#define DEFAULT_READER(T, FN)                         \
-    template <>                                       \
-    struct field_reader<T> {                          \
-        static T read(path_value x) { return FN(x); } \
-    }
-
-DEFAULT_READER(bool, required_bool);
-DEFAULT_READER(sfz::optional<bool>, optional_bool);
-DEFAULT_READER(int64_t, required_int);
-DEFAULT_READER(sfz::optional<int64_t>, optional_int);
-DEFAULT_READER(double, required_double);
-DEFAULT_READER(Fixed, required_fixed);
-DEFAULT_READER(sfz::optional<Fixed>, optional_fixed);
-DEFAULT_READER(sfz::optional<pn::string_view>, optional_string);
-DEFAULT_READER(sfz::optional<pn::string>, optional_string_copy);
-DEFAULT_READER(pn::string_view, required_string);
-DEFAULT_READER(pn::string, required_string_copy);
-DEFAULT_READER(sfz::optional<ticks>, optional_ticks);
-DEFAULT_READER(ticks, required_ticks);
-DEFAULT_READER(sfz::optional<secs>, optional_secs);
-DEFAULT_READER(Tags, optional_tags);
-DEFAULT_READER(sfz::optional<Handle<Admiral>>, optional_admiral);
-DEFAULT_READER(Handle<Admiral>, required_admiral);
-DEFAULT_READER(NamedHandle<const BaseObject>, required_base);
-DEFAULT_READER(sfz::optional<Handle<const Initial>>, optional_initial);
-DEFAULT_READER(Handle<const Initial>, required_initial);
-DEFAULT_READER(Handle<const Condition>, required_condition);
-DEFAULT_READER(sfz::optional<NamedHandle<const Level>>, optional_level);
-DEFAULT_READER(sfz::optional<Owner>, optional_owner);
-DEFAULT_READER(Owner, required_owner);
-DEFAULT_READER(NamedHandle<const Race>, required_race);
-DEFAULT_READER(sfz::optional<Range<int64_t>>, optional_int_range);
-DEFAULT_READER(Range<int64_t>, required_int_range);
-DEFAULT_READER(sfz::optional<Range<Fixed>>, optional_fixed_range);
-DEFAULT_READER(Range<Fixed>, required_fixed_range);
-DEFAULT_READER(sfz::optional<Range<ticks>>, optional_ticks_range);
-DEFAULT_READER(Range<ticks>, required_ticks_range);
-DEFAULT_READER(sfz::optional<Point>, optional_point);
-DEFAULT_READER(Point, required_point);
-DEFAULT_READER(sfz::optional<Rect>, optional_rect);
-DEFAULT_READER(Rect, required_rect);
-DEFAULT_READER(sfz::optional<RgbColor>, optional_color);
-DEFAULT_READER(RgbColor, required_color);
-DEFAULT_READER(sfz::optional<Hue>, optional_hue);
-DEFAULT_READER(Hue, required_hue);
-DEFAULT_READER(Screen, required_screen);
-DEFAULT_READER(Zoom, required_zoom);
 
 template <typename T>
 struct field {

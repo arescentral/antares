@@ -66,7 +66,7 @@ pn::value_cref path_value::array_get(pn::array_cref a, int64_t index) {
     }
 }
 
-sfz::optional<bool> optional_bool(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<bool>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_bool()) {
@@ -76,7 +76,7 @@ sfz::optional<bool> optional_bool(path_value x) {
     }
 }
 
-bool required_bool(path_value x) {
+DEFINE_FIELD_READER(bool) {
     if (x.value().is_bool()) {
         return x.value().as_bool();
     } else {
@@ -84,7 +84,7 @@ bool required_bool(path_value x) {
     }
 }
 
-sfz::optional<int64_t> optional_int(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<int64_t>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_int()) {
@@ -94,7 +94,7 @@ sfz::optional<int64_t> optional_int(path_value x) {
     }
 }
 
-int64_t required_int(path_value x) {
+DEFINE_FIELD_READER(int64_t) {
     if (x.value().is_int()) {
         return x.value().as_int();
     } else {
@@ -154,7 +154,7 @@ int64_t required_int(path_value x, const std::initializer_list<int64_t>& ranges)
     return i;
 }
 
-double required_double(path_value x) {
+DEFINE_FIELD_READER(double) {
     if (x.value().is_number()) {
         return x.value().as_number();
     } else {
@@ -162,7 +162,7 @@ double required_double(path_value x) {
     }
 }
 
-sfz::optional<Fixed> optional_fixed(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Fixed>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_number()) {
@@ -172,7 +172,7 @@ sfz::optional<Fixed> optional_fixed(path_value x) {
     }
 }
 
-Fixed required_fixed(path_value x) {
+DEFINE_FIELD_READER(Fixed) {
     if (x.value().is_number()) {
         return Fixed::from_float(x.value().as_number());
     } else {
@@ -180,7 +180,7 @@ Fixed required_fixed(path_value x) {
     }
 }
 
-sfz::optional<pn::string_view> optional_string(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<pn::string_view>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_string()) {
@@ -190,7 +190,7 @@ sfz::optional<pn::string_view> optional_string(path_value x) {
     }
 }
 
-sfz::optional<pn::string> optional_string_copy(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<pn::string>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_string()) {
@@ -200,13 +200,15 @@ sfz::optional<pn::string> optional_string_copy(path_value x) {
     }
 }
 
-pn::string_view required_string(path_value x) {
+DEFINE_FIELD_READER(pn::string_view) {
     if (x.value().is_string()) {
         return x.value().as_string();
     } else {
         throw std::runtime_error(pn::format("{0}: must be string", x.path()).c_str());
     }
 }
+
+DEFINE_FIELD_READER(pn::string) { return read_field<pn::string_view>(x).copy(); }
 
 static ticks parse_ticks(path_value x, pn::string_view s) {
     try {
@@ -322,7 +324,7 @@ static secs parse_secs(path_value x, pn::string_view s) {
     return ss;
 }
 
-sfz::optional<ticks> optional_ticks(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<ticks>) {
     auto s = read_field<sfz::optional<pn::string_view>>(x);
     if (s.has_value()) {
         return sfz::make_optional(parse_ticks(x, *s));
@@ -331,9 +333,9 @@ sfz::optional<ticks> optional_ticks(path_value x) {
     }
 }
 
-ticks required_ticks(path_value x) { return parse_ticks(x, read_field<pn::string_view>(x)); }
+DEFINE_FIELD_READER(ticks) { return parse_ticks(x, read_field<pn::string_view>(x)); }
 
-sfz::optional<secs> optional_secs(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<secs>) {
     auto s = read_field<sfz::optional<pn::string_view>>(x);
     if (s.has_value()) {
         return sfz::make_optional(parse_secs(x, *s));
@@ -342,7 +344,7 @@ sfz::optional<secs> optional_secs(path_value x) {
     }
 }
 
-Tags optional_tags(path_value x) {
+DEFINE_FIELD_READER(Tags) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_map()) {
@@ -360,7 +362,7 @@ Tags optional_tags(path_value x) {
     }
 }
 
-sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Handle<Admiral>>) {
     auto i = read_field<sfz::optional<int64_t>>(x);
     if (i.has_value()) {
         return sfz::make_optional(Handle<Admiral>(*i));
@@ -369,13 +371,13 @@ sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
     }
 }
 
-Handle<Admiral> required_admiral(path_value x) { return Handle<Admiral>(read_field<int64_t>(x)); }
+DEFINE_FIELD_READER(Handle<Admiral>) { return Handle<Admiral>(read_field<int64_t>(x)); }
 
-NamedHandle<const BaseObject> required_base(path_value x) {
+DEFINE_FIELD_READER(NamedHandle<const BaseObject>) {
     return NamedHandle<const BaseObject>(read_field<pn::string_view>(x));
 }
 
-sfz::optional<Handle<const Initial>> optional_initial(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Handle<const Initial>>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_int()) {
@@ -385,7 +387,7 @@ sfz::optional<Handle<const Initial>> optional_initial(path_value x) {
     }
 }
 
-Handle<const Initial> required_initial(path_value x) {
+DEFINE_FIELD_READER(Handle<const Initial>) {
     if (x.value().is_int()) {
         return Handle<const Initial>(x.value().as_int());
     } else {
@@ -393,11 +395,11 @@ Handle<const Initial> required_initial(path_value x) {
     }
 }
 
-Handle<const Condition> required_condition(path_value x) {
+DEFINE_FIELD_READER(Handle<const Condition>) {
     return Handle<const Condition>(read_field<int64_t>(x));
 }
 
-sfz::optional<NamedHandle<const Level>> optional_level(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<NamedHandle<const Level>>) {
     auto s = read_field<sfz::optional<pn::string_view>>(x);
     if (s.has_value()) {
         return sfz::make_optional(NamedHandle<const Level>(*s));
@@ -406,16 +408,16 @@ sfz::optional<NamedHandle<const Level>> optional_level(path_value x) {
     }
 }
 
-sfz::optional<Owner> optional_owner(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Owner>) {
     return optional_enum<Owner>(
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
 
-NamedHandle<const Race> required_race(path_value x) {
+DEFINE_FIELD_READER(NamedHandle<const Race>) {
     return NamedHandle<const Race>(read_field<pn::string_view>(x));
 }
 
-Owner required_owner(path_value x) {
+DEFINE_FIELD_READER(Owner) {
     return required_enum<Owner>(
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
@@ -429,7 +431,7 @@ std::pair<T, T> range(path_value x) {
     return {p.begin, p.end};
 }
 
-sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Range<int64_t>>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_int()) {
@@ -443,7 +445,7 @@ sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
     }
 }
 
-Range<int64_t> required_int_range(path_value x) {
+DEFINE_FIELD_READER(Range<int64_t>) {
     if (x.value().is_int()) {
         int64_t begin = x.value().as_int();
         return Range<int64_t>{begin, begin + 1};
@@ -455,7 +457,7 @@ Range<int64_t> required_int_range(path_value x) {
     }
 }
 
-sfz::optional<Range<Fixed>> optional_fixed_range(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Range<Fixed>>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_float()) {
@@ -470,7 +472,7 @@ sfz::optional<Range<Fixed>> optional_fixed_range(path_value x) {
     }
 }
 
-Range<Fixed> required_fixed_range(path_value x) {
+DEFINE_FIELD_READER(Range<Fixed>) {
     if (x.value().is_float()) {
         Fixed begin = Fixed::from_float(x.value().as_float());
         Fixed end   = Fixed::from_val(begin.val() + 1);
@@ -483,7 +485,7 @@ Range<Fixed> required_fixed_range(path_value x) {
     }
 }
 
-sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Range<ticks>>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_string()) {
@@ -497,7 +499,7 @@ sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
     }
 }
 
-Range<ticks> required_ticks_range(path_value x) {
+DEFINE_FIELD_READER(Range<ticks>) {
     if (x.value().is_int()) {
         ticks begin = read_field<ticks>(x);
         return Range<ticks>{begin, begin + ticks{1}};
@@ -509,20 +511,17 @@ Range<ticks> required_ticks_range(path_value x) {
     }
 }
 
-static int32_t required_int32(path_value x) {
-    return required_int(x, {-0x80000000ll, 0x80000000ll});
-}
-DEFAULT_READER(int32_t, required_int32);
+DEFINE_FIELD_READER(int32_t) { return required_int(x, {-0x80000000ll, 0x80000000ll}); }
 
-sfz::optional<Point> optional_point(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Point>) {
     return optional_struct<Point>(x, {{"x", &Point::h}, {"y", &Point::v}});
 }
 
-Point required_point(path_value x) {
+DEFINE_FIELD_READER(Point) {
     return required_struct<Point>(x, {{"x", &Point::h}, {"y", &Point::v}});
 }
 
-sfz::optional<Rect> optional_rect(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Rect>) {
     return optional_struct<Rect>(
             x, {{"left", &Rect::left},
                 {"top", &Rect::top},
@@ -530,7 +529,7 @@ sfz::optional<Rect> optional_rect(path_value x) {
                 {"bottom", &Rect::bottom}});
 }
 
-Rect required_rect(path_value x) {
+DEFINE_FIELD_READER(Rect) {
     return required_struct<Rect>(
             x, {{"left", &Rect::left},
                 {"top", &Rect::top},
@@ -538,7 +537,7 @@ Rect required_rect(path_value x) {
                 {"bottom", &Rect::bottom}});
 }
 
-sfz::optional<RgbColor> optional_color(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<RgbColor>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_map()) {
@@ -548,14 +547,7 @@ sfz::optional<RgbColor> optional_color(path_value x) {
     }
 }
 
-static uint8_t required_uint8(path_value x) { return required_int(x, {0, 256}); }
-DEFAULT_READER(uint8_t, required_uint8);
-
-static sfz::optional<uint8_t> optional_uint8(path_value x) {
-    auto i = optional_int(x, {0, 256});
-    return i.has_value() ? sfz::make_optional<uint8_t>(*i) : sfz::nullopt;
-}
-DEFAULT_READER(sfz::optional<uint8_t>, optional_uint8);
+DEFINE_FIELD_READER(uint8_t) { return required_int(x, {0, 256}); }
 
 static bool is_rgb(pn::map_cref m) {
     return (m.size() == 3) && m.has("r") && m.has("g") && m.has("b");
@@ -565,7 +557,7 @@ static bool is_rgba(pn::map_cref m) {
     return (m.size() == 4) && m.has("r") && m.has("g") && m.has("b") && m.has("a");
 }
 
-RgbColor required_color(path_value x) {
+DEFINE_FIELD_READER(RgbColor) {
     if (x.value().is_map()) {
         const pn::map_cref m = x.value().as_map();
         if (is_rgba(m)) {
@@ -591,7 +583,7 @@ RgbColor required_color(path_value x) {
     throw std::runtime_error(pn::format("{0}must be color", x.prefix()).c_str());
 }
 
-sfz::optional<Hue> optional_hue(path_value x) {
+DEFINE_FIELD_READER(sfz::optional<Hue>) {
     return optional_enum<Hue>(
             x, {{"red", Hue::RED},
                 {"orange", Hue::ORANGE},
@@ -611,7 +603,7 @@ sfz::optional<Hue> optional_hue(path_value x) {
                 {"gray", Hue::GRAY}});
 }
 
-Hue required_hue(path_value x) {
+DEFINE_FIELD_READER(Hue) {
     return required_enum<Hue>(
             x, {{"red", Hue::RED},
                 {"orange", Hue::ORANGE},
@@ -631,7 +623,7 @@ Hue required_hue(path_value x) {
                 {"gray", Hue::GRAY}});
 }
 
-Screen required_screen(path_value x) {
+DEFINE_FIELD_READER(Screen) {
     return required_enum<Screen>(
             x, {{"main", Screen::MAIN},
                 {"build", Screen::BUILD},
@@ -640,7 +632,7 @@ Screen required_screen(path_value x) {
                 {"status", Screen::STATUS}});
 }
 
-Zoom required_zoom(path_value x) {
+DEFINE_FIELD_READER(Zoom) {
     return required_enum<Zoom>(
             x, {{"2:1", Zoom::DOUBLE},
                 {"1:1", Zoom::ACTUAL},
@@ -651,8 +643,6 @@ Zoom required_zoom(path_value x) {
                 {"object", Zoom::OBJECT},
                 {"all", Zoom::ALL}});
 }
-
-pn::string required_string_copy(path_value x) { return read_field<pn::string_view>(x).copy(); }
 
 }  // namespace antares
 

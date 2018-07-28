@@ -25,12 +25,10 @@
 
 namespace antares {
 
-Distance required_distance(path_value x) {
+DEFINE_FIELD_READER(Distance) {
     double  d = read_field<double>(x);
     int64_t u = floor(pow(d, 2));
     return Distance{u};
 }
-
-Distance field_reader<Distance>::read(path_value x) { return required_distance(x); }
 
 }  // namespace antares

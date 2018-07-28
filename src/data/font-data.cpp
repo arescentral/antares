@@ -22,7 +22,7 @@
 
 namespace antares {
 
-static FontData::Glyphs required_glyphs(path_value x) {
+FIELD_READER(FontData::Glyphs) {
     if (x.value().is_map()) {
         FontData::Glyphs glyphs;
         for (pn::key_value_cref kv : x.value().as_map()) {
@@ -35,7 +35,6 @@ static FontData::Glyphs required_glyphs(path_value x) {
         throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
     }
 }
-DEFAULT_READER(FontData::Glyphs, required_glyphs);
 
 FontData font_data(pn::value_cref x) {
     return required_struct<FontData>(

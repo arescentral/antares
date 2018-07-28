@@ -35,7 +35,7 @@ static bool valid_sha1(pn::string_view s) {
     return true;
 }
 
-static Info::Identifier optional_identifier(path_value x) {
+FIELD_READER(Info::Identifier) {
     auto id = read_field<sfz::optional<pn::string_view>>(x);
     if (id.has_value() && !valid_sha1(*id)) {
         throw std::runtime_error(
@@ -44,7 +44,6 @@ static Info::Identifier optional_identifier(path_value x) {
     }
     return {id.has_value() ? id->copy() : ""};
 }
-DEFAULT_READER(Info::Identifier, optional_identifier);
 
 static Info fill_identifier(Info info) {
     if (!info.identifier.hash.empty()) {

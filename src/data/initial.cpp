@@ -22,14 +22,11 @@
 
 namespace antares {
 
-static BuildableObject required_buildable_object(path_value x) {
-    return BuildableObject{read_field<pn::string>(x)};
-}
-DEFAULT_READER(BuildableObject, required_buildable_object);
+FIELD_READER(BuildableObject) { return BuildableObject{read_field<pn::string>(x)}; }
 
-static std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
+FIELD_READER(std::vector<BuildableObject>) {
     std::vector<BuildableObject> objects =
-            optional_array<BuildableObject, required_buildable_object>(x);
+            optional_array<BuildableObject, read_field<BuildableObject>>(x);
     if (objects.size() > kMaxShipCanBuild) {
         throw std::runtime_error(pn::format(
                                          "{0}has {1} elements, more than max of {2}", x.prefix(),
@@ -38,23 +35,20 @@ static std::vector<BuildableObject> optional_buildable_object_array(path_value x
     }
     return objects;
 }
-DEFAULT_READER(std::vector<BuildableObject>, optional_buildable_object_array);
 
-static Initial::Override optional_override(path_value x) {
+FIELD_READER(Initial::Override) {
     return optional_struct<Initial::Override>(
                    x, {{"name", &Initial::Override::name}, {"sprite", &Initial::Override::sprite}})
             .value_or(Initial::Override{});
 }
-DEFAULT_READER(Initial::Override, optional_override);
 
-static Initial::Target optional_target(path_value x) {
+FIELD_READER(Initial::Target) {
     return optional_struct<Initial::Target>(
                    x, {{"initial", &Initial::Target::initial}, {"lock", &Initial::Target::lock}})
             .value_or(Initial::Target{});
 }
-DEFAULT_READER(Initial::Target, optional_target);
 
-Initial initial(path_value x) {
+DEFINE_FIELD_READER(Initial) {
     return required_struct<Initial>(
             x, {{"base", &Initial::base},
                 {"owner", &Initial::owner},
@@ -66,7 +60,5 @@ Initial initial(path_value x) {
                 {"target", &Initial::target},
                 {"build", &Initial::build}});
 }
-
-Initial field_reader<Initial>::read(path_value x) { return initial(x); }
 
 }  // namespace antares

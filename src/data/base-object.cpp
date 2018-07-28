@@ -24,38 +24,22 @@
 
 namespace antares {
 
-static int32_t required_int32(path_value x) {
-    return required_int(x, {-0x80000000ll, 0x80000000ll});
-}
-DEFAULT_READER(int32_t, required_int32);
-
-static uint8_t required_uint8(path_value x) { return required_int(x, {0, 0x100}); }
-DEFAULT_READER(uint8_t, required_uint8);
-
-static fixedPointType required_fixed_point(path_value x) {
+FIELD_READER(fixedPointType) {
     return required_struct<fixedPointType>(
             x, {{"x", &fixedPointType::h}, {"y", &fixedPointType::v}});
 }
-DEFAULT_READER(fixedPointType, required_fixed_point);
 
-static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
+FIELD_READER(sfz::optional<BaseObject::Weapon>) {
     return optional_struct<BaseObject::Weapon>(
             x,
             {{"base", &BaseObject::Weapon::base}, {"positions", &BaseObject::Weapon::positions}});
 }
-DEFAULT_READER(sfz::optional<BaseObject::Weapon>, optional_weapon);
 
-static BaseObject::Layer required_layer(path_value x) {
-    return static_cast<BaseObject::Layer>(required_int(x, {1, 4}));
-}
-DEFAULT_READER(BaseObject::Layer, required_layer);
+FIELD_READER(BaseObject::Layer) { return static_cast<BaseObject::Layer>(required_int(x, {1, 4})); }
 
-static BaseObject::Scale required_scale(path_value x) {
-    return BaseObject::Scale{read_field<Fixed>(x).val() << 4};
-}
-DEFAULT_READER(BaseObject::Scale, required_scale);
+FIELD_READER(BaseObject::Scale) { return BaseObject::Scale{read_field<Fixed>(x).val() << 4}; }
 
-static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
+FIELD_READER(sfz::optional<BaseObject::Rotation>) {
     using Rotation = BaseObject::Rotation;
     return optional_struct<Rotation>(
             x, {{"sprite", &Rotation::sprite},
@@ -63,9 +47,8 @@ static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x)
                 {"scale", &Rotation::scale},
                 {"frames", &Rotation::frames}});
 }
-DEFAULT_READER(sfz::optional<BaseObject::Rotation>, optional_rotation_frame);
 
-static BaseObject::Animation::Direction required_animation_direction(path_value x) {
+FIELD_READER(BaseObject::Animation::Direction) {
     using Direction = BaseObject::Animation::Direction;
     return required_enum<Direction>(
             x, {{"0", Direction::NONE},
@@ -73,9 +56,8 @@ static BaseObject::Animation::Direction required_animation_direction(path_value 
                 {"-", Direction::MINUS},
                 {"?", Direction::RANDOM}});
 }
-DEFAULT_READER(BaseObject::Animation::Direction, required_animation_direction);
 
-static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
+FIELD_READER(sfz::optional<BaseObject::Animation>) {
     using Animation = BaseObject::Animation;
     return optional_struct<Animation>(
             x, {{"sprite", &Animation::sprite},
@@ -86,15 +68,13 @@ static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value 
                 {"speed", &Animation::speed},
                 {"first", &Animation::first}});
 }
-DEFAULT_READER(sfz::optional<BaseObject::Animation>, optional_animation_frame);
 
-static BaseObject::Ray::To required_ray_to(path_value x) {
+FIELD_READER(BaseObject::Ray::To) {
     return required_enum<BaseObject::Ray::To>(
             x, {{"object", BaseObject::Ray::To::OBJECT}, {"coord", BaseObject::Ray::To::COORD}});
 }
-DEFAULT_READER(BaseObject::Ray::To, required_ray_to);
 
-static sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
+FIELD_READER(sfz::optional<BaseObject::Ray>) {
     using Ray = BaseObject::Ray;
     return optional_struct<Ray>(
             x, {
@@ -105,15 +85,13 @@ static sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
                        {"range", &Ray::range},
                });
 }
-DEFAULT_READER(sfz::optional<BaseObject::Ray>, optional_ray_frame);
 
-static sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
+FIELD_READER(sfz::optional<BaseObject::Bolt>) {
     using Bolt = BaseObject::Bolt;
     return optional_struct<Bolt>(x, {{"color", &Bolt::color}});
 }
-DEFAULT_READER(sfz::optional<BaseObject::Bolt>, optional_bolt_frame);
 
-static BaseObject::Device::Usage optional_usage(path_value x) {
+FIELD_READER(BaseObject::Device::Usage) {
     using Usage = BaseObject::Device::Usage;
     return optional_struct<Usage>(
                    x, {{"attacking", &Usage::attacking},
@@ -121,16 +99,14 @@ static BaseObject::Device::Usage optional_usage(path_value x) {
                        {"transportation", &Usage::transportation}})
             .value_or(Usage{});
 }
-DEFAULT_READER(BaseObject::Device::Usage, optional_usage);
 
-static BaseObject::Device::Direction required_device_direction(path_value x) {
+FIELD_READER(BaseObject::Device::Direction) {
     return required_enum<BaseObject::Device::Direction>(
             x, {{"fore", BaseObject::Device::Direction::FORE},
                 {"omni", BaseObject::Device::Direction::OMNI}});
 }
-DEFAULT_READER(BaseObject::Device::Direction, required_device_direction);
 
-static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
+FIELD_READER(sfz::optional<BaseObject::Device>) {
     using Device = BaseObject::Device;
     return optional_struct<Device>(
             x, {{"usage", &Device::usage},
@@ -142,9 +118,8 @@ static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
                 {"inverse_speed", &Device::inverseSpeed},
                 {"restock_cost", &Device::restockCost}});
 }
-DEFAULT_READER(sfz::optional<BaseObject::Device>, optional_device_frame);
 
-static BaseObject::Icon::Shape required_icon_shape(path_value x) {
+FIELD_READER(BaseObject::Icon::Shape) {
     using Shape = BaseObject::Icon::Shape;
     return required_enum<Shape>(
             x, {{"square", Shape::SQUARE},
@@ -152,15 +127,13 @@ static BaseObject::Icon::Shape required_icon_shape(path_value x) {
                 {"diamond", Shape::DIAMOND},
                 {"plus", Shape::PLUS}});
 }
-DEFAULT_READER(BaseObject::Icon::Shape, required_icon_shape);
 
-static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
+FIELD_READER(sfz::optional<BaseObject::Icon>) {
     return optional_struct<BaseObject::Icon>(
             x, {{"shape", &BaseObject::Icon::shape}, {"size", &BaseObject::Icon::size}});
 }
-DEFAULT_READER(sfz::optional<BaseObject::Icon>, optional_icon);
 
-static BaseObject::Targeting required_targeting(path_value x) {
+FIELD_READER(BaseObject::Targeting) {
     return required_struct<BaseObject::Targeting>(
             x, {{"base", &BaseObject::Targeting::base},
                 {"hide", &BaseObject::Targeting::hide},
@@ -169,16 +142,14 @@ static BaseObject::Targeting required_targeting(path_value x) {
                 {"select", &BaseObject::Targeting::select},
                 {"lock", &BaseObject::Targeting::lock}});
 }
-DEFAULT_READER(BaseObject::Targeting, required_targeting);
 
-static BaseObject::Loadout optional_loadout(path_value x) {
+FIELD_READER(BaseObject::Loadout) {
     return optional_struct<BaseObject::Loadout>(
                    x, {{"pulse", &BaseObject::Loadout::pulse},
                        {"beam", &BaseObject::Loadout::beam},
                        {"special", &BaseObject::Loadout::special}})
             .value_or(BaseObject::Loadout{});
 }
-DEFAULT_READER(BaseObject::Loadout, optional_loadout);
 
 static BaseObject set_attributes(BaseObject o) {
     if (((o.rotation.has_value() + o.animation.has_value() + o.ray.has_value() +
@@ -316,7 +287,7 @@ static BaseObject set_attributes(BaseObject o) {
     return o;
 }
 
-static BaseObject::Destroy optional_destroy(path_value x) {
+FIELD_READER(BaseObject::Destroy) {
     return optional_struct<BaseObject::Destroy>(
                    x, {{"die", &BaseObject::Destroy::die},
                        {"neutralize", &BaseObject::Destroy::neutralize},
@@ -324,32 +295,28 @@ static BaseObject::Destroy optional_destroy(path_value x) {
                        {"action", &BaseObject::Destroy::action}})
             .value_or(BaseObject::Destroy{});
 }
-DEFAULT_READER(BaseObject::Destroy, optional_destroy);
 
-static BaseObject::Expire::After optional_expire_after(path_value x) {
+FIELD_READER(BaseObject::Expire::After) {
     return optional_struct<BaseObject::Expire::After>(
                    x, {{"age", &BaseObject::Expire::After::age},
                        {"animation", &BaseObject::Expire::After::animation}})
             .value_or(BaseObject::Expire::After{});
 }
-DEFAULT_READER(BaseObject::Expire::After, optional_expire_after);
 
-static BaseObject::Expire optional_expire(path_value x) {
+FIELD_READER(BaseObject::Expire) {
     return optional_struct<BaseObject::Expire>(
                    x, {{"after", &BaseObject::Expire::after},
                        {"die", &BaseObject::Expire::die},
                        {"action", &BaseObject::Expire::action}})
             .value_or(BaseObject::Expire{});
 }
-DEFAULT_READER(BaseObject::Expire, optional_expire);
 
-static BaseObject::Create optional_create(path_value x) {
+FIELD_READER(BaseObject::Create) {
     return optional_struct<BaseObject::Create>(x, {{"action", &BaseObject::Create::action}})
             .value_or(BaseObject::Create{});
 }
-DEFAULT_READER(BaseObject::Create, optional_create);
 
-static BaseObject::Collide::As optional_collide_as(path_value x) {
+FIELD_READER(BaseObject::Collide::As) {
     return optional_struct<BaseObject::Collide::As>(
                    x,
                    {
@@ -358,9 +325,8 @@ static BaseObject::Collide::As optional_collide_as(path_value x) {
                    })
             .value_or(BaseObject::Collide::As{});
 }
-DEFAULT_READER(BaseObject::Collide::As, optional_collide_as);
 
-static BaseObject::Collide optional_collide(path_value x) {
+FIELD_READER(BaseObject::Collide) {
     return optional_struct<BaseObject::Collide>(
                    x, {{"as", &BaseObject::Collide::as},
                        {"damage", &BaseObject::Collide::damage},
@@ -369,32 +335,28 @@ static BaseObject::Collide optional_collide(path_value x) {
                        {"action", &BaseObject::Collide::action}})
             .value_or(BaseObject::Collide{});
 }
-DEFAULT_READER(BaseObject::Collide, optional_collide);
 
-static BaseObject::Activate optional_activate(path_value x) {
+FIELD_READER(BaseObject::Activate) {
     return optional_struct<BaseObject::Activate>(
                    x, {{"period", &BaseObject::Activate::period},
                        {"action", &BaseObject::Activate::action}})
             .value_or(BaseObject::Activate{});
 }
-DEFAULT_READER(BaseObject::Activate, optional_activate);
 
-static BaseObject::Arrive optional_arrive(path_value x) {
+FIELD_READER(BaseObject::Arrive) {
     return optional_struct<BaseObject::Arrive>(
                    x, {{"distance", &BaseObject::Arrive::distance},
                        {"action", &BaseObject::Arrive::action}})
             .value_or(BaseObject::Arrive{});
 }
-DEFAULT_READER(BaseObject::Arrive, optional_arrive);
 
-static BaseObject::AI::Combat::Skill optional_ai_combat_skill(path_value x) {
+FIELD_READER(BaseObject::AI::Combat::Skill) {
     using Skill = BaseObject::AI::Combat::Skill;
     return optional_struct<Skill>(x, {{"num", &Skill::num}, {"den", &Skill::den}})
             .value_or(Skill{});
 }
-DEFAULT_READER(BaseObject::AI::Combat::Skill, optional_ai_combat_skill);
 
-static BaseObject::AI::Combat optional_ai_combat(path_value x) {
+FIELD_READER(BaseObject::AI::Combat) {
     using Combat = BaseObject::AI::Combat;
     return optional_struct<Combat>(
                    x, {{"hated", &Combat::hated},
@@ -408,9 +370,8 @@ static BaseObject::AI::Combat optional_ai_combat(path_value x) {
                        {"skill", &Combat::skill}})
             .value_or(Combat{});
 }
-DEFAULT_READER(BaseObject::AI::Combat, optional_ai_combat);
 
-static BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
+FIELD_READER(BaseObject::AI::Target::Filter) {
     using Filter = BaseObject::AI::Target::Filter;
     return optional_struct<Filter>(
                    x, {{"base", &Filter::base},
@@ -419,16 +380,14 @@ static BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
                        {"tags", &Filter::tags}})
             .value_or(Filter{});
 }
-DEFAULT_READER(BaseObject::AI::Target::Filter, optional_ai_target_filter);
 
-static BaseObject::AI::Target optional_ai_target(path_value x) {
+FIELD_READER(BaseObject::AI::Target) {
     using Target = BaseObject::AI::Target;
     return optional_struct<Target>(x, {{"prefer", &Target::prefer}, {"force", &Target::force}})
             .value_or(Target{});
 }
-DEFAULT_READER(BaseObject::AI::Target, optional_ai_target);
 
-static BaseObject::AI::Escort optional_ai_escort(path_value x) {
+FIELD_READER(BaseObject::AI::Escort) {
     using Escort = BaseObject::AI::Escort;
     return optional_struct<Escort>(
                    x, {{"class", &Escort::class_},
@@ -436,9 +395,8 @@ static BaseObject::AI::Escort optional_ai_escort(path_value x) {
                        {"need", &Escort::need}})
             .value_or(Escort{});
 }
-DEFAULT_READER(BaseObject::AI::Escort, optional_ai_escort);
 
-static BaseObject::AI::Build optional_ai_build(path_value x) {
+FIELD_READER(BaseObject::AI::Build) {
     using Build = BaseObject::AI::Build;
     return optional_struct<Build>(
                    x, {{"ratio", &Build::ratio},
@@ -446,9 +404,8 @@ static BaseObject::AI::Build optional_ai_build(path_value x) {
                        {"legacy_non_builder", &Build::legacy_non_builder}})
             .value_or(Build{});
 }
-DEFAULT_READER(BaseObject::AI::Build, optional_ai_build);
 
-static BaseObject::AI optional_ai(path_value x) {
+FIELD_READER(BaseObject::AI) {
     return optional_struct<BaseObject::AI>(
                    x, {{"combat", &BaseObject::AI::combat},
                        {"target", &BaseObject::AI::target},
@@ -456,7 +413,6 @@ static BaseObject::AI optional_ai(path_value x) {
                        {"build", &BaseObject::AI::build}})
             .value_or(BaseObject::AI{});
 }
-DEFAULT_READER(BaseObject::AI, optional_ai);
 
 BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(

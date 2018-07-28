@@ -29,8 +29,6 @@ struct Distance {
     int64_t squared;
 };
 
-Distance required_distance(path_value x);
-
 template <typename T>
 struct field_reader;
 template <>
