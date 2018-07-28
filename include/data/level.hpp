@@ -54,6 +54,9 @@ struct Level {
         int16_t                 netRaceFlags = 0;
         sfz::optional<Hue>      hue;
     };
+    struct DemoPlayer : Player {};
+    struct SoloPlayer : Player {};
+    struct NetPlayer : Player {};
 
     struct StatusLine {
         sfz::optional<pn::string> text;
@@ -81,7 +84,9 @@ struct Level {
 
     sfz::optional<int64_t>                  chapter;
     pn::string                              name;
-    std::vector<Player>                     players;
+    std::vector<DemoPlayer>                 demo_players;
+    std::vector<SoloPlayer>                 solo_players;
+    std::vector<NetPlayer>                  net_players;
     std::vector<StatusLine>                 status;
     sfz::optional<pn::string>               song;
     sfz::optional<Rect>                     starmap;

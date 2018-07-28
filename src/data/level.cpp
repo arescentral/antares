@@ -43,40 +43,37 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-template <Level::Type T>
-static Level::Player required_player(path_value x);
-
 static Level::Player::Type required_player_type(path_value x) {
     return required_enum<Level::Player::Type>(
             x, {{"human", Level::Player::Type::HUMAN}, {"cpu", Level::Player::Type::CPU}});
 }
 DEFAULT_READER(Level::Player::Type, required_player_type);
 
-template <>
-Level::Player required_player<Level::Type::DEMO>(path_value x) {
-    return required_struct<Level::Player>(
+Level::DemoPlayer required_demo_player(path_value x) {
+    return required_struct<Level::DemoPlayer>(
             x, {{"name", &Level::Player::name},
                 {"race", &Level::Player::playerRace},
                 {"earning_power", &Level::Player::earningPower}});
 }
+DEFAULT_READER(Level::DemoPlayer, required_demo_player);
 
-template <>
-Level::Player required_player<Level::Type::SOLO>(path_value x) {
-    return required_struct<Level::Player>(
+Level::SoloPlayer required_solo_player(path_value x) {
+    return required_struct<Level::SoloPlayer>(
             x, {{"type", &Level::Player::playerType},
                 {"name", &Level::Player::name},
                 {"race", &Level::Player::playerRace},
                 {"hue", &Level::Player::hue},
                 {"earning_power", &Level::Player::earningPower}});
 }
+DEFAULT_READER(Level::SoloPlayer, required_solo_player);
 
-template <>
-Level::Player required_player<Level::Type::NET>(path_value x) {
-    return required_struct<Level::Player>(
+Level::NetPlayer required_net_player(path_value x) {
+    return required_struct<Level::NetPlayer>(
             x, {{"type", &Level::Player::playerType},
                 {"earning_power", &Level::Player::earningPower},
                 {"races", nullptr}});  // TODO(sfiera): populate field
 }
+DEFAULT_READER(Level::NetPlayer, required_net_player);
 
 static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
 DEFAULT_READER(game_ticks, required_game_ticks);
@@ -145,39 +142,25 @@ static Level::Type required_level_type(path_value x) {
 DEFAULT_READER(Level::Type, required_level_type);
 
 static Level demo_level(path_value x) {
-    return required_struct<Level>(
-            x, {
-                       COMMON_LEVEL_FIELDS,
-                       {"players",
-                        {&Level::players,
-                         required_array<Level::Player, required_player<Level::Type::DEMO>>}},
-               });
+    return required_struct<Level>(x, {COMMON_LEVEL_FIELDS, {"players", &Level::demo_players}});
 }
 
 static Level solo_level(path_value x) {
     return required_struct<Level>(
-            x, {
-                       COMMON_LEVEL_FIELDS,
-                       {"players",
-                        {&Level::players,
-                         required_array<Level::Player, required_player<Level::Type::SOLO>>}},
-                       {"no_ships", &Level::own_no_ships_text},
-                       {"prologue", &Level::prologue},
-                       {"epilogue", &Level::epilogue},
-               });
+            x, {COMMON_LEVEL_FIELDS,
+                {"players", &Level::solo_players},
+                {"no_ships", &Level::own_no_ships_text},
+                {"prologue", &Level::prologue},
+                {"epilogue", &Level::epilogue}});
 }
 
 static Level net_level(path_value x) {
     return required_struct<Level>(
-            x, {
-                       COMMON_LEVEL_FIELDS,
-                       {"players",
-                        {&Level::players,
-                         required_array<Level::Player, required_player<Level::Type::NET>>}},
-                       {"own_no_ships", &Level::own_no_ships_text},
-                       {"foe_no_ships", &Level::foe_no_ships_text},
-                       {"description", &Level::description},
-               });
+            x, {COMMON_LEVEL_FIELDS,
+                {"players", &Level::net_players},
+                {"own_no_ships", &Level::own_no_ships_text},
+                {"foe_no_ships", &Level::foe_no_ships_text},
+                {"description", &Level::description}});
 }
 
 Level level(pn::value_cref x0) {

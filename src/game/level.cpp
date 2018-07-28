@@ -176,6 +176,22 @@ void GetInitialCoord(Handle<const Initial> initial, coordPointType* coord, int32
 
 }  // namespace
 
+template <typename Players>
+static void construct_players(const Players& players) {
+    int i = 0;
+    for (const auto& player : players) {
+        if (player.playerType == Level::Player::Type::HUMAN) {
+            auto admiral = Admiral::make(i++, kAIsHuman, player);
+            admiral->pay(Fixed::from_long(5000));
+            g.admiral = admiral;
+        } else {
+            auto admiral = Admiral::make(i++, kAIsComputer, player);
+            admiral->pay(Fixed::from_long(5000));
+        }
+        load_race(player.playerRace);
+    }
+}
+
 LoadState start_construct_level(const Level& level) {
     ResetAllSpaceObjects();
     reset_action_queue();
@@ -203,19 +219,11 @@ LoadState start_construct_level(const Level& level) {
     g.next_level   = nullptr;
     g.victory_text = sfz::nullopt;
 
-    int i = 0;
-    for (const auto& player : g.level->players) {
-        if (player.playerType == Level::Player::Type::HUMAN) {
-            auto admiral = Admiral::make(i++, kAIsHuman, player);
-            admiral->pay(Fixed::from_long(5000));
-            g.admiral = admiral;
-        } else {
-            auto admiral = Admiral::make(i++, kAIsComputer, player);
-            admiral->pay(Fixed::from_long(5000));
-        }
-        load_race(player.playerRace);
+    switch (g.level->type) {
+        case Level::Type::DEMO: construct_players(g.level->demo_players); break;
+        case Level::Type::SOLO: construct_players(g.level->solo_players); break;
+        case Level::Type::NET: construct_players(g.level->net_players); break;
     }
-
     // *** END INIT ADMIRALS ***
 
     g.initials.clear();
