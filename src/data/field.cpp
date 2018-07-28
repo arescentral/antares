@@ -141,7 +141,7 @@ static void check_ranges(path_value x, int64_t i, const std::initializer_list<in
 }
 
 sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<int64_t>& ranges) {
-    auto i = optional_int(x);
+    auto i = read_field<sfz::optional<int64_t>>(x);
     if (i.has_value()) {
         check_ranges(x, *i, ranges);
     }
@@ -149,7 +149,7 @@ sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<in
 }
 
 int64_t required_int(path_value x, const std::initializer_list<int64_t>& ranges) {
-    auto i = required_int(x);
+    auto i = read_field<int64_t>(x);
     check_ranges(x, i, ranges);
     return i;
 }
@@ -323,7 +323,7 @@ static secs parse_secs(path_value x, pn::string_view s) {
 }
 
 sfz::optional<ticks> optional_ticks(path_value x) {
-    sfz::optional<pn::string_view> s = optional_string(x);
+    auto s = read_field<sfz::optional<pn::string_view>>(x);
     if (s.has_value()) {
         return sfz::make_optional(parse_ticks(x, *s));
     } else {
@@ -331,10 +331,10 @@ sfz::optional<ticks> optional_ticks(path_value x) {
     }
 }
 
-ticks required_ticks(path_value x) { return parse_ticks(x, required_string(x)); }
+ticks required_ticks(path_value x) { return parse_ticks(x, read_field<pn::string_view>(x)); }
 
 sfz::optional<secs> optional_secs(path_value x) {
-    sfz::optional<pn::string_view> s = optional_string(x);
+    auto s = read_field<sfz::optional<pn::string_view>>(x);
     if (s.has_value()) {
         return sfz::make_optional(parse_secs(x, *s));
     } else {
@@ -349,7 +349,7 @@ Tags optional_tags(path_value x) {
         pn::map_cref m = x.value().as_map();
         Tags         result;
         for (const auto& kv : m) {
-            auto v = optional_bool(x.get(kv.key()));
+            auto v = read_field<sfz::optional<bool>>(x.get(kv.key()));
             if (v.has_value()) {
                 result.tags[kv.key().copy()] = *v;
             }
@@ -361,7 +361,7 @@ Tags optional_tags(path_value x) {
 }
 
 sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
-    sfz::optional<int64_t> i = optional_int(x);
+    auto i = read_field<sfz::optional<int64_t>>(x);
     if (i.has_value()) {
         return sfz::make_optional(Handle<Admiral>(*i));
     } else {
@@ -369,10 +369,10 @@ sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
     }
 }
 
-Handle<Admiral> required_admiral(path_value x) { return Handle<Admiral>(required_int(x)); }
+Handle<Admiral> required_admiral(path_value x) { return Handle<Admiral>(read_field<int64_t>(x)); }
 
 NamedHandle<const BaseObject> required_base(path_value x) {
-    return NamedHandle<const BaseObject>(required_string(x));
+    return NamedHandle<const BaseObject>(read_field<pn::string_view>(x));
 }
 
 sfz::optional<Handle<const Initial>> optional_initial(path_value x) {
@@ -394,11 +394,11 @@ Handle<const Initial> required_initial(path_value x) {
 }
 
 Handle<const Condition> required_condition(path_value x) {
-    return Handle<const Condition>(required_int(x));
+    return Handle<const Condition>(read_field<int64_t>(x));
 }
 
 sfz::optional<NamedHandle<const Level>> optional_level(path_value x) {
-    sfz::optional<pn::string_view> s = optional_string(x);
+    auto s = read_field<sfz::optional<pn::string_view>>(x);
     if (s.has_value()) {
         return sfz::make_optional(NamedHandle<const Level>(*s));
     } else {
@@ -412,7 +412,7 @@ sfz::optional<Owner> optional_owner(path_value x) {
 }
 
 NamedHandle<const Race> required_race(path_value x) {
-    return NamedHandle<const Race>(required_string(x));
+    return NamedHandle<const Race>(read_field<pn::string_view>(x));
 }
 
 Owner required_owner(path_value x) {
@@ -487,7 +487,7 @@ sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_string()) {
-        ticks begin = required_ticks(x);
+        ticks begin = read_field<ticks>(x);
         return sfz::make_optional(Range<ticks>{begin, begin + ticks{1}});
     } else if (x.value().is_map()) {
         auto r = range<ticks>(x);
@@ -499,7 +499,7 @@ sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
 
 Range<ticks> required_ticks_range(path_value x) {
     if (x.value().is_int()) {
-        ticks begin = required_ticks(x);
+        ticks begin = read_field<ticks>(x);
         return Range<ticks>{begin, begin + ticks{1}};
     } else if (x.value().is_map()) {
         auto r = range<ticks>(x);
@@ -542,7 +542,7 @@ sfz::optional<RgbColor> optional_color(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_map()) {
-        return sfz::make_optional<RgbColor>(required_color(x));
+        return sfz::make_optional<RgbColor>(read_field<RgbColor>(x));
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
@@ -570,12 +570,12 @@ RgbColor required_color(path_value x) {
         const pn::map_cref m = x.value().as_map();
         if (is_rgba(m)) {
             return rgba(
-                    required_uint8(m.get("r")), required_uint8(m.get("g")),
-                    required_uint8(m.get("b")), required_uint8(m.get("a")));
+                    read_field<uint8_t>(m.get("r")), read_field<uint8_t>(m.get("g")),
+                    read_field<uint8_t>(m.get("b")), read_field<uint8_t>(m.get("a")));
         } else if (is_rgb(m)) {
             return rgb(
-                    required_uint8(m.get("r")), required_uint8(m.get("g")),
-                    required_uint8(m.get("b")));
+                    read_field<uint8_t>(m.get("r")), read_field<uint8_t>(m.get("g")),
+                    read_field<uint8_t>(m.get("b")));
         }
     } else if (x.value().is_string()) {
         const pn::string_view s = x.value().as_string();
@@ -652,7 +652,7 @@ Zoom required_zoom(path_value x) {
                 {"all", Zoom::ALL}});
 }
 
-pn::string required_string_copy(path_value x) { return required_string(x).copy(); }
+pn::string required_string_copy(path_value x) { return read_field<pn::string_view>(x).copy(); }
 
 }  // namespace antares
 

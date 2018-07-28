@@ -37,7 +37,8 @@ Race::Ships optional_ships(path_value x) {
     } else if (x.value().is_map()) {
         Race::Ships ships;
         for (pn::key_value_cref kv : x.value().as_map()) {
-            ships.map.emplace(kv.key().copy(), required_base(x.get(kv.key())));
+            ships.map.emplace(
+                    kv.key().copy(), read_field<NamedHandle<const BaseObject>>(x.get(kv.key())));
         }
         return ships;
     } else {

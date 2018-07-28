@@ -36,7 +36,7 @@ static bool valid_sha1(pn::string_view s) {
 }
 
 static Info::Identifier optional_identifier(path_value x) {
-    auto id = optional_string(x);
+    auto id = read_field<sfz::optional<pn::string_view>>(x);
     if (id.has_value() && !valid_sha1(*id)) {
         throw std::runtime_error(
                 pn::format("{0}invalid identifier (must be lowercase sha1 digest)", x.prefix())

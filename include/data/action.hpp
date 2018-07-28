@@ -422,9 +422,9 @@ union Action {
 Action action(path_value x);
 
 template <typename T>
-struct default_reader;
+struct field_reader;
 template <>
-struct default_reader<Action> {
+struct field_reader<Action> {
     static Action read(path_value x);
 };
 

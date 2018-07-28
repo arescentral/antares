@@ -286,7 +286,7 @@ static ConditionWhen zoom_condition(path_value x) {
 }
 
 static ConditionWhen when(path_value x) {
-    switch (required_object_type(x, required_condition_type)) {
+    switch (required_object_type(x, read_field<ConditionType>)) {
         case ConditionWhen::Type::NONE: throw std::runtime_error("condition type none?");
         case ConditionWhen::Type::AUTOPILOT: return autopilot_condition(x);
         case ConditionWhen::Type::BUILDING: return building_condition(x);
@@ -318,6 +318,6 @@ Condition condition(path_value x) {
                 {"action", &Condition::action}});
 }
 
-Condition default_reader<Condition>::read(path_value x) { return condition(x); }
+Condition field_reader<Condition>::read(path_value x) { return condition(x); }
 
 }  // namespace antares

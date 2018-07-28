@@ -273,9 +273,9 @@ struct Condition {
 Condition condition(path_value x);
 
 template <typename T>
-struct default_reader;
+struct field_reader;
 template <>
-struct default_reader<Condition> {
+struct field_reader<Condition> {
     static Condition read(path_value x);
 };
 

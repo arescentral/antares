@@ -75,7 +75,7 @@ Level::NetPlayer required_net_player(path_value x) {
 }
 DEFAULT_READER(Level::NetPlayer, required_net_player);
 
-static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
+static game_ticks required_game_ticks(path_value x) { return game_ticks{read_field<ticks>(x)}; }
 DEFAULT_READER(game_ticks, required_game_ticks);
 
 static Level::Par optional_par(path_value x) {
@@ -165,7 +165,7 @@ static Level net_level(path_value x) {
 
 Level level(pn::value_cref x0) {
     path_value x{x0};
-    switch (required_object_type(x, required_level_type)) {
+    switch (required_object_type(x, read_field<Level::Type>)) {
         case Level::Type::DEMO: return demo_level(x);
         case Level::Type::SOLO: return solo_level(x);
         case Level::Type::NET: return net_level(x);

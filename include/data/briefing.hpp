@@ -38,9 +38,9 @@ struct Briefing {
 Briefing briefing(path_value x);
 
 template <typename T>
-struct default_reader;
+struct field_reader;
 template <>
-struct default_reader<Briefing> {
+struct field_reader<Briefing> {
     static Briefing read(path_value x);
 };
 

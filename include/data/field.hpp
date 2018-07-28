@@ -178,11 +178,16 @@ T required_object_type(path_value x, T (*get_type)(path_value x)) {
 }
 
 template <typename T>
-struct default_reader;
+struct field_reader;
+
+template <typename T>
+T read_field(path_value x) {
+    return field_reader<T>::read(x);
+}
 
 #define DEFAULT_READER(T, FN)                         \
     template <>                                       \
-    struct default_reader<T> {                        \
+    struct field_reader<T> {                          \
         static T read(path_value x) { return FN(x); } \
     }
 
@@ -236,11 +241,7 @@ struct field {
 
     template <typename F, typename U>
     constexpr field(F(U::*field))
-            : set([field](T* t, path_value x) { (t->*field) = default_reader<F>::read(x); }) {}
-
-    template <typename F, typename U>
-    constexpr field(F(U::*field), F (*reader)(path_value x))
-            : set([field, reader](T* t, path_value x) { (t->*field) = reader(x); }) {}
+            : set([field](T* t, path_value x) { (t->*field) = read_field<F>(x); }) {}
 };
 
 template <typename T>
@@ -306,9 +307,9 @@ static std::vector<T> optional_array(path_value x) {
 }
 
 template <typename T>
-struct default_reader<std::vector<T>> {
+struct field_reader<std::vector<T>> {
     static std::vector<T> read(path_value x) {
-        return optional_array<T, default_reader<T>::read>(x);
+        return optional_array<T, field_reader<T>::read>(x);
     }
 };
 

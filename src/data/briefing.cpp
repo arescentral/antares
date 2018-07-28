@@ -30,6 +30,6 @@ Briefing briefing(path_value x) {
                 {"content", &Briefing::content}});
 }
 
-Briefing default_reader<Briefing>::read(path_value x) { return briefing(x); }
+Briefing field_reader<Briefing>::read(path_value x) { return briefing(x); }
 
 }  // namespace antares

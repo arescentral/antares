@@ -65,9 +65,9 @@ struct Initial {
 Initial initial(path_value x);
 
 template <typename T>
-struct default_reader;
+struct field_reader;
 template <>
-struct default_reader<Initial> {
+struct field_reader<Initial> {
     static Initial read(path_value x);
 };
 

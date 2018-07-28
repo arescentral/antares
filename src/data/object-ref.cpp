@@ -54,10 +54,18 @@ ObjectRef required_object_ref(path_value x) {
     }
 
     switch (o.type) {
-        case ObjectRef::Type::INITIAL: o.initial = required_initial(m.get("initial")); break;
-        case ObjectRef::Type::FLAGSHIP: o.admiral = required_admiral(m.get("flagship")); break;
-        case ObjectRef::Type::CONTROL: o.admiral = required_admiral(m.get("control")); break;
-        case ObjectRef::Type::TARGET: o.admiral = required_admiral(m.get("target")); break;
+        case ObjectRef::Type::INITIAL:
+            o.initial = read_field<Handle<const Initial>>(m.get("initial"));
+            break;
+        case ObjectRef::Type::FLAGSHIP:
+            o.admiral = read_field<Handle<Admiral>>(m.get("flagship"));
+            break;
+        case ObjectRef::Type::CONTROL:
+            o.admiral = read_field<Handle<Admiral>>(m.get("control"));
+            break;
+        case ObjectRef::Type::TARGET:
+            o.admiral = read_field<Handle<Admiral>>(m.get("target"));
+            break;
     }
     return o;
 }
@@ -66,15 +74,15 @@ sfz::optional<ObjectRef> optional_object_ref(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_map()) {
-        return sfz::make_optional(required_object_ref(x));
+        return sfz::make_optional(read_field<ObjectRef>(x));
     } else {
         throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
     }
 }
 
-ObjectRef default_reader<ObjectRef>::read(path_value x) { return required_object_ref(x); }
+ObjectRef field_reader<ObjectRef>::read(path_value x) { return required_object_ref(x); }
 
-sfz::optional<ObjectRef> default_reader<sfz::optional<ObjectRef>>::read(path_value x) {
+sfz::optional<ObjectRef> field_reader<sfz::optional<ObjectRef>>::read(path_value x) {
     return optional_object_ref(x);
 }
 

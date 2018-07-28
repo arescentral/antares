@@ -51,7 +51,7 @@ static BaseObject::Layer required_layer(path_value x) {
 DEFAULT_READER(BaseObject::Layer, required_layer);
 
 static BaseObject::Scale required_scale(path_value x) {
-    return BaseObject::Scale{required_fixed(x).val() << 4};
+    return BaseObject::Scale{read_field<Fixed>(x).val() << 4};
 }
 DEFAULT_READER(BaseObject::Scale, required_scale);
 

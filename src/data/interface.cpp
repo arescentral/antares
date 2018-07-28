@@ -37,9 +37,9 @@ namespace antares {
 static std::unique_ptr<InterfaceItemData> interface_item(path_value x);
 
 template <typename T>
-struct default_reader;
+struct field_reader;
 template <>
-struct default_reader<std::unique_ptr<InterfaceItemData>> {
+struct field_reader<std::unique_ptr<InterfaceItemData>> {
     static std::unique_ptr<InterfaceItemData> read(path_value x) { return interface_item(x); }
 };
 
@@ -50,7 +50,7 @@ static InterfaceStyle required_interface_style(path_value x) {
 DEFAULT_READER(InterfaceStyle, required_interface_style);
 
 static Key optional_key_num(path_value x) {
-    auto k = optional_string(x);
+    auto k = read_field<sfz::optional<pn::string>>(x);
     if (!k.has_value()) {
         return Key::NONE;
     }
@@ -63,7 +63,7 @@ static Key optional_key_num(path_value x) {
 DEFAULT_READER(Key, optional_key_num);
 
 static Gamepad::Button optional_gamepad_button(path_value x) {
-    auto k = optional_string(x);
+    auto k = read_field<sfz::optional<pn::string>>(x);
     if (!k.has_value()) {
         return Gamepad::Button::NONE;
     }
@@ -172,7 +172,7 @@ static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
 }
 
 static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
-    switch (required_object_type(x, required_interface_item_type)) {
+    switch (required_object_type(x, read_field<InterfaceItemData::Type>)) {
         case InterfaceItemData::Type::RECT: return rect_interface_item(x);
         case InterfaceItemData::Type::BUTTON: return button_interface_item(x);
         case InterfaceItemData::Type::CHECKBOX: return checkbox_interface_item(x);

@@ -169,7 +169,7 @@ static uint32_t optional_flags(path_value x, const std::map<pn::string_view, int
     } else if (x.value().is_map()) {
         uint32_t result = 0;
         for (auto kv : flags) {
-            if (optional_bool(x.get(kv.first)).value_or(false)) {
+            if (read_field<sfz::optional<bool>>(x.get(kv.first)).value_or(false)) {
                 result |= 1 << kv.second;
             }
         }
@@ -441,7 +441,7 @@ static Action morph_action(path_value x) {
 }
 
 static sfz::optional<coordPointType> optional_coord_point(path_value x) {
-    sfz::optional<Point> p = optional_point(x);
+    auto p = read_field<sfz::optional<Point>>(x);
     if (!p.has_value()) {
         return sfz::nullopt;
     }
@@ -573,7 +573,7 @@ static Action zoom_action(path_value x) {
 }
 
 Action action(path_value x) {
-    switch (required_object_type(x, required_action_type)) {
+    switch (required_object_type(x, read_field<Action::Type>)) {
         case Action::Type::AGE: return age_action(x);
         case Action::Type::ASSUME: return assume_action(x);
         case Action::Type::CAP_SPEED: return cap_speed_action(x);
@@ -613,6 +613,6 @@ Action action(path_value x) {
     }
 }
 
-Action default_reader<Action>::read(path_value x) { return action(x); }
+Action field_reader<Action>::read(path_value x) { return action(x); }
 
 }  // namespace antares

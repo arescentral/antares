@@ -32,9 +32,9 @@ struct Distance {
 Distance required_distance(path_value x);
 
 template <typename T>
-struct default_reader;
+struct field_reader;
 template <>
-struct default_reader<Distance> {
+struct field_reader<Distance> {
     static Distance read(path_value x);
 };
 

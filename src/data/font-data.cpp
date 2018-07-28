@@ -28,7 +28,7 @@ static FontData::Glyphs required_glyphs(path_value x) {
         for (pn::key_value_cref kv : x.value().as_map()) {
             pn::string_view glyph      = kv.key();
             path_value      rect       = x.get(glyph);
-            glyphs.map[*glyph.begin()] = required_rect(rect);
+            glyphs.map[*glyph.begin()] = read_field<Rect>(rect);
         }
         return glyphs;
     } else {

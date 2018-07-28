@@ -23,7 +23,7 @@
 namespace antares {
 
 static BuildableObject required_buildable_object(path_value x) {
-    return BuildableObject{required_string_copy(x)};
+    return BuildableObject{read_field<pn::string>(x)};
 }
 DEFAULT_READER(BuildableObject, required_buildable_object);
 
@@ -67,6 +67,6 @@ Initial initial(path_value x) {
                 {"build", &Initial::build}});
 }
 
-Initial default_reader<Initial>::read(path_value x) { return initial(x); }
+Initial field_reader<Initial>::read(path_value x) { return initial(x); }
 
 }  // namespace antares
