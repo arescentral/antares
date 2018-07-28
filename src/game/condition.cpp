@@ -125,7 +125,7 @@ static bool is_true(const DistanceCondition& c) {
     if (sObject.get() && dObject.get()) {
         int64_t xdist = ABS<int>(sObject->location.h - dObject->location.h);
         int64_t ydist = ABS<int>(sObject->location.v - dObject->location.v);
-        return op_compare(c.op, (ydist * ydist) + (xdist * xdist), c.value);
+        return op_compare(c.op, (ydist * ydist) + (xdist * xdist), c.value.squared);
     }
     return false;
 }

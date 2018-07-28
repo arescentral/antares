@@ -38,12 +38,6 @@ static fixedPointType required_fixed_point(path_value x) {
 }
 DEFAULT_READER(fixedPointType, required_fixed_point);
 
-static uint32_t distance(path_value x) {
-    double d = required_double(x);
-    d        = floor(pow(d, 2));
-    return d;
-}
-
 static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
     return optional_struct<BaseObject::Weapon>(
             x,
@@ -387,7 +381,7 @@ DEFAULT_READER(BaseObject::Activate, optional_activate);
 
 static BaseObject::Arrive optional_arrive(path_value x) {
     return optional_struct<BaseObject::Arrive>(
-                   x, {{"distance", {&BaseObject::Arrive::distance, distance}},
+                   x, {{"distance", &BaseObject::Arrive::distance},
                        {"action", &BaseObject::Arrive::action}})
             .value_or(BaseObject::Arrive{});
 }
@@ -476,7 +470,7 @@ BaseObject base_object(pn::value_cref x0) {
                              {"portrait", &BaseObject::portrait},
 
                              {"price", &BaseObject::price},
-                             {"warp_out_distance", {&BaseObject::warpOutDistance, distance}},
+                             {"warp_out_distance", &BaseObject::warpOutDistance},
                              {"health", &BaseObject::health},
                              {"energy", &BaseObject::energy},
                              {"occupy_count", &BaseObject::occupy_count},

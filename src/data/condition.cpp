@@ -203,17 +203,11 @@ static ConditionWhen destroyed_condition(path_value x) {
                 {"value", &DestroyedCondition::value}});
 }
 
-static int64_t distance(path_value x) {
-    double d = required_double(x);
-    d        = floor(pow(d, 2));
-    return d;
-}
-
 static ConditionWhen distance_condition(path_value x) {
     return required_struct<DistanceCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &DistanceCondition::op},
-                {"value", {&DistanceCondition::value, distance}},
+                {"value", &DistanceCondition::value},
                 {"from", &DistanceCondition::from},
                 {"to", &DistanceCondition::to}});
 }

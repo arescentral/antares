@@ -533,7 +533,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
             }
 
             if (anObject->targetObject == anObject->destObject) {
-                if (distance < static_cast<uint32_t>(baseObject->arrive.distance)) {
+                if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
                     if (baseObject->arrive.action.size() > 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
                             offset.h = offset.v = 0;
@@ -693,7 +693,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                     anObject->timeFromOrigin = ticks(0);
                 }
 
-                if (distance > static_cast<uint32_t>(baseObject->arrive.distance)) {
+                if (distance > static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
                     if (theta < kEvadeAngle) {
                         keysDown |= kUpKey;
                     }
@@ -722,7 +722,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                         }
                     }
 
-                    if (distance < static_cast<uint32_t>(baseObject->arrive.distance)) {
+                    if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
                         if (baseObject->arrive.action.size() > 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
                                 offset.h = offset.v = 0;
@@ -896,7 +896,7 @@ uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
             anObject->direction = angle;
         }
 
-        if (distance < anObject->base->warpOutDistance) {
+        if (distance < anObject->base->warpOutDistance.squared) {
             if (targetObject.get()) {
                 if ((targetObject->presenceState == kWarpInPresence) ||
                     (targetObject->presenceState == kWarpingPresence)) {

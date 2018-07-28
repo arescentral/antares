@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/distance.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/object-ref.hpp"
@@ -129,7 +130,7 @@ struct DistanceCondition : ConditionBase {
     ConditionOp op = ConditionOp::EQ;
     ObjectRef   from;
     ObjectRef   to;
-    int64_t     value;
+    Distance    value;
 };
 
 // Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.

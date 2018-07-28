@@ -22,6 +22,7 @@
 #include <pn/string>
 
 #include "data/action.hpp"
+#include "data/distance.hpp"
 #include "data/range.hpp"
 #include "data/tags.hpp"
 #include "drawing/color.hpp"
@@ -112,7 +113,7 @@ class BaseObject {
 
     Fixed    maxVelocity;      // maximum speed
     Fixed    warpSpeed;        // multiplier of speed at warp (0 if cannot)
-    uint32_t warpOutDistance;  // distance at which to come out of warp
+    Distance warpOutDistance;  // distance at which to come out of warp
 
     Fixed mass;       // how quickly thrust acheives max
     Fixed turn_rate;  // max rate at which object can turn
@@ -197,7 +198,7 @@ class BaseObject {
     } activate;
 
     struct Arrive {
-        uint32_t            distance;
+        Distance            distance;
         std::vector<Action> action;
     } arrive;
 
