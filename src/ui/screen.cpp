@@ -37,50 +37,12 @@ using std::vector;
 
 namespace antares {
 
-namespace {
-
-struct EmplaceBackVisitor : InterfaceItemData::Visitor {
-    std::vector<std::unique_ptr<Widget>>* vec;
-
-    EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
-
-    void visit_box_rect(const BoxRectData& data) const override {
-        vec->emplace_back(new BoxRect{data});
-    }
-
-    void visit_text_rect(const TextRectData& data) const override {
-        vec->emplace_back(new TextRect{data});
-    }
-
-    void visit_picture_rect(const PictureRectData& data) const override {
-        vec->emplace_back(new PictureRect{data});
-    }
-
-    void visit_plain_button(const PlainButtonData& data) const override {
-        vec->emplace_back(new PlainButton{data});
-    }
-
-    void visit_radio_button(const RadioButtonData& data) const override {
-        vec->emplace_back(new RadioButton{data});
-    }
-
-    void visit_checkbox_button(const CheckboxButtonData& data) const override {
-        vec->emplace_back(new CheckboxButton{data});
-    }
-
-    void visit_tab_box(const TabBoxData& data) const override {
-        vec->emplace_back(new TabBox{data});
-    }
-};
-
-}  // namespace
-
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bounds(bounds) {
     try {
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
         for (auto& item : data.items) {
-            item->accept(EmplaceBackVisitor{&_widgets});
+            _widgets.push_back(Widget::from(item));
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));

@@ -31,7 +31,8 @@
 namespace antares {
 
 class path_value;
-struct InterfaceItemData;
+union InterfaceItemData;
+struct InterfaceItemDataBase;
 
 enum class InterfaceStyle { LARGE, SMALL };
 
@@ -41,15 +42,16 @@ struct interfaceLabelType {
 };
 
 struct InterfaceData {
-    bool                                            fullscreen = false;
-    std::vector<std::unique_ptr<InterfaceItemData>> items;
+    bool                           fullscreen = false;
+    std::vector<InterfaceItemData> items;
 };
 
-struct InterfaceItemData {
+struct InterfaceItemDataBase {
   public:
     class Visitor;
 
     enum Type {
+        NONE,
         RECT,
         BUTTON,
         CHECKBOX,
@@ -59,12 +61,10 @@ struct InterfaceItemData {
         TAB_BOX,
     };
 
-    InterfaceItemData()                    = default;
-    InterfaceItemData(InterfaceItemData&&) = default;
-    InterfaceItemData& operator=(InterfaceItemData&&) = default;
-    virtual ~InterfaceItemData() {}
-
-    virtual void accept(const Visitor& visitor) const = 0;
+    InterfaceItemDataBase()                        = default;
+    InterfaceItemDataBase(InterfaceItemDataBase&&) = default;
+    InterfaceItemDataBase& operator=(InterfaceItemDataBase&&) = default;
+    virtual ~InterfaceItemDataBase() {}
 
     Type                   type;
     Rect                   bounds;
@@ -73,29 +73,23 @@ struct InterfaceItemData {
 
 InterfaceData interface(path_value x);
 
-struct BoxRectData : public InterfaceItemData {
-    virtual void accept(const Visitor& visitor) const;
-
+struct BoxRectData : public InterfaceItemDataBase {
     sfz::optional<pn::string> label;
     Hue                       hue   = Hue::GRAY;
     InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
-struct TextRectData : public InterfaceItemData {
-    virtual void accept(const Visitor& visitor) const;
-
+struct TextRectData : public InterfaceItemDataBase {
     sfz::optional<pn::string> text;
     Hue                       hue   = Hue::GRAY;
     InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
-struct PictureRectData : public InterfaceItemData {
-    virtual void accept(const Visitor& visitor) const;
-
+struct PictureRectData : public InterfaceItemDataBase {
     pn::string picture;
 };
 
-struct ButtonData : public InterfaceItemData {
+struct ButtonData : public InterfaceItemDataBase {
     pn::string      label;
     Key             key     = Key::NONE;
     Gamepad::Button gamepad = Gamepad::Button::NONE;
@@ -103,34 +97,24 @@ struct ButtonData : public InterfaceItemData {
     InterfaceStyle  style   = InterfaceStyle::LARGE;
 };
 
-struct PlainButtonData : public ButtonData {
-    virtual void accept(const Visitor& visitor) const;
-};
+struct PlainButtonData : public ButtonData {};
+struct CheckboxButtonData : public ButtonData {};
+struct RadioButtonData : public ButtonData {};
 
-struct CheckboxButtonData : public ButtonData {
-    virtual void accept(const Visitor& visitor) const;
-};
-
-struct RadioButtonData : public ButtonData {
-    virtual void accept(const Visitor& visitor) const;
-};
-
-struct TabBoxData : public InterfaceItemData {
-    virtual void accept(const Visitor& visitor) const;
-
+struct TabBoxData : public InterfaceItemDataBase {
     Hue            hue   = Hue::GRAY;
     InterfaceStyle style = InterfaceStyle::LARGE;
 
     struct Tab {
-        sfz::optional<int64_t>                          id;
-        int64_t                                         width;
-        pn::string                                      label;
-        std::vector<std::unique_ptr<InterfaceItemData>> content;
+        sfz::optional<int64_t>         id;
+        int64_t                        width;
+        pn::string                     label;
+        std::vector<InterfaceItemData> content;
     };
     std::vector<Tab> tabs;
 };
 
-class InterfaceItemData::Visitor {
+class InterfaceItemDataBase::Visitor {
   public:
     ~Visitor();
     virtual void visit_box_rect(const BoxRectData&) const               = 0;
@@ -140,6 +124,34 @@ class InterfaceItemData::Visitor {
     virtual void visit_radio_button(const RadioButtonData&) const       = 0;
     virtual void visit_checkbox_button(const CheckboxButtonData&) const = 0;
     virtual void visit_tab_box(const TabBoxData&) const                 = 0;
+};
+
+union InterfaceItemData {
+    using Type = InterfaceItemDataBase::Type;
+
+    InterfaceItemDataBase       base;
+    InterfaceItemDataBase::Type type() const;
+
+    BoxRectData        rect;
+    TextRectData       text;
+    PictureRectData    picture;
+    PlainButtonData    button;
+    CheckboxButtonData checkbox;
+    RadioButtonData    radio;
+    TabBoxData         tab_box;
+
+    InterfaceItemData();
+    InterfaceItemData(BoxRectData d);
+    InterfaceItemData(TextRectData d);
+    InterfaceItemData(PictureRectData d);
+    InterfaceItemData(PlainButtonData d);
+    InterfaceItemData(CheckboxButtonData d);
+    InterfaceItemData(RadioButtonData d);
+    InterfaceItemData(TabBoxData d);
+
+    ~InterfaceItemData();
+    InterfaceItemData(InterfaceItemData&&);
+    InterfaceItemData& operator=(InterfaceItemData&&);
 };
 
 }  // namespace antares

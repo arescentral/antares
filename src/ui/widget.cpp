@@ -962,40 +962,8 @@ static PlainButtonData tab_button_data(
 
 TabButton::TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds)
         : Button{tab_button_data(*box, data, bounds)}, _parent(box), _inner_bounds{bounds} {
-    struct EmplaceBackVisitor : InterfaceItemData::Visitor {
-        std::vector<std::unique_ptr<Widget>>* vec;
-        EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
-
-        void visit_box_rect(const BoxRectData& data) const override {
-            vec->emplace_back(new BoxRect{data});
-        }
-
-        void visit_text_rect(const TextRectData& data) const override {
-            vec->emplace_back(new TextRect{data});
-        }
-
-        void visit_picture_rect(const PictureRectData& data) const override {
-            vec->emplace_back(new PictureRect{data});
-        }
-
-        void visit_plain_button(const PlainButtonData& data) const override {
-            vec->emplace_back(new PlainButton{data});
-        }
-
-        void visit_radio_button(const RadioButtonData& data) const override {
-            vec->emplace_back(new RadioButton{data});
-        }
-
-        void visit_checkbox_button(const CheckboxButtonData& data) const override {
-            vec->emplace_back(new CheckboxButton{data});
-        }
-
-        void visit_tab_box(const TabBoxData& data) const override {
-            vec->emplace_back(new TabBox{data});
-        }
-    };
     for (const auto& item : data.content) {
-        item->accept(EmplaceBackVisitor{&_content});
+        _content.push_back(Widget::from(item));
     }
 }
 
@@ -1394,6 +1362,26 @@ void TabBox::select(const TabButton& tab) {
         } else {
             t->on() = false;
         }
+    }
+}
+
+std::unique_ptr<Widget> Widget::from(const InterfaceItemData& data) {
+    switch (data.type()) {
+        case InterfaceItemDataBase::Type::NONE: return nullptr;
+        case InterfaceItemDataBase::Type::RECT:
+            return std::unique_ptr<Widget>(new BoxRect{data.rect});
+        case InterfaceItemDataBase::Type::TEXT:
+            return std::unique_ptr<Widget>(new TextRect{data.text});
+        case InterfaceItemDataBase::Type::PICTURE:
+            return std::unique_ptr<Widget>(new PictureRect{data.picture});
+        case InterfaceItemDataBase::Type::BUTTON:
+            return std::unique_ptr<Widget>(new PlainButton{data.button});
+        case InterfaceItemDataBase::Type::CHECKBOX:
+            return std::unique_ptr<Widget>(new CheckboxButton{data.checkbox});
+        case InterfaceItemDataBase::Type::RADIO:
+            return std::unique_ptr<Widget>(new RadioButton{data.radio});
+        case InterfaceItemDataBase::Type::TAB_BOX:
+            return std::unique_ptr<Widget>(new TabBox{data.tab_box});
     }
 }
 

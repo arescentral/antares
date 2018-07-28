@@ -32,6 +32,8 @@ class TabBox;
 
 class Widget {
   public:
+    static std::unique_ptr<Widget> from(const InterfaceItemData& data);
+
     virtual sfz::optional<int64_t> id() const = 0;
 
     virtual Widget* accept_click(Point where);

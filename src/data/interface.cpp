@@ -34,7 +34,64 @@ using sfz::range;
 
 namespace antares {
 
-DECLARE_FIELD_READER(std::unique_ptr<InterfaceItemData>);
+DECLARE_FIELD_READER(InterfaceItemData);
+
+InterfaceItemData::Type InterfaceItemData::type() const { return base.type; }
+
+InterfaceItemData::InterfaceItemData() : base{} {}
+InterfaceItemData::InterfaceItemData(BoxRectData d) : rect(std::move(d)) {}
+InterfaceItemData::InterfaceItemData(TextRectData d) : text(std::move(d)) {}
+InterfaceItemData::InterfaceItemData(PictureRectData d) : picture(std::move(d)) {}
+InterfaceItemData::InterfaceItemData(PlainButtonData d) : button(std::move(d)) {}
+InterfaceItemData::InterfaceItemData(CheckboxButtonData d) : checkbox(std::move(d)) {}
+InterfaceItemData::InterfaceItemData(RadioButtonData d) : radio(std::move(d)) {}
+InterfaceItemData::InterfaceItemData(TabBoxData d) : tab_box(std::move(d)) {}
+
+InterfaceItemData::InterfaceItemData(InterfaceItemData&& a) {
+    switch (a.type()) {
+        case InterfaceItemDataBase::Type::NONE: new (this) InterfaceItemData(); break;
+        case InterfaceItemDataBase::Type::RECT:
+            new (this) InterfaceItemData(std::move(a.rect));
+            break;
+        case InterfaceItemDataBase::Type::TEXT:
+            new (this) InterfaceItemData(std::move(a.text));
+            break;
+        case InterfaceItemDataBase::Type::PICTURE:
+            new (this) InterfaceItemData(std::move(a.picture));
+            break;
+        case InterfaceItemDataBase::Type::BUTTON:
+            new (this) InterfaceItemData(std::move(a.button));
+            break;
+        case InterfaceItemDataBase::Type::CHECKBOX:
+            new (this) InterfaceItemData(std::move(a.checkbox));
+            break;
+        case InterfaceItemDataBase::Type::RADIO:
+            new (this) InterfaceItemData(std::move(a.radio));
+            break;
+        case InterfaceItemDataBase::Type::TAB_BOX:
+            new (this) InterfaceItemData(std::move(a.tab_box));
+            break;
+    }
+}
+
+InterfaceItemData& InterfaceItemData::operator=(InterfaceItemData&& a) {
+    this->~InterfaceItemData();
+    new (this) InterfaceItemData(std::move(a));
+    return *this;
+}
+
+InterfaceItemData::~InterfaceItemData() {
+    switch (type()) {
+        case InterfaceItemDataBase::Type::NONE: base.~InterfaceItemDataBase(); break;
+        case InterfaceItemDataBase::Type::RECT: rect.~BoxRectData(); break;
+        case InterfaceItemDataBase::Type::TEXT: text.~TextRectData(); break;
+        case InterfaceItemDataBase::Type::PICTURE: picture.~PictureRectData(); break;
+        case InterfaceItemDataBase::Type::BUTTON: button.~PlainButtonData(); break;
+        case InterfaceItemDataBase::Type::CHECKBOX: checkbox.~CheckboxButtonData(); break;
+        case InterfaceItemDataBase::Type::RADIO: radio.~RadioButtonData(); break;
+        case InterfaceItemDataBase::Type::TAB_BOX: tab_box.~TabBoxData(); break;
+    }
+}
 
 FIELD_READER(InterfaceStyle) {
     return required_enum<InterfaceStyle>(
@@ -84,83 +141,83 @@ FIELD_READER(TabBoxData::Tab) {
                 {"content", &TabBoxData::Tab::content}});
 }
 
-static std::unique_ptr<InterfaceItemData> rect_interface_item(path_value x) {
-    return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
-            x, {{"type", &InterfaceItemData::type},
-                {"bounds", &InterfaceItemData::bounds},
-                {"id", &InterfaceItemData::id},
+static InterfaceItemData rect_interface_item(path_value x) {
+    return BoxRectData(required_struct<BoxRectData>(
+            x, {{"type", &InterfaceItemDataBase::type},
+                {"bounds", &InterfaceItemDataBase::bounds},
+                {"id", &InterfaceItemDataBase::id},
                 {"label", &BoxRectData::label},
                 {"hue", &BoxRectData::hue},
-                {"style", &BoxRectData::style}})));
+                {"style", &BoxRectData::style}}));
 }
 
-static std::unique_ptr<InterfaceItemData> button_interface_item(path_value x) {
-    return std::unique_ptr<InterfaceItemData>(new PlainButtonData(required_struct<PlainButtonData>(
-            x, {{"type", &InterfaceItemData::type},
-                {"bounds", &InterfaceItemData::bounds},
-                {"id", &InterfaceItemData::id},
+static InterfaceItemData button_interface_item(path_value x) {
+    return required_struct<PlainButtonData>(
+            x, {{"type", &InterfaceItemDataBase::type},
+                {"bounds", &InterfaceItemDataBase::bounds},
+                {"id", &InterfaceItemDataBase::id},
                 {"label", &PlainButtonData::label},
                 {"key", &PlainButtonData::key},
                 {"gamepad", &PlainButtonData::gamepad},
                 {"hue", &PlainButtonData::hue},
-                {"style", &PlainButtonData::style}})));
+                {"style", &PlainButtonData::style}});
 }
 
-static std::unique_ptr<InterfaceItemData> checkbox_interface_item(path_value x) {
-    return std::unique_ptr<InterfaceItemData>(
-            new CheckboxButtonData(required_struct<CheckboxButtonData>(
-                    x, {{"type", &InterfaceItemData::type},
-                        {"bounds", &InterfaceItemData::bounds},
-                        {"id", &InterfaceItemData::id},
-                        {"label", &CheckboxButtonData::label},
-                        {"key", &CheckboxButtonData::key},
-                        {"gamepad", &CheckboxButtonData::gamepad},
-                        {"hue", &CheckboxButtonData::hue},
-                        {"style", &CheckboxButtonData::style}})));
+static InterfaceItemData checkbox_interface_item(path_value x) {
+    return required_struct<CheckboxButtonData>(
+            x, {{"type", &InterfaceItemDataBase::type},
+                {"bounds", &InterfaceItemDataBase::bounds},
+                {"id", &InterfaceItemDataBase::id},
+                {"label", &CheckboxButtonData::label},
+                {"key", &CheckboxButtonData::key},
+                {"gamepad", &CheckboxButtonData::gamepad},
+                {"hue", &CheckboxButtonData::hue},
+                {"style", &CheckboxButtonData::style}});
 }
 
-static std::unique_ptr<InterfaceItemData> radio_interface_item(path_value x) {
-    return std::unique_ptr<InterfaceItemData>(new RadioButtonData(required_struct<RadioButtonData>(
-            x, {{"type", &InterfaceItemData::type},
-                {"bounds", &InterfaceItemData::bounds},
-                {"id", &InterfaceItemData::id},
+static InterfaceItemData radio_interface_item(path_value x) {
+    return required_struct<RadioButtonData>(
+            x, {{"type", &InterfaceItemDataBase::type},
+                {"bounds", &InterfaceItemDataBase::bounds},
+                {"id", &InterfaceItemDataBase::id},
                 {"label", &RadioButtonData::label},
                 {"key", &RadioButtonData::key},
                 {"gamepad", &RadioButtonData::gamepad},
                 {"hue", &RadioButtonData::hue},
-                {"style", &RadioButtonData::style}})));
+                {"style", &RadioButtonData::style}});
 }
 
-static std::unique_ptr<InterfaceItemData> picture_interface_item(path_value x) {
-    return std::unique_ptr<InterfaceItemData>(new PictureRectData(required_struct<PictureRectData>(
-            x, {{"type", &InterfaceItemData::type},
-                {"bounds", &InterfaceItemData::bounds},
-                {"id", &InterfaceItemData::id},
-                {"picture", &PictureRectData::picture}})));
+static InterfaceItemData picture_interface_item(path_value x) {
+    return required_struct<PictureRectData>(
+            x, {{"type", &InterfaceItemDataBase::type},
+                {"bounds", &InterfaceItemDataBase::bounds},
+                {"id", &InterfaceItemDataBase::id},
+                {"picture", &PictureRectData::picture}});
 }
 
-static std::unique_ptr<InterfaceItemData> text_interface_item(path_value x) {
-    return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
-            x, {{"type", &InterfaceItemData::type},
-                {"bounds", &InterfaceItemData::bounds},
-                {"id", &InterfaceItemData::id},
+static InterfaceItemData text_interface_item(path_value x) {
+    return required_struct<TextRectData>(
+            x, {{"type", &InterfaceItemDataBase::type},
+                {"bounds", &InterfaceItemDataBase::bounds},
+                {"id", &InterfaceItemDataBase::id},
                 {"text", &TextRectData::text},
                 {"hue", &TextRectData::hue},
-                {"style", &TextRectData::style}})));
+                {"style", &TextRectData::style}});
 }
 
-static std::unique_ptr<InterfaceItemData> tab_box_interface_item(path_value x) {
-    return std::unique_ptr<InterfaceItemData>(new TabBoxData(required_struct<TabBoxData>(
-            x, {{"type", &InterfaceItemData::type},
-                {"bounds", &InterfaceItemData::bounds},
-                {"id", &InterfaceItemData::id},
+static InterfaceItemData tab_box_interface_item(path_value x) {
+    return required_struct<TabBoxData>(
+            x, {{"type", &InterfaceItemDataBase::type},
+                {"bounds", &InterfaceItemDataBase::bounds},
+                {"id", &InterfaceItemDataBase::id},
                 {"hue", &TabBoxData::hue},
                 {"style", &TabBoxData::style},
-                {"tabs", &TabBoxData::tabs}})));
+                {"tabs", &TabBoxData::tabs}});
 }
 
-DEFINE_FIELD_READER(std::unique_ptr<InterfaceItemData>) {
+DEFINE_FIELD_READER(InterfaceItemData) {
     switch (required_object_type(x, read_field<InterfaceItemData::Type>)) {
+        case InterfaceItemData::Type::NONE: throw std::runtime_error("interface item type none?");
         case InterfaceItemData::Type::RECT: return rect_interface_item(x);
         case InterfaceItemData::Type::BUTTON: return button_interface_item(x);
         case InterfaceItemData::Type::CHECKBOX: return checkbox_interface_item(x);
@@ -175,17 +232,5 @@ InterfaceData interface(path_value x) {
     return required_struct<InterfaceData>(
             x, {{"fullscreen", &InterfaceData::fullscreen}, {"items", &InterfaceData::items}});
 }
-
-void BoxRectData::accept(const Visitor& visitor) const { visitor.visit_box_rect(*this); }
-void TextRectData::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
-void PictureRectData::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
-void PlainButtonData::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }
-void CheckboxButtonData::accept(const Visitor& visitor) const {
-    visitor.visit_checkbox_button(*this);
-}
-void RadioButtonData::accept(const Visitor& visitor) const { visitor.visit_radio_button(*this); }
-void TabBoxData::accept(const Visitor& visitor) const { visitor.visit_tab_box(*this); }
-
-InterfaceItemData::Visitor::~Visitor() {}
 
 }  // namespace antares
