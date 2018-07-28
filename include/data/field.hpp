@@ -101,8 +101,7 @@ DECLARE_FIELD_READER(sfz::optional<int64_t>);
 DECLARE_FIELD_READER(uint8_t);
 DECLARE_FIELD_READER(int32_t);
 
-sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<int64_t>& ranges);
-int64_t                required_int(path_value x, const std::initializer_list<int64_t>& ranges);
+int64_t int_field_within(path_value x, Range<int64_t> range);
 
 DECLARE_FIELD_READER(double);
 DECLARE_FIELD_READER(Fixed);

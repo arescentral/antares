@@ -35,7 +35,9 @@ FIELD_READER(sfz::optional<BaseObject::Weapon>) {
             {{"base", &BaseObject::Weapon::base}, {"positions", &BaseObject::Weapon::positions}});
 }
 
-FIELD_READER(BaseObject::Layer) { return static_cast<BaseObject::Layer>(required_int(x, {1, 4})); }
+FIELD_READER(BaseObject::Layer) {
+    return static_cast<BaseObject::Layer>(int_field_within(x, {1, 4}));
+}
 
 FIELD_READER(BaseObject::Scale) { return BaseObject::Scale{read_field<Fixed>(x).val() << 4}; }
 

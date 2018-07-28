@@ -510,7 +510,7 @@ FIELD_READER(PlayAction::Sound) {
 }
 
 FIELD_READER(PlayAction::Priority) {
-    int level = required_int(x, {0, 6});
+    int level = int_field_within(x, {0, 6});
     return PlayAction::Priority{level};
 }
 

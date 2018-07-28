@@ -102,55 +102,18 @@ DEFINE_FIELD_READER(int64_t) {
     }
 }
 
-// 0 {} => false
-// -1 {0} => false
-// 0 {0} => true
-// 1 {0} => true
-// 0 {1, 4} => false
-// 2 {1, 4} => true
-// 4 {1, 4} => false
-static void check_ranges(path_value x, int64_t i, const std::initializer_list<int64_t>& ranges) {
-    bool ok = false;
-    for (int64_t x : ranges) {
-        if (i >= x) {
-            ok = !ok;
-        } else {
-            break;
-        }
+static void check_range(path_value x, int64_t i, Range<int64_t> range) {
+    if ((range.begin <= i) && (i < range.end)) {
+        return;
     }
-    if (!ok) {
-        pn::string err      = pn::format("{0}: must satisfy", x.path());
-        bool       is_first = true;
-        bool       is_begin = true;
-        for (int64_t x : ranges) {
-            if (is_first) {
-                err += pn::format(" ({0} <= x", x);
-            } else if (is_begin) {
-                err += pn::format(" or ({0} <= x", x);
-            } else {
-                err += pn::format(" < {0})", x);
-            }
-            is_begin = !is_begin;
-            is_first = false;
-        }
-        if (!is_begin) {
-            err += ")";
-        }
-        throw std::runtime_error(err.c_str());
-    }
+    throw std::runtime_error(
+            pn::format("{0}must satisfy ({1} <= x < {2})", x.prefix(), range.begin, range.end)
+                    .c_str());
 }
 
-sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<int64_t>& ranges) {
-    auto i = read_field<sfz::optional<int64_t>>(x);
-    if (i.has_value()) {
-        check_ranges(x, *i, ranges);
-    }
-    return i;
-}
-
-int64_t required_int(path_value x, const std::initializer_list<int64_t>& ranges) {
+int64_t int_field_within(path_value x, Range<int64_t> range) {
     auto i = read_field<int64_t>(x);
-    check_ranges(x, i, ranges);
+    check_range(x, i, range);
     return i;
 }
 
@@ -511,7 +474,7 @@ DEFINE_FIELD_READER(Range<ticks>) {
     }
 }
 
-DEFINE_FIELD_READER(int32_t) { return required_int(x, {-0x80000000ll, 0x80000000ll}); }
+DEFINE_FIELD_READER(int32_t) { return int_field_within(x, {-0x80000000ll, 0x80000000ll}); }
 
 DEFINE_FIELD_READER(sfz::optional<Point>) {
     return optional_struct<Point>(x, {{"x", &Point::h}, {"y", &Point::v}});
@@ -547,7 +510,7 @@ DEFINE_FIELD_READER(sfz::optional<RgbColor>) {
     }
 }
 
-DEFINE_FIELD_READER(uint8_t) { return required_int(x, {0, 256}); }
+DEFINE_FIELD_READER(uint8_t) { return int_field_within(x, {0, 256}); }
 
 static bool is_rgb(pn::map_cref m) {
     return (m.size() == 3) && m.has("r") && m.has("g") && m.has("b");
