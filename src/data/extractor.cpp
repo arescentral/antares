@@ -239,10 +239,10 @@ void check_version(const Info& archive, int64_t expected) {
 }
 
 void check_identifier(const Info& archive, pn::string_view expected) {
-    if (archive.identifier != expected) {
+    if (archive.identifier.hash != expected) {
         throw std::runtime_error(pn::format(
                                          "mismatch in plugin identifier {0}",
-                                         pn::dump(archive.identifier, pn::dump_short))
+                                         pn::dump(archive.identifier.hash, pn::dump_short))
                                          .c_str());
     }
 }
@@ -266,7 +266,7 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
         ZipArchive archive(path, 0);
         Info       info = info_for_zip_archive(archive);
         check_version(info, kVersion);
-        found_scenario = info.identifier.copy();
+        found_scenario = info.identifier.hash.copy();
     }
 
     // Copy it to $DOWNLOADS/$IDENTIFIER.antaresplugin.  This is where

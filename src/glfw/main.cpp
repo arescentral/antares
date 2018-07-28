@@ -124,7 +124,7 @@ void main(int argc, char* const* argv) {
         bool              have_scenario = false;
         std::vector<Info> scenarios     = scenario_list();
         for (const Info& entry : scenarios) {
-            if (entry.identifier == *scenario) {
+            if (entry.identifier.hash == *scenario) {
                 have_scenario = true;
                 break;
             }

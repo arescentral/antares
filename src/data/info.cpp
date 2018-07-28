@@ -35,30 +35,31 @@ static bool valid_sha1(pn::string_view s) {
     return true;
 }
 
-static pn::string optional_identifier(path_value x) {
+static Info::Identifier optional_identifier(path_value x) {
     auto id = optional_string(x);
     if (id.has_value() && !valid_sha1(*id)) {
         throw std::runtime_error(
                 pn::format("{0}invalid identifier (must be lowercase sha1 digest)", x.prefix())
                         .c_str());
     }
-    return id.has_value() ? id->copy() : "";
+    return {id.has_value() ? id->copy() : ""};
 }
+DEFAULT_READER(Info::Identifier, optional_identifier);
 
 static Info fill_identifier(Info info) {
-    if (!info.identifier.empty()) {
+    if (!info.identifier.hash.empty()) {
         return info;
     }
     sfz::sha1 sha;
     sha.write(info.title);
-    info.identifier = sha.compute().hex();
+    info.identifier.hash = sha.compute().hex();
     return info;
 }
 
 Info info(path_value x) {
     return fill_identifier(required_struct<Info>(
             x, {{"title", &Info::title},
-                {"identifier", {&Info::identifier, optional_identifier}},
+                {"identifier", &Info::identifier},
                 {"format", &Info::format},
                 {"download_url", &Info::download_url},
                 {"author", &Info::author},

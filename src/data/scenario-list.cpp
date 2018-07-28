@@ -53,7 +53,7 @@ std::vector<Info> scenario_list() {
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
         scenarios.emplace_back(info(path_value{x}));
-        scenarios.back().identifier = kFactoryScenarioIdentifier;
+        scenarios.back().identifier.hash = kFactoryScenarioIdentifier;
     } catch (...) {
         // ignore
     }
