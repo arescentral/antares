@@ -48,7 +48,7 @@ FIELD_READER(Key) {
     }
     Key i;
     if (!GetKeyNameNum(*k, i)) {
-        throw std::runtime_error(pn::format("{0}: must be a key", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}must be a key", x.prefix()).c_str());
     }
     return i;
 }
@@ -60,7 +60,7 @@ FIELD_READER(Gamepad::Button) {
     }
     Gamepad::Button i = Gamepad::num(*k);
     if (i == Gamepad::Button::NONE) {
-        throw std::runtime_error(pn::format("{0}: must be a gamepad button", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}must be a gamepad button", x.prefix()).c_str());
     }
     return i;
 }

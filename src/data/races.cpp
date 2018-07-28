@@ -42,7 +42,7 @@ FIELD_READER(Race::Ships) {
         }
         return ships;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
     }
 }
 
