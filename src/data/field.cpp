@@ -105,12 +105,13 @@ DEFINE_FIELD_READER(int64_t) {
 }
 
 static void check_range(path_value x, int64_t i, Range<int64_t> range) {
-    if ((range.begin <= i) && (i < range.end)) {
-        return;
+    if (i < range.begin) {
+        throw std::runtime_error(
+                pn::format("{0}must be >= {1} (was {2})", x.prefix(), range.begin, i).c_str());
+    } else if (i >= range.end) {
+        throw std::runtime_error(
+                pn::format("{0}must be < {1} (was {2})", x.prefix(), range.end, i).c_str());
     }
-    throw std::runtime_error(
-            pn::format("{0}must satisfy ({1} <= x < {2})", x.prefix(), range.begin, range.end)
-                    .c_str());
 }
 
 int64_t int_field_within(path_value x, Range<int64_t> range) {
