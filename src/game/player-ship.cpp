@@ -391,7 +391,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 return;
             case Gamepad::Button::Y:
                 if (_gamepad_state & SELECT_BUMPER) {
-                    player->keysDown |= kGiveCommandKey;
+                    _key_presses |= kOrderKey;
                 } else {
                     engage_autopilot();
                 }
