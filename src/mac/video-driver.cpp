@@ -72,6 +72,18 @@ class InputModeTracker : public EventReceiver {
 
 }  // namespace
 
+static int32_t get_iohid_property(IOHIDDeviceRef device, CFStringRef key) {
+    int32_t    vendor      = 0;
+    cf::Type   vendor_type = CFRetain(IOHIDDeviceGetProperty(device, key));
+    cf::Number vendor_number;
+    if (vendor_type.c_obj() &&
+        (vendor_number = cf::cast<cf::Number>(std::move(vendor_type))).c_obj() &&
+        cf::unwrap(vendor_number, vendor)) {
+        return vendor;
+    }
+    return 0;
+}
+
 CocoaVideoDriver::CocoaVideoDriver() {}
 
 Size CocoaVideoDriver::viewport_size() const {
@@ -166,6 +178,130 @@ struct CocoaVideoDriver::EventBridge {
         if (!antares_is_active()) {
             return;
         }
+
+        IOHIDDeviceRef device  = IOHIDElementGetDevice(element);
+        int32_t        vendor  = get_iohid_property(device, CFSTR(kIOHIDVendorIDKey));
+        int32_t        product = get_iohid_property(device, CFSTR(kIOHIDProductIDKey));
+        switch (vendor) {
+            case 0x057e:  // Nintendo
+                switch (product) {
+                    case 0x2006:  // Joy-Con (L)
+                        return joy_con_l_button_event(element, value);
+                    case 0x2007:  // Joy-Con (R)
+                        return joy_con_r_button_event(element, value);
+                }
+        }
+        default_button_event(element, value);
+    }
+
+    void analog_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
+        if (!antares_is_active()) {
+            return;
+        }
+
+        IOHIDDeviceRef device  = IOHIDElementGetDevice(element);
+        int32_t        vendor  = get_iohid_property(device, CFSTR(kIOHIDVendorIDKey));
+        int32_t        product = get_iohid_property(device, CFSTR(kIOHIDProductIDKey));
+        switch (vendor) {
+            case 0x057e:  // Nintendo
+                switch (product) {
+                    case 0x2006:  // Joy-Con (L)
+                        return joy_con_l_analog_event(element, value);
+                    case 0x2007:  // Joy-Con (R)
+                        return joy_con_r_analog_event(element, value);
+                }
+        }
+        default_analog_event(element, value);
+    }
+
+    void joy_con_l_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        bool            down   = IOHIDValueGetIntegerValue(value);
+        uint16_t        usage  = IOHIDElementGetUsage(element);
+        Gamepad::Button button = Gamepad::Button::NONE;
+
+        switch (usage) {
+            case 1: button = Gamepad::Button::LEFT; break;
+            case 2: button = Gamepad::Button::DOWN; break;
+            case 3: button = Gamepad::Button::UP; break;
+            case 4: button = Gamepad::Button::RIGHT; break;
+            case 9: button = Gamepad::Button::BACK; break;
+            case 11: button = Gamepad::Button::LSB; break;
+            case 14: button = Gamepad::Button::NONE; break;
+            case 15: button = Gamepad::Button::LB; break;
+            case 16: button = Gamepad::Button::LT; break;
+        }
+
+        if (button == Gamepad::Button::NONE) {
+            return;
+        } else if (down) {
+            enqueue(new GamepadButtonDownEvent(_now(), button));
+        } else {
+            enqueue(new GamepadButtonUpEvent(_now(), button));
+        }
+    }
+
+    void joy_con_r_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        bool            down   = IOHIDValueGetIntegerValue(value);
+        uint16_t        usage  = IOHIDElementGetUsage(element);
+        Gamepad::Button button = Gamepad::Button::NONE;
+
+        switch (usage) {
+            case 1: button = Gamepad::Button::A; break;
+            case 2: button = Gamepad::Button::X; break;
+            case 3: button = Gamepad::Button::B; break;
+            case 4: button = Gamepad::Button::Y; break;
+            case 10: button = Gamepad::Button::START; break;
+            case 12: button = Gamepad::Button::RSB; break;
+            case 13: button = Gamepad::Button::NONE; break;
+            case 15: button = Gamepad::Button::RB; break;
+            case 16: button = Gamepad::Button::RT; break;
+        }
+
+        if (button == Gamepad::Button::NONE) {
+            return;
+        } else if (down) {
+            enqueue(new GamepadButtonDownEvent(_now(), button));
+        } else {
+            enqueue(new GamepadButtonUpEvent(_now(), button));
+        }
+    }
+
+    void joy_con_l_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        using Stick       = Gamepad::Stick;
+        int64_t int_value = IOHIDValueGetIntegerValue(value);
+        switch (int_value) {
+            case 0: enqueue(new GamepadStickEvent(_now(), Stick::LS, +1.000, +0.000)); break;
+            case 1: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.707, +0.707)); break;
+            case 2: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.000, +1.000)); break;
+            case 3: enqueue(new GamepadStickEvent(_now(), Stick::LS, -0.707, +0.707)); break;
+            case 4: enqueue(new GamepadStickEvent(_now(), Stick::LS, -1.000, +0.000)); break;
+            case 5: enqueue(new GamepadStickEvent(_now(), Stick::LS, -0.707, -0.707)); break;
+            case 6: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.000, -1.000)); break;
+            case 7: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.707, -0.707)); break;
+            case 8: enqueue(new GamepadStickEvent(_now(), Stick::LS, 0.000, 0.000)); break;
+        }
+    }
+
+    void joy_con_r_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        using Stick       = Gamepad::Stick;
+        int64_t int_value = IOHIDValueGetIntegerValue(value);
+        switch (int_value) {
+            case 0: enqueue(new GamepadStickEvent(_now(), Stick::RS, +1.000, +0.000)); break;
+            case 1: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.707, +0.707)); break;
+            case 2: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.000, +1.000)); break;
+            case 3: enqueue(new GamepadStickEvent(_now(), Stick::RS, -0.707, +0.707)); break;
+            case 4: enqueue(new GamepadStickEvent(_now(), Stick::RS, -1.000, +0.000)); break;
+            case 5: enqueue(new GamepadStickEvent(_now(), Stick::RS, -0.707, -0.707)); break;
+            case 6: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.000, -1.000)); break;
+            case 7: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.707, -0.707)); break;
+            case 8: enqueue(new GamepadStickEvent(_now(), Stick::RS, 0.000, 0.000)); break;
+        }
+    }
+
+    void default_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        if (!antares_is_active()) {
+            return;
+        }
         bool     down  = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
@@ -175,17 +311,17 @@ struct CocoaVideoDriver::EventBridge {
         }
     }
 
-    void analog_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
-        int      int_value = IOHIDValueGetIntegerValue(value);
+    void default_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        int64_t  int_value = IOHIDValueGetIntegerValue(value);
         uint16_t usage     = IOHIDElementGetUsage(element);
         switch (usage) {
             case kHIDUsage_GD_X:
             case kHIDUsage_GD_Y:
             case kHIDUsage_GD_Rx:
             case kHIDUsage_GD_Ry: {
-                int    min          = IOHIDElementGetLogicalMin(element);
-                int    max          = IOHIDElementGetLogicalMax(element);
-                double double_value = int_value;
+                int64_t min          = IOHIDElementGetLogicalMin(element);
+                int64_t max          = IOHIDElementGetLogicalMax(element);
+                double  double_value = int_value;
                 if (int_value < 0) {
                     double_value = -(double_value / min);
                 } else {
@@ -202,7 +338,7 @@ struct CocoaVideoDriver::EventBridge {
                         x, y));
             } break;
             case kHIDUsage_GD_Z:
-            case kHIDUsage_GD_Rz: button_event(result, element, value); break;
+            case kHIDUsage_GD_Rz: default_button_event(element, value); break;
         }
     }
 
