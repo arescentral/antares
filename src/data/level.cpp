@@ -147,7 +147,6 @@ FIELD_READER(LevelBase::StatusLine) {
             {"song", &LevelBase::song},                                                          \
             {"status", &LevelBase::status},                                                      \
             {"start_time", &LevelBase::start_time},                                              \
-            {"skip", &LevelBase::skip},                                                          \
             {"angle", &LevelBase::angle},                                                        \
             {"par", &LevelBase::par}
 // clang-format on
@@ -167,7 +166,8 @@ static Level solo_level(path_value x) {
     return required_struct<SoloLevel>(
             x, {COMMON_LEVEL_FIELDS,
                 {"players", &SoloLevel::players},
-                {"no_ships", &SoloLevel::no_ships_text},
+                {"skip", &SoloLevel::skip},
+                {"no_ships", &SoloLevel::no_ships},
                 {"prologue", &SoloLevel::prologue},
                 {"epilogue", &SoloLevel::epilogue}});
 }
@@ -176,9 +176,9 @@ static Level net_level(path_value x) {
     return required_struct<NetLevel>(
             x, {COMMON_LEVEL_FIELDS,
                 {"players", &NetLevel::players},
-                {"own_no_ships", &NetLevel::own_no_ships_text},
-                {"foe_no_ships", &NetLevel::foe_no_ships_text},
-                {"description", &NetLevel::description}});
+                {"description", &NetLevel::description},
+                {"own_no_ships", &NetLevel::own_no_ships},
+                {"foe_no_ships", &NetLevel::foe_no_ships}});
 }
 
 Level level(pn::value_cref x0) {

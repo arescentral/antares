@@ -912,14 +912,12 @@ void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
             g.game_over_at = g.time + secs(3);
         }
         switch (g.level->type()) {
-            case Level::Type::SOLO:
-                g.victory_text.emplace(g.level->solo.no_ships_text->copy());
-                break;
+            case Level::Type::SOLO: g.victory_text.emplace(g.level->solo.no_ships->copy()); break;
             case Level::Type::NET:
                 if (flagship->owner == g.admiral) {
-                    g.victory_text.emplace(g.level->net.own_no_ships_text->copy());
+                    g.victory_text.emplace(g.level->net.own_no_ships->copy());
                 } else {
-                    g.victory_text.emplace(g.level->net.foe_no_ships_text->copy());
+                    g.victory_text.emplace(g.level->net.foe_no_ships->copy());
                 }
                 break;
             default: g.victory_text = sfz::nullopt; break;

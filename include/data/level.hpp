@@ -69,14 +69,13 @@ struct LevelBase {
         StatusLine(const StatusLine&) = delete;
     };
 
-    sfz::optional<int64_t>                  chapter;
-    pn::string                              name;
-    std::vector<StatusLine>                 status;
-    sfz::optional<pn::string>               song;
-    sfz::optional<Rect>                     starmap;
-    sfz::optional<secs>                     start_time;
-    sfz::optional<NamedHandle<const Level>> skip;
-    sfz::optional<int64_t>                  angle;
+    sfz::optional<int64_t>    chapter;
+    pn::string                name;
+    std::vector<StatusLine>   status;
+    sfz::optional<pn::string> song;
+    sfz::optional<Rect>       starmap;
+    sfz::optional<secs>       start_time;
+    sfz::optional<int64_t>    angle;
     struct Par {
         game_ticks time;
         int64_t    kills;
@@ -108,10 +107,11 @@ struct SoloLevel : LevelBase {
         sfz::optional<Fixed>    earning_power;
     };
 
-    std::vector<Player>       players;
-    sfz::optional<pn::string> prologue;
-    sfz::optional<pn::string> epilogue;
-    sfz::optional<pn::string> no_ships_text;
+    std::vector<Player>                     players;
+    sfz::optional<NamedHandle<const Level>> skip;
+    sfz::optional<pn::string>               prologue;
+    sfz::optional<pn::string>               epilogue;
+    sfz::optional<pn::string>               no_ships;
 };
 
 struct NetLevel : LevelBase {
@@ -123,8 +123,8 @@ struct NetLevel : LevelBase {
 
     std::vector<Player>       players;
     sfz::optional<pn::string> description;
-    sfz::optional<pn::string> own_no_ships_text;
-    sfz::optional<pn::string> foe_no_ships_text;
+    sfz::optional<pn::string> own_no_ships;
+    sfz::optional<pn::string> foe_no_ships;
 };
 
 union Level {
