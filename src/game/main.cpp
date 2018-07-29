@@ -545,9 +545,16 @@ void GamePlay::fire_timer() {
             } else {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
-                stack()->push(new DebriefingScreen(
-                        *g.victory_text, g.time, g.level->base.par.time, GetAdmiralLoss(a),
-                        g.level->base.par.losses, GetAdmiralKill(a), g.level->base.par.kills));
+                switch (g.level->type()) {
+                    case Level::Type::SOLO:
+                        stack()->push(new DebriefingScreen(
+                                *g.victory_text, g.time, g.level->solo.par.time, GetAdmiralLoss(a),
+                                g.level->solo.par.losses, GetAdmiralKill(a),
+                                g.level->solo.par.kills));
+                        break;
+
+                    default: stack()->push(new DebriefingScreen(*g.victory_text)); break;
+                }
             }
             break;
 

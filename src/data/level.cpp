@@ -104,12 +104,12 @@ FIELD_READER(NetLevel::Player) {
 
 FIELD_READER(game_ticks) { return game_ticks{read_field<ticks>(x)}; }
 
-FIELD_READER(LevelBase::Par) {
-    return optional_struct<LevelBase::Par>(
-                   x, {{"time", &LevelBase::Par::time},
-                       {"kills", &LevelBase::Par::kills},
-                       {"losses", &LevelBase::Par::losses}})
-            .value_or(LevelBase::Par{game_ticks{ticks{0}}, 0, 0});
+FIELD_READER(SoloLevel::Par) {
+    return optional_struct<SoloLevel::Par>(
+                   x, {{"time", &SoloLevel::Par::time},
+                       {"kills", &SoloLevel::Par::kills},
+                       {"losses", &SoloLevel::Par::losses}})
+            .value_or(SoloLevel::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
 FIELD_READER(sfz::optional<LevelBase::StatusLine::Counter>) {
@@ -147,8 +147,7 @@ FIELD_READER(LevelBase::StatusLine) {
             {"song", &LevelBase::song},                                                          \
             {"status", &LevelBase::status},                                                      \
             {"start_time", &LevelBase::start_time},                                              \
-            {"angle", &LevelBase::angle},                                                        \
-            {"par", &LevelBase::par}
+            {"angle", &LevelBase::angle}
 // clang-format on
 
 FIELD_READER(LevelBase::Type) {
@@ -166,6 +165,7 @@ static Level solo_level(path_value x) {
     return required_struct<SoloLevel>(
             x, {COMMON_LEVEL_FIELDS,
                 {"players", &SoloLevel::players},
+                {"par", &SoloLevel::par},
                 {"skip", &SoloLevel::skip},
                 {"no_ships", &SoloLevel::no_ships},
                 {"prologue", &SoloLevel::prologue},

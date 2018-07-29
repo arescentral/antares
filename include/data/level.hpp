@@ -76,11 +76,6 @@ struct LevelBase {
     sfz::optional<Rect>       starmap;
     sfz::optional<secs>       start_time;
     sfz::optional<int64_t>    angle;
-    struct Par {
-        game_ticks time;
-        int64_t    kills;
-        int64_t    losses;
-    } par;
 
     std::vector<Initial>   initials;
     std::vector<Condition> conditions;
@@ -106,8 +101,15 @@ struct SoloLevel : LevelBase {
         sfz::optional<Hue>      hue;
         sfz::optional<Fixed>    earning_power;
     };
+    std::vector<Player> players;
 
-    std::vector<Player>                     players;
+    struct Par {
+        game_ticks time;
+        int64_t    kills;
+        int64_t    losses;
+    };
+    Par par;
+
     sfz::optional<NamedHandle<const Level>> skip;
     sfz::optional<pn::string>               prologue;
     sfz::optional<pn::string>               epilogue;
