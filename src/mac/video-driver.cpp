@@ -138,7 +138,6 @@ struct CocoaVideoDriver::EventBridge {
             case kHIDPage_KeyboardOrKeypad: self->key_event(result, element, value); break;
             case kHIDPage_GenericDesktop: self->analog_event(result, element, value); break;
             case kHIDPage_Button: self->button_event(result, element, value); break;
-            default: pn::format(stderr, "{0}\n", usage_page); break;
         }
     }
 
