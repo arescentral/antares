@@ -91,7 +91,7 @@ Sprite::Sprite()
           style(spriteNormal),
           styleColor(RgbColor::white()),
           styleData(0),
-          whichLayer(kNoSpriteLayer),
+          whichLayer(BaseObject::Layer::NONE),
           killMe(false),
           draw_tiny(NULL) {}
 
@@ -128,7 +128,7 @@ const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, sfz::optional<BaseObject::Icon> icon, int16_t layer, Hue tiny_hue,
+        int32_t scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
         uint8_t tiny_shade) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
@@ -174,7 +174,8 @@ Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t sc
 
 void draw_sprites() {
     if (gAbsoluteScale >= kBlipThreshhold) {
-        for (int layer : range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
+        for (BaseObject::Layer layer :
+             {BaseObject::Layer::BASES, BaseObject::Layer::SHIPS, BaseObject::Layer::SHOTS}) {
             for (auto aSprite : Sprite::all()) {
                 if ((aSprite->table != NULL) && !aSprite->killMe &&
                     (aSprite->whichLayer == layer)) {
@@ -203,7 +204,8 @@ void draw_sprites() {
             }
         }
     } else {
-        for (int layer : range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
+        for (BaseObject::Layer layer :
+             {BaseObject::Layer::BASES, BaseObject::Layer::SHIPS, BaseObject::Layer::SHOTS}) {
             for (auto aSprite : Sprite::all()) {
                 int tinySize = aSprite->icon.size;
                 if ((aSprite->table != NULL) && !aSprite->killMe && tinySize &&

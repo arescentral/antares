@@ -187,9 +187,9 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("briefing", {0, 0, 640, 480}),
           _level(level),
           _cancelled(cancelled),
-          _briefing_point(_level.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
+          _briefing_point(_level.base.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
           _briefing_point_start(_briefing_point),
-          _briefing_point_end(_level.briefings.size()),
+          _briefing_point_end(_level.base.briefings.size()),
           _data_item{{}} {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
@@ -265,7 +265,8 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
     for (const auto& pict : _inline_pict) {
         if (pict.bounds.contains(where) && pict.object) {
             stack()->push(new ObjectDataScreen(
-                    event.where(), *pict.object, ObjectDataScreen::MOUSE, event.button()));
+                    event.where(), *pict.object, ObjectDataScreen::MOUSE, event.button(),
+                    Key::NONE, Gamepad::Button::NONE));
             return;
         }
     }
@@ -274,34 +275,34 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
 
 void BriefingScreen::key_down(const KeyDownEvent& event) {
     switch (event.key()) {
-        case Keys::ESCAPE: {
+        case Key::ESCAPE: {
             *_cancelled = true;
             stack()->pop(this);
         }
             return;
-        case Keys::K1: return show_object_data(0, event);
-        case Keys::K2: return show_object_data(1, event);
-        case Keys::K3: return show_object_data(2, event);
-        case Keys::K4: return show_object_data(3, event);
-        case Keys::K5: return show_object_data(4, event);
-        case Keys::K6: return show_object_data(5, event);
-        case Keys::K7: return show_object_data(6, event);
-        case Keys::K8: return show_object_data(7, event);
-        case Keys::K9: return show_object_data(8, event);
-        case Keys::K0: return show_object_data(9, event);
+        case Key::K1: return show_object_data(0, event);
+        case Key::K2: return show_object_data(1, event);
+        case Key::K3: return show_object_data(2, event);
+        case Key::K4: return show_object_data(3, event);
+        case Key::K5: return show_object_data(4, event);
+        case Key::K6: return show_object_data(5, event);
+        case Key::K7: return show_object_data(6, event);
+        case Key::K8: return show_object_data(7, event);
+        case Key::K9: return show_object_data(8, event);
+        case Key::K0: return show_object_data(9, event);
         default: { return InterfaceScreen::key_down(event); }
     }
 }
 
 void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
-        case Gamepad::B: {
+        case Gamepad::Button::B: {
             *_cancelled = true;
             stack()->pop(this);
         }
             return;
-        case Gamepad::UP: return show_object_data(0, event);
-        case Gamepad::DOWN: return show_object_data(1, event);
+        case Gamepad::Button::UP: return show_object_data(0, event);
+        case Gamepad::Button::DOWN: return show_object_data(1, event);
         default: { return InterfaceScreen::gamepad_button_down(event); }
     }
 }
@@ -313,8 +314,8 @@ void BriefingScreen::build_star_map() {
     _bounds = pix_bounds;
     _bounds.center_in(widget(MAP_RECT)->inner_bounds());
 
-    if (_level.starmap.has_value()) {
-        _star_rect = *_level.starmap;
+    if (_level.base.starmap.has_value()) {
+        _star_rect = *_level.base.starmap;
 
         // Move `_star_rect` so that it is inside of `pix_bounds`.
         if (_star_rect.left < pix_bounds.left) {
@@ -423,19 +424,21 @@ void BriefingScreen::draw_brief_point() const {
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {
-    show_object_data(index, ObjectDataScreen::KEY, event.key());
+    show_object_data(index, ObjectDataScreen::KEY, 0, event.key(), Gamepad::Button::NONE);
 }
 
 void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& event) {
-    show_object_data(index, ObjectDataScreen::GAMEPAD, event.button);
+    show_object_data(index, ObjectDataScreen::GAMEPAD, 0, Key::NONE, event.button);
 }
 
-void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigger, int which) {
+void BriefingScreen::show_object_data(
+        int index, ObjectDataScreen::Trigger trigger, int mouse, Key key,
+        Gamepad::Button gamepad) {
     if (index < _inline_pict.size()) {
         auto obj = _inline_pict[index].object;
         if (obj) {
             const Point origin = _inline_pict[index].bounds.center();
-            stack()->push(new ObjectDataScreen(origin, *obj, trigger, which));
+            stack()->push(new ObjectDataScreen(origin, *obj, trigger, mouse, key, gamepad));
             return;
         }
     }

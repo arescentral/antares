@@ -208,15 +208,15 @@ KeyControlScreen::~KeyControlScreen() {}
 void KeyControlScreen::key_down(const KeyDownEvent& event) {
     if (_selected_key >= 0) {
         switch (event.key()) {
-            case Keys::ESCAPE:
-            case Keys::RETURN:
-            case Keys::CAPS_LOCK:
+            case Key::ESCAPE:
+            case Key::RETURN:
+            case Key::CAPS_LOCK:
                 sys.sound.warning();
                 _selected_key = -1;
                 break;
 
             default:
-                sys.prefs->set_key(_selected_key, event.key() + 1);
+                sys.prefs->set_key(_selected_key, event.key());
                 int old_tab = get_tab_num(_selected_key);
                 int new_tab = get_tab_num(++_selected_key);
                 if (old_tab != new_tab) {
@@ -255,7 +255,7 @@ void KeyControlScreen::adjust_interface() {
 
     for (int key = kKeyIndices[0]; key < kKeyIndices[5]; ++key) {
         PlainButton* b       = button(key + 15);
-        int          key_num = sys.prefs->key(key);
+        Key          key_num = sys.prefs->key(key);
         b->key()             = key_num;
         if (key == _selected_key) {
             b->activate();

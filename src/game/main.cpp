@@ -210,8 +210,8 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            if (g.level->song) {
-                sys.music.play(Music::IN_GAME, *g.level->song);
+            if (g.level->base.song.has_value()) {
+                sys.music.play(Music::IN_GAME, *g.level->base.song);
             }
 
             stack()->push(new GamePlay(_replay, _input_source, _game_result));
@@ -223,7 +223,7 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->chapter);
+                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->base.chapter);
                 const char* sep = "";
                 pn::format(stderr, "  \"objects\": [");
                 for (auto object : covered_objects) {
@@ -293,7 +293,7 @@ class PauseScreen : public Card {
 
     virtual void key_up(const KeyUpEvent& event) {
         wake();
-        if (event.key() == Keys::CAPS_LOCK) {
+        if (event.key() == Key::CAPS_LOCK) {
             stack()->pop(this);
         }
     }
@@ -371,7 +371,7 @@ void GamePlay::become_front() {
                     *_game_result  = QUIT_GAME;
                     g.game_over    = true;
                     g.next_level   = nullptr;
-                    g.victory_text = "";
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
@@ -379,7 +379,7 @@ void GamePlay::become_front() {
                     *_game_result  = RESTART_GAME;
                     g.game_over    = true;
                     g.next_level   = nullptr;
-                    g.victory_text = "";
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
@@ -389,8 +389,8 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = g.level->skip->get();
-                    g.victory_text = "";
+                    g.next_level   = g.level->solo.skip->get();
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
@@ -540,14 +540,21 @@ void GamePlay::fire_timer() {
         case RESTART_GAME: stack()->pop(this); break;
 
         case WIN_GAME:
-            if (_replay || g.victory_text.empty()) {
+            if (_replay || !g.victory_text.has_value()) {
                 stack()->pop(this);
             } else {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
-                stack()->push(new DebriefingScreen(
-                        g.victory_text, g.time, g.level->par.time, GetAdmiralLoss(a),
-                        g.level->par.losses, GetAdmiralKill(a), g.level->par.kills));
+                switch (g.level->type()) {
+                    case Level::Type::SOLO:
+                        stack()->push(new DebriefingScreen(
+                                *g.victory_text, g.time, g.level->solo.par.time, GetAdmiralLoss(a),
+                                g.level->solo.par.losses, GetAdmiralKill(a),
+                                g.level->solo.par.kills));
+                        break;
+
+                    default: stack()->push(new DebriefingScreen(*g.victory_text)); break;
+                }
             }
             break;
 
@@ -555,12 +562,12 @@ void GamePlay::fire_timer() {
             if (_replay) {
                 *_game_result = QUIT_GAME;
                 stack()->pop(this);
-            } else if (g.victory_text.empty()) {
+            } else if (!g.victory_text.has_value()) {
                 _state = PLAY_AGAIN;
                 stack()->push(new PlayAgainScreen(false, false, &_play_again));
             } else {
                 _state = DEBRIEFING;
-                stack()->push(new DebriefingScreen(g.victory_text));
+                stack()->push(new DebriefingScreen(*g.victory_text));
             }
             break;
 
@@ -572,24 +579,27 @@ void GamePlay::fire_timer() {
 
 void GamePlay::key_down(const KeyDownEvent& event) {
     switch (event.key()) {
-        case Keys::CAPS_LOCK:
+        case Key::CAPS_LOCK:
             _state         = PAUSED;
             _player_paused = true;
             stack()->push(new PauseScreen);
             return;
 
-        case Keys::ESCAPE:
+        case Key::ESCAPE:
             if (_replay) {
                 break;
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
+                stack()->push(new PlayAgainScreen(
+                        true,
+                        (g.level->type() == Level::Type::SOLO) && g.level->solo.skip.has_value(),
+                        &_play_again));
                 return;
             }
 
         default:
-            if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
+            if (event.key() == sys.prefs->key(kHelpKeyNum)) {
                 if (_replay) {
                     break;
                 } else {
@@ -598,20 +608,20 @@ void GamePlay::key_down(const KeyDownEvent& event) {
                     stack()->push(new HelpScreen);
                     return;
                 }
-            } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
-                sys.prefs->set_volume(sys.prefs->volume() - 1);
+            } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum)) {
+                sys.prefs->set_volume(sys.prefs->volume());
                 sys.audio->set_global_volume(sys.prefs->volume());
                 return;
-            } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum)) {
                 sys.prefs->set_volume(sys.prefs->volume() + 1);
                 sys.audio->set_global_volume(sys.prefs->volume());
                 return;
-            } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kActionMusicKeyNum)) {
                 if (sys.prefs->play_music_in_game()) {
                     sys.music.toggle();
                 }
                 return;
-            } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kFastMotionKeyNum)) {
                 _fast_motion = true;
                 return;
             }
@@ -621,7 +631,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
-    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kFastMotionKeyNum)) {
         _fast_motion = false;
         return;
     }
@@ -637,15 +647,19 @@ void GamePlay::mouse_move(const MouseMoveEvent& event) { _input_source->mouse_mo
 
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
-        case Gamepad::START:
+        case Gamepad::Button::START:
             if (_replay) {
                 break;
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
+                stack()->push(new PlayAgainScreen(
+                        true,
+                        (g.level->type() == Level::Type::SOLO) && g.level->solo.skip.has_value(),
+                        &_play_again));
                 return;
             }
+        default: break;
     }
 
     _input_source->gamepad_button_down(event);

@@ -84,7 +84,7 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
             cf::Number number = cf::cast<cf::Number>(cf::Type(CFRetain(key_settings.get(i))));
             int        key;
             if (cf::unwrap(number, key)) {
-                _current.keys[i] = key;
+                _current.keys[i] = static_cast<Key>(key - 1);
             }
         }
     }
@@ -123,7 +123,7 @@ void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
 
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
     for (int i : range<int>(KEY_COUNT)) {
-        int key = preferences.keys[i];
+        int key = 1 + static_cast<int>(preferences.keys[i]);
         key_settings.append(cf::wrap(key).c_obj());
     }
     cf::set_preference(kKeySettingsPreference, key_settings);

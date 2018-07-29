@@ -22,56 +22,43 @@
 
 namespace antares {
 
-static BuildableObject required_buildable_object(path_value x) {
-    return BuildableObject{required_string_copy(x)};
-}
+FIELD_READER(BuildableObject) { return BuildableObject{read_field<pn::string>(x)}; }
 
-static std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref a = x.value().as_array();
-        if (a.size() > kMaxShipCanBuild) {
-            throw std::runtime_error(pn::format(
-                                             "{0}has {1} elements, more than max of {2}",
-                                             x.prefix(), a.size(), kMaxShipCanBuild)
-                                             .c_str());
-        }
-        std::vector<BuildableObject> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_buildable_object(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+FIELD_READER(std::vector<BuildableObject>) {
+    std::vector<BuildableObject> objects =
+            optional_array<BuildableObject, read_field<BuildableObject>>(x);
+    if (objects.size() > kMaxShipCanBuild) {
+        throw std::runtime_error(pn::format(
+                                         "{0}has {1} elements, more than max of {2}", x.prefix(),
+                                         objects.size(), kMaxShipCanBuild)
+                                         .c_str());
     }
+    return objects;
 }
 
-static Initial::Override optional_override(path_value x) {
+FIELD_READER(Initial::Override) {
     return optional_struct<Initial::Override>(
-                   x, {{"name", {&Initial::Override::name, optional_string_copy}},
-                       {"sprite", {&Initial::Override::sprite, optional_string_copy}}})
+                   x, {{"name", &Initial::Override::name}, {"sprite", &Initial::Override::sprite}})
             .value_or(Initial::Override{});
 }
 
-static Initial::Target optional_target(path_value x) {
+FIELD_READER(Initial::Target) {
     return optional_struct<Initial::Target>(
-                   x, {{"initial", {&Initial::Target::initial, optional_initial, Initial::none()}},
-                       {"lock", {&Initial::Target::lock, optional_bool, false}}})
+                   x, {{"initial", &Initial::Target::initial}, {"lock", &Initial::Target::lock}})
             .value_or(Initial::Target{});
 }
 
-Initial initial(path_value x) {
+DEFINE_FIELD_READER(Initial) {
     return required_struct<Initial>(
-            x, {{"base", {&Initial::base, required_buildable_object}},
-                {"owner", {&Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
-                {"at", {&Initial::at, required_point}},
-                {"earning", {&Initial::earning, optional_fixed, Fixed::zero()}},
-                {"hide", {&Initial::hide, optional_bool, false}},
-                {"flagship", {&Initial::flagship, optional_bool, false}},
-                {"override", {&Initial::override_, optional_override}},
-                {"target", {&Initial::target, optional_target}},
-                {"build", {&Initial::build, optional_buildable_object_array}}});
+            x, {{"base", &Initial::base},
+                {"owner", &Initial::owner},
+                {"at", &Initial::at},
+                {"earning", &Initial::earning},
+                {"hide", &Initial::hide},
+                {"flagship", &Initial::flagship},
+                {"override", &Initial::override_},
+                {"target", &Initial::target},
+                {"build", &Initial::build}});
 }
 
 }  // namespace antares

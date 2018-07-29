@@ -32,6 +32,37 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
+Level::Type Level::type() const { return base.type; }
+
+Level::Level() : base{} {}
+Level::Level(DemoLevel l) : demo(std::move(l)) {}
+Level::Level(SoloLevel l) : solo(std::move(l)) {}
+Level::Level(NetLevel l) : net(std::move(l)) {}
+
+Level::Level(Level&& l) {
+    switch (l.type()) {
+        case Level::Type::NONE: new (this) Level(); break;
+        case Level::Type::DEMO: new (this) Level(std::move(l.demo)); break;
+        case Level::Type::SOLO: new (this) Level(std::move(l.solo)); break;
+        case Level::Type::NET: new (this) Level(std::move(l.net)); break;
+    }
+}
+
+Level& Level::operator=(Level&& l) {
+    this->~Level();
+    new (this) Level(std::move(l));
+    return *this;
+}
+
+Level::~Level() {
+    switch (type()) {
+        case Level::Type::NONE: base.~LevelBase(); break;
+        case Level::Type::DEMO: demo.~DemoLevel(); break;
+        case Level::Type::SOLO: solo.~SoloLevel(); break;
+        case Level::Type::NET: net.~NetLevel(); break;
+    }
+}
+
 const Level* Level::get(int number) { return plug.chapters[number]; }
 
 const Level* Level::get(pn::string_view name) {
@@ -43,151 +74,117 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-static sfz::optional<int32_t> optional_int32(path_value x) {
-    auto i = optional_int(x, {-0x80000000ll, 0x80000000ll});
-    return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
+FIELD_READER(LevelBase::PlayerType) {
+    return required_enum<LevelBase::PlayerType>(
+            x, {{"human", LevelBase::PlayerType::HUMAN}, {"cpu", LevelBase::PlayerType::CPU}});
 }
 
-template <Level::Type T>
-static Level::Player required_player(path_value x);
-
-static Level::Player::Type required_player_type(path_value x) {
-    return required_enum<Level::Player::Type>(
-            x, {{"human", Level::Player::Type::HUMAN}, {"cpu", Level::Player::Type::CPU}});
+FIELD_READER(DemoLevel::Player) {
+    return required_struct<DemoLevel::Player>(
+            x, {{"name", &DemoLevel::Player::name},
+                {"race", &DemoLevel::Player::race},
+                {"earning_power", &DemoLevel::Player::earning_power}});
 }
 
-template <>
-Level::Player required_player<Level::Type::DEMO>(path_value x) {
-    return required_struct<Level::Player>(
-            x, {{"name", {&Level::Player::name, required_string_copy}},
-                {"race", {&Level::Player::playerRace, required_race}},
-                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+FIELD_READER(SoloLevel::Player) {
+    return required_struct<SoloLevel::Player>(
+            x, {{"type", &SoloLevel::Player::type},
+                {"name", &SoloLevel::Player::name},
+                {"race", &SoloLevel::Player::race},
+                {"hue", &SoloLevel::Player::hue},
+                {"earning_power", &SoloLevel::Player::earning_power}});
 }
 
-template <>
-Level::Player required_player<Level::Type::SOLO>(path_value x) {
-    return required_struct<Level::Player>(
-            x, {{"type", {&Level::Player::playerType, required_player_type}},
-                {"name", {&Level::Player::name, required_string_copy}},
-                {"race", {&Level::Player::playerRace, required_race}},
-                {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
-                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
-}
-
-template <>
-Level::Player required_player<Level::Type::NET>(path_value x) {
-    return required_struct<Level::Player>(
-            x, {{"type", {&Level::Player::playerType, required_player_type}},
-                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
+FIELD_READER(NetLevel::Player) {
+    return required_struct<NetLevel::Player>(
+            x, {{"type", &NetLevel::Player::type},
+                {"earning_power", &NetLevel::Player::earning_power},
                 {"races", nullptr}});  // TODO(sfiera): populate field
 }
 
-static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
+FIELD_READER(game_ticks) { return game_ticks{read_field<ticks>(x)}; }
 
-static Level::Par optional_par(path_value x) {
-    return optional_struct<Level::Par>(
-                   x,
-                   {
-                           {"time", {&Level::Par::time, required_game_ticks}},
-                           {"kills", {&Level::Par::kills, required_int}},
-                           {"losses", {&Level::Par::losses, required_int}},
-                   })
-            .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
+FIELD_READER(SoloLevel::Par) {
+    return optional_struct<SoloLevel::Par>(
+                   x, {{"time", &SoloLevel::Par::time},
+                       {"kills", &SoloLevel::Par::kills},
+                       {"losses", &SoloLevel::Par::losses}})
+            .value_or(SoloLevel::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
-static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(path_value x) {
-    return optional_struct<Level::StatusLine::Counter>(
-            x, {
-                       {"player", {&Level::StatusLine::Counter::player, required_int}},
-                       {"which", {&Level::StatusLine::Counter::which, required_int}},
-                       {"fixed", {&Level::StatusLine::Counter::fixed, optional_bool, false}},
-               });
+FIELD_READER(sfz::optional<LevelBase::StatusLine::Counter>) {
+    return optional_struct<LevelBase::StatusLine::Counter>(
+            x, {{"player", &LevelBase::StatusLine::Counter::player},
+                {"which", &LevelBase::StatusLine::Counter::which},
+                {"fixed", &LevelBase::StatusLine::Counter::fixed}});
 };
 
-static Level::StatusLine required_status_line(path_value x) {
-    return required_struct<Level::StatusLine>(
-            x, {
-                       {"text", {&Level::StatusLine::text, optional_string_copy}},
-                       {"prefix", {&Level::StatusLine::prefix, optional_string_copy}},
+FIELD_READER(LevelBase::StatusLine) {
+    return required_struct<LevelBase::StatusLine>(
+            x, {{"text", &LevelBase::StatusLine::text},
+                {"prefix", &LevelBase::StatusLine::prefix},
 
-                       {"condition", {&Level::StatusLine::condition, optional_int}},
-                       {"true", {&Level::StatusLine::true_, optional_string_copy}},
-                       {"false", {&Level::StatusLine::false_, optional_string_copy}},
+                {"condition", &LevelBase::StatusLine::condition},
+                {"true", &LevelBase::StatusLine::true_},
+                {"false", &LevelBase::StatusLine::false_},
 
-                       {"minuend", {&Level::StatusLine::minuend, optional_fixed}},
-                       {"counter", {&Level::StatusLine::counter, optional_status_line_counter}},
+                {"minuend", &LevelBase::StatusLine::minuend},
+                {"counter", &LevelBase::StatusLine::counter},
 
-                       {"suffix", {&Level::StatusLine::suffix, optional_string_copy}},
-                       {"underline", {&Level::StatusLine::underline, optional_bool, false}},
-               });
+                {"suffix", &LevelBase::StatusLine::suffix},
+                {"underline", &LevelBase::StatusLine::underline}});
 };
 
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
-            {"type", {&Level::type, required_level_type}},                                       \
-            {"chapter", {&Level::chapter, optional_int}},                                        \
-            {"title", {&Level::name, required_string_copy}},                                     \
-            {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
-            {"conditions", {&Level::conditions, optional_array<Condition, condition>}},          \
-            {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
-            {"starmap", {&Level::starmap, optional_rect}},                                       \
-            {"song", {&Level::song, optional_string_copy}},                                      \
-            {"status",                                                                           \
-             {&Level::status, optional_array<Level::StatusLine, required_status_line>}},         \
-            {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
-            {"skip", {&Level::skip, optional_level}},                                            \
-            {"angle", {&Level::angle, optional_int32, -1}},                                      \
-            {"par", {&Level::par, optional_par}}
+            {"type", &LevelBase::type},                                                          \
+            {"chapter", &LevelBase::chapter},                                                    \
+            {"title", &LevelBase::name},                                                         \
+            {"initials", &LevelBase::initials},                                                  \
+            {"conditions", &LevelBase::conditions},                                              \
+            {"briefings", &LevelBase::briefings},                                                \
+            {"starmap", &LevelBase::starmap},                                                    \
+            {"song", &LevelBase::song},                                                          \
+            {"status", &LevelBase::status},                                                      \
+            {"start_time", &LevelBase::start_time},                                              \
+            {"angle", &LevelBase::angle}
 // clang-format on
 
-static Level::Type required_level_type(path_value x) {
-    return required_enum<Level::Type>(
-            x,
-            {{"solo", Level::Type::SOLO}, {"net", Level::Type::NET}, {"demo", Level::Type::DEMO}});
+FIELD_READER(LevelBase::Type) {
+    return required_enum<LevelBase::Type>(
+            x, {{"solo", LevelBase::Type::SOLO},
+                {"net", LevelBase::Type::NET},
+                {"demo", LevelBase::Type::DEMO}});
 }
 
 static Level demo_level(path_value x) {
-    return required_struct<Level>(
-            x, {
-                       COMMON_LEVEL_FIELDS,
-                       {"players",
-                        {&Level::players,
-                         required_array<Level::Player, required_player<Level::Type::DEMO>>}},
-               });
+    return required_struct<DemoLevel>(x, {COMMON_LEVEL_FIELDS, {"players", &DemoLevel::players}});
 }
 
 static Level solo_level(path_value x) {
-    return required_struct<Level>(
-            x, {
-                       COMMON_LEVEL_FIELDS,
-                       {"players",
-                        {&Level::players,
-                         required_array<Level::Player, required_player<Level::Type::SOLO>>}},
-                       {"no_ships", {&Level::own_no_ships_text, optional_string, ""}},
-                       {"prologue", {&Level::prologue, optional_string, ""}},
-                       {"epilogue", {&Level::epilogue, optional_string, ""}},
-               });
+    return required_struct<SoloLevel>(
+            x, {COMMON_LEVEL_FIELDS,
+                {"players", &SoloLevel::players},
+                {"par", &SoloLevel::par},
+                {"skip", &SoloLevel::skip},
+                {"no_ships", &SoloLevel::no_ships},
+                {"prologue", &SoloLevel::prologue},
+                {"epilogue", &SoloLevel::epilogue}});
 }
 
 static Level net_level(path_value x) {
-    return required_struct<Level>(
-            x, {
-                       COMMON_LEVEL_FIELDS,
-                       {"players",
-                        {&Level::players,
-                         required_array<Level::Player, required_player<Level::Type::NET>>}},
-                       {"own_no_ships", {&Level::own_no_ships_text, optional_string, ""}},
-                       {"foe_no_ships", {&Level::foe_no_ships_text, optional_string, ""}},
-                       {"description", {&Level::description, optional_string, ""}},
-               });
+    return required_struct<NetLevel>(
+            x, {COMMON_LEVEL_FIELDS,
+                {"players", &NetLevel::players},
+                {"description", &NetLevel::description},
+                {"own_no_ships", &NetLevel::own_no_ships},
+                {"foe_no_ships", &NetLevel::foe_no_ships}});
 }
 
 Level level(pn::value_cref x0) {
     path_value x{x0};
-    if (!x.value().is_map()) {
-        throw std::runtime_error("must be map");
-    }
-    switch (required_level_type(x.get("type"))) {
+    switch (required_object_type(x, read_field<Level::Type>)) {
+        case Level::Type::NONE: throw std::runtime_error("level type NONE?");
         case Level::Type::DEMO: return demo_level(x);
         case Level::Type::SOLO: return solo_level(x);
         case Level::Type::NET: return net_level(x);

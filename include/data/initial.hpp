@@ -38,15 +38,15 @@ struct BuildableObject {
 };
 
 struct Initial {
-    BuildableObject base;
-    Handle<Admiral> owner;
-    Point           at;
-    bool            hide     = false;
-    bool            flagship = false;
+    BuildableObject                base;
+    sfz::optional<Handle<Admiral>> owner;
+    Point                          at;
+    sfz::optional<bool>            hide;
+    sfz::optional<bool>            flagship;
 
     struct Target {
-        Handle<const Initial> initial;
-        bool                  lock = false;
+        sfz::optional<Handle<const Initial>> initial;
+        sfz::optional<bool>                  lock;
     } target;
 
     struct Override {
@@ -54,7 +54,7 @@ struct Initial {
         sfz::optional<pn::string> sprite;
     } override_;
 
-    Fixed                        earning = Fixed::zero();
+    sfz::optional<Fixed>         earning;
     std::vector<BuildableObject> build;
 
     static const Initial*            get(int n);
@@ -62,7 +62,12 @@ struct Initial {
     static HandleList<const Initial> all();
 };
 
-Initial initial(path_value x);
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<Initial> {
+    static Initial read(path_value x);
+};
 
 }  // namespace antares
 

@@ -146,22 +146,22 @@ void main(int argc, char* const* argv) {
 }
 
 void main_screen(EventScheduler& scheduler) {
-    scheduler.schedule_key(Keys::Q, 900, 901);
+    scheduler.schedule_key(Key::Q, 900, 901);
     scheduler.schedule_snapshot(900);
-    scheduler.schedule_key(Keys::Q, 902, 903);
+    scheduler.schedule_key(Key::Q, 902, 903);
 }
 
 void options(EventScheduler& scheduler) {
-    scheduler.schedule_key(Keys::Q, 899, 900);
+    scheduler.schedule_key(Key::Q, 899, 900);
 
     // Head to the Options screens.  Grab the sound options screen.
-    scheduler.schedule_key(Keys::O, 960, 1020);
+    scheduler.schedule_key(Key::O, 960, 1020);
     scheduler.schedule_snapshot(900);
     scheduler.schedule_snapshot(960);
     scheduler.schedule_snapshot(1020);
 
     // Switch to the key settings screen.  View all the tabs.
-    scheduler.schedule_key(Keys::K, 1080, 1140);
+    scheduler.schedule_key(Key::K, 1080, 1140);
     scheduler.schedule_snapshot(1080);
     scheduler.schedule_snapshot(1140);
 
@@ -186,23 +186,23 @@ void options(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(1680);
     scheduler.schedule_snapshot(1740);
 
-    scheduler.schedule_key(Keys::Q, 1800, 1860);
+    scheduler.schedule_key(Key::Q, 1800, 1860);
     scheduler.schedule_snapshot(1800);
 }
 
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
     ledger.unlock_chapter(22);
 
-    scheduler.schedule_key(Keys::Q, 900, 901);
+    scheduler.schedule_key(Key::Q, 900, 901);
     scheduler.schedule_snapshot(900);
 
     // Head to the level selection screen.
-    scheduler.schedule_key(Keys::S, 960, 1020);
+    scheduler.schedule_key(Key::S, 960, 1020);
     scheduler.schedule_snapshot(960);
     scheduler.schedule_snapshot(1020);
 
     // Start the level.  Level selection screen fades out.
-    scheduler.schedule_key(Keys::RETURN, 1080, 1140);
+    scheduler.schedule_key(Key::RETURN, 1080, 1140);
     scheduler.schedule_snapshot(1080);
     scheduler.schedule_snapshot(1140);
     scheduler.schedule_snapshot(1170);
@@ -210,16 +210,16 @@ void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
 
     int64_t time_ticks = 1260;
     for (int i = 0; i < 10; ++i) {
-        scheduler.schedule_key(Keys::RIGHT_ARROW, time_ticks, time_ticks + 60);
+        scheduler.schedule_key(Key::RIGHT_ARROW, time_ticks, time_ticks + 60);
         scheduler.schedule_snapshot(time_ticks);
         scheduler.schedule_snapshot(time_ticks + 60);
         time_ticks += 120;
     }
 
-    scheduler.schedule_key(Keys::ESCAPE, time_ticks, time_ticks + 1);
+    scheduler.schedule_key(Key::ESCAPE, time_ticks, time_ticks + 1);
     scheduler.schedule_snapshot(time_ticks);
 
-    scheduler.schedule_key(Keys::Q, time_ticks + 60, time_ticks + 120);
+    scheduler.schedule_key(Key::Q, time_ticks + 60, time_ticks + 120);
     scheduler.schedule_snapshot(time_ticks + 60);
     scheduler.schedule_snapshot(time_ticks + 119);
     scheduler.schedule_snapshot(time_ticks + 120);
@@ -232,13 +232,13 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(wall_time(), Point(320, 240))));
 
     // Skip the intro.  Start the first tutorial and skip the prologue.
-    scheduler.schedule_key(Keys::Q, 1756, 1757);
-    scheduler.schedule_key(Keys::S, 1816, 1817);
-    scheduler.schedule_key(Keys::RETURN, 1875, 1876);
+    scheduler.schedule_key(Key::Q, 1756, 1757);
+    scheduler.schedule_key(Key::S, 1816, 1817);
+    scheduler.schedule_key(Key::RETURN, 1875, 1876);
     scheduler.schedule_snapshot(1875);
     scheduler.schedule_snapshot(1905);
     scheduler.schedule_snapshot(1935);
-    scheduler.schedule_key(Keys::RETURN, 1936, 1937);
+    scheduler.schedule_key(Key::RETURN, 1936, 1937);
 
     scheduler.schedule_snapshot(1937);
     scheduler.schedule_snapshot(1957);
@@ -247,7 +247,7 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(1980);
     scheduler.schedule_snapshot(2000);
 
-    scheduler.schedule_key(Keys::CAPS_LOCK, 2020, 2140);
+    scheduler.schedule_key(Key::CAPS_LOCK, 2020, 2140);
     scheduler.schedule_snapshot(2020);
     scheduler.schedule_snapshot(2040);
     scheduler.schedule_snapshot(2060);
@@ -260,16 +260,16 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(2180);
 
     // Exit play.
-    scheduler.schedule_key(Keys::ESCAPE, 2200, 2260);
+    scheduler.schedule_key(Key::ESCAPE, 2200, 2260);
     scheduler.schedule_snapshot(2200);
     scheduler.schedule_snapshot(2260);
 
-    scheduler.schedule_key(Keys::Q, 2320, 2380);
+    scheduler.schedule_key(Key::Q, 2320, 2380);
     scheduler.schedule_snapshot(2320);
     scheduler.schedule_snapshot(2380);
 
     // Quit game.
-    scheduler.schedule_key(Keys::Q, 2440, 2500);
+    scheduler.schedule_key(Key::Q, 2440, 2500);
     scheduler.schedule_snapshot(2440);
 }
 

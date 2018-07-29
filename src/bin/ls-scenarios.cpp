@@ -82,7 +82,7 @@ void main(int argc, char* const* argv) {
     std::vector<Info> scenarios = scenario_list();
     pn::map           m;
     for (const Info& s : scenarios) {
-        m[s.identifier.copy()] = pn::map{
+        m[s.identifier.hash.copy()] = pn::map{
                 {"title", s.title.copy()},     {"download_url", maybe_string(s.download_url)},
                 {"author", s.author.copy()},   {"author_url", maybe_string(s.author_url)},
                 {"version", s.version.copy()},

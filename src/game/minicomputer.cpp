@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "config/preferences.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/shapes.hpp"
@@ -1054,7 +1055,8 @@ void MiniComputerSetStatusStrings() {
 
     for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
         miniScreenLineType* line = g.mini.lineData.get() + count;
-        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) >= g.level->status.size()) {
+        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) >=
+            g.level->base.status.size()) {
             line->statusType = kNoStatusData;
             line->value      = -1;
             line->string.clear();
@@ -1062,9 +1064,10 @@ void MiniComputerSetStatusStrings() {
         }
 
         // we have some data for this line to interpret
-        const Level::StatusLine& l = g.level->status.at(count - kStatusMiniScreenFirstLine);
+        const LevelBase::StatusLine& l =
+                g.level->base.status.at(count - kStatusMiniScreenFirstLine);
 
-        line->underline = l.underline;
+        line->underline = l.underline.value_or(false);
         if (l.text.has_value()) {
             line->statusType = kPlainTextStatus;
             line->value      = 0;
@@ -1082,7 +1085,7 @@ void MiniComputerSetStatusStrings() {
         } else if (l.counter.has_value()) {
             line->whichStatus  = l.counter->which;
             line->statusPlayer = Handle<Admiral>(l.counter->player);
-            if (l.counter->fixed) {
+            if (l.counter->fixed.value_or(false)) {
                 if (l.minuend.has_value()) {
                     line->statusType    = kSmallFixedMinusValue;
                     line->negativeValue = l.minuend->val();

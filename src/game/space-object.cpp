@@ -88,8 +88,8 @@ BaseObject* BaseObject::get(pn::string_view name) {
 
 NamedHandle<const BaseObject> get_buildable_object_handle(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.find(o.name.copy());
-    if (it == race->ships.end()) {
+    auto it = race->ships.map.find(o.name.copy());
+    if (it == race->ships.map.end()) {
         return NamedHandle<const BaseObject>(o.name.copy());
     }
     return it->second.copy();
@@ -97,8 +97,8 @@ NamedHandle<const BaseObject> get_buildable_object_handle(
 
 const BaseObject* get_buildable_object(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.find(o.name.copy());
-    if (it == race->ships.end()) {
+    auto it = race->ships.map.find(o.name.copy());
+    if (it == race->ships.map.end()) {
         return BaseObject::get(o.name);
     }
     return BaseObject::get(it->second.name());
@@ -115,11 +115,11 @@ static Handle<SpaceObject> next_free_space_object() {
 
 static uint8_t get_tiny_shade(const SpaceObject& o) {
     switch (o.layer) {
-        case kFirstSpriteLayer: return MEDIUM; break;
-        case kMiddleSpriteLayer: return LIGHT; break;
-        case kLastSpriteLayer: return VERY_LIGHT; break;
+        case BaseObject::Layer::NONE: return DARK; break;
+        case BaseObject::Layer::BASES: return MEDIUM; break;
+        case BaseObject::Layer::SHIPS: return LIGHT; break;
+        case BaseObject::Layer::SHOTS: return VERY_LIGHT; break;
     }
-    return DARK;
 }
 
 static Hue get_tiny_color(const SpaceObject& o) {
@@ -250,9 +250,9 @@ SpaceObject::SpaceObject(
         continue;
     }
 
-    if (base->activate.period.begin != ticks(0)) {
+    if (base->activate.period.has_value()) {
         periodicTime =
-                base->activate.period.begin + randomSeed.next(base->activate.period.range());
+                base->activate.period->begin + randomSeed.next(base->activate.period->range());
     }
 
     direction = base->initial_direction.begin;
@@ -298,9 +298,9 @@ SpaceObject::SpaceObject(
         frame.animation.speed         = base->animation->speed;
     }
 
-    if (base->expire.after.age.begin >= ticks(1)) {
+    if (base->expire.after.age.has_value()) {
         expire_after =
-                base->expire.after.age.begin + randomSeed.next(base->expire.after.age.range());
+                base->expire.after.age->begin + randomSeed.next(base->expire.after.age->range());
         expires = true;
     } else {
         expires = false;
@@ -419,9 +419,9 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base.maxVelocity;
 
-    if (base.expire.after.age.begin >= ticks(1)) {
-        obj->expire_after =
-                base.expire.after.age.begin + obj->randomSeed.next(base.expire.after.age.range());
+    if (base.expire.after.age.has_value()) {
+        obj->expire_after = base.expire.after.age->begin +
+                            obj->randomSeed.next(base.expire.after.age->range());
         obj->expires = true;
     } else {
         obj->expires = false;
@@ -457,9 +457,9 @@ void SpaceObject::change_base_type(
 
     // check periodic time
     obj->periodicTime = ticks(0);
-    if (base.activate.period.begin != ticks(0)) {
+    if (base.activate.period.has_value()) {
         obj->periodicTime =
-                base.activate.period.begin + obj->randomSeed.next(base.activate.period.range());
+                base.activate.period->begin + obj->randomSeed.next(base.activate.period->range());
     }
 
     obj->pulse.base = base.weapons.pulse.has_value() ? base.weapons.pulse->base.get() : nullptr;
@@ -860,10 +860,10 @@ Fixed SpaceObject::turn_rate() const { return base->turn_rate; }
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
 
-bool tags_match(const BaseObject& o, const std::map<pn::string, bool>& query) {
-    for (const auto& kv : query) {
-        auto it      = o.tags.find(kv.first);
-        bool has_tag = ((it != o.tags.end()) && it->second);
+bool tags_match(const BaseObject& o, const Tags& query) {
+    for (const auto& kv : query.tags) {
+        auto it      = o.tags.tags.find(kv.first);
+        bool has_tag = ((it != o.tags.tags.end()) && it->second);
         if (kv.second != has_tag) {
             return false;
         }
@@ -881,21 +881,21 @@ sfz::optional<pn::string_view> sprite_resource(const BaseObject& o) {
     }
 }
 
-int32_t sprite_layer(const BaseObject& o) {
+BaseObject::Layer sprite_layer(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
         return o.rotation->layer;
     } else if (o.attributes & kIsSelfAnimated) {
         return o.animation->layer;
     } else {
-        return 0;
+        return BaseObject::Layer::NONE;
     }
 }
 
 int32_t sprite_scale(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return o.rotation->scale;
+        return o.rotation->scale.factor;
     } else if (o.attributes & kIsSelfAnimated) {
-        return o.animation->scale;
+        return o.animation->scale.factor;
     } else {
         return SCALE_SCALE;
     }

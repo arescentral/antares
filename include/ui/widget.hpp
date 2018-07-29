@@ -24,6 +24,7 @@
 #include "data/interface.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
@@ -31,11 +32,13 @@ class TabBox;
 
 class Widget {
   public:
+    static std::unique_ptr<Widget> from(const WidgetData& data);
+
     virtual sfz::optional<int64_t> id() const = 0;
 
     virtual Widget* accept_click(Point where);
-    virtual Widget* accept_key(int64_t which);
-    virtual Widget* accept_button(int64_t which);
+    virtual Widget* accept_key(Key which);
+    virtual Widget* accept_button(Gamepad::Button which);
     virtual void    action();
 
     virtual void activate();
@@ -86,11 +89,11 @@ class TextRect : public Widget {
     Rect outer_bounds() const override;
 
   private:
-    Rect                   _inner_bounds;
-    sfz::optional<int64_t> _id;
-    pn::string             _text;
-    Hue                    _hue   = Hue::GRAY;
-    InterfaceStyle         _style = InterfaceStyle::LARGE;
+    Rect                      _inner_bounds;
+    sfz::optional<int64_t>    _id;
+    sfz::optional<pn::string> _text;
+    Hue                       _hue   = Hue::GRAY;
+    InterfaceStyle            _style = InterfaceStyle::LARGE;
 };
 
 class PictureRect : public Widget {
@@ -114,22 +117,22 @@ class Button : public Widget {
     sfz::optional<int64_t> id() const override { return _id; }
 
     Widget* accept_click(Point where) override;
-    Widget* accept_key(int64_t which) override;
-    Widget* accept_button(int64_t which) override;
+    Widget* accept_key(Key which) override;
+    Widget* accept_button(Gamepad::Button which) override;
 
     void activate() override { _active = true; }
     void deactivate() override { _active = false; }
 
     pn::string_view label() const { return _label; }
-    int16_t         key() const { return _key; }
-    int16_t         gamepad() const { return _gamepad; }
+    Key             key() const { return _key; }
+    Gamepad::Button gamepad() const { return _gamepad; }
     Hue             hue() const { return _hue; }
     InterfaceStyle  style() const { return _style; }
     bool            active() const { return _active; }
     virtual bool    enabled() const = 0;
 
-    int16_t& key() { return _key; }
-    Hue&     hue() { return _hue; }
+    Key& key() { return _key; }
+    Hue& hue() { return _hue; }
 
   protected:
     Button(const ButtonData& data);
@@ -137,8 +140,8 @@ class Button : public Widget {
   private:
     sfz::optional<int64_t> _id;
     pn::string             _label;
-    int16_t                _key;
-    int16_t                _gamepad;
+    Key                    _key;
+    Gamepad::Button        _gamepad;
     Hue                    _hue    = Hue::GRAY;
     InterfaceStyle         _style  = InterfaceStyle::LARGE;
     bool                   _active = false;
@@ -237,8 +240,8 @@ class TabBox : public Widget {
     sfz::optional<int64_t> id() const override { return _id; }
 
     Widget* accept_click(Point where) override;
-    Widget* accept_key(int64_t which) override;
-    Widget* accept_button(int64_t which) override;
+    Widget* accept_key(Key which) override;
+    Widget* accept_button(Gamepad::Button which) override;
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;

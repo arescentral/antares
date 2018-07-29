@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2016-2017 The Antares Authors
+// Copyright (C) 2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,39 +16,19 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_PLUGIN_HPP_
-#define ANTARES_DATA_PLUGIN_HPP_
+#include "data/distance.hpp"
 
-#include <map>
-#include <vector>
+#include <pn/map>
+#include <pn/value>
 
-#include "data/handle.hpp"
-#include "data/info.hpp"
-#include "video/driver.hpp"
+#include "data/field.hpp"
 
 namespace antares {
 
-class BaseObject;
-union Level;
-struct Race;
-
-struct ScenarioGlobals {
-    Info                             info;
-    std::map<int, const Level*>      chapters;
-    std::map<pn::string, Level>      levels;
-    std::map<pn::string, BaseObject> objects;
-    std::map<pn::string, Race>       races;
-    Texture                          splash;
-    Texture                          starmap;
-};
-
-extern ScenarioGlobals plug;
-
-void PluginInit();
-
-void load_race(const NamedHandle<const Race>& r);
-void load_object(const NamedHandle<const BaseObject>& o);
+DEFINE_FIELD_READER(Distance) {
+    double  d = read_field<double>(x);
+    int64_t u = floor(pow(d, 2));
+    return Distance{u};
+}
 
 }  // namespace antares
-
-#endif  // ANTARES_DATA_PLUGIN_HPP_

@@ -22,13 +22,13 @@
 
 namespace antares {
 
-static std::map<pn::rune, Rect> required_glyphs(path_value x) {
+FIELD_READER(FontData::Glyphs) {
     if (x.value().is_map()) {
-        std::map<pn::rune, Rect> glyphs;
+        FontData::Glyphs glyphs;
         for (pn::key_value_cref kv : x.value().as_map()) {
-            pn::string_view glyph  = kv.key();
-            path_value      rect   = x.get(glyph);
-            glyphs[*glyph.begin()] = required_rect(rect);
+            pn::string_view glyph      = kv.key();
+            path_value      rect       = x.get(glyph);
+            glyphs.map[*glyph.begin()] = read_field<Rect>(rect);
         }
         return glyphs;
     } else {
@@ -38,10 +38,10 @@ static std::map<pn::rune, Rect> required_glyphs(path_value x) {
 
 FontData font_data(pn::value_cref x) {
     return required_struct<FontData>(
-            path_value{x}, {{"logical-width", {&FontData::logical_width, required_int}},
-                            {"height", {&FontData::height, required_int}},
-                            {"ascent", {&FontData::ascent, required_int}},
-                            {"glyphs", {&FontData::glyphs, required_glyphs}}});
+            path_value{x}, {{"logical-width", &FontData::logical_width},
+                            {"height", &FontData::height},
+                            {"ascent", &FontData::ascent},
+                            {"glyphs", &FontData::glyphs}});
 }
 
 }  // namespace antares

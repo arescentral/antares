@@ -26,18 +26,19 @@ using sfz::range;
 
 namespace antares {
 
-int16_t Gamepad::num(pn::string_view name) {
+Gamepad::Button Gamepad::num(pn::string_view name) {
     for (auto i : range<int>(BEGIN, END)) {
         if (sys.gamepad_names.at(i) == name) {
-            return i;
+            return static_cast<Gamepad::Button>(i);
         }
     }
-    return 0;
+    return Gamepad::Button::NONE;
 }
 
-bool Gamepad::name(int16_t button, pn::string& out) {
-    if ((0 <= button) && (button < sys.gamepad_names.size())) {
-        out = sys.gamepad_names.at(button).copy();
+bool Gamepad::name(Gamepad::Button button, pn::string& out) {
+    int index = static_cast<int>(button);
+    if ((0 <= index) && (index < sys.gamepad_names.size())) {
+        out = sys.gamepad_names.at(index).copy();
         return true;
     }
     return false;

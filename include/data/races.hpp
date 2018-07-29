@@ -35,14 +35,18 @@ class BaseObject;
 class path_value;
 
 struct Race {
-    pn::string                                          singular;
-    pn::string                                          plural;
-    pn::string                                          military;
-    pn::string                                          homeworld;
-    Hue                                                 hue;
-    std::vector<Hue>                                    not_hue;
-    Fixed                                               advantage;
-    std::map<pn::string, NamedHandle<const BaseObject>> ships;
+    pn::string       singular;
+    pn::string       plural;
+    pn::string       military;
+    pn::string       homeworld;
+    Hue              hue;
+    std::vector<Hue> not_hue;
+    Fixed            advantage;
+
+    struct Ships {
+        std::map<pn::string, NamedHandle<const BaseObject>> map;
+    };
+    Ships ships;
 
     static Race* get(pn::string_view name);
 };

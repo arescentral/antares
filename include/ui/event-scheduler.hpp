@@ -45,7 +45,7 @@ class EventScheduler {
 
     void schedule_snapshot(int64_t at);
     void schedule_event(std::unique_ptr<Event> event);
-    void schedule_key(int32_t key, int64_t down, int64_t up);
+    void schedule_key(Key key, int64_t down, int64_t up);
     void schedule_mouse(int button, const Point& where, int64_t down, int64_t up);
 
     void loop(MainLoop& loop);

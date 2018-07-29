@@ -39,21 +39,11 @@ struct Condition;
 struct Initial;
 struct Race;
 
-struct Level {
-    enum class Type { SOLO, NET, DEMO };
+struct LevelBase {
+    enum class Type { NONE, SOLO, NET, DEMO };
+    enum class PlayerType { HUMAN, CPU };
 
     Type type = Type::DEMO;
-
-    struct Player {
-        enum class Type { HUMAN, CPU };
-
-        Type                    playerType = Type::CPU;
-        NamedHandle<const Race> playerRace;
-        pn::string              name;
-        Fixed                   earningPower = Fixed::zero();
-        int16_t                 netRaceFlags = 0;
-        Hue                     hue          = Hue::GRAY;
-    };
 
     struct StatusLine {
         sfz::optional<pn::string> text;
@@ -64,48 +54,102 @@ struct Level {
         sfz::optional<pn::string> false_;
 
         struct Counter {
-            int64_t player = 0;
-            int64_t which  = 0;
-            bool    fixed  = false;
+            int64_t             player = 0;
+            int64_t             which  = 0;
+            sfz::optional<bool> fixed;
         };
         sfz::optional<Fixed>   minuend;
         sfz::optional<Counter> counter;
 
         sfz::optional<pn::string> suffix;
-        bool                      underline = false;
+        sfz::optional<bool>       underline;
 
         StatusLine()                  = default;
         StatusLine(StatusLine&&)      = default;
         StatusLine(const StatusLine&) = delete;
     };
 
-    sfz::optional<int64_t>                  chapter;
-    pn::string                              name;
-    std::vector<Player>                     players;
-    std::vector<StatusLine>                 status;
-    sfz::optional<pn::string>               song;
-    sfz::optional<Rect>                     starmap;
-    secs                                    startTime = secs(0);
-    sfz::optional<NamedHandle<const Level>> skip;
-    int32_t                                 angle = 0;
-    struct Par {
-        game_ticks time;
-        int64_t    kills;
-        int64_t    losses;
-    } par;
+    sfz::optional<int64_t>    chapter;
+    pn::string                name;
+    std::vector<StatusLine>   status;
+    sfz::optional<pn::string> song;
+    sfz::optional<Rect>       starmap;
+    sfz::optional<secs>       start_time;
+    sfz::optional<int64_t>    angle;
 
     std::vector<Initial>   initials;
     std::vector<Condition> conditions;
     std::vector<Briefing>  briefings;
+};
 
-    pn::string prologue;           // SOLO
-    pn::string epilogue;           // SOLO
-    pn::string own_no_ships_text;  // SOLO, NET
-    pn::string foe_no_ships_text;  // NET
-    pn::string description;        // NET
+struct DemoLevel : LevelBase {
+    struct Player {
+        pn::string              name;
+        NamedHandle<const Race> race;
+        sfz::optional<Hue>      hue;
+        sfz::optional<Fixed>    earning_power;
+    };
 
+    std::vector<Player> players;
+};
+
+struct SoloLevel : LevelBase {
+    struct Player {
+        PlayerType              type = PlayerType::CPU;
+        pn::string              name;
+        NamedHandle<const Race> race;
+        sfz::optional<Hue>      hue;
+        sfz::optional<Fixed>    earning_power;
+    };
+    std::vector<Player> players;
+
+    struct Par {
+        game_ticks time;
+        int64_t    kills;
+        int64_t    losses;
+    };
+    Par par;
+
+    sfz::optional<NamedHandle<const Level>> skip;
+    sfz::optional<pn::string>               prologue;
+    sfz::optional<pn::string>               epilogue;
+    sfz::optional<pn::string>               no_ships;
+};
+
+struct NetLevel : LevelBase {
+    struct Player {
+        PlayerType           type  = PlayerType::CPU;
+        int16_t              races = 0;
+        sfz::optional<Fixed> earning_power;
+    };
+
+    std::vector<Player>       players;
+    sfz::optional<pn::string> description;
+    sfz::optional<pn::string> own_no_ships;
+    sfz::optional<pn::string> foe_no_ships;
+};
+
+union Level {
     static const Level* get(int n);
     static const Level* get(pn::string_view n);
+
+    using Type = LevelBase::Type;
+
+    LevelBase base;
+    Type      type() const;
+
+    DemoLevel demo;
+    SoloLevel solo;
+    NetLevel  net;
+
+    Level();
+    Level(DemoLevel l);
+    Level(SoloLevel l);
+    Level(NetLevel l);
+
+    ~Level();
+    Level(Level&&);
+    Level& operator=(Level&&);
 };
 Level level(pn::value_cref x);
 

@@ -411,7 +411,7 @@ void ReplayBuilder::key_down(const KeyDownEvent& event) {
         return;
     }
     for (auto i : range<int>(KEY_COUNT)) {
-        if (event.key() == sys.prefs->key(i) - 1) {
+        if (event.key() == sys.prefs->key(i)) {
             ReplayData::Action action = {};
             action.at                 = _at;
             action.keys_down.push_back(i);
@@ -425,7 +425,7 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
         return;
     }
     for (auto i : range<int>(KEY_COUNT)) {
-        if (event.key() == sys.prefs->key(i) - 1) {
+        if (event.key() == sys.prefs->key(i)) {
             ReplayData::Action action = {};
             action.at                 = _at;
             action.keys_up.push_back(i);

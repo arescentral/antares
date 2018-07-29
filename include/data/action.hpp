@@ -29,6 +29,7 @@
 #include "data/handle.hpp"
 #include "data/object-ref.hpp"
 #include "data/range.hpp"
+#include "data/tags.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -37,7 +38,7 @@
 namespace antares {
 
 class SpaceObject;
-struct Level;
+union Level;
 struct Initial;
 struct Condition;
 class path_value;
@@ -86,12 +87,15 @@ enum class Within { CIRCLE, SQUARE };
 struct ActionBase {
     ActionType type;
 
-    bool reflexive = false;  // does it apply to object executing verb?
+    sfz::optional<bool> reflexive;  // does it apply to object executing verb?
 
     struct Filter {
-        uint32_t                   attributes = 0;
-        std::map<pn::string, bool> tags;
-        Owner                      owner = Owner::ANY;
+        struct Attributes {
+            uint32_t bits = 0;
+        };
+        Attributes           attributes;
+        Tags                 tags;
+        sfz::optional<Owner> owner;
     } filter;
 
     struct Override {
@@ -101,8 +105,8 @@ struct ActionBase {
 };
 
 struct AgeAction : public ActionBase {
-    bool         relative;  // if true, add value to age; if false, set age to value
-    Range<ticks> value;     // age range
+    sfz::optional<bool> relative;  // if true, add value to age; if false, set age to value
+    Range<ticks>        value;     // age range
 };
 
 struct AssumeAction : public ActionBase {
@@ -131,16 +135,16 @@ struct ConditionAction : public ActionBase {
 };
 
 struct CreateAction : public ActionBase {
-    NamedHandle<const BaseObject> base;                         // what type
-    Range<int64_t>                count              = {1, 2};  // # to make randomly
-    bool                          relative_velocity  = false;   // is velocity relative to creator?
-    bool                          relative_direction = false;   // determines initial heading
-    int64_t                       distance = 0;  // create at this distance in random direction
-    Within                        within   = Within::CIRCLE;
-    bool                          inherit  = false;  // if false, gets creator as target
-                                                     // if true, gets creator’s target as target
-    bool legacy_random = false;                      // if true, consume a random number from
-                                                     // subject even if not necessary
+    NamedHandle<const BaseObject> base;                // what type
+    sfz::optional<Range<int64_t>> count;               // # to make randomly
+    sfz::optional<bool>           relative_velocity;   // is velocity relative to creator?
+    sfz::optional<bool>           relative_direction;  // determines initial heading
+    sfz::optional<int64_t>        distance;  // create at this distance in random direction
+    Within                        within = Within::CIRCLE;
+    sfz::optional<bool>           inherit;  // if false, gets creator as target
+                                            // if true, gets creator’s target as target
+    sfz::optional<bool> legacy_random;      // if true, consume a random number from
+                                            // subject even if not necessary
 };
 
 struct DelayAction : public ActionBase {
@@ -233,7 +237,7 @@ struct MessageAction : public ActionBase {
 };
 
 struct MorphAction : public ActionBase {
-    bool                          keep_ammo;
+    sfz::optional<bool>           keep_ammo;
     NamedHandle<const BaseObject> base;
 };
 
@@ -242,10 +246,11 @@ struct MoveAction : public ActionBase {
         LEVEL,    // absolute coordinates, in level’s rotated frame of reference
         SUBJECT,  // relative to subject
         OBJECT,   // relative to object
-    } origin;
-    coordPointType to;
-    int64_t        distance;
-    Within         within;
+    };
+    sfz::optional<Origin>         origin;
+    sfz::optional<coordPointType> to;
+    sfz::optional<int64_t>        distance;
+    Within                        within;
 };
 
 struct OccupyAction : public ActionBase {
@@ -287,10 +292,13 @@ struct SelectAction : public ActionBase {
 };
 
 struct PlayAction : public ActionBase {
-    uint8_t priority;     // 1-5; takes over a channel playing a lower-priority sound
-    ticks   persistence;  // time before a lower-priority sound can take channel
-    bool    absolute;     // plays at same volume, regardless of distance from player
-    int64_t volume;       // 1-255; volume at focus
+    struct Priority {
+        int level;
+    };
+    Priority            priority;     // 1-5; takes over a channel playing a lower-priority sound
+    ticks               persistence;  // time before a lower-priority sound can take channel
+    sfz::optional<bool> absolute;     // plays at same volume, regardless of distance from player
+    int64_t             volume;       // 1-255; volume at focus
 
     struct Sound {
         pn::string sound;
@@ -411,7 +419,12 @@ union Action {
     Action& operator=(Action&&);
 };
 
-Action action(path_value x);
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<Action> {
+    static Action read(path_value x);
+};
 
 }  // namespace antares
 

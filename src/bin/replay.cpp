@@ -93,15 +93,15 @@ class ReplayMaster : public Card {
                     pn::string path = pn::format("{0}/debriefing.txt", *_output_path);
                     sfz::makedirs(path::dirname(path), 0755);
                     pn::file outcome = pn::open(path, "w");
-                    if (!g.victory_text.empty()) {
-                        outcome.write(g.victory_text);
+                    if (g.victory_text.has_value()) {
+                        outcome.write(*g.victory_text);
                         if (_game_result == WIN_GAME) {
                             outcome.write("\n");
                             Handle<Admiral> player(0);
                             pn::string      text = DebriefingScreen::build_score_text(
-                                    g.time, g.level->par.time, GetAdmiralLoss(player),
-                                    g.level->par.losses, GetAdmiralKill(player),
-                                    g.level->par.kills);
+                                    g.time, g.level->solo.par.time, GetAdmiralLoss(player),
+                                    g.level->solo.par.losses, GetAdmiralKill(player),
+                                    g.level->solo.par.kills);
                             outcome.write(text);
                             outcome.write("\n");
                         }

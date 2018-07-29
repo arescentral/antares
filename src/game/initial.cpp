@@ -28,42 +28,40 @@
 namespace antares {
 
 const Initial* Initial::get(int number) {
-    if ((0 <= number) && (number < g.level->initials.size())) {
-        return &g.level->initials[number];
+    if ((0 <= number) && (number < g.level->base.initials.size())) {
+        return &g.level->base.initials[number];
     }
     return nullptr;
 }
 
 HandleList<const Initial> Initial::all() {
-    return HandleList<const Initial>(0, g.level->initials.size());
+    return HandleList<const Initial>(0, g.level->base.initials.size());
 }
 
 void create_initial(Handle<const Initial> initial) {
-    if (initial->hide) {
+    if (initial->hide.value_or(false)) {
         g.initials[initial.number()] = SpaceObject::none();
         return;
     }
 
     coordPointType coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
 
-    Handle<Admiral> owner = Admiral::none();
-    if (initial->owner.get()) {
-        owner = initial->owner;
-    }
+    Handle<Admiral> owner = initial->owner.value_or(Admiral::none());
 
     int32_t attributes = 0;
-    if (initial->flagship) {
+    if (initial->flagship.value_or(false)) {
         if ((owner == g.admiral) && !owner->flagship().get()) {
             attributes |= kIsPlayerShip;
         }
     }
-    if (initial->target.lock) {
+    if (initial->target.lock.value_or(false)) {
         attributes |= kStaticDestination;
     }
 
-    const BaseObject* base = initial->owner.get()
-                                     ? get_buildable_object(initial->base, initial->owner->race())
-                                     : BaseObject::get(initial->base.name);
+    const BaseObject* base =
+            initial->owner.has_value()
+                    ? get_buildable_object(initial->base, (*initial->owner)->race())
+                    : BaseObject::get(initial->base.name);
     // TODO(sfiera): remap object in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
@@ -74,7 +72,8 @@ void create_initial(Handle<const Initial> initial) {
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
-                anObject, initial->build, initial->earning, initial->override_.name);
+                anObject, initial->build, initial->earning.value_or(Fixed::zero()),
+                initial->override_.name);
     }
     g.initial_ids[initial.number()] = anObject->id;
 
@@ -101,15 +100,15 @@ void create_initial(Handle<const Initial> initial) {
 void set_initial_destination(Handle<const Initial> initial, bool preserve) {
     auto object = g.initials[initial.number()];
     if (!object.get()                              // hasn't been created yet
-        || (initial->target.initial.number() < 0)  // doesn't have a target
-        || (!initial->owner.get())) {              // doesn't have an owner
+        || (!initial->target.initial.has_value())  // doesn't have a target
+        || (!initial->owner.has_value())) {        // doesn't have an owner
         return;
     }
 
     // get the correct admiral #
-    Handle<Admiral> owner = initial->owner;
+    Handle<Admiral> owner = initial->owner.value_or(Admiral::none());
 
-    const auto& target = g.initials[initial->target.initial.number()];
+    const auto& target = g.initials[initial->target.initial->number()];
     if (target.get()) {
         auto saveDest = owner->target();  // save the original dest
 
@@ -137,24 +136,22 @@ void UnhideInitialObject(Handle<const Initial> initial) {
 
     coordPointType coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
 
-    Handle<Admiral> owner = Admiral::none();
-    if (initial->owner.get()) {
-        owner = initial->owner;
-    }
+    Handle<Admiral> owner = initial->owner.value_or(Admiral::none());
 
     uint32_t attributes = 0;
-    if (initial->flagship) {
+    if (initial->flagship.value_or(false)) {
         if ((owner == g.admiral) && !owner->flagship().get()) {
             attributes |= kIsPlayerShip;
         }
     }
-    if (initial->target.lock) {
+    if (initial->target.lock.value_or(false)) {
         attributes |= kStaticDestination;
     }
 
-    const BaseObject* base = initial->owner.get()
-                                     ? get_buildable_object(initial->base, initial->owner->race())
-                                     : BaseObject::get(initial->base.name);
+    const BaseObject* base =
+            initial->owner.has_value()
+                    ? get_buildable_object(initial->base, (*initial->owner)->race())
+                    : BaseObject::get(initial->base.name);
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
@@ -165,7 +162,8 @@ void UnhideInitialObject(Handle<const Initial> initial) {
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
-                anObject, initial->build, initial->earning, initial->override_.name);
+                anObject, initial->build, initial->earning.value_or(Fixed::zero()),
+                initial->override_.name);
 
         if (owner.get()) {
             if (initial->build.size() > 0) {

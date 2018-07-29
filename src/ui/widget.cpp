@@ -212,8 +212,8 @@ static int h_border(InterfaceStyle style) {
 }
 
 Widget* Widget::accept_click(Point where) { return nullptr; }
-Widget* Widget::accept_key(int64_t which) { return nullptr; }
-Widget* Widget::accept_button(int64_t which) { return nullptr; }
+Widget* Widget::accept_key(Key which) { return nullptr; }
+Widget* Widget::accept_button(Gamepad::Button which) { return nullptr; }
 void    Widget::action() {}
 
 void Widget::activate() {}
@@ -407,14 +407,14 @@ Rect BoxRect::outer_bounds() const {
 TextRect::TextRect(const TextRectData& data)
         : _inner_bounds{data.bounds},
           _id{data.id},
-          _text{data.text.copy()},
+          _text{data.text.has_value() ? sfz::make_optional(data.text->copy()) : sfz::nullopt},
           _hue{data.hue},
           _style{data.style} {}
 
 void TextRect::draw(Point offset, InputMode) const {
     Rect bounds = _inner_bounds;
     bounds.offset(offset.h, offset.v);
-    draw_text_in_rect(bounds, _text, _style, _hue);
+    draw_text_in_rect(bounds, _text.has_value() ? _text->copy() : pn::string_view{}, _style, _hue);
 }
 
 Rect TextRect::inner_bounds() const { return _inner_bounds; }
@@ -463,14 +463,14 @@ Widget* Button::accept_click(Point where) {
     return nullptr;
 }
 
-Widget* Button::accept_key(int64_t which) {
+Widget* Button::accept_key(Key which) {
     if (enabled() && (_key == which)) {
         return this;
     }
     return nullptr;
 }
 
-Widget* Button::accept_button(int64_t which) {
+Widget* Button::accept_button(Gamepad::Button which) {
     if (enabled() && (_gamepad == which)) {
         return this;
     }
@@ -558,10 +558,10 @@ void PlainButton::draw(Point offset, InputMode mode) const {
 
     bool       draw_shortcut = false;
     pn::string shortcut_text;
-    if ((mode == KEYBOARD_MOUSE) && key()) {
+    if ((mode == KEYBOARD_MOUSE) && (key() != Key::NONE)) {
         draw_shortcut = true;
         GetKeyNumName(key(), shortcut_text);
-    } else if ((mode == GAMEPAD) && gamepad()) {
+    } else if ((mode == GAMEPAD) && (gamepad() != Gamepad::Button::NONE)) {
         draw_shortcut = true;
         Gamepad::name(gamepad(), shortcut_text);
     }
@@ -962,40 +962,8 @@ static PlainButtonData tab_button_data(
 
 TabButton::TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds)
         : Button{tab_button_data(*box, data, bounds)}, _parent(box), _inner_bounds{bounds} {
-    struct EmplaceBackVisitor : InterfaceItemData::Visitor {
-        std::vector<std::unique_ptr<Widget>>* vec;
-        EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
-
-        void visit_box_rect(const BoxRectData& data) const override {
-            vec->emplace_back(new BoxRect{data});
-        }
-
-        void visit_text_rect(const TextRectData& data) const override {
-            vec->emplace_back(new TextRect{data});
-        }
-
-        void visit_picture_rect(const PictureRectData& data) const override {
-            vec->emplace_back(new PictureRect{data});
-        }
-
-        void visit_plain_button(const PlainButtonData& data) const override {
-            vec->emplace_back(new PlainButton{data});
-        }
-
-        void visit_radio_button(const RadioButtonData& data) const override {
-            vec->emplace_back(new RadioButton{data});
-        }
-
-        void visit_checkbox_button(const CheckboxButtonData& data) const override {
-            vec->emplace_back(new CheckboxButton{data});
-        }
-
-        void visit_tab_box(const TabBoxData& data) const override {
-            vec->emplace_back(new TabBox{data});
-        }
-    };
     for (const auto& item : data.content) {
-        item->accept(EmplaceBackVisitor{&_content});
+        _content.push_back(Widget::from(item));
     }
 }
 
@@ -1104,7 +1072,7 @@ void TabButton::draw(Point offset, InputMode) const {
         rects.fill(uRect, RgbColor::black());
     }
 
-    if (key() == 0) {
+    if (key() == Key::NONE) {
         Rect uRect(
                 tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
@@ -1249,7 +1217,7 @@ Widget* TabBox::accept_click(Point where) {
     return nullptr;
 }
 
-Widget* TabBox::accept_key(int64_t which) {
+Widget* TabBox::accept_key(Key which) {
     for (const std::unique_ptr<TabButton>& tab : _tabs) {
         if (Widget* w = tab->accept_key(which)) {
             return w;
@@ -1263,7 +1231,7 @@ Widget* TabBox::accept_key(int64_t which) {
     return nullptr;
 }
 
-Widget* TabBox::accept_button(int64_t which) {
+Widget* TabBox::accept_button(Gamepad::Button which) {
     for (const std::unique_ptr<TabButton>& tab : _tabs) {
         if (Widget* w = tab->accept_button(which)) {
             return w;
@@ -1394,6 +1362,24 @@ void TabBox::select(const TabButton& tab) {
         } else {
             t->on() = false;
         }
+    }
+}
+
+std::unique_ptr<Widget> Widget::from(const WidgetData& data) {
+    switch (data.type()) {
+        case WidgetDataBase::Type::NONE: return nullptr;
+        case WidgetDataBase::Type::RECT: return std::unique_ptr<Widget>(new BoxRect{data.rect});
+        case WidgetDataBase::Type::TEXT: return std::unique_ptr<Widget>(new TextRect{data.text});
+        case WidgetDataBase::Type::PICTURE:
+            return std::unique_ptr<Widget>(new PictureRect{data.picture});
+        case WidgetDataBase::Type::BUTTON:
+            return std::unique_ptr<Widget>(new PlainButton{data.button});
+        case WidgetDataBase::Type::CHECKBOX:
+            return std::unique_ptr<Widget>(new CheckboxButton{data.checkbox});
+        case WidgetDataBase::Type::RADIO:
+            return std::unique_ptr<Widget>(new RadioButton{data.radio});
+        case WidgetDataBase::Type::TAB_BOX:
+            return std::unique_ptr<Widget>(new TabBox{data.tab_box});
     }
 }
 

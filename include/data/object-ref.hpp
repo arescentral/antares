@@ -34,8 +34,16 @@ struct ObjectRef {
     Handle<Admiral>       admiral;
 };
 
-ObjectRef                required_object_ref(path_value x);
-sfz::optional<ObjectRef> optional_object_ref(path_value x);
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<ObjectRef> {
+    static ObjectRef read(path_value x);
+};
+template <>
+struct field_reader<sfz::optional<ObjectRef>> {
+    static sfz::optional<ObjectRef> read(path_value x);
+};
 
 }  // namespace antares
 

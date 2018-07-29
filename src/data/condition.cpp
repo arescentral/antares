@@ -24,12 +24,10 @@
 
 namespace antares {
 
-static ConditionWhen when(path_value x);
+DECLARE_FIELD_READER(ConditionWhen);
 
-// clang-format off
-#define COMMON_CONDITION_FIELDS                                                                   \
-            {"type", {&ConditionBase::type, required_condition_type}}
-// clang-format on
+#define COMMON_CONDITION_FIELDS \
+    { "type", &ConditionBase::type }
 
 ConditionWhen::Type ConditionWhen::type() const { return base.type; }
 
@@ -108,7 +106,7 @@ ConditionWhen::~ConditionWhen() {
     }
 }
 
-static ConditionWhen::Type required_condition_type(path_value x) {
+FIELD_READER(ConditionWhen::Type) {
     return required_enum<ConditionWhen::Type>(
             x, {{"autopilot", ConditionWhen::Type::AUTOPILOT},
                 {"building", ConditionWhen::Type::BUILDING},
@@ -129,7 +127,7 @@ static ConditionWhen::Type required_condition_type(path_value x) {
                 {"zoom", ConditionWhen::Type::ZOOM}});
 }
 
-static ConditionOp required_condition_op(path_value x) {
+FIELD_READER(ConditionOp) {
     return required_enum<ConditionOp>(
             x, {{"eq", ConditionOp::EQ},
                 {"ne", ConditionOp::NE},
@@ -139,162 +137,152 @@ static ConditionOp required_condition_op(path_value x) {
                 {"ge", ConditionOp::GE}});
 }
 
-static ConditionEqOp required_condition_eq_op(path_value x) {
+FIELD_READER(ConditionEqOp) {
     return required_enum<ConditionEqOp>(x, {{"eq", ConditionEqOp::EQ}, {"ne", ConditionEqOp::NE}});
 }
 
 static ConditionWhen autopilot_condition(path_value x) {
     return required_struct<AutopilotCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&AutopilotCondition::op, required_condition_eq_op}},
-                {"player", {&AutopilotCondition::player, required_admiral}},
-                {"value", {&AutopilotCondition::value, required_bool}}});
+                {"op", &AutopilotCondition::op},
+                {"player", &AutopilotCondition::player},
+                {"value", &AutopilotCondition::value}});
 }
 
 static ConditionWhen building_condition(path_value x) {
     return required_struct<BuildingCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&BuildingCondition::op, required_condition_eq_op}},
-                {"player", {&BuildingCondition::player, required_admiral}},
-                {"value", {&BuildingCondition::value, required_bool}}});
+                {"op", &BuildingCondition::op},
+                {"player", &BuildingCondition::player},
+                {"value", &BuildingCondition::value}});
 }
 
 static ConditionWhen cash_condition(path_value x) {
     return required_struct<CashCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&CashCondition::op, required_condition_op}},
-                {"player", {&CashCondition::player, required_admiral}},
-                {"value", {&CashCondition::value, required_fixed}}});
+                {"op", &CashCondition::op},
+                {"player", &CashCondition::player},
+                {"value", &CashCondition::value}});
 }
 
 static ConditionWhen computer_condition(path_value x) {
     return required_struct<ComputerCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&ComputerCondition::op, required_condition_eq_op}},
+                {"op", &ComputerCondition::op},
                 {"player", nullptr},
-                {"screen", {&ComputerCondition::screen, required_screen}},
-                {"line", {&ComputerCondition::line, optional_int}}});
+                {"screen", &ComputerCondition::screen},
+                {"line", &ComputerCondition::line}});
 }
 
 static ConditionWhen count_condition(path_value x) {
     return required_struct<CountCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&CountCondition::op, required_condition_op}},
-                {"value", {&CountCondition::value, required_int}},
-                {"of", {&CountCondition::of, required_array<ConditionWhen, when>}}});
+                {"op", &CountCondition::op},
+                {"value", &CountCondition::value},
+                {"of", &CountCondition::of}});
 }
 
 static ConditionWhen counter_condition(path_value x) {
     return required_struct<CounterCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&CounterCondition::op, required_condition_op}},
-                {"player", {&CounterCondition::player, required_admiral}},
-                {"counter", {&CounterCondition::counter, required_int}},
-                {"value", {&CounterCondition::value, required_int}}});
+                {"op", &CounterCondition::op},
+                {"player", &CounterCondition::player},
+                {"counter", &CounterCondition::counter},
+                {"value", &CounterCondition::value}});
 }
 
 static ConditionWhen destroyed_condition(path_value x) {
     return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&DestroyedCondition::op, required_condition_eq_op}},
-                {"what", {&DestroyedCondition::what, required_object_ref}},
-                {"value", {&DestroyedCondition::value, required_bool}}});
-}
-
-static int64_t distance(path_value x) {
-    double d = required_double(x);
-    d        = floor(pow(d, 2));
-    return d;
+                {"op", &DestroyedCondition::op},
+                {"what", &DestroyedCondition::what},
+                {"value", &DestroyedCondition::value}});
 }
 
 static ConditionWhen distance_condition(path_value x) {
     return required_struct<DistanceCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&DistanceCondition::op, required_condition_op}},
-                {"value", {&DistanceCondition::value, distance}},
-                {"from", {&DistanceCondition::from, required_object_ref}},
-                {"to", {&DistanceCondition::to, required_object_ref}}});
+                {"op", &DistanceCondition::op},
+                {"value", &DistanceCondition::value},
+                {"from", &DistanceCondition::from},
+                {"to", &DistanceCondition::to}});
 }
 
 static ConditionWhen health_condition(path_value x) {
     return required_struct<HealthCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&HealthCondition::op, required_condition_op}},
-                {"value", {&HealthCondition::value, required_double}},
-                {"what", {&HealthCondition::what, required_object_ref}}});
+                {"op", &HealthCondition::op},
+                {"value", &HealthCondition::value},
+                {"what", &HealthCondition::what}});
 }
 
 static ConditionWhen message_condition(path_value x) {
     return required_struct<MessageCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&MessageCondition::op, required_condition_eq_op}},
+                {"op", &MessageCondition::op},
                 {"player", nullptr},
-                {"id", {&MessageCondition::id, required_int}},
-                {"page", {&MessageCondition::page, required_int}}});
+                {"id", &MessageCondition::id},
+                {"page", &MessageCondition::page}});
 }
 
 static ConditionWhen owner_condition(path_value x) {
     return required_struct<OwnerCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&OwnerCondition::op, required_condition_eq_op}},
-                {"player", {&OwnerCondition::player, required_admiral}},
-                {"what", {&OwnerCondition::what, required_object_ref}}});
+                {"op", &OwnerCondition::op},
+                {"player", &OwnerCondition::player},
+                {"what", &OwnerCondition::what}});
 }
 
 static ConditionWhen ships_condition(path_value x) {
     return required_struct<ShipsCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&ShipsCondition::op, required_condition_op}},
-                {"player", {&ShipsCondition::player, required_admiral}},
-                {"value", {&ShipsCondition::value, required_int}}});
+                {"op", &ShipsCondition::op},
+                {"player", &ShipsCondition::player},
+                {"value", &ShipsCondition::value}});
 }
 
 static ConditionWhen speed_condition(path_value x) {
     return required_struct<SpeedCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&SpeedCondition::op, required_condition_op}},
-                {"value", {&SpeedCondition::value, required_fixed}},
-                {"what", {&SpeedCondition::what, required_object_ref}}});
+                {"op", &SpeedCondition::op},
+                {"value", &SpeedCondition::value},
+                {"what", &SpeedCondition::what}});
 }
 
 static ConditionWhen object_condition(path_value x) {
     return required_struct<ObjectCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&ObjectCondition::op, required_condition_eq_op}},
-                {"a", {&ObjectCondition::a, required_object_ref}},
-                {"b", {&ObjectCondition::b, required_object_ref}}});
+                {"op", &ObjectCondition::op},
+                {"a", &ObjectCondition::a},
+                {"b", &ObjectCondition::b}});
 }
 
 static ConditionWhen target_condition(path_value x) {
     return required_struct<TargetCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&TargetCondition::op, required_condition_eq_op}},
-                {"what", {&TargetCondition::what, required_object_ref}},
-                {"target", {&TargetCondition::target, required_object_ref}}});
+                {"op", &TargetCondition::op},
+                {"what", &TargetCondition::what},
+                {"target", &TargetCondition::target}});
 }
 
 static ConditionWhen time_condition(path_value x) {
     return required_struct<TimeCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&TimeCondition::op, required_condition_op}},
-                {"duration", {&TimeCondition::duration, required_ticks}},
-                {"legacy_start_time", {&TimeCondition::legacy_start_time, optional_bool, false}}});
+                {"op", &TimeCondition::op},
+                {"duration", &TimeCondition::duration},
+                {"legacy_start_time", &TimeCondition::legacy_start_time}});
 }
 
 static ConditionWhen zoom_condition(path_value x) {
     return required_struct<ZoomCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", {&ZoomCondition::op, required_condition_op}},
+                {"op", &ZoomCondition::op},
                 {"player", nullptr},
-                {"value", {&ZoomCondition::value, required_zoom}}});
+                {"value", &ZoomCondition::value}});
 }
 
-static ConditionWhen when(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    switch (required_condition_type(x.get("type"))) {
+DEFINE_FIELD_READER(ConditionWhen) {
+    switch (required_object_type(x, read_field<ConditionType>)) {
         case ConditionWhen::Type::NONE: throw std::runtime_error("condition type none?");
         case ConditionWhen::Type::AUTOPILOT: return autopilot_condition(x);
         case ConditionWhen::Type::BUILDING: return building_condition(x);
@@ -316,14 +304,14 @@ static ConditionWhen when(path_value x) {
     }
 }
 
-Condition condition(path_value x) {
+DEFINE_FIELD_READER(Condition) {
     return required_struct<Condition>(
-            x, {{"persistent", {&Condition::persistent, optional_bool, false}},
-                {"disabled", {&Condition::disabled, optional_bool, false}},
-                {"when", {&Condition::when, when}},
-                {"subject", {&Condition::subject, optional_object_ref}},
-                {"object", {&Condition::object, optional_object_ref}},
-                {"action", {&Condition::action, required_array<Action, action>}}});
+            x, {{"persistent", &Condition::persistent},
+                {"disabled", &Condition::disabled},
+                {"when", &Condition::when},
+                {"subject", &Condition::subject},
+                {"object", &Condition::object},
+                {"action", &Condition::action}});
 }
 
 }  // namespace antares

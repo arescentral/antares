@@ -61,7 +61,7 @@ void EventScheduler::schedule_event(unique_ptr<Event> event) {
     push_heap(_event_heap.begin(), _event_heap.end(), is_later);
 }
 
-void EventScheduler::schedule_key(int32_t key, int64_t down, int64_t up) {
+void EventScheduler::schedule_key(Key key, int64_t down, int64_t up) {
     schedule_event(unique_ptr<Event>(new KeyDownEvent(wall_time(ticks(down)), key)));
     schedule_event(unique_ptr<Event>(new KeyUpEvent(wall_time(ticks(up)), key)));
 }

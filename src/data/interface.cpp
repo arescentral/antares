@@ -34,163 +34,189 @@ using sfz::range;
 
 namespace antares {
 
-static InterfaceStyle required_interface_style(path_value x) {
+DECLARE_FIELD_READER(WidgetData);
+
+WidgetData::Type WidgetData::type() const { return base.type; }
+
+WidgetData::WidgetData() : base{} {}
+WidgetData::WidgetData(BoxRectData d) : rect(std::move(d)) {}
+WidgetData::WidgetData(TextRectData d) : text(std::move(d)) {}
+WidgetData::WidgetData(PictureRectData d) : picture(std::move(d)) {}
+WidgetData::WidgetData(PlainButtonData d) : button(std::move(d)) {}
+WidgetData::WidgetData(CheckboxButtonData d) : checkbox(std::move(d)) {}
+WidgetData::WidgetData(RadioButtonData d) : radio(std::move(d)) {}
+WidgetData::WidgetData(TabBoxData d) : tab_box(std::move(d)) {}
+
+WidgetData::WidgetData(WidgetData&& a) {
+    switch (a.type()) {
+        case WidgetDataBase::Type::NONE: new (this) WidgetData(); break;
+        case WidgetDataBase::Type::RECT: new (this) WidgetData(std::move(a.rect)); break;
+        case WidgetDataBase::Type::TEXT: new (this) WidgetData(std::move(a.text)); break;
+        case WidgetDataBase::Type::PICTURE: new (this) WidgetData(std::move(a.picture)); break;
+        case WidgetDataBase::Type::BUTTON: new (this) WidgetData(std::move(a.button)); break;
+        case WidgetDataBase::Type::CHECKBOX: new (this) WidgetData(std::move(a.checkbox)); break;
+        case WidgetDataBase::Type::RADIO: new (this) WidgetData(std::move(a.radio)); break;
+        case WidgetDataBase::Type::TAB_BOX: new (this) WidgetData(std::move(a.tab_box)); break;
+    }
+}
+
+WidgetData& WidgetData::operator=(WidgetData&& a) {
+    this->~WidgetData();
+    new (this) WidgetData(std::move(a));
+    return *this;
+}
+
+WidgetData::~WidgetData() {
+    switch (type()) {
+        case WidgetDataBase::Type::NONE: base.~WidgetDataBase(); break;
+        case WidgetDataBase::Type::RECT: rect.~BoxRectData(); break;
+        case WidgetDataBase::Type::TEXT: text.~TextRectData(); break;
+        case WidgetDataBase::Type::PICTURE: picture.~PictureRectData(); break;
+        case WidgetDataBase::Type::BUTTON: button.~PlainButtonData(); break;
+        case WidgetDataBase::Type::CHECKBOX: checkbox.~CheckboxButtonData(); break;
+        case WidgetDataBase::Type::RADIO: radio.~RadioButtonData(); break;
+        case WidgetDataBase::Type::TAB_BOX: tab_box.~TabBoxData(); break;
+    }
+}
+
+FIELD_READER(InterfaceStyle) {
     return required_enum<InterfaceStyle>(
             x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
 }
 
-static int16_t optional_key_num(path_value x) {
-    auto k = optional_string(x);
+FIELD_READER(Key) {
+    auto k = read_field<sfz::optional<pn::string>>(x);
     if (!k.has_value()) {
-        return 0;
+        return Key::NONE;
     }
-    int i;
+    Key i;
     if (!GetKeyNameNum(*k, i)) {
-        throw std::runtime_error(pn::format("{0}: must be a key", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}must be a key", x.prefix()).c_str());
     }
     return i;
 }
 
-static int16_t optional_gamepad_button(path_value x) {
-    auto k = optional_string(x);
+FIELD_READER(Gamepad::Button) {
+    auto k = read_field<sfz::optional<pn::string>>(x);
     if (!k.has_value()) {
-        return 0;
+        return Gamepad::Button::NONE;
     }
-    int i;
-    if (!(i = Gamepad::num(*k))) {
-        throw std::runtime_error(pn::format("{0}: must be a gamepad button", x.path()).c_str());
+    Gamepad::Button i = Gamepad::num(*k);
+    if (i == Gamepad::Button::NONE) {
+        throw std::runtime_error(pn::format("{0}must be a gamepad button", x.prefix()).c_str());
     }
     return i;
 }
 
-static std::unique_ptr<InterfaceItemData> interface_item(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}must be a map", x.prefix()).c_str());
-    }
+FIELD_READER(WidgetData::Type) {
+    return required_enum<WidgetData::Type>(
+            x, {{"rect", WidgetData::Type::RECT},
+                {"button", WidgetData::Type::BUTTON},
+                {"checkbox", WidgetData::Type::CHECKBOX},
+                {"radio", WidgetData::Type::RADIO},
+                {"picture", WidgetData::Type::PICTURE},
+                {"text", WidgetData::Type::TEXT},
+                {"tab-box", WidgetData::Type::TAB_BOX}});
+}
 
-    pn::string_view type = required_string(x.get("type"));
-    if (type == "rect") {
-        return std::unique_ptr<InterfaceItemData>(new BoxRectData(required_struct<BoxRectData>(
-                x, {
-                           {"type", nullptr},
-                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                           {"id", {&InterfaceItemData::id, optional_int}},
-                           {"label", {&BoxRectData::label, optional_string_copy}},
-                           {"hue", {&BoxRectData::hue, required_hue}},
-                           {"style", {&BoxRectData::style, required_interface_style}},
-                   })));
-    } else if (type == "button") {
-        return std::unique_ptr<InterfaceItemData>(
-                new PlainButtonData(required_struct<PlainButtonData>(
-                        x,
-                        {
-                                {"type", nullptr},
-                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                {"id", {&InterfaceItemData::id, optional_int}},
-                                {"label", {&PlainButtonData::label, required_string_copy}},
-                                {"key", {&PlainButtonData::key, optional_key_num}},
-                                {"gamepad", {&PlainButtonData::gamepad, optional_gamepad_button}},
-                                {"hue", {&PlainButtonData::hue, required_hue}},
-                                {"style", {&PlainButtonData::style, required_interface_style}},
-                        })));
-    } else if (type == "checkbox") {
-        return std::unique_ptr<InterfaceItemData>(
-                new CheckboxButtonData(required_struct<CheckboxButtonData>(
-                        x,
-                        {
-                                {"type", nullptr},
-                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                {"id", {&InterfaceItemData::id, optional_int}},
-                                {"label", {&CheckboxButtonData::label, required_string_copy}},
-                                {"key", {&CheckboxButtonData::key, optional_key_num}},
-                                {"gamepad",
-                                 {&CheckboxButtonData::gamepad, optional_gamepad_button}},
-                                {"hue", {&CheckboxButtonData::hue, required_hue}},
-                                {"style", {&CheckboxButtonData::style, required_interface_style}},
-                        })));
-    } else if (type == "radio") {
-        return std::unique_ptr<InterfaceItemData>(
-                new RadioButtonData(required_struct<RadioButtonData>(
-                        x,
-                        {
-                                {"type", nullptr},
-                                {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                {"id", {&InterfaceItemData::id, optional_int}},
-                                {"label", {&RadioButtonData::label, required_string_copy}},
-                                {"key", {&RadioButtonData::key, optional_key_num}},
-                                {"gamepad", {&RadioButtonData::gamepad, optional_gamepad_button}},
-                                {"hue", {&RadioButtonData::hue, required_hue}},
-                                {"style", {&RadioButtonData::style, required_interface_style}},
-                        })));
-    } else if (type == "picture") {
-        return std::unique_ptr<InterfaceItemData>(
-                new PictureRectData(required_struct<PictureRectData>(
-                        x, {
-                                   {"type", nullptr},
-                                   {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                                   {"id", {&InterfaceItemData::id, optional_int}},
-                                   {"picture", {&PictureRectData::picture, required_string_copy}},
-                           })));
-    } else if (type == "text") {
-        return std::unique_ptr<InterfaceItemData>(new TextRectData(required_struct<TextRectData>(
-                x, {
-                           {"type", nullptr},
-                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                           {"id", {&InterfaceItemData::id, optional_int}},
-                           {"text", {&TextRectData::text, optional_string, ""}},
-                           {"hue", {&TextRectData::hue, required_hue}},
-                           {"style", {&TextRectData::style, required_interface_style}},
-                   })));
-    } else if (type == "tab-box") {
-        TabBoxData tab_box = required_struct<TabBoxData>(
-                x, {
-                           {"type", nullptr},
-                           {"bounds", {&InterfaceItemData::bounds, required_rect}},
-                           {"id", {&InterfaceItemData::id, optional_int}},
-                           {"hue", {&TabBoxData::hue, required_hue}},
-                           {"style", {&TabBoxData::style, required_interface_style}},
-                           {"tabs", nullptr},
-                   });
+FIELD_READER(TabBoxData::Tab) {
+    return required_struct<TabBoxData::Tab>(
+            x, {{"id", &TabBoxData::Tab::id},
+                {"width", &TabBoxData::Tab::width},
+                {"label", &TabBoxData::Tab::label},
+                {"content", &TabBoxData::Tab::content}});
+}
 
-        path_value tabs = x.get("tabs");
-        for (auto i : range(tabs.value().as_array().size())) {
-            using Tab = TabBoxData::Tab;
-            tab_box.tabs.emplace_back(required_struct<Tab>(
-                    tabs.get(i),
-                    {
-                            {"id", {&Tab::id, optional_int}},
-                            {"width", {&Tab::width, required_int}},
-                            {"label", {&Tab::label, required_string_copy}},
-                            {"content",
-                             {&Tab::content,
-                              required_array<std::unique_ptr<InterfaceItemData>, interface_item>}},
-                    }));
-        }
+static WidgetData rect_interface_item(path_value x) {
+    return BoxRectData(required_struct<BoxRectData>(
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
+                {"label", &BoxRectData::label},
+                {"hue", &BoxRectData::hue},
+                {"style", &BoxRectData::style}}));
+}
 
-        return std::unique_ptr<InterfaceItemData>(new TabBoxData(std::move(tab_box)));
-    } else {
-        throw std::runtime_error(pn::format("{0}: unknown type: {1}", x.path(), type).c_str());
+static WidgetData button_interface_item(path_value x) {
+    return required_struct<PlainButtonData>(
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
+                {"label", &PlainButtonData::label},
+                {"key", &PlainButtonData::key},
+                {"gamepad", &PlainButtonData::gamepad},
+                {"hue", &PlainButtonData::hue},
+                {"style", &PlainButtonData::style}});
+}
+
+static WidgetData checkbox_interface_item(path_value x) {
+    return required_struct<CheckboxButtonData>(
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
+                {"label", &CheckboxButtonData::label},
+                {"key", &CheckboxButtonData::key},
+                {"gamepad", &CheckboxButtonData::gamepad},
+                {"hue", &CheckboxButtonData::hue},
+                {"style", &CheckboxButtonData::style}});
+}
+
+static WidgetData radio_interface_item(path_value x) {
+    return required_struct<RadioButtonData>(
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
+                {"label", &RadioButtonData::label},
+                {"key", &RadioButtonData::key},
+                {"gamepad", &RadioButtonData::gamepad},
+                {"hue", &RadioButtonData::hue},
+                {"style", &RadioButtonData::style}});
+}
+
+static WidgetData picture_interface_item(path_value x) {
+    return required_struct<PictureRectData>(
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
+                {"picture", &PictureRectData::picture}});
+}
+
+static WidgetData text_interface_item(path_value x) {
+    return required_struct<TextRectData>(
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
+                {"text", &TextRectData::text},
+                {"hue", &TextRectData::hue},
+                {"style", &TextRectData::style}});
+}
+
+static WidgetData tab_box_interface_item(path_value x) {
+    return required_struct<TabBoxData>(
+            x, {{"type", &WidgetDataBase::type},
+                {"bounds", &WidgetDataBase::bounds},
+                {"id", &WidgetDataBase::id},
+                {"hue", &TabBoxData::hue},
+                {"style", &TabBoxData::style},
+                {"tabs", &TabBoxData::tabs}});
+}
+
+DEFINE_FIELD_READER(WidgetData) {
+    switch (required_object_type(x, read_field<WidgetData::Type>)) {
+        case WidgetData::Type::NONE: throw std::runtime_error("interface item type none?");
+        case WidgetData::Type::RECT: return rect_interface_item(x);
+        case WidgetData::Type::BUTTON: return button_interface_item(x);
+        case WidgetData::Type::CHECKBOX: return checkbox_interface_item(x);
+        case WidgetData::Type::RADIO: return radio_interface_item(x);
+        case WidgetData::Type::PICTURE: return picture_interface_item(x);
+        case WidgetData::Type::TEXT: return text_interface_item(x);
+        case WidgetData::Type::TAB_BOX: return tab_box_interface_item(x);
     }
 }
 
 InterfaceData interface(path_value x) {
     return required_struct<InterfaceData>(
-            x, {{"fullscreen", {&InterfaceData::fullscreen, required_bool}},
-                {"items",
-                 {&InterfaceData::items,
-                  required_array<std::unique_ptr<InterfaceItemData>, interface_item>}}});
+            x, {{"fullscreen", &InterfaceData::fullscreen}, {"items", &InterfaceData::items}});
 }
-
-void BoxRectData::accept(const Visitor& visitor) const { visitor.visit_box_rect(*this); }
-void TextRectData::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
-void PictureRectData::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
-void PlainButtonData::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }
-void CheckboxButtonData::accept(const Visitor& visitor) const {
-    visitor.visit_checkbox_button(*this);
-}
-void RadioButtonData::accept(const Visitor& visitor) const { visitor.visit_radio_button(*this); }
-void TabBoxData::accept(const Visitor& visitor) const { visitor.visit_tab_box(*this); }
-
-InterfaceItemData::Visitor::~Visitor() {}
 
 }  // namespace antares

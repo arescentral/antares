@@ -28,7 +28,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class ReplayGame : public Card {
   public:

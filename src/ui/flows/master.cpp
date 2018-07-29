@@ -18,6 +18,7 @@
 
 #include "ui/flows/master.hpp"
 
+#include "config/preferences.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "game/admiral.hpp"

@@ -21,6 +21,7 @@
 
 #include <pn/string>
 #include <pn/value>
+#include <sfz/optional.hpp>
 #include <vector>
 
 #include "math/geometry.hpp"
@@ -28,9 +29,9 @@
 namespace antares {
 
 struct SpriteData {
-    int64_t           rows, cols;
-    Point             center;
-    std::vector<Rect> frames;
+    sfz::optional<int64_t> rows, cols;
+    Point                  center;
+    std::vector<Rect>      frames;
 };
 
 SpriteData sprite_data(pn::value_cref x);

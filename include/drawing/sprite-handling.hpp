@@ -35,13 +35,6 @@ const int16_t kSpriteTableColorShift  = 11;
 const int16_t kSpriteTableColorIDMask = 0x7800;  // bits 11-14
 // this makes the max legal sprite id 2047
 
-enum {
-    kNoSpriteLayer     = 0,
-    kFirstSpriteLayer  = 1,
-    kMiddleSpriteLayer = 2,
-    kLastSpriteLayer   = 3,
-};
-
 const int32_t kSpriteMaxSize  = 2048;
 const int32_t kBlipThreshhold = kOneQuarterScale;
 
@@ -62,14 +55,14 @@ class Sprite {
 
     Sprite();
 
-    Point           where;
-    NatePixTable*   table;
-    int             whichShape;
-    int32_t         scale;
-    spriteStyleType style;
-    RgbColor        styleColor;
-    int16_t         styleData;
-    int16_t         whichLayer;
+    Point             where;
+    NatePixTable*     table;
+    int               whichShape;
+    int32_t           scale;
+    spriteStyleType   style;
+    RgbColor          styleColor;
+    int16_t           styleData;
+    BaseObject::Layer whichLayer;
     struct {
         Hue     hue;
         uint8_t shade;
@@ -112,7 +105,7 @@ void           ResetAllSprites();
 Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, sfz::optional<BaseObject::Icon> icon, int16_t layer, Hue tiny_hue,
+        int32_t scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
         uint8_t tiny_shade);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();

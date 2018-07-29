@@ -22,7 +22,9 @@
 #include <pn/string>
 
 #include "data/action.hpp"
+#include "data/distance.hpp"
 #include "data/range.hpp"
+#include "data/tags.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"
@@ -111,7 +113,7 @@ class BaseObject {
 
     Fixed    maxVelocity;      // maximum speed
     Fixed    warpSpeed;        // multiplier of speed at warp (0 if cannot)
-    uint32_t warpOutDistance;  // distance at which to come out of warp
+    Distance warpOutDistance;  // distance at which to come out of warp
 
     Fixed mass;       // how quickly thrust acheives max
     Fixed turn_rate;  // max rate at which object can turn
@@ -168,8 +170,8 @@ class BaseObject {
 
     struct Expire {
         struct After {
-            Range<ticks> age;  // starting random age
-            bool         animation = false;
+            sfz::optional<Range<ticks>> age;  // starting random age
+            bool                        animation = false;
         } after;
         bool                die;
         std::vector<Action> action;
@@ -191,20 +193,25 @@ class BaseObject {
     } collide;
 
     struct Activate {
-        Range<ticks>        period;
-        std::vector<Action> action;
+        sfz::optional<Range<ticks>> period;
+        std::vector<Action>         action;
     } activate;
 
     struct Arrive {
-        uint32_t            distance;
+        Distance            distance;
         std::vector<Action> action;
     } arrive;
+
+    enum class Layer { NONE = 0, BASES = 1, SHIPS = 2, SHOTS = 3 };
+    struct Scale {
+        int64_t factor;  // sprite scale; 4096 = 100%
+    };
 
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
         pn::string sprite;  // ID of sprite resource
-        int16_t    layer;   // 0 = no layer 1->3 = back to front
-        int32_t    scale;   // sprite scale; 4096 = 100%
+        Layer      layer;
+        Scale      scale;
 
         Range<int64_t> frames;
     };
@@ -220,8 +227,8 @@ class BaseObject {
         };
 
         pn::string sprite;  // ID of sprite resource
-        int16_t    layer;   // 0 = no layer 1->3 = back to front
-        int32_t    scale;   // sprite scale; 4096 = 100%
+        Layer      layer;
+        Scale      scale;
 
         Range<Fixed> frames;     // range of frames from sprite
         Direction    direction;  // frame sequence
@@ -269,20 +276,20 @@ class BaseObject {
     };
     sfz::optional<Device> device;
 
-    uint32_t                   orderFlags = 0;
-    std::map<pn::string, bool> tags;
-    ticks                      buildTime;
+    uint32_t orderFlags = 0;
+    Tags     tags;
+    ticks    buildTime;
 
     struct AI {
         struct Combat {
-            bool                       hated   = false;
-            bool                       guided  = false;
-            bool                       engages = false;
-            std::map<pn::string, bool> engages_if;
-            bool                       engaged = false;
-            std::map<pn::string, bool> engaged_if;
-            bool                       evades = false;
-            bool                       evaded = false;
+            bool hated   = false;
+            bool guided  = false;
+            bool engages = false;
+            Tags engages_if;
+            bool engaged = false;
+            Tags engaged_if;
+            bool evades = false;
+            bool evaded = false;
             struct Skill {
                 uint8_t num;
                 uint8_t den;
@@ -291,10 +298,10 @@ class BaseObject {
 
         struct Target {
             struct Filter {
-                sfz::optional<bool>        base;
-                sfz::optional<bool>        local;
-                Owner                      owner;
-                std::map<pn::string, bool> tags;
+                sfz::optional<bool> base;
+                sfz::optional<bool> local;
+                Owner               owner;
+                Tags                tags;
             };
             Filter prefer;
             Filter force;

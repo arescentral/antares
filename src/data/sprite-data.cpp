@@ -24,11 +24,10 @@ namespace antares {
 
 SpriteData sprite_data(pn::value_cref x) {
     return required_struct<SpriteData>(
-            path_value{x},
-            {{"rows", {&SpriteData::rows, optional_int, 1}},
-             {"cols", {&SpriteData::cols, optional_int, 1}},
-             {"center", {&SpriteData::center, required_point}},
-             {"frames", {&SpriteData::frames, required_array<Rect, required_rect>}}});
+            path_value{x}, {{"rows", &SpriteData::rows},
+                            {"cols", &SpriteData::cols},
+                            {"center", &SpriteData::center},
+                            {"frames", &SpriteData::frames}});
 }
 
 }  // namespace antares

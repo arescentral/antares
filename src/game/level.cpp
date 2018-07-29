@@ -176,6 +176,19 @@ void GetInitialCoord(Handle<const Initial> initial, coordPointType* coord, int32
 
 }  // namespace
 
+template <typename Players>
+static void construct_players(const Players& players) {
+    int i = 0;
+    for (const auto& player : players) {
+        auto admiral = Admiral::make(i++, player);
+        if (admiral->attributes() & kAIsHuman) {
+            g.admiral = admiral;
+        }
+        admiral->pay(Fixed::from_long(5000));
+        load_race(admiral->race());
+    }
+}
+
 LoadState start_construct_level(const Level& level) {
     ResetAllSpaceObjects();
     reset_action_queue();
@@ -193,32 +206,22 @@ LoadState start_construct_level(const Level& level) {
 
     g.level = &level;
 
-    {
-        int32_t angle = g.level->angle;
-        if (angle < 0) {
-            g.angle = g.random.next(ROT_POS);
-        } else {
-            g.angle = angle;
-        }
+    if (g.level->base.angle.has_value()) {
+        g.angle = *g.level->base.angle;
+    } else {
+        g.angle = g.random.next(ROT_POS);
     }
 
     g.victor       = Admiral::none();
     g.next_level   = nullptr;
-    g.victory_text = "";
+    g.victory_text = sfz::nullopt;
 
-    int i = 0;
-    for (const auto& player : g.level->players) {
-        if (player.playerType == Level::Player::Type::HUMAN) {
-            auto admiral = Admiral::make(i++, kAIsHuman, player);
-            admiral->pay(Fixed::from_long(5000));
-            g.admiral = admiral;
-        } else {
-            auto admiral = Admiral::make(i++, kAIsComputer, player);
-            admiral->pay(Fixed::from_long(5000));
-        }
-        load_race(player.playerRace);
+    switch (g.level->type()) {
+        case Level::Type::NONE: throw std::runtime_error("level with type NONE?");
+        case Level::Type::DEMO: construct_players(g.level->demo.players); break;
+        case Level::Type::SOLO: construct_players(g.level->solo.players); break;
+        case Level::Type::NET: throw std::runtime_error("can’t construct net player");
     }
-
     // *** END INIT ADMIRALS ***
 
     g.initials.clear();
@@ -226,7 +229,7 @@ LoadState start_construct_level(const Level& level) {
     g.initial_ids.clear();
     g.initial_ids.resize(Initial::all().size());
     g.condition_enabled.clear();
-    g.condition_enabled.resize(g.level->conditions.size());
+    g.condition_enabled.resize(g.level->base.conditions.size());
 
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
 
@@ -235,7 +238,8 @@ LoadState start_construct_level(const Level& level) {
 
     LoadState s;
     s.max = Initial::all().size() * 3L + 1 +
-            g.level->startTime.count();  // for each run through the initial num
+            g.level->base.start_time.value_or(secs(0))
+                    .count();  // for each run through the initial num
 
     return s;
 }
@@ -254,7 +258,7 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
 }
 
 static void load_initial(Handle<const Initial> initial, std::bitset<16> all_colors) {
-    Handle<Admiral>               owner           = initial->owner;
+    Handle<Admiral>               owner           = initial->owner.value_or(Admiral::none());
     const BuildableObject&        buildableObject = initial->base;
     NamedHandle<const BaseObject> baseObject;
     if (owner.get()) {
@@ -292,11 +296,11 @@ static void load_condition(Handle<const Condition> condition, std::bitset<16> al
     for (const auto& action : condition->action) {
         AddActionMedia(action, all_colors);
     }
-    g.condition_enabled[condition.number()] = !condition->disabled;
+    g.condition_enabled[condition.number()] = !condition->disabled.value_or(false);
 }
 
 static void run_game_1s() {
-    game_ticks start_time = game_ticks(-g.level->startTime);
+    game_ticks start_time = game_ticks(-g.level->base.start_time.value_or(secs(0)));
     do {
         g.time += kMajorTick;
         MoveSpaceObjects(kMajorTick);
@@ -344,7 +348,7 @@ void construct_level(LoadState* state) {
     } else if (step == (3 * Initial::all().size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
-        g.time = game_ticks(-g.level->startTime);
+        g.time = game_ticks(-g.level->base.start_time.value_or(secs(0)));
     } else {
         run_game_1s();
     }
@@ -359,13 +363,13 @@ void DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::stri
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
         g.next_level   = nextLevel;
-        g.victory_text = text.copy();
+        g.victory_text = sfz::make_optional(text.copy());
         g.game_over    = true;
         g.game_over_at = g.time;
     } else {
         if (!g.victor.get()) {
             g.victor       = whichPlayer;
-            g.victory_text = text.copy();
+            g.victory_text = sfz::make_optional(text.copy());
             g.next_level   = nextLevel;
             if (!g.game_over) {
                 g.game_over    = true;
@@ -390,7 +394,7 @@ void GetLevelFullScaleAndCorner(
 
     biggest = 0;
     for (const auto& initial : Initial::all()) {
-        if (!initial->hide) {
+        if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
             for (const auto& other : Initial::all()) {
@@ -416,7 +420,7 @@ void GetLevelFullScaleAndCorner(
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
     for (const auto& initial : Initial::all()) {
-        if (!initial->hide) {
+        if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {

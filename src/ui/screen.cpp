@@ -37,50 +37,12 @@ using std::vector;
 
 namespace antares {
 
-namespace {
-
-struct EmplaceBackVisitor : InterfaceItemData::Visitor {
-    std::vector<std::unique_ptr<Widget>>* vec;
-
-    EmplaceBackVisitor(std::vector<std::unique_ptr<Widget>>* v) : vec{v} {}
-
-    void visit_box_rect(const BoxRectData& data) const override {
-        vec->emplace_back(new BoxRect{data});
-    }
-
-    void visit_text_rect(const TextRectData& data) const override {
-        vec->emplace_back(new TextRect{data});
-    }
-
-    void visit_picture_rect(const PictureRectData& data) const override {
-        vec->emplace_back(new PictureRect{data});
-    }
-
-    void visit_plain_button(const PlainButtonData& data) const override {
-        vec->emplace_back(new PlainButton{data});
-    }
-
-    void visit_radio_button(const RadioButtonData& data) const override {
-        vec->emplace_back(new RadioButton{data});
-    }
-
-    void visit_checkbox_button(const CheckboxButtonData& data) const override {
-        vec->emplace_back(new CheckboxButton{data});
-    }
-
-    void visit_tab_box(const TabBoxData& data) const override {
-        vec->emplace_back(new TabBox{data});
-    }
-};
-
-}  // namespace
-
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bounds(bounds) {
     try {
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
         for (auto& item : data.items) {
-            item->accept(EmplaceBackVisitor{&_widgets});
+            _widgets.push_back(Widget::from(item));
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
@@ -95,9 +57,10 @@ void InterfaceScreen::become_front() {
 
 void InterfaceScreen::resign_front() { set_state(NORMAL); }
 
-void InterfaceScreen::set_state(State state, Widget* widget, uint32_t pressed) {
-    _state   = state;
-    _pressed = pressed;
+void InterfaceScreen::set_state(State state, Widget* widget, Key key, Gamepad::Button gamepad) {
+    _state           = state;
+    _key_pressed     = key;
+    _gamepad_pressed = gamepad;
     if (widget) {  // Even if already the active widget.
         sys.sound.select();
     }
@@ -183,9 +146,8 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 }
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
-    const int32_t key_code = event.key() + 1;
     for (auto& widget : _widgets) {
-        if (Widget* item = widget->accept_key(key_code)) {
+        if (Widget* item = widget->accept_key(event.key())) {
             set_state(KEY_DOWN, item, event.key());
             return;
         }
@@ -193,7 +155,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 }
 
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
-    if ((_state == KEY_DOWN) && (_pressed == event.key())) {
+    if ((_state == KEY_DOWN) && (_key_pressed == event.key())) {
         Widget* w = _active_widget;
         set_state(NORMAL);
         w->action();
@@ -203,14 +165,14 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     for (auto& widget : _widgets) {
         if (Widget* item = widget->accept_button(event.button)) {
-            set_state(GAMEPAD_DOWN, item, event.button);
+            set_state(GAMEPAD_DOWN, item, Key::NONE, event.button);
             return;
         }
     }
 }
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
+    if ((_state == GAMEPAD_DOWN) && (_gamepad_pressed == event.button)) {
         Widget* w = _active_widget;
         set_state(NORMAL);
         w->action();

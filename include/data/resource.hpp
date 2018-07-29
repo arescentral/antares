@@ -32,7 +32,7 @@ class Texture;
 struct Info;
 struct InterfaceData;
 struct FontData;
-struct Level;
+union Level;
 struct Race;
 struct ReplayData;
 struct SoundData;

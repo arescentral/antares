@@ -47,8 +47,8 @@ static void read_all_levels() {
     plug.chapters.clear();
     for (pn::string_view name : Resource::list_levels()) {
         auto it = plug.levels.emplace(name.copy(), Resource::level(name)).first;
-        if (it->second.chapter.has_value()) {
-            plug.chapters[*it->second.chapter] = &it->second;
+        if (it->second.base.chapter.has_value()) {
+            plug.chapters[*it->second.base.chapter] = &it->second;
         }
     }
 }

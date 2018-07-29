@@ -26,6 +26,7 @@
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 

@@ -63,9 +63,9 @@ void SoloGame::become_front() {
 
         case START_LEVEL:
             _state = PROLOGUE;
-            if (!_level->prologue.empty()) {
+            if ((_level->type() == Level::Type::SOLO) && _level->solo.prologue.has_value()) {
                 stack()->push(new ScrollTextScreen(
-                        _level->prologue, 450, kSlowScrollInterval, Music::prologue_song));
+                        *_level->solo.prologue, 450, kSlowScrollInterval, Music::prologue_song));
                 break;
             }
         // else fall through
@@ -88,11 +88,10 @@ void SoloGame::become_front() {
 void SoloGame::handle_game_result() {
     switch (_game_result) {
         case WIN_GAME: {
-            _state                         = EPILOGUE;
-            const pn::string_view epilogue = _level->epilogue;
-            if (!epilogue.empty()) {
+            _state = EPILOGUE;
+            if ((_level->type() == Level::Type::SOLO) && _level->solo.epilogue.has_value()) {
                 stack()->push(new ScrollTextScreen(
-                        epilogue, 450, kSlowScrollInterval,
+                        *_level->solo.epilogue, 450, kSlowScrollInterval,
                         g.next_level ? Music::prologue_song : Music::victory_song));
             } else {
                 become_front();
@@ -119,8 +118,8 @@ void SoloGame::epilogue_done() {
     _state = QUIT;
 
     if (g.next_level) {
-        if (g.next_level && g.next_level->chapter.has_value()) {
-            Ledger::ledger()->unlock_chapter(*g.next_level->chapter);
+        if (g.next_level && g.next_level->base.chapter.has_value()) {
+            Ledger::ledger()->unlock_chapter(*g.next_level->base.chapter);
             _level = g.next_level;
             _state = START_LEVEL;
         }

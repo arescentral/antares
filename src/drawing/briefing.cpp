@@ -426,19 +426,20 @@ void draw_briefing_objects(
 BriefPointInfo BriefPoint_Data_Get(
         int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
         int32_t maxSize, const Rect& bounds) {
-    const Briefing& brief = level.briefings[whichPoint];
+    const Briefing& brief = level.base.briefings[whichPoint];
 
     BriefPointInfo info;
     info.header    = brief.title.copy();
     info.content   = brief.content.copy();
     info.highlight = Rect{};
 
-    if (brief.initial.get()) {
+    if (brief.initial.has_value()) {
         Point   where;
         Rect    spriteRect;
         int32_t thisScale;
         GetInitialObjectSpriteData(
-                brief.initial, maxSize, bounds, corner, scale, &thisScale, &where, &spriteRect);
+                brief.initial.value_or(Initial::none()), maxSize, bounds, corner, scale,
+                &thisScale, &where, &spriteRect);
         info.highlight = spriteRect;
         info.highlight.inset(-2, -2);
     }

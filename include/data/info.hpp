@@ -30,7 +30,10 @@ class BaseObject;
 class path_value;
 
 struct Info {
-    pn::string identifier;
+    struct Identifier {
+        pn::string hash;
+    };
+    Identifier identifier;
     int64_t    format;
 
     NamedHandle<const BaseObject> warpInFlareID;

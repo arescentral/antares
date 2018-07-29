@@ -27,6 +27,7 @@
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/range.hpp"
+#include "data/tags.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -34,7 +35,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 struct Initial;
 struct Condition;
 struct Race;
@@ -55,6 +56,7 @@ class path_value {
                           array_get(_value.as_array(), index)};
     }
 
+    bool       is_root() const;
     pn::string path() const;
     pn::string prefix() const;
 
@@ -73,58 +75,80 @@ class path_value {
     pn::value_cref    _value;
 };
 
-sfz::optional<bool> optional_bool(path_value x);
-bool                required_bool(path_value x);
+template <typename T>
+struct field_reader;
 
-sfz::optional<int64_t> optional_int(path_value x);
-int64_t                required_int(path_value x);
-sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<int64_t>& ranges);
-int64_t                required_int(path_value x, const std::initializer_list<int64_t>& ranges);
+template <typename T>
+T read_field(path_value x) {
+    return field_reader<T>::read(x);
+}
 
-double required_double(path_value x);
+#define DECLARE_FIELD_READER(T)      \
+    template <>                      \
+    struct field_reader<T> {         \
+        static T read(path_value x); \
+    }
 
-sfz::optional<Fixed> optional_fixed(path_value x);
-Fixed                required_fixed(path_value x);
+#define DEFINE_FIELD_READER(T) T field_reader<T>::read(path_value x)
 
-sfz::optional<pn::string_view> optional_string(path_value x);
-sfz::optional<pn::string>      optional_string_copy(path_value x);
-pn::string_view                required_string(path_value x);
-pn::string                     required_string_copy(path_value x);
+#define FIELD_READER(T)      \
+    DECLARE_FIELD_READER(T); \
+    DEFINE_FIELD_READER(T)
 
-sfz::optional<ticks> optional_ticks(path_value x);
-ticks                required_ticks(path_value x);
-sfz::optional<secs>  optional_secs(path_value x);
+DECLARE_FIELD_READER(bool);
+DECLARE_FIELD_READER(sfz::optional<bool>);
+DECLARE_FIELD_READER(int64_t);
+DECLARE_FIELD_READER(sfz::optional<int64_t>);
+DECLARE_FIELD_READER(uint8_t);
+DECLARE_FIELD_READER(int32_t);
 
-sfz::optional<Handle<Admiral>>          optional_admiral(path_value x);
-Handle<Admiral>                         required_admiral(path_value x);
-NamedHandle<const BaseObject>           required_base(path_value x);
-sfz::optional<Handle<const Initial>>    optional_initial(path_value x);
-Handle<const Initial>                   required_initial(path_value x);
-Handle<const Condition>                 required_condition(path_value x);
-sfz::optional<NamedHandle<const Level>> optional_level(path_value x);
-sfz::optional<Owner>                    optional_owner(path_value x);
-Owner                                   required_owner(path_value x);
-NamedHandle<const Race>                 required_race(path_value x);
+int64_t int_field_within(path_value x, Range<int64_t> range);
 
-sfz::optional<Range<int64_t>> optional_int_range(path_value x);
-Range<int64_t>                required_int_range(path_value x);
-sfz::optional<Range<Fixed>>   optional_fixed_range(path_value x);
-Range<Fixed>                  required_fixed_range(path_value x);
-sfz::optional<Range<ticks>>   optional_ticks_range(path_value x);
-Range<ticks>                  required_ticks_range(path_value x);
+DECLARE_FIELD_READER(double);
+DECLARE_FIELD_READER(Fixed);
+DECLARE_FIELD_READER(sfz::optional<Fixed>);
 
-sfz::optional<Point> optional_point(path_value x);
-Point                required_point(path_value x);
-sfz::optional<Rect>  optional_rect(path_value x);
-Rect                 required_rect(path_value x);
+DECLARE_FIELD_READER(pn::string_view);
+DECLARE_FIELD_READER(sfz::optional<pn::string_view>);
+DECLARE_FIELD_READER(pn::string);
+DECLARE_FIELD_READER(sfz::optional<pn::string>);
 
-sfz::optional<RgbColor> optional_color(path_value x);
-RgbColor                required_color(path_value x);
+DECLARE_FIELD_READER(sfz::optional<ticks>);
+DECLARE_FIELD_READER(ticks);
+DECLARE_FIELD_READER(sfz::optional<secs>);
 
-sfz::optional<Hue> optional_hue(path_value x);
-Hue                required_hue(path_value x);
-Screen             required_screen(path_value x);
-Zoom               required_zoom(path_value x);
+DECLARE_FIELD_READER(Tags);
+
+DECLARE_FIELD_READER(sfz::optional<Handle<Admiral>>);
+DECLARE_FIELD_READER(Handle<Admiral>);
+DECLARE_FIELD_READER(NamedHandle<const BaseObject>);
+DECLARE_FIELD_READER(sfz::optional<Handle<const Initial>>);
+DECLARE_FIELD_READER(Handle<const Initial>);
+DECLARE_FIELD_READER(Handle<const Condition>);
+DECLARE_FIELD_READER(sfz::optional<NamedHandle<const Level>>);
+DECLARE_FIELD_READER(sfz::optional<Owner>);
+DECLARE_FIELD_READER(Owner);
+DECLARE_FIELD_READER(NamedHandle<const Race>);
+
+DECLARE_FIELD_READER(sfz::optional<Range<int64_t>>);
+DECLARE_FIELD_READER(Range<int64_t>);
+DECLARE_FIELD_READER(sfz::optional<Range<Fixed>>);
+DECLARE_FIELD_READER(Range<Fixed>);
+DECLARE_FIELD_READER(sfz::optional<Range<ticks>>);
+DECLARE_FIELD_READER(Range<ticks>);
+
+DECLARE_FIELD_READER(sfz::optional<Point>);
+DECLARE_FIELD_READER(Point);
+DECLARE_FIELD_READER(sfz::optional<Rect>);
+DECLARE_FIELD_READER(Rect);
+
+DECLARE_FIELD_READER(sfz::optional<RgbColor>);
+DECLARE_FIELD_READER(RgbColor);
+
+DECLARE_FIELD_READER(sfz::optional<Hue>);
+DECLARE_FIELD_READER(Hue);
+DECLARE_FIELD_READER(Screen);
+DECLARE_FIELD_READER(Zoom);
 
 template <typename T, int N>
 sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
@@ -145,7 +169,7 @@ sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T>
     for (auto kv : values) {
         keys.push_back(kv.first.copy());
     }
-    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
+    throw std::runtime_error(pn::format("{0}must be one of {1}", x.prefix(), keys).c_str());
 }
 
 template <typename T, int N>
@@ -163,7 +187,15 @@ T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) 
     for (auto kv : values) {
         keys.push_back(kv.first.copy());
     }
-    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
+    throw std::runtime_error(pn::format("{0}must be one of {1}", x.prefix(), keys).c_str());
+}
+
+template <typename T>
+T required_object_type(path_value x, T (*get_type)(path_value x)) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
+    }
+    return get_type(x.get("type"));
 }
 
 template <typename T>
@@ -173,22 +205,8 @@ struct field {
     constexpr field(std::nullptr_t) : set([](T*, path_value) {}) {}
 
     template <typename F, typename U>
-    constexpr field(F(U::*field), F (*reader)(path_value x))
-            : set([field, reader](T* t, path_value x) { (t->*field) = reader(x); }) {}
-
-    template <typename F, typename U, typename D>
-    constexpr field(F(U::*field), sfz::optional<F> (*reader)(path_value x), const D& default_value)
-            : set([field, reader, default_value](T* t, path_value x) {
-                  (t->*field) = reader(x).value_or(default_value);
-              }) {}
-
-    template <typename U>
-    constexpr field(
-            pn::string(U::*field), sfz::optional<pn::string_view> (*reader)(path_value x),
-            pn::string_view default_value)
-            : set([field, reader, default_value](T* t, path_value x) {
-                  (t->*field) = reader(x).value_or(default_value).copy();
-              }) {}
+    constexpr field(F(U::*field))
+            : set([field](T* t, path_value x) { (t->*field) = read_field<F>(x); }) {}
 };
 
 template <typename T>
@@ -233,7 +251,7 @@ static std::vector<T> required_array(path_value x) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}must be array", x.prefix()).c_str());
     }
 }
 
@@ -249,9 +267,16 @@ static std::vector<T> optional_array(path_value x) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}must be null or array", x.prefix()).c_str());
     }
 }
+
+template <typename T>
+struct field_reader<std::vector<T>> {
+    static std::vector<T> read(path_value x) {
+        return optional_array<T, field_reader<T>::read>(x);
+    }
+};
 
 }  // namespace antares
 

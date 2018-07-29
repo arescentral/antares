@@ -56,8 +56,9 @@ Rect object_data_bounds(Point origin, Size size) {
 }  // namespace
 
 ObjectDataScreen::ObjectDataScreen(
-        Point origin, const BaseObject& object, Trigger trigger, int which)
-        : _trigger(trigger), _which(which), _state(TYPING) {
+        Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key,
+        Gamepad::Button gamepad)
+        : _trigger(trigger), _mouse(mouse), _key(key), _gamepad(gamepad), _state(TYPING) {
     pn::string text;
     CreateObjectDataText(text, object);
     _text.reset(new StyledText(sys.fonts.button));
@@ -107,19 +108,19 @@ void ObjectDataScreen::fire_timer() {
 }
 
 void ObjectDataScreen::mouse_up(const MouseUpEvent& event) {
-    if ((_trigger == MOUSE) && (event.button() == _which)) {
+    if ((_trigger == MOUSE) && (event.button() == _mouse)) {
         stack()->pop(this);
     }
 }
 
 void ObjectDataScreen::key_up(const KeyUpEvent& event) {
-    if ((_trigger == KEY) && (event.key() == _which)) {
+    if ((_trigger == KEY) && (event.key() == _key)) {
         stack()->pop(this);
     }
 }
 
 void ObjectDataScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if ((_trigger == GAMEPAD) && (event.button == _which)) {
+    if ((_trigger == GAMEPAD) && (event.button == _gamepad)) {
         stack()->pop(this);
     }
 }

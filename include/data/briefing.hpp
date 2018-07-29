@@ -20,6 +20,7 @@
 #define ANTARES_DATA_BRIEFING_HPP_
 
 #include <pn/string>
+#include <sfz/optional.hpp>
 
 #include "data/handle.hpp"
 
@@ -29,12 +30,17 @@ class path_value;
 struct Initial;
 
 struct Briefing {
-    Handle<const Initial> initial;  // Object to focus on, or none for freestanding.
-    pn::string            title;    // Plain text, used for title bar.
-    pn::string            content;  // Styled text, used for body.
+    sfz::optional<Handle<const Initial>> initial;  // Object to focus on, or none for freestanding.
+    pn::string                           title;    // Plain text, used for title bar.
+    pn::string                           content;  // Styled text, used for body.
 };
 
-Briefing briefing(path_value x);
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<Briefing> {
+    static Briefing read(path_value x);
+};
 
 }  // namespace antares
 

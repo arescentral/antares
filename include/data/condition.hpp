@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/distance.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/object-ref.hpp"
@@ -129,7 +130,7 @@ struct DistanceCondition : ConditionBase {
     ConditionOp op = ConditionOp::EQ;
     ObjectRef   from;
     ObjectRef   to;
-    int64_t     value;
+    Distance    value;
 };
 
 // Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.
@@ -194,9 +195,9 @@ struct TargetCondition : ConditionBase {
 // `legacy_start_time` specifies an alternate mode where the setup time counts for only 1/3 as much
 // as time after the setup finishes.
 struct TimeCondition : ConditionBase {
-    ConditionOp op = ConditionOp::EQ;
-    ticks       duration;
-    bool        legacy_start_time;
+    ConditionOp         op = ConditionOp::EQ;
+    ticks               duration;
+    sfz::optional<bool> legacy_start_time;
 };
 
 // Compares zoom level of the local player to `value`.
@@ -256,8 +257,8 @@ union ConditionWhen {
 };
 
 struct Condition {
-    bool disabled   = false;
-    bool persistent = false;
+    sfz::optional<bool> disabled;
+    sfz::optional<bool> persistent;
 
     ConditionWhen when;
 
@@ -269,7 +270,12 @@ struct Condition {
     static HandleList<const Condition> all();
 };
 
-Condition condition(path_value x);
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<Condition> {
+    static Condition read(path_value x);
+};
 
 }  // namespace antares
 

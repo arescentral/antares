@@ -30,10 +30,10 @@ namespace antares {
 
 // clang-format off
 #define COMMON_ACTION_FIELDS                                                                      \
-            {"type", {&ActionBase::type, required_action_type}},                                  \
-            {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                        \
-            {"if", {&ActionBase::filter, optional_action_filter}},                                \
-            {"override", {&ActionBase::override_, optional_action_override}}
+            {"type", &ActionBase::type},                                                          \
+            {"reflexive", &ActionBase::reflexive},                                                \
+            {"if", &ActionBase::filter},                                                          \
+            {"override", &ActionBase::override_}
 // clang-format on
 
 Action::Type Action::type() const { return base.type; }
@@ -169,7 +169,7 @@ static uint32_t optional_flags(path_value x, const std::map<pn::string_view, int
     } else if (x.value().is_map()) {
         uint32_t result = 0;
         for (auto kv : flags) {
-            if (optional_bool(x.get(kv.first)).value_or(false)) {
+            if (read_field<sfz::optional<bool>>(x.get(kv.first)).value_or(false)) {
                 result |= 1 << kv.second;
             }
         }
@@ -185,8 +185,9 @@ static uint32_t optional_flags(path_value x, const std::map<pn::string_view, int
     }
 }
 
-static uint32_t optional_object_attributes(path_value x) {
-    return optional_flags(
+FIELD_READER(ActionBase::Filter::Attributes) {
+    ActionBase::Filter::Attributes attributes;
+    attributes.bits = optional_flags(
             x, {{"can_be_engaged", 1},
                 {"does_bounce", 6},
                 {"can_be_destination", 10},
@@ -208,43 +209,25 @@ static uint32_t optional_object_attributes(path_value x) {
                 {"neutral_death", 27},
                 {"is_guided", 28},
                 {"appear_on_radar", 29}});
+    return attributes;
 }
 
-static std::map<pn::string, bool> optional_tags(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_map()) {
-        pn::map_cref               m = x.value().as_map();
-        std::map<pn::string, bool> result;
-        for (const auto& kv : m) {
-            auto v = optional_bool(x.get(kv.key()));
-            if (v.has_value()) {
-                result[kv.key().copy()] = *v;
-            }
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
-}
-
-static ActionBase::Filter optional_action_filter(path_value x) {
+FIELD_READER(ActionBase::Filter) {
     return optional_struct<ActionBase::Filter>(
-                   x,
-                   {{"attributes", {&ActionBase::Filter::attributes, optional_object_attributes}},
-                    {"tags", {&ActionBase::Filter::tags, optional_tags}},
-                    {"owner", {&ActionBase::Filter::owner, optional_owner, Owner::ANY}}})
+                   x, {{"attributes", &ActionBase::Filter::attributes},
+                       {"tags", &ActionBase::Filter::tags},
+                       {"owner", &ActionBase::Filter::owner}})
             .value_or(ActionBase::Filter{});
 }
 
-static ActionBase::Override optional_action_override(path_value x) {
+FIELD_READER(ActionBase::Override) {
     return optional_struct<ActionBase::Override>(
-                   x, {{"subject", {&ActionBase::Override::subject, optional_object_ref}},
-                       {"object", {&ActionBase::Override::object, optional_object_ref}}})
+                   x, {{"subject", &ActionBase::Override::subject},
+                       {"object", &ActionBase::Override::object}})
             .value_or(ActionBase::Override{});
 }
 
-static Action::Type required_action_type(path_value x) {
+FIELD_READER(Action::Type) {
     return required_enum<Action::Type>(
             x, {{"age", Action::Type::AGE},
                 {"assume", Action::Type::ASSUME},
@@ -284,7 +267,7 @@ static Action::Type required_action_type(path_value x) {
                 {"zoom", Action::Type::ZOOM}});
 }
 
-static Within required_within(path_value x) {
+FIELD_READER(Within) {
     return optional_enum<Within>(x, {{"circle", Within::CIRCLE}, {"square", Within::SQUARE}})
             .value_or(Within::CIRCLE);
 }
@@ -292,23 +275,23 @@ static Within required_within(path_value x) {
 static Action age_action(path_value x) {
     return required_struct<AgeAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"relative", {&AgeAction::relative, optional_bool, false}},
-                {"value", {&AgeAction::value, required_ticks_range}}});
+                {"relative", &AgeAction::relative},
+                {"value", &AgeAction::value}});
 }
 
 static Action assume_action(path_value x) {
     return required_struct<AssumeAction>(
-            x, {COMMON_ACTION_FIELDS, {"which", {&AssumeAction::which, required_int}}});
+            x, {COMMON_ACTION_FIELDS, {"which", &AssumeAction::which}});
 }
 
 static Action cap_speed_action(path_value x) {
     return required_struct<CapSpeedAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&CapSpeedAction::value, optional_fixed}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &CapSpeedAction::value}});
 }
 
 static Action capture_action(path_value x) {
     return required_struct<CaptureAction>(
-            x, {COMMON_ACTION_FIELDS, {"player", {&CaptureAction::player, optional_admiral}}});
+            x, {COMMON_ACTION_FIELDS, {"player", &CaptureAction::player}});
 }
 
 static Action check_action(path_value x) {
@@ -322,76 +305,69 @@ static Action cloak_action(path_value x) {
 static Action condition_action(path_value x) {
     return required_struct<ConditionAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable",
-                 {&ConditionAction::enable,
-                  optional_array<Handle<const Condition>, required_condition>}},
-                {"disable",
-                 {&ConditionAction::disable,
-                  optional_array<Handle<const Condition>, required_condition>}}});
+                {"enable", &ConditionAction::enable},
+                {"disable", &ConditionAction::disable}});
 }
 
 static Action create_action(path_value x) {
     return required_struct<CreateAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"base", {&CreateAction::base, required_base}},
-                {"count", {&CreateAction::count, optional_int_range, Range<int64_t>{1, 2}}},
-                {"relative_velocity", {&CreateAction::relative_velocity, optional_bool, false}},
-                {"relative_direction", {&CreateAction::relative_direction, optional_bool, false}},
-                {"distance", {&CreateAction::distance, optional_int, 0}},
-                {"within", {&CreateAction::within, required_within}},
-                {"inherit", {&CreateAction::inherit, optional_bool, false}},
-                {"legacy_random", {&CreateAction::legacy_random, optional_bool, false}}});
+                {"base", &CreateAction::base},
+                {"count", &CreateAction::count},
+                {"relative_velocity", &CreateAction::relative_velocity},
+                {"relative_direction", &CreateAction::relative_direction},
+                {"distance", &CreateAction::distance},
+                {"within", &CreateAction::within},
+                {"inherit", &CreateAction::inherit},
+                {"legacy_random", &CreateAction::legacy_random}});
 }
 
 static Action delay_action(path_value x) {
     return required_struct<DelayAction>(
-            x, {COMMON_ACTION_FIELDS, {"duration", {&DelayAction::duration, required_ticks}}});
+            x, {COMMON_ACTION_FIELDS, {"duration", &DelayAction::duration}});
 }
 
 static Action disable_action(path_value x) {
     return required_struct<DisableAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&DisableAction::value, required_fixed_range}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &DisableAction::value}});
 }
 
 static Action energize_action(path_value x) {
     return required_struct<EnergizeAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&EnergizeAction::value, required_int}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &EnergizeAction::value}});
 }
 
-static Weapon required_weapon(path_value x) {
+FIELD_READER(Weapon) {
     return required_enum<Weapon>(
             x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});
 }
 
 static Action equip_action(path_value x) {
     return required_struct<EquipAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"which", {&EquipAction::which, required_weapon}},
-                {"base", {&EquipAction::base, required_base}}});
+            x,
+            {COMMON_ACTION_FIELDS, {"which", &EquipAction::which}, {"base", &EquipAction::base}});
 }
 
 static Action fire_action(path_value x) {
-    return required_struct<FireAction>(
-            x, {COMMON_ACTION_FIELDS, {"which", {&FireAction::which, required_weapon}}});
+    return required_struct<FireAction>(x, {COMMON_ACTION_FIELDS, {"which", &FireAction::which}});
 }
 
 static Action flash_action(path_value x) {
     return required_struct<FlashAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"duration", {&FlashAction::duration, required_ticks}},
-                {"color", {&FlashAction::color, required_color}}});
+                {"duration", &FlashAction::duration},
+                {"color", &FlashAction::color}});
 }
 
 static Action heal_action(path_value x) {
-    return required_struct<HealAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&HealAction::value, required_int}}});
+    return required_struct<HealAction>(x, {COMMON_ACTION_FIELDS, {"value", &HealAction::value}});
 }
 
 static Action hold_action(path_value x) {
     return required_struct<HoldAction>(x, {COMMON_ACTION_FIELDS});
 }
 
-static KeyAction::Key required_key(path_value x) {
+FIELD_READER(KeyAction::Key) {
     return required_enum<KeyAction::Key>(
             x, {{"up", KeyAction::Key::UP},
                 {"down", KeyAction::Key::DOWN},
@@ -424,11 +400,11 @@ static KeyAction::Key required_key(path_value x) {
 static Action key_action(path_value x) {
     return required_struct<KeyAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"enable", {&KeyAction::enable, optional_array<KeyAction::Key, required_key>}},
-                {"disable", {&KeyAction::disable, optional_array<KeyAction::Key, required_key>}}});
+                {"enable", &KeyAction::enable},
+                {"disable", &KeyAction::disable}});
 }
 
-static KillAction::Kind required_kill_kind(path_value x) {
+FIELD_READER(KillAction::Kind) {
     return required_enum<KillAction::Kind>(
             x, {{"none", KillAction::Kind::NONE},
                 {"expire", KillAction::Kind::EXPIRE},
@@ -436,39 +412,35 @@ static KillAction::Kind required_kill_kind(path_value x) {
 }
 
 static Action kill_action(path_value x) {
-    return required_struct<KillAction>(
-            x, {COMMON_ACTION_FIELDS, {"kind", {&KillAction::kind, required_kill_kind}}});
+    return required_struct<KillAction>(x, {COMMON_ACTION_FIELDS, {"kind", &KillAction::kind}});
 }
 
 static Action land_action(path_value x) {
-    return required_struct<LandAction>(
-            x, {COMMON_ACTION_FIELDS, {"speed", {&LandAction::speed, required_int}}});
+    return required_struct<LandAction>(x, {COMMON_ACTION_FIELDS, {"speed", &LandAction::speed}});
 }
 
 static Action message_action(path_value x) {
     return required_struct<MessageAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"id", {&MessageAction::id, optional_int}},
-                {"pages",
-                 {&MessageAction::pages, required_array<pn::string, required_string_copy>}}});
+            x,
+            {COMMON_ACTION_FIELDS, {"id", &MessageAction::id}, {"pages", &MessageAction::pages}});
 }
 
 static Action morph_action(path_value x) {
     return required_struct<MorphAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"base", {&MorphAction::base, required_base}},
-                {"keep_ammo", {&MorphAction::keep_ammo, optional_bool, false}}});
+                {"base", &MorphAction::base},
+                {"keep_ammo", &MorphAction::keep_ammo}});
 }
 
-static sfz::optional<coordPointType> optional_coord_point(path_value x) {
-    sfz::optional<Point> p = optional_point(x);
+FIELD_READER(sfz::optional<coordPointType>) {
+    auto p = read_field<sfz::optional<Point>>(x);
     if (!p.has_value()) {
         return sfz::nullopt;
     }
     return sfz::make_optional(coordPointType{(uint32_t)p->h, (uint32_t)p->v});
 }
 
-static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
+FIELD_READER(sfz::optional<MoveAction::Origin>) {
     return optional_enum<MoveAction::Origin>(
             x, {{"level", MoveAction::Origin::LEVEL},
                 {"subject", MoveAction::Origin::SUBJECT},
@@ -478,15 +450,15 @@ static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
 static Action move_action(path_value x) {
     return required_struct<MoveAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"origin", {&MoveAction::origin, optional_origin, MoveAction::Origin::LEVEL}},
-                {"to", {&MoveAction::to, optional_coord_point, coordPointType{0, 0}}},
-                {"distance", {&MoveAction::distance, optional_int, 0}},
-                {"within", {&MoveAction::within, required_within}}});
+                {"origin", &MoveAction::origin},
+                {"to", &MoveAction::to},
+                {"distance", &MoveAction::distance},
+                {"within", &MoveAction::within}});
 }
 
 static Action occupy_action(path_value x) {
     return required_struct<OccupyAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&OccupyAction::value, required_int}}});
+            x, {COMMON_ACTION_FIELDS, {"value", &OccupyAction::value}});
 }
 
 static Action order_action(path_value x) {
@@ -495,12 +467,11 @@ static Action order_action(path_value x) {
 
 static Action pay_action(path_value x) {
     return required_struct<PayAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"value", {&PayAction::value, required_fixed}},
-                {"player", {&PayAction::player, optional_admiral}}});
+            x,
+            {COMMON_ACTION_FIELDS, {"value", &PayAction::value}, {"player", &PayAction::player}});
 }
 
-static PushAction::Kind required_push_kind(path_value x) {
+FIELD_READER(PushAction::Kind) {
     return required_enum<PushAction::Kind>(
             x, {{"collide", PushAction::Kind::COLLIDE},
                 {"decelerate", PushAction::Kind::DECELERATE},
@@ -511,71 +482,65 @@ static PushAction::Kind required_push_kind(path_value x) {
 
 static Action push_action(path_value x) {
     return required_struct<PushAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"kind", {&PushAction::kind, required_push_kind}},
-                {"value", {&PushAction::value, optional_fixed, Fixed::zero()}}});
+            x, {COMMON_ACTION_FIELDS, {"kind", &PushAction::kind}, {"value", &PushAction::value}});
 }
 
 static Action reveal_action(path_value x) {
     return required_struct<RevealAction>(
-            x,
-            {COMMON_ACTION_FIELDS,
-             {"initial",
-              {&RevealAction::initial, required_array<Handle<const Initial>, required_initial>}}});
+            x, {COMMON_ACTION_FIELDS, {"initial", &RevealAction::initial}});
 }
 
 static Action score_action(path_value x) {
     return required_struct<ScoreAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"player", {&ScoreAction::player, optional_admiral}},
-                {"which", {&ScoreAction::which, required_int}},
-                {"value", {&ScoreAction::value, required_int}}});
+                {"player", &ScoreAction::player},
+                {"which", &ScoreAction::which},
+                {"value", &ScoreAction::value}});
 }
 
 static Action select_action(path_value x) {
     return required_struct<SelectAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"screen", {&SelectAction::screen, required_screen}},
-                {"line", {&SelectAction::line, required_int}}});
+                {"screen", &SelectAction::screen},
+                {"line", &SelectAction::line}});
 }
 
-static PlayAction::Sound required_sound(path_value x) {
-    return required_struct<PlayAction::Sound>(
-            x, {{"sound", {&PlayAction::Sound::sound, required_string_copy}}});
+FIELD_READER(PlayAction::Sound) {
+    return required_struct<PlayAction::Sound>(x, {{"sound", &PlayAction::Sound::sound}});
 }
 
-static uint8_t required_sound_priority(path_value x) { return required_int(x, {0, 6}); }
+FIELD_READER(PlayAction::Priority) {
+    int level = int_field_within(x, {0, 6});
+    return PlayAction::Priority{level};
+}
 
 static Action play_action(path_value x) {
     return required_struct<PlayAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"priority", {&PlayAction::priority, required_sound_priority}},
-                {"persistence", {&PlayAction::persistence, required_ticks}},
-                {"absolute", {&PlayAction::absolute, optional_bool, false}},
-                {"volume", {&PlayAction::volume, required_int}},
-                {"sound", {&PlayAction::sound, optional_string_copy}},
-                {"any", {&PlayAction::any, optional_array<PlayAction::Sound, required_sound>}}});
+                {"priority", &PlayAction::priority},
+                {"persistence", &PlayAction::persistence},
+                {"absolute", &PlayAction::absolute},
+                {"volume", &PlayAction::volume},
+                {"sound", &PlayAction::sound},
+                {"any", &PlayAction::any}});
 }
 
 static Action spark_action(path_value x) {
     return required_struct<SparkAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"count", {&SparkAction::count, required_int}},
-                {"hue", {&SparkAction::hue, required_hue}},
-                {"decay", {&SparkAction::decay, required_int}},
-                {"velocity", {&SparkAction::velocity, required_fixed}}});
+                {"count", &SparkAction::count},
+                {"hue", &SparkAction::hue},
+                {"decay", &SparkAction::decay},
+                {"velocity", &SparkAction::velocity}});
 }
 
 static Action spin_action(path_value x) {
-    return required_struct<SpinAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&SpinAction::value, required_fixed_range}}});
+    return required_struct<SpinAction>(x, {COMMON_ACTION_FIELDS, {"value", &SpinAction::value}});
 }
 
 static Action thrust_action(path_value x) {
     return required_struct<ThrustAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"value", {&ThrustAction::value, required_fixed_range}},
-                {"relative", nullptr}});
+            x, {COMMON_ACTION_FIELDS, {"value", &ThrustAction::value}, {"relative", nullptr}});
 }
 
 static Action warp_action(path_value x) {
@@ -585,22 +550,17 @@ static Action warp_action(path_value x) {
 static Action win_action(path_value x) {
     return required_struct<WinAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"player", {&WinAction::player, optional_admiral}},
-                {"next", {&WinAction::next, optional_level}},
-                {"text", {&WinAction::text, required_string_copy}}});
+                {"player", &WinAction::player},
+                {"next", &WinAction::next},
+                {"text", &WinAction::text}});
 }
 
 static Action zoom_action(path_value x) {
-    return required_struct<ZoomAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&ZoomAction::value, required_zoom}}});
+    return required_struct<ZoomAction>(x, {COMMON_ACTION_FIELDS, {"value", &ZoomAction::value}});
 }
 
-Action action(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    switch (required_action_type(x.get("type"))) {
+DEFINE_FIELD_READER(Action) {
+    switch (required_object_type(x, read_field<Action::Type>)) {
         case Action::Type::AGE: return age_action(x);
         case Action::Type::ASSUME: return assume_action(x);
         case Action::Type::CAP_SPEED: return cap_speed_action(x);

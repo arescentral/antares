@@ -70,13 +70,16 @@ class InterfaceScreen : public Card {
     State _state = NORMAL;
 
     pn::value load_pn(pn::string_view id);
-    void      set_state(State state, Widget* widget = nullptr, uint32_t pressed = 0);
+    void      set_state(
+                 State state, Widget* widget = nullptr, Key key = Key::NONE,
+                 Gamepad::Button gamepad = Gamepad::Button::NONE);
 
     const Rect                           _bounds;
     bool                                 _full_screen = false;
     std::vector<std::unique_ptr<Widget>> _widgets;
-    Widget*                              _active_widget = nullptr;
-    uint32_t                             _pressed;
+    Widget*                              _active_widget   = nullptr;
+    Key                                  _key_pressed     = Key::NONE;
+    Gamepad::Button                      _gamepad_pressed = Gamepad::Button::NONE;
     Cursor                               _cursor;
 };
 

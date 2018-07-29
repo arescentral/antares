@@ -30,7 +30,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class LoadingScreen : public InterfaceScreen {
   public:

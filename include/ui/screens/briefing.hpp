@@ -28,7 +28,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class BriefingScreen : public InterfaceScreen {
   public:
@@ -61,7 +61,9 @@ class BriefingScreen : public InterfaceScreen {
 
     void show_object_data(int index, const KeyDownEvent& event);
     void show_object_data(int index, const GamepadButtonDownEvent& event);
-    void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
+    void show_object_data(
+            int index, ObjectDataScreen::Trigger trigger, int mouse, Key key,
+            Gamepad::Button gamepad);
 
     const Level&    _level;
     bool* const     _cancelled;

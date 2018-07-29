@@ -31,31 +31,32 @@ namespace antares {
 
 Race* Race::get(pn::string_view name) { return &plug.races[name.copy()]; }
 
-std::map<pn::string, NamedHandle<const BaseObject>> optional_ships(path_value x) {
+FIELD_READER(Race::Ships) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_map()) {
-        std::map<pn::string, NamedHandle<const BaseObject>> ships;
+        Race::Ships ships;
         for (pn::key_value_cref kv : x.value().as_map()) {
-            ships.emplace(kv.key().copy(), required_base(x.get(kv.key())));
+            ships.map.emplace(
+                    kv.key().copy(), read_field<NamedHandle<const BaseObject>>(x.get(kv.key())));
         }
         return ships;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
     }
 }
 
 Race race(path_value x) {
     return required_struct<Race>(
             x, {{"numeric", nullptr},
-                {"singular", {&Race::singular, required_string_copy}},
-                {"plural", {&Race::plural, required_string_copy}},
-                {"military", {&Race::military, required_string_copy}},
-                {"homeworld", {&Race::homeworld, required_string_copy}},
-                {"hue", {&Race::hue, required_hue}},
-                {"not_hue", {&Race::not_hue, optional_array<Hue, required_hue>}},
-                {"advantage", {&Race::advantage, required_fixed}},
-                {"ships", {&Race::ships, optional_ships}}});
+                {"singular", &Race::singular},
+                {"plural", &Race::plural},
+                {"military", &Race::military},
+                {"homeworld", &Race::homeworld},
+                {"hue", &Race::hue},
+                {"not_hue", &Race::not_hue},
+                {"advantage", &Race::advantage},
+                {"ships", &Race::ships}});
 }
 
 }  // namespace antares

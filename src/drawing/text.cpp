@@ -60,7 +60,7 @@ Font::Font(
 Font font(pn::string_view name) {
     FontData d       = Resource::font(name);
     Texture  texture = Resource::font_image(name);
-    return Font(std::move(texture), d.logical_width, d.height, d.ascent, d.glyphs);
+    return Font(std::move(texture), d.logical_width, d.height, d.ascent, d.glyphs.map);
 }
 
 Font::~Font() {}

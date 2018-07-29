@@ -121,9 +121,9 @@ bool BothCommandAndQ() {
     bool q       = false;
 
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
-        uint32_t key = sys.prefs->key(i);
-        q |= (key == Keys::Q);
-        command |= (key == Keys::L_COMMAND);
+        Key key = sys.prefs->key(i);
+        q |= (key == Key::Q);
+        command |= (key == Key::L_COMMAND);
     }
 
     return command && q;
@@ -260,7 +260,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t res
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         pn::string_view search  = keys.at(i);
-        pn::string      replace = values.at(sys.prefs->key(i) - 1).copy();
+        pn::string      replace = values.at(static_cast<int>(sys.prefs->key(i))).copy();
         // First, pad to the desired width.
         while (replace.size() < padTo) {
             replace += pn::rune{' '};

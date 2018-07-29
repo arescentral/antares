@@ -122,12 +122,12 @@ struct CocoaVideoDriver::EventBridge {
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(_now(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyDownEvent(_now(), Key::CAPS_LOCK));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(_now(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyUpEvent(_now(), Key::CAPS_LOCK));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -150,14 +150,16 @@ struct CocoaVideoDriver::EventBridge {
         uint16_t scan_code = IOHIDElementGetUsage(element);
         if ((scan_code < 4) || (231 < scan_code)) {
             return;
-        } else if (scan_code == Keys::CAPS_LOCK) {
+        }
+        Key usb_key = static_cast<Key>(scan_code);
+        if (usb_key == Key::CAPS_LOCK) {
             return;
         }
 
         if (down) {
-            enqueue(new KeyDownEvent(_now(), scan_code));
+            enqueue(new KeyDownEvent(_now(), usb_key));
         } else {
-            enqueue(new KeyUpEvent(_now(), scan_code));
+            enqueue(new KeyUpEvent(_now(), usb_key));
         }
     }
 
@@ -168,9 +170,9 @@ struct CocoaVideoDriver::EventBridge {
         bool     down  = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
-            enqueue(new GamepadButtonDownEvent(_now(), usage));
+            enqueue(new GamepadButtonDownEvent(_now(), static_cast<Gamepad::Button>(usage)));
         } else {
-            enqueue(new GamepadButtonUpEvent(_now(), usage));
+            enqueue(new GamepadButtonUpEvent(_now(), static_cast<Gamepad::Button>(usage)));
         }
     }
 
@@ -196,7 +198,9 @@ struct CocoaVideoDriver::EventBridge {
                 static const int x_component[] = {0, 0, -1, 3, 3, -1};
                 double           x             = gamepad[x_component[usage]];
                 double           y             = gamepad[x_component[usage] + 1];
-                enqueue(new GamepadStickEvent(_now(), kHIDUsage_GD_X + x_component[usage], x, y));
+                enqueue(new GamepadStickEvent(
+                        _now(), static_cast<Gamepad::Stick>(kHIDUsage_GD_X + x_component[usage]),
+                        x, y));
             } break;
             case kHIDUsage_GD_Z:
             case kHIDUsage_GD_Rz: button_event(result, element, value); break;

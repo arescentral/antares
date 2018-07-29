@@ -203,8 +203,8 @@ class SpaceObject {
     ticks           rechargeTime = ticks(0);
     int16_t         active       = kObjectAvailable;
 
-    int16_t        layer = 0;
-    Handle<Sprite> sprite;
+    BaseObject::Layer layer = BaseObject::Layer::NONE;
+    Handle<Sprite>    sprite;
 
     uint64_t            distanceFromPlayer = 0;
     uint32_t            closestDistance    = kMaximumRelevantDistanceSquared;
@@ -278,10 +278,10 @@ NamedHandle<const BaseObject> get_buildable_object_handle(
 const BaseObject* get_buildable_object(
         const BuildableObject& o, const NamedHandle<const Race>& race);
 
-bool tags_match(const BaseObject& o, const std::map<pn::string, bool>& query);
+bool tags_match(const BaseObject& o, const Tags& query);
 
 sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
-int32_t                        sprite_layer(const BaseObject& o);
+BaseObject::Layer              sprite_layer(const BaseObject& o);
 int32_t                        sprite_scale(const BaseObject& o);
 int32_t                        rotation_resolution(const BaseObject& o);
 
