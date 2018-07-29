@@ -111,14 +111,14 @@ Admiral* Admiral::get(int i) {
     return nullptr;
 }
 
-Handle<Admiral> Admiral::make(int index, const Level::DemoPlayer& player) {
+Handle<Admiral> Admiral::make(int index, const DemoLevel::Player& player) {
     return make(index, kAIsComputer, player.name, player.earning_power, player.race, player.hue);
 }
 
-Handle<Admiral> Admiral::make(int index, const Level::SoloPlayer& player) {
+Handle<Admiral> Admiral::make(int index, const SoloLevel::Player& player) {
     return make(
-            index, player.type == Level::PlayerType::HUMAN ? kAIsHuman : kAIsComputer, player.name,
-            player.earning_power, player.race, player.hue);
+            index, player.type == LevelBase::PlayerType::HUMAN ? kAIsHuman : kAIsComputer,
+            player.name, player.earning_power, player.race, player.hue);
 }
 
 Handle<Admiral> Admiral::make(

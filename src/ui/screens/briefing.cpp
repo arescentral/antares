@@ -187,9 +187,9 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("briefing", {0, 0, 640, 480}),
           _level(level),
           _cancelled(cancelled),
-          _briefing_point(_level.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
+          _briefing_point(_level.base.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
           _briefing_point_start(_briefing_point),
-          _briefing_point_end(_level.briefings.size()),
+          _briefing_point_end(_level.base.briefings.size()),
           _data_item{{}} {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
@@ -314,8 +314,8 @@ void BriefingScreen::build_star_map() {
     _bounds = pix_bounds;
     _bounds.center_in(widget(MAP_RECT)->inner_bounds());
 
-    if (_level.starmap.has_value()) {
-        _star_rect = *_level.starmap;
+    if (_level.base.starmap.has_value()) {
+        _star_rect = *_level.base.starmap;
 
         // Move `_star_rect` so that it is inside of `pix_bounds`.
         if (_star_rect.left < pix_bounds.left) {

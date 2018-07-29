@@ -38,7 +38,7 @@
 namespace antares {
 
 class SpaceObject;
-struct Level;
+union Level;
 struct Initial;
 struct Condition;
 class path_value;

@@ -32,6 +32,37 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
+Level::Type Level::type() const { return base.type; }
+
+Level::Level() : base{} {}
+Level::Level(DemoLevel l) : demo(std::move(l)) {}
+Level::Level(SoloLevel l) : solo(std::move(l)) {}
+Level::Level(NetLevel l) : net(std::move(l)) {}
+
+Level::Level(Level&& l) {
+    switch (l.type()) {
+        case Level::Type::NONE: new (this) Level(); break;
+        case Level::Type::DEMO: new (this) Level(std::move(l.demo)); break;
+        case Level::Type::SOLO: new (this) Level(std::move(l.solo)); break;
+        case Level::Type::NET: new (this) Level(std::move(l.net)); break;
+    }
+}
+
+Level& Level::operator=(Level&& l) {
+    this->~Level();
+    new (this) Level(std::move(l));
+    return *this;
+}
+
+Level::~Level() {
+    switch (type()) {
+        case Level::Type::NONE: base.~LevelBase(); break;
+        case Level::Type::DEMO: demo.~DemoLevel(); break;
+        case Level::Type::SOLO: solo.~SoloLevel(); break;
+        case Level::Type::NET: net.~NetLevel(); break;
+    }
+}
+
 const Level* Level::get(int number) { return plug.chapters[number]; }
 
 const Level* Level::get(pn::string_view name) {
@@ -43,115 +74,117 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-FIELD_READER(Level::PlayerType) {
-    return required_enum<Level::PlayerType>(
-            x, {{"human", Level::PlayerType::HUMAN}, {"cpu", Level::PlayerType::CPU}});
+FIELD_READER(LevelBase::PlayerType) {
+    return required_enum<LevelBase::PlayerType>(
+            x, {{"human", LevelBase::PlayerType::HUMAN}, {"cpu", LevelBase::PlayerType::CPU}});
 }
 
-FIELD_READER(Level::DemoPlayer) {
-    return required_struct<Level::DemoPlayer>(
-            x, {{"name", &Level::DemoPlayer::name},
-                {"race", &Level::DemoPlayer::race},
-                {"earning_power", &Level::DemoPlayer::earning_power}});
+FIELD_READER(DemoLevel::Player) {
+    return required_struct<DemoLevel::Player>(
+            x, {{"name", &DemoLevel::Player::name},
+                {"race", &DemoLevel::Player::race},
+                {"earning_power", &DemoLevel::Player::earning_power}});
 }
 
-FIELD_READER(Level::SoloPlayer) {
-    return required_struct<Level::SoloPlayer>(
-            x, {{"type", &Level::SoloPlayer::type},
-                {"name", &Level::SoloPlayer::name},
-                {"race", &Level::SoloPlayer::race},
-                {"hue", &Level::SoloPlayer::hue},
-                {"earning_power", &Level::SoloPlayer::earning_power}});
+FIELD_READER(SoloLevel::Player) {
+    return required_struct<SoloLevel::Player>(
+            x, {{"type", &SoloLevel::Player::type},
+                {"name", &SoloLevel::Player::name},
+                {"race", &SoloLevel::Player::race},
+                {"hue", &SoloLevel::Player::hue},
+                {"earning_power", &SoloLevel::Player::earning_power}});
 }
 
-FIELD_READER(Level::NetPlayer) {
-    return required_struct<Level::NetPlayer>(
-            x, {{"type", &Level::NetPlayer::type},
-                {"earning_power", &Level::NetPlayer::earning_power},
+FIELD_READER(NetLevel::Player) {
+    return required_struct<NetLevel::Player>(
+            x, {{"type", &NetLevel::Player::type},
+                {"earning_power", &NetLevel::Player::earning_power},
                 {"races", nullptr}});  // TODO(sfiera): populate field
 }
 
 FIELD_READER(game_ticks) { return game_ticks{read_field<ticks>(x)}; }
 
-FIELD_READER(Level::Par) {
-    return optional_struct<Level::Par>(
-                   x, {{"time", &Level::Par::time},
-                       {"kills", &Level::Par::kills},
-                       {"losses", &Level::Par::losses}})
-            .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
+FIELD_READER(LevelBase::Par) {
+    return optional_struct<LevelBase::Par>(
+                   x, {{"time", &LevelBase::Par::time},
+                       {"kills", &LevelBase::Par::kills},
+                       {"losses", &LevelBase::Par::losses}})
+            .value_or(LevelBase::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
-FIELD_READER(sfz::optional<Level::StatusLine::Counter>) {
-    return optional_struct<Level::StatusLine::Counter>(
-            x, {{"player", &Level::StatusLine::Counter::player},
-                {"which", &Level::StatusLine::Counter::which},
-                {"fixed", &Level::StatusLine::Counter::fixed}});
+FIELD_READER(sfz::optional<LevelBase::StatusLine::Counter>) {
+    return optional_struct<LevelBase::StatusLine::Counter>(
+            x, {{"player", &LevelBase::StatusLine::Counter::player},
+                {"which", &LevelBase::StatusLine::Counter::which},
+                {"fixed", &LevelBase::StatusLine::Counter::fixed}});
 };
 
-FIELD_READER(Level::StatusLine) {
-    return required_struct<Level::StatusLine>(
-            x, {{"text", &Level::StatusLine::text},
-                {"prefix", &Level::StatusLine::prefix},
+FIELD_READER(LevelBase::StatusLine) {
+    return required_struct<LevelBase::StatusLine>(
+            x, {{"text", &LevelBase::StatusLine::text},
+                {"prefix", &LevelBase::StatusLine::prefix},
 
-                {"condition", &Level::StatusLine::condition},
-                {"true", &Level::StatusLine::true_},
-                {"false", &Level::StatusLine::false_},
+                {"condition", &LevelBase::StatusLine::condition},
+                {"true", &LevelBase::StatusLine::true_},
+                {"false", &LevelBase::StatusLine::false_},
 
-                {"minuend", &Level::StatusLine::minuend},
-                {"counter", &Level::StatusLine::counter},
+                {"minuend", &LevelBase::StatusLine::minuend},
+                {"counter", &LevelBase::StatusLine::counter},
 
-                {"suffix", &Level::StatusLine::suffix},
-                {"underline", &Level::StatusLine::underline}});
+                {"suffix", &LevelBase::StatusLine::suffix},
+                {"underline", &LevelBase::StatusLine::underline}});
 };
 
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
-            {"type", &Level::type},                                                              \
-            {"chapter", &Level::chapter},                                                        \
-            {"title", &Level::name},                                                             \
-            {"initials", &Level::initials},                                                      \
-            {"conditions", &Level::conditions},                                                  \
-            {"briefings", &Level::briefings},                                                    \
-            {"starmap", &Level::starmap},                                                        \
-            {"song", &Level::song},                                                              \
-            {"status", &Level::status},                                                          \
-            {"start_time", &Level::start_time},                                                  \
-            {"skip", &Level::skip},                                                              \
-            {"angle", &Level::angle},                                                            \
-            {"par", &Level::par}
+            {"type", &LevelBase::type},                                                          \
+            {"chapter", &LevelBase::chapter},                                                    \
+            {"title", &LevelBase::name},                                                         \
+            {"initials", &LevelBase::initials},                                                  \
+            {"conditions", &LevelBase::conditions},                                              \
+            {"briefings", &LevelBase::briefings},                                                \
+            {"starmap", &LevelBase::starmap},                                                    \
+            {"song", &LevelBase::song},                                                          \
+            {"status", &LevelBase::status},                                                      \
+            {"start_time", &LevelBase::start_time},                                              \
+            {"skip", &LevelBase::skip},                                                          \
+            {"angle", &LevelBase::angle},                                                        \
+            {"par", &LevelBase::par}
 // clang-format on
 
-FIELD_READER(Level::Type) {
-    return required_enum<Level::Type>(
-            x,
-            {{"solo", Level::Type::SOLO}, {"net", Level::Type::NET}, {"demo", Level::Type::DEMO}});
+FIELD_READER(LevelBase::Type) {
+    return required_enum<LevelBase::Type>(
+            x, {{"solo", LevelBase::Type::SOLO},
+                {"net", LevelBase::Type::NET},
+                {"demo", LevelBase::Type::DEMO}});
 }
 
 static Level demo_level(path_value x) {
-    return required_struct<Level>(x, {COMMON_LEVEL_FIELDS, {"players", &Level::demo_players}});
+    return required_struct<DemoLevel>(x, {COMMON_LEVEL_FIELDS, {"players", &DemoLevel::players}});
 }
 
 static Level solo_level(path_value x) {
-    return required_struct<Level>(
+    return required_struct<SoloLevel>(
             x, {COMMON_LEVEL_FIELDS,
-                {"players", &Level::solo_players},
-                {"no_ships", &Level::own_no_ships_text},
-                {"prologue", &Level::prologue},
-                {"epilogue", &Level::epilogue}});
+                {"players", &SoloLevel::players},
+                {"no_ships", &SoloLevel::no_ships_text},
+                {"prologue", &SoloLevel::prologue},
+                {"epilogue", &SoloLevel::epilogue}});
 }
 
 static Level net_level(path_value x) {
-    return required_struct<Level>(
+    return required_struct<NetLevel>(
             x, {COMMON_LEVEL_FIELDS,
-                {"players", &Level::net_players},
-                {"own_no_ships", &Level::own_no_ships_text},
-                {"foe_no_ships", &Level::foe_no_ships_text},
-                {"description", &Level::description}});
+                {"players", &NetLevel::players},
+                {"own_no_ships", &NetLevel::own_no_ships_text},
+                {"foe_no_ships", &NetLevel::foe_no_ships_text},
+                {"description", &NetLevel::description}});
 }
 
 Level level(pn::value_cref x0) {
     path_value x{x0};
     switch (required_object_type(x, read_field<Level::Type>)) {
+        case Level::Type::NONE: throw std::runtime_error("level type NONE?");
         case Level::Type::DEMO: return demo_level(x);
         case Level::Type::SOLO: return solo_level(x);
         case Level::Type::NET: return net_level(x);

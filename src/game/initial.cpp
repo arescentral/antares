@@ -28,14 +28,14 @@
 namespace antares {
 
 const Initial* Initial::get(int number) {
-    if ((0 <= number) && (number < g.level->initials.size())) {
-        return &g.level->initials[number];
+    if ((0 <= number) && (number < g.level->base.initials.size())) {
+        return &g.level->base.initials[number];
     }
     return nullptr;
 }
 
 HandleList<const Initial> Initial::all() {
-    return HandleList<const Initial>(0, g.level->initials.size());
+    return HandleList<const Initial>(0, g.level->base.initials.size());
 }
 
 void create_initial(Handle<const Initial> initial) {

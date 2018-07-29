@@ -35,14 +35,14 @@ namespace antares {
 static bool is_true(const ConditionWhen& c);
 
 const Condition* Condition::get(int number) {
-    if ((0 <= number) && (number < g.level->conditions.size())) {
-        return &g.level->conditions[number];
+    if ((0 <= number) && (number < g.level->base.conditions.size())) {
+        return &g.level->base.conditions[number];
     }
     return nullptr;
 }
 
 HandleList<const Condition> Condition::all() {
-    return HandleList<const Condition>(0, g.level->conditions.size());
+    return HandleList<const Condition>(0, g.level->base.conditions.size());
 }
 
 template <typename X, typename Y>
@@ -188,10 +188,10 @@ static bool is_true(const TimeCondition& c) {
         // Tricky: the original code for handling startTime counted g.time in major ticks,
         // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
         // (game start) counts as 1/3 towards time conditions to preserve old behavior.
-        if ((3 * c.duration) < g.level->start_time.value_or(secs(0))) {
-            t = game_ticks{(3 * c.duration) - g.level->start_time.value_or(secs(0))};
+        if ((3 * c.duration) < g.level->base.start_time.value_or(secs(0))) {
+            t = game_ticks{(3 * c.duration) - g.level->base.start_time.value_or(secs(0))};
         } else {
-            t = game_ticks{c.duration - (g.level->start_time.value_or(secs(0)) / 3)};
+            t = game_ticks{c.duration - (g.level->base.start_time.value_or(secs(0)) / 3)};
         }
     }
     return op_compare(c.op, g.time, t);
@@ -223,8 +223,8 @@ static bool is_true(const ConditionWhen& c) {
 }
 
 void CheckLevelConditions() {
-    for (auto& c : g.level->conditions) {
-        int index = (&c - g.level->conditions.data());
+    for (auto& c : g.level->base.conditions) {
+        int index = (&c - g.level->base.conditions.data());
         if ((g.condition_enabled[index] || c.persistent.value_or(false)) && is_true(c.when)) {
             g.condition_enabled[index] = false;
             auto  sObject              = resolve_object_ref(c.subject);

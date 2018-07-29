@@ -426,7 +426,7 @@ void draw_briefing_objects(
 BriefPointInfo BriefPoint_Data_Get(
         int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
         int32_t maxSize, const Rect& bounds) {
-    const Briefing& brief = level.briefings[whichPoint];
+    const Briefing& brief = level.base.briefings[whichPoint];
 
     BriefPointInfo info;
     info.header    = brief.title.copy();

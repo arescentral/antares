@@ -26,7 +26,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class SelectLevelScreen : public InterfaceScreen {
   public:

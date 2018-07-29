@@ -206,8 +206,8 @@ LoadState start_construct_level(const Level& level) {
 
     g.level = &level;
 
-    if (g.level->angle.has_value()) {
-        g.angle = *g.level->angle;
+    if (g.level->base.angle.has_value()) {
+        g.angle = *g.level->base.angle;
     } else {
         g.angle = g.random.next(ROT_POS);
     }
@@ -216,9 +216,10 @@ LoadState start_construct_level(const Level& level) {
     g.next_level   = nullptr;
     g.victory_text = sfz::nullopt;
 
-    switch (g.level->type) {
-        case Level::Type::DEMO: construct_players(g.level->demo_players); break;
-        case Level::Type::SOLO: construct_players(g.level->solo_players); break;
+    switch (g.level->type()) {
+        case Level::Type::NONE: throw std::runtime_error("level with type NONE?");
+        case Level::Type::DEMO: construct_players(g.level->demo.players); break;
+        case Level::Type::SOLO: construct_players(g.level->solo.players); break;
         case Level::Type::NET: throw std::runtime_error("can’t construct net player");
     }
     // *** END INIT ADMIRALS ***
@@ -228,7 +229,7 @@ LoadState start_construct_level(const Level& level) {
     g.initial_ids.clear();
     g.initial_ids.resize(Initial::all().size());
     g.condition_enabled.clear();
-    g.condition_enabled.resize(g.level->conditions.size());
+    g.condition_enabled.resize(g.level->base.conditions.size());
 
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
 
@@ -237,7 +238,8 @@ LoadState start_construct_level(const Level& level) {
 
     LoadState s;
     s.max = Initial::all().size() * 3L + 1 +
-            g.level->start_time.value_or(secs(0)).count();  // for each run through the initial num
+            g.level->base.start_time.value_or(secs(0))
+                    .count();  // for each run through the initial num
 
     return s;
 }
@@ -298,7 +300,7 @@ static void load_condition(Handle<const Condition> condition, std::bitset<16> al
 }
 
 static void run_game_1s() {
-    game_ticks start_time = game_ticks(-g.level->start_time.value_or(secs(0)));
+    game_ticks start_time = game_ticks(-g.level->base.start_time.value_or(secs(0)));
     do {
         g.time += kMajorTick;
         MoveSpaceObjects(kMajorTick);
@@ -346,7 +348,7 @@ void construct_level(LoadState* state) {
     } else if (step == (3 * Initial::all().size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
-        g.time = game_ticks(-g.level->start_time.value_or(secs(0)));
+        g.time = game_ticks(-g.level->base.start_time.value_or(secs(0)));
     } else {
         run_game_1s();
     }

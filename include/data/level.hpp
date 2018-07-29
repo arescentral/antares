@@ -39,32 +39,11 @@ struct Condition;
 struct Initial;
 struct Race;
 
-struct Level {
-    enum class Type { SOLO, NET, DEMO };
+struct LevelBase {
+    enum class Type { NONE, SOLO, NET, DEMO };
     enum class PlayerType { HUMAN, CPU };
 
     Type type = Type::DEMO;
-
-    struct DemoPlayer {
-        pn::string              name;
-        NamedHandle<const Race> race;
-        sfz::optional<Hue>      hue;
-        sfz::optional<Fixed>    earning_power;
-    };
-
-    struct SoloPlayer {
-        PlayerType              type = PlayerType::CPU;
-        pn::string              name;
-        NamedHandle<const Race> race;
-        sfz::optional<Hue>      hue;
-        sfz::optional<Fixed>    earning_power;
-    };
-
-    struct NetPlayer {
-        PlayerType           type  = PlayerType::CPU;
-        int16_t              races = 0;
-        sfz::optional<Fixed> earning_power;
-    };
 
     struct StatusLine {
         sfz::optional<pn::string> text;
@@ -92,9 +71,6 @@ struct Level {
 
     sfz::optional<int64_t>                  chapter;
     pn::string                              name;
-    std::vector<DemoPlayer>                 demo_players;
-    std::vector<SoloPlayer>                 solo_players;
-    std::vector<NetPlayer>                  net_players;
     std::vector<StatusLine>                 status;
     sfz::optional<pn::string>               song;
     sfz::optional<Rect>                     starmap;
@@ -110,15 +86,68 @@ struct Level {
     std::vector<Initial>   initials;
     std::vector<Condition> conditions;
     std::vector<Briefing>  briefings;
+};
 
-    sfz::optional<pn::string> prologue;           // SOLO
-    sfz::optional<pn::string> epilogue;           // SOLO
-    sfz::optional<pn::string> own_no_ships_text;  // SOLO, NET
-    sfz::optional<pn::string> foe_no_ships_text;  // NET
-    sfz::optional<pn::string> description;        // NET
+struct DemoLevel : LevelBase {
+    struct Player {
+        pn::string              name;
+        NamedHandle<const Race> race;
+        sfz::optional<Hue>      hue;
+        sfz::optional<Fixed>    earning_power;
+    };
 
+    std::vector<Player> players;
+};
+
+struct SoloLevel : LevelBase {
+    struct Player {
+        PlayerType              type = PlayerType::CPU;
+        pn::string              name;
+        NamedHandle<const Race> race;
+        sfz::optional<Hue>      hue;
+        sfz::optional<Fixed>    earning_power;
+    };
+
+    std::vector<Player>       players;
+    sfz::optional<pn::string> prologue;
+    sfz::optional<pn::string> epilogue;
+    sfz::optional<pn::string> no_ships_text;
+};
+
+struct NetLevel : LevelBase {
+    struct Player {
+        PlayerType           type  = PlayerType::CPU;
+        int16_t              races = 0;
+        sfz::optional<Fixed> earning_power;
+    };
+
+    std::vector<Player>       players;
+    sfz::optional<pn::string> description;
+    sfz::optional<pn::string> own_no_ships_text;
+    sfz::optional<pn::string> foe_no_ships_text;
+};
+
+union Level {
     static const Level* get(int n);
     static const Level* get(pn::string_view n);
+
+    using Type = LevelBase::Type;
+
+    LevelBase base;
+    Type      type() const;
+
+    DemoLevel demo;
+    SoloLevel solo;
+    NetLevel  net;
+
+    Level();
+    Level(DemoLevel l);
+    Level(SoloLevel l);
+    Level(NetLevel l);
+
+    ~Level();
+    Level(Level&&);
+    Level& operator=(Level&&);
 };
 Level level(pn::value_cref x);
 

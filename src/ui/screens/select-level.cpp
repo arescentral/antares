@@ -150,7 +150,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
 void SelectLevelScreen::overlay() const { draw_level_name(); }
 
 void SelectLevelScreen::draw_level_name() const {
-    const pn::string_view chapter_name = (*_level)->name;
+    const pn::string_view chapter_name = (*_level)->base.name;
 
     const Widget& i = *widget(NAME);
 

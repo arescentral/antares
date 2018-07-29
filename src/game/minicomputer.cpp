@@ -1055,7 +1055,8 @@ void MiniComputerSetStatusStrings() {
 
     for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
         miniScreenLineType* line = g.mini.lineData.get() + count;
-        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) >= g.level->status.size()) {
+        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) >=
+            g.level->base.status.size()) {
             line->statusType = kNoStatusData;
             line->value      = -1;
             line->string.clear();
@@ -1063,7 +1064,8 @@ void MiniComputerSetStatusStrings() {
         }
 
         // we have some data for this line to interpret
-        const Level::StatusLine& l = g.level->status.at(count - kStatusMiniScreenFirstLine);
+        const LevelBase::StatusLine& l =
+                g.level->base.status.at(count - kStatusMiniScreenFirstLine);
 
         line->underline = l.underline.value_or(false);
         if (l.text.has_value()) {

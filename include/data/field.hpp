@@ -35,7 +35,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 struct Initial;
 struct Condition;
 struct Race;

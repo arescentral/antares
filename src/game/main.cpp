@@ -210,8 +210,8 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            if (g.level->song.has_value()) {
-                sys.music.play(Music::IN_GAME, *g.level->song);
+            if (g.level->base.song.has_value()) {
+                sys.music.play(Music::IN_GAME, *g.level->base.song);
             }
 
             stack()->push(new GamePlay(_replay, _input_source, _game_result));
@@ -223,7 +223,7 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->chapter);
+                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->base.chapter);
                 const char* sep = "";
                 pn::format(stderr, "  \"objects\": [");
                 for (auto object : covered_objects) {
@@ -389,7 +389,7 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = g.level->skip->get();
+                    g.next_level   = g.level->base.skip->get();
                     g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
@@ -546,8 +546,8 @@ void GamePlay::fire_timer() {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
                 stack()->push(new DebriefingScreen(
-                        *g.victory_text, g.time, g.level->par.time, GetAdmiralLoss(a),
-                        g.level->par.losses, GetAdmiralKill(a), g.level->par.kills));
+                        *g.victory_text, g.time, g.level->base.par.time, GetAdmiralLoss(a),
+                        g.level->base.par.losses, GetAdmiralKill(a), g.level->base.par.kills));
             }
             break;
 
@@ -584,7 +584,8 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
+                stack()->push(
+                        new PlayAgainScreen(true, g.level->base.skip.has_value(), &_play_again));
                 return;
             }
 
@@ -643,7 +644,8 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
+                stack()->push(
+                        new PlayAgainScreen(true, g.level->base.skip.has_value(), &_play_again));
                 return;
             }
         default: break;

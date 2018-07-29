@@ -99,9 +99,9 @@ class ReplayMaster : public Card {
                             outcome.write("\n");
                             Handle<Admiral> player(0);
                             pn::string      text = DebriefingScreen::build_score_text(
-                                    g.time, g.level->par.time, GetAdmiralLoss(player),
-                                    g.level->par.losses, GetAdmiralKill(player),
-                                    g.level->par.kills);
+                                    g.time, g.level->base.par.time, GetAdmiralLoss(player),
+                                    g.level->base.par.losses, GetAdmiralKill(player),
+                                    g.level->base.par.kills);
                             outcome.write(text);
                             outcome.write("\n");
                         }

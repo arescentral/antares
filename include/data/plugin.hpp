@@ -29,7 +29,7 @@
 namespace antares {
 
 class BaseObject;
-struct Level;
+union Level;
 struct Race;
 
 struct ScenarioGlobals {

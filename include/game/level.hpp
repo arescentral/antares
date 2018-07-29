@@ -28,7 +28,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 struct LoadState {
     bool    done = false;

@@ -26,7 +26,7 @@
 namespace antares {
 
 class InputSource;
-struct Level;
+union Level;
 
 enum GameResult {
     NO_GAME      = -1,

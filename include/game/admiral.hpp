@@ -96,8 +96,8 @@ class Admiral {
     static void                init();
     static void                reset();
     static Admiral*            get(int i);
-    static Handle<Admiral>     make(int index, const Level::DemoPlayer& player);
-    static Handle<Admiral>     make(int index, const Level::SoloPlayer& player);
+    static Handle<Admiral>     make(int index, const DemoLevel::Player& player);
+    static Handle<Admiral>     make(int index, const SoloLevel::Player& player);
     static Handle<Admiral>     none() { return Handle<Admiral>(-1); }
     static HandleList<Admiral> all() { return HandleList<Admiral>(0, kMaxPlayerNum); }
 

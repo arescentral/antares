@@ -24,7 +24,7 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 class PixMap;
 
 struct BriefingSpriteBounds {
