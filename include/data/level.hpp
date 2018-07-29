@@ -41,22 +41,30 @@ struct Race;
 
 struct Level {
     enum class Type { SOLO, NET, DEMO };
+    enum class PlayerType { HUMAN, CPU };
 
     Type type = Type::DEMO;
 
-    struct Player {
-        enum class Type { HUMAN, CPU };
-
-        Type                    playerType = Type::CPU;
-        NamedHandle<const Race> playerRace;
+    struct DemoPlayer {
         pn::string              name;
-        sfz::optional<Fixed>    earningPower;
-        int16_t                 netRaceFlags = 0;
+        NamedHandle<const Race> race;
         sfz::optional<Hue>      hue;
+        sfz::optional<Fixed>    earning_power;
     };
-    struct DemoPlayer : Player {};
-    struct SoloPlayer : Player {};
-    struct NetPlayer : Player {};
+
+    struct SoloPlayer {
+        PlayerType              type = PlayerType::CPU;
+        pn::string              name;
+        NamedHandle<const Race> race;
+        sfz::optional<Hue>      hue;
+        sfz::optional<Fixed>    earning_power;
+    };
+
+    struct NetPlayer {
+        PlayerType           type  = PlayerType::CPU;
+        int16_t              races = 0;
+        sfz::optional<Fixed> earning_power;
+    };
 
     struct StatusLine {
         sfz::optional<pn::string> text;

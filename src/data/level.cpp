@@ -43,31 +43,31 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-FIELD_READER(Level::Player::Type) {
-    return required_enum<Level::Player::Type>(
-            x, {{"human", Level::Player::Type::HUMAN}, {"cpu", Level::Player::Type::CPU}});
+FIELD_READER(Level::PlayerType) {
+    return required_enum<Level::PlayerType>(
+            x, {{"human", Level::PlayerType::HUMAN}, {"cpu", Level::PlayerType::CPU}});
 }
 
 FIELD_READER(Level::DemoPlayer) {
     return required_struct<Level::DemoPlayer>(
-            x, {{"name", &Level::Player::name},
-                {"race", &Level::Player::playerRace},
-                {"earning_power", &Level::Player::earningPower}});
+            x, {{"name", &Level::DemoPlayer::name},
+                {"race", &Level::DemoPlayer::race},
+                {"earning_power", &Level::DemoPlayer::earning_power}});
 }
 
 FIELD_READER(Level::SoloPlayer) {
     return required_struct<Level::SoloPlayer>(
-            x, {{"type", &Level::Player::playerType},
-                {"name", &Level::Player::name},
-                {"race", &Level::Player::playerRace},
-                {"hue", &Level::Player::hue},
-                {"earning_power", &Level::Player::earningPower}});
+            x, {{"type", &Level::SoloPlayer::type},
+                {"name", &Level::SoloPlayer::name},
+                {"race", &Level::SoloPlayer::race},
+                {"hue", &Level::SoloPlayer::hue},
+                {"earning_power", &Level::SoloPlayer::earning_power}});
 }
 
 FIELD_READER(Level::NetPlayer) {
     return required_struct<Level::NetPlayer>(
-            x, {{"type", &Level::Player::playerType},
-                {"earning_power", &Level::Player::earningPower},
+            x, {{"type", &Level::NetPlayer::type},
+                {"earning_power", &Level::NetPlayer::earning_power},
                 {"races", nullptr}});  // TODO(sfiera): populate field
 }
 

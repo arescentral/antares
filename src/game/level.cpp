@@ -180,15 +180,12 @@ template <typename Players>
 static void construct_players(const Players& players) {
     int i = 0;
     for (const auto& player : players) {
-        if (player.playerType == Level::Player::Type::HUMAN) {
-            auto admiral = Admiral::make(i++, kAIsHuman, player);
-            admiral->pay(Fixed::from_long(5000));
+        auto admiral = Admiral::make(i++, player);
+        if (admiral->attributes() & kAIsHuman) {
             g.admiral = admiral;
-        } else {
-            auto admiral = Admiral::make(i++, kAIsComputer, player);
-            admiral->pay(Fixed::from_long(5000));
         }
-        load_race(player.playerRace);
+        admiral->pay(Fixed::from_long(5000));
+        load_race(admiral->race());
     }
 }
 
@@ -222,7 +219,7 @@ LoadState start_construct_level(const Level& level) {
     switch (g.level->type) {
         case Level::Type::DEMO: construct_players(g.level->demo_players); break;
         case Level::Type::SOLO: construct_players(g.level->solo_players); break;
-        case Level::Type::NET: construct_players(g.level->net_players); break;
+        case Level::Type::NET: throw std::runtime_error("can’t construct net player");
     }
     // *** END INIT ADMIRALS ***
 

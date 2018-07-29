@@ -111,7 +111,19 @@ Admiral* Admiral::get(int i) {
     return nullptr;
 }
 
-Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Player& player) {
+Handle<Admiral> Admiral::make(int index, const Level::DemoPlayer& player) {
+    return make(index, kAIsComputer, player.name, player.earning_power, player.race, player.hue);
+}
+
+Handle<Admiral> Admiral::make(int index, const Level::SoloPlayer& player) {
+    return make(
+            index, player.type == Level::PlayerType::HUMAN ? kAIsHuman : kAIsComputer, player.name,
+            player.earning_power, player.race, player.hue);
+}
+
+Handle<Admiral> Admiral::make(
+        int index, uint32_t attributes, pn::string_view name, sfz::optional<Fixed> earning_power,
+        const NamedHandle<const Race>& race, sfz::optional<Hue> hue) {
     Handle<Admiral> a(index);
     if (a->_active) {
         return none();
@@ -119,15 +131,15 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
 
     a->_active        = true;
     a->_attributes    = attributes;
-    a->_earning_power = player.earningPower.value_or(Fixed::zero());
-    a->_race          = player.playerRace.copy();
-    a->_hue           = player.hue.value_or(Hue::GRAY);
+    a->_earning_power = earning_power.value_or(Fixed::zero());
+    a->_race          = race.copy();
+    a->_hue           = hue.value_or(Hue::GRAY);
 
-    if (!player.name.empty()) {
-        if (pn::rune::count(player.name) > kAdmiralNameLen) {
-            a->_name = pn::rune::slice(player.name, 0, kAdmiralNameLen).copy();
+    if (!name.empty()) {
+        if (pn::rune::count(name) > kAdmiralNameLen) {
+            a->_name = pn::rune::slice(name, 0, kAdmiralNameLen).copy();
         } else {
-            a->_name = player.name.copy();
+            a->_name = name.copy();
         }
     }
 
