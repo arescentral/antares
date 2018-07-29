@@ -392,8 +392,10 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             case Gamepad::Button::Y:
                 if (_gamepad_state & SELECT_BUMPER) {
                     _key_presses |= kOrderKey;
+                    _key_releases &= ~kOrderKey;
                 } else {
-                    engage_autopilot();
+                    _key_presses |= kAutoPilotKey;
+                    _key_releases &= ~kAutoPilotKey;
                 }
                 return;
             case Gamepad::Button::LSB:
@@ -436,6 +438,8 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
 void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
     switch (event.button) {
         case Gamepad::Button::LB:
+            _key_presses &= ~kOrderKey;
+            _key_releases |= kOrderKey;
             if (_gamepad_state & OVERRIDE) {
                 _gamepad_state = SELECT_BUMPER;
             } else {
@@ -443,6 +447,8 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             }
             return;
         case Gamepad::Button::RB:
+            _key_presses &= ~kAutoPilotKey;
+            _key_releases |= kAutoPilotKey;
             if (_gamepad_state & OVERRIDE) {
                 _gamepad_state = TARGET_BUMPER;
             } else {
@@ -461,8 +467,11 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             case Gamepad::Button::A:
             case Gamepad::Button::B:
             case Gamepad::Button::X:
-            case Gamepad::Button::Y:
             case Gamepad::Button::LSB: return;
+            case Gamepad::Button::Y:
+                _key_presses &= ~(kOrderKey | kAutoPilotKey);
+                _key_releases |= (kOrderKey | kAutoPilotKey);
+                return;
             default: break;
         }
     }
