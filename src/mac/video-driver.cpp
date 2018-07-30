@@ -116,6 +116,7 @@ struct CocoaVideoDriver::EventBridge {
     std::queue<Event*> event_queue;
 
     double gamepad[6];
+    bool   switch_dpad[4];
 
     static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
@@ -189,6 +190,8 @@ struct CocoaVideoDriver::EventBridge {
                         return joy_con_l_button_event(element, value);
                     case 0x2007:  // Joy-Con (R)
                         return joy_con_r_button_event(element, value);
+                    case 0x2009:  // Switch Pro controller
+                        return switch_pro_button_event(element, value);
                 }
         }
         default_button_event(element, value);
@@ -209,6 +212,8 @@ struct CocoaVideoDriver::EventBridge {
                         return joy_con_l_analog_event(element, value);
                     case 0x2007:  // Joy-Con (R)
                         return joy_con_r_analog_event(element, value);
+                    case 0x2009:  // Switch Pro controller
+                        return switch_pro_analog_event(element, value);
                 }
         }
         default_analog_event(element, value);
@@ -298,6 +303,79 @@ struct CocoaVideoDriver::EventBridge {
         }
     }
 
+    void switch_pro_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        if (!antares_is_active()) {
+            return;
+        }
+        bool            down   = IOHIDValueGetIntegerValue(value);
+        uint16_t        usage  = IOHIDElementGetUsage(element);
+        Gamepad::Button button = Gamepad::Button::NONE;
+
+        switch (usage) {
+            case 1: button = Gamepad::Button::B; break;
+            case 2: button = Gamepad::Button::A; break;
+            case 3: button = Gamepad::Button::Y; break;
+            case 4: button = Gamepad::Button::X; break;
+            case 5: button = Gamepad::Button::LB; break;
+            case 6: button = Gamepad::Button::RB; break;
+            case 7: button = Gamepad::Button::LT; break;
+            case 8: button = Gamepad::Button::RT; break;
+            case 9: button = Gamepad::Button::BACK; break;
+            case 10: button = Gamepad::Button::START; break;
+            case 11: button = Gamepad::Button::LSB; break;
+            case 12: button = Gamepad::Button::RSB; break;
+            case 13: button = Gamepad::Button::NONE; break;
+            case 14: button = Gamepad::Button::NONE; break;
+        }
+
+        if (button == Gamepad::Button::NONE) {
+            return;
+        } else if (down) {
+            enqueue(new GamepadButtonDownEvent(_now(), button));
+        } else {
+            enqueue(new GamepadButtonUpEvent(_now(), button));
+        }
+    }
+
+    void switch_pro_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        uint16_t usage = IOHIDElementGetUsage(element);
+        if (usage == 57) {  // D-Pad
+            int64_t int_value = IOHIDValueGetIntegerValue(value);
+            switch (int_value) {
+                case 0: set_switch_dpad(true, false, false, false); break;
+                case 1: set_switch_dpad(true, true, false, false); break;
+                case 2: set_switch_dpad(false, true, false, false); break;
+                case 3: set_switch_dpad(false, true, true, false); break;
+                case 4: set_switch_dpad(false, false, true, false); break;
+                case 5: set_switch_dpad(false, false, true, true); break;
+                case 6: set_switch_dpad(false, false, false, true); break;
+                case 7: set_switch_dpad(true, false, false, true); break;
+                case 8: set_switch_dpad(false, false, false, false); break;
+            }
+            return;
+        }
+
+        return default_analog_event(element, value);
+    }
+
+    void set_switch_dpad(bool up, bool right, bool down, bool left) {
+        set_switch_dpad_button(Gamepad::Button::UP, 0, up);
+        set_switch_dpad_button(Gamepad::Button::RIGHT, 1, right);
+        set_switch_dpad_button(Gamepad::Button::DOWN, 2, down);
+        set_switch_dpad_button(Gamepad::Button::LEFT, 3, left);
+    }
+
+    void set_switch_dpad_button(Gamepad::Button button, int index, bool pressed) {
+        if (pressed != switch_dpad[index]) {
+            if (pressed) {
+                enqueue(new GamepadButtonDownEvent(_now(), button));
+            } else {
+                enqueue(new GamepadButtonUpEvent(_now(), button));
+            }
+            switch_dpad[index] = pressed;
+        }
+    }
+
     void default_button_event(IOHIDElementRef element, IOHIDValueRef value) {
         if (!antares_is_active()) {
             return;
@@ -321,12 +399,8 @@ struct CocoaVideoDriver::EventBridge {
             case kHIDUsage_GD_Ry: {
                 int64_t min          = IOHIDElementGetLogicalMin(element);
                 int64_t max          = IOHIDElementGetLogicalMax(element);
-                double  double_value = int_value;
-                if (int_value < 0) {
-                    double_value = -(double_value / min);
-                } else {
-                    double_value = (double_value / max);
-                }
+                int64_t range        = max - min;
+                double  double_value = ((double(int_value - min) / range) * 2.0) - 1.0;
 
                 usage -= kHIDUsage_GD_X;
                 gamepad[usage]                 = double_value;
