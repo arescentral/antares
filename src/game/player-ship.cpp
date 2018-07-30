@@ -499,7 +499,7 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
 void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
     bool active;
     int  direction = 0;
-    if ((event.x * event.x + event.y * event.y) < 0.90) {
+    if ((event.x * event.x + event.y * event.y) < 0.30) {
         active = false;
     } else {
         active    = true;
