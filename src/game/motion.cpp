@@ -414,7 +414,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
     }
 
-    if (g.ship->active) {
+    if (g.ship.get() && g.ship->active) {
         gGlobalCorner.h = g.ship->location.h - (center_scale().width / gAbsoluteScale);
         gGlobalCorner.v = g.ship->location.v - (center_scale().height / gAbsoluteScale);
     }

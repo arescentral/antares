@@ -38,8 +38,8 @@ def unit_test(opts, queue, name, args=[]):
 
 def diff_test(queue, name, cmd, expected):
     with NamedTemporaryDir() as d:
-        return (run(queue, name, cmd + ["--output=%s" % d]) and
-                run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
+        return (run(queue, name, cmd + ["--output=%s" % d])
+                and run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
 
 
 def data_test(opts, queue, name, args=[], smoke_args=[]):
@@ -80,7 +80,10 @@ def call(args):
 
     sys.stdout = cStringIO.StringIO()
 
-    queue.put((name, START, ))
+    queue.put((
+        name,
+        START,
+    ))
     try:
         start = time.time()
         result = fn(opts, queue, name, *args)
@@ -124,6 +127,7 @@ def main():
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
+        (offscreen_test, opts, queue, "fast-motion"),
         (offscreen_test, opts, queue, "main-screen"),
         (offscreen_test, opts, queue, "mission-briefing", ["--text"]),
         (offscreen_test, opts, queue, "options"),

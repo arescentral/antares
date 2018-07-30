@@ -485,26 +485,20 @@ void draw_instruments() {
     sys.left_instrument_texture.draw(left_rect.left, left_rect.top);
     sys.right_instrument_texture.draw(right_rect.left, right_rect.top);
 
-    if (g.ship.get()) {
-        auto player = g.ship;
-        if (player->active) {
-            draw_player_ammo(
-                    (player->pulse.base && (player->pulse.base->device->ammo > 0))
-                            ? player->pulse.ammo
-                            : -1,
-                    (player->beam.base && (player->beam.base->device->ammo > 0))
-                            ? player->beam.ammo
-                            : -1,
-                    (player->special.base && (player->special.base->device->ammo > 0))
-                            ? player->special.ammo
-                            : -1);
-        }
+    if (g.ship.get() && g.ship->active) {
+        const SpaceObject::Weapon& pulse   = g.ship->pulse;
+        const SpaceObject::Weapon& beam    = g.ship->beam;
+        const SpaceObject::Weapon& special = g.ship->special;
+        draw_player_ammo(
+                (pulse.base && (pulse.base->device->ammo > 0)) ? pulse.ammo : -1,
+                (beam.base && (beam.base->device->ammo > 0)) ? beam.ammo : -1,
+                (special.base && (special.base->device->ammo > 0)) ? special.ammo : -1);
+
+        draw_bar_indicator(kShieldBar, g.ship->health(), g.ship->max_health());
+        draw_bar_indicator(kEnergyBar, g.ship->energy(), g.ship->max_energy());
+        draw_bar_indicator(kBatteryBar, g.ship->battery(), g.ship->max_battery());
     }
 
-    auto o = g.ship;
-    draw_bar_indicator(kShieldBar, o->health(), o->max_health());
-    draw_bar_indicator(kEnergyBar, o->energy(), o->max_energy());
-    draw_bar_indicator(kBatteryBar, o->battery(), o->max_battery());
     draw_build_time_bar();
     draw_money();
     draw_radar();

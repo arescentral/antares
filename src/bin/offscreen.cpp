@@ -40,6 +40,7 @@ namespace args = sfz::args;
 namespace antares {
 namespace {
 
+void fast_motion(EventScheduler& scheduler);
 void main_screen(EventScheduler& scheduler);
 void options(EventScheduler& scheduler);
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger);
@@ -54,6 +55,7 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "\n"
             "scripts:\n"
             "     main-screen\n"
+            "     fast-motion\n"
             "     options\n"
             "     mission-briefing\n"
             "     pause\n"
@@ -115,6 +117,8 @@ void main(int argc, char* const* argv) {
     NullLedger      ledger;
     if (!script.has_value()) {
         throw std::runtime_error("missing required argument 'script'");
+    } else if (*script == "fast-motion") {
+        fast_motion(scheduler);
     } else if (*script == "main-screen") {
         main_screen(scheduler);
     } else if (*script == "options") {
@@ -143,6 +147,49 @@ void main(int argc, char* const* argv) {
         OffscreenVideoDriver video({640, 480}, output_dir);
         video.loop(new Master(14586), scheduler);
     }
+}
+
+void fast_motion(EventScheduler& scheduler) {
+    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(wall_time(), Point(320, 240))));
+
+    // Skip the intro.  Start the first tutorial and skip the prologue.
+    scheduler.schedule_key(Key::Q, 1756, 1757);
+    scheduler.schedule_key(Key::S, 1816, 1817);
+    scheduler.schedule_key(Key::L_SHIFT, 1860, 1863);
+    scheduler.schedule_key(Key::K8, 1861, 1862);
+    scheduler.schedule_key(Key::K0, 1864, 1865);
+    scheduler.schedule_key(Key::K6, 1866, 1867);
+    scheduler.schedule_snapshot(1870);
+    scheduler.schedule_key(Key::RETURN, 1875, 1876);
+    scheduler.schedule_snapshot(1875);
+
+    scheduler.schedule_snapshot(1937);
+    scheduler.schedule_snapshot(1957);
+    scheduler.schedule_snapshot(1977);
+
+    scheduler.schedule_key(Key::RETURN, 1980, 1981);
+    scheduler.schedule_snapshot(1980);
+    scheduler.schedule_snapshot(2000);
+
+    scheduler.schedule_key(Key::N5, 2020, 2400);
+    scheduler.schedule_key(Key::F6, 2020, 2400);
+    for (int i = 2200; i < 2290; i += 10) {
+        scheduler.schedule_snapshot(i);
+    }
+
+    scheduler.schedule_snapshot(2400);
+
+    // Exit play.
+    scheduler.schedule_key(Key::SPACE, 2460, 2520);
+    scheduler.schedule_snapshot(2460);
+
+    scheduler.schedule_key(Key::Q, 2580, 2640);
+    scheduler.schedule_snapshot(2580);
+    scheduler.schedule_snapshot(2640);
+
+    // Quit game.
+    scheduler.schedule_key(Key::Q, 2700, 2760);
+    scheduler.schedule_snapshot(2700);
 }
 
 void main_screen(EventScheduler& scheduler) {
