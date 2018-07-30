@@ -233,7 +233,7 @@ void Starfield::draw() const {
     const RgbColor mediumColor = GetRGBTranslateColorShade(kStarColor, LIGHT);
     const RgbColor fastColor   = GetRGBTranslateColorShade(kStarColor, LIGHTER);
 
-    switch (g.ship->presenceState) {
+    switch (g.ship.get() ? g.ship->presenceState : kNormalPresence) {
         default:
             if (!_warp_stars) {
                 Points points;
@@ -286,7 +286,7 @@ void Starfield::draw() const {
 }
 
 void Starfield::show() {
-    if ((g.ship->presenceState != kWarpInPresence) &&
+    if (g.ship.get() && g.ship->active && (g.ship->presenceState != kWarpInPresence) &&
         (g.ship->presenceState != kWarpOutPresence) &&
         (g.ship->presenceState != kWarpingPresence)) {
         if (_warp_stars) {
