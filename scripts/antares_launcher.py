@@ -6,6 +6,7 @@
 from __future__ import division, print_function, unicode_literals
 
 import gi
+import json
 import os
 import subprocess
 import sys
@@ -92,9 +93,9 @@ class LauncherWindow(Gtk.Dialog):
     def set_scenario(self, s):
         self.scenario = s["id"]
         self.download.set_label(s["title"])
-        self.download.set_uri(s["download url"])
+        self.download.set_uri(s["download_url"])
         self.author.set_label(s["author"])
-        self.author.set_uri(s["author url"])
+        self.author.set_uri(s["author_url"])
         self.version.set_label(s["version"])
 
     def on_change_scenario(self, combo):
@@ -138,8 +139,8 @@ def ls_scenarios():
         if not line[0].isspace():
             scenarios.append({"id": line[:-1]})
         else:
-            key, val = line.strip().split(": ", 1)
-            scenarios[-1][key] = val
+            key, val = line.strip().split(":", 1)
+            scenarios[-1][key] = json.loads(val)
     return scenarios
 
 
