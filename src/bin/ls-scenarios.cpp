@@ -36,10 +36,12 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "  Lists installed Antares scenarios\n"
             "\n"
             "  options:\n"
-            "    -f, --factory       set path to factory scenario\n"
-            "                        (default: {1})\n"
-            "    -h, --help          display this help screen\n",
-            progname, default_factory_scenario_path());
+            "    -a, --application-data  set path to application data\n"
+            "                            (default: {1})\n"
+            "    -f, --factory-scenario  set path to factory scenario\n"
+            "                            (default: {2})\n"
+            "    -h, --help              display this help screen\n",
+            progname, default_application_path(), default_factory_scenario_path());
     exit(retcode);
 }
 
@@ -60,6 +62,7 @@ void main(int argc, char* const* argv) {
     callbacks.short_option = [&progname](
                                      pn::rune opt, const args::callbacks::get_value_f& get_value) {
         switch (opt.value()) {
+            case 'a': set_application_path(get_value()); return true;
             case 'f': set_factory_scenario_path(get_value()); return true;
             case 'h': usage(stdout, progname, 0); return true;
             default: return false;
@@ -68,7 +71,9 @@ void main(int argc, char* const* argv) {
 
     callbacks.long_option =
             [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
-                if (opt == "factory-scenario") {
+                if (opt == "application-data") {
+                    return callbacks.short_option(pn::rune{'a'}, get_value);
+                } else if (opt == "factory-scenario") {
                     return callbacks.short_option(pn::rune{'f'}, get_value);
                 } else if (opt == "help") {
                     return callbacks.short_option(pn::rune{'h'}, get_value);
