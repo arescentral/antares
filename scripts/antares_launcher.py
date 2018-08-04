@@ -6,6 +6,7 @@
 from __future__ import division, print_function, unicode_literals
 
 import gi
+import json
 import os
 import subprocess
 import sys
@@ -29,7 +30,7 @@ else:
     ANTARES_ICON = os.path.join(DATADIR, "antares.iconset", "icon_128x128.png")
     APP_DATA = os.path.join(PREFIX, "data")
     SCENARIOS = os.path.join(APP_DATA, "scenarios")
-    FACTORY_SCENARIO = os.path.join(SCENARIOS, "com.biggerplanet.ares")
+    FACTORY_SCENARIO = os.path.join(SCENARIOS, "4cab7415715aeeacf1486a352267ae82c0efb220")
 
 ANTARES_BIN = os.path.join(BIN_PREFIX, "antares-glfw")
 INSTALL_DATA_BIN = os.path.join(BIN_PREFIX, "antares-install-data")
@@ -51,6 +52,8 @@ class LauncherWindow(Gtk.Dialog):
                 self, "Antares", None, 0,
                 ("Quit", Gtk.ResponseType.CANCEL, "Start", Gtk.ResponseType.OK),
                 window_position=Gtk.WindowPosition.CENTER)
+        self.set_resizable(False)
+
         self.set_default_response(Gtk.ResponseType.OK)
         self.connect("response", self.on_response)
 
@@ -92,9 +95,9 @@ class LauncherWindow(Gtk.Dialog):
     def set_scenario(self, s):
         self.scenario = s["id"]
         self.download.set_label(s["title"])
-        self.download.set_uri(s["download url"])
+        self.download.set_uri(s["download_url"])
         self.author.set_label(s["author"])
-        self.author.set_uri(s["author url"])
+        self.author.set_uri(s["author_url"])
         self.version.set_label(s["version"])
 
     def on_change_scenario(self, combo):
@@ -129,6 +132,8 @@ def reinstall_or_check_scenario():
 
 def ls_scenarios():
     args = [LS_SCENARIOS_BIN]
+    if APP_DATA:
+        args += ["--application-data", APP_DATA]
     if FACTORY_SCENARIO:
         args += ["--factory-scenario", FACTORY_SCENARIO]
     print(" ".join(args))
@@ -138,8 +143,8 @@ def ls_scenarios():
         if not line[0].isspace():
             scenarios.append({"id": line[:-1]})
         else:
-            key, val = line.strip().split(": ", 1)
-            scenarios[-1][key] = val
+            key, val = line.strip().split(":", 1)
+            scenarios[-1][key] = json.loads(val)
     return scenarios
 
 
