@@ -29,7 +29,7 @@ else:
     ANTARES_ICON = os.path.join(DATADIR, "antares.iconset", "icon_128x128.png")
     APP_DATA = os.path.join(PREFIX, "data")
     SCENARIOS = os.path.join(APP_DATA, "scenarios")
-    FACTORY_SCENARIO = os.path.join(SCENARIOS, "com.biggerplanet.ares")
+    FACTORY_SCENARIO = os.path.join(SCENARIOS, "4cab7415715aeeacf1486a352267ae82c0efb220")
 
 ANTARES_BIN = os.path.join(BIN_PREFIX, "antares-glfw")
 INSTALL_DATA_BIN = os.path.join(BIN_PREFIX, "antares-install-data")
