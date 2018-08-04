@@ -52,6 +52,8 @@ class LauncherWindow(Gtk.Dialog):
                 self, "Antares", None, 0,
                 ("Quit", Gtk.ResponseType.CANCEL, "Start", Gtk.ResponseType.OK),
                 window_position=Gtk.WindowPosition.CENTER)
+        self.set_resizable(False)
+
         self.set_default_response(Gtk.ResponseType.OK)
         self.connect("response", self.on_response)
 
@@ -130,6 +132,8 @@ def reinstall_or_check_scenario():
 
 def ls_scenarios():
     args = [LS_SCENARIOS_BIN]
+    if APP_DATA:
+        args += ["--application-data", APP_DATA]
     if FACTORY_SCENARIO:
         args += ["--factory-scenario", FACTORY_SCENARIO]
     print(" ".join(args))
