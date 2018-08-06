@@ -41,7 +41,7 @@ enum class Hue {
     RED         = 15,
 };
 
-// Restricts actions based on the owners of the subject and object.
+// Restricts actions based on the owners of the subject and direct objects.
 enum class Owner {
     ANY       = 0,   // Always execute.
     SAME      = 1,   // Execute only if match.

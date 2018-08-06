@@ -184,7 +184,7 @@ class BaseObject {
     struct Collide {
         struct As {
             bool subject = false;
-            bool object  = false;
+            bool direct  = false;
         } as;
         bool                solid  = false;
         bool                edge   = false;

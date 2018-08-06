@@ -310,7 +310,7 @@ DEFINE_FIELD_READER(Condition) {
                 {"disabled", &Condition::disabled},
                 {"when", &Condition::when},
                 {"subject", &Condition::subject},
-                {"object", &Condition::object},
+                {"direct", &Condition::direct},
                 {"action", &Condition::action}});
 }
 

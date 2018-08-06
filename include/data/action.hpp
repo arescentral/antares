@@ -100,7 +100,7 @@ struct ActionBase {
 
     struct Override {
         sfz::optional<ObjectRef> subject;
-        sfz::optional<ObjectRef> object;
+        sfz::optional<ObjectRef> direct;
     } override_;
 };
 
@@ -120,9 +120,9 @@ struct CapSpeedAction : public ActionBase {
 
 struct CaptureAction : public ActionBase {
     sfz::optional<Handle<Admiral>>
-            player;  // if present, set focus’s owner to `*player`
-                     // if absent and reflexive, set subject’s owner to object’s
-                     // if absent and non-reflexive, set object’s owner to subject’s
+            player;  // if present, set focus object’s owner to `*player`
+                     // if absent and reflexive, set focus object’s owner to direct object’s
+                     // if absent and non-reflexive, set focus object’s owner to subject object’s
 };
 
 struct CheckAction : public ActionBase {};
@@ -144,7 +144,7 @@ struct CreateAction : public ActionBase {
     sfz::optional<bool>           inherit;  // if false, gets creator as target
                                             // if true, gets creator’s target as target
     sfz::optional<bool> legacy_random;      // if true, consume a random number from
-                                            // subject even if not necessary
+                                            // subject object even if not necessary
 };
 
 struct DelayAction : public ActionBase {
@@ -215,14 +215,14 @@ struct KeyAction : public ActionBase {
 
 struct KillAction : public ActionBase {
     enum class Kind {
-        // Removes the focus without any further fanfare.
+        // Removes the focus object without any further fanfare.
         NONE = 0,
 
-        // Removes the subject without any further fanfare.
+        // Removes the subject object without any further fanfare.
         // Essentially, this is NONE, but always reflexive.
         EXPIRE = 1,
 
-        // Removes the subject and executes its destroy action.
+        // Removes the subject object and executes its destroy action.
         DESTROY = 2,
     } kind;
 };
@@ -244,8 +244,8 @@ struct MorphAction : public ActionBase {
 struct MoveAction : public ActionBase {
     enum class Origin {
         LEVEL,    // absolute coordinates, in level’s rotated frame of reference
-        SUBJECT,  // relative to subject
-        OBJECT,   // relative to object
+        SUBJECT,  // relative to subject object
+        DIRECT,   // relative to direct object
     };
     sfz::optional<Origin>         origin;
     sfz::optional<coordPointType> to;
@@ -261,16 +261,16 @@ struct OrderAction : public ActionBase {};
 
 struct PayAction : public ActionBase {
     Fixed                          value;   // amount to pay; not affected by earning power
-    sfz::optional<Handle<Admiral>> player;  // if not present pay focus’s owner.
+    sfz::optional<Handle<Admiral>> player;  // if not present, pay focus object’s owner.
 };
 
 struct PushAction : public ActionBase {
     enum class Kind {
-        COLLIDE,     // impart velocity from subject like a collision (capped)
-        DECELERATE,  // decrease focus’s velocity (capped)
-        SET,         // set focus’s velocity to value in subject’s direction
-        BOOST,       // add to focus’s velocity in subject’s direction
-        CRUISE,      // set focus’s velocity in focus’s direction
+        COLLIDE,     // impart velocity from subject object like a collision (capped)
+        DECELERATE,  // decrease focus object’s velocity (capped)
+        SET,         // set focus object’s velocity to value in subject object’s direction
+        BOOST,       // add to focus object’s velocity in subject object’s direction
+        CRUISE,      // set focus object’s velocity in focus object’s direction
     } kind;
     Fixed value;
 };
@@ -281,7 +281,7 @@ struct RevealAction : public ActionBase {
 
 struct ScoreAction : public ActionBase {
     sfz::optional<Handle<Admiral>>
-            player;  // which player’s score to change; absent = owner of focus
+            player;  // which player’s score to change; absent = owner of focus object
     int64_t which;   // 0-2; each player has three "scores"
     int64_t value;   // amount to change by
 };
@@ -298,7 +298,7 @@ struct PlayAction : public ActionBase {
     Priority            priority;     // 1-5; takes over a channel playing a lower-priority sound
     ticks               persistence;  // time before a lower-priority sound can take channel
     sfz::optional<bool> absolute;     // plays at same volume, regardless of distance from player
-    int64_t             volume;       // 1-255; volume at focus
+    int64_t             volume;       // 1-255; volume at focus object
 
     struct Sound {
         pn::string sound;
@@ -325,7 +325,7 @@ struct ThrustAction : public ActionBase {
 struct WarpAction : public ActionBase {};
 
 struct WinAction : public ActionBase {
-    sfz::optional<Handle<Admiral>>          player;  // victor; absent = owner of focus
+    sfz::optional<Handle<Admiral>>          player;  // victor; absent = owner of focus object
     sfz::optional<NamedHandle<const Level>> next;    // next chapter to play; absent = none
     pn::string                              text;    // "debriefing" text
 };
