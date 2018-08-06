@@ -223,7 +223,7 @@ FIELD_READER(ActionBase::Filter) {
 FIELD_READER(ActionBase::Override) {
     return optional_struct<ActionBase::Override>(
                    x, {{"subject", &ActionBase::Override::subject},
-                       {"object", &ActionBase::Override::object}})
+                       {"direct", &ActionBase::Override::direct}})
             .value_or(ActionBase::Override{});
 }
 
@@ -444,7 +444,7 @@ FIELD_READER(sfz::optional<MoveAction::Origin>) {
     return optional_enum<MoveAction::Origin>(
             x, {{"level", MoveAction::Origin::LEVEL},
                 {"subject", MoveAction::Origin::SUBJECT},
-                {"object", MoveAction::Origin::OBJECT}});
+                {"direct", MoveAction::Origin::DIRECT}});
 }
 
 static Action move_action(path_value x) {
