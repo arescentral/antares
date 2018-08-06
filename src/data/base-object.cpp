@@ -207,7 +207,7 @@ static BaseObject set_attributes(BaseObject o) {
     if (o.collide.as.subject) {
         o.attributes |= kCanCollide;
     }
-    if (o.collide.as.object) {
+    if (o.collide.as.direct) {
         o.attributes |= kCanBeHit;
     }
     if (o.collide.solid) {
@@ -323,7 +323,7 @@ FIELD_READER(BaseObject::Collide::As) {
                    x,
                    {
                            {"subject", &BaseObject::Collide::As::subject},
-                           {"object", &BaseObject::Collide::As::object},
+                           {"direct", &BaseObject::Collide::As::direct},
                    })
             .value_or(BaseObject::Collide::As{});
 }

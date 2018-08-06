@@ -263,7 +263,7 @@ struct Condition {
     ConditionWhen when;
 
     sfz::optional<ObjectRef> subject;
-    sfz::optional<ObjectRef> object;
+    sfz::optional<ObjectRef> direct;
     std::vector<Action>      action;
 
     static const Condition*            get(int n);

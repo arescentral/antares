@@ -227,10 +227,10 @@ void CheckLevelConditions() {
         int index = (&c - g.level->base.conditions.data());
         if ((g.condition_enabled[index] || c.persistent.value_or(false)) && is_true(c.when)) {
             g.condition_enabled[index] = false;
-            auto  sObject              = resolve_object_ref(c.subject);
-            auto  dObject              = resolve_object_ref(c.object);
+            auto  subject              = resolve_object_ref(c.subject);
+            auto  direct               = resolve_object_ref(c.direct);
             Point offset;
-            exec(c.action, sObject, dObject, &offset);
+            exec(c.action, subject, direct, &offset);
         }
     }
 }
