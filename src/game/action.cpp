@@ -166,12 +166,12 @@ static void apply(
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
-                if (a.reflexive.value_or(false)) {
-                    if (!a.inherit.value_or(false)) {
-                        OverrideObjectDestination(product, subject);
-                    } else if (subject->destObject.get()) {
+                if (a.inherit.value_or(false)) {
+                    if (subject->destObject.get()) {
                         OverrideObjectDestination(product, subject->destObject);
                     }
+                } else if (a.reflexive.value_or(false)) {
+                    OverrideObjectDestination(product, subject);
                 }
             } else if (a.reflexive.value_or(false)) {
                 product->timeFromOrigin = kTimeToCheckHome;
