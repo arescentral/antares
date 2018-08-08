@@ -225,10 +225,12 @@ static bool is_true(const ConditionWhen& c) {
 void CheckLevelConditions() {
     for (auto& c : g.level->base.conditions) {
         int index = (&c - g.level->base.conditions.data());
-        if ((g.condition_enabled[index] || c.persistent.value_or(false)) && is_true(c.when)) {
-            g.condition_enabled[index] = false;
-            auto  subject              = resolve_object_ref(c.subject);
-            auto  direct               = resolve_object_ref(c.direct);
+        if (g.condition_enabled[index] && is_true(c.when)) {
+            if (!c.persistent.value_or(false)) {
+                g.condition_enabled[index] = false;
+            }
+            auto  subject = resolve_object_ref(c.subject);
+            auto  direct  = resolve_object_ref(c.direct);
             Point offset;
             exec(c.action, subject, direct, &offset);
         }
