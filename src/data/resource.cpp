@@ -272,7 +272,14 @@ static pn::value merged_object(pn::string_view name) {
     }
 }
 
-BaseObject Resource::object(pn::string_view name) { return base_object(merged_object(name)); }
+BaseObject Resource::object(pn::string_view name) {
+    pn::value x = merged_object(name);
+    try {
+        return base_object(x);
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(pn::format("objects/{0}.pn", name).c_str()));
+    }
+}
 
 Race Resource::race(pn::string_view name) {
     pn::string path = pn::format("races/{0}.pn", name);

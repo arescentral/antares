@@ -152,7 +152,7 @@ struct DelayAction : public ActionBase {
 };
 
 struct DisableAction : public ActionBase {
-    Range<Fixed> value;
+    Range<ticks> duration;
 };
 
 struct EnergizeAction : public ActionBase {

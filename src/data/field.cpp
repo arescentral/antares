@@ -469,7 +469,7 @@ DEFINE_FIELD_READER(sfz::optional<Range<ticks>>) {
 }
 
 DEFINE_FIELD_READER(Range<ticks>) {
-    if (x.value().is_int()) {
+    if (x.value().is_string()) {
         ticks begin = read_field<ticks>(x);
         return Range<ticks>{begin, begin + ticks{1}};
     } else if (x.value().is_map()) {
