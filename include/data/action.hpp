@@ -310,8 +310,8 @@ struct PlayAction : public ActionBase {
 struct SparkAction : public ActionBase {
     int64_t count;     // number of sparks to create
     Hue     hue;       // hue of sparks; they start bright and fade with time
-    int64_t decay;     // sparks will be visible for 17.05/decay seconds
     Fixed   velocity;  // sparks fly at at random speed up to this
+    ticks   age;       // how long the spark will be visible
 };
 
 struct SpinAction : public ActionBase {

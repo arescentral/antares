@@ -240,7 +240,8 @@ static void apply(
             location.v = -kSpriteMaxSize;
         }
     }
-    globals()->starfield.make_sparks(a.count, a.decay, a.velocity, a.hue, &location);
+    int32_t decay = round(1023 / a.age.count());
+    globals()->starfield.make_sparks(a.count, decay, a.velocity, a.hue, &location);
 }
 
 static void apply(

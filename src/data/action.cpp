@@ -530,7 +530,7 @@ static Action spark_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"count", &SparkAction::count},
                 {"hue", &SparkAction::hue},
-                {"decay", &SparkAction::decay},
+                {"age", &SparkAction::age},
                 {"velocity", &SparkAction::velocity}});
 }
 
