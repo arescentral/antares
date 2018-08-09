@@ -339,12 +339,14 @@ static void apply(
 static void apply(
         const DisableAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> direct, Point* offset) {
-    Fixed f  = a.value.begin + focus->randomSeed.next(a.value.range());
-    Fixed f2 = focus->base->mass;
-    if (f2 == Fixed::zero()) {
+    Fixed begin = Fixed::from_long(a.duration.begin.count()) / 3;
+    Fixed end   = Fixed::from_long(a.duration.end.count()) / 3;
+    Fixed mass  = focus->base->mass;
+    Fixed f     = begin + focus->randomSeed.next(end - begin);
+    if (mass == Fixed::zero()) {
         f = kFixedNone;
     } else {
-        f /= f2;
+        f /= mass;
     }
     focus->offlineTime = mFixedToLong(f);
 }
