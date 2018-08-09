@@ -329,7 +329,7 @@ static Action delay_action(path_value x) {
 
 static Action disable_action(path_value x) {
     return required_struct<DisableAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", &DisableAction::value}});
+            x, {COMMON_ACTION_FIELDS, {"duration", &DisableAction::duration}});
 }
 
 static Action energize_action(path_value x) {
