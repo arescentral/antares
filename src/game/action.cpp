@@ -81,6 +81,9 @@ static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
+static void execute_actions(
+        const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
+        const Handle<SpaceObject> original_direct, Point* offset);
 static void queue_action(
         const Action* begin, const Action* end, ticks delayTime, Handle<SpaceObject> subject,
         Handle<SpaceObject> direct, Point* offset);
@@ -699,6 +702,12 @@ static void apply(
 }
 
 static void apply(
+        const GroupAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
+        Handle<SpaceObject> direct, Point* offset) {
+    execute_actions(a.of.data(), a.of.data() + a.of.size(), subject, focus, offset);
+}
+
+static void apply(
         const KeyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> direct, Point* offset) {
     for (KeyAction::Key key : a.enable) {
@@ -752,6 +761,7 @@ static void apply(
         case Action::Type::EQUIP: apply(a.equip, subject, focus, direct, offset); break;
         case Action::Type::FIRE: apply(a.fire, subject, focus, direct, offset); break;
         case Action::Type::FLASH: apply(a.flash, subject, focus, direct, offset); break;
+        case Action::Type::GROUP: apply(a.group, subject, focus, direct, offset); break;
         case Action::Type::HEAL: apply(a.heal, subject, focus, direct, offset); break;
         case Action::Type::HOLD: apply(a.hold, subject, focus, direct, offset); break;
         case Action::Type::KEY: apply(a.key, subject, focus, direct, offset); break;

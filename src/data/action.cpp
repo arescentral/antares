@@ -52,6 +52,7 @@ Action::Action(EnergizeAction a) : energize(std::move(a)) {}
 Action::Action(EquipAction a) : equip(std::move(a)) {}
 Action::Action(FireAction a) : fire(std::move(a)) {}
 Action::Action(FlashAction a) : flash(std::move(a)) {}
+Action::Action(GroupAction a) : group(std::move(a)) {}
 Action::Action(HealAction a) : heal(std::move(a)) {}
 Action::Action(HoldAction a) : hold(std::move(a)) {}
 Action::Action(KeyAction a) : key(std::move(a)) {}
@@ -91,6 +92,7 @@ Action::Action(Action&& a) {
         case Action::Type::EQUIP: new (this) Action(std::move(a.equip)); break;
         case Action::Type::FIRE: new (this) Action(std::move(a.fire)); break;
         case Action::Type::FLASH: new (this) Action(std::move(a.flash)); break;
+        case Action::Type::GROUP: new (this) Action(std::move(a.group)); break;
         case Action::Type::HEAL: new (this) Action(std::move(a.heal)); break;
         case Action::Type::HOLD: new (this) Action(std::move(a.hold)); break;
         case Action::Type::KEY: new (this) Action(std::move(a.key)); break;
@@ -138,6 +140,7 @@ Action::~Action() {
         case Action::Type::EQUIP: equip.~EquipAction(); break;
         case Action::Type::FIRE: fire.~FireAction(); break;
         case Action::Type::FLASH: flash.~FlashAction(); break;
+        case Action::Type::GROUP: group.~GroupAction(); break;
         case Action::Type::HEAL: heal.~HealAction(); break;
         case Action::Type::HOLD: hold.~HoldAction(); break;
         case Action::Type::KEY: key.~KeyAction(); break;
@@ -243,6 +246,7 @@ FIELD_READER(Action::Type) {
                 {"equip", Action::Type::EQUIP},
                 {"fire", Action::Type::FIRE},
                 {"flash", Action::Type::FLASH},
+                {"group", Action::Type::GROUP},
                 {"heal", Action::Type::HEAL},
                 {"hold", Action::Type::HOLD},
                 {"key", Action::Type::KEY},
@@ -357,6 +361,10 @@ static Action flash_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"duration", &FlashAction::duration},
                 {"color", &FlashAction::color}});
+}
+
+static Action group_action(path_value x) {
+    return required_struct<GroupAction>(x, {COMMON_ACTION_FIELDS, {"of", &GroupAction::of}});
 }
 
 static Action heal_action(path_value x) {
@@ -575,6 +583,7 @@ DEFINE_FIELD_READER(Action) {
         case Action::Type::EQUIP: return equip_action(x);
         case Action::Type::FIRE: return fire_action(x);
         case Action::Type::FLASH: return flash_action(x);
+        case Action::Type::GROUP: return group_action(x);
         case Action::Type::HEAL: return heal_action(x);
         case Action::Type::HOLD: return hold_action(x);
         case Action::Type::KEY: return key_action(x);

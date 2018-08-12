@@ -38,6 +38,7 @@
 namespace antares {
 
 class SpaceObject;
+union Action;
 union Level;
 struct Initial;
 struct Condition;
@@ -58,6 +59,7 @@ enum class ActionType {
     EQUIP,
     FIRE,
     FLASH,
+    GROUP,
     HEAL,
     HOLD,
     KEY,
@@ -171,6 +173,10 @@ struct FireAction : public ActionBase {
 struct FlashAction : public ActionBase {
     ticks    duration;  // length of flash
     RgbColor color;     // color of flash
+};
+
+struct GroupAction : public ActionBase {
+    std::vector<Action> of;
 };
 
 struct HealAction : public ActionBase {
@@ -354,6 +360,7 @@ union Action {
     EquipAction     equip;
     FireAction      fire;
     FlashAction     flash;
+    GroupAction     group;
     HealAction      heal;
     HoldAction      hold;
     KeyAction       key;
@@ -391,6 +398,7 @@ union Action {
     Action(EquipAction a);
     Action(FireAction a);
     Action(FlashAction a);
+    Action(GroupAction a);
     Action(HealAction a);
     Action(HoldAction a);
     Action(KeyAction a);
