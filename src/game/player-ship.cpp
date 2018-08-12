@@ -415,11 +415,8 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         case Gamepad::Button::X: zoom_out(); break;
         case Gamepad::Button::Y: zoom_in(); break;
         case Gamepad::Button::BACK: Messages::advance(); break;
-        case Gamepad::Button::LT: _gamepad_keys |= kEnterKey; break;
-        case Gamepad::Button::RT:
-            _gamepad_keys |= kOneKey;
-            _gamepad_keys |= kTwoKey;
-            break;
+        case Gamepad::Button::LT: _gamepad_keys |= kSpecialKey; break;
+        case Gamepad::Button::RT: _gamepad_keys |= (kPulseKey | kBeamKey); break;
         case Gamepad::Button::LSB:
             if (player->presenceState == kWarpingPresence) {
                 _gamepad_keys &= !kWarpKey;
@@ -480,11 +477,8 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
     switch (event.button) {
         case Gamepad::Button::A: _gamepad_keys &= ~kUpKey; break;
         case Gamepad::Button::B: _gamepad_keys &= ~kDownKey; break;
-        case Gamepad::Button::LT: _gamepad_keys &= ~kEnterKey; break;
-        case Gamepad::Button::RT:
-            _gamepad_keys &= ~kOneKey;
-            _gamepad_keys &= ~kTwoKey;
-            break;
+        case Gamepad::Button::LT: _gamepad_keys &= ~kSpecialKey; break;
+        case Gamepad::Button::RT: _gamepad_keys &= ~(kPulseKey | kBeamKey); break;
         case Gamepad::Button::LSB:
             if (player->presenceState != kWarpingPresence) {
                 _gamepad_keys &= !kWarpKey;

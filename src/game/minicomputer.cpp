@@ -813,9 +813,9 @@ static void fire(Handle<Admiral> adm, int key) {
     }
 }
 
-static void fire1(Handle<Admiral> adm, int32_t line) { fire(adm, kOneKey); }
-static void fire2(Handle<Admiral> adm, int32_t line) { fire(adm, kTwoKey); }
-static void fire_special(Handle<Admiral> adm, int32_t line) { fire(adm, kEnterKey); }
+static void fire_pulse(Handle<Admiral> adm, int32_t line) { fire(adm, kPulseKey); }
+static void fire_beam(Handle<Admiral> adm, int32_t line) { fire(adm, kBeamKey); }
+static void fire_special(Handle<Admiral> adm, int32_t line) { fire(adm, kSpecialKey); }
 
 static void hold_position(Handle<Admiral> adm, int32_t line) {
     if (g.key_mask & kComputerSpecialMenu) {
@@ -888,8 +888,8 @@ static void show_special_screen(Handle<Admiral> adm, int32_t line) {
             selectable("Transfer Control", transfer_control),
             selectable("Hold Position", hold_position),
             selectable("Go To My Position", come_to_me),
-            selectable("Fire Weapon 1", fire1),
-            selectable("Fire Weapon 2", fire2),
+            selectable("Fire Weapon 1", fire_pulse),
+            selectable("Fire Weapon 2", fire_beam),
             selectable("Fire Special", fire_special),
             accept("Execute"),
             cancel("Main Menu"),
