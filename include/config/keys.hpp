@@ -255,9 +255,9 @@ enum {
     kDownKey         = 0x00000002,
     kLeftKey         = 0x00000004,
     kRightKey        = 0x00000008,
-    kOneKey          = 0x00000010,
-    kTwoKey          = 0x00000020,
-    kEnterKey        = 0x00000040,
+    kPulseKey        = 0x00000010,
+    kBeamKey         = 0x00000020,
+    kSpecialKey      = 0x00000040,
     kWarpKey         = 0x00000080,
     kSelectFriendKey = 0x00000100,
     kSelectFoeKey    = 0x00000200,
@@ -286,7 +286,7 @@ enum {
 
     kSpecialKeyMask = (kAutoPilotKey | kGiveCommandKey | kAdoptTargetKey),
     kMotionKeyMask  = (kUpKey | kDownKey | kRightKey | kLeftKey),
-    kWeaponKeyMask  = (kOneKey | kTwoKey | kEnterKey),
+    kWeaponKeyMask  = (kPulseKey | kBeamKey | kSpecialKey),
     kMiscKeyMask    = (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask)),
 };
 

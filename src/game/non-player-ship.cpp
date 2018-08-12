@@ -163,15 +163,15 @@ void fire_weapon(
 }
 
 static void tick_pulse(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kOneKey, subject->base->weapons.pulse, subject->pulse);
+    tick_weapon(subject, target, kPulseKey, subject->base->weapons.pulse, subject->pulse);
 }
 
 static void tick_beam(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kTwoKey, subject->base->weapons.beam, subject->beam);
+    tick_weapon(subject, target, kBeamKey, subject->base->weapons.beam, subject->beam);
 }
 
 static void tick_special(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kEnterKey, subject->base->weapons.special, subject->special);
+    tick_weapon(subject, target, kSpecialKey, subject->base->weapons.special, subject->special);
 }
 
 static uint8_t get_tiny_shade(const SpaceObject& o) {
@@ -404,21 +404,21 @@ uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
     if (obj->pulse.base) {
         auto weaponObject = obj->pulse.base;
         if (weaponObject->device->usage.defense) {
-            keys |= kOneKey;
+            keys |= kPulseKey;
         }
     }
 
     if (obj->beam.base) {
         auto weaponObject = obj->beam.base;
         if (weaponObject->device->usage.defense) {
-            keys |= kTwoKey;
+            keys |= kBeamKey;
         }
     }
 
     if (obj->special.base) {
         auto weaponObject = obj->special.base;
         if (weaponObject->device->usage.defense) {
-            keys |= kEnterKey;
+            keys |= kSpecialKey;
         }
     }
 
@@ -701,7 +701,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                     if (anObject->special.base && (distance > kWarpInDistance) &&
                         (theta <= kDirectionError)) {
                         if (anObject->special.base->device->usage.transportation) {
-                            keysDown |= kEnterKey;
+                            keysDown |= kSpecialKey;
                         }
                     }
                     if ((baseObject->warpSpeed > Fixed::zero()) &&
@@ -1464,7 +1464,7 @@ uint32_t ThinkObjectEngageTarget(
             if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
                 (distance < static_cast<uint32_t>(weaponObject->device->range))) {
-                keysDown |= kOneKey;
+                keysDown |= kPulseKey;
             }
         }
 
@@ -1473,7 +1473,7 @@ uint32_t ThinkObjectEngageTarget(
             if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
                 (distance < static_cast<uint32_t>(weaponObject->device->range))) {
-                keysDown |= kTwoKey;
+                keysDown |= kBeamKey;
             }
         }
 
@@ -1482,7 +1482,7 @@ uint32_t ThinkObjectEngageTarget(
             if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
                 (distance < static_cast<uint32_t>(weaponObject->device->range))) {
-                keysDown |= kEnterKey;
+                keysDown |= kSpecialKey;
             }
         }
     }  // target is not in range
