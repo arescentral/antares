@@ -66,21 +66,19 @@ struct ActionCursor {
     Handle<SpaceObject> direct;
     int32_t             direct_id;
 
+    std::unique_ptr<ActionCursor> continuation;
+
+    ActionCursor() = default;
     ActionCursor(
             const std::vector<Action>& actions, Handle<SpaceObject> subject,
-            Handle<SpaceObject> direct)
+            Handle<SpaceObject> direct, std::unique_ptr<ActionCursor> continuation = nullptr)
             : begin{actions.data()},
               end{actions.data() + actions.size()},
               subject{subject},
               subject_id{subject.get() ? subject->id : -1},
               direct{direct},
-              direct_id{direct.get() ? direct->id : -1} {}
-
-    ActionCursor()                    = default;
-    ActionCursor(const ActionCursor&) = delete;
-    ActionCursor(ActionCursor&&)      = default;
-    ActionCursor& operator=(const ActionCursor&) = delete;
-    ActionCursor& operator=(ActionCursor&&) = default;
+              direct_id{direct.get() ? direct->id : -1},
+              continuation{std::move(continuation)} {}
 };
 
 struct actionQueueType {
@@ -705,12 +703,6 @@ static void apply(
 }
 
 static void apply(
-        const GroupAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
-    execute_actions(ActionCursor(a.of, subject, focus), offset);
-}
-
-static void apply(
         const KeyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> direct, Point* offset) {
     for (KeyAction::Key key : a.enable) {
@@ -750,6 +742,9 @@ static void apply(
         const Action& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> direct, Point* offset) {
     switch (a.type()) {
+        case Action::Type::DELAY: throw std::runtime_error("delay shouldn’t get here");
+        case Action::Type::GROUP: throw std::runtime_error("group shouldn’t get here");
+
         case Action::Type::AGE: apply(a.age, subject, focus, direct, offset); break;
         case Action::Type::ASSUME: apply(a.assume, subject, focus, direct, offset); break;
         case Action::Type::CAPTURE: apply(a.capture, subject, focus, direct, offset); break;
@@ -758,14 +753,12 @@ static void apply(
         case Action::Type::CLOAK: apply(a.cloak, subject, focus, direct, offset); break;
         case Action::Type::CONDITION: apply(a.condition, subject, focus, direct, offset); break;
         case Action::Type::CREATE: apply(a.create, subject, focus, direct, offset); break;
-        case Action::Type::DELAY: throw std::runtime_error("delay shouldn’t get here");
         case Action::Type::DESTROY: apply(a.destroy, subject, focus, direct, offset); break;
         case Action::Type::DISABLE: apply(a.disable, subject, focus, direct, offset); break;
         case Action::Type::ENERGIZE: apply(a.energize, subject, focus, direct, offset); break;
         case Action::Type::EQUIP: apply(a.equip, subject, focus, direct, offset); break;
         case Action::Type::FIRE: apply(a.fire, subject, focus, direct, offset); break;
         case Action::Type::FLASH: apply(a.flash, subject, focus, direct, offset); break;
-        case Action::Type::GROUP: apply(a.group, subject, focus, direct, offset); break;
         case Action::Type::HEAL: apply(a.heal, subject, focus, direct, offset); break;
         case Action::Type::HOLD: apply(a.hold, subject, focus, direct, offset); break;
         case Action::Type::KEY: apply(a.key, subject, focus, direct, offset); break;
@@ -825,12 +818,29 @@ static void execute_actions(ActionCursor cursor, Point* offset) {
             continue;
         }
 
+        switch (action.type()) {
+            case Action::Type::DELAY:
+                queue_action(std::move(cursor), action.delay.duration, offset);
+                return;
+            case Action::Type::GROUP:
+                execute_actions(
+                        ActionCursor{action.group.of, subject, direct,
+                                     std::unique_ptr<ActionCursor>(
+                                             new ActionCursor(std::move(cursor)))},
+                        offset);
+                return;
+            default: break;
+        }
         if (action.type() == ActionType::DELAY) {
             queue_action(std::move(cursor), action.delay.duration, offset);
             return;
         }
 
         apply(action, subject, focus, direct, offset);
+    }
+
+    if (cursor.continuation) {
+        execute_actions(std::move(*cursor.continuation), offset);
     }
 }
 
