@@ -31,7 +31,7 @@ bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target);
 
 void exec(
         const std::vector<Action>& actions, Handle<SpaceObject> sObject,
-        Handle<SpaceObject> dObject, Point* offset);
+        Handle<SpaceObject> dObject, Point offset);
 
 void reset_action_queue();
 void execute_action_queue();

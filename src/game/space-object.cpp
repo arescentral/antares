@@ -552,7 +552,7 @@ Handle<SpaceObject> CreateAnySpaceObject(
 #endif  // DATA_COVERAGE
 
     obj->attributes |= specialAttributes;
-    exec(obj->base->create.action, obj, SpaceObject::none(), NULL);
+    exec(obj->base->create.action, obj, SpaceObject::none(), {0, 0});
     return obj;
 }
 
@@ -738,7 +738,7 @@ void SpaceObject::destroy() {
 
         object->set_owner(Admiral::none(), true);
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
-        exec(object->base->destroy.action, object, SpaceObject::none(), NULL);
+        exec(object->base->destroy.action, object, SpaceObject::none(), {0, 0});
     } else {
         AddKillToAdmiral(object);
         if (object->attributes & kReleaseEnergyOnDeath) {
@@ -766,7 +766,7 @@ void SpaceObject::destroy() {
             }
         }
 
-        exec(object->base->destroy.action, object, SpaceObject::none(), NULL);
+        exec(object->base->destroy.action, object, SpaceObject::none(), {0, 0});
 
         if (object->attributes & kCanAcceptDestination) {
             RemoveObjectFromDestination(object);

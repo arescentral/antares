@@ -66,18 +66,22 @@ struct ActionCursor {
     Handle<SpaceObject> direct;
     int32_t             direct_id;
 
+    Point offset;
+
     std::unique_ptr<ActionCursor> continuation;
 
     ActionCursor() = default;
     ActionCursor(
             const std::vector<Action>& actions, Handle<SpaceObject> subject,
-            Handle<SpaceObject> direct, std::unique_ptr<ActionCursor> continuation = nullptr)
+            Handle<SpaceObject> direct, Point offset,
+            std::unique_ptr<ActionCursor> continuation = nullptr)
             : begin{actions.data()},
               end{actions.data() + actions.size()},
               subject{subject},
               subject_id{subject.get() ? subject->id : -1},
               direct{direct},
               direct_id{direct.get() ? direct->id : -1},
+              offset{offset},
               continuation{std::move(continuation)} {}
 };
 
@@ -85,7 +89,6 @@ struct actionQueueType {
     ActionCursor     cursor;
     ticks            scheduledTime;
     actionQueueType* nextActionQueue;
-    Point            offset;
 
     bool empty() const { return cursor.begin == cursor.end; }
 };
@@ -98,8 +101,8 @@ static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
-static void execute_actions(ActionCursor cursor, Point* offset);
-static void queue_action(ActionCursor cursor, ticks delayTime, Point* offset);
+static void execute_actions(ActionCursor cursor);
+static void queue_action(ActionCursor cursor, ticks delayTime);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
     if (!tags_match(*target->base, action.base.filter.tags)) {
@@ -136,7 +139,7 @@ static Point random_point(Random* r, int32_t distance, Within within) {
 
 static void apply(
         const CreateAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     auto count = a.count.value_or(Range<int64_t>{1, 2});
     auto c     = count.begin;
     if (count.range() > 1) {
@@ -161,10 +164,8 @@ static void apply(
             direction = subject->direction;
         }
         coordPointType at = subject->location;
-        if (offset != NULL) {
-            at.h += offset->h;
-            at.v += offset->v;
-        }
+        at.h += offset.h;
+        at.v += offset.v;
 
         if (a.distance.has_value()) {
             Point p = random_point(&subject->randomSeed, *a.distance, a.within);
@@ -216,7 +217,7 @@ static void apply(
 
 static void apply(
         const PlayAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     pn::string_view pick;
     if (a.sound.has_value()) {
         pick = *a.sound;
@@ -234,7 +235,7 @@ static void apply(
 
 static void apply(
         const SparkAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Point location;
     if (focus->sprite.get()) {
         location.h = focus->sprite->where.h;
@@ -262,7 +263,7 @@ static void apply(
 
 static void apply(
         const DestroyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (!focus.get()) {
         return;
     }
@@ -275,7 +276,7 @@ static void apply(
 
 static void apply(
         const RemoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (!focus.get()) {
         return;
     }
@@ -288,7 +289,7 @@ static void apply(
 
 static void apply(
         const HoldAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     focus->targetObject   = SpaceObject::none();
     focus->targetObjectID = kNoShip;
     focus->lastTarget     = SpaceObject::none();
@@ -296,19 +297,19 @@ static void apply(
 
 static void apply(
         const HealAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     focus->alter_health(a.value);
 }
 
 static void apply(
         const EnergizeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     focus->alter_energy(a.value);
 }
 
 static void apply(
         const RevealAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     for (auto i : a.initial) {
         UnhideInitialObject(i);
     }
@@ -316,19 +317,19 @@ static void apply(
 
 static void apply(
         const CheckAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     CheckLevelConditions();
 }
 
 static void apply(
         const CloakAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     focus->set_cloak(true);
 }
 
 static void apply(
         const SpinAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (focus->attributes & kCanTurn) {
         Fixed f  = focus->turn_rate() * (a.value.begin + focus->randomSeed.next(a.value.range()));
         Fixed f2 = focus->base->mass;
@@ -343,7 +344,7 @@ static void apply(
 
 static void apply(
         const DisableAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Fixed begin = Fixed::from_long(a.duration.begin.count()) / 3;
     Fixed end   = Fixed::from_long(a.duration.end.count()) / 3;
     Fixed mass  = focus->base->mass;
@@ -388,7 +389,7 @@ void cap_velocity(Handle<SpaceObject> object) {
 
 static void apply(
         const PushAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (!subject.get()) {
         return;
     }
@@ -450,7 +451,7 @@ static void apply(
 
 static void apply(
         const CapSpeedAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (a.value.has_value()) {
         focus->maxVelocity = *a.value;
     } else {
@@ -460,14 +461,14 @@ static void apply(
 
 static void apply(
         const ThrustAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Fixed f       = a.value.begin + focus->randomSeed.next(a.value.range());
     focus->thrust = f;
 }
 
 static void apply(
         const MorphAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (focus.get()) {
         focus->change_base_type(*a.base, sfz::nullopt, a.keep_ammo.value_or(false));
     }
@@ -475,7 +476,7 @@ static void apply(
 
 static void apply(
         const CaptureAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (!focus.get()) {
         return;
     }
@@ -495,7 +496,7 @@ static void apply(
 
 static void apply(
         const ConditionAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     for (auto c : a.enable) {
         g.condition_enabled[c.number()] = true;
     }
@@ -506,7 +507,7 @@ static void apply(
 
 static void apply(
         const OccupyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (focus.get()) {
         focus->alter_occupation(subject->owner, a.value, true);
     }
@@ -514,7 +515,7 @@ static void apply(
 
 static void apply(
         const PayAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Handle<Admiral> admiral;
     if (a.player.has_value()) {
         admiral = *a.player;
@@ -530,7 +531,7 @@ static void apply(
 
 static void apply(
         const AgeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     ticks t = a.value.begin + focus->randomSeed.next(a.value.range());
 
     if (a.relative.value_or(false)) {
@@ -548,7 +549,7 @@ static void apply(
 
 static void apply(
         const MoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     coordPointType newLocation;
     switch (a.origin.value_or(MoveAction::Origin::LEVEL)) {
         case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
@@ -590,7 +591,7 @@ static void alter_weapon(
 
 static void apply(
         const EquipAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     switch (a.which) {
         case Weapon::PULSE: alter_weapon(a.base.get(), focus, focus->pulse); break;
         case Weapon::BEAM: alter_weapon(a.base.get(), focus, focus->beam); break;
@@ -600,7 +601,7 @@ static void apply(
 
 static void apply(
         const LandAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     // even though this is never a reflexive verb, we only effect ourselves
     if (subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
         subject->create_floating_player_body();
@@ -612,7 +613,7 @@ static void apply(
 
 static void apply(
         const WarpAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     subject->presenceState             = kWarpInPresence;
     subject->presence.warp_in.progress = ticks(0);
     subject->presence.warp_in.step     = 0;
@@ -625,7 +626,7 @@ static void apply(
 
 static void apply(
         const ScoreAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Handle<Admiral> admiral;
     if (a.player.has_value()) {
         admiral = *a.player;
@@ -639,7 +640,7 @@ static void apply(
 
 static void apply(
         const WinAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Handle<Admiral> admiral;
     if (a.player.has_value()) {
         admiral = *a.player;
@@ -655,13 +656,13 @@ static void apply(
 
 static void apply(
         const MessageAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Messages::start(a.id, &a.pages);
 }
 
 static void apply(
         const OrderAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
     OverrideObjectDestination(subject, focus);
@@ -670,7 +671,7 @@ static void apply(
 
 static void apply(
         const FireAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     switch (a.which) {
         case Weapon::PULSE:
             fire_weapon(
@@ -698,13 +699,13 @@ static void apply(
 
 static void apply(
         const FlashAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     globals()->transitions.start_boolean(a.duration, a.color);
 }
 
 static void apply(
         const KeyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     for (KeyAction::Key key : a.enable) {
         g.key_mask = g.key_mask & ~(1 << static_cast<int32_t>(key));
     }
@@ -715,7 +716,7 @@ static void apply(
 
 static void apply(
         const ZoomAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     if (a.value != g.zoom) {
         g.zoom = a.value;
         sys.sound.click();
@@ -725,13 +726,13 @@ static void apply(
 
 static void apply(
         const SelectAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     MiniComputer_SetScreenAndLineHack(a.screen, a.line);
 }
 
 static void apply(
         const AssumeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     Handle<Admiral> player1(0);
     int             index = a.which + GetAdmiralScore(player1, 0);
     g.initials[index]     = focus;
@@ -740,7 +741,7 @@ static void apply(
 
 static void apply(
         const Action& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
-        Handle<SpaceObject> direct, Point* offset) {
+        Handle<SpaceObject> direct, Point offset) {
     switch (a.type()) {
         case Action::Type::DELAY: throw std::runtime_error("delay shouldn’t get here");
         case Action::Type::GROUP: throw std::runtime_error("group shouldn’t get here");
@@ -784,7 +785,7 @@ static void apply(
     }
 }
 
-static void execute_actions(ActionCursor cursor, Point* offset) {
+static void execute_actions(ActionCursor cursor) {
     while (cursor.begin != cursor.end) {
         const Action& action = *(cursor.begin++);
 #ifdef DATA_COVERAGE
@@ -820,34 +821,32 @@ static void execute_actions(ActionCursor cursor, Point* offset) {
 
         switch (action.type()) {
             case Action::Type::DELAY:
-                queue_action(std::move(cursor), action.delay.duration, offset);
+                queue_action(std::move(cursor), action.delay.duration);
                 return;
             case Action::Type::GROUP:
-                execute_actions(
-                        ActionCursor{action.group.of, subject, direct,
-                                     std::unique_ptr<ActionCursor>(
-                                             new ActionCursor(std::move(cursor)))},
-                        offset);
+                execute_actions(ActionCursor{
+                        action.group.of, subject, direct, cursor.offset,
+                        std::unique_ptr<ActionCursor>(new ActionCursor(std::move(cursor)))});
                 return;
             default: break;
         }
         if (action.type() == ActionType::DELAY) {
-            queue_action(std::move(cursor), action.delay.duration, offset);
+            queue_action(std::move(cursor), action.delay.duration);
             return;
         }
 
-        apply(action, subject, focus, direct, offset);
+        apply(action, subject, focus, direct, cursor.offset);
     }
 
     if (cursor.continuation) {
-        execute_actions(std::move(*cursor.continuation), offset);
+        execute_actions(std::move(*cursor.continuation));
     }
 }
 
 void exec(
         const std::vector<Action>& actions, Handle<SpaceObject> subject,
-        Handle<SpaceObject> direct, Point* offset) {
-    execute_actions(ActionCursor(actions, subject, direct), offset);
+        Handle<SpaceObject> direct, Point offset) {
+    execute_actions(ActionCursor(actions, subject, direct, offset));
 }
 
 void reset_action_queue() {
@@ -862,7 +861,7 @@ void reset_action_queue() {
     }
 }
 
-static void queue_action(ActionCursor cursor, ticks delayTime, Point* offset) {
+static void queue_action(ActionCursor cursor, ticks delayTime) {
     int32_t          queueNumber = 0;
     actionQueueType* actionQueue = gActionQueueData.get();
     while (!actionQueue->empty() && (queueNumber < kActionQueueLength)) {
@@ -875,12 +874,6 @@ static void queue_action(ActionCursor cursor, ticks delayTime, Point* offset) {
     }
     actionQueue->cursor        = std::move(cursor);
     actionQueue->scheduledTime = delayTime;
-
-    if (offset) {
-        actionQueue->offset = *offset;
-    } else {
-        actionQueue->offset = Point{0, 0};
-    }
 
     actionQueueType* previousQueue = NULL;
     actionQueueType* nextQueue     = gFirstActionQueue;
@@ -919,7 +912,7 @@ void execute_action_queue() {
         }
         if ((subjectid == gFirstActionQueue->cursor.subject_id) &&
             (directid == gFirstActionQueue->cursor.direct_id)) {
-            execute_actions(std::move(gFirstActionQueue->cursor), &gFirstActionQueue->offset);
+            execute_actions(std::move(gFirstActionQueue->cursor));
         }
 
         gFirstActionQueue->cursor.begin = gFirstActionQueue->cursor.end = nullptr;

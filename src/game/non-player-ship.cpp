@@ -145,14 +145,14 @@ void fire_weapon(
     fcos = -fcos;
     fsin = -fsin;
 
-    Point  offset;
-    Point* at = nullptr;
+    Point offset;
+    Point at = {0, 0};
     if ((&weapon != &subject->special) && !positions.empty()) {
         offset.h = mFixedToLong(
                 (positions[weapon.position].h * fcos) + (positions[weapon.position].v * -fsin));
         offset.v = mFixedToLong(
                 (positions[weapon.position].h * fsin) + (positions[weapon.position].v * fcos));
-        at = &offset;
+        at = offset;
     }
 
     weapon.time = g.time + weaponObject->device->fireTime;
@@ -433,7 +433,6 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
     Fixed               slope;
     int16_t             angle, theta, beta;
     Fixed               calcv, fdist;
-    Point               offset;
 
     if (!(anObject->attributes & kRemoteOrHuman) || (anObject->attributes & kOnAutoPilot)) {
         // set all keys off
@@ -536,9 +535,8 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                 if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
                     if (baseObject->arrive.action.size() > 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
-                            offset.h = offset.v = 0;
                             exec(baseObject->arrive.action, anObject, anObject->destObject,
-                                 &offset);
+                                 {0, 0});
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -725,9 +723,8 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                     if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
                         if (baseObject->arrive.action.size() > 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
-                                offset.h = offset.v = 0;
                                 exec(baseObject->arrive.action, anObject, anObject->destObject,
-                                     &offset);
+                                     {0, 0});
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -1072,7 +1069,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
     }
 
     if (anObject->presence.landing.scale <= 0) {
-        exec(anObject->base->expire.action, anObject, target, NULL);
+        exec(anObject->base->expire.action, anObject, target, {0, 0});
         anObject->active = kObjectToBeFreed;
     } else if (anObject->sprite.get()) {
         anObject->sprite->scale = anObject->presence.landing.scale;
@@ -1522,7 +1519,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     }
 
     if (sObject->active == kObjectInUse) {
-        exec(sObject->base->collide.action, sObject, anObject, NULL);
+        exec(sObject->base->collide.action, sObject, anObject, {0, 0});
     }
 
     if (anObject->owner == g.admiral && (anObject->attributes & kIsPlayerShip) &&
