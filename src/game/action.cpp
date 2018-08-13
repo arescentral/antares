@@ -785,13 +785,6 @@ static void execute_actions(
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-        if (action.type() == ActionType::DELAY) {
-            queue_action(
-                    curr + 1, end, action.delay.duration, original_subject, original_direct,
-                    offset);
-            return;
-        }
-
         auto subject = original_subject;
         if (action.base.override_.subject.has_value()) {
             subject = resolve_object_ref(*action.base.override_.subject);
@@ -817,6 +810,13 @@ static void execute_actions(
         if ((action.base.filter.attributes.bits || !action.base.filter.tags.tags.empty()) &&
             (!direct.get() || !action_filter_applies_to(action, direct))) {
             continue;
+        }
+
+        if (action.type() == ActionType::DELAY) {
+            queue_action(
+                    curr + 1, end, action.delay.duration, original_subject, original_direct,
+                    offset);
+            return;
         }
 
         apply(action, subject, focus, direct, offset);
