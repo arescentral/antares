@@ -57,20 +57,39 @@ namespace antares {
 
 const size_t kActionQueueLength = 120;
 
-struct actionQueueType {
-    const Action*       actionBegin;
-    const Action*       actionEnd;
-    ticks               scheduledTime;
-    actionQueueType*    nextActionQueue;
-    Handle<SpaceObject> subjectObject;
-    int32_t             subjectObjectNum;
-    int32_t             subjectObjectID;
-    Handle<SpaceObject> directObject;
-    int32_t             directObjectNum;
-    int32_t             directObjectID;
-    Point               offset;
+struct ActionCursor {
+    const Action* begin = nullptr;
+    const Action* end   = nullptr;
 
-    bool empty() const { return actionBegin == actionEnd; }
+    Handle<SpaceObject> subject;
+    int32_t             subject_id;
+    Handle<SpaceObject> direct;
+    int32_t             direct_id;
+
+    ActionCursor(
+            const std::vector<Action>& actions, Handle<SpaceObject> subject,
+            Handle<SpaceObject> direct)
+            : begin{actions.data()},
+              end{actions.data() + actions.size()},
+              subject{subject},
+              subject_id{subject.get() ? subject->id : -1},
+              direct{direct},
+              direct_id{direct.get() ? direct->id : -1} {}
+
+    ActionCursor()                    = default;
+    ActionCursor(const ActionCursor&) = delete;
+    ActionCursor(ActionCursor&&)      = default;
+    ActionCursor& operator=(const ActionCursor&) = delete;
+    ActionCursor& operator=(ActionCursor&&) = default;
+};
+
+struct actionQueueType {
+    ActionCursor     cursor;
+    ticks            scheduledTime;
+    actionQueueType* nextActionQueue;
+    Point            offset;
+
+    bool empty() const { return cursor.begin == cursor.end; }
 };
 
 static ANTARES_GLOBAL actionQueueType* gFirstActionQueue = NULL;
@@ -81,12 +100,8 @@ static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
-static void execute_actions(
-        const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
-        const Handle<SpaceObject> original_direct, Point* offset);
-static void queue_action(
-        const Action* begin, const Action* end, ticks delayTime, Handle<SpaceObject> subject,
-        Handle<SpaceObject> direct, Point* offset);
+static void execute_actions(ActionCursor cursor, Point* offset);
+static void queue_action(ActionCursor cursor, ticks delayTime, Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
     if (!tags_match(*target->base, action.base.filter.tags)) {
@@ -692,7 +707,7 @@ static void apply(
 static void apply(
         const GroupAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> direct, Point* offset) {
-    execute_actions(a.of.data(), a.of.data() + a.of.size(), subject, focus, offset);
+    execute_actions(ActionCursor(a.of, subject, focus), offset);
 }
 
 static void apply(
@@ -776,20 +791,18 @@ static void apply(
     }
 }
 
-static void execute_actions(
-        const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
-        const Handle<SpaceObject> original_direct, Point* offset) {
-    for (const Action* curr : sfz::range(begin, end)) {
-        const Action& action = *curr;
+static void execute_actions(ActionCursor cursor, Point* offset) {
+    while (cursor.begin != cursor.end) {
+        const Action& action = *(cursor.begin++);
 #ifdef DATA_COVERAGE
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-        auto subject = original_subject;
+        auto subject = cursor.subject;
         if (action.base.override_.subject.has_value()) {
             subject = resolve_object_ref(*action.base.override_.subject);
         }
-        auto direct = original_direct;
+        auto direct = cursor.direct;
         if (action.base.override_.direct.has_value()) {
             direct = resolve_object_ref(*action.base.override_.direct);
         }
@@ -813,9 +826,7 @@ static void execute_actions(
         }
 
         if (action.type() == ActionType::DELAY) {
-            queue_action(
-                    curr + 1, end, action.delay.duration, original_subject, original_direct,
-                    offset);
+            queue_action(std::move(cursor), action.delay.duration, offset);
             return;
         }
 
@@ -826,7 +837,7 @@ static void execute_actions(
 void exec(
         const std::vector<Action>& actions, Handle<SpaceObject> subject,
         Handle<SpaceObject> direct, Point* offset) {
-    execute_actions(actions.data(), actions.data() + actions.size(), subject, direct, offset);
+    execute_actions(ActionCursor(actions, subject, direct), offset);
 }
 
 void reset_action_queue() {
@@ -836,14 +847,12 @@ void reset_action_queue() {
 
     actionQueueType* action = gActionQueueData.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        action->actionBegin = action->actionEnd = nullptr;
+        action->cursor.begin = action->cursor.end = nullptr;
         ++action;
     }
 }
 
-static void queue_action(
-        const Action* begin, const Action* end, ticks delayTime, Handle<SpaceObject> subject,
-        Handle<SpaceObject> direct, Point* offset) {
+static void queue_action(ActionCursor cursor, ticks delayTime, Point* offset) {
     int32_t          queueNumber = 0;
     actionQueueType* actionQueue = gActionQueueData.get();
     while (!actionQueue->empty() && (queueNumber < kActionQueueLength)) {
@@ -854,32 +863,13 @@ static void queue_action(
     if (queueNumber == kActionQueueLength) {
         return;
     }
-    actionQueue->actionBegin   = begin;
-    actionQueue->actionEnd     = end;
+    actionQueue->cursor        = std::move(cursor);
     actionQueue->scheduledTime = delayTime;
 
     if (offset) {
         actionQueue->offset = *offset;
     } else {
         actionQueue->offset = Point{0, 0};
-    }
-
-    actionQueue->subjectObject = subject;
-    if (subject.get()) {
-        actionQueue->subjectObjectNum = subject->number();
-        actionQueue->subjectObjectID  = subject->id;
-    } else {
-        actionQueue->subjectObjectNum = -1;
-        actionQueue->subjectObjectID  = -1;
-    }
-
-    actionQueue->directObject = direct;
-    if (direct.get()) {
-        actionQueue->directObjectNum = direct->number();
-        actionQueue->directObjectID  = direct->id;
-    } else {
-        actionQueue->directObjectNum = -1;
-        actionQueue->directObjectID  = -1;
     }
 
     actionQueueType* previousQueue = NULL;
@@ -909,23 +899,20 @@ void execute_action_queue() {
     while (gFirstActionQueue && !gFirstActionQueue->empty() &&
            (gFirstActionQueue->scheduledTime <= ticks(0))) {
         int32_t subjectid = -1;
-        if (gFirstActionQueue->subjectObject.get() && gFirstActionQueue->subjectObject->active) {
-            subjectid = gFirstActionQueue->subjectObject->id;
+        if (gFirstActionQueue->cursor.subject.get() && gFirstActionQueue->cursor.subject->active) {
+            subjectid = gFirstActionQueue->cursor.subject->id;
         }
 
         int32_t directid = -1;
-        if (gFirstActionQueue->directObject.get() && gFirstActionQueue->directObject->active) {
-            directid = gFirstActionQueue->directObject->id;
+        if (gFirstActionQueue->cursor.direct.get() && gFirstActionQueue->cursor.direct->active) {
+            directid = gFirstActionQueue->cursor.direct->id;
         }
-        if ((subjectid == gFirstActionQueue->subjectObjectID) &&
-            (directid == gFirstActionQueue->directObjectID)) {
-            execute_actions(
-                    gFirstActionQueue->actionBegin, gFirstActionQueue->actionEnd,
-                    gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
-                    &gFirstActionQueue->offset);
+        if ((subjectid == gFirstActionQueue->cursor.subject_id) &&
+            (directid == gFirstActionQueue->cursor.direct_id)) {
+            execute_actions(std::move(gFirstActionQueue->cursor), &gFirstActionQueue->offset);
         }
 
-        gFirstActionQueue->actionBegin = gFirstActionQueue->actionEnd = nullptr;
+        gFirstActionQueue->cursor.begin = gFirstActionQueue->cursor.end = nullptr;
         gFirstActionQueue = gFirstActionQueue->nextActionQueue;
     }
 }
