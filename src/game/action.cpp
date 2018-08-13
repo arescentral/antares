@@ -248,41 +248,29 @@ static void apply(
 }
 
 static void apply(
-        const KillAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
+        const DestroyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Handle<SpaceObject> direct, Point* offset) {
-    bool destroy = false;
-    switch (a.kind) {
-        case KillAction::Kind::EXPIRE:
-            if (subject.get()) {
-                focus = subject;
-            } else {
-                return;
-            }
-            break;
-
-        case KillAction::Kind::DESTROY:
-            if (subject.get()) {
-                focus   = subject;
-                destroy = true;
-            } else {
-                return;
-            }
-            break;
-
-        case KillAction::Kind::NONE: break;
+    if (!focus.get()) {
+        return;
     }
-
-    // if the object is occupied by a human, eject him since he can't die
+    // If the object is occupied by a human, eject a body since players can't die.
     if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) && focus->base->destroy.die) {
         focus->create_floating_player_body();
     }
-    if (destroy) {
-        if (focus.get()) {
-            focus->destroy();
-        }
-    } else {
-        focus->active = kObjectToBeFreed;
+    focus->destroy();
+}
+
+static void apply(
+        const RemoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
+        Handle<SpaceObject> direct, Point* offset) {
+    if (!focus.get()) {
+        return;
     }
+    // If the object is occupied by a human, eject a body since players can't die.
+    if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) && focus->base->destroy.die) {
+        focus->create_floating_player_body();
+    }
+    focus->active = kObjectToBeFreed;
 }
 
 static void apply(
@@ -749,13 +737,14 @@ static void apply(
     switch (a.type()) {
         case Action::Type::AGE: apply(a.age, subject, focus, direct, offset); break;
         case Action::Type::ASSUME: apply(a.assume, subject, focus, direct, offset); break;
-        case Action::Type::CAP_SPEED: apply(a.cap_speed, subject, focus, direct, offset); break;
         case Action::Type::CAPTURE: apply(a.capture, subject, focus, direct, offset); break;
+        case Action::Type::CAP_SPEED: apply(a.cap_speed, subject, focus, direct, offset); break;
         case Action::Type::CHECK: apply(a.check, subject, focus, direct, offset); break;
         case Action::Type::CLOAK: apply(a.cloak, subject, focus, direct, offset); break;
         case Action::Type::CONDITION: apply(a.condition, subject, focus, direct, offset); break;
         case Action::Type::CREATE: apply(a.create, subject, focus, direct, offset); break;
         case Action::Type::DELAY: throw std::runtime_error("delay shouldn’t get here");
+        case Action::Type::DESTROY: apply(a.destroy, subject, focus, direct, offset); break;
         case Action::Type::DISABLE: apply(a.disable, subject, focus, direct, offset); break;
         case Action::Type::ENERGIZE: apply(a.energize, subject, focus, direct, offset); break;
         case Action::Type::EQUIP: apply(a.equip, subject, focus, direct, offset); break;
@@ -765,7 +754,6 @@ static void apply(
         case Action::Type::HEAL: apply(a.heal, subject, focus, direct, offset); break;
         case Action::Type::HOLD: apply(a.hold, subject, focus, direct, offset); break;
         case Action::Type::KEY: apply(a.key, subject, focus, direct, offset); break;
-        case Action::Type::KILL: apply(a.kill, subject, focus, direct, offset); break;
         case Action::Type::LAND: apply(a.land, subject, focus, direct, offset); break;
         case Action::Type::MESSAGE: apply(a.message, subject, focus, direct, offset); break;
         case Action::Type::MORPH: apply(a.morph, subject, focus, direct, offset); break;
@@ -775,6 +763,7 @@ static void apply(
         case Action::Type::PAY: apply(a.pay, subject, focus, direct, offset); break;
         case Action::Type::PLAY: apply(a.play, subject, focus, direct, offset); break;
         case Action::Type::PUSH: apply(a.push, subject, focus, direct, offset); break;
+        case Action::Type::REMOVE: apply(a.remove, subject, focus, direct, offset); break;
         case Action::Type::REVEAL: apply(a.reveal, subject, focus, direct, offset); break;
         case Action::Type::SCORE: apply(a.score, subject, focus, direct, offset); break;
         case Action::Type::SELECT: apply(a.select, subject, focus, direct, offset); break;
