@@ -73,8 +73,17 @@ struct ActionCursor {
     ActionCursor() = default;
     ActionCursor(
             const std::vector<Action>& actions, Handle<SpaceObject> subject,
-            Handle<SpaceObject> direct, Point offset,
-            std::unique_ptr<ActionCursor> continuation = nullptr)
+            Handle<SpaceObject> direct, Point offset)
+            : begin{actions.data()},
+              end{actions.data() + actions.size()},
+              subject{subject},
+              subject_id{subject.get() ? subject->id : -1},
+              direct{direct},
+              direct_id{direct.get() ? direct->id : -1},
+              offset{offset} {}
+    ActionCursor(
+            const std::vector<Action>& actions, Handle<SpaceObject> subject,
+            Handle<SpaceObject> direct, Point offset, ActionCursor continuation)
             : begin{actions.data()},
               end{actions.data() + actions.size()},
               subject{subject},
@@ -82,7 +91,7 @@ struct ActionCursor {
               direct{direct},
               direct_id{direct.get() ? direct->id : -1},
               offset{offset},
-              continuation{std::move(continuation)} {}
+              continuation{new ActionCursor{std::move(continuation)}} {}
 };
 
 struct actionQueueType {
@@ -226,6 +235,7 @@ static void apply(
     } else {
         return;
     }
+
     if (a.absolute.value_or(false)) {
         sys.sound.play(pick, a.volume, a.persistence, a.priority.level);
     } else {
@@ -788,9 +798,6 @@ static void apply(
 static void execute_actions(ActionCursor cursor) {
     while (cursor.begin != cursor.end) {
         const Action& action = *(cursor.begin++);
-#ifdef DATA_COVERAGE
-        covered_actions.insert(action.number());
-#endif  // DATA_COVERAGE
 
         auto subject = cursor.subject;
         if (action.base.override_.subject.has_value()) {
@@ -824,18 +831,11 @@ static void execute_actions(ActionCursor cursor) {
                 queue_action(std::move(cursor), action.delay.duration);
                 return;
             case Action::Type::GROUP:
-                execute_actions(ActionCursor{
-                        action.group.of, subject, direct, cursor.offset,
-                        std::unique_ptr<ActionCursor>(new ActionCursor(std::move(cursor)))});
+                execute_actions(ActionCursor{action.group.of, subject, direct, cursor.offset,
+                                             std::move(cursor)});
                 return;
-            default: break;
+            default: apply(action, subject, focus, direct, cursor.offset); break;
         }
-        if (action.type() == ActionType::DELAY) {
-            queue_action(std::move(cursor), action.delay.duration);
-            return;
-        }
-
-        apply(action, subject, focus, direct, cursor.offset);
     }
 
     if (cursor.continuation) {
