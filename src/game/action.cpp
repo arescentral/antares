@@ -503,10 +503,10 @@ static void apply(
         // if it's relative AND reflexive, we take the indirect
         // object's owner, since relative & reflexive would
         // do nothing.
-        if (a.reflexive.value_or(false) && indirect.get()) {
-            direct->set_owner(indirect->owner, true);
-        } else {
+        if (subject.get() != direct.get()) {
             direct->set_owner(subject->owner, true);
+        } else if (indirect.get()) {
+            direct->set_owner(indirect->owner, true);
         }
     }
 }
