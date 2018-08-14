@@ -175,7 +175,7 @@ static void apply(
         }
         int32_t direction = 0;
         if (a.base->attributes & kAutoTarget) {
-            direction = direct->targetAngle;
+            direction = subject->targetAngle;
         } else if (a.relative_direction.value_or(false)) {
             direction = subject->direction;
         }
