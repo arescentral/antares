@@ -117,7 +117,6 @@ static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
-static void execute_actions(ActionCursor cursor);
 static void queue_action(ActionCursor cursor, ticks delayTime);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
@@ -754,12 +753,16 @@ static void apply(
     g.initial_ids[index]  = direct->id;
 }
 
-static void apply(
+static ActionCursor apply(
         const Action& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        Handle<SpaceObject> indirect, Point offset, ActionCursor next) {
     switch (a.type()) {
-        case Action::Type::DELAY: throw std::runtime_error("delay shouldn’t get here");
-        case Action::Type::GROUP: throw std::runtime_error("group shouldn’t get here");
+        case Action::Type::DELAY:
+            queue_action(std::move(next), a.delay.duration);
+            return ActionCursor{};
+
+        case Action::Type::GROUP:
+            return ActionCursor{a.group.of, subject, direct, indirect, offset, std::move(next)};
 
         case Action::Type::AGE: apply(a.age, subject, direct, indirect, offset); break;
         case Action::Type::ASSUME: apply(a.assume, subject, direct, indirect, offset); break;
@@ -798,56 +801,53 @@ static void apply(
         case Action::Type::WIN: apply(a.win, subject, direct, indirect, offset); break;
         case Action::Type::ZOOM: apply(a.zoom, subject, direct, indirect, offset); break;
     }
+
+    return next;
 }
 
 static void execute_actions(ActionCursor cursor) {
-    while (cursor.begin != cursor.end) {
-        const Action& action = *(cursor.begin++);
+    while (true) {
+        while (cursor.begin != cursor.end) {
+            const Action& action = *(cursor.begin++);
 
-        auto subject  = cursor.subject;
-        auto direct   = cursor.direct;
-        auto indirect = cursor.indirect;
-        if (action.base.override_.subject.has_value()) {
-            subject = resolve_object_ref(*action.base.override_.subject);
-        }
-        if (action.base.override_.direct.has_value()) {
-            direct = indirect = resolve_object_ref(*action.base.override_.direct);
-        }
+            auto subject  = cursor.subject;
+            auto direct   = cursor.direct;
+            auto indirect = cursor.indirect;
+            if (action.base.override_.subject.has_value()) {
+                subject = resolve_object_ref(*action.base.override_.subject);
+            }
+            if (action.base.override_.direct.has_value()) {
+                direct = indirect = resolve_object_ref(*action.base.override_.direct);
+            }
 
-        if (action.base.reflexive.value_or(false) || !direct.get()) {
-            direct = subject;
-        }
-        if (!indirect.get()) {
-            indirect = subject;
-        }
+            if (action.base.reflexive.value_or(false) || !direct.get()) {
+                direct = subject;
+            }
+            if (!indirect.get()) {
+                indirect = subject;
+            }
 
-        auto owner_filter = action.base.filter.owner.value_or(Owner::ANY);
-        if (indirect.get() && subject.get()) {
-            if (((owner_filter == Owner::DIFFERENT) && (indirect->owner == subject->owner)) ||
-                ((owner_filter == Owner::SAME) && (indirect->owner != subject->owner))) {
+            auto owner_filter = action.base.filter.owner.value_or(Owner::ANY);
+            if (indirect.get() && subject.get()) {
+                if (((owner_filter == Owner::DIFFERENT) && (indirect->owner == subject->owner)) ||
+                    ((owner_filter == Owner::SAME) && (indirect->owner != subject->owner))) {
+                    continue;
+                }
+            }
+
+            if ((action.base.filter.attributes.bits || !action.base.filter.tags.tags.empty()) &&
+                (!indirect.get() || !action_filter_applies_to(action, indirect))) {
                 continue;
             }
+
+            cursor = apply(action, subject, direct, indirect, cursor.offset, std::move(cursor));
         }
 
-        if ((action.base.filter.attributes.bits || !action.base.filter.tags.tags.empty()) &&
-            (!indirect.get() || !action_filter_applies_to(action, indirect))) {
-            continue;
+        if (cursor.continuation) {
+            cursor = std::move(*cursor.continuation);
+        } else {
+            break;
         }
-
-        switch (action.type()) {
-            case Action::Type::DELAY:
-                queue_action(std::move(cursor), action.delay.duration);
-                return;
-            case Action::Type::GROUP:
-                execute_actions(ActionCursor{action.group.of, subject, direct, indirect,
-                                             cursor.offset, std::move(cursor)});
-                return;
-            default: apply(action, subject, direct, indirect, cursor.offset); break;
-        }
-    }
-
-    if (cursor.continuation) {
-        execute_actions(std::move(*cursor.continuation));
     }
 }
 
