@@ -65,8 +65,6 @@ struct ActionCursor {
     int32_t             subject_id;
     Handle<SpaceObject> direct;
     int32_t             direct_id;
-    Handle<SpaceObject> indirect;
-    int32_t             indirect_id;
 
     Point offset;
 
@@ -75,28 +73,23 @@ struct ActionCursor {
     ActionCursor() = default;
     ActionCursor(
             const std::vector<Action>& actions, Handle<SpaceObject> subject,
-            Handle<SpaceObject> direct, Handle<SpaceObject> indirect, Point offset)
+            Handle<SpaceObject> direct, Point offset)
             : begin{actions.data()},
               end{actions.data() + actions.size()},
               subject{subject},
               subject_id{subject.get() ? subject->id : -1},
               direct{direct},
               direct_id{direct.get() ? direct->id : -1},
-              indirect{indirect},
-              indirect_id{indirect.get() ? indirect->id : -1},
               offset{offset} {}
     ActionCursor(
             const std::vector<Action>& actions, Handle<SpaceObject> subject,
-            Handle<SpaceObject> direct, Handle<SpaceObject> indirect, Point offset,
-            ActionCursor continuation)
+            Handle<SpaceObject> direct, Point offset, ActionCursor continuation)
             : begin{actions.data()},
               end{actions.data() + actions.size()},
               subject{subject},
               subject_id{subject.get() ? subject->id : -1},
               direct{direct},
               direct_id{direct.get() ? direct->id : -1},
-              indirect{indirect},
-              indirect_id{indirect.get() ? indirect->id : -1},
               offset{offset},
               continuation{new ActionCursor{std::move(continuation)}} {}
 };
@@ -497,14 +490,7 @@ static void apply(
     if (a.player.has_value()) {
         direct->set_owner(*a.player, false);
     } else {
-        // if it's relative AND reflexive, we take the indirect
-        // object's owner, since relative & reflexive would
-        // do nothing.
-        if (subject.get() != direct.get()) {
-            direct->set_owner(subject->owner, true);
-        } else if (indirect.get()) {
-            direct->set_owner(indirect->owner, true);
-        }
+        direct->set_owner(indirect->owner, true);
     }
 }
 
@@ -762,7 +748,7 @@ static ActionCursor apply(
             return ActionCursor{};
 
         case Action::Type::GROUP:
-            return ActionCursor{a.group.of, subject, direct, indirect, offset, std::move(next)};
+            return ActionCursor{a.group.of, subject, direct, offset, std::move(next)};
 
         case Action::Type::AGE: apply(a.age, subject, direct, indirect, offset); break;
         case Action::Type::ASSUME: apply(a.assume, subject, direct, indirect, offset); break;
@@ -810,34 +796,36 @@ static void execute_actions(ActionCursor cursor) {
         while (cursor.begin != cursor.end) {
             const Action& action = *(cursor.begin++);
 
-            auto subject  = cursor.subject;
-            auto direct   = cursor.direct;
-            auto indirect = cursor.indirect;
+            auto subject = cursor.subject;
+            auto direct  = cursor.direct;
             if (action.base.override_.subject.has_value()) {
                 subject = resolve_object_ref(*action.base.override_.subject);
             }
             if (action.base.override_.direct.has_value()) {
-                direct = indirect = resolve_object_ref(*action.base.override_.direct);
+                direct = resolve_object_ref(*action.base.override_.direct);
             }
 
-            if (action.base.reflexive.value_or(false) || !direct.get()) {
+            if (!direct.get()) {
                 direct = subject;
-            }
-            if (!indirect.get()) {
-                indirect = subject;
             }
 
             auto owner_filter = action.base.filter.owner.value_or(Owner::ANY);
-            if (indirect.get() && subject.get()) {
-                if (((owner_filter == Owner::DIFFERENT) && (indirect->owner == subject->owner)) ||
-                    ((owner_filter == Owner::SAME) && (indirect->owner != subject->owner))) {
+            if (direct.get() && subject.get()) {
+                if (((owner_filter == Owner::DIFFERENT) && (direct->owner == subject->owner)) ||
+                    ((owner_filter == Owner::SAME) && (direct->owner != subject->owner))) {
                     continue;
                 }
             }
 
             if ((action.base.filter.attributes.bits || !action.base.filter.tags.tags.empty()) &&
-                (!indirect.get() || !action_filter_applies_to(action, indirect))) {
+                (!direct.get() || !action_filter_applies_to(action, direct))) {
                 continue;
+            }
+
+            auto indirect = subject;
+            if (action.base.reflexive.value_or(false)) {
+                indirect = direct;
+                direct   = subject;
             }
 
             cursor = apply(action, subject, direct, indirect, cursor.offset, std::move(cursor));
@@ -854,7 +842,7 @@ static void execute_actions(ActionCursor cursor) {
 void exec(
         const std::vector<Action>& actions, Handle<SpaceObject> subject,
         Handle<SpaceObject> direct, Point offset) {
-    execute_actions(ActionCursor(actions, subject, direct, direct, offset));
+    execute_actions(ActionCursor(actions, subject, direct, offset));
 }
 
 void reset_action_queue() {
