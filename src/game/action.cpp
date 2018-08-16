@@ -146,43 +146,43 @@ static Point random_point(Random* r, int32_t distance, Within within) {
 }
 
 static void apply(
-        const CreateAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const CreateAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     auto count = a.count.value_or(Range<int64_t>{1, 2});
     auto c     = count.begin;
     if (count.range() > 1) {
-        c += subject->randomSeed.next(count.range());
+        c += direct->randomSeed.next(count.range());
     } else if (a.legacy_random.value_or(false)) {
         // It used to be that the range test above was >0 instead of >1. That worked for most
         // objects, which had ranges of 0. However, the Nastiroid shooter on Mothership Connection
         // specified a range of 1. This was meaningless as far as the actual object count went, but
         // caused a random number to be consumed unnecessarily. To preserve replay-compatibility,
         // it now specifies `legacy_random`.
-        subject->randomSeed.next(1);
+        direct->randomSeed.next(1);
     }
     for (int i = 0; i < c; ++i) {
         fixedPointType vel = {Fixed::zero(), Fixed::zero()};
         if (a.relative_velocity.value_or(false)) {
-            vel = subject->velocity;
+            vel = direct->velocity;
         }
         int32_t direction = 0;
         if (a.base->attributes & kAutoTarget) {
-            direction = subject->targetAngle;
+            direction = direct->targetAngle;
         } else if (a.relative_direction.value_or(false)) {
-            direction = subject->direction;
+            direction = direct->direction;
         }
-        coordPointType at = subject->location;
+        coordPointType at = direct->location;
         at.h += offset.h;
         at.v += offset.v;
 
         if (a.distance.has_value()) {
-            Point p = random_point(&subject->randomSeed, *a.distance, a.within);
+            Point p = random_point(&direct->randomSeed, *a.distance, a.within);
             at.h += p.h;
             at.v += p.v;
         }
 
         auto product = CreateAnySpaceObject(
-                *a.base, &vel, &at, direction, subject->owner, 0, sfz::nullopt);
+                *a.base, &vel, &at, direction, direct->owner, 0, sfz::nullopt);
         if (!product.get()) {
             continue;
         }
@@ -191,23 +191,23 @@ static void apply(
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
-                if (a.inherit.value_or(false) && subject->destObject.get()) {
-                    OverrideObjectDestination(product, subject->destObject);
+                if (a.inherit.value_or(false) && direct->destObject.get()) {
+                    OverrideObjectDestination(product, direct->destObject);
                 } else {
-                    OverrideObjectDestination(product, subject);
+                    OverrideObjectDestination(product, direct);
                 }
             } else {
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
-                product->destObject       = subject;  // a->destinationObject;
-                product->destObjectDest   = subject->destObject;
-                product->destObjectID     = subject->id;
-                product->destObjectDestID = subject->destObjectID;
+                product->destObject       = direct;  // a->destinationObject;
+                product->destObjectDest   = direct->destObject;
+                product->destObjectID     = direct->id;
+                product->destObjectDestID = direct->destObjectID;
             }
             product->attributes = save_attributes;
         }
-        product->targetObject   = subject->targetObject;
-        product->targetObjectID = subject->targetObjectID;
+        product->targetObject   = direct->targetObject;
+        product->targetObjectID = direct->targetObjectID;
         product->closestObject  = product->targetObject;
 
         //  ugly though it is, we have to fill in the rest of
@@ -215,15 +215,15 @@ static void apply(
         if (product->attributes & kIsVector) {
             if (product->frame.vector->is_ray) {
                 // special beams need special post-creation acts
-                Vectors::set_attributes(product, subject);
+                Vectors::set_attributes(product, direct);
             }
         }
     }
 }
 
 static void apply(
-        const PlayAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const PlayAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     pn::string_view pick;
     if (a.sound.has_value()) {
         pick = *a.sound;
@@ -241,8 +241,8 @@ static void apply(
 }
 
 static void apply(
-        const SparkAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const SparkAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Point location;
     if (direct->sprite.get()) {
         location.h = direct->sprite->where.h;
@@ -269,8 +269,8 @@ static void apply(
 }
 
 static void apply(
-        const DestroyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const DestroyAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (!direct.get()) {
         return;
     }
@@ -282,8 +282,8 @@ static void apply(
 }
 
 static void apply(
-        const RemoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const RemoveAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (!direct.get()) {
         return;
     }
@@ -295,48 +295,48 @@ static void apply(
 }
 
 static void apply(
-        const HoldAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const HoldAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     direct->targetObject   = SpaceObject::none();
     direct->targetObjectID = kNoShip;
     direct->lastTarget     = SpaceObject::none();
 }
 
 static void apply(
-        const HealAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const HealAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     direct->alter_health(a.value);
 }
 
 static void apply(
-        const EnergizeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const EnergizeAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     direct->alter_energy(a.value);
 }
 
 static void apply(
-        const RevealAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const RevealAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     for (auto i : a.initial) {
         UnhideInitialObject(i);
     }
 }
 
 static void apply(
-        const CheckAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const CheckAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     CheckLevelConditions();
 }
 
 static void apply(
-        const CloakAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const CloakAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     direct->set_cloak(true);
 }
 
 static void apply(
-        const SpinAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const SpinAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (direct->attributes & kCanTurn) {
         Fixed f = direct->turn_rate() * (a.value.begin + direct->randomSeed.next(a.value.range()));
         Fixed f2 = direct->base->mass;
@@ -350,8 +350,8 @@ static void apply(
 }
 
 static void apply(
-        const DisableAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const DisableAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Fixed begin = Fixed::from_long(a.duration.begin.count()) / 3;
     Fixed end   = Fixed::from_long(a.duration.end.count()) / 3;
     Fixed mass  = direct->base->mass;
@@ -395,8 +395,8 @@ void cap_velocity(Handle<SpaceObject> object) {
 }
 
 static void apply(
-        const PushAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const PushAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (!direct.get()) {
         return;
     }
@@ -457,8 +457,8 @@ static void apply(
 }
 
 static void apply(
-        const CapSpeedAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const CapSpeedAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (a.value.has_value()) {
         direct->maxVelocity = *a.value;
     } else {
@@ -467,23 +467,23 @@ static void apply(
 }
 
 static void apply(
-        const ThrustAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const ThrustAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Fixed f        = a.value.begin + direct->randomSeed.next(a.value.range());
     direct->thrust = f;
 }
 
 static void apply(
-        const MorphAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const MorphAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (direct.get()) {
         direct->change_base_type(*a.base, sfz::nullopt, a.keep_ammo.value_or(false));
     }
 }
 
 static void apply(
-        const CaptureAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const CaptureAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (!direct.get()) {
         return;
     }
@@ -495,8 +495,8 @@ static void apply(
 }
 
 static void apply(
-        const ConditionAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const ConditionAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     for (auto c : a.enable) {
         g.condition_enabled[c.number()] = true;
     }
@@ -506,16 +506,16 @@ static void apply(
 }
 
 static void apply(
-        const OccupyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const OccupyAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (direct.get()) {
         direct->alter_occupation(indirect->owner, a.value, true);
     }
 }
 
 static void apply(
-        const PayAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const PayAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Handle<Admiral> admiral;
     if (a.player.has_value()) {
         admiral = *a.player;
@@ -530,8 +530,8 @@ static void apply(
 }
 
 static void apply(
-        const AgeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const AgeAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     ticks t = a.value.begin + direct->randomSeed.next(a.value.range());
 
     if (a.relative.value_or(false)) {
@@ -548,12 +548,12 @@ static void apply(
 }
 
 static void apply(
-        const MoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const MoveAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     coordPointType newLocation;
     switch (a.origin.value_or(MoveAction::Origin::LEVEL)) {
         case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
-        case MoveAction::Origin::SUBJECT: newLocation = subject->location; break;
+        case MoveAction::Origin::SUBJECT: newLocation = indirect->location; break;
         case MoveAction::Origin::DIRECT: newLocation = direct->location; break;
     }
 
@@ -590,8 +590,8 @@ static void alter_weapon(
 }
 
 static void apply(
-        const EquipAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const EquipAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     switch (a.which) {
         case Weapon::PULSE: alter_weapon(a.base.get(), direct, direct->pulse); break;
         case Weapon::BEAM: alter_weapon(a.base.get(), direct, direct->beam); break;
@@ -600,33 +600,33 @@ static void apply(
 }
 
 static void apply(
-        const LandAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const LandAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     // even though this is never a reflexive verb, we only effect ourselves
-    if (subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
-        subject->create_floating_player_body();
+    if (direct->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
+        direct->create_floating_player_body();
     }
-    subject->presenceState          = kLandingPresence;
-    subject->presence.landing.speed = a.speed;
-    subject->presence.landing.scale = sprite_scale(*subject->base);
+    direct->presenceState          = kLandingPresence;
+    direct->presence.landing.speed = a.speed;
+    direct->presence.landing.scale = sprite_scale(*direct->base);
 }
 
 static void apply(
-        const WarpAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
-    subject->presenceState             = kWarpInPresence;
-    subject->presence.warp_in.progress = ticks(0);
-    subject->presence.warp_in.step     = 0;
-    subject->attributes &= ~kOccupiesSpace;
+        const WarpAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
+    direct->presenceState             = kWarpInPresence;
+    direct->presence.warp_in.progress = ticks(0);
+    direct->presence.warp_in.step     = 0;
+    direct->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
     CreateAnySpaceObject(
-            *plug.info.warpInFlareID, &newVel, &subject->location, subject->direction,
+            *plug.info.warpInFlareID, &newVel, &direct->location, direct->direction,
             Admiral::none(), 0, sfz::nullopt);
 }
 
 static void apply(
-        const ScoreAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const ScoreAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Handle<Admiral> admiral;
     if (a.player.has_value()) {
         admiral = *a.player;
@@ -639,8 +639,8 @@ static void apply(
 }
 
 static void apply(
-        const WinAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const WinAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Handle<Admiral> admiral;
     if (a.player.has_value()) {
         admiral = *a.player;
@@ -655,14 +655,14 @@ static void apply(
 }
 
 static void apply(
-        const MessageAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const MessageAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Messages::start(a.id, &a.pages);
 }
 
 static void apply(
-        const OrderAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const OrderAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     uint32_t save_attributes = indirect->attributes;
     indirect->attributes &= ~kStaticDestination;
     OverrideObjectDestination(indirect, direct);
@@ -670,42 +670,41 @@ static void apply(
 }
 
 static void apply(
-        const FireAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const FireAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     switch (a.which) {
         case Weapon::PULSE:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->pulse,
-                    subject->base->weapons.pulse.has_value()
-                            ? subject->base->weapons.pulse->positions
+                    direct, SpaceObject::none(), direct->pulse,
+                    direct->base->weapons.pulse.has_value()
+                            ? direct->base->weapons.pulse->positions
                             : std::vector<fixedPointType>{});
             break;
         case Weapon::BEAM:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->beam,
-                    subject->base->weapons.beam.has_value()
-                            ? subject->base->weapons.beam->positions
-                            : std::vector<fixedPointType>{});
+                    direct, SpaceObject::none(), direct->beam,
+                    direct->base->weapons.beam.has_value() ? direct->base->weapons.beam->positions
+                                                           : std::vector<fixedPointType>{});
             break;
         case Weapon::SPECIAL:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->special,
-                    subject->base->weapons.special.has_value()
-                            ? subject->base->weapons.special->positions
+                    direct, SpaceObject::none(), direct->special,
+                    direct->base->weapons.special.has_value()
+                            ? direct->base->weapons.special->positions
                             : std::vector<fixedPointType>{});
             break;
     }
 }
 
 static void apply(
-        const FlashAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const FlashAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     globals()->transitions.start_boolean(a.duration, a.color);
 }
 
 static void apply(
-        const KeyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const KeyAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     for (KeyAction::Key key : a.enable) {
         g.key_mask = g.key_mask & ~(1 << static_cast<int32_t>(key));
     }
@@ -715,8 +714,8 @@ static void apply(
 }
 
 static void apply(
-        const ZoomAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const ZoomAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     if (a.value != g.zoom) {
         g.zoom = a.value;
         sys.sound.click();
@@ -725,14 +724,14 @@ static void apply(
 }
 
 static void apply(
-        const SelectAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const SelectAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     MiniComputer_SetScreenAndLineHack(a.screen, a.line);
 }
 
 static void apply(
-        const AssumeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset) {
+        const AssumeAction& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect,
+        Point offset) {
     Handle<Admiral> player1(0);
     int             index = a.which + GetAdmiralScore(player1, 0);
     g.initials[index]     = direct;
@@ -740,52 +739,52 @@ static void apply(
 }
 
 static ActionCursor apply(
-        const Action& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
-        Handle<SpaceObject> indirect, Point offset, ActionCursor next) {
+        const Action& a, Handle<SpaceObject> direct, Handle<SpaceObject> indirect, Point offset,
+        ActionCursor next) {
     switch (a.type()) {
         case Action::Type::DELAY:
             queue_action(std::move(next), a.delay.duration);
             return ActionCursor{};
 
         case Action::Type::GROUP:
-            return ActionCursor{a.group.of, subject, direct, offset, std::move(next)};
+            return ActionCursor{a.group.of, indirect, direct, offset, std::move(next)};
 
-        case Action::Type::AGE: apply(a.age, subject, direct, indirect, offset); break;
-        case Action::Type::ASSUME: apply(a.assume, subject, direct, indirect, offset); break;
-        case Action::Type::CAPTURE: apply(a.capture, subject, direct, indirect, offset); break;
-        case Action::Type::CAP_SPEED: apply(a.cap_speed, subject, direct, indirect, offset); break;
-        case Action::Type::CHECK: apply(a.check, subject, direct, indirect, offset); break;
-        case Action::Type::CLOAK: apply(a.cloak, subject, direct, indirect, offset); break;
-        case Action::Type::CONDITION: apply(a.condition, subject, direct, indirect, offset); break;
-        case Action::Type::CREATE: apply(a.create, subject, direct, indirect, offset); break;
-        case Action::Type::DESTROY: apply(a.destroy, subject, direct, indirect, offset); break;
-        case Action::Type::DISABLE: apply(a.disable, subject, direct, indirect, offset); break;
-        case Action::Type::ENERGIZE: apply(a.energize, subject, direct, indirect, offset); break;
-        case Action::Type::EQUIP: apply(a.equip, subject, direct, indirect, offset); break;
-        case Action::Type::FIRE: apply(a.fire, subject, direct, indirect, offset); break;
-        case Action::Type::FLASH: apply(a.flash, subject, direct, indirect, offset); break;
-        case Action::Type::HEAL: apply(a.heal, subject, direct, indirect, offset); break;
-        case Action::Type::HOLD: apply(a.hold, subject, direct, indirect, offset); break;
-        case Action::Type::KEY: apply(a.key, subject, direct, indirect, offset); break;
-        case Action::Type::LAND: apply(a.land, subject, direct, indirect, offset); break;
-        case Action::Type::MESSAGE: apply(a.message, subject, direct, indirect, offset); break;
-        case Action::Type::MORPH: apply(a.morph, subject, direct, indirect, offset); break;
-        case Action::Type::MOVE: apply(a.move, subject, direct, indirect, offset); break;
-        case Action::Type::OCCUPY: apply(a.occupy, subject, direct, indirect, offset); break;
-        case Action::Type::ORDER: apply(a.order, subject, direct, indirect, offset); break;
-        case Action::Type::PAY: apply(a.pay, subject, direct, indirect, offset); break;
-        case Action::Type::PLAY: apply(a.play, subject, direct, indirect, offset); break;
-        case Action::Type::PUSH: apply(a.push, subject, direct, indirect, offset); break;
-        case Action::Type::REMOVE: apply(a.remove, subject, direct, indirect, offset); break;
-        case Action::Type::REVEAL: apply(a.reveal, subject, direct, indirect, offset); break;
-        case Action::Type::SCORE: apply(a.score, subject, direct, indirect, offset); break;
-        case Action::Type::SELECT: apply(a.select, subject, direct, indirect, offset); break;
-        case Action::Type::SPARK: apply(a.spark, subject, direct, indirect, offset); break;
-        case Action::Type::SPIN: apply(a.spin, subject, direct, indirect, offset); break;
-        case Action::Type::THRUST: apply(a.thrust, subject, direct, indirect, offset); break;
-        case Action::Type::WARP: apply(a.warp, subject, direct, indirect, offset); break;
-        case Action::Type::WIN: apply(a.win, subject, direct, indirect, offset); break;
-        case Action::Type::ZOOM: apply(a.zoom, subject, direct, indirect, offset); break;
+        case Action::Type::AGE: apply(a.age, direct, indirect, offset); break;
+        case Action::Type::ASSUME: apply(a.assume, direct, indirect, offset); break;
+        case Action::Type::CAPTURE: apply(a.capture, direct, indirect, offset); break;
+        case Action::Type::CAP_SPEED: apply(a.cap_speed, direct, indirect, offset); break;
+        case Action::Type::CHECK: apply(a.check, direct, indirect, offset); break;
+        case Action::Type::CLOAK: apply(a.cloak, direct, indirect, offset); break;
+        case Action::Type::CONDITION: apply(a.condition, direct, indirect, offset); break;
+        case Action::Type::CREATE: apply(a.create, direct, indirect, offset); break;
+        case Action::Type::DESTROY: apply(a.destroy, direct, indirect, offset); break;
+        case Action::Type::DISABLE: apply(a.disable, direct, indirect, offset); break;
+        case Action::Type::ENERGIZE: apply(a.energize, direct, indirect, offset); break;
+        case Action::Type::EQUIP: apply(a.equip, direct, indirect, offset); break;
+        case Action::Type::FIRE: apply(a.fire, direct, indirect, offset); break;
+        case Action::Type::FLASH: apply(a.flash, direct, indirect, offset); break;
+        case Action::Type::HEAL: apply(a.heal, direct, indirect, offset); break;
+        case Action::Type::HOLD: apply(a.hold, direct, indirect, offset); break;
+        case Action::Type::KEY: apply(a.key, direct, indirect, offset); break;
+        case Action::Type::LAND: apply(a.land, direct, indirect, offset); break;
+        case Action::Type::MESSAGE: apply(a.message, direct, indirect, offset); break;
+        case Action::Type::MORPH: apply(a.morph, direct, indirect, offset); break;
+        case Action::Type::MOVE: apply(a.move, direct, indirect, offset); break;
+        case Action::Type::OCCUPY: apply(a.occupy, direct, indirect, offset); break;
+        case Action::Type::ORDER: apply(a.order, direct, indirect, offset); break;
+        case Action::Type::PAY: apply(a.pay, direct, indirect, offset); break;
+        case Action::Type::PLAY: apply(a.play, direct, indirect, offset); break;
+        case Action::Type::PUSH: apply(a.push, direct, indirect, offset); break;
+        case Action::Type::REMOVE: apply(a.remove, direct, indirect, offset); break;
+        case Action::Type::REVEAL: apply(a.reveal, direct, indirect, offset); break;
+        case Action::Type::SCORE: apply(a.score, direct, indirect, offset); break;
+        case Action::Type::SELECT: apply(a.select, direct, indirect, offset); break;
+        case Action::Type::SPARK: apply(a.spark, direct, indirect, offset); break;
+        case Action::Type::SPIN: apply(a.spin, direct, indirect, offset); break;
+        case Action::Type::THRUST: apply(a.thrust, direct, indirect, offset); break;
+        case Action::Type::WARP: apply(a.warp, direct, indirect, offset); break;
+        case Action::Type::WIN: apply(a.win, direct, indirect, offset); break;
+        case Action::Type::ZOOM: apply(a.zoom, direct, indirect, offset); break;
     }
 
     return next;
@@ -828,7 +827,7 @@ static void execute_actions(ActionCursor cursor) {
                 direct   = subject;
             }
 
-            cursor = apply(action, subject, direct, indirect, cursor.offset, std::move(cursor));
+            cursor = apply(action, direct, indirect, cursor.offset, std::move(cursor));
         }
 
         if (cursor.continuation) {
