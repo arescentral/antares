@@ -397,7 +397,7 @@ void cap_velocity(Handle<SpaceObject> object) {
 static void apply(
         const PushAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Handle<SpaceObject> indirect, Point offset) {
-    if (!subject.get()) {
+    if (!direct.get()) {
         return;
     }
 
@@ -419,7 +419,7 @@ static void apply(
 
         case PushAction::Kind::SET: {
             Fixed fx, fy;
-            GetRotPoint(&fx, &fy, subject->direction);
+            GetRotPoint(&fx, &fy, indirect->direction);
             direct->velocity = {a.value * fx, a.value * fy};
             break;
         }
@@ -431,9 +431,9 @@ static void apply(
 
             // if colliding, then PUSH the direct like collision
             direct->velocity.h +=
-                    ((subject->velocity.h - direct->velocity.h) / direct->base->mass.val()) << 6L;
+                    ((indirect->velocity.h - direct->velocity.h) / direct->base->mass.val()) << 6L;
             direct->velocity.v +=
-                    ((subject->velocity.v - direct->velocity.v) / direct->base->mass.val()) << 6L;
+                    ((indirect->velocity.v - direct->velocity.v) / direct->base->mass.val()) << 6L;
 
             // make sure we're not going faster than our top speed
             cap_velocity(direct);
