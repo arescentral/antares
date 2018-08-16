@@ -509,7 +509,7 @@ static void apply(
         const OccupyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Handle<SpaceObject> indirect, Point offset) {
     if (direct.get()) {
-        direct->alter_occupation(subject->owner, a.value, true);
+        direct->alter_occupation(indirect->owner, a.value, true);
     }
 }
 
@@ -663,10 +663,10 @@ static void apply(
 static void apply(
         const OrderAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Handle<SpaceObject> indirect, Point offset) {
-    uint32_t save_attributes = subject->attributes;
-    subject->attributes &= ~kStaticDestination;
-    OverrideObjectDestination(subject, direct);
-    subject->attributes = save_attributes;
+    uint32_t save_attributes = indirect->attributes;
+    indirect->attributes &= ~kStaticDestination;
+    OverrideObjectDestination(indirect, direct);
+    indirect->attributes = save_attributes;
 }
 
 static void apply(
