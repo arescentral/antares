@@ -229,10 +229,9 @@ void CheckLevelConditions() {
             if (!c.persistent.value_or(false)) {
                 g.condition_enabled[index] = false;
             }
-            auto  subject = resolve_object_ref(c.subject);
-            auto  direct  = resolve_object_ref(c.direct);
-            Point offset;
-            exec(c.action, subject, direct, &offset);
+            auto subject = resolve_object_ref(c.subject);
+            auto direct  = resolve_object_ref(c.direct);
+            exec(c.action, subject, direct, {0, 0});
         }
     }
 }
