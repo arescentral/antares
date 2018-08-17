@@ -38,6 +38,7 @@
 namespace antares {
 
 class SpaceObject;
+union Action;
 union Level;
 struct Initial;
 struct Condition;
@@ -46,22 +47,23 @@ class path_value;
 enum class ActionType {
     AGE,
     ASSUME,
-    CAP_SPEED,
     CAPTURE,
+    CAP_SPEED,
     CHECK,
     CLOAK,
     CONDITION,
     CREATE,
     DELAY,
+    DESTROY,
     DISABLE,
     ENERGIZE,
     EQUIP,
     FIRE,
     FLASH,
+    GROUP,
     HEAL,
     HOLD,
     KEY,
-    KILL,
     LAND,
     MESSAGE,
     MORPH,
@@ -69,11 +71,12 @@ enum class ActionType {
     OCCUPY,
     ORDER,
     PAY,
+    PLAY,
     PUSH,
+    REMOVE,
     REVEAL,
     SCORE,
     SELECT,
-    PLAY,
     SPARK,
     SPIN,
     THRUST,
@@ -151,6 +154,8 @@ struct DelayAction : public ActionBase {
     ticks duration;
 };
 
+struct DestroyAction : public ActionBase {};
+
 struct DisableAction : public ActionBase {
     Range<ticks> duration;
 };
@@ -171,6 +176,10 @@ struct FireAction : public ActionBase {
 struct FlashAction : public ActionBase {
     ticks    duration;  // length of flash
     RgbColor color;     // color of flash
+};
+
+struct GroupAction : public ActionBase {
+    std::vector<Action> of;
 };
 
 struct HealAction : public ActionBase {
@@ -211,20 +220,6 @@ struct KeyAction : public ActionBase {
 
     std::vector<Key> disable;  // keys to disable
     std::vector<Key> enable;   // keys to enable
-};
-
-struct KillAction : public ActionBase {
-    enum class Kind {
-        // Removes the focus object without any further fanfare.
-        NONE = 0,
-
-        // Removes the subject object without any further fanfare.
-        // Essentially, this is NONE, but always reflexive.
-        EXPIRE = 1,
-
-        // Removes the subject object and executes its destroy action.
-        DESTROY = 2,
-    } kind;
 };
 
 struct LandAction : public ActionBase {
@@ -274,6 +269,8 @@ struct PushAction : public ActionBase {
     } kind;
     Fixed value;
 };
+
+struct RemoveAction : public ActionBase {};
 
 struct RevealAction : public ActionBase {
     std::vector<Handle<const Initial>> initial;
@@ -349,15 +346,16 @@ union Action {
     ConditionAction condition;
     CreateAction    create;
     DelayAction     delay;
+    DestroyAction   destroy;
     DisableAction   disable;
     EnergizeAction  energize;
     EquipAction     equip;
     FireAction      fire;
     FlashAction     flash;
+    GroupAction     group;
     HealAction      heal;
     HoldAction      hold;
     KeyAction       key;
-    KillAction      kill;
     LandAction      land;
     MessageAction   message;
     MorphAction     morph;
@@ -366,6 +364,7 @@ union Action {
     OrderAction     order;
     PayAction       pay;
     PushAction      push;
+    RemoveAction    remove;
     RevealAction    reveal;
     ScoreAction     score;
     SelectAction    select;
@@ -386,15 +385,16 @@ union Action {
     Action(ConditionAction a);
     Action(CreateAction a);
     Action(DelayAction a);
+    Action(DestroyAction a);
     Action(DisableAction a);
     Action(EnergizeAction a);
     Action(EquipAction a);
     Action(FireAction a);
     Action(FlashAction a);
+    Action(GroupAction a);
     Action(HealAction a);
     Action(HoldAction a);
     Action(KeyAction a);
-    Action(KillAction a);
     Action(LandAction a);
     Action(MessageAction a);
     Action(MorphAction a);
@@ -407,6 +407,7 @@ union Action {
     Action(ScoreAction a);
     Action(SelectAction a);
     Action(PlayAction a);
+    Action(RemoveAction a);
     Action(SparkAction a);
     Action(SpinAction a);
     Action(ThrustAction a);

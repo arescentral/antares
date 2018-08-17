@@ -151,6 +151,13 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
                     sys.sound.load(s.sound);
                 }
             }
+            break;
+
+        case Action::Type::GROUP:
+            for (const auto& a : action.group.of) {
+                AddActionMedia(a, all_colors);
+            }
+            break;
 
         default: break;
     }

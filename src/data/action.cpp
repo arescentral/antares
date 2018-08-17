@@ -47,15 +47,16 @@ Action::Action(CloakAction a) : cloak(std::move(a)) {}
 Action::Action(ConditionAction a) : condition(std::move(a)) {}
 Action::Action(CreateAction a) : create(std::move(a)) {}
 Action::Action(DelayAction a) : delay(std::move(a)) {}
+Action::Action(DestroyAction a) : destroy(std::move(a)) {}
 Action::Action(DisableAction a) : disable(std::move(a)) {}
 Action::Action(EnergizeAction a) : energize(std::move(a)) {}
 Action::Action(EquipAction a) : equip(std::move(a)) {}
 Action::Action(FireAction a) : fire(std::move(a)) {}
 Action::Action(FlashAction a) : flash(std::move(a)) {}
+Action::Action(GroupAction a) : group(std::move(a)) {}
 Action::Action(HealAction a) : heal(std::move(a)) {}
 Action::Action(HoldAction a) : hold(std::move(a)) {}
 Action::Action(KeyAction a) : key(std::move(a)) {}
-Action::Action(KillAction a) : kill(std::move(a)) {}
 Action::Action(LandAction a) : land(std::move(a)) {}
 Action::Action(MessageAction a) : message(std::move(a)) {}
 Action::Action(MorphAction a) : morph(std::move(a)) {}
@@ -64,6 +65,7 @@ Action::Action(OccupyAction a) : occupy(std::move(a)) {}
 Action::Action(OrderAction a) : order(std::move(a)) {}
 Action::Action(PayAction a) : pay(std::move(a)) {}
 Action::Action(PushAction a) : push(std::move(a)) {}
+Action::Action(RemoveAction a) : remove(std::move(a)) {}
 Action::Action(RevealAction a) : reveal(std::move(a)) {}
 Action::Action(ScoreAction a) : score(std::move(a)) {}
 Action::Action(SelectAction a) : select(std::move(a)) {}
@@ -86,15 +88,16 @@ Action::Action(Action&& a) {
         case Action::Type::CONDITION: new (this) Action(std::move(a.condition)); break;
         case Action::Type::CREATE: new (this) Action(std::move(a.create)); break;
         case Action::Type::DELAY: new (this) Action(std::move(a.delay)); break;
+        case Action::Type::DESTROY: new (this) Action(std::move(a.destroy)); break;
         case Action::Type::DISABLE: new (this) Action(std::move(a.disable)); break;
         case Action::Type::ENERGIZE: new (this) Action(std::move(a.energize)); break;
         case Action::Type::EQUIP: new (this) Action(std::move(a.equip)); break;
         case Action::Type::FIRE: new (this) Action(std::move(a.fire)); break;
         case Action::Type::FLASH: new (this) Action(std::move(a.flash)); break;
+        case Action::Type::GROUP: new (this) Action(std::move(a.group)); break;
         case Action::Type::HEAL: new (this) Action(std::move(a.heal)); break;
         case Action::Type::HOLD: new (this) Action(std::move(a.hold)); break;
         case Action::Type::KEY: new (this) Action(std::move(a.key)); break;
-        case Action::Type::KILL: new (this) Action(std::move(a.kill)); break;
         case Action::Type::LAND: new (this) Action(std::move(a.land)); break;
         case Action::Type::MESSAGE: new (this) Action(std::move(a.message)); break;
         case Action::Type::MORPH: new (this) Action(std::move(a.morph)); break;
@@ -103,6 +106,7 @@ Action::Action(Action&& a) {
         case Action::Type::ORDER: new (this) Action(std::move(a.order)); break;
         case Action::Type::PAY: new (this) Action(std::move(a.pay)); break;
         case Action::Type::PUSH: new (this) Action(std::move(a.push)); break;
+        case Action::Type::REMOVE: new (this) Action(std::move(a.remove)); break;
         case Action::Type::REVEAL: new (this) Action(std::move(a.reveal)); break;
         case Action::Type::SCORE: new (this) Action(std::move(a.score)); break;
         case Action::Type::SELECT: new (this) Action(std::move(a.select)); break;
@@ -133,15 +137,16 @@ Action::~Action() {
         case Action::Type::CONDITION: condition.~ConditionAction(); break;
         case Action::Type::CREATE: create.~CreateAction(); break;
         case Action::Type::DELAY: delay.~DelayAction(); break;
+        case Action::Type::DESTROY: destroy.~DestroyAction(); break;
         case Action::Type::DISABLE: disable.~DisableAction(); break;
         case Action::Type::ENERGIZE: energize.~EnergizeAction(); break;
         case Action::Type::EQUIP: equip.~EquipAction(); break;
         case Action::Type::FIRE: fire.~FireAction(); break;
         case Action::Type::FLASH: flash.~FlashAction(); break;
+        case Action::Type::GROUP: group.~GroupAction(); break;
         case Action::Type::HEAL: heal.~HealAction(); break;
         case Action::Type::HOLD: hold.~HoldAction(); break;
         case Action::Type::KEY: key.~KeyAction(); break;
-        case Action::Type::KILL: kill.~KillAction(); break;
         case Action::Type::LAND: land.~LandAction(); break;
         case Action::Type::MESSAGE: message.~MessageAction(); break;
         case Action::Type::MORPH: morph.~MorphAction(); break;
@@ -150,6 +155,7 @@ Action::~Action() {
         case Action::Type::ORDER: order.~OrderAction(); break;
         case Action::Type::PAY: pay.~PayAction(); break;
         case Action::Type::PUSH: push.~PushAction(); break;
+        case Action::Type::REMOVE: remove.~RemoveAction(); break;
         case Action::Type::REVEAL: reveal.~RevealAction(); break;
         case Action::Type::SCORE: score.~ScoreAction(); break;
         case Action::Type::SELECT: select.~SelectAction(); break;
@@ -238,15 +244,16 @@ FIELD_READER(Action::Type) {
                 {"condition", Action::Type::CONDITION},
                 {"create", Action::Type::CREATE},
                 {"delay", Action::Type::DELAY},
+                {"destroy", Action::Type::DESTROY},
                 {"disable", Action::Type::DISABLE},
                 {"energize", Action::Type::ENERGIZE},
                 {"equip", Action::Type::EQUIP},
                 {"fire", Action::Type::FIRE},
                 {"flash", Action::Type::FLASH},
+                {"group", Action::Type::GROUP},
                 {"heal", Action::Type::HEAL},
                 {"hold", Action::Type::HOLD},
                 {"key", Action::Type::KEY},
-                {"kill", Action::Type::KILL},
                 {"land", Action::Type::LAND},
                 {"message", Action::Type::MESSAGE},
                 {"morph", Action::Type::MORPH},
@@ -254,11 +261,12 @@ FIELD_READER(Action::Type) {
                 {"occupy", Action::Type::OCCUPY},
                 {"order", Action::Type::ORDER},
                 {"pay", Action::Type::PAY},
+                {"play", Action::Type::PLAY},
                 {"push", Action::Type::PUSH},
+                {"remove", Action::Type::REMOVE},
                 {"reveal", Action::Type::REVEAL},
                 {"score", Action::Type::SCORE},
                 {"select", Action::Type::SELECT},
-                {"play", Action::Type::PLAY},
                 {"spark", Action::Type::SPARK},
                 {"spin", Action::Type::SPIN},
                 {"thrust", Action::Type::THRUST},
@@ -327,6 +335,10 @@ static Action delay_action(path_value x) {
             x, {COMMON_ACTION_FIELDS, {"duration", &DelayAction::duration}});
 }
 
+static Action destroy_action(path_value x) {
+    return required_struct<DestroyAction>(x, {COMMON_ACTION_FIELDS});
+}
+
 static Action disable_action(path_value x) {
     return required_struct<DisableAction>(
             x, {COMMON_ACTION_FIELDS, {"duration", &DisableAction::duration}});
@@ -357,6 +369,10 @@ static Action flash_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"duration", &FlashAction::duration},
                 {"color", &FlashAction::color}});
+}
+
+static Action group_action(path_value x) {
+    return required_struct<GroupAction>(x, {COMMON_ACTION_FIELDS, {"of", &GroupAction::of}});
 }
 
 static Action heal_action(path_value x) {
@@ -402,17 +418,6 @@ static Action key_action(path_value x) {
             x, {COMMON_ACTION_FIELDS,
                 {"enable", &KeyAction::enable},
                 {"disable", &KeyAction::disable}});
-}
-
-FIELD_READER(KillAction::Kind) {
-    return required_enum<KillAction::Kind>(
-            x, {{"none", KillAction::Kind::NONE},
-                {"expire", KillAction::Kind::EXPIRE},
-                {"destroy", KillAction::Kind::DESTROY}});
-}
-
-static Action kill_action(path_value x) {
-    return required_struct<KillAction>(x, {COMMON_ACTION_FIELDS, {"kind", &KillAction::kind}});
 }
 
 static Action land_action(path_value x) {
@@ -483,6 +488,10 @@ FIELD_READER(PushAction::Kind) {
 static Action push_action(path_value x) {
     return required_struct<PushAction>(
             x, {COMMON_ACTION_FIELDS, {"kind", &PushAction::kind}, {"value", &PushAction::value}});
+}
+
+static Action remove_action(path_value x) {
+    return required_struct<RemoveAction>(x, {COMMON_ACTION_FIELDS});
 }
 
 static Action reveal_action(path_value x) {
@@ -570,15 +579,16 @@ DEFINE_FIELD_READER(Action) {
         case Action::Type::CONDITION: return condition_action(x);
         case Action::Type::CREATE: return create_action(x);
         case Action::Type::DELAY: return delay_action(x);
+        case Action::Type::DESTROY: return destroy_action(x);
         case Action::Type::DISABLE: return disable_action(x);
         case Action::Type::ENERGIZE: return energize_action(x);
         case Action::Type::EQUIP: return equip_action(x);
         case Action::Type::FIRE: return fire_action(x);
         case Action::Type::FLASH: return flash_action(x);
+        case Action::Type::GROUP: return group_action(x);
         case Action::Type::HEAL: return heal_action(x);
         case Action::Type::HOLD: return hold_action(x);
         case Action::Type::KEY: return key_action(x);
-        case Action::Type::KILL: return kill_action(x);
         case Action::Type::LAND: return land_action(x);
         case Action::Type::MESSAGE: return message_action(x);
         case Action::Type::MORPH: return morph_action(x);
@@ -586,11 +596,12 @@ DEFINE_FIELD_READER(Action) {
         case Action::Type::OCCUPY: return occupy_action(x);
         case Action::Type::ORDER: return order_action(x);
         case Action::Type::PAY: return pay_action(x);
+        case Action::Type::PLAY: return play_action(x);
         case Action::Type::PUSH: return push_action(x);
+        case Action::Type::REMOVE: return remove_action(x);
         case Action::Type::REVEAL: return reveal_action(x);
         case Action::Type::SCORE: return score_action(x);
         case Action::Type::SELECT: return select_action(x);
-        case Action::Type::PLAY: return play_action(x);
         case Action::Type::SPARK: return spark_action(x);
         case Action::Type::SPIN: return spin_action(x);
         case Action::Type::THRUST: return thrust_action(x);
