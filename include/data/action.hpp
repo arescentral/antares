@@ -69,7 +69,6 @@ enum class ActionType {
     MORPH,
     MOVE,
     OCCUPY,
-    ORDER,
     PAY,
     PLAY,
     PUSH,
@@ -79,6 +78,7 @@ enum class ActionType {
     SELECT,
     SPARK,
     SPIN,
+    TARGET,
     THRUST,
     WARP,
     WIN,
@@ -252,8 +252,6 @@ struct OccupyAction : public ActionBase {
     int64_t value;
 };
 
-struct OrderAction : public ActionBase {};
-
 struct PayAction : public ActionBase {
     Fixed                          value;   // amount to pay; not affected by earning power
     sfz::optional<Handle<Admiral>> player;  // if not present, pay focus object’s owner.
@@ -315,6 +313,8 @@ struct SpinAction : public ActionBase {
     Range<Fixed> value;
 };
 
+struct TargetAction : public ActionBase {};
+
 struct ThrustAction : public ActionBase {
     Range<Fixed> value;  // range
 };
@@ -361,7 +361,6 @@ union Action {
     MorphAction     morph;
     MoveAction      move;
     OccupyAction    occupy;
-    OrderAction     order;
     PayAction       pay;
     PushAction      push;
     RemoveAction    remove;
@@ -371,6 +370,7 @@ union Action {
     PlayAction      play;
     SparkAction     spark;
     SpinAction      spin;
+    TargetAction    target;
     ThrustAction    thrust;
     WarpAction      warp;
     WinAction       win;
@@ -400,7 +400,7 @@ union Action {
     Action(MorphAction a);
     Action(MoveAction a);
     Action(OccupyAction a);
-    Action(OrderAction a);
+    Action(TargetAction a);
     Action(PayAction a);
     Action(PushAction a);
     Action(RevealAction a);

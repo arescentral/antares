@@ -665,7 +665,7 @@ static void apply(
 }
 
 static void apply(
-        const OrderAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
+        const TargetAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
     uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
@@ -775,7 +775,6 @@ static ActionCursor apply(
         case Action::Type::MORPH: apply(a.morph, subject, direct, offset); break;
         case Action::Type::MOVE: apply(a.move, subject, direct, offset); break;
         case Action::Type::OCCUPY: apply(a.occupy, subject, direct, offset); break;
-        case Action::Type::ORDER: apply(a.order, subject, direct, offset); break;
         case Action::Type::PAY: apply(a.pay, subject, direct, offset); break;
         case Action::Type::PLAY: apply(a.play, subject, direct, offset); break;
         case Action::Type::PUSH: apply(a.push, subject, direct, offset); break;
@@ -785,6 +784,7 @@ static ActionCursor apply(
         case Action::Type::SELECT: apply(a.select, subject, direct, offset); break;
         case Action::Type::SPARK: apply(a.spark, subject, direct, offset); break;
         case Action::Type::SPIN: apply(a.spin, subject, direct, offset); break;
+        case Action::Type::TARGET: apply(a.target, subject, direct, offset); break;
         case Action::Type::THRUST: apply(a.thrust, subject, direct, offset); break;
         case Action::Type::WARP: apply(a.warp, subject, direct, offset); break;
         case Action::Type::WIN: apply(a.win, subject, direct, offset); break;
