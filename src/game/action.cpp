@@ -553,8 +553,12 @@ static void apply(
     coordPointType newLocation;
     switch (a.origin.value_or(MoveAction::Origin::LEVEL)) {
         case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
-        case MoveAction::Origin::SUBJECT: newLocation = subject->location; break;
-        case MoveAction::Origin::DIRECT: newLocation = direct->location; break;
+        case MoveAction::Origin::SUBJECT:
+            newLocation = a.reflexive ? direct->location : subject->location;
+            break;
+        case MoveAction::Origin::DIRECT:
+            newLocation = a.reflexive ? subject->location : direct->location;
+            break;
     }
 
     coordPointType off = a.to.value_or(coordPointType{0, 0});
