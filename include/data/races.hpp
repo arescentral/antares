@@ -35,7 +35,7 @@ class BaseObject;
 class path_value;
 
 struct Race {
-    pn::string       singular;
+    pn::string       adjective;
     pn::string       plural;
     pn::string       military;
     pn::string       homeworld;

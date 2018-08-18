@@ -49,7 +49,7 @@ FIELD_READER(Race::Ships) {
 Race race(path_value x) {
     return required_struct<Race>(
             x, {{"numeric", nullptr},
-                {"singular", &Race::singular},
+                {"adjective", &Race::adjective},
                 {"plural", &Race::plural},
                 {"military", &Race::military},
                 {"homeworld", &Race::homeworld},
