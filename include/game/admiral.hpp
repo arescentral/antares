@@ -160,7 +160,6 @@ class Admiral {
     Handle<SpaceObject>            _destinationObject;
     int32_t                        _destinationObjectID = -1;
     Handle<SpaceObject>            _flagship;
-    int32_t                        _flagshipID = -1;
     Handle<SpaceObject>            _considerShip;
     int32_t                        _considerShipID      = -1;
     int32_t                        _considerDestination = kNoShip;
