@@ -29,9 +29,11 @@
 namespace antares {
 
 struct SpriteData {
-    sfz::optional<int64_t> rows, cols;
-    Point                  center;
-    std::vector<Rect>      frames;
+    struct Frame {
+        int32_t left, top, right, bottom;
+        int32_t cx, cy;
+    };
+    std::vector<Frame> frames;
 };
 
 SpriteData sprite_data(pn::value_cref x);

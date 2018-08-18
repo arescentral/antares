@@ -22,12 +22,18 @@
 
 namespace antares {
 
+FIELD_READER(SpriteData::Frame) {
+    return required_struct<SpriteData::Frame>(
+            x, {{"left", &SpriteData::Frame::left},
+                {"top", &SpriteData::Frame::top},
+                {"right", &SpriteData::Frame::right},
+                {"bottom", &SpriteData::Frame::bottom},
+                {"cx", &SpriteData::Frame::cx},
+                {"cy", &SpriteData::Frame::cy}});
+}
+
 SpriteData sprite_data(pn::value_cref x) {
-    return required_struct<SpriteData>(
-            path_value{x}, {{"rows", &SpriteData::rows},
-                            {"cols", &SpriteData::cols},
-                            {"center", &SpriteData::center},
-                            {"frames", &SpriteData::frames}});
+    return required_struct<SpriteData>(path_value{x}, {{"frames", &SpriteData::frames}});
 }
 
 }  // namespace antares
