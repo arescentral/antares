@@ -34,6 +34,8 @@ class Widget {
   public:
     static std::unique_ptr<Widget> from(const WidgetData& data);
 
+    virtual ~Widget();
+
     virtual sfz::optional<int64_t> id() const = 0;
 
     virtual Widget* accept_click(Point where);
