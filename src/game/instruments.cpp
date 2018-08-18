@@ -605,7 +605,6 @@ void draw_sector_lines() {
     Rects    rects;
     int32_t  x;
     uint32_t size, level, h, division;
-    RgbColor color;
 
     size  = kSubSectorSize / 4;
     level = 1;
@@ -870,9 +869,6 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     } else {
         graphicValue = 0;
     }
-
-    RgbColor color, lightColor, darkColor;
-    Rect     rrect;
 
     Hue  hue = gBarIndicator[which].hue;
     Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);

@@ -211,6 +211,8 @@ static int h_border(InterfaceStyle style) {
     return style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
 }
 
+Widget::~Widget() = default;
+
 Widget* Widget::accept_click(Point where) { return nullptr; }
 Widget* Widget::accept_key(Key which) { return nullptr; }
 Widget* Widget::accept_button(Gamepad::Button which) { return nullptr; }

@@ -208,10 +208,7 @@ void Messages::clip() {
 }
 
 void Messages::draw_long_message(ticks time_pass) {
-    Rect             tRect, uRect;
-    Rect             lRect, cRect;
     longMessageType* m = long_message_data;
-    RgbColor         color;
 
     if (m->was_updated()) {
         // TODO(sfiera): figure out what this meant.
