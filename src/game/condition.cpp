@@ -146,7 +146,7 @@ static bool is_true(const MessageCondition& c) {
             std::make_pair(c.id, c.page - 1));
 }
 
-static bool is_true(const ObjectCondition& c) {
+static bool is_true(const IdentityCondition& c) {
     auto a = resolve_object_ref(c.a);
     auto b = resolve_object_ref(c.b);
     if (!(a.get() && b.get())) {
@@ -210,8 +210,8 @@ static bool is_true(const ConditionWhen& c) {
         case ConditionWhen::Type::DESTROYED: return is_true(c.destroyed);
         case ConditionWhen::Type::DISTANCE: return is_true(c.distance);
         case ConditionWhen::Type::HEALTH: return is_true(c.health);
+        case ConditionWhen::Type::IDENTITY: return is_true(c.identity);
         case ConditionWhen::Type::MESSAGE: return is_true(c.message);
-        case ConditionWhen::Type::OBJECT: return is_true(c.object);
         case ConditionWhen::Type::OWNER: return is_true(c.owner);
         case ConditionWhen::Type::SCORE: return is_true(c.score);
         case ConditionWhen::Type::SHIPS: return is_true(c.ships);

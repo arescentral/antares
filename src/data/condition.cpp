@@ -40,8 +40,8 @@ ConditionWhen::ConditionWhen(CountCondition a) : count(std::move(a)) {}
 ConditionWhen::ConditionWhen(DestroyedCondition a) : destroyed(std::move(a)) {}
 ConditionWhen::ConditionWhen(DistanceCondition a) : distance(std::move(a)) {}
 ConditionWhen::ConditionWhen(HealthCondition a) : health(std::move(a)) {}
+ConditionWhen::ConditionWhen(IdentityCondition a) : identity(std::move(a)) {}
 ConditionWhen::ConditionWhen(MessageCondition a) : message(std::move(a)) {}
-ConditionWhen::ConditionWhen(ObjectCondition a) : object(std::move(a)) {}
 ConditionWhen::ConditionWhen(OwnerCondition a) : owner(std::move(a)) {}
 ConditionWhen::ConditionWhen(ScoreCondition a) : score(std::move(a)) {}
 ConditionWhen::ConditionWhen(ShipsCondition a) : ships(std::move(a)) {}
@@ -65,13 +65,13 @@ ConditionWhen::ConditionWhen(ConditionWhen&& a) {
             break;
         case ConditionWhen::Type::DISTANCE: new (this) ConditionWhen(std::move(a.distance)); break;
         case ConditionWhen::Type::HEALTH: new (this) ConditionWhen(std::move(a.health)); break;
+        case ConditionWhen::Type::IDENTITY: new (this) ConditionWhen(std::move(a.identity)); break;
         case ConditionWhen::Type::MESSAGE: new (this) ConditionWhen(std::move(a.message)); break;
-        case ConditionWhen::Type::TARGET: new (this) ConditionWhen(std::move(a.target)); break;
-        case ConditionWhen::Type::OBJECT: new (this) ConditionWhen(std::move(a.object)); break;
         case ConditionWhen::Type::OWNER: new (this) ConditionWhen(std::move(a.owner)); break;
         case ConditionWhen::Type::SCORE: new (this) ConditionWhen(std::move(a.score)); break;
         case ConditionWhen::Type::SHIPS: new (this) ConditionWhen(std::move(a.ships)); break;
         case ConditionWhen::Type::SPEED: new (this) ConditionWhen(std::move(a.speed)); break;
+        case ConditionWhen::Type::TARGET: new (this) ConditionWhen(std::move(a.target)); break;
         case ConditionWhen::Type::TIME: new (this) ConditionWhen(std::move(a.time)); break;
         case ConditionWhen::Type::ZOOM: new (this) ConditionWhen(std::move(a.zoom)); break;
     }
@@ -94,8 +94,8 @@ ConditionWhen::~ConditionWhen() {
         case ConditionWhen::Type::DESTROYED: destroyed.~DestroyedCondition(); break;
         case ConditionWhen::Type::DISTANCE: distance.~DistanceCondition(); break;
         case ConditionWhen::Type::HEALTH: health.~HealthCondition(); break;
+        case ConditionWhen::Type::IDENTITY: identity.~IdentityCondition(); break;
         case ConditionWhen::Type::MESSAGE: message.~MessageCondition(); break;
-        case ConditionWhen::Type::OBJECT: object.~ObjectCondition(); break;
         case ConditionWhen::Type::OWNER: owner.~OwnerCondition(); break;
         case ConditionWhen::Type::SCORE: score.~ScoreCondition(); break;
         case ConditionWhen::Type::SHIPS: ships.~ShipsCondition(); break;
@@ -116,12 +116,12 @@ FIELD_READER(ConditionWhen::Type) {
                 {"destroyed", ConditionWhen::Type::DESTROYED},
                 {"distance", ConditionWhen::Type::DISTANCE},
                 {"health", ConditionWhen::Type::HEALTH},
+                {"identity", ConditionWhen::Type::IDENTITY},
                 {"message", ConditionWhen::Type::MESSAGE},
                 {"owner", ConditionWhen::Type::OWNER},
                 {"score", ConditionWhen::Type::SCORE},
                 {"ships", ConditionWhen::Type::SHIPS},
                 {"speed", ConditionWhen::Type::SPEED},
-                {"object", ConditionWhen::Type::OBJECT},
                 {"target", ConditionWhen::Type::TARGET},
                 {"time", ConditionWhen::Type::TIME},
                 {"zoom", ConditionWhen::Type::ZOOM}});
@@ -248,12 +248,12 @@ static ConditionWhen speed_condition(path_value x) {
                 {"what", &SpeedCondition::what}});
 }
 
-static ConditionWhen object_condition(path_value x) {
-    return required_struct<ObjectCondition>(
+static ConditionWhen identity_condition(path_value x) {
+    return required_struct<IdentityCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", &ObjectCondition::op},
-                {"a", &ObjectCondition::a},
-                {"b", &ObjectCondition::b}});
+                {"op", &IdentityCondition::op},
+                {"a", &IdentityCondition::a},
+                {"b", &IdentityCondition::b}});
 }
 
 static ConditionWhen target_condition(path_value x) {
@@ -293,7 +293,7 @@ DEFINE_FIELD_READER(ConditionWhen) {
         case ConditionWhen::Type::HEALTH: return health_condition(x);
         case ConditionWhen::Type::MESSAGE: return message_condition(x);
         case ConditionWhen::Type::TARGET: return target_condition(x);
-        case ConditionWhen::Type::OBJECT: return object_condition(x);
+        case ConditionWhen::Type::IDENTITY: return identity_condition(x);
         case ConditionWhen::Type::OWNER: return owner_condition(x);
         case ConditionWhen::Type::SCORE: return score_condition(x);
         case ConditionWhen::Type::SHIPS: return ships_condition(x);

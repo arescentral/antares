@@ -48,8 +48,8 @@ enum class ConditionType {
     DESTROYED,
     DISTANCE,
     HEALTH,
+    IDENTITY,
     MESSAGE,
-    OBJECT,
     OWNER,
     SCORE,
     SHIPS,
@@ -136,6 +136,13 @@ struct HealthCondition : ConditionBase {
     double      value;
 };
 
+// Precondition: `a` and `b` exist.
+// Compares identity of `a` to `b`.
+struct IdentityCondition : ConditionBase {
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     a, b;
+};
+
 // Compares (id, page) of local player’s current message to (id, page).
 //
 // Warning: not net-safe.
@@ -143,13 +150,6 @@ struct MessageCondition : ConditionBase {
     ConditionEqOp op = ConditionEqOp::EQ;
     int64_t       id;
     int64_t       page;
-};
-
-// Precondition: `a` and `b` exist.
-// Compares `a` to `b`.
-struct ObjectCondition : ConditionBase {
-    ConditionEqOp op = ConditionEqOp::EQ;
-    ObjectRef     a, b;
 };
 
 // Precondition: `what` exists.
@@ -222,8 +222,8 @@ union ConditionWhen {
     DestroyedCondition destroyed;
     DistanceCondition  distance;
     HealthCondition    health;
+    IdentityCondition  identity;
     MessageCondition   message;
-    ObjectCondition    object;
     OwnerCondition     owner;
     ScoreCondition     score;
     ShipsCondition     ships;
@@ -242,7 +242,7 @@ union ConditionWhen {
     ConditionWhen(DistanceCondition c);
     ConditionWhen(HealthCondition c);
     ConditionWhen(MessageCondition c);
-    ConditionWhen(ObjectCondition c);
+    ConditionWhen(IdentityCondition c);
     ConditionWhen(OwnerCondition c);
     ConditionWhen(ScoreCondition c);
     ConditionWhen(ShipsCondition c);
