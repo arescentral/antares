@@ -112,13 +112,6 @@ FIELD_READER(SoloLevel::Par) {
             .value_or(SoloLevel::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
-FIELD_READER(sfz::optional<LevelBase::StatusLine::Counter>) {
-    return optional_struct<LevelBase::StatusLine::Counter>(
-            x, {{"player", &LevelBase::StatusLine::Counter::player},
-                {"which", &LevelBase::StatusLine::Counter::which},
-                {"fixed", &LevelBase::StatusLine::Counter::fixed}});
-};
-
 FIELD_READER(LevelBase::StatusLine) {
     return required_struct<LevelBase::StatusLine>(
             x, {{"text", &LevelBase::StatusLine::text},

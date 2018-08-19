@@ -1079,13 +1079,12 @@ void MiniComputerSetStatusStrings() {
         line->postString   = l.suffix.has_value() ? l.suffix->copy() : pn::string{};
         if (l.condition.has_value()) {
             line->statusType  = kTrueFalseCondition;
-            line->whichStatus = *l.condition;
+            line->condition   = *l.condition;
             line->statusTrue  = l.true_.has_value() ? l.true_->copy() : pn::string{};
             line->statusFalse = l.false_.has_value() ? l.false_->copy() : pn::string{};
         } else if (l.counter.has_value()) {
-            line->whichStatus  = l.counter->which;
-            line->statusPlayer = Handle<Admiral>(l.counter->player);
-            if (l.counter->fixed.value_or(false)) {
+            line->counter = *l.counter;
+            if (l.fixed.value_or(false)) {
                 if (l.minuend.has_value()) {
                     line->statusType    = kSmallFixedMinusValue;
                     line->negativeValue = l.minuend->val();
@@ -1152,7 +1151,7 @@ int32_t MiniComputerGetStatusValue(int32_t whichLine) {
         case kPlainTextStatus: return 0; break;
 
         case kTrueFalseCondition:
-            if (g.condition_enabled[line->whichStatus]) {
+            if (g.condition_enabled[line->condition.number()]) {
                 return 0;
             } else {
                 return 1;
@@ -1160,13 +1159,11 @@ int32_t MiniComputerGetStatusValue(int32_t whichLine) {
             break;
 
         case kIntegerValue:
-        case kSmallFixedValue:
-            return GetAdmiralScore(line->statusPlayer, line->whichStatus);
-            break;
+        case kSmallFixedValue: return GetAdmiralScore(line->counter); break;
 
         case kIntegerMinusValue:
         case kSmallFixedMinusValue:
-            return line->negativeValue - GetAdmiralScore(line->statusPlayer, line->whichStatus);
+            return line->negativeValue - GetAdmiralScore(line->counter);
             break;
 
         default: return 0; break;

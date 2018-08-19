@@ -1068,15 +1068,15 @@ void Admiral::pay_absolute(Fixed howMuch) {
     }
 }
 
-void AlterAdmiralScore(Handle<Admiral> admiral, int32_t whichScore, int32_t amount) {
-    if (admiral.get() && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
-        admiral->score()[whichScore] += amount;
+void AlterAdmiralScore(Counter counter, int32_t amount) {
+    if (counter.player.get() && (counter.which >= 0) && (counter.which < kAdmiralScoreNum)) {
+        counter.player->score()[counter.which] += amount;
     }
 }
 
-int32_t GetAdmiralScore(Handle<Admiral> admiral, int32_t whichScore) {
-    if (admiral.get() && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
-        return admiral->score()[whichScore];
+int32_t GetAdmiralScore(Counter counter) {
+    if (counter.player.get() && (counter.which >= 0) && (counter.which < kAdmiralScoreNum)) {
+        return counter.player->score()[counter.which];
     } else {
         return 0;
     }

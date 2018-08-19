@@ -25,6 +25,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/counter.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/object-ref.hpp"
@@ -275,10 +276,8 @@ struct RevealAction : public ActionBase {
 };
 
 struct ScoreAction : public ActionBase {
-    sfz::optional<Handle<Admiral>>
-            player;  // which player’s score to change; absent = owner of focus object
-    int64_t which;   // 0-2; each player has three "scores"
-    int64_t value;   // amount to change by
+    RelativeCounter counter;
+    int64_t         value;  // amount to change by
 };
 
 struct SelectAction : public ActionBase {

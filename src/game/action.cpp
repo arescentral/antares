@@ -631,14 +631,15 @@ static void apply(
 static void apply(
         const ScoreAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    Handle<Admiral> admiral;
-    if (a.player.has_value()) {
-        admiral = *a.player;
+    Counter counter;
+    counter.which = a.counter.which;
+    if (a.counter.player.has_value()) {
+        counter.player = *a.counter.player;
     } else if (direct.get()) {
-        admiral = direct->owner;
+        counter.player = direct->owner;
     }
-    if (admiral.get()) {
-        AlterAdmiralScore(admiral, a.which, a.value);
+    if (counter.player.get()) {
+        AlterAdmiralScore(counter, a.value);
     }
 }
 
@@ -736,10 +737,9 @@ static void apply(
 static void apply(
         const AssumeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    Handle<Admiral> player1(0);
-    int             index = a.which + GetAdmiralScore(player1, 0);
-    g.initials[index]     = direct;
-    g.initial_ids[index]  = direct->id;
+    int index            = a.which + GetAdmiralScore({Handle<Admiral>{0}, 0});
+    g.initials[index]    = direct;
+    g.initial_ids[index] = direct->id;
 }
 
 static ActionCursor apply(

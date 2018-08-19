@@ -364,6 +364,16 @@ DEFINE_FIELD_READER(Handle<const Initial>) {
     }
 }
 
+DEFINE_FIELD_READER(sfz::optional<Handle<const Condition>>) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_int()) {
+        return sfz::make_optional(Handle<const Condition>(x.value().as_int()));
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
+    }
+}
+
 DEFINE_FIELD_READER(Handle<const Condition>) {
     return Handle<const Condition>(read_field<int64_t>(x));
 }

@@ -124,6 +124,7 @@ DECLARE_FIELD_READER(Handle<Admiral>);
 DECLARE_FIELD_READER(NamedHandle<const BaseObject>);
 DECLARE_FIELD_READER(sfz::optional<Handle<const Initial>>);
 DECLARE_FIELD_READER(Handle<const Initial>);
+DECLARE_FIELD_READER(sfz::optional<Handle<const Condition>>);
 DECLARE_FIELD_READER(Handle<const Condition>);
 DECLARE_FIELD_READER(sfz::optional<NamedHandle<const Level>>);
 DECLARE_FIELD_READER(sfz::optional<Owner>);

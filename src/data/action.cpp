@@ -498,8 +498,7 @@ static Action reveal_action(path_value x) {
 static Action score_action(path_value x) {
     return required_struct<ScoreAction>(
             x, {COMMON_ACTION_FIELDS,
-                {"player", &ScoreAction::player},
-                {"which", &ScoreAction::which},
+                {"counter", &ScoreAction::counter},
                 {"value", &ScoreAction::value}});
 }
 

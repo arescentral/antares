@@ -110,10 +110,6 @@ static bool is_true(const CountCondition& c) {
     return op_compare(c.op, count, c.value);
 }
 
-static bool is_true(const CounterCondition& c) {
-    return op_compare(c.op, GetAdmiralScore(c.player, c.counter), c.value);
-}
-
 static bool is_true(const DestroyedCondition& c) {
     auto sObject = resolve_object_ref(c.what);
     return op_eq(c.op, !sObject.get(), c.value);
@@ -164,6 +160,10 @@ static bool is_true(const OwnerCondition& c) {
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
 }
 
+static bool is_true(const ScoreCondition& c) {
+    return op_compare(c.op, GetAdmiralScore(c.counter), c.value);
+}
+
 static bool is_true(const ShipsCondition& c) {
     return op_compare(c.op, GetAdmiralShipsLeft(c.player), c.value);
 }
@@ -207,13 +207,13 @@ static bool is_true(const ConditionWhen& c) {
         case ConditionWhen::Type::CASH: return is_true(c.cash);
         case ConditionWhen::Type::COMPUTER: return is_true(c.computer);
         case ConditionWhen::Type::COUNT: return is_true(c.count);
-        case ConditionWhen::Type::COUNTER: return is_true(c.counter);
         case ConditionWhen::Type::DESTROYED: return is_true(c.destroyed);
         case ConditionWhen::Type::DISTANCE: return is_true(c.distance);
         case ConditionWhen::Type::HEALTH: return is_true(c.health);
         case ConditionWhen::Type::MESSAGE: return is_true(c.message);
         case ConditionWhen::Type::OBJECT: return is_true(c.object);
         case ConditionWhen::Type::OWNER: return is_true(c.owner);
+        case ConditionWhen::Type::SCORE: return is_true(c.score);
         case ConditionWhen::Type::SHIPS: return is_true(c.ships);
         case ConditionWhen::Type::SPEED: return is_true(c.speed);
         case ConditionWhen::Type::TARGET: return is_true(c.target);

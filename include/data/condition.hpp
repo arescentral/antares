@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/counter.hpp"
 #include "data/distance.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
@@ -44,13 +45,13 @@ enum class ConditionType {
     CASH,
     COMPUTER,
     COUNT,
-    COUNTER,
     DESTROYED,
     DISTANCE,
     HEALTH,
     MESSAGE,
     OBJECT,
     OWNER,
+    SCORE,
     SHIPS,
     SPEED,
     TARGET,
@@ -103,14 +104,6 @@ struct CountCondition : ConditionBase {
     ConditionOp                op = ConditionOp::EQ;
     int64_t                    value;
     std::vector<ConditionWhen> of;
-};
-
-// Compares given counter of given admiral to `value`.
-struct CounterCondition : ConditionBase {
-    ConditionOp     op = ConditionOp::EQ;
-    Handle<Admiral> player;
-    int64_t         counter;
-    int64_t         value;
 };
 
 // Compares state of given object (destroyed = true; alive = false) to `value`.
@@ -167,6 +160,13 @@ struct OwnerCondition : ConditionBase {
     Handle<Admiral> player;
 };
 
+// Compares given counter of given admiral to `value`.
+struct ScoreCondition : ConditionBase {
+    ConditionOp op = ConditionOp::EQ;
+    Counter     counter;
+    int64_t     value;
+};
+
 // Compares ship count of `player` to `value`.
 struct ShipsCondition : ConditionBase {
     ConditionOp     op = ConditionOp::EQ;
@@ -219,13 +219,13 @@ union ConditionWhen {
     CashCondition      cash;
     ComputerCondition  computer;
     CountCondition     count;
-    CounterCondition   counter;
     DestroyedCondition destroyed;
     DistanceCondition  distance;
     HealthCondition    health;
     MessageCondition   message;
     ObjectCondition    object;
     OwnerCondition     owner;
+    ScoreCondition     score;
     ShipsCondition     ships;
     SpeedCondition     speed;
     TargetCondition    target;
@@ -238,13 +238,13 @@ union ConditionWhen {
     ConditionWhen(CashCondition c);
     ConditionWhen(ComputerCondition c);
     ConditionWhen(CountCondition c);
-    ConditionWhen(CounterCondition c);
     ConditionWhen(DestroyedCondition c);
     ConditionWhen(DistanceCondition c);
     ConditionWhen(HealthCondition c);
     ConditionWhen(MessageCondition c);
     ConditionWhen(ObjectCondition c);
     ConditionWhen(OwnerCondition c);
+    ConditionWhen(ScoreCondition c);
     ConditionWhen(ShipsCondition c);
     ConditionWhen(SpeedCondition c);
     ConditionWhen(TargetCondition c);

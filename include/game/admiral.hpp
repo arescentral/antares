@@ -215,8 +215,8 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o);
 void AdmiralThink();
 void StopBuilding(Handle<Destination> whichDestObject);
 
-void    AlterAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore, int32_t amount);
-int32_t GetAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore);
+void    AlterAdmiralScore(Counter counter, int32_t amount);
+int32_t GetAdmiralScore(Counter counter);
 int32_t GetAdmiralShipsLeft(Handle<Admiral> whichAdmiral);
 int32_t AlterDestinationObjectOccupation(
         Handle<Destination> whichDestination, Handle<Admiral> whichAdmiral, int32_t amount);

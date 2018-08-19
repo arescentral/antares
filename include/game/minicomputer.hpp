@@ -33,20 +33,20 @@ enum MiniScreenLineKind {
 };
 
 struct miniScreenLineType {
-    MiniScreenLineKind kind = MINI_NONE;
-    pn::string         string;
-    pn::string         statusFalse;
-    pn::string         statusTrue;
-    pn::string         statusString;
-    pn::string         postString;
-    int32_t            whichButton = -1;
-    bool               underline   = false;
-    int32_t            value;  // for keeping track of changing values
-    int32_t            statusType;
-    int32_t            whichStatus;
-    Handle<Admiral>    statusPlayer;
-    int32_t            negativeValue;
-    const BaseObject*  sourceData;
+    MiniScreenLineKind      kind = MINI_NONE;
+    pn::string              string;
+    pn::string              statusFalse;
+    pn::string              statusTrue;
+    pn::string              statusString;
+    pn::string              postString;
+    int32_t                 whichButton = -1;
+    bool                    underline   = false;
+    int32_t                 value;  // for keeping track of changing values
+    int32_t                 statusType;
+    Handle<const Condition> condition;
+    Counter                 counter;
+    int32_t                 negativeValue;
+    const BaseObject*       sourceData;
     void (*callback)(Handle<Admiral> adm, int32_t line) = nullptr;
 };
 
