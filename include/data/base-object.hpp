@@ -104,7 +104,7 @@ class BaseObject {
     static BaseObject* get(int number);
     static BaseObject* get(pn::string_view name);
 
-    pn::string                name;
+    pn::string                long_name;
     pn::string                short_name;
     sfz::optional<pn::string> portrait;
 

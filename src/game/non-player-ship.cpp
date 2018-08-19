@@ -1515,7 +1515,8 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (anObject->health() < 0 && (anObject->owner == g.admiral) &&
         (anObject->attributes & kCanAcceptDestination)) {
         int count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
-        Messages::add(pn::format(" {0} destroyed.  {1} remaining. ", anObject->base->name, count));
+        Messages::add(
+                pn::format(" {0} destroyed.  {1} remaining. ", anObject->long_name(), count));
     }
 
     if (sObject->active == kObjectInUse) {

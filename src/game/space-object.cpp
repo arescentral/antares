@@ -691,9 +691,10 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
     }
     if (message) {
         if (new_owner.get()) {
-            Messages::add(pn::format("{0} captured by {1}.", object->name(), new_owner->name()));
+            Messages::add(
+                    pn::format("{0} captured by {1}.", object->long_name(), new_owner->name()));
         } else if (old_owner.get()) {  // must be since can't both be -1
-            Messages::add(pn::format("{0} lost by {1}.", object->name(), old_owner->name()));
+            Messages::add(pn::format("{0} lost by {1}.", object->long_name(), old_owner->name()));
         }
     }
 }
@@ -835,11 +836,11 @@ void SpaceObject::create_floating_player_body() {
     }
 }
 
-pn::string_view SpaceObject::name() const {
+pn::string_view SpaceObject::long_name() const {
     if (attributes & kIsDestination) {
         return GetDestBalanceName(asDestination);
     } else {
-        return base->name;
+        return base->long_name;
     }
 }
 

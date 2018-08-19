@@ -105,7 +105,7 @@ class SpaceObject {
     void free();
     void create_floating_player_body();
 
-    pn::string_view name() const;
+    pn::string_view long_name() const;
     pn::string_view short_name() const;
     bool            engages(const SpaceObject& b) const;
     Fixed           turn_rate() const;

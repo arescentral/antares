@@ -95,16 +95,17 @@ static ANTARES_GLOBAL Zoom gPreviousZoomMode;
 pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
     int h = HotKey_GetFromObject(space_object);
     if (h < 0) {
-        return space_object->name().copy();
+        return space_object->long_name().copy();
     }
 
     Key keyNum = sys.prefs->key(h + kFirstHotKeyNum);
     if (keyNum == Key::NONE) {
-        return space_object->name().copy();
+        return space_object->long_name().copy();
     }
 
     return pn::format(
-            "{0} < {1} >", space_object->name(), sys.key_long_names.at(static_cast<int>(keyNum)));
+            "{0} < {1} >", space_object->long_name(),
+            sys.key_long_names.at(static_cast<int>(keyNum)));
 };
 
 }  // namespace

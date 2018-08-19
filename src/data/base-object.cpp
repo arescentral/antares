@@ -418,7 +418,7 @@ FIELD_READER(BaseObject::AI) {
 
 BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
-            path_value{x0}, {{"long_name", &BaseObject::name},
+            path_value{x0}, {{"long_name", &BaseObject::long_name},
                              {"short_name", &BaseObject::short_name},
 
                              {"notes", nullptr},

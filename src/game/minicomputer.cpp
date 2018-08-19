@@ -762,7 +762,8 @@ static void draw_mini_ship_data(
         RgbColor color = GetRGBTranslateColorShade(friendly ? Hue::GREEN : Hue::RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
         sys.fonts.computer.draw(
-                Point(lRect.left, lRect.top + sys.fonts.computer.ascent), dest->name(), color);
+                Point(lRect.left, lRect.top + sys.fonts.computer.ascent), dest->long_name(),
+                color);
     }
 }
 
@@ -990,7 +991,7 @@ void MiniComputerSetBuildStrings() {
             continue;
         }
 
-        mCopyBlankLineString(line, buildObject->name);
+        mCopyBlankLineString(line, buildObject->long_name);
         if (buildObject->price > mFixedToLong(g.admiral->cash())) {
             line->kind = MINI_DIM;
         } else {
