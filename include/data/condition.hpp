@@ -111,7 +111,7 @@ struct CountCondition : ConditionBase {
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
     ConditionEqOp op = ConditionEqOp::EQ;
-    ObjectRef     what;
+    ObjectRef     object;
     bool          value;
 };
 
@@ -126,13 +126,13 @@ struct DistanceCondition : ConditionBase {
     Distance    value;
 };
 
-// Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.
+// Compares health fraction of `object` (e.g. 0.5 for half health) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
     ConditionOp op = ConditionOp::EQ;
-    ObjectRef   what;
+    ObjectRef   object;
     double      value;
 };
 
@@ -152,11 +152,11 @@ struct MessageCondition : ConditionBase {
     int64_t       page;
 };
 
-// Precondition: `what` exists.
-// Compares owner of `what` to `player`.
+// Precondition: `object` exists.
+// Compares owner of `object` to `player`.
 struct OwnerCondition : ConditionBase {
     ConditionEqOp   op = ConditionEqOp::EQ;
-    ObjectRef       what;
+    ObjectRef       object;
     Handle<Admiral> player;
 };
 
@@ -174,19 +174,19 @@ struct ShipsCondition : ConditionBase {
     int64_t         value;
 };
 
-// Precondition: `what` exists.
-// Compares speed of `what` to `value`.
+// Precondition: `object` exists.
+// Compares speed of `object` to `value`.
 struct SpeedCondition : ConditionBase {
     ConditionOp op = ConditionOp::EQ;
-    ObjectRef   what;
+    ObjectRef   object;
     Fixed       value;
 };
 
-// Precondition: `what` and `target` exist.
-// Compares target of `what` to `target`.
+// Precondition: `object` and `target` exist.
+// Compares target of `object` to `target`.
 struct TargetCondition : ConditionBase {
     ConditionEqOp op = ConditionEqOp::EQ;
-    ObjectRef     what;
+    ObjectRef     object;
     ObjectRef     target;
 };
 
