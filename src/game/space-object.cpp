@@ -88,20 +88,20 @@ BaseObject* BaseObject::get(pn::string_view name) {
 
 NamedHandle<const BaseObject> get_buildable_object_handle(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.map.find(o.name.copy());
-    if (it == race->ships.map.end()) {
-        return NamedHandle<const BaseObject>(o.name.copy());
+    pn::string race_object = pn::format("{0}/{1}", race.name(), o.name);
+    if (Resource::object_exists(race_object)) {
+        return NamedHandle<const BaseObject>(race_object);
     }
-    return it->second.copy();
+    return NamedHandle<const BaseObject>(o.name.copy());
 }
 
 const BaseObject* get_buildable_object(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.map.find(o.name.copy());
-    if (it == race->ships.map.end()) {
-        return BaseObject::get(o.name);
+    pn::string race_object = pn::format("{0}/{1}", race.name(), o.name);
+    if (auto base = BaseObject::get(race_object)) {
+        return base;
     }
-    return BaseObject::get(it->second.name());
+    return BaseObject::get(o.name);
 }
 
 static Handle<SpaceObject> next_free_space_object() {

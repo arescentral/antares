@@ -43,11 +43,6 @@ struct Race {
     std::vector<Hue> not_hue;
     Fixed            advantage;
 
-    struct Ships {
-        std::map<pn::string, NamedHandle<const BaseObject>> map;
-    };
-    Ships ships;
-
     static Race* get(pn::string_view name);
 };
 
