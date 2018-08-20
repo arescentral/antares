@@ -282,14 +282,19 @@ class BaseObject {
 
     struct AI {
         struct Combat {
-            bool hated   = false;
-            bool guided  = false;
-            bool engages = false;
-            Tags engages_if;
-            bool engaged = false;
-            Tags engaged_if;
-            bool evades = false;
-            bool evaded = false;
+            struct Engage {
+                sfz::optional<bool> unconditional;  // if has value, ignore if_.
+                struct If {
+                    Tags tags;
+                } if_;
+            };
+
+            bool   hated  = false;
+            bool   guided = false;
+            Engage engages;
+            Engage engaged;
+            bool   evades = false;
+            bool   evaded = false;
             struct Skill {
                 uint8_t num;
                 uint8_t den;
