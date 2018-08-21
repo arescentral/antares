@@ -77,8 +77,11 @@ enum class ActionType {
     REVEAL,
     SCORE,
     SELECT,
+    SLOW,
     SPARK,
+    SPEED,
     SPIN,
+    STOP,
     TARGET,
     THRUST,
     WARP,
@@ -258,14 +261,23 @@ struct PayAction : public ActionBase {
     sfz::optional<Handle<Admiral>> player;  // if not present, pay focus object’s owner.
 };
 
+struct PlayAction : public ActionBase {
+    struct Priority {
+        int level;
+    };
+    Priority            priority;     // 1-5; takes over a channel playing a lower-priority sound
+    ticks               persistence;  // time before a lower-priority sound can take channel
+    sfz::optional<bool> absolute;     // plays at same volume, regardless of distance from player
+    int64_t             volume;       // 1-255; volume at focus object
+
+    struct Sound {
+        pn::string sound;
+    };
+    sfz::optional<pn::string> sound;  // play this sound if present
+    std::vector<Sound>        any;    // pick ID randomly
+};
+
 struct PushAction : public ActionBase {
-    enum class Kind {
-        COLLIDE,     // impart velocity from subject object like a collision (capped)
-        DECELERATE,  // decrease focus object’s velocity (capped)
-        SET,         // set focus object’s velocity to value in subject object’s direction
-        BOOST,       // add to focus object’s velocity in subject object’s direction
-        CRUISE,      // set focus object’s velocity in focus object’s direction
-    } kind;
     sfz::optional<Fixed> value;
 };
 
@@ -285,20 +297,8 @@ struct SelectAction : public ActionBase {
     int64_t line;
 };
 
-struct PlayAction : public ActionBase {
-    struct Priority {
-        int level;
-    };
-    Priority            priority;     // 1-5; takes over a channel playing a lower-priority sound
-    ticks               persistence;  // time before a lower-priority sound can take channel
-    sfz::optional<bool> absolute;     // plays at same volume, regardless of distance from player
-    int64_t             volume;       // 1-255; volume at focus object
-
-    struct Sound {
-        pn::string sound;
-    };
-    sfz::optional<pn::string> sound;  // play this sound if present
-    std::vector<Sound>        any;    // pick ID randomly
+struct SlowAction : public ActionBase {
+    Fixed value;
 };
 
 struct SparkAction : public ActionBase {
@@ -308,9 +308,16 @@ struct SparkAction : public ActionBase {
     ticks   age;       // how long the spark will be visible
 };
 
+struct SpeedAction : public ActionBase {
+    Fixed               value;
+    sfz::optional<bool> relative;
+};
+
 struct SpinAction : public ActionBase {
     Range<Fixed> value;
 };
+
+struct StopAction : public ActionBase {};
 
 struct TargetAction : public ActionBase {};
 
@@ -361,14 +368,17 @@ union Action {
     MoveAction      move;
     OccupyAction    occupy;
     PayAction       pay;
+    PlayAction      play;
     PushAction      push;
     RemoveAction    remove;
     RevealAction    reveal;
     ScoreAction     score;
     SelectAction    select;
-    PlayAction      play;
+    SlowAction      slow;
     SparkAction     spark;
+    SpeedAction     speed;
     SpinAction      spin;
+    StopAction      stop;
     TargetAction    target;
     ThrustAction    thrust;
     WarpAction      warp;
@@ -401,14 +411,17 @@ union Action {
     Action(OccupyAction a);
     Action(TargetAction a);
     Action(PayAction a);
+    Action(PlayAction a);
     Action(PushAction a);
+    Action(RemoveAction a);
     Action(RevealAction a);
     Action(ScoreAction a);
     Action(SelectAction a);
-    Action(PlayAction a);
-    Action(RemoveAction a);
+    Action(SlowAction a);
     Action(SparkAction a);
+    Action(SpeedAction a);
     Action(SpinAction a);
+    Action(StopAction a);
     Action(ThrustAction a);
     Action(WarpAction a);
     Action(WinAction a);
