@@ -266,7 +266,7 @@ struct PushAction : public ActionBase {
         BOOST,       // add to focus object’s velocity in subject object’s direction
         CRUISE,      // set focus object’s velocity in focus object’s direction
     } kind;
-    Fixed value;
+    sfz::optional<Fixed> value;
 };
 
 struct RemoveAction : public ActionBase {};

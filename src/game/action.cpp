@@ -401,26 +401,27 @@ static void apply(
         return;
     }
 
+    Fixed value = a.value.value_or(Fixed::zero());
     switch (a.kind) {
         case PushAction::Kind::BOOST: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, direct->direction);
-            direct->velocity.h += a.value * fx;
-            direct->velocity.v += a.value * fy;
+            direct->velocity.h += value * fx;
+            direct->velocity.v += value * fy;
             break;
         }
 
         case PushAction::Kind::CRUISE: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, direct->direction);
-            direct->velocity = {a.value * fx, a.value * fy};
+            direct->velocity = {value * fx, value * fy};
             break;
         }
 
         case PushAction::Kind::SET: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, subject->direction);
-            direct->velocity = {a.value * fx, a.value * fy};
+            direct->velocity = {value * fx, value * fy};
             break;
         }
 
@@ -446,8 +447,8 @@ static void apply(
             }
 
             // if decelerating, then STOP the direct like applying brakes
-            direct->velocity.h += direct->velocity.h * -a.value;
-            direct->velocity.v += direct->velocity.v * -a.value;
+            direct->velocity.h += direct->velocity.h * -value;
+            direct->velocity.v += direct->velocity.v * -value;
 
             // make sure we're not going faster than our top speed
             cap_velocity(direct);
