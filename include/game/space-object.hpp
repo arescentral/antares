@@ -51,6 +51,11 @@ const int32_t kCloakOffStateMax = -252;
 const int32_t kEngageRange = 1048576;  // range at which to engage closest ship
                                        // about 2 subsectors (512 * 2)^2
 
+extern const NamedHandle<const BaseObject> kWarpInFlare;
+extern const NamedHandle<const BaseObject> kWarpOutFlare;
+extern const NamedHandle<const BaseObject> kPlayerBody;
+extern const NamedHandle<const BaseObject> kEnergyBlob;
+
 enum dutyType {
     eNoDuty          = 0,
     eEscortDuty      = 1,

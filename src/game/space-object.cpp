@@ -54,6 +54,11 @@ using std::unique_ptr;
 
 namespace antares {
 
+const NamedHandle<const BaseObject> kWarpInFlare{"sfx/warp/in"};
+const NamedHandle<const BaseObject> kWarpOutFlare{"sfx/warp/out"};
+const NamedHandle<const BaseObject> kPlayerBody{"sfx/crew"};
+const NamedHandle<const BaseObject> kEnergyBlob{"sfx/energy"};
+
 const Hue kFriendlyColor               = Hue::GREEN;
 const Hue kHostileColor[kMaxPlayerNum] = {Hue::PINK, Hue::RED, Hue::YELLOW, Hue::ORANGE};
 const Hue kNeutralColor                = Hue::SKY_BLUE;
@@ -746,8 +751,8 @@ void SpaceObject::destroy() {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
-                        *plug.info.energyBlobID, &object->velocity, &object->location,
-                        object->direction, Admiral::none(), 0, sfz::nullopt);
+                        *kEnergyBlob, &object->velocity, &object->location, object->direction,
+                        Admiral::none(), 0, sfz::nullopt);
                 energyNum--;
             }
         }
@@ -819,7 +824,7 @@ void SpaceObject::free() {
 
 void SpaceObject::create_floating_player_body() {
     auto              obj       = Handle<SpaceObject>(number());
-    const BaseObject& body_type = *plug.info.playerBodyID;
+    const BaseObject& body_type = *kPlayerBody;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
     if (obj->base == &body_type) {

@@ -40,6 +40,9 @@ namespace antares {
 
 static constexpr int kPluginFormat = 20;
 
+static constexpr const char kSplashPicture[]  = "splash";
+static constexpr const char kStarmapPicture[] = "starmap";
+
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 static void read_all_levels() {
@@ -60,8 +63,8 @@ void PluginInit() {
             throw std::runtime_error(
                     pn::format("unknown plugin format {0}", plug.info.format).c_str());
         }
-        plug.splash  = Resource::texture(plug.info.splash_screen);
-        plug.starmap = Resource::texture(plug.info.starmap);
+        plug.splash  = Resource::texture(kSplashPicture);
+        plug.starmap = Resource::texture(kStarmapPicture);
     } catch (...) {
         std::throw_with_nested(std::runtime_error("info.pn"));
     }

@@ -121,6 +121,7 @@ DECLARE_FIELD_READER(Tags);
 
 DECLARE_FIELD_READER(sfz::optional<Handle<Admiral>>);
 DECLARE_FIELD_READER(Handle<Admiral>);
+DECLARE_FIELD_READER(sfz::optional<NamedHandle<const BaseObject>>);
 DECLARE_FIELD_READER(NamedHandle<const BaseObject>);
 DECLARE_FIELD_READER(sfz::optional<Handle<const Initial>>);
 DECLARE_FIELD_READER(Handle<const Initial>);

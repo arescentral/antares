@@ -342,6 +342,16 @@ DEFINE_FIELD_READER(sfz::optional<Handle<Admiral>>) {
 
 DEFINE_FIELD_READER(Handle<Admiral>) { return Handle<Admiral>(read_field<int64_t>(x)); }
 
+DEFINE_FIELD_READER(sfz::optional<NamedHandle<const BaseObject>>) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_int()) {
+        return sfz::make_optional(NamedHandle<const BaseObject>(x.value().as_string()));
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
+    }
+}
+
 DEFINE_FIELD_READER(NamedHandle<const BaseObject>) {
     return NamedHandle<const BaseObject>(read_field<pn::string_view>(x));
 }

@@ -585,8 +585,8 @@ static void apply(
     direct->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
     CreateAnySpaceObject(
-            *plug.info.warpInFlareID, &newVel, &direct->location, direct->direction,
-            Admiral::none(), 0, sfz::nullopt);
+            *kWarpInFlare, &newVel, &direct->location, direct->direction, Admiral::none(), 0,
+            sfz::nullopt);
 }
 
 static void apply(
