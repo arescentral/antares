@@ -599,7 +599,7 @@ void SpaceObject::alter_battery(int32_t amount) {
     _battery += amount;
     if (_battery > max_battery()) {
         if (owner.get()) {
-            owner->pay(Fixed::from_val(_battery - max_battery()));
+            owner->pay(Cash{Fixed::from_val(_battery - max_battery())});
         }
         _battery = max_battery();
     }

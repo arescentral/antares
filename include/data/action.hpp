@@ -25,6 +25,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/cash.hpp"
 #include "data/counter.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
@@ -257,7 +258,7 @@ struct OccupyAction : public ActionBase {
 };
 
 struct PayAction : public ActionBase {
-    Fixed                          value;   // amount to pay; not affected by earning power
+    Cash                           value;   // amount to pay; not affected by earning power
     sfz::optional<Handle<Admiral>> player;  // if not present, pay focus object’s owner.
 };
 

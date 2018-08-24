@@ -548,7 +548,7 @@ static void update_build_screen_lines() {
         for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
             auto buildObject = line->sourceData;
             if (buildObject) {
-                if (buildObject->price > mFixedToLong(admiral->cash())) {
+                if (buildObject->price > admiral->cash()) {
                     if (line->kind != MINI_DIM) {
                         line->kind = MINI_DIM;
                     }
@@ -992,7 +992,7 @@ void MiniComputerSetBuildStrings() {
         }
 
         mCopyBlankLineString(line, buildObject->long_name);
-        if (buildObject->price > mFixedToLong(g.admiral->cash())) {
+        if (buildObject->price > g.admiral->cash()) {
             line->kind = MINI_DIM;
         } else {
             line->kind = MINI_SELECTABLE;
@@ -1010,19 +1010,19 @@ void MiniComputerSetBuildStrings() {
 //  If the selection is not legal, or the current Menu is not the Build Menu,
 //  returns 0
 
-Fixed MiniComputerGetPriceOfCurrentSelection() {
+Cash MiniComputerGetPriceOfCurrentSelection() {
     if ((g.mini.currentScreen != Screen::BUILD) ||
         (g.mini.selectLine == kMiniScreenNoLineSelected)) {
-        return Fixed::zero();
+        return Cash{Fixed::zero()};
     }
 
     miniScreenLineType* line        = &g.mini.lineData[g.mini.selectLine];
     auto                buildObject = line->sourceData;
-    if (!buildObject || (buildObject->price < 0)) {
-        return Fixed::zero();
+    if (!buildObject || (buildObject->price < Cash{Fixed::zero()})) {
+        return Cash{Fixed::zero()};
     }
 
-    return Fixed::from_long(buildObject->price);
+    return buildObject->price;
 }
 
 void MiniComputerSetStatusStrings() {

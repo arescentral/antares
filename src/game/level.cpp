@@ -191,7 +191,7 @@ static void construct_players(const Players& players) {
         if (admiral->attributes() & kAIsHuman) {
             g.admiral = admiral;
         }
-        admiral->pay(Fixed::from_long(5000));
+        admiral->pay(Cash{Fixed::from_long(5000)});
         load_race(admiral->race());
     }
 }

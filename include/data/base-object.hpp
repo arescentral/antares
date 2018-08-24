@@ -22,6 +22,7 @@
 #include <pn/string>
 
 #include "data/action.hpp"
+#include "data/cash.hpp"
 #include "data/distance.hpp"
 #include "data/range.hpp"
 #include "data/tags.hpp"
@@ -109,7 +110,7 @@ class BaseObject {
     sfz::optional<pn::string> portrait;
 
     uint32_t attributes = 0;  // initial attributes (see flags)
-    int32_t  price;
+    Cash     price;
 
     Fixed    maxVelocity;      // maximum speed
     Fixed    warpSpeed;        // multiplier of speed at warp (0 if cannot)

@@ -77,9 +77,7 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kPayMoneyCheat:
-            whichPlayer->pay_absolute(Fixed::from_long(5000));
-            whichPlayer->pay_absolute(Fixed::from_long(5000));
-            whichPlayer->pay_absolute(Fixed::from_long(5000));
+            whichPlayer->pay_absolute(Cash{Fixed::from_long(15000)});
             CheatFeedback(whichCheat, true, whichPlayer);
             break;
 

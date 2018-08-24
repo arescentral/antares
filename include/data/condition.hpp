@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/cash.hpp"
 #include "data/counter.hpp"
 #include "data/distance.hpp"
 #include "data/enums.hpp"
@@ -87,7 +88,7 @@ struct BuildingCondition : ConditionBase {
 struct CashCondition : ConditionBase {
     ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
-    Fixed           value;
+    Cash            value;
 };
 
 // Compares local player’s (screen, line), or just screen if line < 0.

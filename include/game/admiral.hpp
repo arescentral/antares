@@ -103,8 +103,8 @@ class Admiral {
 
     void think();
     bool build(int32_t buildWhichType);
-    void pay(Fixed howMuch);
-    void pay_absolute(Fixed howMuch);
+    void pay(Cash howMuch);
+    void pay_absolute(Cash howMuch);
     void remove_destination(Handle<Destination> d);
 
     Handle<SpaceObject> control() const;
@@ -127,9 +127,9 @@ class Admiral {
         return _buildAtObject;
     }  // # of destination object to build at
     const NamedHandle<const Race>& race() { return _race; }
-    Fixed                          cash() const { return _cash; }
-    Fixed&                         cash() { return _cash; }
-    Fixed&                         saveGoal() { return _saveGoal; }
+    Cash                           cash() const { return _cash; }
+    Cash&                          cash() { return _cash; }
+    Cash&                          saveGoal() { return _saveGoal; }
 
     Fixed earning_power() { return _earning_power; }
     void  set_earning_power(Fixed value) { _earning_power = value; }
@@ -165,8 +165,8 @@ class Admiral {
     int32_t                        _considerDestination = kNoShip;
     Handle<Destination>            _buildAtObject;  // # of destination object to build at
     NamedHandle<const Race>        _race;
-    Fixed                          _cash                    = Fixed::zero();
-    Fixed                          _saveGoal                = Fixed::zero();
+    Cash                           _cash                    = Cash{Fixed::zero()};
+    Cash                           _saveGoal                = Cash{Fixed::zero()};
     Fixed                          _earning_power           = Fixed::zero();
     int32_t                        _kills                   = 0;
     int32_t                        _losses                  = 0;

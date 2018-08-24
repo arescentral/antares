@@ -88,7 +88,7 @@ const int32_t kGrossMoneyVBuffer   = 4;
 const int32_t kGrossMoneyBarWidth  = 10;
 const int32_t kGrossMoneyBarHeight = 5;
 const int32_t kGrossMoneyBarNum    = 7;
-const int32_t kGrossMoneyBarValue  = 20000;
+const Cash    kGrossMoneyBarValue  = Cash{Fixed::from_long(20000)};
 const Hue     kGrossMoneyColor     = Hue::YELLOW;
 
 const int32_t kFineMoneyLeft      = 25;
@@ -98,14 +98,13 @@ const int32_t kFineMoneyVBuffer   = 1;
 const int32_t kFineMoneyBarWidth  = 2;
 const int32_t kFineMoneyBarHeight = 4;
 const int32_t kFineMoneyBarNum    = 100;
-const int32_t kFineMoneyBarMod    = kGrossMoneyBarValue;
-const int32_t kFineMoneyBarValue  = 200;
+const Cash    kFineMoneyBarMod    = kGrossMoneyBarValue;
+const Cash    kFineMoneyBarValue  = Cash{Fixed::from_long(200)};
 const Hue     kFineMoneyColor     = Hue::PALE_GREEN;
 const Hue     kFineMoneyNeedColor = Hue::ORANGE;
 const Hue     kFineMoneyUseColor  = Hue::SKY_BLUE;
 
-const Fixed kMaxMoneyValue =
-        Fixed::from_long(kGrossMoneyBarValue * kGrossMoneyBarNum) - Fixed::from_val(1);
+const Cash kMaxMoneyValue{(kGrossMoneyBarValue.amount * kGrossMoneyBarNum) - Fixed::from_val(1)};
 
 Rect mini_build_time_rect() {
     Rect result(play_screen().right + 10, 8, play_screen().right + 22, 37);
@@ -382,11 +381,12 @@ void draw_radar() {
 
 // SHOW ME THE MONEY
 static void draw_money() {
-    auto&       admiral = g.admiral;
-    const Fixed cash    = clamp(admiral->cash(), Fixed::zero(), kMaxMoneyValue);
+    auto&      admiral = g.admiral;
+    const Cash cash    = clamp(admiral->cash(), Cash{Fixed::zero()}, kMaxMoneyValue);
     gBarIndicator[kFineMoneyBar].thisValue =
-            mFixedToLong((cash % kFineMoneyBarMod) / kFineMoneyBarValue);
-    const int price = mFixedToLong(MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue);
+            mFixedToLong((cash.amount % kFineMoneyBarMod.amount) / kFineMoneyBarValue.amount);
+    const int price = mFixedToLong(
+            MiniComputerGetPriceOfCurrentSelection().amount / kFineMoneyBarValue.amount);
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
     box.offset(
@@ -448,7 +448,7 @@ static void draw_money() {
     gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = gBarIndicator + kGrossMoneyBar;
-    gross->thisValue        = mFixedToLong(admiral->cash() / kGrossMoneyBarValue);
+    gross->thisValue        = mFixedToLong(admiral->cash().amount / kGrossMoneyBarValue.amount);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
     box.offset(
