@@ -25,6 +25,6 @@
 
 namespace antares {
 
-DEFINE_FIELD_READER(Cash) { return Cash{read_field<Fixed>(x)}; }
+DEFINE_FIELD_READER(Cash) { return Cash{200 * read_field<Fixed>(x)}; }
 
 }  // namespace antares
