@@ -546,6 +546,16 @@ static bool is_rgba(pn::map_cref m) {
     return (m.size() == 4) && m.has("r") && m.has("g") && m.has("b") && m.has("a");
 }
 
+static bool is_hue(pn::string_view s) {
+    static const std::set<pn::string_view> kHues = {
+            "red",         "orange",   "yellow", "blue", "green", "purple",
+            "indigo",      "salmon",   "gold",   "aqua", "pink",  "pale-green",
+            "pale-purple", "sky-blue", "tan",    "gray"};
+    return kHues.find(s) != kHues.end();
+}
+
+static bool is_hue_shade(pn::map_cref m) { return (m.size() == 1) && is_hue(m.begin()->key()); }
+
 DEFINE_FIELD_READER(RgbColor) {
     if (x.value().is_map()) {
         const pn::map_cref m = x.value().as_map();
@@ -557,6 +567,11 @@ DEFINE_FIELD_READER(RgbColor) {
             return rgb(
                     read_field<uint8_t>(m.get("r")), read_field<uint8_t>(m.get("g")),
                     read_field<uint8_t>(m.get("b")));
+        } else if (is_hue_shade(m)) {
+            pn::string_view hue = m.begin()->key();
+            return RgbColor::tint(
+                    read_field<Hue>(path_value{pn::value{hue.copy()}}),
+                    read_field<uint8_t>(m.get(hue)));
         }
     } else if (x.value().is_string()) {
         const pn::string_view s = x.value().as_string();

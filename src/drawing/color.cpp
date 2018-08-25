@@ -116,16 +116,17 @@ static const int kDiffuse[][3] = {
 };
 
 static const int kAmbient[][3] = {
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},    {0, 0, 0},
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {15, 15, 12}, {0, 0, 0},
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0},          {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0},          {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+        {0, 0, 0}, {0, 0, 0}, {3840, 3744, 3072}, {0, 0, 0},
 };
 
 RgbColor RgbColor::tint(Hue hue, uint8_t shade) {
     int h = static_cast<int>(hue);
     return rgb(
-            (kDiffuse[h][0] * shade / 256) + kAmbient[h][0],
-            (kDiffuse[h][1] * shade / 256) + kAmbient[h][1],
-            (kDiffuse[h][2] * shade / 256) + kAmbient[h][2]);
+            ((kDiffuse[h][0] * shade) + kAmbient[h][0]) / 256,
+            ((kDiffuse[h][1] * shade) + kAmbient[h][1]) / 256,
+            ((kDiffuse[h][2] * shade) + kAmbient[h][2]) / 256);
 }
 
 const RgbColor& RgbColor::at(uint8_t index) { return kColors[index]; }

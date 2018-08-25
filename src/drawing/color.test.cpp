@@ -79,20 +79,20 @@ TEST_F(ColorTest, Indigo) {
 
 // Tan: complicated shades
 TEST_F(ColorTest, Tan) {
-    EXPECT_THAT(RgbColor::tint(Hue::TAN, 255), Eq(GetRGBTranslateColorShade(Hue::TAN, 16)));
-    EXPECT_THAT(RgbColor::tint(Hue::TAN, 240), Almost(GetRGBTranslateColorShade(Hue::TAN, 15)));
+    EXPECT_THAT(RgbColor::tint(Hue::TAN, 255), Almost(GetRGBTranslateColorShade(Hue::TAN, 16)));
+    EXPECT_THAT(RgbColor::tint(Hue::TAN, 240), Eq(GetRGBTranslateColorShade(Hue::TAN, 15)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 224), Eq(GetRGBTranslateColorShade(Hue::TAN, 14)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 208), Eq(GetRGBTranslateColorShade(Hue::TAN, 13)));
-    EXPECT_THAT(RgbColor::tint(Hue::TAN, 192), Almost(GetRGBTranslateColorShade(Hue::TAN, 12)));
+    EXPECT_THAT(RgbColor::tint(Hue::TAN, 192), Eq(GetRGBTranslateColorShade(Hue::TAN, 12)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 176), Eq(GetRGBTranslateColorShade(Hue::TAN, 11)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 160), Eq(GetRGBTranslateColorShade(Hue::TAN, 10)));
-    EXPECT_THAT(RgbColor::tint(Hue::TAN, 144), Almost(GetRGBTranslateColorShade(Hue::TAN, 9)));
+    EXPECT_THAT(RgbColor::tint(Hue::TAN, 144), Eq(GetRGBTranslateColorShade(Hue::TAN, 9)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 128), Eq(GetRGBTranslateColorShade(Hue::TAN, 8)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 112), Eq(GetRGBTranslateColorShade(Hue::TAN, 7)));
-    EXPECT_THAT(RgbColor::tint(Hue::TAN, 96), Almost(GetRGBTranslateColorShade(Hue::TAN, 6)));
+    EXPECT_THAT(RgbColor::tint(Hue::TAN, 96), Eq(GetRGBTranslateColorShade(Hue::TAN, 6)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 80), Eq(GetRGBTranslateColorShade(Hue::TAN, 5)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 64), Eq(GetRGBTranslateColorShade(Hue::TAN, 4)));
-    EXPECT_THAT(RgbColor::tint(Hue::TAN, 48), Almost(GetRGBTranslateColorShade(Hue::TAN, 3)));
+    EXPECT_THAT(RgbColor::tint(Hue::TAN, 48), Eq(GetRGBTranslateColorShade(Hue::TAN, 3)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 32), Eq(GetRGBTranslateColorShade(Hue::TAN, 2)));
     EXPECT_THAT(RgbColor::tint(Hue::TAN, 16), Eq(GetRGBTranslateColorShade(Hue::TAN, 1)));
 }
