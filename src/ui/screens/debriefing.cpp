@@ -103,7 +103,7 @@ int score(
 
 unique_ptr<StyledText> style_score_text(pn::string text) {
     unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
-    result->set_fore_color(GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT));
+    result->set_fore_color(GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST));
     result->set_back_color(GetRGBTranslateColorShade(Hue::GOLD, DARKEST));
     result->set_retro_text(text);
     return result;
@@ -154,7 +154,7 @@ void DebriefingScreen::draw() const {
 
     draw_text_in_rect(interface_bounds, _message, InterfaceStyle::LARGE, Hue::GOLD);
 
-    RgbColor bracket_color  = GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT);
+    RgbColor bracket_color  = GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST);
     Rect     bracket_bounds = _score_bounds;
     bracket_bounds.inset(-2, -2);
     draw_vbracket(Rects(), bracket_bounds, bracket_color);

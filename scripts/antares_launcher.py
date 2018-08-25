@@ -14,7 +14,6 @@ import sys
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-
 PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if os.path.exists(os.path.join(PREFIX, "games", "antares-glfw")):
     BIN_PREFIX = os.path.join(PREFIX, "games")
@@ -29,7 +28,7 @@ else:
     DATADIR = os.path.join(PREFIX, "resources")
     ANTARES_ICON = os.path.join(DATADIR, "antares.iconset", "icon_128x128.png")
     APP_DATA = os.path.join(PREFIX, "data")
-    SCENARIOS = os.path.join(APP_DATA, "scenarios")
+    SCENARIOS = os.path.join(PREFIX, "scenarios")
     FACTORY_SCENARIO = os.path.join(SCENARIOS, "4cab7415715aeeacf1486a352267ae82c0efb220")
 
 ANTARES_BIN = os.path.join(BIN_PREFIX, "antares-glfw")
@@ -46,12 +45,13 @@ def main():
 
 
 class LauncherWindow(Gtk.Dialog):
-
     def __init__(self, scenarios):
         Gtk.Dialog.__init__(
-                self, "Antares", None, 0,
-                ("Quit", Gtk.ResponseType.CANCEL, "Start", Gtk.ResponseType.OK),
-                window_position=Gtk.WindowPosition.CENTER)
+            self,
+            "Antares",
+            None,
+            0, ("Quit", Gtk.ResponseType.CANCEL, "Start", Gtk.ResponseType.OK),
+            window_position=Gtk.WindowPosition.CENTER)
         self.set_resizable(False)
 
         self.set_default_response(Gtk.ResponseType.OK)
@@ -71,7 +71,7 @@ class LauncherWindow(Gtk.Dialog):
 
         plugin.attach(Gtk.Label("Version", xalign=1), 0, 3, 1, 1)
         self.version = Gtk.Label(
-                "", hexpand=True, justify=Gtk.Justification.LEFT, xalign=0, margin_left=10)
+            "", hexpand=True, justify=Gtk.Justification.LEFT, xalign=0, margin_left=10)
         plugin.attach(self.version, 1, 3, 1, 1)
 
         scenario_combo = Gtk.ComboBoxText()
@@ -127,7 +127,6 @@ def reinstall_or_check_scenario():
         args += ["--check"]
     print(" ".join(args))
     subprocess.check_call(args)
-
 
 
 def ls_scenarios():

@@ -211,6 +211,8 @@ static int h_border(InterfaceStyle style) {
     return style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
 }
 
+Widget::~Widget() = default;
+
 Widget* Widget::accept_click(Point where) { return nullptr; }
 Widget* Widget::accept_key(Key which) { return nullptr; }
 Widget* Widget::accept_button(Gamepad::Button which) { return nullptr; }
@@ -739,7 +741,7 @@ void CheckboxButton::draw(Point offset, InputMode) const {
         if (!get()) {
             color = RgbColor::black();
         } else {
-            color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
+            color = GetRGBTranslateColorShade(hue(), LIGHTEST);
         }
         Rects().fill(wRect, color);
     } else {
@@ -876,7 +878,7 @@ void RadioButton::draw(Point offset, InputMode) const {
         if (!on()) {
             PaintOval(pix, wRect, RgbColor::black());
         } else {
-            const RgbColor color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
+            const RgbColor color = GetRGBTranslateColorShade(item.hue, LIGHTEST);
             PaintOval(pix, wRect, color);
         }
     } else {
@@ -1100,7 +1102,7 @@ void TabButton::draw(Point offset, InputMode) const {
                 color = GetRGBTranslateColorShade(hue(), LIGHT);
             }
         } else {
-            color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
+            color = GetRGBTranslateColorShade(hue(), LIGHTEST);
         }
 
         pn::string_view s = label();
@@ -1113,7 +1115,7 @@ void TabButton::draw(Point offset, InputMode) const {
         if (on()) {
             shade = MEDIUM + kLighterColor;
         } else if (active()) {
-            shade = VERY_LIGHT;
+            shade = LIGHTEST;
         } else {
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
         }
@@ -1130,7 +1132,7 @@ void TabButton::draw(Point offset, InputMode) const {
         if (on()) {
             shade = MEDIUM;
         } else if (active()) {
-            shade = VERY_LIGHT;
+            shade = LIGHTEST;
         } else {
             shade = DARKER;  // DARKEST + kSlightlyLighterColor;
         }
@@ -1162,7 +1164,7 @@ void TabButton::draw(Point offset, InputMode) const {
                 color = GetRGBTranslateColorShade(hue(), LIGHT);
             }
         } else {
-            color = GetRGBTranslateColorShade(hue(), VERY_LIGHT);
+            color = GetRGBTranslateColorShade(hue(), LIGHTEST);
         }
 
         {

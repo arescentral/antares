@@ -64,14 +64,8 @@ Info info(path_value x) {
                 {"author", &Info::author},
                 {"author_url", &Info::author_url},
                 {"version", &Info::version},
-                {"warp_in_flare", &Info::warpInFlareID},
-                {"warp_out_flare", &Info::warpOutFlareID},
-                {"player_body", &Info::playerBodyID},
-                {"energy_blob", &Info::energyBlobID},
                 {"intro", &Info::intro},
-                {"about", &Info::about},
-                {"splash", &Info::splash_screen},
-                {"starmap", &Info::starmap}}));
+                {"about", &Info::about}}));
 }
 
 }  // namespace antares

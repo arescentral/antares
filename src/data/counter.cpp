@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,31 +16,26 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "data/races.hpp"
+#include "data/counter.hpp"
+
+#include <pn/map>
+#include <pn/value>
 
 #include "data/field.hpp"
-#include "data/level.hpp"
-#include "data/plugin.hpp"
-#include "data/resource.hpp"
-#include "game/globals.hpp"
-#include "lang/defines.hpp"
-
-using std::unique_ptr;
 
 namespace antares {
 
-Race* Race::get(pn::string_view name) { return &plug.races[name.copy()]; }
+DEFINE_FIELD_READER(Counter) {
+    return required_struct<Counter>(x, {{"player", &Counter::player}, {"which", &Counter::which}});
+}
 
-Race race(path_value x) {
-    return required_struct<Race>(
-            x, {{"numeric", nullptr},
-                {"adjective", &Race::adjective},
-                {"plural", &Race::plural},
-                {"military", &Race::military},
-                {"homeworld", &Race::homeworld},
-                {"hue", &Race::hue},
-                {"not_hue", &Race::not_hue},
-                {"advantage", &Race::advantage}});
+DEFINE_FIELD_READER(sfz::optional<Counter>) {
+    return optional_struct<Counter>(x, {{"player", &Counter::player}, {"which", &Counter::which}});
+}
+
+DEFINE_FIELD_READER(RelativeCounter) {
+    return required_struct<RelativeCounter>(
+            x, {{"player", &RelativeCounter::player}, {"which", &RelativeCounter::which}});
 }
 
 }  // namespace antares

@@ -179,7 +179,7 @@ static uint8_t get_tiny_shade(const SpaceObject& o) {
         case BaseObject::Layer::NONE: return DARK; break;
         case BaseObject::Layer::BASES: return MEDIUM; break;
         case BaseObject::Layer::SHIPS: return LIGHT; break;
-        case BaseObject::Layer::SHOTS: return VERY_LIGHT; break;
+        case BaseObject::Layer::SHOTS: return LIGHTEST; break;
     }
 }
 
@@ -860,7 +860,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = Fixed::zero();
             CreateAnySpaceObject(
-                    *plug.info.warpInFlareID, &newVel, &anObject->location, anObject->direction,
+                    *kWarpInFlare, &newVel, &anObject->location, anObject->direction,
                     Admiral::none(), 0, sfz::nullopt);
         } else {
             anObject->presenceState = kNormalPresence;
@@ -932,7 +932,7 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObje
         newVel.h = newVel.v = Fixed::zero();
 
         CreateAnySpaceObject(
-                *plug.info.warpOutFlareID, &(newVel), &(anObject->location), anObject->direction,
+                *kWarpOutFlare, &(newVel), &(anObject->location), anObject->direction,
                 Admiral::none(), 0, sfz::nullopt);
     }
     return (keysDown);
@@ -1515,7 +1515,8 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (anObject->health() < 0 && (anObject->owner == g.admiral) &&
         (anObject->attributes & kCanAcceptDestination)) {
         int count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
-        Messages::add(pn::format(" {0} destroyed.  {1} remaining. ", anObject->base->name, count));
+        Messages::add(
+                pn::format(" {0} destroyed.  {1} remaining. ", anObject->long_name(), count));
     }
 
     if (sObject->active == kObjectInUse) {

@@ -29,19 +29,14 @@
 namespace antares {
 
 enum {
-    BLACK = 0xff,
-    WHITE = 0x00,
-};
-
-enum {
-    VERY_LIGHT = 16,
-    LIGHTER    = 14,
-    LIGHT      = 12,
-    MEDIUM     = 9,
-    DARK       = 7,
-    DARKER     = 5,
-    VERY_DARK  = 3,
-    DARKEST    = 1,
+    LIGHTEST  = 16,
+    LIGHTER   = 14,
+    LIGHT     = 12,
+    MEDIUM    = 9,
+    DARK      = 7,
+    DARKER    = 5,
+    VERY_DARK = 3,
+    DARKEST   = 1,
 };
 
 enum {

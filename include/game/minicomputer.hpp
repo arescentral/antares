@@ -33,42 +33,42 @@ enum MiniScreenLineKind {
 };
 
 struct miniScreenLineType {
-    MiniScreenLineKind kind = MINI_NONE;
-    pn::string         string;
-    pn::string         statusFalse;
-    pn::string         statusTrue;
-    pn::string         statusString;
-    pn::string         postString;
-    int32_t            whichButton = -1;
-    bool               underline   = false;
-    int32_t            value;  // for keeping track of changing values
-    int32_t            statusType;
-    int32_t            whichStatus;
-    Handle<Admiral>    statusPlayer;
-    int32_t            negativeValue;
-    const BaseObject*  sourceData;
+    MiniScreenLineKind      kind = MINI_NONE;
+    pn::string              string;
+    pn::string              statusFalse;
+    pn::string              statusTrue;
+    pn::string              statusString;
+    pn::string              postString;
+    int32_t                 whichButton = -1;
+    bool                    underline   = false;
+    int32_t                 value;  // for keeping track of changing values
+    int32_t                 statusType;
+    Handle<const Condition> condition;
+    Counter                 counter;
+    int32_t                 negativeValue;
+    const BaseObject*       sourceData;
     void (*callback)(Handle<Admiral> adm, int32_t line) = nullptr;
 };
 
-void  MiniScreenInit(void);
-void  MiniScreenCleanup(void);
-void  DisposeMiniScreenStatusStrList(void);
-void  ClearMiniScreenLines(void);
-void  draw_mini_screen();
-void  minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases);
-void  minicomputer_cancel();
-Fixed MiniComputerGetPriceOfCurrentSelection(void);
-void  UpdateMiniScreenLines(void);
-void  draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
-void  MiniComputerDoAccept(void);
-void  transfer_control(Handle<Admiral> adm, int line);
-void  MiniComputerDoCancel(void);
-void  MiniComputerSetBuildStrings(void);
-void  MiniComputerHandleClick(Point);
-void  MiniComputerHandleDoubleClick(Point);
-void  MiniComputerHandleMouseUp(Point);
-void  MiniComputerHandleMouseStillDown(Point);
-void  MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine);
+void MiniScreenInit(void);
+void MiniScreenCleanup(void);
+void DisposeMiniScreenStatusStrList(void);
+void ClearMiniScreenLines(void);
+void draw_mini_screen();
+void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases);
+void minicomputer_cancel();
+Cash MiniComputerGetPriceOfCurrentSelection(void);
+void UpdateMiniScreenLines(void);
+void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
+void MiniComputerDoAccept(void);
+void transfer_control(Handle<Admiral> adm, int line);
+void MiniComputerDoCancel(void);
+void MiniComputerSetBuildStrings(void);
+void MiniComputerHandleClick(Point);
+void MiniComputerHandleDoubleClick(Point);
+void MiniComputerHandleMouseUp(Point);
+void MiniComputerHandleMouseStillDown(Point);
+void MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine);
 
 }  // namespace antares
 

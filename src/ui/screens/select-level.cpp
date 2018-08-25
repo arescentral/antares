@@ -154,7 +154,7 @@ void SelectLevelScreen::draw_level_name() const {
 
     const Widget& i = *widget(NAME);
 
-    RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, VERY_LIGHT);
+    RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, LIGHTEST);
     StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
     retro.set_retro_text(chapter_name);

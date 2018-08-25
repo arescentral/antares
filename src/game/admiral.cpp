@@ -594,7 +594,7 @@ void AdmiralThink() {
 
         auto anObject = destBalance->whichObject;
         if (anObject.get() && anObject->owner.get()) {
-            anObject->owner->pay(destBalance->earn);
+            anObject->owner->pay(Cash{destBalance->earn});
         }
     }
 
@@ -936,7 +936,7 @@ void Admiral::think_build() {
     if (_cash <= _saveGoal) {
         return;
     }
-    _saveGoal = Fixed::zero();
+    _saveGoal = Cash{Fixed::zero()};
 
     // consider what ship to build
     if (!_buildAtObject.get()) {
@@ -1024,12 +1024,12 @@ void Admiral::think_build() {
     }
 
     auto baseObject = get_buildable_object(*_hopeToBuild, _race);
-    if (_cash >= Fixed::from_long(baseObject->price)) {
+    if (_cash >= baseObject->price) {
         Admiral::build(j);
         _hopeToBuild.reset();
-        _saveGoal = Fixed::zero();
+        _saveGoal = Cash{Fixed::zero()};
     } else {
-        _saveGoal = Fixed::from_long(baseObject->price);
+        _saveGoal = baseObject->price;
     }
 }
 
@@ -1038,8 +1038,8 @@ bool Admiral::build(int32_t buildWhichType) {
     if ((buildWhichType >= 0) && (buildWhichType < dest->canBuildType.size()) && (dest.get()) &&
         (dest->buildTime <= ticks(0))) {
         auto buildBaseObject = get_buildable_object(dest->canBuildType[buildWhichType], _race);
-        if (buildBaseObject && (buildBaseObject->price <= mFixedToLong(_cash))) {
-            _cash -= (Fixed::from_long(buildBaseObject->price));
+        if (buildBaseObject && (buildBaseObject->price <= _cash)) {
+            _cash.amount -= buildBaseObject->price.amount;
             if (_cheats & kBuildFastBit) {
                 dest->buildTime      = kMinorTick;
                 dest->totalBuildTime = kMinorTick;
@@ -1059,24 +1059,24 @@ void StopBuilding(Handle<Destination> destObject) {
     destObject->buildObjectBaseNum                     = nullptr;
 }
 
-void Admiral::pay(Fixed howMuch) { pay_absolute(howMuch * _earning_power); }
+void Admiral::pay(Cash howMuch) { pay_absolute(Cash{howMuch.amount * _earning_power}); }
 
-void Admiral::pay_absolute(Fixed howMuch) {
-    _cash += howMuch;
-    if (_cash < Fixed::zero()) {
-        _cash = Fixed::zero();
+void Admiral::pay_absolute(Cash howMuch) {
+    _cash.amount += howMuch.amount;
+    if (_cash < Cash{Fixed::zero()}) {
+        _cash = Cash{Fixed::zero()};
     }
 }
 
-void AlterAdmiralScore(Handle<Admiral> admiral, int32_t whichScore, int32_t amount) {
-    if (admiral.get() && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
-        admiral->score()[whichScore] += amount;
+void AlterAdmiralScore(Counter counter, int32_t amount) {
+    if (counter.player.get() && (counter.which >= 0) && (counter.which < kAdmiralScoreNum)) {
+        counter.player->score()[counter.which] += amount;
     }
 }
 
-int32_t GetAdmiralScore(Handle<Admiral> admiral, int32_t whichScore) {
-    if (admiral.get() && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
-        return admiral->score()[whichScore];
+int32_t GetAdmiralScore(Counter counter) {
+    if (counter.player.get() && (counter.which >= 0) && (counter.which < kAdmiralScoreNum)) {
+        return counter.player->score()[counter.which];
     } else {
         return 0;
     }

@@ -342,6 +342,16 @@ DEFINE_FIELD_READER(sfz::optional<Handle<Admiral>>) {
 
 DEFINE_FIELD_READER(Handle<Admiral>) { return Handle<Admiral>(read_field<int64_t>(x)); }
 
+DEFINE_FIELD_READER(sfz::optional<NamedHandle<const BaseObject>>) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_int()) {
+        return sfz::make_optional(NamedHandle<const BaseObject>(x.value().as_string()));
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
+    }
+}
+
 DEFINE_FIELD_READER(NamedHandle<const BaseObject>) {
     return NamedHandle<const BaseObject>(read_field<pn::string_view>(x));
 }
@@ -361,6 +371,16 @@ DEFINE_FIELD_READER(Handle<const Initial>) {
         return Handle<const Initial>(x.value().as_int());
     } else {
         throw std::runtime_error(pn::format("{0}must be int", x.prefix()).c_str());
+    }
+}
+
+DEFINE_FIELD_READER(sfz::optional<Handle<const Condition>>) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_int()) {
+        return sfz::make_optional(Handle<const Condition>(x.value().as_int()));
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
     }
 }
 
@@ -509,7 +529,7 @@ DEFINE_FIELD_READER(Rect) {
 DEFINE_FIELD_READER(sfz::optional<RgbColor>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
-    } else if (x.value().is_map()) {
+    } else if (x.value().is_map() || x.value().is_string()) {
         return sfz::make_optional<RgbColor>(read_field<RgbColor>(x));
     } else {
         throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
@@ -526,6 +546,16 @@ static bool is_rgba(pn::map_cref m) {
     return (m.size() == 4) && m.has("r") && m.has("g") && m.has("b") && m.has("a");
 }
 
+static bool is_hue(pn::string_view s) {
+    static const std::set<pn::string_view> kHues = {
+            "red",         "orange",   "yellow", "blue", "green", "purple",
+            "indigo",      "salmon",   "gold",   "aqua", "pink",  "pale-green",
+            "pale-purple", "sky-blue", "tan",    "gray"};
+    return kHues.find(s) != kHues.end();
+}
+
+static bool is_hue_shade(pn::map_cref m) { return (m.size() == 1) && is_hue(m.begin()->key()); }
+
 DEFINE_FIELD_READER(RgbColor) {
     if (x.value().is_map()) {
         const pn::map_cref m = x.value().as_map();
@@ -537,6 +567,11 @@ DEFINE_FIELD_READER(RgbColor) {
             return rgb(
                     read_field<uint8_t>(m.get("r")), read_field<uint8_t>(m.get("g")),
                     read_field<uint8_t>(m.get("b")));
+        } else if (is_hue_shade(m)) {
+            pn::string_view hue = m.begin()->key();
+            return RgbColor::tint(
+                    read_field<Hue>(path_value{pn::value{hue.copy()}}),
+                    read_field<uint8_t>(m.get(hue)));
         }
     } else if (x.value().is_string()) {
         const pn::string_view s = x.value().as_string();
@@ -565,9 +600,9 @@ DEFINE_FIELD_READER(sfz::optional<Hue>) {
                 {"gold", Hue::GOLD},
                 {"aqua", Hue::AQUA},
                 {"pink", Hue::PINK},
-                {"pale green", Hue::PALE_GREEN},
-                {"pale purple", Hue::PALE_PURPLE},
-                {"sky blue", Hue::SKY_BLUE},
+                {"pale-green", Hue::PALE_GREEN},
+                {"pale-purple", Hue::PALE_PURPLE},
+                {"sky-blue", Hue::SKY_BLUE},
                 {"tan", Hue::TAN},
                 {"gray", Hue::GRAY}});
 }
@@ -585,9 +620,9 @@ DEFINE_FIELD_READER(Hue) {
                 {"gold", Hue::GOLD},
                 {"aqua", Hue::AQUA},
                 {"pink", Hue::PINK},
-                {"pale green", Hue::PALE_GREEN},
-                {"pale purple", Hue::PALE_PURPLE},
-                {"sky blue", Hue::SKY_BLUE},
+                {"pale-green", Hue::PALE_GREEN},
+                {"pale-purple", Hue::PALE_PURPLE},
+                {"sky-blue", Hue::SKY_BLUE},
                 {"tan", Hue::TAN},
                 {"gray", Hue::GRAY}});
 }

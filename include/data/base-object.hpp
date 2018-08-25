@@ -22,6 +22,7 @@
 #include <pn/string>
 
 #include "data/action.hpp"
+#include "data/cash.hpp"
 #include "data/distance.hpp"
 #include "data/range.hpp"
 #include "data/tags.hpp"
@@ -104,12 +105,12 @@ class BaseObject {
     static BaseObject* get(int number);
     static BaseObject* get(pn::string_view name);
 
-    pn::string                name;
+    pn::string                long_name;
     pn::string                short_name;
     sfz::optional<pn::string> portrait;
 
     uint32_t attributes = 0;  // initial attributes (see flags)
-    int32_t  price;
+    Cash     price;
 
     Fixed    maxVelocity;      // maximum speed
     Fixed    warpSpeed;        // multiplier of speed at warp (0 if cannot)
@@ -282,14 +283,19 @@ class BaseObject {
 
     struct AI {
         struct Combat {
-            bool hated   = false;
-            bool guided  = false;
-            bool engages = false;
-            Tags engages_if;
-            bool engaged = false;
-            Tags engaged_if;
-            bool evades = false;
-            bool evaded = false;
+            struct Engage {
+                sfz::optional<bool> unconditional;  // if has value, ignore if_.
+                struct If {
+                    Tags tags;
+                } if_;
+            };
+
+            bool   hated  = false;
+            bool   guided = false;
+            Engage engages;
+            Engage engaged;
+            bool   evades = false;
+            bool   evaded = false;
             struct Skill {
                 uint8_t num;
                 uint8_t den;

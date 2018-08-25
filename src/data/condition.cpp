@@ -37,13 +37,13 @@ ConditionWhen::ConditionWhen(BuildingCondition a) : building(std::move(a)) {}
 ConditionWhen::ConditionWhen(CashCondition a) : cash(std::move(a)) {}
 ConditionWhen::ConditionWhen(ComputerCondition a) : computer(std::move(a)) {}
 ConditionWhen::ConditionWhen(CountCondition a) : count(std::move(a)) {}
-ConditionWhen::ConditionWhen(CounterCondition a) : counter(std::move(a)) {}
 ConditionWhen::ConditionWhen(DestroyedCondition a) : destroyed(std::move(a)) {}
 ConditionWhen::ConditionWhen(DistanceCondition a) : distance(std::move(a)) {}
 ConditionWhen::ConditionWhen(HealthCondition a) : health(std::move(a)) {}
+ConditionWhen::ConditionWhen(IdentityCondition a) : identity(std::move(a)) {}
 ConditionWhen::ConditionWhen(MessageCondition a) : message(std::move(a)) {}
-ConditionWhen::ConditionWhen(ObjectCondition a) : object(std::move(a)) {}
 ConditionWhen::ConditionWhen(OwnerCondition a) : owner(std::move(a)) {}
+ConditionWhen::ConditionWhen(ScoreCondition a) : score(std::move(a)) {}
 ConditionWhen::ConditionWhen(ShipsCondition a) : ships(std::move(a)) {}
 ConditionWhen::ConditionWhen(SpeedCondition a) : speed(std::move(a)) {}
 ConditionWhen::ConditionWhen(TargetCondition a) : target(std::move(a)) {}
@@ -60,18 +60,18 @@ ConditionWhen::ConditionWhen(ConditionWhen&& a) {
         case ConditionWhen::Type::CASH: new (this) ConditionWhen(std::move(a.cash)); break;
         case ConditionWhen::Type::COMPUTER: new (this) ConditionWhen(std::move(a.computer)); break;
         case ConditionWhen::Type::COUNT: new (this) ConditionWhen(std::move(a.count)); break;
-        case ConditionWhen::Type::COUNTER: new (this) ConditionWhen(std::move(a.counter)); break;
         case ConditionWhen::Type::DESTROYED:
             new (this) ConditionWhen(std::move(a.destroyed));
             break;
         case ConditionWhen::Type::DISTANCE: new (this) ConditionWhen(std::move(a.distance)); break;
         case ConditionWhen::Type::HEALTH: new (this) ConditionWhen(std::move(a.health)); break;
+        case ConditionWhen::Type::IDENTITY: new (this) ConditionWhen(std::move(a.identity)); break;
         case ConditionWhen::Type::MESSAGE: new (this) ConditionWhen(std::move(a.message)); break;
-        case ConditionWhen::Type::TARGET: new (this) ConditionWhen(std::move(a.target)); break;
-        case ConditionWhen::Type::OBJECT: new (this) ConditionWhen(std::move(a.object)); break;
         case ConditionWhen::Type::OWNER: new (this) ConditionWhen(std::move(a.owner)); break;
+        case ConditionWhen::Type::SCORE: new (this) ConditionWhen(std::move(a.score)); break;
         case ConditionWhen::Type::SHIPS: new (this) ConditionWhen(std::move(a.ships)); break;
         case ConditionWhen::Type::SPEED: new (this) ConditionWhen(std::move(a.speed)); break;
+        case ConditionWhen::Type::TARGET: new (this) ConditionWhen(std::move(a.target)); break;
         case ConditionWhen::Type::TIME: new (this) ConditionWhen(std::move(a.time)); break;
         case ConditionWhen::Type::ZOOM: new (this) ConditionWhen(std::move(a.zoom)); break;
     }
@@ -91,13 +91,13 @@ ConditionWhen::~ConditionWhen() {
         case ConditionWhen::Type::CASH: cash.~CashCondition(); break;
         case ConditionWhen::Type::COMPUTER: computer.~ComputerCondition(); break;
         case ConditionWhen::Type::COUNT: count.~CountCondition(); break;
-        case ConditionWhen::Type::COUNTER: counter.~CounterCondition(); break;
         case ConditionWhen::Type::DESTROYED: destroyed.~DestroyedCondition(); break;
         case ConditionWhen::Type::DISTANCE: distance.~DistanceCondition(); break;
         case ConditionWhen::Type::HEALTH: health.~HealthCondition(); break;
+        case ConditionWhen::Type::IDENTITY: identity.~IdentityCondition(); break;
         case ConditionWhen::Type::MESSAGE: message.~MessageCondition(); break;
-        case ConditionWhen::Type::OBJECT: object.~ObjectCondition(); break;
         case ConditionWhen::Type::OWNER: owner.~OwnerCondition(); break;
+        case ConditionWhen::Type::SCORE: score.~ScoreCondition(); break;
         case ConditionWhen::Type::SHIPS: ships.~ShipsCondition(); break;
         case ConditionWhen::Type::SPEED: speed.~SpeedCondition(); break;
         case ConditionWhen::Type::TARGET: target.~TargetCondition(); break;
@@ -113,15 +113,15 @@ FIELD_READER(ConditionWhen::Type) {
                 {"cash", ConditionWhen::Type::CASH},
                 {"computer", ConditionWhen::Type::COMPUTER},
                 {"count", ConditionWhen::Type::COUNT},
-                {"counter", ConditionWhen::Type::COUNTER},
                 {"destroyed", ConditionWhen::Type::DESTROYED},
                 {"distance", ConditionWhen::Type::DISTANCE},
                 {"health", ConditionWhen::Type::HEALTH},
+                {"identity", ConditionWhen::Type::IDENTITY},
                 {"message", ConditionWhen::Type::MESSAGE},
                 {"owner", ConditionWhen::Type::OWNER},
+                {"score", ConditionWhen::Type::SCORE},
                 {"ships", ConditionWhen::Type::SHIPS},
                 {"speed", ConditionWhen::Type::SPEED},
-                {"object", ConditionWhen::Type::OBJECT},
                 {"target", ConditionWhen::Type::TARGET},
                 {"time", ConditionWhen::Type::TIME},
                 {"zoom", ConditionWhen::Type::ZOOM}});
@@ -182,20 +182,19 @@ static ConditionWhen count_condition(path_value x) {
                 {"of", &CountCondition::of}});
 }
 
-static ConditionWhen counter_condition(path_value x) {
-    return required_struct<CounterCondition>(
+static ConditionWhen score_condition(path_value x) {
+    return required_struct<ScoreCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", &CounterCondition::op},
-                {"player", &CounterCondition::player},
-                {"counter", &CounterCondition::counter},
-                {"value", &CounterCondition::value}});
+                {"op", &ScoreCondition::op},
+                {"counter", &ScoreCondition::counter},
+                {"value", &ScoreCondition::value}});
 }
 
 static ConditionWhen destroyed_condition(path_value x) {
     return required_struct<DestroyedCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &DestroyedCondition::op},
-                {"what", &DestroyedCondition::what},
+                {"object", &DestroyedCondition::object},
                 {"value", &DestroyedCondition::value}});
 }
 
@@ -213,7 +212,7 @@ static ConditionWhen health_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &HealthCondition::op},
                 {"value", &HealthCondition::value},
-                {"what", &HealthCondition::what}});
+                {"object", &HealthCondition::object}});
 }
 
 static ConditionWhen message_condition(path_value x) {
@@ -230,7 +229,7 @@ static ConditionWhen owner_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &OwnerCondition::op},
                 {"player", &OwnerCondition::player},
-                {"what", &OwnerCondition::what}});
+                {"object", &OwnerCondition::object}});
 }
 
 static ConditionWhen ships_condition(path_value x) {
@@ -246,22 +245,22 @@ static ConditionWhen speed_condition(path_value x) {
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &SpeedCondition::op},
                 {"value", &SpeedCondition::value},
-                {"what", &SpeedCondition::what}});
+                {"object", &SpeedCondition::object}});
 }
 
-static ConditionWhen object_condition(path_value x) {
-    return required_struct<ObjectCondition>(
+static ConditionWhen identity_condition(path_value x) {
+    return required_struct<IdentityCondition>(
             x, {COMMON_CONDITION_FIELDS,
-                {"op", &ObjectCondition::op},
-                {"a", &ObjectCondition::a},
-                {"b", &ObjectCondition::b}});
+                {"op", &IdentityCondition::op},
+                {"a", &IdentityCondition::a},
+                {"b", &IdentityCondition::b}});
 }
 
 static ConditionWhen target_condition(path_value x) {
     return required_struct<TargetCondition>(
             x, {COMMON_CONDITION_FIELDS,
                 {"op", &TargetCondition::op},
-                {"what", &TargetCondition::what},
+                {"object", &TargetCondition::object},
                 {"target", &TargetCondition::target}});
 }
 
@@ -289,14 +288,14 @@ DEFINE_FIELD_READER(ConditionWhen) {
         case ConditionWhen::Type::CASH: return cash_condition(x);
         case ConditionWhen::Type::COMPUTER: return computer_condition(x);
         case ConditionWhen::Type::COUNT: return count_condition(x);
-        case ConditionWhen::Type::COUNTER: return counter_condition(x);
         case ConditionWhen::Type::DESTROYED: return destroyed_condition(x);
         case ConditionWhen::Type::DISTANCE: return distance_condition(x);
         case ConditionWhen::Type::HEALTH: return health_condition(x);
         case ConditionWhen::Type::MESSAGE: return message_condition(x);
         case ConditionWhen::Type::TARGET: return target_condition(x);
-        case ConditionWhen::Type::OBJECT: return object_condition(x);
+        case ConditionWhen::Type::IDENTITY: return identity_condition(x);
         case ConditionWhen::Type::OWNER: return owner_condition(x);
+        case ConditionWhen::Type::SCORE: return score_condition(x);
         case ConditionWhen::Type::SHIPS: return ships_condition(x);
         case ConditionWhen::Type::SPEED: return speed_condition(x);
         case ConditionWhen::Type::TIME: return time_condition(x);

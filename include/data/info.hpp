@@ -36,19 +36,12 @@ struct Info {
     Identifier identifier;
     int64_t    format;
 
-    NamedHandle<const BaseObject> warpInFlareID;
-    NamedHandle<const BaseObject> warpOutFlareID;
-    NamedHandle<const BaseObject> playerBodyID;
-    NamedHandle<const BaseObject> energyBlobID;
-    sfz::optional<pn::string>     download_url;
-    pn::string                    title;
-    pn::string                    author;
-    sfz::optional<pn::string>     author_url;
-    sfz::optional<pn::string>     intro;
-    sfz::optional<pn::string>     about;
-
-    pn::string splash_screen;
-    pn::string starmap;
+    sfz::optional<pn::string> download_url;
+    pn::string                title;
+    pn::string                author;
+    sfz::optional<pn::string> author_url;
+    sfz::optional<pn::string> intro;
+    sfz::optional<pn::string> about;
 
     pn::string version;
 };

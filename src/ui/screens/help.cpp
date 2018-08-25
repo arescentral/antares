@@ -39,7 +39,7 @@ HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sy
     pn::string text = Resource::text(6002);
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
-    RgbColor fore = GetRGBTranslateColorShade(Hue::RED, VERY_LIGHT);
+    RgbColor fore = GetRGBTranslateColorShade(Hue::RED, LIGHTEST);
     RgbColor back = GetRGBTranslateColorShade(Hue::RED, VERY_DARK);
     _text.set_fore_color(fore);
     _text.set_back_color(back);

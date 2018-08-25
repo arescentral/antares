@@ -129,7 +129,7 @@ void Label::draw() {
         if ((0 <= label->retroCount) && (label->retroCount < text.size())) {
             text = text.substr(0, label->retroCount);
         }
-        const RgbColor light = GetRGBTranslateColorShade(label->hue, VERY_LIGHT);
+        const RgbColor light = GetRGBTranslateColorShade(label->hue, LIGHTEST);
         const RgbColor dark  = GetRGBTranslateColorShade(label->hue, VERY_DARK);
         sys.video->dither_rect(label->thisRect, dark);
         at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical.ascent);
@@ -284,7 +284,7 @@ void Label::update_positions(ticks units_done) {
                         source.h = label->where.h + label->width + 2;
                     }
                     Auto_Animate_Line(&source, &dest);
-                    HintLine::show(source, dest, label->hue, VERY_LIGHT);
+                    HintLine::show(source, dest, label->hue, LIGHTEST);
                 }
             }
             if (label->age > ticks(0)) {
