@@ -529,7 +529,7 @@ DEFINE_FIELD_READER(Rect) {
 DEFINE_FIELD_READER(sfz::optional<RgbColor>) {
     if (x.value().is_null()) {
         return sfz::nullopt;
-    } else if (x.value().is_map()) {
+    } else if (x.value().is_map() || x.value().is_string()) {
         return sfz::make_optional<RgbColor>(read_field<RgbColor>(x));
     } else {
         throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
@@ -585,9 +585,9 @@ DEFINE_FIELD_READER(sfz::optional<Hue>) {
                 {"gold", Hue::GOLD},
                 {"aqua", Hue::AQUA},
                 {"pink", Hue::PINK},
-                {"pale green", Hue::PALE_GREEN},
-                {"pale purple", Hue::PALE_PURPLE},
-                {"sky blue", Hue::SKY_BLUE},
+                {"pale-green", Hue::PALE_GREEN},
+                {"pale-purple", Hue::PALE_PURPLE},
+                {"sky-blue", Hue::SKY_BLUE},
                 {"tan", Hue::TAN},
                 {"gray", Hue::GRAY}});
 }
@@ -605,9 +605,9 @@ DEFINE_FIELD_READER(Hue) {
                 {"gold", Hue::GOLD},
                 {"aqua", Hue::AQUA},
                 {"pink", Hue::PINK},
-                {"pale green", Hue::PALE_GREEN},
-                {"pale purple", Hue::PALE_PURPLE},
-                {"sky blue", Hue::SKY_BLUE},
+                {"pale-green", Hue::PALE_GREEN},
+                {"pale-purple", Hue::PALE_PURPLE},
+                {"sky-blue", Hue::SKY_BLUE},
                 {"tan", Hue::TAN},
                 {"gray", Hue::GRAY}});
 }
