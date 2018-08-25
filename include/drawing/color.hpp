@@ -29,11 +29,6 @@
 namespace antares {
 
 enum {
-    BLACK = 0xff,
-    WHITE = 0x00,
-};
-
-enum {
     LIGHTEST  = 16,
     LIGHTER   = 14,
     LIGHT     = 12,

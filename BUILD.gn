@@ -21,6 +21,7 @@ group("default") {
     ":antares-install-data",
     ":antares-ls-scenarios",
     ":build-pix",
+    ":color-test",
     ":fixed-test",
     ":hash-data",
     ":object-data",
@@ -518,6 +519,18 @@ source_set("libantares-test") {
       "src/linux/offscreen.hpp",
     ]
   }
+  configs += [ ":antares_private" ]
+}
+
+executable("color-test") {
+  testonly = true
+  sources = [
+    "src/drawing/color.test.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+    "//ext/gmock:gmock_main",
+  ]
   configs += [ ":antares_private" ]
 }
 
