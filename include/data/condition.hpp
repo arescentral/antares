@@ -23,6 +23,8 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/cash.hpp"
+#include "data/counter.hpp"
 #include "data/distance.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
@@ -44,13 +46,13 @@ enum class ConditionType {
     CASH,
     COMPUTER,
     COUNT,
-    COUNTER,
     DESTROYED,
     DISTANCE,
     HEALTH,
+    IDENTITY,
     MESSAGE,
-    OBJECT,
     OWNER,
+    SCORE,
     SHIPS,
     SPEED,
     TARGET,
@@ -86,7 +88,7 @@ struct BuildingCondition : ConditionBase {
 struct CashCondition : ConditionBase {
     ConditionOp     op = ConditionOp::EQ;
     Handle<Admiral> player;
-    Fixed           value;
+    Cash            value;
 };
 
 // Compares local player’s (screen, line), or just screen if line < 0.
@@ -105,20 +107,12 @@ struct CountCondition : ConditionBase {
     std::vector<ConditionWhen> of;
 };
 
-// Compares given counter of given admiral to `value`.
-struct CounterCondition : ConditionBase {
-    ConditionOp     op = ConditionOp::EQ;
-    Handle<Admiral> player;
-    int64_t         counter;
-    int64_t         value;
-};
-
 // Compares state of given object (destroyed = true; alive = false) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct DestroyedCondition : ConditionBase {
     ConditionEqOp op = ConditionEqOp::EQ;
-    ObjectRef     what;
+    ObjectRef     object;
     bool          value;
 };
 
@@ -133,14 +127,21 @@ struct DistanceCondition : ConditionBase {
     Distance    value;
 };
 
-// Compares health fraction of `what` (e.g. 0.5 for half health) to `value`.
+// Compares health fraction of `object` (e.g. 0.5 for half health) to `value`.
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
 struct HealthCondition : ConditionBase {
     ConditionOp op = ConditionOp::EQ;
-    ObjectRef   what;
+    ObjectRef   object;
     double      value;
+};
+
+// Precondition: `a` and `b` exist.
+// Compares identity of `a` to `b`.
+struct IdentityCondition : ConditionBase {
+    ConditionEqOp op = ConditionEqOp::EQ;
+    ObjectRef     a, b;
 };
 
 // Compares (id, page) of local player’s current message to (id, page).
@@ -152,19 +153,19 @@ struct MessageCondition : ConditionBase {
     int64_t       page;
 };
 
-// Precondition: `a` and `b` exist.
-// Compares `a` to `b`.
-struct ObjectCondition : ConditionBase {
-    ConditionEqOp op = ConditionEqOp::EQ;
-    ObjectRef     a, b;
-};
-
-// Precondition: `what` exists.
-// Compares owner of `what` to `player`.
+// Precondition: `object` exists.
+// Compares owner of `object` to `player`.
 struct OwnerCondition : ConditionBase {
     ConditionEqOp   op = ConditionEqOp::EQ;
-    ObjectRef       what;
+    ObjectRef       object;
     Handle<Admiral> player;
+};
+
+// Compares given counter of given admiral to `value`.
+struct ScoreCondition : ConditionBase {
+    ConditionOp op = ConditionOp::EQ;
+    Counter     counter;
+    int64_t     value;
 };
 
 // Compares ship count of `player` to `value`.
@@ -174,19 +175,19 @@ struct ShipsCondition : ConditionBase {
     int64_t         value;
 };
 
-// Precondition: `what` exists.
-// Compares speed of `what` to `value`.
+// Precondition: `object` exists.
+// Compares speed of `object` to `value`.
 struct SpeedCondition : ConditionBase {
     ConditionOp op = ConditionOp::EQ;
-    ObjectRef   what;
+    ObjectRef   object;
     Fixed       value;
 };
 
-// Precondition: `what` and `target` exist.
-// Compares target of `what` to `target`.
+// Precondition: `object` and `target` exist.
+// Compares target of `object` to `target`.
 struct TargetCondition : ConditionBase {
     ConditionEqOp op = ConditionEqOp::EQ;
-    ObjectRef     what;
+    ObjectRef     object;
     ObjectRef     target;
 };
 
@@ -219,13 +220,13 @@ union ConditionWhen {
     CashCondition      cash;
     ComputerCondition  computer;
     CountCondition     count;
-    CounterCondition   counter;
     DestroyedCondition destroyed;
     DistanceCondition  distance;
     HealthCondition    health;
+    IdentityCondition  identity;
     MessageCondition   message;
-    ObjectCondition    object;
     OwnerCondition     owner;
+    ScoreCondition     score;
     ShipsCondition     ships;
     SpeedCondition     speed;
     TargetCondition    target;
@@ -238,13 +239,13 @@ union ConditionWhen {
     ConditionWhen(CashCondition c);
     ConditionWhen(ComputerCondition c);
     ConditionWhen(CountCondition c);
-    ConditionWhen(CounterCondition c);
     ConditionWhen(DestroyedCondition c);
     ConditionWhen(DistanceCondition c);
     ConditionWhen(HealthCondition c);
     ConditionWhen(MessageCondition c);
-    ConditionWhen(ObjectCondition c);
+    ConditionWhen(IdentityCondition c);
     ConditionWhen(OwnerCondition c);
+    ConditionWhen(ScoreCondition c);
     ConditionWhen(ShipsCondition c);
     ConditionWhen(SpeedCondition c);
     ConditionWhen(TargetCondition c);

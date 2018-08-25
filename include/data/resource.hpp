@@ -42,6 +42,7 @@ class Resource {
   public:
     static std::vector<pn::string> list_levels();
     static std::vector<pn::string> list_replays();
+    static bool                    object_exists(pn::string_view name);
 
     static FontData                font(pn::string_view name);
     static Texture                 font_image(pn::string_view name);

@@ -25,6 +25,8 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/cash.hpp"
+#include "data/counter.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/object-ref.hpp"
@@ -69,7 +71,6 @@ enum class ActionType {
     MORPH,
     MOVE,
     OCCUPY,
-    ORDER,
     PAY,
     PLAY,
     PUSH,
@@ -77,8 +78,12 @@ enum class ActionType {
     REVEAL,
     SCORE,
     SELECT,
+    SLOW,
     SPARK,
+    SPEED,
     SPIN,
+    STOP,
+    TARGET,
     THRUST,
     WARP,
     WIN,
@@ -252,40 +257,9 @@ struct OccupyAction : public ActionBase {
     int64_t value;
 };
 
-struct OrderAction : public ActionBase {};
-
 struct PayAction : public ActionBase {
-    Fixed                          value;   // amount to pay; not affected by earning power
+    Cash                           value;   // amount to pay; not affected by earning power
     sfz::optional<Handle<Admiral>> player;  // if not present, pay focus object’s owner.
-};
-
-struct PushAction : public ActionBase {
-    enum class Kind {
-        COLLIDE,     // impart velocity from subject object like a collision (capped)
-        DECELERATE,  // decrease focus object’s velocity (capped)
-        SET,         // set focus object’s velocity to value in subject object’s direction
-        BOOST,       // add to focus object’s velocity in subject object’s direction
-        CRUISE,      // set focus object’s velocity in focus object’s direction
-    } kind;
-    Fixed value;
-};
-
-struct RemoveAction : public ActionBase {};
-
-struct RevealAction : public ActionBase {
-    std::vector<Handle<const Initial>> initial;
-};
-
-struct ScoreAction : public ActionBase {
-    sfz::optional<Handle<Admiral>>
-            player;  // which player’s score to change; absent = owner of focus object
-    int64_t which;   // 0-2; each player has three "scores"
-    int64_t value;   // amount to change by
-};
-
-struct SelectAction : public ActionBase {
-    Screen  screen;
-    int64_t line;
 };
 
 struct PlayAction : public ActionBase {
@@ -304,6 +278,30 @@ struct PlayAction : public ActionBase {
     std::vector<Sound>        any;    // pick ID randomly
 };
 
+struct PushAction : public ActionBase {
+    sfz::optional<Fixed> value;
+};
+
+struct RemoveAction : public ActionBase {};
+
+struct RevealAction : public ActionBase {
+    std::vector<Handle<const Initial>> initial;
+};
+
+struct ScoreAction : public ActionBase {
+    RelativeCounter counter;
+    int64_t         value;  // amount to change by
+};
+
+struct SelectAction : public ActionBase {
+    Screen  screen;
+    int64_t line;
+};
+
+struct SlowAction : public ActionBase {
+    Fixed value;
+};
+
 struct SparkAction : public ActionBase {
     int64_t count;     // number of sparks to create
     Hue     hue;       // hue of sparks; they start bright and fade with time
@@ -311,9 +309,18 @@ struct SparkAction : public ActionBase {
     ticks   age;       // how long the spark will be visible
 };
 
+struct SpeedAction : public ActionBase {
+    Fixed               value;
+    sfz::optional<bool> relative;
+};
+
 struct SpinAction : public ActionBase {
     Range<Fixed> value;
 };
+
+struct StopAction : public ActionBase {};
+
+struct TargetAction : public ActionBase {};
 
 struct ThrustAction : public ActionBase {
     Range<Fixed> value;  // range
@@ -361,16 +368,19 @@ union Action {
     MorphAction     morph;
     MoveAction      move;
     OccupyAction    occupy;
-    OrderAction     order;
     PayAction       pay;
+    PlayAction      play;
     PushAction      push;
     RemoveAction    remove;
     RevealAction    reveal;
     ScoreAction     score;
     SelectAction    select;
-    PlayAction      play;
+    SlowAction      slow;
     SparkAction     spark;
+    SpeedAction     speed;
     SpinAction      spin;
+    StopAction      stop;
+    TargetAction    target;
     ThrustAction    thrust;
     WarpAction      warp;
     WinAction       win;
@@ -400,16 +410,19 @@ union Action {
     Action(MorphAction a);
     Action(MoveAction a);
     Action(OccupyAction a);
-    Action(OrderAction a);
+    Action(TargetAction a);
     Action(PayAction a);
+    Action(PlayAction a);
     Action(PushAction a);
+    Action(RemoveAction a);
     Action(RevealAction a);
     Action(ScoreAction a);
     Action(SelectAction a);
-    Action(PlayAction a);
-    Action(RemoveAction a);
+    Action(SlowAction a);
     Action(SparkAction a);
+    Action(SpeedAction a);
     Action(SpinAction a);
+    Action(StopAction a);
     Action(ThrustAction a);
     Action(WarpAction a);
     Action(WinAction a);

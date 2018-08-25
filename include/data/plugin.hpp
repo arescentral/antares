@@ -38,8 +38,9 @@ struct ScenarioGlobals {
     std::map<pn::string, Level>      levels;
     std::map<pn::string, BaseObject> objects;
     std::map<pn::string, Race>       races;
-    Texture                          splash;
-    Texture                          starmap;
+
+    Texture splash;
+    Texture starmap;
 };
 
 extern ScenarioGlobals plug;

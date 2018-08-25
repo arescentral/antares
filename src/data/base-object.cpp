@@ -223,10 +223,10 @@ static BaseObject set_attributes(BaseObject o) {
     if (o.ai.combat.guided) {
         o.attributes |= kIsGuided;
     }
-    if (o.ai.combat.engages) {
+    if (o.ai.combat.engages.unconditional.value_or(true)) {
         o.attributes |= kCanEngage;
     }
-    if (o.ai.combat.engaged) {
+    if (o.ai.combat.engaged.unconditional.value_or(true)) {
         o.attributes |= kCanBeEngaged;
     }
     if (o.ai.combat.evades) {
@@ -358,15 +358,31 @@ FIELD_READER(BaseObject::AI::Combat::Skill) {
             .value_or(Skill{});
 }
 
+FIELD_READER(BaseObject::AI::Combat::Engage::If) {
+    using If = BaseObject::AI::Combat::Engage::If;
+    return required_struct<If>(x, {{"tags", &If::tags}});
+}
+
+FIELD_READER(BaseObject::AI::Combat::Engage) {
+    using Engage = BaseObject::AI::Combat::Engage;
+    if (x.value().is_bool()) {
+        Engage e;
+        e.unconditional = sfz::make_optional(x.value().as_bool());
+        return e;
+    } else if (x.value().is_map()) {
+        return required_struct<Engage>(x, {{"if", &Engage::if_}});
+    } else {
+        throw std::runtime_error(pn::format("{0}must be bool or map", x.prefix()).c_str());
+    }
+}
+
 FIELD_READER(BaseObject::AI::Combat) {
     using Combat = BaseObject::AI::Combat;
     return optional_struct<Combat>(
                    x, {{"hated", &Combat::hated},
                        {"guided", &Combat::guided},
                        {"engages", &Combat::engages},
-                       {"engages_if", &Combat::engages_if},
                        {"engaged", &Combat::engaged},
-                       {"engaged_if", &Combat::engaged_if},
                        {"evades", &Combat::evades},
                        {"evaded", &Combat::evaded},
                        {"skill", &Combat::skill}})
@@ -418,7 +434,7 @@ FIELD_READER(BaseObject::AI) {
 
 BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
-            path_value{x0}, {{"long_name", &BaseObject::name},
+            path_value{x0}, {{"long_name", &BaseObject::long_name},
                              {"short_name", &BaseObject::short_name},
 
                              {"notes", nullptr},

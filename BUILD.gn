@@ -21,6 +21,7 @@ group("default") {
     ":antares-install-data",
     ":antares-ls-scenarios",
     ":build-pix",
+    ":color-test",
     ":fixed-test",
     ":hash-data",
     ":object-data",
@@ -114,7 +115,9 @@ source_set("libantares-data") {
     "include/data/audio.hpp",
     "include/data/base-object.hpp",
     "include/data/briefing.hpp",
+    "include/data/cash.hpp",
     "include/data/condition.hpp",
+    "include/data/counter.hpp",
     "include/data/distance.hpp",
     "include/data/enums.hpp",
     "include/data/extractor.hpp",
@@ -138,7 +141,9 @@ source_set("libantares-data") {
     "src/data/audio.cpp",
     "src/data/base-object.cpp",
     "src/data/briefing.cpp",
+    "src/data/cash.cpp",
     "src/data/condition.cpp",
+    "src/data/counter.cpp",
     "src/data/distance.cpp",
     "src/data/extractor.cpp",
     "src/data/field.cpp",
@@ -514,6 +519,18 @@ source_set("libantares-test") {
       "src/linux/offscreen.hpp",
     ]
   }
+  configs += [ ":antares_private" ]
+}
+
+executable("color-test") {
+  testonly = true
+  sources = [
+    "src/drawing/color.test.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+    "//ext/gmock:gmock_main",
+  ]
   configs += [ ":antares_private" ]
 }
 

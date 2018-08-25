@@ -25,6 +25,7 @@
 #include "data/action.hpp"
 #include "data/base-object.hpp"
 #include "data/briefing.hpp"
+#include "data/counter.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
@@ -49,15 +50,11 @@ struct LevelBase {
         sfz::optional<pn::string> text;
         sfz::optional<pn::string> prefix;
 
-        sfz::optional<int64_t>    condition;
-        sfz::optional<pn::string> true_;
-        sfz::optional<pn::string> false_;
+        sfz::optional<Handle<const Condition>> condition;
+        sfz::optional<pn::string>              true_;
+        sfz::optional<pn::string>              false_;
 
-        struct Counter {
-            int64_t             player = 0;
-            int64_t             which  = 0;
-            sfz::optional<bool> fixed;
-        };
+        sfz::optional<bool>    fixed;
         sfz::optional<Fixed>   minuend;
         sfz::optional<Counter> counter;
 

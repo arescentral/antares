@@ -186,7 +186,7 @@ void Messages::clip() {
         m->labelMessage = false;
     }
 
-    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, VERY_LIGHT);
+    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHTEST);
     const RgbColor& dark_blue  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKEST);
     m->retro_text.reset(new StyledText(sys.fonts.tactical));
     m->retro_text->set_fore_color(light_blue);
@@ -446,7 +446,7 @@ void Messages::draw_message() {
     }
 
     const RgbColor& dark_blue  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKEST);
-    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, VERY_LIGHT);
+    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHTEST);
     Rect            message_bounds(
             play_screen().left, viewport().bottom, play_screen().right, play_screen().bottom);
     {

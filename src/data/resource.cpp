@@ -184,6 +184,10 @@ static SoundData load_audio(pn::string_view name) {
             pn::format("couldn't find sound {0}", pn::dump(name, pn::dump_short)).c_str());
 }
 
+bool Resource::object_exists(pn::string_view name) {
+    return exists(pn::format("objects/{0}.pn", name));
+}
+
 FontData Resource::font(pn::string_view name) {
     pn::string path = pn::format("fonts/{0}.pn", name);
     try {

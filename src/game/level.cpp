@@ -191,7 +191,7 @@ static void construct_players(const Players& players) {
         if (admiral->attributes() & kAIsHuman) {
             g.admiral = admiral;
         }
-        admiral->pay(Fixed::from_long(5000));
+        admiral->pay(Cash{Fixed::from_long(5000)});
         load_race(admiral->race());
     }
 }
@@ -255,9 +255,8 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
-    const auto&                          info      = plug.info;
     const NamedHandle<const BaseObject>* blessed[] = {
-            &info.energyBlobID, &info.warpInFlareID, &info.warpOutFlareID, &info.playerBodyID,
+            &kEnergyBlob, &kWarpInFlare, &kWarpOutFlare, &kPlayerBody,
     };
     for (auto id : blessed) {
         AddBaseObjectMedia(*id, all_colors, Required::YES);

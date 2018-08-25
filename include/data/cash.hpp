@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,38 +16,39 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_RACES_HPP_
-#define ANTARES_DATA_RACES_HPP_
+#ifndef ANTARES_MATH_CASH_HPP_
+#define ANTARES_MATH_CASH_HPP_
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <map>
-#include <pn/string>
-#include <vector>
+#include <sfz/sfz.hpp>
 
-#include "data/enums.hpp"
-#include "data/handle.hpp"
 #include "math/fixed.hpp"
 
 namespace antares {
 
-class BaseObject;
 class path_value;
 
-struct Race {
-    pn::string       adjective;
-    pn::string       plural;
-    pn::string       military;
-    pn::string       homeworld;
-    Hue              hue;
-    std::vector<Hue> not_hue;
-    Fixed            advantage;
+struct Cash {
+    Fixed amount;
 
-    static Race* get(pn::string_view name);
+    bool operator==(Cash y) const { return amount == y.amount; }
+    bool operator!=(Cash y) const { return amount != y.amount; }
+    bool operator<(Cash y) const { return amount < y.amount; }
+    bool operator<=(Cash y) const { return amount <= y.amount; }
+    bool operator>(Cash y) const { return amount > y.amount; }
+    bool operator>=(Cash y) const { return amount >= y.amount; }
 };
 
-Race race(path_value x);
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<Cash> {
+    static Cash read(path_value x);
+};
+template <>
+struct field_reader<sfz::optional<Cash>> {
+    static sfz::optional<Cash> read(path_value x);
+};
 
 }  // namespace antares
 
-#endif  // ANTARES_DATA_RACES_HPP_
+#endif  // ANTARES_MATH_CASH_HPP_

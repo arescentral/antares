@@ -122,6 +122,7 @@ def main():
     queue = multiprocessing.Queue()
     pool = multiprocessing.pool.ThreadPool()
     tests = [
+        (unit_test, opts, queue, "color-test"),
         (unit_test, opts, queue, "fixed-test"),
         (data_test, opts, queue, "build-pix", [], ["--text"]),
         (data_test, opts, queue, "object-data"),

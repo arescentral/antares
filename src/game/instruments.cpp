@@ -88,7 +88,7 @@ const int32_t kGrossMoneyVBuffer   = 4;
 const int32_t kGrossMoneyBarWidth  = 10;
 const int32_t kGrossMoneyBarHeight = 5;
 const int32_t kGrossMoneyBarNum    = 7;
-const int32_t kGrossMoneyBarValue  = 20000;
+const Cash    kGrossMoneyBarValue  = Cash{Fixed::from_long(20000)};
 const Hue     kGrossMoneyColor     = Hue::YELLOW;
 
 const int32_t kFineMoneyLeft      = 25;
@@ -98,14 +98,13 @@ const int32_t kFineMoneyVBuffer   = 1;
 const int32_t kFineMoneyBarWidth  = 2;
 const int32_t kFineMoneyBarHeight = 4;
 const int32_t kFineMoneyBarNum    = 100;
-const int32_t kFineMoneyBarMod    = kGrossMoneyBarValue;
-const int32_t kFineMoneyBarValue  = 200;
+const Cash    kFineMoneyBarMod    = kGrossMoneyBarValue;
+const Cash    kFineMoneyBarValue  = Cash{Fixed::from_long(200)};
 const Hue     kFineMoneyColor     = Hue::PALE_GREEN;
 const Hue     kFineMoneyNeedColor = Hue::ORANGE;
 const Hue     kFineMoneyUseColor  = Hue::SKY_BLUE;
 
-const Fixed kMaxMoneyValue =
-        Fixed::from_long(kGrossMoneyBarValue * kGrossMoneyBarNum) - Fixed::from_val(1);
+const Cash kMaxMoneyValue{(kGrossMoneyBarValue.amount * kGrossMoneyBarNum) - Fixed::from_val(1)};
 
 Rect mini_build_time_rect() {
     Rect result(play_screen().right + 10, 8, play_screen().right + 22, 37);
@@ -345,7 +344,7 @@ void draw_radar() {
     bounds.offset(0, instrument_top());
     bounds.inset(1, 1);
 
-    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
+    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, LIGHTEST);
     const RgbColor darkest    = GetRGBTranslateColorShade(kRadarColor, DARKEST);
     const RgbColor very_dark  = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
     if (g.radar_on) {
@@ -382,11 +381,12 @@ void draw_radar() {
 
 // SHOW ME THE MONEY
 static void draw_money() {
-    auto&       admiral = g.admiral;
-    const Fixed cash    = clamp(admiral->cash(), Fixed::zero(), kMaxMoneyValue);
+    auto&      admiral = g.admiral;
+    const Cash cash    = clamp(admiral->cash(), Cash{Fixed::zero()}, kMaxMoneyValue);
     gBarIndicator[kFineMoneyBar].thisValue =
-            mFixedToLong((cash % kFineMoneyBarMod) / kFineMoneyBarValue);
-    const int price = mFixedToLong(MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue);
+            mFixedToLong((cash.amount % kFineMoneyBarMod.amount) / kFineMoneyBarValue.amount);
+    const int price = mFixedToLong(
+            MiniComputerGetPriceOfCurrentSelection().amount / kFineMoneyBarValue.amount);
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
     box.offset(
@@ -411,16 +411,16 @@ static void draw_money() {
     RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
 
     if (gBarIndicator[kFineMoneyBar].thisValue < price) {
-        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHTEST);
         first_color_minor  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
         second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
         first_threshold    = gBarIndicator[kFineMoneyBar].thisValue;
         second_threshold   = price;
     } else {
-        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHTEST);
         first_color_minor  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
-        second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
+        second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHTEST);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
         first_threshold    = gBarIndicator[kFineMoneyBar].thisValue - price;
         second_threshold   = gBarIndicator[kFineMoneyBar].thisValue;
@@ -448,14 +448,14 @@ static void draw_money() {
     gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = gBarIndicator + kGrossMoneyBar;
-    gross->thisValue        = mFixedToLong(admiral->cash() / kGrossMoneyBarValue);
+    gross->thisValue        = mFixedToLong(admiral->cash().amount / kGrossMoneyBarValue.amount);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
     box.offset(
             play_screen().right + kGrossMoneyLeft + kGrossMoneyHBuffer,
             kGrossMoneyTop + instrument_top() + kGrossMoneyVBuffer);
 
-    const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
+    const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, LIGHTEST);
     const RgbColor dark  = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
     for (int i = 0; i < kGrossMoneyBarNum; ++i) {
         if (i < gross->thisValue) {
@@ -887,7 +887,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         Rect bottom_bar            = bar;
         bottom_bar.top             = bottom_bar.bottom - graphicValue;
         const RgbColor fill_color  = GetRGBTranslateColorShade(hue, LIGHTER);
-        const RgbColor light_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
+        const RgbColor light_color = GetRGBTranslateColorShade(hue, LIGHTEST);
         const RgbColor dark_color  = GetRGBTranslateColorShade(hue, MEDIUM);
         draw_shaded_rect(rects, bottom_bar, fill_color, light_color, dark_color);
     }

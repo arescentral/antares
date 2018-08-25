@@ -108,29 +108,25 @@ static const RgbColor kColors[256] = {
         rgb(80, 0, 0),      rgb(64, 0, 0),      rgb(48, 0, 0),      rgb(0, 0, 0),
 };
 
-static const uint8_t kDiffuse[][3] = {
-        {255, 255, 255}, {255, 128, 0}, {255, 255, 0},   {0, 0, 255},
-        {0, 255, 0},     {128, 0, 255}, {128, 128, 255}, {255, 128, 128},
-        {255, 255, 128}, {0, 255, 255}, {255, 0, 128},   {128, 255, 128},
-        {255, 128, 255}, {0, 128, 255}, {239, 233, 195}, {255, 0, 0},
+static const int kDiffuse[][3] = {
+        {256, 256, 256}, {256, 128, 0}, {256, 256, 0},   {0, 0, 256},
+        {0, 256, 0},     {128, 0, 256}, {128, 128, 256}, {256, 128, 128},
+        {256, 256, 128}, {0, 256, 256}, {256, 0, 128},   {128, 256, 128},
+        {256, 128, 256}, {0, 128, 256}, {241, 235, 196}, {256, 0, 0},
 };
 
-static const uint8_t kAmbient[][3] = {
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},    {0, 0, 0},
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {16, 15, 12}, {0, 0, 0},
+static const int kAmbient[][3] = {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0},          {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0},          {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+        {0, 0, 0}, {0, 0, 0}, {3840, 3744, 3072}, {0, 0, 0},
 };
 
 RgbColor RgbColor::tint(Hue hue, uint8_t shade) {
+    int h = static_cast<int>(hue);
     return rgb(
-            implicit_cast<uint8_t>(
-                    (kDiffuse[static_cast<int>(hue)][0] * shade / 255) +
-                    kAmbient[static_cast<int>(hue)][0]),
-            implicit_cast<uint8_t>(
-                    (kDiffuse[static_cast<int>(hue)][1] * shade / 255) +
-                    kAmbient[static_cast<int>(hue)][1]),
-            implicit_cast<uint8_t>(
-                    (kDiffuse[static_cast<int>(hue)][2] * shade / 255) +
-                    kAmbient[static_cast<int>(hue)][2]));
+            ((kDiffuse[h][0] * shade) + kAmbient[h][0]) / 256,
+            ((kDiffuse[h][1] * shade) + kAmbient[h][1]) / 256,
+            ((kDiffuse[h][2] * shade) + kAmbient[h][2]) / 256);
 }
 
 const RgbColor& RgbColor::at(uint8_t index) { return kColors[index]; }
@@ -148,22 +144,10 @@ uint8_t GetTranslateColorShade(Hue hue, uint8_t shade) {
     return (17 - shade) + (static_cast<int>(hue) * 16);
 }
 
-void GetRGBTranslateColorShade(RgbColor* c, Hue hue, uint8_t shade) {
-    *c = RgbColor::at(GetTranslateColorShade(hue, shade));
-}
-
 RgbColor GetRGBTranslateColorShade(Hue hue, uint8_t shade) {
-    RgbColor result;
-    GetRGBTranslateColorShade(&result, hue, shade);
-    return result;
+    return RgbColor::at(GetTranslateColorShade(hue, shade));
 }
 
-void GetRGBTranslateColor(RgbColor* c, uint8_t color) { *c = RgbColor::at(color); }
-
-RgbColor GetRGBTranslateColor(uint8_t color) {
-    RgbColor result;
-    GetRGBTranslateColor(&result, color);
-    return result;
-}
+RgbColor GetRGBTranslateColor(uint8_t color) { return RgbColor::at(color); }
 
 }  // namespace antares

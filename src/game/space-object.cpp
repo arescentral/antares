@@ -54,6 +54,11 @@ using std::unique_ptr;
 
 namespace antares {
 
+const NamedHandle<const BaseObject> kWarpInFlare{"sfx/warp/in"};
+const NamedHandle<const BaseObject> kWarpOutFlare{"sfx/warp/out"};
+const NamedHandle<const BaseObject> kPlayerBody{"sfx/crew"};
+const NamedHandle<const BaseObject> kEnergyBlob{"sfx/energy"};
+
 const Hue kFriendlyColor               = Hue::GREEN;
 const Hue kHostileColor[kMaxPlayerNum] = {Hue::PINK, Hue::RED, Hue::YELLOW, Hue::ORANGE};
 const Hue kNeutralColor                = Hue::SKY_BLUE;
@@ -88,20 +93,20 @@ BaseObject* BaseObject::get(pn::string_view name) {
 
 NamedHandle<const BaseObject> get_buildable_object_handle(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.map.find(o.name.copy());
-    if (it == race->ships.map.end()) {
-        return NamedHandle<const BaseObject>(o.name.copy());
+    pn::string race_object = pn::format("{0}/{1}", race.name(), o.name);
+    if (Resource::object_exists(race_object)) {
+        return NamedHandle<const BaseObject>(race_object);
     }
-    return it->second.copy();
+    return NamedHandle<const BaseObject>(o.name.copy());
 }
 
 const BaseObject* get_buildable_object(
         const BuildableObject& o, const NamedHandle<const Race>& race) {
-    auto it = race->ships.map.find(o.name.copy());
-    if (it == race->ships.map.end()) {
-        return BaseObject::get(o.name);
+    pn::string race_object = pn::format("{0}/{1}", race.name(), o.name);
+    if (auto base = BaseObject::get(race_object)) {
+        return base;
     }
-    return BaseObject::get(it->second.name());
+    return BaseObject::get(o.name);
 }
 
 static Handle<SpaceObject> next_free_space_object() {
@@ -118,7 +123,7 @@ static uint8_t get_tiny_shade(const SpaceObject& o) {
         case BaseObject::Layer::NONE: return DARK; break;
         case BaseObject::Layer::BASES: return MEDIUM; break;
         case BaseObject::Layer::SHIPS: return LIGHT; break;
-        case BaseObject::Layer::SHOTS: return VERY_LIGHT; break;
+        case BaseObject::Layer::SHOTS: return LIGHTEST; break;
     }
 }
 
@@ -594,7 +599,7 @@ void SpaceObject::alter_battery(int32_t amount) {
     _battery += amount;
     if (_battery > max_battery()) {
         if (owner.get()) {
-            owner->pay(Fixed::from_val(_battery - max_battery()));
+            owner->pay(Cash{Fixed::from_val(_battery - max_battery())});
         }
         _battery = max_battery();
     }
@@ -691,9 +696,10 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
     }
     if (message) {
         if (new_owner.get()) {
-            Messages::add(pn::format("{0} captured by {1}.", object->name(), new_owner->name()));
+            Messages::add(
+                    pn::format("{0} captured by {1}.", object->long_name(), new_owner->name()));
         } else if (old_owner.get()) {  // must be since can't both be -1
-            Messages::add(pn::format("{0} lost by {1}.", object->name(), old_owner->name()));
+            Messages::add(pn::format("{0} lost by {1}.", object->long_name(), old_owner->name()));
         }
     }
 }
@@ -745,8 +751,8 @@ void SpaceObject::destroy() {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
-                        *plug.info.energyBlobID, &object->velocity, &object->location,
-                        object->direction, Admiral::none(), 0, sfz::nullopt);
+                        *kEnergyBlob, &object->velocity, &object->location, object->direction,
+                        Admiral::none(), 0, sfz::nullopt);
                 energyNum--;
             }
         }
@@ -818,7 +824,7 @@ void SpaceObject::free() {
 
 void SpaceObject::create_floating_player_body() {
     auto              obj       = Handle<SpaceObject>(number());
-    const BaseObject& body_type = *plug.info.playerBodyID;
+    const BaseObject& body_type = *kPlayerBody;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
     if (obj->base == &body_type) {
@@ -835,11 +841,11 @@ void SpaceObject::create_floating_player_body() {
     }
 }
 
-pn::string_view SpaceObject::name() const {
+pn::string_view SpaceObject::long_name() const {
     if (attributes & kIsDestination) {
         return GetDestBalanceName(asDestination);
     } else {
-        return base->name;
+        return base->long_name;
     }
 }
 
@@ -852,8 +858,8 @@ pn::string_view SpaceObject::short_name() const {
 }
 
 bool SpaceObject::engages(const SpaceObject& b) const {
-    return tags_match(*b.base, base->ai.combat.engages_if) &&
-           tags_match(*base, b.base->ai.combat.engaged_if);
+    return tags_match(*b.base, base->ai.combat.engages.if_.tags) &&
+           tags_match(*base, b.base->ai.combat.engaged.if_.tags);
 }
 
 Fixed SpaceObject::turn_rate() const { return base->turn_rate; }

@@ -41,7 +41,7 @@ const Font& interface_font(InterfaceStyle style) {
 }
 
 void draw_text_in_rect(Rect tRect, pn::string_view text, InterfaceStyle style, Hue hue) {
-    RgbColor   color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
+    RgbColor   color = GetRGBTranslateColorShade(hue, LIGHTEST);
     StyledText interface_text(interface_font(style));
     interface_text.set_fore_color(color);
     interface_text.set_interface_text(text);

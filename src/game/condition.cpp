@@ -110,12 +110,8 @@ static bool is_true(const CountCondition& c) {
     return op_compare(c.op, count, c.value);
 }
 
-static bool is_true(const CounterCondition& c) {
-    return op_compare(c.op, GetAdmiralScore(c.player, c.counter), c.value);
-}
-
 static bool is_true(const DestroyedCondition& c) {
-    auto sObject = resolve_object_ref(c.what);
+    auto sObject = resolve_object_ref(c.object);
     return op_eq(c.op, !sObject.get(), c.value);
 }
 
@@ -131,7 +127,7 @@ static bool is_true(const DistanceCondition& c) {
 }
 
 static bool is_true(const HealthCondition& c) {
-    auto   sObject = resolve_object_ref(c.what);
+    auto   sObject = resolve_object_ref(c.object);
     double health  = 0.0;
     if (sObject.get()) {
         health = sObject->health();
@@ -150,7 +146,7 @@ static bool is_true(const MessageCondition& c) {
             std::make_pair(c.id, c.page - 1));
 }
 
-static bool is_true(const ObjectCondition& c) {
+static bool is_true(const IdentityCondition& c) {
     auto a = resolve_object_ref(c.a);
     auto b = resolve_object_ref(c.b);
     if (!(a.get() && b.get())) {
@@ -160,8 +156,12 @@ static bool is_true(const ObjectCondition& c) {
 }
 
 static bool is_true(const OwnerCondition& c) {
-    auto sObject = resolve_object_ref(c.what);
+    auto sObject = resolve_object_ref(c.object);
     return sObject.get() && op_eq(c.op, c.player, sObject->owner);
+}
+
+static bool is_true(const ScoreCondition& c) {
+    return op_compare(c.op, GetAdmiralScore(c.counter), c.value);
 }
 
 static bool is_true(const ShipsCondition& c) {
@@ -169,13 +169,13 @@ static bool is_true(const ShipsCondition& c) {
 }
 
 static bool is_true(const SpeedCondition& c) {
-    auto sObject = resolve_object_ref(c.what);
+    auto sObject = resolve_object_ref(c.object);
     return sObject.get() &&
            op_compare(c.op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), c.value);
 }
 
 static bool is_true(const TargetCondition& c) {
-    auto sObject = resolve_object_ref(c.what);
+    auto sObject = resolve_object_ref(c.object);
     auto dObject = resolve_object_ref(c.target);
     return sObject.get() && dObject.get() &&
            op_eq(c.op, std::make_pair(sObject->destObject, sObject->destObjectID),
@@ -207,13 +207,13 @@ static bool is_true(const ConditionWhen& c) {
         case ConditionWhen::Type::CASH: return is_true(c.cash);
         case ConditionWhen::Type::COMPUTER: return is_true(c.computer);
         case ConditionWhen::Type::COUNT: return is_true(c.count);
-        case ConditionWhen::Type::COUNTER: return is_true(c.counter);
         case ConditionWhen::Type::DESTROYED: return is_true(c.destroyed);
         case ConditionWhen::Type::DISTANCE: return is_true(c.distance);
         case ConditionWhen::Type::HEALTH: return is_true(c.health);
+        case ConditionWhen::Type::IDENTITY: return is_true(c.identity);
         case ConditionWhen::Type::MESSAGE: return is_true(c.message);
-        case ConditionWhen::Type::OBJECT: return is_true(c.object);
         case ConditionWhen::Type::OWNER: return is_true(c.owner);
+        case ConditionWhen::Type::SCORE: return is_true(c.score);
         case ConditionWhen::Type::SHIPS: return is_true(c.ships);
         case ConditionWhen::Type::SPEED: return is_true(c.speed);
         case ConditionWhen::Type::TARGET: return is_true(c.target);

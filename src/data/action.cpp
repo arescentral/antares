@@ -62,16 +62,19 @@ Action::Action(MessageAction a) : message(std::move(a)) {}
 Action::Action(MorphAction a) : morph(std::move(a)) {}
 Action::Action(MoveAction a) : move(std::move(a)) {}
 Action::Action(OccupyAction a) : occupy(std::move(a)) {}
-Action::Action(OrderAction a) : order(std::move(a)) {}
 Action::Action(PayAction a) : pay(std::move(a)) {}
+Action::Action(PlayAction a) : play(std::move(a)) {}
 Action::Action(PushAction a) : push(std::move(a)) {}
 Action::Action(RemoveAction a) : remove(std::move(a)) {}
 Action::Action(RevealAction a) : reveal(std::move(a)) {}
 Action::Action(ScoreAction a) : score(std::move(a)) {}
 Action::Action(SelectAction a) : select(std::move(a)) {}
-Action::Action(PlayAction a) : play(std::move(a)) {}
+Action::Action(SlowAction a) : slow(std::move(a)) {}
 Action::Action(SparkAction a) : spark(std::move(a)) {}
+Action::Action(SpeedAction a) : speed(std::move(a)) {}
 Action::Action(SpinAction a) : spin(std::move(a)) {}
+Action::Action(StopAction a) : stop(std::move(a)) {}
+Action::Action(TargetAction a) : target(std::move(a)) {}
 Action::Action(ThrustAction a) : thrust(std::move(a)) {}
 Action::Action(WarpAction a) : warp(std::move(a)) {}
 Action::Action(WinAction a) : win(std::move(a)) {}
@@ -103,16 +106,19 @@ Action::Action(Action&& a) {
         case Action::Type::MORPH: new (this) Action(std::move(a.morph)); break;
         case Action::Type::MOVE: new (this) Action(std::move(a.move)); break;
         case Action::Type::OCCUPY: new (this) Action(std::move(a.occupy)); break;
-        case Action::Type::ORDER: new (this) Action(std::move(a.order)); break;
         case Action::Type::PAY: new (this) Action(std::move(a.pay)); break;
+        case Action::Type::PLAY: new (this) Action(std::move(a.play)); break;
         case Action::Type::PUSH: new (this) Action(std::move(a.push)); break;
         case Action::Type::REMOVE: new (this) Action(std::move(a.remove)); break;
         case Action::Type::REVEAL: new (this) Action(std::move(a.reveal)); break;
         case Action::Type::SCORE: new (this) Action(std::move(a.score)); break;
         case Action::Type::SELECT: new (this) Action(std::move(a.select)); break;
-        case Action::Type::PLAY: new (this) Action(std::move(a.play)); break;
+        case Action::Type::SLOW: new (this) Action(std::move(a.slow)); break;
         case Action::Type::SPARK: new (this) Action(std::move(a.spark)); break;
+        case Action::Type::SPEED: new (this) Action(std::move(a.speed)); break;
         case Action::Type::SPIN: new (this) Action(std::move(a.spin)); break;
+        case Action::Type::STOP: new (this) Action(std::move(a.stop)); break;
+        case Action::Type::TARGET: new (this) Action(std::move(a.target)); break;
         case Action::Type::THRUST: new (this) Action(std::move(a.thrust)); break;
         case Action::Type::WARP: new (this) Action(std::move(a.warp)); break;
         case Action::Type::WIN: new (this) Action(std::move(a.win)); break;
@@ -152,16 +158,19 @@ Action::~Action() {
         case Action::Type::MORPH: morph.~MorphAction(); break;
         case Action::Type::MOVE: move.~MoveAction(); break;
         case Action::Type::OCCUPY: occupy.~OccupyAction(); break;
-        case Action::Type::ORDER: order.~OrderAction(); break;
         case Action::Type::PAY: pay.~PayAction(); break;
+        case Action::Type::PLAY: play.~PlayAction(); break;
         case Action::Type::PUSH: push.~PushAction(); break;
         case Action::Type::REMOVE: remove.~RemoveAction(); break;
         case Action::Type::REVEAL: reveal.~RevealAction(); break;
         case Action::Type::SCORE: score.~ScoreAction(); break;
         case Action::Type::SELECT: select.~SelectAction(); break;
-        case Action::Type::PLAY: play.~PlayAction(); break;
+        case Action::Type::SLOW: slow.~SlowAction(); break;
         case Action::Type::SPARK: spark.~SparkAction(); break;
+        case Action::Type::SPEED: speed.~SpeedAction(); break;
         case Action::Type::SPIN: spin.~SpinAction(); break;
+        case Action::Type::STOP: stop.~StopAction(); break;
+        case Action::Type::TARGET: target.~TargetAction(); break;
         case Action::Type::THRUST: thrust.~ThrustAction(); break;
         case Action::Type::WARP: warp.~WarpAction(); break;
         case Action::Type::WIN: win.~WinAction(); break;
@@ -259,7 +268,7 @@ FIELD_READER(Action::Type) {
                 {"morph", Action::Type::MORPH},
                 {"move", Action::Type::MOVE},
                 {"occupy", Action::Type::OCCUPY},
-                {"order", Action::Type::ORDER},
+                {"target", Action::Type::TARGET},
                 {"pay", Action::Type::PAY},
                 {"play", Action::Type::PLAY},
                 {"push", Action::Type::PUSH},
@@ -267,8 +276,11 @@ FIELD_READER(Action::Type) {
                 {"reveal", Action::Type::REVEAL},
                 {"score", Action::Type::SCORE},
                 {"select", Action::Type::SELECT},
+                {"slow", Action::Type::SLOW},
                 {"spark", Action::Type::SPARK},
+                {"speed", Action::Type::SPEED},
                 {"spin", Action::Type::SPIN},
+                {"stop", Action::Type::STOP},
                 {"thrust", Action::Type::THRUST},
                 {"warp", Action::Type::WARP},
                 {"win", Action::Type::WIN},
@@ -466,52 +478,10 @@ static Action occupy_action(path_value x) {
             x, {COMMON_ACTION_FIELDS, {"value", &OccupyAction::value}});
 }
 
-static Action order_action(path_value x) {
-    return required_struct<OrderAction>(x, {COMMON_ACTION_FIELDS});
-}
-
 static Action pay_action(path_value x) {
     return required_struct<PayAction>(
             x,
             {COMMON_ACTION_FIELDS, {"value", &PayAction::value}, {"player", &PayAction::player}});
-}
-
-FIELD_READER(PushAction::Kind) {
-    return required_enum<PushAction::Kind>(
-            x, {{"collide", PushAction::Kind::COLLIDE},
-                {"decelerate", PushAction::Kind::DECELERATE},
-                {"boost", PushAction::Kind::BOOST},
-                {"set", PushAction::Kind::SET},
-                {"cruise", PushAction::Kind::CRUISE}});
-}
-
-static Action push_action(path_value x) {
-    return required_struct<PushAction>(
-            x, {COMMON_ACTION_FIELDS, {"kind", &PushAction::kind}, {"value", &PushAction::value}});
-}
-
-static Action remove_action(path_value x) {
-    return required_struct<RemoveAction>(x, {COMMON_ACTION_FIELDS});
-}
-
-static Action reveal_action(path_value x) {
-    return required_struct<RevealAction>(
-            x, {COMMON_ACTION_FIELDS, {"initial", &RevealAction::initial}});
-}
-
-static Action score_action(path_value x) {
-    return required_struct<ScoreAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"player", &ScoreAction::player},
-                {"which", &ScoreAction::which},
-                {"value", &ScoreAction::value}});
-}
-
-static Action select_action(path_value x) {
-    return required_struct<SelectAction>(
-            x, {COMMON_ACTION_FIELDS,
-                {"screen", &SelectAction::screen},
-                {"line", &SelectAction::line}});
 }
 
 FIELD_READER(PlayAction::Sound) {
@@ -534,6 +504,37 @@ static Action play_action(path_value x) {
                 {"any", &PlayAction::any}});
 }
 
+static Action push_action(path_value x) {
+    return required_struct<PushAction>(x, {COMMON_ACTION_FIELDS, {"value", &PushAction::value}});
+}
+
+static Action remove_action(path_value x) {
+    return required_struct<RemoveAction>(x, {COMMON_ACTION_FIELDS});
+}
+
+static Action reveal_action(path_value x) {
+    return required_struct<RevealAction>(
+            x, {COMMON_ACTION_FIELDS, {"initial", &RevealAction::initial}});
+}
+
+static Action score_action(path_value x) {
+    return required_struct<ScoreAction>(
+            x, {COMMON_ACTION_FIELDS,
+                {"counter", &ScoreAction::counter},
+                {"value", &ScoreAction::value}});
+}
+
+static Action select_action(path_value x) {
+    return required_struct<SelectAction>(
+            x, {COMMON_ACTION_FIELDS,
+                {"screen", &SelectAction::screen},
+                {"line", &SelectAction::line}});
+}
+
+static Action slow_action(path_value x) {
+    return required_struct<SlowAction>(x, {COMMON_ACTION_FIELDS, {"value", &SlowAction::value}});
+}
+
 static Action spark_action(path_value x) {
     return required_struct<SparkAction>(
             x, {COMMON_ACTION_FIELDS,
@@ -543,8 +544,23 @@ static Action spark_action(path_value x) {
                 {"velocity", &SparkAction::velocity}});
 }
 
+static Action speed_action(path_value x) {
+    return required_struct<SpeedAction>(
+            x, {COMMON_ACTION_FIELDS,
+                {"value", &SpeedAction::value},
+                {"relative", &SpeedAction::relative}});
+}
+
 static Action spin_action(path_value x) {
     return required_struct<SpinAction>(x, {COMMON_ACTION_FIELDS, {"value", &SpinAction::value}});
+}
+
+static Action stop_action(path_value x) {
+    return required_struct<StopAction>(x, {COMMON_ACTION_FIELDS});
+}
+
+static Action target_action(path_value x) {
+    return required_struct<TargetAction>(x, {COMMON_ACTION_FIELDS});
 }
 
 static Action thrust_action(path_value x) {
@@ -594,7 +610,6 @@ DEFINE_FIELD_READER(Action) {
         case Action::Type::MORPH: return morph_action(x);
         case Action::Type::MOVE: return move_action(x);
         case Action::Type::OCCUPY: return occupy_action(x);
-        case Action::Type::ORDER: return order_action(x);
         case Action::Type::PAY: return pay_action(x);
         case Action::Type::PLAY: return play_action(x);
         case Action::Type::PUSH: return push_action(x);
@@ -602,8 +617,12 @@ DEFINE_FIELD_READER(Action) {
         case Action::Type::REVEAL: return reveal_action(x);
         case Action::Type::SCORE: return score_action(x);
         case Action::Type::SELECT: return select_action(x);
+        case Action::Type::SLOW: return slow_action(x);
         case Action::Type::SPARK: return spark_action(x);
+        case Action::Type::SPEED: return speed_action(x);
         case Action::Type::SPIN: return spin_action(x);
+        case Action::Type::STOP: return stop_action(x);
+        case Action::Type::TARGET: return target_action(x);
         case Action::Type::THRUST: return thrust_action(x);
         case Action::Type::WARP: return warp_action(x);
         case Action::Type::WIN: return win_action(x);

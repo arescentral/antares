@@ -44,32 +44,15 @@ NatePixTable::NatePixTable(pn::string_view name, Hue hue) {
     if (image.size() != overlay.size()) {
         throw std::runtime_error("size mismatch between image and overlay");
     }
-    if (image.size().width % data.cols.value_or(1)) {
-        throw std::runtime_error("sprite column count does not evenly split image");
-    }
-    if (image.size().height % data.rows.value_or(1)) {
-        throw std::runtime_error("sprite row count does not evenly split image");
-    }
-    if (data.frames.size() != (data.rows.value_or(1) * data.cols.value_or(1))) {
-        throw std::runtime_error("frame count not equal to rows * cols");
-    }
-    for (Rect frame : data.frames) {
-        const int  i           = _frames.size();
-        const int  col         = i % data.cols.value_or(1);
-        const int  row         = i / data.cols.value_or(1);
-        const int  cell_width  = image.size().width / data.cols.value_or(1);
-        const int  cell_height = image.size().height / data.rows.value_or(1);
-        const Rect cell(Point(cell_width * col, cell_height * row), Size(cell_width, cell_height));
-        Rect       sprite = frame;
-        sprite.offset(data.center.h, data.center.v);
-        Rect bounds(frame);
-        bounds.offset(2 * -bounds.left, 2 * -bounds.top);
+    for (SpriteData::Frame frame : data.frames) {
+        const int i = _frames.size();
+        Rect      sprite{frame.left, frame.top, frame.right, frame.bottom};
+        Rect      bounds = sprite;
+        bounds.offset(-frame.cx, -frame.cy);
         if (hue == Hue::GRAY) {
-            _frames.emplace_back(bounds, image.view(cell).view(sprite), name, i);
+            _frames.emplace_back(bounds, image.view(sprite), name, i);
         } else {
-            _frames.emplace_back(
-                    bounds, image.view(cell).view(sprite), name, i,
-                    overlay.view(cell).view(sprite), hue);
+            _frames.emplace_back(bounds, image.view(sprite), name, i, overlay.view(sprite), hue);
         }
     }
 }
@@ -119,7 +102,7 @@ void NatePixTable::Frame::load_overlay(const PixMap& pix, Hue hue) {
 
 uint16_t       NatePixTable::Frame::width() const { return _bounds.width(); }
 uint16_t       NatePixTable::Frame::height() const { return _bounds.height(); }
-Point          NatePixTable::Frame::center() const { return _bounds.origin(); }
+Point          NatePixTable::Frame::center() const { return {-_bounds.left, -_bounds.top}; }
 const PixMap&  NatePixTable::Frame::pix_map() const { return _pix_map; }
 const Texture& NatePixTable::Frame::texture() const { return _texture; }
 

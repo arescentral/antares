@@ -401,58 +401,19 @@ static void apply(
         return;
     }
 
-    switch (a.kind) {
-        case PushAction::Kind::BOOST: {
-            Fixed fx, fy;
-            GetRotPoint(&fx, &fy, direct->direction);
-            direct->velocity.h += a.value * fx;
-            direct->velocity.v += a.value * fy;
-            break;
-        }
+    if (a.value.has_value()) {
+        Fixed fx, fy;
+        GetRotPoint(&fx, &fy, subject->direction);
+        direct->velocity = {*a.value * fx, *a.value * fy};
+    } else if ((direct->base->mass > Fixed::zero()) && (direct->maxVelocity > Fixed::zero())) {
+        // if colliding, then PUSH the direct like collision
+        direct->velocity.h +=
+                ((subject->velocity.h - direct->velocity.h) / direct->base->mass.val()) << 6L;
+        direct->velocity.v +=
+                ((subject->velocity.v - direct->velocity.v) / direct->base->mass.val()) << 6L;
 
-        case PushAction::Kind::CRUISE: {
-            Fixed fx, fy;
-            GetRotPoint(&fx, &fy, direct->direction);
-            direct->velocity = {a.value * fx, a.value * fy};
-            break;
-        }
-
-        case PushAction::Kind::SET: {
-            Fixed fx, fy;
-            GetRotPoint(&fx, &fy, subject->direction);
-            direct->velocity = {a.value * fx, a.value * fy};
-            break;
-        }
-
-        case PushAction::Kind::COLLIDE: {
-            if ((direct->base->mass <= Fixed::zero()) || (direct->maxVelocity <= Fixed::zero())) {
-                return;
-            }
-
-            // if colliding, then PUSH the direct like collision
-            direct->velocity.h +=
-                    ((subject->velocity.h - direct->velocity.h) / direct->base->mass.val()) << 6L;
-            direct->velocity.v +=
-                    ((subject->velocity.v - direct->velocity.v) / direct->base->mass.val()) << 6L;
-
-            // make sure we're not going faster than our top speed
-            cap_velocity(direct);
-            break;
-        }
-
-        case PushAction::Kind::DECELERATE: {
-            if ((direct->base->mass <= Fixed::zero()) || (direct->maxVelocity <= Fixed::zero())) {
-                return;
-            }
-
-            // if decelerating, then STOP the direct like applying brakes
-            direct->velocity.h += direct->velocity.h * -a.value;
-            direct->velocity.v += direct->velocity.v * -a.value;
-
-            // make sure we're not going faster than our top speed
-            cap_velocity(direct);
-            break;
-        }
+        // make sure we're not going faster than our top speed
+        cap_velocity(direct);
     }
 }
 
@@ -624,21 +585,22 @@ static void apply(
     direct->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
     CreateAnySpaceObject(
-            *plug.info.warpInFlareID, &newVel, &direct->location, direct->direction,
-            Admiral::none(), 0, sfz::nullopt);
+            *kWarpInFlare, &newVel, &direct->location, direct->direction, Admiral::none(), 0,
+            sfz::nullopt);
 }
 
 static void apply(
         const ScoreAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    Handle<Admiral> admiral;
-    if (a.player.has_value()) {
-        admiral = *a.player;
+    Counter counter;
+    counter.which = a.counter.which;
+    if (a.counter.player.has_value()) {
+        counter.player = *a.counter.player;
     } else if (direct.get()) {
-        admiral = direct->owner;
+        counter.player = direct->owner;
     }
-    if (admiral.get()) {
-        AlterAdmiralScore(admiral, a.which, a.value);
+    if (counter.player.get()) {
+        AlterAdmiralScore(counter, a.value);
     }
 }
 
@@ -665,7 +627,7 @@ static void apply(
 }
 
 static void apply(
-        const OrderAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
+        const TargetAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
     uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
@@ -734,12 +696,52 @@ static void apply(
 }
 
 static void apply(
+        const SlowAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
+        Point offset) {
+    if (!(direct.get() && (direct->maxVelocity > Fixed::zero()))) {
+        return;
+    }
+
+    // if decelerating, then STOP the direct like applying brakes
+    direct->velocity.h += direct->velocity.h * (a.value - Fixed::from_long(1));
+    direct->velocity.v += direct->velocity.v * (a.value - Fixed::from_long(1));
+
+    // make sure we're not going faster than our top speed
+    cap_velocity(direct);
+}
+
+static void apply(
+        const SpeedAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
+        Point offset) {
+    if (!direct.get()) {
+        return;
+    }
+
+    Fixed fx, fy;
+    GetRotPoint(&fx, &fy, direct->direction);
+    if (a.relative.value_or(false)) {
+        direct->velocity.h += a.value * fx;
+        direct->velocity.v += a.value * fy;
+    } else {
+        direct->velocity = {a.value * fx, a.value * fy};
+    }
+}
+
+static void apply(
+        const StopAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
+        Point offset) {
+    if (!direct.get()) {
+        return;
+    }
+    direct->velocity = {Fixed::zero(), Fixed::zero()};
+}
+
+static void apply(
         const AssumeAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    Handle<Admiral> player1(0);
-    int             index = a.which + GetAdmiralScore(player1, 0);
-    g.initials[index]     = direct;
-    g.initial_ids[index]  = direct->id;
+    int index            = a.which + GetAdmiralScore({Handle<Admiral>{0}, 0});
+    g.initials[index]    = direct;
+    g.initial_ids[index] = direct->id;
 }
 
 static ActionCursor apply(
@@ -775,7 +777,6 @@ static ActionCursor apply(
         case Action::Type::MORPH: apply(a.morph, subject, direct, offset); break;
         case Action::Type::MOVE: apply(a.move, subject, direct, offset); break;
         case Action::Type::OCCUPY: apply(a.occupy, subject, direct, offset); break;
-        case Action::Type::ORDER: apply(a.order, subject, direct, offset); break;
         case Action::Type::PAY: apply(a.pay, subject, direct, offset); break;
         case Action::Type::PLAY: apply(a.play, subject, direct, offset); break;
         case Action::Type::PUSH: apply(a.push, subject, direct, offset); break;
@@ -783,8 +784,12 @@ static ActionCursor apply(
         case Action::Type::REVEAL: apply(a.reveal, subject, direct, offset); break;
         case Action::Type::SCORE: apply(a.score, subject, direct, offset); break;
         case Action::Type::SELECT: apply(a.select, subject, direct, offset); break;
+        case Action::Type::SLOW: apply(a.slow, subject, direct, offset); break;
+        case Action::Type::SPEED: apply(a.speed, subject, direct, offset); break;
+        case Action::Type::STOP: apply(a.stop, subject, direct, offset); break;
         case Action::Type::SPARK: apply(a.spark, subject, direct, offset); break;
         case Action::Type::SPIN: apply(a.spin, subject, direct, offset); break;
+        case Action::Type::TARGET: apply(a.target, subject, direct, offset); break;
         case Action::Type::THRUST: apply(a.thrust, subject, direct, offset); break;
         case Action::Type::WARP: apply(a.warp, subject, direct, offset); break;
         case Action::Type::WIN: apply(a.win, subject, direct, offset); break;
