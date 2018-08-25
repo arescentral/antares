@@ -255,7 +255,7 @@ static void item_text(const Quads& quads, int line, pn::string_view string, bool
     Point origin = rect.origin();
     origin.offset(
             kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
-    RgbColor textcolor = GetRGBTranslateColorShade(kMiniScreenColor, VERY_LIGHT);
+    RgbColor textcolor = GetRGBTranslateColorShade(kMiniScreenColor, LIGHTEST);
     if (dim) {
         if (line == g.mini.selectLine) {
             textcolor = GetRGBTranslateColorShade(kMiniScreenColor, VERY_DARK);
@@ -274,7 +274,7 @@ static void button_on(const Rects& rects, int line) {
     hilite_rect.top    = rect.top + (line * sys.fonts.computer.height);
     hilite_rect.right  = rect.right;
     hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
-    draw_shaded_rect(rects, hilite_rect, kMiniButColor, LIGHT, VERY_LIGHT, MEDIUM);
+    draw_shaded_rect(rects, hilite_rect, kMiniButColor, LIGHT, LIGHTEST, MEDIUM);
 }
 
 static void button_off(const Rects& rects, int line) {
@@ -305,7 +305,7 @@ static void button_off_text(const Quads& quads, int line, pn::string_view string
     Point origin = rect.origin();
     origin.offset(
             kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
-    RgbColor textcolor = GetRGBTranslateColorShade(kMiniButColor, VERY_LIGHT);
+    RgbColor textcolor = GetRGBTranslateColorShade(kMiniButColor, LIGHTEST);
     sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
@@ -593,7 +593,7 @@ void UpdateMiniScreenLines() {
 
 static void draw_player_ammo_in_rect(int32_t value, Hue hue, const Rect& rect) {
     if (value >= 0) {
-        const RgbColor text_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
+        const RgbColor text_color = GetRGBTranslateColorShade(hue, LIGHTEST);
         const char     digits[]   = {
                 char(((value % 1000) / 100) + '0'), char(((value % 100) / 10) + '0'),
                 char((value % 10) + '0'), '\0',
@@ -620,7 +620,7 @@ static void draw_mini_ship_data(
     {
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
-        draw_shaded_rect(Rects(), bar, header_hue, LIGHT, VERY_LIGHT, MEDIUM);
+        draw_shaded_rect(Rects(), bar, header_hue, LIGHT, LIGHTEST, MEDIUM);
         sys.fonts.computer.draw(
                 Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer.ascent),
                 label, RgbColor::black());
@@ -643,7 +643,7 @@ static void draw_mini_ship_data(
             sys.fonts.computer.draw(
                     Point(lRect.left + kMiniScreenLeftBuffer,
                           lRect.top + sys.fonts.computer.ascent),
-                    obj->short_name(), GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT));
+                    obj->short_name(), GetRGBTranslateColorShade(Hue::PALE_GREEN, LIGHTEST));
         }
     }
 
@@ -725,7 +725,7 @@ static void draw_mini_ship_data(
 
     {
         // Weapons
-        RgbColor color = GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT);
+        RgbColor color = GetRGBTranslateColorShade(Hue::PALE_GREEN, LIGHTEST);
 
         if (obj->beam.base) {
             Rect lRect = mini_screen_line_bounds(
@@ -759,7 +759,7 @@ static void draw_mini_ship_data(
     if (obj->destObject.get()) {
         auto     dest     = obj->destObject;
         bool     friendly = (dest->owner == g.admiral);
-        RgbColor color = GetRGBTranslateColorShade(friendly ? Hue::GREEN : Hue::RED, VERY_LIGHT);
+        RgbColor color    = GetRGBTranslateColorShade(friendly ? Hue::GREEN : Hue::RED, LIGHTEST);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
         sys.fonts.computer.draw(
                 Point(lRect.left, lRect.top + sys.fonts.computer.ascent), dest->long_name(),

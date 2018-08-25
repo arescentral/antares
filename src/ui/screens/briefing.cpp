@@ -240,7 +240,7 @@ void BriefingScreen::overlay() const {
             Rect  star_rect = _star_rect;
             star_rect.offset(off.h, off.v);
             const Point star   = star_rect.center();
-            RgbColor    gold   = GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT);
+            RgbColor    gold   = GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST);
             Rect        bounds = _bounds;
             bounds.offset(off.h, off.v);
             plug.starmap.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
@@ -379,7 +379,7 @@ void BriefingScreen::draw_brief_point() const {
         Rect highlight_rect = _highlight_rect;
         highlight_rect.offset(off.h, off.v);
         Rects          rects;
-        const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
+        const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, LIGHTEST);
         rects.fill(
                 {highlight_rect.left, highlight_rect.top, highlight_rect.right,
                  highlight_rect.top + 1},
