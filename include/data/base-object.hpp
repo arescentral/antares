@@ -275,7 +275,7 @@ class BaseObject {
         int32_t         energyCost;   // cost to fire
         ticks           fireTime;     // time between shots
         int32_t         ammo;         // initial ammo
-        int32_t         range;        // range (= age * max velocity)
+        Distance        range;        // range (= age * max velocity)
         InvertableSpeed speed;        // for AI: inverse = 1/max velocity
         int32_t         restockCost;  // energy to make new ammo
     };
