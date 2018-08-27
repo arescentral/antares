@@ -546,11 +546,11 @@ static void alter_weapon(
     }
 
     weapon.ammo = base->device->ammo;
-    if (base->device->range > direct->longestWeaponRange) {
-        direct->longestWeaponRange = base->device->range;
+    if (base->device->range.squared > direct->longestWeaponRange) {
+        direct->longestWeaponRange = base->device->range.squared;
     }
-    if (base->device->range < direct->shortestWeaponRange) {
-        direct->shortestWeaponRange = base->device->range;
+    if (base->device->range.squared < direct->shortestWeaponRange) {
+        direct->shortestWeaponRange = base->device->range.squared;
     }
 }
 
