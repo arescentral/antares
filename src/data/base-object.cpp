@@ -108,6 +108,13 @@ FIELD_READER(BaseObject::Device::Direction) {
                 {"omni", BaseObject::Device::Direction::OMNI}});
 }
 
+FIELD_READER(InvertableSpeed) {
+    auto    speed   = read_field<double>(x);
+    double  inverse = 256 / speed;
+    int32_t rounded = round(inverse);
+    return InvertableSpeed{Fixed::from_val(rounded)};
+}
+
 FIELD_READER(sfz::optional<BaseObject::Device>) {
     using Device = BaseObject::Device;
     return optional_struct<Device>(
@@ -117,7 +124,7 @@ FIELD_READER(sfz::optional<BaseObject::Device>) {
                 {"fire_time", &Device::fireTime},
                 {"ammo", &Device::ammo},
                 {"range", &Device::range},
-                {"inverse_speed", &Device::inverseSpeed},
+                {"speed", &Device::speed},
                 {"restock_cost", &Device::restockCost}});
 }
 

@@ -802,7 +802,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 
                     calcv = targetObject->velocity.h - anObject->velocity.h;
                     fdist = Fixed::from_long(dcalc);
-                    fdist *= bestWeapon->device->inverseSpeed;
+                    fdist *= bestWeapon->device->speed.inverse;
                     calcv      = (calcv * fdist);
                     difference = mFixedToLong(calcv);
                     dest.h -= difference;

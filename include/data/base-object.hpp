@@ -100,6 +100,10 @@ enum {
     kHardTargetMatchesTags = 0x00080000,
 };
 
+struct InvertableSpeed {
+    Fixed inverse;
+};
+
 class BaseObject {
   public:
     static BaseObject* get(int number);
@@ -268,12 +272,12 @@ class BaseObject {
             FORE,  // should use when foe is in front of bearer
             OMNI,  // should use when foe is anywhere near bearer
         } direction = Direction::FORE;
-        int32_t energyCost;    // cost to fire
-        ticks   fireTime;      // time between shots
-        int32_t ammo;          // initial ammo
-        int32_t range;         // range (= age * max velocity)
-        Fixed   inverseSpeed;  // for AI = 1/max velocity
-        int32_t restockCost;   // energy to make new ammo
+        int32_t         energyCost;   // cost to fire
+        ticks           fireTime;     // time between shots
+        int32_t         ammo;         // initial ammo
+        int32_t         range;        // range (= age * max velocity)
+        InvertableSpeed speed;        // for AI: inverse = 1/max velocity
+        int32_t         restockCost;  // energy to make new ammo
     };
     sfz::optional<Device> device;
 
