@@ -337,9 +337,9 @@ SpaceObject::SpaceObject(
         if (weapon->base) {
             const auto& frame = weapon->base->device;
             weapon->ammo      = frame->ammo;
-            if ((frame->range > 0) && (frame->usage.attacking)) {
-                longestWeaponRange  = max(frame->range, longestWeaponRange);
-                shortestWeaponRange = min(frame->range, shortestWeaponRange);
+            if ((frame->range.squared > 0) && (frame->usage.attacking)) {
+                longestWeaponRange  = max<int32_t>(frame->range.squared, longestWeaponRange);
+                shortestWeaponRange = min<int32_t>(frame->range.squared, shortestWeaponRange);
             }
         }
     }
@@ -487,7 +487,7 @@ void SpaceObject::change_base_type(
                 weapon->time = g.time + weapon->base->device->fireTime;
             }
         }
-        r = weapon->base->device->range;
+        r = weapon->base->device->range.squared;
         if ((r > 0) && (weapon->base->device->usage.attacking)) {
             if (r > obj->longestWeaponRange) {
                 obj->longestWeaponRange = r;

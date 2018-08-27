@@ -768,30 +768,30 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                 if (anObject->beam.base) {
                     auto weaponObject = bestWeapon = anObject->beam.base;
                     if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range) >= distance) &&
-                        (weaponObject->device->range < difference)) {
+                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                        (weaponObject->device->range.squared < difference)) {
                         bestWeapon = weaponObject;
-                        difference = weaponObject->device->range;
+                        difference = weaponObject->device->range.squared;
                     }
                 }
 
                 if (anObject->pulse.base) {
                     auto weaponObject = anObject->pulse.base;
                     if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range) >= distance) &&
-                        (weaponObject->device->range < difference)) {
+                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                        (weaponObject->device->range.squared < difference)) {
                         bestWeapon = weaponObject;
-                        difference = weaponObject->device->range;
+                        difference = weaponObject->device->range.squared;
                     }
                 }
 
                 if (anObject->special.base) {
                     auto weaponObject = anObject->special.base;
                     if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range) >= distance) &&
-                        (weaponObject->device->range < difference)) {
+                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                        (weaponObject->device->range.squared < difference)) {
                         bestWeapon = weaponObject;
-                        difference = weaponObject->device->range;
+                        difference = weaponObject->device->range.squared;
                     }
                 }
 
@@ -802,7 +802,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 
                     calcv = targetObject->velocity.h - anObject->velocity.h;
                     fdist = Fixed::from_long(dcalc);
-                    fdist *= bestWeapon->device->inverseSpeed;
+                    fdist *= bestWeapon->device->speed.inverse;
                     calcv      = (calcv * fdist);
                     difference = mFixedToLong(calcv);
                     dest.h -= difference;
@@ -1389,30 +1389,30 @@ uint32_t ThinkObjectEngageTarget(
         if (anObject->beam.base) {
             auto weaponObject = bestWeapon = anObject->beam.base;
             if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range) >= distance) &&
-                (weaponObject->device->range < difference)) {
+                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                (weaponObject->device->range.squared < difference)) {
                 bestWeapon = weaponObject;
-                difference = weaponObject->device->range;
+                difference = weaponObject->device->range.squared;
             }
         }
 
         if (anObject->pulse.base) {
             auto weaponObject = anObject->pulse.base;
             if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range) >= distance) &&
-                (weaponObject->device->range < difference)) {
+                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                (weaponObject->device->range.squared < difference)) {
                 bestWeapon = weaponObject;
-                difference = weaponObject->device->range;
+                difference = weaponObject->device->range.squared;
             }
         }
 
         if (anObject->special.base) {
             auto weaponObject = anObject->special.base;
             if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range) >= distance) &&
-                (weaponObject->device->range < difference)) {
+                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                (weaponObject->device->range.squared < difference)) {
                 bestWeapon = weaponObject;
-                difference = weaponObject->device->range;
+                difference = weaponObject->device->range.squared;
             }
         }
         //      dest.h = targetObject->location.h;
@@ -1460,7 +1460,7 @@ uint32_t ThinkObjectEngageTarget(
             auto weaponObject = anObject->pulse.base;
             if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range))) {
+                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
                 keysDown |= kPulseKey;
             }
         }
@@ -1469,7 +1469,7 @@ uint32_t ThinkObjectEngageTarget(
             auto weaponObject = anObject->beam.base;
             if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range))) {
+                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
                 keysDown |= kBeamKey;
             }
         }
@@ -1478,7 +1478,7 @@ uint32_t ThinkObjectEngageTarget(
             auto weaponObject = anObject->special.base;
             if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range))) {
+                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
                 keysDown |= kSpecialKey;
             }
         }
