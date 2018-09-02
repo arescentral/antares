@@ -53,10 +53,7 @@ FIELD_READER(sfz::optional<BaseObject::Rotation>) {
 FIELD_READER(BaseObject::Animation::Direction) {
     using Direction = BaseObject::Animation::Direction;
     return required_enum<Direction>(
-            x, {{"0", Direction::NONE},
-                {"+", Direction::PLUS},
-                {"-", Direction::MINUS},
-                {"?", Direction::RANDOM}});
+            x, {{"+", Direction::PLUS}, {"-", Direction::MINUS}, {"?", Direction::RANDOM}});
 }
 
 FIELD_READER(sfz::optional<BaseObject::Animation>) {
