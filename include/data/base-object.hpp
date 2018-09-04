@@ -225,10 +225,9 @@ class BaseObject {
     // animation: objects whose appearence does not depend on direction
     struct Animation {
         enum class Direction {
-            NONE   = 0,   // 0
             PLUS   = +1,  // +
             MINUS  = -1,  // -
-            RANDOM = 2,   // ?
+            RANDOM = 0,   // ?
         };
 
         pn::string sprite;  // ID of sprite resource
