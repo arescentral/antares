@@ -103,7 +103,7 @@ void ResetAllSprites() {
 
 void Pix::reset() {
     _pix.clear();
-    _cursor.reset(new NatePixTable("cursor", Hue::GRAY));
+    _cursor.reset(new NatePixTable("gui/cursor", Hue::GRAY));
 }
 
 NatePixTable* Pix::add(pn::string_view name, Hue hue) {
