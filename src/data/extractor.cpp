@@ -210,7 +210,7 @@ pn::data convert_snd(const SoundInfo& info, pn::data_view data) {
 }
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static int64_t    kVersion        = 20;
+static int64_t    kVersion        = 21;
 
 static const char kPluginInfoFile[] = "info.pn";
 

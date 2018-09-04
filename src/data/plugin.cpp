@@ -38,7 +38,7 @@ using std::vector;
 
 namespace antares {
 
-static constexpr int kPluginFormat = 20;
+static constexpr int kPluginFormat = 21;
 
 static constexpr const char kSplashPicture[]  = "splash";
 static constexpr const char kStarmapPicture[] = "starmap";
