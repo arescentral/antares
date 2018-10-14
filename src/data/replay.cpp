@@ -347,7 +347,7 @@ namespace {
 // TODO(sfiera): put globbing in a central location.
 struct ScopedGlob {
     glob_t data;
-    ScopedGlob() { memset(&data, sizeof(data), 0); }
+    ScopedGlob() { memset(&data, 0, sizeof(data)); }
     ~ScopedGlob() { globfree(&data); }
 };
 
