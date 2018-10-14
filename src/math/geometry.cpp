@@ -19,22 +19,9 @@
 #include "math/geometry.hpp"
 
 #include <algorithm>
-#include <sfz/sfz.hpp>
-
-using sfz::ReadSource;
-using sfz::format;
-using sfz::read;
+#include <pn/file>
 
 namespace antares {
-
-Point::Point() : h(0), v(0) {}
-
-Point::Point(int x, int y) : h(x), v(y) {}
-
-void Point::offset(int32_t x, int32_t y) {
-    h += x;
-    v += y;
-}
 
 void Point::clamp_to(const Rect& rect) {
     h = std::max(h, rect.left);
@@ -43,70 +30,9 @@ void Point::clamp_to(const Rect& rect) {
     v = std::min(v, rect.bottom - 1);
 }
 
-bool operator==(const Point& lhs, const Point& rhs) {
-    return (lhs.h == rhs.h) && (lhs.v == rhs.v);
-}
+Rect Size::as_rect() const { return Rect(0, 0, width, height); }
 
-bool operator!=(const Point& lhs, const Point& rhs) {
-    return !(lhs == rhs);
-}
-
-void read_from(ReadSource in, Point& p) {
-    read(in, p.h);
-    read(in, p.v);
-}
-
-Size::Size() : width(0), height(0) {}
-
-Size::Size(int32_t width, int32_t height) : width(width), height(height) {}
-
-Rect Size::as_rect() const {
-    return Rect(0, 0, width, height);
-}
-
-bool operator==(Size x, Size y) {
-    return (x.width == y.width) && (x.height == y.height);
-}
-
-bool operator!=(Size x, Size y) {
-    return !(x == y);
-}
-
-Rect::Rect() : left(0), top(0), right(0), bottom(0) {}
-
-Rect::Rect(int32_t left, int32_t top, int32_t right, int32_t bottom)
-        : left(left), top(top), right(right), bottom(bottom) {}
-
-Rect::Rect(Point origin, Size size)
-        : left(origin.h), top(origin.v), right(left + size.width), bottom(top + size.height) {}
-
-bool Rect::empty() const {
-    return (width() <= 0) || (height() <= 0);
-}
-
-int32_t Rect::width() const {
-    return right - left;
-}
-
-int32_t Rect::height() const {
-    return bottom - top;
-}
-
-Point Rect::origin() const {
-    return Point(left, top);
-}
-
-Point Rect::center() const {
-    return Point((left + right) / 2, (top + bottom) / 2);
-}
-
-Size Rect::size() const {
-    return Size(width(), height());
-}
-
-int32_t Rect::area() const {
-    return width() * height();
-}
+Point Rect::center() const { return Point((left + right) / 2, (top + bottom) / 2); }
 
 bool Rect::contains(const Point& p) const {
     return left <= p.h && p.h < right && top <= p.v && p.v < bottom;
@@ -125,6 +51,13 @@ void Rect::offset(int32_t x, int32_t y) {
     right += x;
     top += y;
     bottom += y;
+}
+
+void Rect::scale(int32_t x, int32_t y) {
+    left *= x;
+    right *= x;
+    top *= y;
+    bottom *= y;
 }
 
 void Rect::inset(int32_t x, int32_t y) {
@@ -154,15 +87,8 @@ void Rect::enlarge_to(const Rect& r) {
     bottom = std::max(bottom, r.bottom);
 }
 
-void read_from(ReadSource in, Rect& r) {
-    read(in, r.left);
-    read(in, r.top);
-    read(in, r.right);
-    read(in, r.bottom);
-}
-
-void print_to(sfz::PrintTarget out, Rect r) {
-    print(out, format("{{{0}, {1}, {2}, {3}}}", r.left, r.top, r.right, r.bottom));
+pn::string stringify(Rect r) {
+    return pn::format("{{{0}, {1}, {2}, {3}}}", r.left, r.top, r.right, r.bottom);
 }
 
 }  // namespace antares

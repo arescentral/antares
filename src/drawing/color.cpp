@@ -19,16 +19,10 @@
 #include "drawing/color.hpp"
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"
-
-using sfz::ReadSource;
-using sfz::WriteTarget;
-using sfz::format;
-using sfz::read;
-using sfz::write;
 
 namespace antares {
 
@@ -114,60 +108,46 @@ static const RgbColor kColors[256] = {
         rgb(80, 0, 0),      rgb(64, 0, 0),      rgb(48, 0, 0),      rgb(0, 0, 0),
 };
 
-static const uint8_t kDiffuse[][3] = {
-        {255, 255, 255}, {255, 128, 0}, {255, 255, 0},   {0, 0, 255},
-        {0, 255, 0},     {128, 0, 255}, {128, 128, 255}, {255, 128, 128},
-        {255, 255, 128}, {0, 255, 255}, {255, 0, 128},   {128, 255, 128},
-        {255, 128, 255}, {0, 128, 255}, {239, 233, 195}, {255, 0, 0},
+static const int kDiffuse[][3] = {
+        {256, 256, 256}, {256, 128, 0}, {256, 256, 0},   {0, 0, 256},
+        {0, 256, 0},     {128, 0, 256}, {128, 128, 256}, {256, 128, 128},
+        {256, 256, 128}, {0, 256, 256}, {256, 0, 128},   {128, 256, 128},
+        {256, 128, 256}, {0, 128, 256}, {241, 235, 196}, {256, 0, 0},
 };
 
-static const uint8_t kAmbient[][3] = {
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0},    {0, 0, 0},
-        {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {16, 15, 12}, {0, 0, 0},
+static const int kAmbient[][3] = {
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0},          {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+        {0, 0, 0}, {0, 0, 0}, {0, 0, 0},          {0, 0, 0}, {0, 0, 0}, {0, 0, 0},
+        {0, 0, 0}, {0, 0, 0}, {3840, 3744, 3072}, {0, 0, 0},
 };
 
-RgbColor RgbColor::tint(uint8_t color, uint8_t value) {
+RgbColor RgbColor::tint(Hue hue, uint8_t shade) {
+    int h = static_cast<int>(hue);
     return rgb(
-            implicit_cast<uint8_t>((kDiffuse[color][0] * value / 255) + kAmbient[color][0]),
-            implicit_cast<uint8_t>((kDiffuse[color][1] * value / 255) + kAmbient[color][1]),
-            implicit_cast<uint8_t>((kDiffuse[color][2] * value / 255) + kAmbient[color][2]));
+            ((kDiffuse[h][0] * shade) + kAmbient[h][0]) / 256,
+            ((kDiffuse[h][1] * shade) + kAmbient[h][1]) / 256,
+            ((kDiffuse[h][2] * shade) + kAmbient[h][2]) / 256);
 }
 
-const RgbColor& RgbColor::at(uint8_t index) {
-    return kColors[index];
-}
+const RgbColor& RgbColor::at(uint8_t index) { return kColors[index]; }
 
-void print_to(sfz::PrintTarget out, const RgbColor& color) {
+pn::string stringify(const RgbColor& color) {
     if (color.alpha == 0xff) {
-        print(out, format("rgb({0}, {1}, {2})", color.red, color.green, color.blue));
+        return pn::format("rgb({0}, {1}, {2})", color.red, color.green, color.blue);
     } else {
-        print(out,
-              format("rgba({0}, {1}, {2}, {3})", color.red, color.green, color.blue, color.alpha));
+        return pn::format(
+                "rgba({0}, {1}, {2}, {3})", color.red, color.green, color.blue, color.alpha);
     }
 }
 
-uint8_t GetTranslateColorShade(uint8_t color, uint8_t shade) {
-    return (17 - shade) + (color * 16);
+uint8_t GetTranslateColorShade(Hue hue, uint8_t shade) {
+    return (17 - shade) + (static_cast<int>(hue) * 16);
 }
 
-void GetRGBTranslateColorShade(RgbColor* c, uint8_t color, uint8_t shade) {
-    *c = RgbColor::at(GetTranslateColorShade(color, shade));
+RgbColor GetRGBTranslateColorShade(Hue hue, uint8_t shade) {
+    return RgbColor::at(GetTranslateColorShade(hue, shade));
 }
 
-RgbColor GetRGBTranslateColorShade(uint8_t color, uint8_t shade) {
-    RgbColor result;
-    GetRGBTranslateColorShade(&result, color, shade);
-    return result;
-}
-
-void GetRGBTranslateColor(RgbColor* c, uint8_t color) {
-    *c = RgbColor::at(color);
-}
-
-RgbColor GetRGBTranslateColor(uint8_t color) {
-    RgbColor result;
-    GetRGBTranslateColor(&result, color);
-    return result;
-}
+RgbColor GetRGBTranslateColor(uint8_t color) { return RgbColor::at(color); }
 
 }  // namespace antares

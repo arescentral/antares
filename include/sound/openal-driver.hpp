@@ -19,8 +19,6 @@
 #ifndef ANTARES_SOUND_OPENAL_DRIVER_HPP_
 #define ANTARES_SOUND_OPENAL_DRIVER_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "sound/driver.hpp"
 
 #ifdef __APPLE__
@@ -36,24 +34,22 @@ namespace antares {
 class OpenAlSoundDriver : public SoundDriver {
   public:
     OpenAlSoundDriver();
+    OpenAlSoundDriver(const OpenAlSoundDriver&) = delete;
+    OpenAlSoundDriver& operator=(const OpenAlSoundDriver&) = delete;
     ~OpenAlSoundDriver();
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path);
-    virtual void set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path);
+    virtual void                          set_global_volume(uint8_t volume);
 
   private:
     class OpenAlChannel;
     class OpenAlSound;
 
-    template <typename T>
-    static void read_sound(sfz::BytesSlice data, OpenAlSound& sound);
-
     ALCcontext*    _context;
     ALCdevice*     _device;
     OpenAlChannel* _active_channel;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenAlSoundDriver);
 };
 
 }  // namespace antares

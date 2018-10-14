@@ -19,6 +19,7 @@
 #ifndef ANTARES_DATA_EXTRACTOR_HPP_
 #define ANTARES_DATA_EXTRACTOR_HPP_
 
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -27,34 +28,33 @@ class DataExtractor {
   public:
     struct Observer {
         virtual ~Observer();
-        virtual void status(const sfz::StringSlice& status) = 0;
+        virtual void status(pn::string_view status) = 0;
     };
 
-    DataExtractor(const sfz::StringSlice& downloads_dir, const sfz::StringSlice& output_dir);
+    DataExtractor(pn::string_view downloads_dir, pn::string_view output_dir);
 
-    void set_scenario(sfz::StringSlice scenario);
-    void set_plugin_file(sfz::StringSlice path);
+    void set_scenario(pn::string_view scenario);
+    void set_plugin_file(pn::string_view path);
 
     bool current() const;
     void extract(Observer* observer) const;
 
   private:
-    bool scenario_current(sfz::StringSlice scenario) const;
+    bool scenario_current(pn::string_view scenario) const;
 
     void extract_factory_scenario(Observer* observer) const;
     void extract_plugin_scenario(Observer* observer) const;
 
     void download(
-            Observer* observer, const sfz::StringSlice& base, const sfz::StringSlice& name,
-            const sfz::StringSlice& version, const sfz::Sha1::Digest& digest) const;
-    void write_version(sfz::StringSlice scenario_identifier) const;
-    void extract_original(Observer* observer, const sfz::StringSlice& zip) const;
-    void extract_supplemental(Observer* observer, const sfz::StringSlice& zip) const;
+            Observer* observer, pn::string_view base, pn::string_view name,
+            pn::string_view version, const sfz::sha1::digest& digest) const;
+    void extract_original(Observer* observer, pn::string_view zip) const;
+    void extract_supplemental(Observer* observer, pn::string_view zip) const;
     void extract_plugin(Observer* observer) const;
 
-    const sfz::String _downloads_dir;
-    const sfz::String _output_dir;
-    sfz::String       _scenario;
+    const pn::string _downloads_dir;
+    const pn::string _output_dir;
+    pn::string       _scenario;
 };
 
 }  // namespace antares

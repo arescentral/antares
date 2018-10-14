@@ -18,9 +18,10 @@
 
 #include "game/non-player-ship.hpp"
 
+#include <pn/file>
+
 #include "config/keys.hpp"
 #include "data/plugin.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/action.hpp"
@@ -41,9 +42,6 @@
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"
 
-using sfz::Exception;
-using sfz::StringSlice;
-
 namespace antares {
 
 const int32_t kDirectionError = 5;   // how picky in degrees we are about angle
@@ -61,19 +59,16 @@ const int32_t kWeaponRatio        = 2;
 const int32_t kEnergyChunk        = kHealthRatio + (kWeaponRatio * 3);
 const int32_t kWarpInEnergyFactor = 3;
 
-enum {
-    kFriendlyColor = GREEN,
-    kHostileColor  = RED,
-    kNeutralColor  = SKY_BLUE,
-};
+static const ticks    kCollideFlashDuration = ticks{3};
+static const RgbColor kCollideFlashColor    = rgba(255, 255, 255, 127);
 
-uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject);
+uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject);
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject);
 uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject);
-uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject);
+uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject);
 uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject);
-void ThinkObjectGetCoordVector(
-        Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance, int16_t* angle);
+void     ThinkObjectGetCoordVector(
+            Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance, int16_t* angle);
 void ThinkObjectGetCoordDistance(
         Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance);
 void ThinkObjectResolveDestination(
@@ -97,15 +92,14 @@ void SpaceObject::recharge() {
     }
 
     for (auto* weapon : {&pulse, &beam, &special}) {
-        if (weapon->base.get()) {
-            if ((weapon->ammo < (weapon->base->frame.weapon.ammo >> 1)) &&
-                (_energy >= kWeaponRatio)) {
+        if (weapon->base) {
+            if ((weapon->ammo < (weapon->base->device->ammo >> 1)) && (_energy >= kWeaponRatio)) {
                 weapon->charge++;
                 _energy -= kWeaponRatio;
 
-                if ((weapon->base->frame.weapon.restockCost >= 0) &&
-                    (weapon->charge >= weapon->base->frame.weapon.restockCost)) {
-                    weapon->charge -= weapon->base->frame.weapon.restockCost;
+                if ((weapon->base->device->restockCost >= 0) &&
+                    (weapon->charge >= weapon->base->device->restockCost)) {
+                    weapon->charge -= weapon->base->device->restockCost;
                     weapon->ammo++;
                 }
             }
@@ -115,30 +109,32 @@ void SpaceObject::recharge() {
 
 static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target, uint32_t key,
-        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
+        const sfz::optional<BaseObject::Weapon>& base_weapon, SpaceObject::Weapon& weapon) {
     if (subject->keysDown & key) {
-        fire_weapon(subject, target, base_weapon, weapon);
+        fire_weapon(
+                subject, target, weapon,
+                base_weapon.has_value() ? base_weapon->positions : std::vector<fixedPointType>{});
     }
 }
 
 void fire_weapon(
-        Handle<SpaceObject> subject, Handle<SpaceObject> target,
-        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if ((weapon.time > g.time) || !weapon.base.get()) {
+        Handle<SpaceObject> subject, Handle<SpaceObject> target, SpaceObject::Weapon& weapon,
+        const std::vector<fixedPointType>& positions) {
+    if ((weapon.time > g.time) || !weapon.base) {
         return;
     }
 
     auto weaponObject = weapon.base;
-    if ((subject->energy() < weaponObject->frame.weapon.energyCost) ||
-        ((weaponObject->frame.weapon.ammo > 0) && (weapon.ammo <= 0))) {
+    if ((subject->energy() < weaponObject->device->energyCost) ||
+        ((weaponObject->device->ammo > 0) && (weapon.ammo <= 0))) {
         return;
     }
     if ((&weapon != &subject->special) && (subject->cloakState > 0)) {
         subject->set_cloak(false);
     }
-    subject->_energy -= weaponObject->frame.weapon.energyCost;
+    subject->_energy -= weaponObject->device->energyCost;
     weapon.position++;
-    if (weapon.position >= base_weapon.positionNum) {
+    if (weapon.position >= positions.size()) {
         weapon.position = 0;
     }
 
@@ -149,59 +145,53 @@ void fire_weapon(
     fcos = -fcos;
     fsin = -fsin;
 
-    Point  offset;
-    Point* at = nullptr;
-    if (&weapon != &subject->special) {
+    Point offset;
+    Point at = {0, 0};
+    if ((&weapon != &subject->special) && !positions.empty()) {
         offset.h = mFixedToLong(
-                (base_weapon.position[weapon.position].h * fcos) +
-                (base_weapon.position[weapon.position].v * -fsin));
+                (positions[weapon.position].h * fcos) + (positions[weapon.position].v * -fsin));
         offset.v = mFixedToLong(
-                (base_weapon.position[weapon.position].h * fsin) +
-                (base_weapon.position[weapon.position].v * fcos));
-        at = &offset;
+                (positions[weapon.position].h * fsin) + (positions[weapon.position].v * fcos));
+        at = offset;
     }
 
-    weapon.time = g.time + weaponObject->frame.weapon.fireTime;
-    if (weaponObject->frame.weapon.ammo > 0) {
+    weapon.time = g.time + weaponObject->device->fireTime;
+    if (weaponObject->device->ammo > 0) {
         weapon.ammo--;
     }
-    exec(weaponObject->activate, subject, target, at);
+    exec(weaponObject->activate.action, subject, target, at);
 }
 
 static void tick_pulse(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kOneKey, subject->baseType->pulse, subject->pulse);
+    tick_weapon(subject, target, kPulseKey, subject->base->weapons.pulse, subject->pulse);
 }
 
 static void tick_beam(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kTwoKey, subject->baseType->beam, subject->beam);
+    tick_weapon(subject, target, kBeamKey, subject->base->weapons.beam, subject->beam);
 }
 
 static void tick_special(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kEnterKey, subject->baseType->special, subject->special);
+    tick_weapon(subject, target, kSpecialKey, subject->base->weapons.special, subject->special);
+}
+
+static uint8_t get_tiny_shade(const SpaceObject& o) {
+    switch (o.layer) {
+        case BaseObject::Layer::NONE: return DARK; break;
+        case BaseObject::Layer::BASES: return MEDIUM; break;
+        case BaseObject::Layer::SHIPS: return LIGHT; break;
+        case BaseObject::Layer::SHOTS: return LIGHTEST; break;
+    }
 }
 
 void NonplayerShipThink() {
-    RgbColor friendSick, foeSick, neutralSick;
+    uint8_t friendSick, foeSick, neutralSick;
     switch ((std::chrono::time_point_cast<ticks>(g.time).time_since_epoch().count() / 9) % 4) {
-        case 0:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, MEDIUM);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, MEDIUM);
-            break;
-        case 1:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, DARK);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, DARK);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARK);
-            break;
-        case 2:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, DARKER);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, DARKER);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKER);
-            break;
+        case 0: friendSick = foeSick = neutralSick = MEDIUM; break;
+        case 1: friendSick = foeSick = neutralSick = DARK; break;
+        case 2: friendSick = foeSick = neutralSick = DARKER; break;
         case 3:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, DARKEST);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, DARKER - 1);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKEST);
+            friendSick = neutralSick = DARKEST;
+            foeSick                  = DARKER - 1;
             break;
     }
 
@@ -212,76 +202,76 @@ void NonplayerShipThink() {
 
     // it probably doesn't matter what order we do this in, but we'll do
     // it in the "ideal" order anyway
-    for (auto anObject = g.root; anObject.get(); anObject = anObject->nextObject) {
-        if (!anObject->active) {
+    SpaceObject* o = nullptr;
+    for (auto o_handle = g.root; (o = o_handle.get()); o_handle = o->nextObject) {
+        if (!o->active) {
             continue;
         }
 
-        g.sync += anObject->location.h;
-        g.sync += anObject->location.v;
+        g.sync += o->location.h;
+        g.sync += o->location.v;
 
         // strobe its symbol if it's not feeling well
-        if (anObject->sprite.get()) {
-            if ((anObject->health() > 0) &&
-                (anObject->health() <= (anObject->max_health() >> 2))) {
-                if (anObject->owner == g.admiral) {
-                    anObject->sprite->tinyColor = friendSick;
-                } else if (anObject->owner.get()) {
-                    anObject->sprite->tinyColor = foeSick;
+        if (o->sprite.get()) {
+            if ((o->health() > 0) && (o->health() <= (o->max_health() >> 2))) {
+                if (o->owner == g.admiral) {
+                    o->sprite->tinyColor.shade = friendSick;
+                } else if (o->owner.get()) {
+                    o->sprite->tinyColor.shade = foeSick;
                 } else {
-                    anObject->sprite->tinyColor = neutralSick;
+                    o->sprite->tinyColor.shade = neutralSick;
                 }
             } else {
-                anObject->sprite->tinyColor = anObject->tinyColor;
+                o->sprite->tinyColor.shade = get_tiny_shade(*o);
             }
         }
 
         // if the object can think, or is human controlled
-        if (!(anObject->attributes & (kCanThink | kRemoteOrHuman))) {
+        if (!(o->attributes & (kCanThink | kRemoteOrHuman))) {
             continue;
         }
 
         // get the object's base object
-        auto baseObject       = anObject->base;
-        anObject->targetAngle = anObject->directionGoal = anObject->direction;
+        auto baseObject = o->base;
+        o->targetAngle = o->directionGoal = o->direction;
 
         // incremenent its admiral's # of ships
-        if (anObject->owner.get()) {
-            anObject->owner->shipsLeft()++;
+        if (o->owner.get()) {
+            o->owner->shipsLeft()++;
         }
 
         uint32_t keysDown;
-        switch (anObject->presenceState) {
+        switch (o->presenceState) {
             case kNormalPresence:
-                keysDown = ThinkObjectNormalPresence(anObject, baseObject);
+                keysDown = ThinkObjectNormalPresence(o_handle, baseObject);
                 break;
 
-            case kWarpingPresence: keysDown = ThinkObjectWarpingPresence(anObject); break;
+            case kWarpingPresence: keysDown = ThinkObjectWarpingPresence(o_handle); break;
 
-            case kWarpInPresence: keysDown = ThinkObjectWarpInPresence(anObject); break;
+            case kWarpInPresence: keysDown = ThinkObjectWarpInPresence(o_handle); break;
 
             case kWarpOutPresence:
-                keysDown = ThinkObjectWarpOutPresence(anObject, baseObject);
+                keysDown = ThinkObjectWarpOutPresence(o_handle, baseObject);
                 break;
 
-            case kLandingPresence: keysDown = ThinkObjectLandingPresence(anObject); break;
+            case kLandingPresence: keysDown = ThinkObjectLandingPresence(o_handle); break;
         }
 
-        if (!(anObject->attributes & kRemoteOrHuman) || (anObject->attributes & kOnAutoPilot)) {
-            if (anObject->attributes & kHasDirectionGoal) {
-                if (anObject->attributes & kShapeFromDirection) {
-                    if ((anObject->attributes & kIsGuided) && anObject->targetObject.get()) {
-                        int32_t difference = anObject->targetAngle - anObject->direction;
+        if (!(o->attributes & kRemoteOrHuman) || (o->attributes & kOnAutoPilot)) {
+            if (o->attributes & kHasDirectionGoal) {
+                if (o->attributes & kShapeFromDirection) {
+                    if ((o->attributes & kIsGuided) && o->targetObject.get()) {
+                        int32_t difference = o->targetAngle - o->direction;
                         if ((difference < -60) || (difference > 60)) {
-                            anObject->targetObject   = SpaceObject::none();
-                            anObject->targetObjectID = kNoShip;
-                            anObject->directionGoal  = anObject->direction;
+                            o->targetObject   = SpaceObject::none();
+                            o->targetObjectID = kNoShip;
+                            o->directionGoal  = o->direction;
                         }
                     }
                 }
                 Point offset;
-                offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
-                offset.v = mFixedToLong(anObject->turn_rate() << 1);
+                offset.h           = mAngleDifference(o->directionGoal, o->direction);
+                offset.v           = mFixedToLong(o->turn_rate() << 1);
                 int32_t difference = ABS(offset.h);
                 if (difference > offset.v) {
                     if (offset.h < 0) {
@@ -292,117 +282,117 @@ void NonplayerShipThink() {
                 }
             }
             // and here?
-            if (!(anObject->keysDown & kManualOverrideFlag)) {
-                if (anObject->closestDistance < kEngageRange) {
+            if (!(o->keysDown & kManualOverrideFlag)) {
+                if (o->closestDistance < kEngageRange) {
                     // why do we only do this randomly when closest is within engagerange?
                     // to simulate the innaccuracy of battle
                     // (to keep things from wiggling, really)
-                    if (anObject->randomSeed.next(baseObject->skillDen) < baseObject->skillNum) {
-                        anObject->keysDown &= ~kMotionKeyMask;
-                        anObject->keysDown |= keysDown & kMotionKeyMask;
+                    if (o->randomSeed.next(baseObject->ai.combat.skill.den) <
+                        baseObject->ai.combat.skill.num) {
+                        o->keysDown &= ~kMotionKeyMask;
+                        o->keysDown |= keysDown & kMotionKeyMask;
                     }
-                    if (anObject->randomSeed.next(3) == 1) {
-                        anObject->keysDown &= ~kWeaponKeyMask;
-                        anObject->keysDown |= keysDown & kWeaponKeyMask;
+                    if (o->randomSeed.next(3) == 1) {
+                        o->keysDown &= ~kWeaponKeyMask;
+                        o->keysDown |= keysDown & kWeaponKeyMask;
                     }
-                    anObject->keysDown &= ~kMiscKeyMask;
-                    anObject->keysDown |= keysDown & kMiscKeyMask;
+                    o->keysDown &= ~kMiscKeyMask;
+                    o->keysDown |= keysDown & kMiscKeyMask;
                 } else {
-                    anObject->keysDown = (anObject->keysDown & kSpecialKeyMask) | keysDown;
+                    o->keysDown = (o->keysDown & kSpecialKeyMask) | keysDown;
                 }
             } else {
-                anObject->keysDown &= ~kManualOverrideFlag;
+                o->keysDown &= ~kManualOverrideFlag;
             }
         }
 
         // Take care of any "keys" being pressed
-        if (anObject->keysDown & kAdoptTargetKey) {
-            SetObjectDestination(anObject);
+        if (o->keysDown & kAdoptTargetKey) {
+            SetObjectDestination(o_handle);
         }
-        if (anObject->keysDown & kAutoPilotKey) {
-            TogglePlayerAutoPilot(anObject);
+        if (o->keysDown & kAutoPilotKey) {
+            TogglePlayerAutoPilot(o_handle);
         }
-        if (anObject->keysDown & kGiveCommandKey) {
-            PlayerShipGiveCommand(anObject->owner);
+        if (o->keysDown & kGiveCommandKey) {
+            PlayerShipGiveCommand(o->owner);
         }
-        anObject->keysDown &= ~kSpecialKeyMask;
+        o->keysDown &= ~kSpecialKeyMask;
 
-        if (anObject->offlineTime > 0) {
-            if (anObject->randomSeed.next(anObject->offlineTime) > 5) {
-                anObject->keysDown = 0;
+        if (o->offlineTime > 0) {
+            if (o->randomSeed.next(o->offlineTime) > 5) {
+                o->keysDown = 0;
             }
-            anObject->offlineTime--;
+            o->offlineTime--;
         }
 
-        if ((anObject->attributes & kRemoteOrHuman) && (!(anObject->attributes & kCanThink)) &&
-            (!anObject->expires || (anObject->expire_after < secs(2)))) {
-            PlayerShipBodyExpire(anObject);
+        if ((o->attributes & kRemoteOrHuman) && (!(o->attributes & kCanThink)) &&
+            (!o->expires || (o->expire_after < secs(2)))) {
+            PlayerShipBodyExpire(o_handle);
         }
 
-        if ((anObject->attributes & kHasDirectionGoal) && (anObject->offlineTime <= 0)) {
-            if (anObject->keysDown & kLeftKey) {
-                anObject->turnVelocity = -anObject->turn_rate();
-            } else if (anObject->keysDown & kRightKey) {
-                anObject->turnVelocity = anObject->turn_rate();
+        if ((o->attributes & kHasDirectionGoal) && (o->offlineTime <= 0)) {
+            if (o->keysDown & kLeftKey) {
+                o->turnVelocity = -o->turn_rate();
+            } else if (o->keysDown & kRightKey) {
+                o->turnVelocity = o->turn_rate();
             } else {
-                anObject->turnVelocity = Fixed::zero();
+                o->turnVelocity = Fixed::zero();
             }
         }
 
-        if (anObject->keysDown & kUpKey) {
-            if ((anObject->presenceState != kWarpInPresence) &&
-                (anObject->presenceState != kWarpingPresence) &&
-                (anObject->presenceState != kWarpOutPresence)) {
-                anObject->thrust = baseObject->maxThrust;
+        if (o->keysDown & kUpKey) {
+            if ((o->presenceState != kWarpInPresence) && (o->presenceState != kWarpingPresence) &&
+                (o->presenceState != kWarpOutPresence)) {
+                o->thrust = baseObject->thrust;
             }
-        } else if (anObject->keysDown & kDownKey) {
-            anObject->thrust = -baseObject->maxThrust;
+        } else if (o->keysDown & kDownKey) {
+            o->thrust = -baseObject->thrust;
         } else {
-            anObject->thrust = Fixed::zero();
+            o->thrust = Fixed::zero();
         }
 
-        if (anObject->rechargeTime < kRechargeSpeed) {
-            anObject->rechargeTime += kMajorTick;
+        if (o->rechargeTime < kRechargeSpeed) {
+            o->rechargeTime += kMajorTick;
         } else {
-            anObject->rechargeTime = ticks(0);
+            o->rechargeTime = ticks(0);
 
-            if (anObject->presenceState == kWarpingPresence) {
-                anObject->collect_warp_energy(1);
-            } else if (anObject->presenceState == kNormalPresence) {
-                anObject->recharge();
+            if (o->presenceState == kWarpingPresence) {
+                o->collect_warp_energy(1);
+            } else if (o->presenceState == kNormalPresence) {
+                o->recharge();
             }
         }
 
         // targetObject is set for all three weapons -- do not change
         auto targetObject = SpaceObject::none();
-        if (anObject->targetObject.get()) {
-            targetObject = anObject->targetObject;
+        if (o->targetObject.get()) {
+            targetObject = o->targetObject;
         }
 
-        tick_pulse(anObject, targetObject);
-        tick_beam(anObject, targetObject);
-        tick_special(anObject, targetObject);
+        tick_pulse(o_handle, targetObject);
+        tick_beam(o_handle, targetObject);
+        tick_special(o_handle, targetObject);
 
-        if ((anObject->keysDown & kWarpKey) && (baseObject->warpSpeed > Fixed::zero()) &&
-            (anObject->energy() > 0)) {
-            if (anObject->presenceState == kWarpingPresence) {
-                anObject->thrust = baseObject->maxThrust * anObject->presence.warping;
-            } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = baseObject->maxThrust * anObject->presence.warp_out;
+        if ((o->keysDown & kWarpKey) && (baseObject->warpSpeed > Fixed::zero()) &&
+            (o->energy() > 0)) {
+            if (o->presenceState == kWarpingPresence) {
+                o->thrust = baseObject->thrust * o->presence.warping;
+            } else if (o->presenceState == kWarpOutPresence) {
+                o->thrust = baseObject->thrust * o->presence.warp_out;
             } else if (
-                    (anObject->presenceState == kNormalPresence) &&
-                    (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))) {
-                anObject->presenceState             = kWarpInPresence;
-                anObject->presence.warp_in.step     = 0;
-                anObject->presence.warp_in.progress = ticks(0);
+                    (o->presenceState == kNormalPresence) &&
+                    (o->energy() > (o->max_energy() >> kWarpInEnergyFactor))) {
+                o->presenceState             = kWarpInPresence;
+                o->presence.warp_in.step     = 0;
+                o->presence.warp_in.progress = ticks(0);
             }
         } else {
-            if (anObject->presenceState == kWarpInPresence) {
-                anObject->presenceState = kNormalPresence;
-            } else if (anObject->presenceState == kWarpingPresence) {
-                anObject->presenceState = kWarpOutPresence;
-            } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = baseObject->maxThrust * anObject->presence.warp_out;
+            if (o->presenceState == kWarpInPresence) {
+                o->presenceState = kNormalPresence;
+            } else if (o->presenceState == kWarpingPresence) {
+                o->presenceState = kWarpOutPresence;
+            } else if (o->presenceState == kWarpOutPresence) {
+                o->thrust = baseObject->thrust * o->presence.warp_out;
             }
         }
     }
@@ -411,31 +401,31 @@ void NonplayerShipThink() {
 uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
     uint32_t keys = 0;
 
-    if (obj->pulse.base.get()) {
+    if (obj->pulse.base) {
         auto weaponObject = obj->pulse.base;
-        if (weaponObject->frame.weapon.usage & kUseForDefense) {
-            keys |= kOneKey;
+        if (weaponObject->device->usage.defense) {
+            keys |= kPulseKey;
         }
     }
 
-    if (obj->beam.base.get()) {
+    if (obj->beam.base) {
         auto weaponObject = obj->beam.base;
-        if (weaponObject->frame.weapon.usage & kUseForDefense) {
-            keys |= kTwoKey;
+        if (weaponObject->device->usage.defense) {
+            keys |= kBeamKey;
         }
     }
 
-    if (obj->special.base.get()) {
+    if (obj->special.base) {
         auto weaponObject = obj->special.base;
-        if (weaponObject->frame.weapon.usage & kUseForDefense) {
-            keys |= kEnterKey;
+        if (weaponObject->device->usage.defense) {
+            keys |= kSpecialKey;
         }
     }
 
     return keys;
 }
 
-uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject) {
+uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
     uint32_t            keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
     coordPointType      dest;
     Handle<SpaceObject> targetObject;
@@ -443,7 +433,6 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObje
     Fixed               slope;
     int16_t             angle, theta, beta;
     Fixed               calcv, fdist;
-    Point               offset;
 
     if (!(anObject->attributes & kRemoteOrHuman) || (anObject->attributes & kOnAutoPilot)) {
         // set all keys off
@@ -543,11 +532,11 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObje
             }
 
             if (anObject->targetObject == anObject->destObject) {
-                if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                    if (baseObject->arrive.size() > 0) {
+                if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
+                    if (baseObject->arrive.action.size() > 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
-                            offset.h = offset.v = 0;
-                            exec(baseObject->arrive, anObject, anObject->destObject, &offset);
+                            exec(baseObject->arrive.action, anObject, anObject->destObject,
+                                 {0, 0});
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -702,15 +691,15 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObje
                     anObject->timeFromOrigin = ticks(0);
                 }
 
-                if (distance > static_cast<uint32_t>(baseObject->arriveActionDistance)) {
+                if (distance > static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
                     if (theta < kEvadeAngle) {
                         keysDown |= kUpKey;
                     }
                     anObject->lastTargetDistance = distance;
-                    if ((anObject->special.base.get()) && (distance > kWarpInDistance) &&
+                    if (anObject->special.base && (distance > kWarpInDistance) &&
                         (theta <= kDirectionError)) {
-                        if (anObject->special.base->frame.weapon.usage & kUseForTransportation) {
-                            keysDown |= kEnterKey;
+                        if (anObject->special.base->device->usage.transportation) {
+                            keysDown |= kSpecialKey;
                         }
                     }
                     if ((baseObject->warpSpeed > Fixed::zero()) &&
@@ -731,11 +720,11 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObje
                         }
                     }
 
-                    if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                        if (baseObject->arrive.size() > 0) {
+                    if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
+                        if (baseObject->arrive.action.size() > 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
-                                offset.h = offset.v = 0;
-                                exec(baseObject->arrive, anObject, anObject->destObject, &offset);
+                                exec(baseObject->arrive.action, anObject, anObject->destObject,
+                                     {0, 0});
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -774,46 +763,46 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObje
 
                 difference = anObject->longestWeaponRange;
 
-                auto bestWeapon = BaseObject::none();
+                const BaseObject* bestWeapon = nullptr;
 
-                if (anObject->beam.base.get()) {
+                if (anObject->beam.base) {
                     auto weaponObject = bestWeapon = anObject->beam.base;
-                    if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
-                        (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance) &&
-                        (weaponObject->frame.weapon.range < difference)) {
+                    if ((weaponObject->device->usage.attacking) &&
+                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                        (weaponObject->device->range.squared < difference)) {
                         bestWeapon = weaponObject;
-                        difference = weaponObject->frame.weapon.range;
+                        difference = weaponObject->device->range.squared;
                     }
                 }
 
-                if (anObject->pulse.base.get()) {
+                if (anObject->pulse.base) {
                     auto weaponObject = anObject->pulse.base;
-                    if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
-                        (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance) &&
-                        (weaponObject->frame.weapon.range < difference)) {
+                    if ((weaponObject->device->usage.attacking) &&
+                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                        (weaponObject->device->range.squared < difference)) {
                         bestWeapon = weaponObject;
-                        difference = weaponObject->frame.weapon.range;
+                        difference = weaponObject->device->range.squared;
                     }
                 }
 
-                if (anObject->special.base.get()) {
+                if (anObject->special.base) {
                     auto weaponObject = anObject->special.base;
-                    if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
-                        (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance) &&
-                        (weaponObject->frame.weapon.range < difference)) {
+                    if ((weaponObject->device->usage.attacking) &&
+                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                        (weaponObject->device->range.squared < difference)) {
                         bestWeapon = weaponObject;
-                        difference = weaponObject->frame.weapon.range;
+                        difference = weaponObject->device->range.squared;
                     }
                 }
 
                 // offset dest for anticipated position -- overkill?
 
-                if (bestWeapon.get()) {
+                if (bestWeapon) {
                     dcalc = lsqrt(distance);
 
                     calcv = targetObject->velocity.h - anObject->velocity.h;
                     fdist = Fixed::from_long(dcalc);
-                    fdist *= bestWeapon->frame.weapon.inverseSpeed;
+                    fdist *= bestWeapon->device->speed.inverse;
                     calcv      = (calcv * fdist);
                     difference = mFixedToLong(calcv);
                     dest.h -= difference;
@@ -867,12 +856,12 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
     if (presence.progress > ticks(100)) {
         if (anObject->collect_warp_energy(anObject->max_energy() >> kWarpInEnergyFactor)) {
             anObject->presenceState    = kWarpingPresence;
-            anObject->presence.warping = anObject->baseType->warpSpeed;
+            anObject->presence.warping = anObject->base->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = Fixed::zero();
             CreateAnySpaceObject(
-                    plug.meta.warpInFlareID, &newVel, &anObject->location, anObject->direction,
-                    Admiral::none(), 0, -1);
+                    *kWarpInFlare, &newVel, &anObject->location, anObject->direction,
+                    Admiral::none(), 0, sfz::nullopt);
         } else {
             anObject->presenceState = kNormalPresence;
             anObject->_energy       = 0;
@@ -904,7 +893,7 @@ uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
             anObject->direction = angle;
         }
 
-        if (distance < anObject->baseType->warpOutDistance) {
+        if (distance < anObject->base->warpOutDistance.squared) {
             if (targetObject.get()) {
                 if ((targetObject->presenceState == kWarpInPresence) ||
                     (targetObject->presenceState == kWarpingPresence)) {
@@ -918,7 +907,7 @@ uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
     return (keysDown);
 }
 
-uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject) {
+uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
     uint32_t       keysDown = anObject->keysDown & kSpecialKeyMask;
     Fixed          calcv, fdist;
     fixedPointType newVel;
@@ -943,8 +932,8 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObj
         newVel.h = newVel.v = Fixed::zero();
 
         CreateAnySpaceObject(
-                plug.meta.warpOutFlareID, &(newVel), &(anObject->location), anObject->direction,
-                Admiral::none(), 0, -1);
+                *kWarpOutFlare, &(newVel), &(anObject->location), anObject->direction,
+                Admiral::none(), 0, sfz::nullopt);
     }
     return (keysDown);
 }
@@ -1080,7 +1069,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
     }
 
     if (anObject->presence.landing.scale <= 0) {
-        exec(anObject->baseType->expire, anObject, target, NULL);
+        exec(anObject->base->expire.action, anObject, target, {0, 0});
         anObject->active = kObjectToBeFreed;
     } else if (anObject->sprite.get()) {
         anObject->sprite->scale = anObject->presence.landing.scale;
@@ -1394,36 +1383,36 @@ uint32_t ThinkObjectEngageTarget(
             anObject->timeFromOrigin += kMajorTick;
         }
 
-        auto bestWeapon = BaseObject::none();
-        difference      = anObject->longestWeaponRange;
+        const BaseObject* bestWeapon = nullptr;
+        difference                   = anObject->longestWeaponRange;
 
-        if (anObject->beam.base.get()) {
+        if (anObject->beam.base) {
             auto weaponObject = bestWeapon = anObject->beam.base;
-            if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
-                (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance) &&
-                (weaponObject->frame.weapon.range < difference)) {
+            if ((weaponObject->device->usage.attacking) &&
+                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                (weaponObject->device->range.squared < difference)) {
                 bestWeapon = weaponObject;
-                difference = weaponObject->frame.weapon.range;
+                difference = weaponObject->device->range.squared;
             }
         }
 
-        if (anObject->pulse.base.get()) {
+        if (anObject->pulse.base) {
             auto weaponObject = anObject->pulse.base;
-            if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
-                (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance) &&
-                (weaponObject->frame.weapon.range < difference)) {
+            if ((weaponObject->device->usage.attacking) &&
+                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                (weaponObject->device->range.squared < difference)) {
                 bestWeapon = weaponObject;
-                difference = weaponObject->frame.weapon.range;
+                difference = weaponObject->device->range.squared;
             }
         }
 
-        if (anObject->special.base.get()) {
+        if (anObject->special.base) {
             auto weaponObject = anObject->special.base;
-            if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
-                (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance) &&
-                (weaponObject->frame.weapon.range < difference)) {
+            if ((weaponObject->device->usage.attacking) &&
+                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
+                (weaponObject->device->range.squared < difference)) {
                 bestWeapon = weaponObject;
-                difference = weaponObject->frame.weapon.range;
+                difference = weaponObject->device->range.squared;
             }
         }
         //      dest.h = targetObject->location.h;
@@ -1467,30 +1456,30 @@ uint32_t ThinkObjectEngageTarget(
         beta = anObject->direction;
         beta = mAngleDifference(beta, angle);
 
-        if (anObject->pulse.base.get()) {
+        if (anObject->pulse.base) {
             auto weaponObject = anObject->pulse.base;
-            if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
+            if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->frame.weapon.range))) {
-                keysDown |= kOneKey;
+                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
+                keysDown |= kPulseKey;
             }
         }
 
-        if (anObject->beam.base.get()) {
+        if (anObject->beam.base) {
             auto weaponObject = anObject->beam.base;
-            if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
+            if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->frame.weapon.range))) {
-                keysDown |= kTwoKey;
+                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
+                keysDown |= kBeamKey;
             }
         }
 
-        if (anObject->special.base.get()) {
+        if (anObject->special.base) {
             auto weaponObject = anObject->special.base;
-            if ((weaponObject->frame.weapon.usage & kUseForAttacking) &&
+            if ((weaponObject->device->usage.attacking) &&
                 ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->frame.weapon.range))) {
-                keysDown |= kEnterKey;
+                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
+                keysDown |= kSpecialKey;
             }
         }
     }  // target is not in range
@@ -1509,13 +1498,12 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     }
 
     anObject->timeFromOrigin = ticks(0);
-    if (((anObject->_health - sObject->baseType->damage) < 0) &&
-        (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-        !anObject->baseType->destroyDontDie) {
+    if (((anObject->_health - sObject->base->collide.damage) < 0) &&
+        (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) && anObject->base->destroy.die) {
         anObject->create_floating_player_body();
     }
-    anObject->alter_health(-sObject->baseType->damage);
-    if (anObject->shieldColor != 0xFF) {
+    anObject->alter_health(-sObject->base->collide.damage);
+    if (anObject->shieldColor.has_value()) {
         anObject->hitState = (anObject->health() * kHitStateMax) / anObject->max_health();
         anObject->hitState += 16;
     }
@@ -1526,18 +1514,18 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
 
     if (anObject->health() < 0 && (anObject->owner == g.admiral) &&
         (anObject->attributes & kCanAcceptDestination)) {
-        const StringSlice& object_name = get_object_name(anObject->base);
-        int                count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
-        Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
+        int count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
+        Messages::add(
+                pn::format(" {0} destroyed.  {1} remaining. ", anObject->long_name(), count));
     }
 
     if (sObject->active == kObjectInUse) {
-        exec(sObject->baseType->collide, sObject, anObject, NULL);
+        exec(sObject->base->collide.action, sObject, anObject, {0, 0});
     }
 
-    if (anObject->owner == g.admiral && (anObject->attributes & kIsHumanControlled) &&
-        (sObject->baseType->damage > 0)) {
-        globals()->transitions.start_boolean(128, 128, WHITE);
+    if (anObject->owner == g.admiral && (anObject->attributes & kIsPlayerShip) &&
+        (sObject->base->collide.damage > 0)) {
+        globals()->transitions.start_boolean(kCollideFlashDuration, kCollideFlashColor);
     }
 }
 

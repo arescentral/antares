@@ -19,25 +19,18 @@
 #include "config/file-prefs-driver.hpp"
 
 #include <fcntl.h>
+#include <pn/file>
+#include <pn/map>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
 #include "config/keys.hpp"
 
-using sfz::Exception;
-using sfz::Json;
-using sfz::MappedFile;
-using sfz::ScopedFd;
-using sfz::String;
 using sfz::StringMap;
-using sfz::StringSlice;
-using sfz::format;
 using sfz::makedirs;
 using sfz::path::dirname;
 using sfz::range;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -58,17 +51,25 @@ static const char* kKeyNames[KEY_COUNT] = {
         "hotkey 6",        "hotkey 7",       "hotkey 8",    "hotkey 9",     "hotkey 10",
 };
 
-static bool get(Json json, bool& v) {
-    if (json.is_boolean()) {
-        v = json.boolean();
+static bool get(pn::value_cref x, bool& v) {
+    if (x.is_bool()) {
+        v = x.as_bool();
         return true;
     }
     return false;
 }
 
-static bool get(Json json, int& v) {
-    if (json.is_number()) {
-        v = json.number();
+static bool get(pn::value_cref x, int& v) {
+    if (x.is_int()) {
+        v = x.as_int();
+        return true;
+    }
+    return false;
+}
+
+static bool get(pn::value_cref x, Key& v) {
+    if (x.is_int()) {
+        v = static_cast<Key>(x.as_int());
         return true;
     }
     return false;
@@ -76,9 +77,9 @@ static bool get(Json json, int& v) {
 
 template <typename ValueType, typename ValueKey, typename PrefsMethod>
 static void set_from(
-        const Json& json, const char* section_key, ValueKey value_key, Preferences& prefs,
+        pn::map_cref x, const char* section_key, ValueKey value_key, Preferences& prefs,
         PrefsMethod pmeth) {
-    auto      section = json.get(section_key);
+    auto      section = x.get(section_key).as_map();
     auto      value   = section.get(value_key);
     ValueType typed;
     if (get(value, typed)) {
@@ -88,9 +89,9 @@ static void set_from(
 
 template <typename ValueType, typename ValueKey, typename PrefsMethod>
 static void set_from(
-        const Json& json, const char* section_key, ValueKey value_key, Preferences& prefs,
+        pn::map_cref x, const char* section_key, ValueKey value_key, Preferences& prefs,
         PrefsMethod pmeth, int index) {
-    auto      section = json.get(section_key);
+    auto      section = x.get(section_key).as_map();
     auto      value   = section.get(value_key);
     ValueType typed;
     if (get(value, typed)) {
@@ -99,51 +100,41 @@ static void set_from(
 }
 
 FilePrefsDriver::FilePrefsDriver() {
-    try {
-        String     path(format("{0}/config.json", dirs().root));
-        MappedFile file(path);
-        Json       json;
-        String     data(utf8::decode(file.data()));
-        if (!string_to_json(data, json)) {
-            return;
-        }
+    pn::string path = pn::format("{0}/config.pn", dirs().root);
+    pn::value  x;
+    pn::file   f = pn::open(path, "r");
+    if (!f || !pn::parse(f, x, nullptr)) {
+        return;
+    }
+    pn::map_cref m = x.as_map();
 
-        set_from<int>(json, "sound", "volume", _current, &Preferences::volume);
-        set_from<bool>(json, "sound", "speech", _current, &Preferences::speech_on);
-        set_from<bool>(json, "sound", "idle music", _current, &Preferences::play_idle_music);
-        set_from<bool>(json, "sound", "game music", _current, &Preferences::play_music_in_game);
+    set_from<int>(m, "sound", "volume", _current, &Preferences::volume);
+    set_from<bool>(m, "sound", "speech", _current, &Preferences::speech_on);
+    set_from<bool>(m, "sound", "idle music", _current, &Preferences::play_idle_music);
+    set_from<bool>(m, "sound", "game music", _current, &Preferences::play_music_in_game);
 
-        for (auto i : range<size_t>(KEY_COUNT)) {
-            set_from<int>(json, "keys", kKeyNames[i], _current, &Preferences::keys, i);
-        }
-    } catch (Exception& e) {
-        // pass
+    for (auto i : range<size_t>(KEY_COUNT)) {
+        set_from<Key>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
     }
 }
 
 void FilePrefsDriver::set(const Preferences& p) {
     _current = p.copy();
 
-    StringMap<Json> sound;
-    sound["volume"]     = Json::number(p.volume);
-    sound["speech"]     = Json::boolean(p.speech_on);
-    sound["idle music"] = Json::boolean(p.play_idle_music);
-    sound["game music"] = Json::boolean(p.play_music_in_game);
-
-    StringMap<Json> keys;
+    pn::map keys;
     for (auto i : range<size_t>(KEY_COUNT)) {
-        keys[kKeyNames[i]] = Json::number(p.keys[i]);
+        keys[kKeyNames[i]] = static_cast<int>(p.keys[i]);
     }
 
-    StringMap<Json> all;
-    all["sound"] = Json::object(sound);
-    all["keys"]  = Json::object(keys);
-
-    String path(format("{0}/config.json", dirs().root));
+    pn::string path = pn::format("{0}/config.pn", dirs().root);
     makedirs(dirname(path), 0755);
-    ScopedFd fd(open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644));
-    String   pretty(pretty_print(Json::object(all)));
-    write(fd, utf8::encode(pretty));
+    pn::file file = pn::open(path, "w");
+    pn::dump(
+            file, pn::map{{"sound", pn::map{{"volume", p.volume},
+                                            {"speech", p.speech_on},
+                                            {"idle music", p.play_idle_music},
+                                            {"game music", p.play_music_in_game}}},
+                          {"keys", std::move(keys)}});
 }
 
 }  // namespace antares

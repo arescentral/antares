@@ -24,7 +24,6 @@
 #include "drawing/pix-map.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using std::min;
 
 namespace antares {
@@ -125,7 +124,7 @@ void draw_shaded_rect(
 }
 
 void draw_shaded_rect(
-        const Rects& rects, Rect rect, uint8_t hue, uint8_t fill_color, uint8_t light_color,
+        const Rects& rects, Rect rect, Hue hue, uint8_t fill_color, uint8_t light_color,
         uint8_t dark_color) {
     draw_shaded_rect(
             rects, rect, GetRGBTranslateColorShade(hue, fill_color),

@@ -19,12 +19,14 @@
 #ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 #include <vector>
 
+#include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
@@ -33,20 +35,23 @@ class Picture;
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
-    Rect    bounds;
-    int16_t id;
+    Rect              bounds;
+    pn::string        picture;
+    const BaseObject* object;  // May be null.
 };
 
 class StyledText {
   public:
-    StyledText(const Font* font);
+    StyledText(const Font& font);
+    StyledText(const StyledText&) = delete;
+    StyledText& operator=(const StyledText&) = delete;
     ~StyledText();
 
     void set_fore_color(RgbColor fore_color);
     void set_back_color(RgbColor back_color);
     void set_tab_width(int tab_width);
-    void set_retro_text(sfz::StringSlice text);
-    void set_interface_text(sfz::StringSlice text);
+    void set_retro_text(pn::string_view text);
+    void set_interface_text(pn::string_view text);
     void wrap_to(int width, int side_margin, int line_spacing);
 
     int                                size() const;
@@ -77,7 +82,7 @@ class StyledText {
                 uint32_t character, SpecialChar special, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
-        sfz::Rune   character;
+        pn::rune    character;
         SpecialChar special;
         RgbColor    fore_color;
         RgbColor    back_color;
@@ -86,7 +91,7 @@ class StyledText {
     };
 
     void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
-    int move_word_down(int index, int v);
+    int  move_word_down(int index, int v);
 
     RgbColor                    _fore_color;
     RgbColor                    _back_color;
@@ -99,9 +104,7 @@ class StyledText {
     int                         _auto_width;
     int                         _side_margin;
     int                         _line_spacing;
-    const Font* const           _font;
-
-    DISALLOW_COPY_AND_ASSIGN(StyledText);
+    const Font&                 _font;
 };
 
 }  // namespace antares

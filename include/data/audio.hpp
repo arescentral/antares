@@ -16,39 +16,27 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_MAC_AUDIO_FILE_HPP_
-#define ANTARES_MAC_AUDIO_FILE_HPP_
+#ifndef ANTARES_DATA_SNDFILE_HPP_
+#define ANTARES_DATA_SNDFILE_HPP_
 
-#include <AudioToolbox/AudioToolbox.h>
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#include <sfz/sfz.hpp>
+#include <pn/data>
 
 namespace antares {
 
-class AudioFile {
-  public:
-    AudioFile(const sfz::BytesSlice& data);
-
-    ~AudioFile();
-
-    void convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const;
-
-    AudioFileID id() const { return _id; }
-
-  private:
-    static OSStatus read_proc(
-            void* this_, SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count);
-    static SInt64 get_size_proc(void* this_);
-    OSStatus read(SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count) const;
-    SInt64 get_size() const;
-
-    AudioFileID     _id;
-    sfz::BytesSlice _data;
-
-    DISALLOW_COPY_AND_ASSIGN(AudioFile);
+struct SoundData {
+    pn::data data;  // 16-bit signed LPCM
+    int      channels;
+    int      frequency;
 };
+
+namespace sndfile {
+SoundData convert(pn::data_view in);
+}  // namespace sndfile
+
+namespace modplug {
+SoundData convert(pn::data_view in);
+}  // namespace modplug
 
 }  // namespace antares
 
-#endif  // ANTARES_MAC_AUDIO_FILE_HPP_
+#endif  // ANTARES_DATA_SNDFILE_HPP_

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2015-2017 The Antares Authors
+// Copyright (C) 2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,33 +16,18 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_SOUND_SNDFILE_HPP_
-#define ANTARES_SOUND_SNDFILE_HPP_
+#ifndef ANTARES_LANG_EXCEPTION_HPP_
+#define ANTARES_LANG_EXCEPTION_HPP_
 
-#include <sfz/sfz.hpp>
-
-#ifdef __APPLE__
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#else
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
+#include <functional>
+#include <pn/fwd>
 
 namespace antares {
 
-class Sndfile {
-  public:
-    Sndfile(const sfz::BytesSlice& data);
-
-    void convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const;
-
-  private:
-    sfz::BytesSlice _data;
-
-    DISALLOW_COPY_AND_ASSIGN(Sndfile);
-};
+pn::string full_exception_string(const std::exception& e);
+int        wrap_main(
+               const std::function<void(int argc, char* const* argv)>& main, int argc, char* const* argv);
 
 }  // namespace antares
 
-#endif  // ANTARES_SOUND_SNDFILE_HPP_
+#endif  // ANTARES_LANG_EXCEPTION_HPP_

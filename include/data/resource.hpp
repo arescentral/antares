@@ -20,20 +20,50 @@
 #define ANTARES_DATA_RESOURCE_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <pn/string>
+#include <vector>
 
 namespace antares {
 
+class ArrayPixMap;
+class BaseObject;
+class NatePixTable;
+class Texture;
+struct Info;
+struct InterfaceData;
+struct FontData;
+union Level;
+struct Race;
+struct ReplayData;
+struct SoundData;
+struct SpriteData;
+
 class Resource {
   public:
-    Resource(const sfz::StringSlice& type, const sfz::StringSlice& extension, int id);
-    Resource(const sfz::PrintItem& resource_path);
-    ~Resource();
+    static std::vector<pn::string> list_levels();
+    static std::vector<pn::string> list_replays();
+    static bool                    object_exists(pn::string_view name);
 
-    sfz::BytesSlice data() const;
+    static FontData                font(pn::string_view name);
+    static Texture                 font_image(pn::string_view name);
+    static Info                    info();
+    static InterfaceData           interface(pn::string_view name);
+    static Level                   level(pn::string_view path);
+    static SoundData               music(pn::string_view name);
+    static BaseObject              object(pn::string_view path);
+    static Race                    race(pn::string_view path);
+    static ReplayData              replay(pn::string_view name);
+    static std::vector<int32_t>    rotation_table();
+    static SoundData               sound(pn::string_view name);
+    static SpriteData              sprite_data(pn::string_view name);
+    static ArrayPixMap             sprite_image(pn::string_view name);
+    static ArrayPixMap             sprite_overlay(pn::string_view name);
+    static std::vector<pn::string> strings(int id);
+    static pn::string              text(int id);
+    static Texture                 texture(pn::string_view name);
+    static Texture                 texture(int16_t id);
 
-  private:
-    std::unique_ptr<sfz::MappedFile> _file;
+    Resource() = delete;
 };
 
 }  // namespace antares

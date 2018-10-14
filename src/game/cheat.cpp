@@ -19,9 +19,8 @@
 #include "game/cheat.hpp"
 
 #include <algorithm>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
-#include "data/string-list.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
 #include "game/messages.hpp"
@@ -31,11 +30,6 @@
 #include "lang/defines.hpp"
 #include "math/fixed.hpp"
 
-using sfz::BytesSlice;
-using sfz::PrintItem;
-using sfz::Rune;
-using sfz::String;
-using sfz::StringSlice;
 using std::unique_ptr;
 
 namespace antares {
@@ -53,12 +47,12 @@ const int16_t kLowerPayRateCheat  = 8;
 
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
 void CheatFeedbackPlus(
-        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
+        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra);
 
-int16_t GetCheatNumFromString(const StringSlice& s) {
-    String code_string;
-    for (Rune r : s) {
-        code_string.append(1, r + kCheatCodeValue);
+int16_t GetCheatNumFromString(pn::string_view s) {
+    pn::string code_string;
+    for (pn::rune r : s) {
+        code_string += pn::rune{r.value() + kCheatCodeValue};
     }
     auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), code_string);
     if (it == sys.cheat.codes.end()) {
@@ -83,9 +77,7 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kPayMoneyCheat:
-            whichPlayer->pay_absolute(Fixed::from_long(5000));
-            whichPlayer->pay_absolute(Fixed::from_long(5000));
-            whichPlayer->pay_absolute(Fixed::from_long(5000));
+            whichPlayer->pay_absolute(Cash{Fixed::from_long(15000)});
             CheatFeedback(whichCheat, true, whichPlayer);
             break;
 
@@ -109,38 +101,40 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
         case kRaisePayRateCheat:
             whichPlayer->set_earning_power(
                     whichPlayer->earning_power() + Fixed::from_float(0.125));
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
+            CheatFeedbackPlus(
+                    whichCheat, true, whichPlayer, stringify(Fixed(whichPlayer->earning_power())));
             break;
 
         case kLowerPayRateCheat:
             whichPlayer->set_earning_power(
                     whichPlayer->earning_power() - Fixed::from_float(0.125));
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
+            CheatFeedbackPlus(
+                    whichCheat, true, whichPlayer, stringify(Fixed(whichPlayer->earning_power())));
             break;
     }
 }
 
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer) {
-    String admiral_name(GetAdmiralName(whichPlayer));
-    String feedback;
+    pn::string_view admiral_name = GetAdmiralName(whichPlayer);
+    pn::string_view feedback;
     if (activate) {
-        feedback.assign(sys.cheat.on.at(whichCheat - 1));
+        feedback = sys.cheat.on.at(whichCheat - 1);
     } else {
-        feedback.assign(sys.cheat.off.at(whichCheat - 1));
+        feedback = sys.cheat.off.at(whichCheat - 1);
     }
-    Messages::add(format("{0}{1}", admiral_name, feedback));
+    Messages::add(pn::format("{0}{1}", admiral_name, feedback));
 }
 
 void CheatFeedbackPlus(
-        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra) {
-    String admiral_name(GetAdmiralName(whichPlayer));
-    String feedback;
+        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra) {
+    pn::string_view admiral_name = GetAdmiralName(whichPlayer);
+    pn::string_view feedback;
     if (activate) {
-        feedback.assign(sys.cheat.on.at(whichCheat - 1));
+        feedback = sys.cheat.on.at(whichCheat - 1);
     } else {
-        feedback.assign(sys.cheat.off.at(whichCheat - 1));
+        feedback = sys.cheat.off.at(whichCheat - 1);
     }
-    Messages::add(format("{0}{1}{2}", admiral_name, feedback, extra));
+    Messages::add(pn::format("{0}{1}{2}", admiral_name, feedback, extra));
 }
 
 }  // namespace antares

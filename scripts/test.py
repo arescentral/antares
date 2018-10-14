@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 # Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
@@ -15,7 +16,6 @@ import sys
 import tempfile
 import time
 import traceback
-
 
 START = "START"
 PASSED = "PASSED"
@@ -38,8 +38,8 @@ def unit_test(opts, queue, name, args=[]):
 
 def diff_test(queue, name, cmd, expected):
     with NamedTemporaryDir() as d:
-        return (run(queue, name, cmd + ["--output=%s" % d]) and
-                run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
+        return (run(queue, name, cmd + ["--output=%s" % d])
+                and run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
 
 
 def data_test(opts, queue, name, args=[], smoke_args=[]):
@@ -80,7 +80,10 @@ def call(args):
 
     sys.stdout = cStringIO.StringIO()
 
-    queue.put((name, START,))
+    queue.put((
+        name,
+        START,
+    ))
     try:
         start = time.time()
         result = fn(opts, queue, name, *args)
@@ -100,8 +103,14 @@ def main():
         if "DISPLAY" not in os.environ:
             # TODO(sfiera): determine when Xvfb is unnecessary and skip this.
             print("no DISPLAY; using Xvfb")
-            os.execvp("xvfb-run",
-                      ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
+            os.execvp("xvfb-run", ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
+
+    os.chdir(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+    # Get test submodule if necessary.
+    if not os.path.isfile("test/space-race.NLRP"):
+        print("test data submodule is missing; fetching it")
+        subprocess.check_call("git submodule update --init test".split())
 
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
@@ -113,18 +122,17 @@ def main():
     queue = multiprocessing.Queue()
     pool = multiprocessing.pool.ThreadPool()
     tests = [
+        (unit_test, opts, queue, "color-test"),
         (unit_test, opts, queue, "fixed-test"),
-
         (data_test, opts, queue, "build-pix", [], ["--text"]),
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
-
+        (offscreen_test, opts, queue, "fast-motion"),
         (offscreen_test, opts, queue, "main-screen"),
         (offscreen_test, opts, queue, "mission-briefing", ["--text"]),
         (offscreen_test, opts, queue, "options"),
         (offscreen_test, opts, queue, "pause", ["--text"]),
-
         (replay_test, opts, queue, "and-it-feels-so-good"),
         (replay_test, opts, queue, "astrotrash-plus"),
         (replay_test, opts, queue, "blood-toil-tears-sweat"),

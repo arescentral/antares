@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -44,16 +45,7 @@
 #include "linux/offscreen.hpp"
 #endif
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::Optional;
-using sfz::PrintItem;
-using sfz::ScopedFd;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::WriteTarget;
 using sfz::dec;
-using sfz::format;
 using sfz::range;
 using std::greater;
 using std::max;
@@ -62,7 +54,6 @@ using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -97,7 +88,7 @@ class SnapshotBuffer {
 void gl_check() {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
-        throw Exception(error);
+        throw std::runtime_error(pn::format("gl: {0}", error).c_str());
     }
 }
 
@@ -127,32 +118,37 @@ struct Renderbuffer {
 
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
-    MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial)
+    MainLoop(
+            OffscreenVideoDriver& driver, const sfz::optional<pn::string>& output_dir,
+            Card* initial)
             : _driver(driver),
               _offscreen(driver._screen_size),
               _setup(*this),
-              _output_dir(output_dir),
-              _loop(driver, initial) {}
+              _loop(driver, initial) {
+        if (output_dir.has_value()) {
+            _output_dir.emplace(output_dir->copy());
+        }
+    }
 
-    bool takes_snapshots() { return _output_dir.has(); }
+    bool takes_snapshots() { return _output_dir.has_value(); }
 
     void snapshot(wall_ticks ticks) {
         snapshot_to(
                 _driver._capture_rect,
-                format("screens/{0}.png", dec(ticks.time_since_epoch().count(), 6)));
+                pn::format("screens/{0}.png", dec(ticks.time_since_epoch().count(), 6)));
     }
 
-    void snapshot_to(Rect bounds, PrintItem relpath) {
+    void snapshot_to(Rect bounds, pn::string_view relpath) {
         if (!takes_snapshots()) {
             return;
         }
         bounds.offset(0, _driver._screen_size.height - bounds.height() - bounds.top);
         ArrayPixMap pix(bounds.size());
         _buffer.copy(bounds, pix);
-        String path(format("{0}/{1}", *_output_dir, relpath));
-        makedirs(path::dirname(path), 0755);
-        ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(file, pix);
+        pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
+        sfz::makedirs(path::dirname(path), 0755);
+        pn::file file = pn::open(path, "w");
+        pix.encode(file);
     }
 
     void  draw() { _loop.draw(); }
@@ -177,14 +173,17 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         }
     };
     Setup                       _setup;
-    Optional<String>            _output_dir;
+    sfz::optional<pn::string>   _output_dir;
     OpenGlVideoDriver::MainLoop _loop;
 };
 
-OffscreenVideoDriver::OffscreenVideoDriver(Size screen_size, const Optional<String>& output_dir)
-        : _screen_size(screen_size),
-          _output_dir(output_dir),
-          _capture_rect(screen_size.as_rect()) {}
+OffscreenVideoDriver::OffscreenVideoDriver(
+        Size screen_size, const sfz::optional<pn::string>& output_dir)
+        : _screen_size(screen_size), _capture_rect(screen_size.as_rect()) {
+    if (output_dir.has_value()) {
+        _output_dir.emplace(output_dir->copy());
+    }
+}
 
 void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
     _scheduler = &scheduler;
@@ -210,7 +209,7 @@ class DummyCard : public Card {
 
 }  // namespace
 
-void OffscreenVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
+void OffscreenVideoDriver::capture(vector<pair<unique_ptr<Card>, pn::string>>& pix) {
     MainLoop loop(*this, _output_dir, new DummyCard);
     for (auto& p : pix) {
         loop.top()->stack()->push(p.first.release());

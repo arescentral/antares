@@ -62,9 +62,7 @@ void clear(T& t) {
     swap(t, u);
 }
 
-int32_t scale(int32_t value, int32_t scale) {
-    return (value * scale) >> SHIFT_SCALE;
-}
+int32_t scale(int32_t value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
 
 }  // namespace
 
@@ -77,9 +75,7 @@ Vector* Vector::get(int number) {
 
 Vector::Vector() : killMe(false), active(false) {}
 
-void Vectors::init() {
-    g.vectors.reset(new Vector[Vector::size]);
-}
+void Vectors::init() { g.vectors.reset(new Vector[Vector::size]); }
 
 void Vectors::reset() {
     for (auto vector : Vector::all()) {
@@ -87,9 +83,7 @@ void Vectors::reset() {
     }
 }
 
-Handle<Vector> Vectors::add(
-        coordPointType* location, uint8_t color, uint8_t kind, int32_t accuracy,
-        int32_t vector_range) {
+Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Ray& r) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;
@@ -97,16 +91,54 @@ Handle<Vector> Vectors::add(
             vector->lastApparentLocation = *location;
             vector->killMe               = false;
             vector->active               = true;
-            vector->color                = color;
+            vector->visible              = r.hue.has_value();
+            vector->color                = RgbColor::clear();
+            vector->hue                  = r.hue;
 
-            const int32_t h      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
-            const int32_t v      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
+            const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
+            const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
             vector->thisLocation = Rect(0, 0, 0, 0);
-            vector->thisLocation.offset(h + viewport().left, v + viewport().top);
+            vector->thisLocation.offset(x + viewport().left, y + viewport().top);
 
-            vector->vectorKind      = kind;
-            vector->accuracy        = accuracy;
-            vector->range           = vector_range;
+            vector->is_ray          = true;
+            vector->to_coord        = (r.to == BaseObject::Ray::To::COORD);
+            vector->lightning       = r.lightning;
+            vector->accuracy        = r.accuracy;
+            vector->range           = r.range;
+            vector->fromObjectID    = -1;
+            vector->fromObject      = SpaceObject::none();
+            vector->toObjectID      = -1;
+            vector->toObject        = SpaceObject::none();
+            vector->toRelativeCoord = Point(0, 0);
+            vector->boltState       = 0;
+
+            return vector;
+        }
+    }
+
+    return Vector::none();
+}
+
+Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Bolt& b) {
+    for (auto vector : Vector::all()) {
+        if (!vector->active) {
+            vector->lastGlobalLocation   = *location;
+            vector->objectLocation       = *location;
+            vector->lastApparentLocation = *location;
+            vector->killMe               = false;
+            vector->active               = true;
+            vector->visible              = (b.color != RgbColor::clear());
+            vector->hue                  = sfz::nullopt;
+            vector->color                = b.color;
+
+            const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
+            const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
+            vector->thisLocation = Rect(0, 0, 0, 0);
+            vector->thisLocation.offset(x + viewport().left, y + viewport().top);
+
+            vector->is_ray          = false;
+            vector->to_coord        = false;
+            vector->lightning       = false;
             vector->fromObjectID    = -1;
             vector->fromObject      = SpaceObject::none();
             vector->toObjectID      = -1;
@@ -137,15 +169,12 @@ void Vectors::set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObjec
 
             if ((((h * h) + (v * v)) > (vector.range * vector.range)) ||
                 (h > kMaximumRelevantDistance) || (v > kMaximumRelevantDistance)) {
-                if (vector.vectorKind == Vector::BEAM_TO_OBJECT) {
-                    vector.vectorKind = Vector::BEAM_TO_COORD;
-                } else if (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) {
-                    vector.vectorKind = Vector::BEAM_TO_COORD_LIGHTNING;
+                if (vector.is_ray) {
+                    vector.to_coord = true;
                 }
                 DetermineVectorRelativeCoordFromAngle(vectorObject, sourceObject->targetAngle);
             } else {
-                if ((vector.vectorKind == Vector::BEAM_TO_COORD) ||
-                    (vector.vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
+                if (vector.to_coord) {
                     vector.toRelativeCoord.h = target->location.h - sourceObject->location.h -
                                                vector.accuracy +
                                                vectorObject->randomSeed.next(vector.accuracy << 1);
@@ -158,18 +187,14 @@ void Vectors::set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObjec
                 }
             }
         } else {  // target not valid
-            if (vector.vectorKind == Vector::BEAM_TO_OBJECT) {
-                vector.vectorKind = Vector::BEAM_TO_COORD;
-            } else if (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) {
-                vector.vectorKind = Vector::BEAM_TO_COORD_LIGHTNING;
+            if (vector.is_ray) {
+                vector.to_coord = true;
             }
             DetermineVectorRelativeCoordFromAngle(vectorObject, sourceObject->direction);
         }
     } else {  // target not valid
-        if (vector.vectorKind == Vector::BEAM_TO_OBJECT) {
-            vector.vectorKind = Vector::BEAM_TO_COORD;
-        } else if (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) {
-            vector.vectorKind = Vector::BEAM_TO_COORD_LIGHTNING;
+        if (vector.is_ray) {
+            vector.to_coord = true;
         }
         DetermineVectorRelativeCoordFromAngle(vectorObject, sourceObject->direction);
     }
@@ -189,21 +214,19 @@ void Vectors::update() {
             }
 
             if (!vector->killMe) {
-                if (vector->color) {
-                    if (vector->vectorKind != Vector::BOLT) {
+                if (vector->visible) {
+                    if (vector->hue.has_value()) {
                         vector->boltState++;
                         if (vector->boltState > 24)
                             vector->boltState = -24;
-                        uint8_t currentColor = vector->color;
-                        currentColor &= 0xf0;
+                        uint8_t currentColor = static_cast<int>(*vector->hue) << 4;
                         if (vector->boltState < 0)
                             currentColor += (-vector->boltState) >> 1;
                         else
                             currentColor += vector->boltState >> 1;
-                        vector->color = currentColor;
+                        vector->color = GetRGBTranslateColor(currentColor);
                     }
-                    if ((vector->vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) ||
-                        (vector->vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
+                    if (vector->lightning) {
                         vector->thisBoltPoint[0].h                 = vector->thisLocation.left;
                         vector->thisBoltPoint[0].v                 = vector->thisLocation.top;
                         vector->thisBoltPoint[kBoltPointNum - 1].h = vector->thisLocation.right;
@@ -235,19 +258,18 @@ void Vectors::draw() {
     for (auto vector : Vector::all()) {
         if (vector->active) {
             if (!vector->killMe) {
-                if (vector->color) {
-                    if ((vector->vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) ||
-                        (vector->vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
+                if (vector->visible) {
+                    if (vector->lightning) {
                         for (int j : range(1, kBoltPointNum)) {
                             lines.draw(
                                     vector->thisBoltPoint[j - 1], vector->thisBoltPoint[j],
-                                    GetRGBTranslateColor(vector->color));
+                                    vector->color);
                         }
                     } else {
                         lines.draw(
                                 Point(vector->thisLocation.left, vector->thisLocation.top),
                                 Point(vector->thisLocation.right, vector->thisLocation.bottom),
-                                GetRGBTranslateColor(vector->color));
+                                vector->color);
                     }
                 }
             }
@@ -261,9 +283,8 @@ void Vectors::show_all() {
             if (vector->killMe) {
                 vector->active = false;
             }
-            if (vector->color) {
-                if ((vector->vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) ||
-                    (vector->vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
+            if (vector->visible) {
+                if (vector->lightning) {
                     for (int j : range(kBoltPointNum)) {
                         vector->lastBoltPoint[j] = vector->thisBoltPoint[j];
                     }

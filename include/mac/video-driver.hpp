@@ -20,7 +20,6 @@
 #define ANTARES_MAC_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <sfz/sfz.hpp>
 #include <stack>
 
 #include "config/keys.hpp"
@@ -55,19 +54,18 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     class EventTranslator {
       public:
         EventTranslator() : _c_obj(antares_event_translator_create()) {}
+        EventTranslator(const EventTranslator&) = delete;
+        EventTranslator& operator=(const EventTranslator&) = delete;
         ~EventTranslator() { antares_event_translator_destroy(_c_obj); }
         AntaresEventTranslator* c_obj() const { return _c_obj; }
 
       private:
         AntaresEventTranslator* _c_obj;
-        DISALLOW_COPY_AND_ASSIGN(EventTranslator);
     };
     EventTranslator _translator;
 
     InputMode      _input_mode = KEYBOARD_MOUSE;
     AntaresWindow* _window     = nullptr;
-
-    DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };
 
 }  // namespace antares

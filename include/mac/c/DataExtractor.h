@@ -19,20 +19,18 @@
 #ifndef ANTARES_MAC_C_DATA_EXTRACTOR_H_
 #define ANTARES_MAC_C_DATA_EXTRACTOR_H_
 
+#include <CoreFoundation/CoreFoundation.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct AntaresDataExtractor AntaresDataExtractor;
-
-AntaresDataExtractor* antares_data_extractor_create(
-        const char* downloads_dir, const char* output_dir);
-void antares_data_extractor_destroy(AntaresDataExtractor* extractor);
-void antares_data_extractor_set_scenario(AntaresDataExtractor* extractor, const char* scenario);
-void antares_data_extractor_set_plugin_file(AntaresDataExtractor* extractor, const char* path);
-int antares_data_extractor_current(AntaresDataExtractor* extractor);
-void antares_data_extractor_extract(
-        AntaresDataExtractor* extractor, void (*callback)(const char*, void*), void* userdata);
+bool antares_data_extract_path(
+        const char* download_dir, const char* scenario_dir, const char* plugin_file,
+        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message);
+bool antares_data_extract_identifier(
+        const char* download_dir, const char* scenario_dir, const char* identifier,
+        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message);
 
 #ifdef __cplusplus
 }  // extern "C"

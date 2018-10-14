@@ -19,21 +19,20 @@
 #ifndef ANTARES_UI_SCREENS_DEBRIEFING_HPP_
 #define ANTARES_UI_SCREENS_DEBRIEFING_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/styled-text.hpp"
 #include "math/units.hpp"
 #include "ui/card.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 
 class DebriefingScreen : public Card {
   public:
-    DebriefingScreen(int text_id);
+    DebriefingScreen(pn::string_view message);
 
     DebriefingScreen(
-            int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
-            int your_kill, int par_kill);
+            pn::string_view message, game_ticks your_time, game_ticks par_time, int your_loss,
+            int par_loss, int your_kill, int par_kill);
 
     virtual void become_front();
     virtual void resign_front();
@@ -46,21 +45,21 @@ class DebriefingScreen : public Card {
     virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
-    static sfz::String build_score_text(
+    static pn::string build_score_text(
             game_ticks your_length, game_ticks par_length, int your_loss, int par_loss,
             int your_kill, int par_kill);
 
   private:
-    LabeledRect initialize(int text_id, bool do_score);
+    BoxRect initialize(pn::string_view message, bool do_score);
 
     enum State {
         TYPING,
         DONE,
     };
-    friend void print_to(sfz::PrintTarget out, State state);
-    State _state;
+    friend const char* stringify(State state);
+    State              _state;
 
-    sfz::String                 _message;
+    pn::string                  _message;
     std::unique_ptr<StyledText> _score;
     Rect                        _pix_bounds;
     Rect                        _message_bounds;
@@ -69,12 +68,10 @@ class DebriefingScreen : public Card {
     wall_time _next_update;
     int       _typed_chars;
 
-    LabeledRect _data_item;
-
-    DISALLOW_COPY_AND_ASSIGN(DebriefingScreen);
+    BoxRect _data_item;
 };
 
-void print_to(sfz::PrintTarget out, DebriefingScreen::State state);
+const char* stringify(DebriefingScreen::State state);
 
 }  // namespace antares
 

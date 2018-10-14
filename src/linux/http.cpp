@@ -22,22 +22,18 @@
 #include <neon/ne_session.h>
 #include <neon/ne_uri.h>
 #include <unistd.h>
-#include <sfz/sfz.hpp>
+#include <memory>
+#include <pn/file>
+#include <pn/string>
 
-using sfz::BytesSlice;
-using sfz::CString;
-using sfz::Exception;
-using sfz::StringSlice;
-using sfz::WriteTarget;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
 namespace http {
 
 struct ne_userdata {
-    WriteTarget out;
-    size_t      total;
+    pn::file_view out;
+    size_t        total;
 };
 
 static int accept(void* userdata, ne_request* req, const ne_status* st) {
@@ -51,20 +47,19 @@ static int accept(void* userdata, ne_request* req, const ne_status* st) {
 static int reader(void* userdata, const char* buf, size_t len) {
     ne_userdata* u = reinterpret_cast<ne_userdata*>(userdata);
     u->total += len;
-    write(u->out, buf, len);
+    u->out.write(pn::data_view{reinterpret_cast<const uint8_t*>(buf), static_cast<int>(len)});
     return 0;
 }
 
-void get(const StringSlice& url, WriteTarget out) {
+void get(pn::string_view url, pn::file_view out) {
     static int inited = ne_sock_init();
     if (inited != 0) {
-        throw Exception("ne_sock_init()");
+        throw std::runtime_error("ne_sock_init()");
     }
 
-    CString cstr(url);
-    ne_uri  uri = {};
-    if (ne_uri_parse(cstr.data(), &uri)) {
-        throw Exception("ne_uri_parse()");
+    ne_uri uri = {};
+    if (ne_uri_parse(url.copy().c_str(), &uri)) {
+        throw std::runtime_error("ne_uri_parse()");
     }
     if (uri.port == 0) {
         uri.port = ne_uri_defaultport(uri.scheme);
@@ -81,11 +76,11 @@ void get(const StringSlice& url, WriteTarget out) {
 
     auto err = ne_request_dispatch(req.get());
     if (err != NE_OK) {
-        throw Exception("ne_request_dispatch()");
+        throw std::runtime_error("ne_request_dispatch()");
     }
     auto* st = ne_get_status(req.get());
     if (st->code != 200) {
-        throw Exception(st->code);
+        throw std::runtime_error(pn::format("HTTP error {0}", st->code).c_str());
     }
 }
 

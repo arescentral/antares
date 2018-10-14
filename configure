@@ -7,11 +7,17 @@ from __future__ import division, print_function, unicode_literals
 
 import argparse
 import collections
-import glob
 import os
 import platform
-import subprocess
 import sys
+
+try:
+    from shlex import quote
+except ImportError:
+    from pipes import quote
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "scripts"))
+import installdeps
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "build", "lib", "scripts"))
 try:
@@ -24,19 +30,25 @@ str = type("")  # For Python2
 
 def main():
     os.chdir(os.path.dirname(sys.argv[0]))
-    progname = sys.argv[0]
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-m", "--mode", metavar="MODE",
-                        type=str, choices="dbg dev opt".split(), default="opt",
-                        help="set build configuration:\n"
-                        "  - opt: compile for fast binaries (default)\n"
-                        "  - dev: compile for fast builds\n"
-                        "  - dbg: add debugging symbols")
-    parser.add_argument("-o", "--target-os", metavar="OS",
-                        type=str,
-                        help="target os (default: host os)")
-    parser.add_argument("--prefix", type=str, default="/usr/local",
-                        help="installation prefix (default: /usr/local)")
+    parser.add_argument(
+        "-m",
+        "--mode",
+        metavar="MODE",
+        type=str,
+        choices="dbg dev opt".split(),
+        default="opt",
+        help="set build configuration:\n"
+        "  - opt: compile for fast binaries (default)\n"
+        "  - dev: compile for fast builds\n"
+        "  - dbg: add debugging symbols")
+    parser.add_argument(
+        "-o", "--target-os", metavar="OS", type=str, help="target os (default: host os)")
+    parser.add_argument(
+        "--prefix",
+        type=str,
+        default="/usr/local",
+        help="installation prefix (default: /usr/local)")
     args = parser.parse_args()
 
     check_submodules()
@@ -66,7 +78,7 @@ def check_submodules():
         "ext/libsfz/BUILD.gn",
         "ext/libsndfile/BUILD.gn",
         "ext/libzipxx/BUILD.gn",
-        "ext/rezin/BUILD.gn",
+        "ext/procyon/BUILD.gn",
         "data/README.md",
     ]
     missing = False
@@ -77,7 +89,10 @@ def check_submodules():
 
     if missing:
         print("Some submodules are missing. Run:")
+        print("")
         print("  $ git submodule update --init build ext data")
+        print("")
+        print("Then, try ./configure again")
         sys.exit(1)
 
 
@@ -118,83 +133,64 @@ def check_mac(args):
 
     missing = collections.OrderedDict()
     if not (check_clang() and check_libcxx()):
-        missing["xcode"] = (
-                "* To install Xcode, open the App Store:\n"
-                "    https://itunes.apple.com/en/app/xcode/id497799835\n"
-                "  After installing, open it and accept the license agreement\n")
-    if not check_gn():
-        missing["gn"] = (
-                "* To download gn, run:\n"
-                "    $ build/lib/scripts/download-gn.py\n")
-    if not check_ninja():
-        missing["ninja"] = (
-                "* To download ninja, run:\n"
-                "    $ build/lib/scripts/download-ninja.py\n")
+        missing["xcode"] = ("* To install Xcode, open the App Store:\n"
+                            "    https://itunes.apple.com/en/app/xcode/id497799835\n"
+                            "  After installing, open it and accept the license agreement\n")
 
     if missing:
         print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
         for step in missing.values():
             sys.stdout.write(step)
+        print("")
+        print("Then, try ./configure again")
         sys.exit(1)
 
 
 def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
         distro = platform.linux_distribution()
-        if distro[0] == "Ubuntu":
+        if distro[0].lower() in installdeps.COMMAND:
             msg(" ".join(distro), color="green")
+            distro = distro[0]
         else:
             msg(" ".join(distro) + " (untested)", color="yellow")
+            distro = "Ubuntu"
+        command = installdeps.COMMAND[distro.lower()]
+        package = installdeps.PACKAGE[distro.lower()]
 
-    missing_pkgs = collections.OrderedDict()
+    missing_pkgs = []
     if not check_clang("clang++"):
-        missing_pkgs["clang"] = "clang"
+        missing_pkgs.append("clang")
+    if not check_libcxx("clang++"):
+        missing_pkgs.append("libc++")
+    if not check_libcxxabi("clang++"):
+        missing_pkgs.append("libc++abi")
+
+    if not check_python_gi():
+        missing_pkgs.append("python-gi")
+    elif not check_python_gtk():
+        missing_pkgs.append("python-gtk3")
 
     if check_pkg_config():
-        libs = [
-            ("gl", "libgl1-mesa-dev"),
-            ("glfw3", "libglfw3-dev"),
-            ("glu", "libglu1-mesa-dev"),
-            ("libmodplug", "libmodplug-dev"),
-            ("libzip", "libzip-dev"),
-            ("libpng16", "libpng16-dev"),
-            ("neon", "libneon27-dev"),
-            ("openal", "libopenal-dev"),
-            ("sndfile", "libsndfile1-dev"),
-            ("x11", "libx11-dev"),
-            ("xcursor", "libxcursor-dev"),
-            ("xinerama", "libxinerama-dev"),
-            ("xrandr", "libxrandr-dev"),
-            ("xxf86vm", "libxxf86vm-dev"),
-            ("zlib", "zlib1g-dev"),
-        ]
-        for lib, dpkg in libs:
+        libs = """
+            gl glfw3 glu libmodplug libzip libpng16 neon openal sndfile
+            x11 xcursor xinerama xrandr xxf86vm zlib
+        """.split()
+        for lib in libs:
             if not cfg.check_pkg(lib):
-                missing_pkgs[lib] = dpkg
+                missing_pkgs.append(lib)
     else:
-        missing_pkgs["pkg-config"] = "pkg-config"
+        missing_pkgs.append("pkg-config")
 
-    missing = collections.OrderedDict()
-    if not check_gn():
-        missing["gn"] = (
-                "* To download gn, run:\n"
-                "    $ build/lib/scripts/download-gn.py\n")
-    if not check_ninja():
-        missing["ninja"] = (
-                "* To download ninja, run:\n"
-                "    $ build/lib/scripts/download-ninja.py\n")
     if missing_pkgs:
+        print("\nmissing dependencies: %s" % " ".join(missing_pkgs))
         if len(missing_pkgs) == 1:
-            apt_get_install = "On Ubuntu, you can install %s with:\n" % next(iter(missing_pkgs))
+            print("On %s, you can install it with:\n" % distro)
         else:
-            apt_get_install = "On Ubuntu, you can install the missing packages with:\n"
-        apt_get_install += "    $ sudo apt-get install %s\n" % (" ".join(missing_pkgs.values()))
-        missing[" ".join(missing_pkgs.keys())] = apt_get_install
-
-    if missing:
-        print("\nmissing dependencies: %s" % " ".join(missing_pkgs.keys()))
-        for step in missing.values():
-            sys.stdout.write(step)
+            print("On %s, you can install them with:\n" % distro)
+        command = ["sudo"] + command + list(package[pkg] for pkg in missing_pkgs)
+        print("    $ %s\n" % (" ".join(quote(arg) for arg in command)))
+        print("Then, try ./configure again")
         sys.exit(1)
 
 
@@ -202,28 +198,31 @@ def check_clang(executable=""):
     """Compile a basic C++11 binary."""
     executable = executable or "clang++"
     return cfg.check_bin(
-            ("%s -x c++ -std=c++11 - -o /dev/null" % executable).split(),
-            what="clang",
-            input="int main() { return 1; }")
+        ("%s -x c++ -std=c++11 - -o /dev/null" % executable).split(),
+        what="clang",
+        input="int main() { return 1; }")
 
 
 def check_libcxx(executable=""):
     """Compile a basic C++11, libc++ binary."""
     executable = executable or "clang++"
     return cfg.check_bin(
-            ("%s -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null" % executable).split(),
-            what="libc++",
-            input="#include <chrono>\n\nint main() { return std::chrono::seconds(1).count(); }")
+        ("%s -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null" % executable).split(),
+        what="libc++",
+        input="#include <chrono>\n\nint main() { return std::chrono::seconds(1).count(); }")
 
 
-def check_gn():
-    """Run gn --version."""
-    return cfg.check_bin("build/lib/scripts/gn --version".split(), what="gn")
+def check_libcxxabi(executable=""):
+    """Compile a basic C++11, libc++ binary, including cxxabi.h.
 
-
-def check_ninja():
-    """Run ninja --version."""
-    return cfg.check_bin("build/lib/scripts/ninja --version".split(), what="ninja")
+    Pass -I/usr/include/libcxxabi explicitly to work around a broken
+    environment on Ubuntu.
+    """
+    executable = executable or "clang++"
+    return cfg.check_bin(
+            ("%s -x c++ -std=c++11 -stdlib=libc++ -I/usr/include/libcxxabi - -o /dev/null" % executable).split(),
+            what="libc++abi",
+            input="#include <cxxabi.h>\n\nint main() { return 0; }")
 
 
 def check_pkg_config():
@@ -231,12 +230,28 @@ def check_pkg_config():
     return cfg.check_bin("pkg-config --version".split())
 
 
-def submodules():
-    if all(glob.glob(os.path.join("ext", d, "*.gyp")) for d in os.listdir("ext")):
-        if os.path.exists("data/README.md"):
-            return
-    subprocess.check_call("git submodule init".split())
-    subprocess.check_call("git submodule update ext data".split())
+def check_python_gi():
+    """Check if Python can import python-gi."""
+    with cfg.step("checking for python-gi") as msg:
+        try:
+            import gi
+            return True
+        except ImportError:
+            msg("missing", color="red")
+    return False
+
+
+def check_python_gtk():
+    """Check if Python can load Gtk 3.0 through python-gi."""
+    with cfg.step("checking for python Gtk") as msg:
+        try:
+            import gi
+            gi.require_version("Gtk", "3.0")
+            from gi.repository import Gtk
+            return True
+        except ImportError:
+            msg("missing", color="red")
+    return False
 
 
 if __name__ == "__main__":

@@ -19,7 +19,6 @@
 #include "game/globals.hpp"
 
 #include "config/gamepad.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
@@ -41,9 +40,7 @@ ANTARES_GLOBAL GlobalState& g = head;
 ANTARES_GLOBAL GlobalState head;
 ANTARES_GLOBAL GlobalState tail;
 
-aresGlobalType* globals() {
-    return gAresGlobal;
-}
+aresGlobalType* globals() { return gAresGlobal; }
 
 void init_globals() {
     gAresGlobal = new aresGlobalType;

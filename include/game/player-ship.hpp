@@ -33,7 +33,6 @@ class PlayerShip : public EventReceiver {
   public:
     PlayerShip();
 
-    void update_keys(const KeyMap& keys);
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 
@@ -78,13 +77,12 @@ class PlayerShip : public EventReceiver {
     GameCursor   _cursor;
 };
 
-void ResetPlayerShip(Handle<SpaceObject> which);
+void ResetPlayerShip();
 void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip(
         Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);
 void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip);
 void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
-bool IsPlayerShipOnAutoPilot(void);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
 void PlayerShipBodyExpire(Handle<SpaceObject> theShip);
 void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool*);

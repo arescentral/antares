@@ -37,17 +37,11 @@ static bool mouse_visible = true;
 }
 @end
 
-bool antares_is_active() {
-    return [NSApp isActive];
-}
+bool antares_is_active() { return [NSApp isActive]; }
 
-void antares_menu_bar_hide() {
-    [NSMenu setMenuBarVisible:NO];
-}
+void antares_menu_bar_hide() { [NSMenu setMenuBarVisible:NO]; }
 
-void antares_menu_bar_show() {
-    [NSMenu setMenuBarVisible:YES];
-}
+void antares_menu_bar_show() { [NSMenu setMenuBarVisible:YES]; }
 
 void antares_mouse_hide() {
     if (mouse_visible) {
@@ -158,9 +152,7 @@ AntaresEventTranslator* antares_event_translator_create() {
     return translator;
 }
 
-void antares_event_translator_destroy(AntaresEventTranslator* translator) {
-    free(translator);
-}
+void antares_event_translator_destroy(AntaresEventTranslator* translator) { free(translator); }
 
 void antares_event_translator_set_window(
         AntaresEventTranslator* translator, AntaresWindow* window) {
@@ -169,7 +161,7 @@ void antares_event_translator_set_window(
 
 void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y) {
     NSPoint location = [NSEvent mouseLocation];
-    NSRect r         = NSMakeRect(location.x, location.y, 1, 1);
+    NSRect  r        = NSMakeRect(location.x, location.y, 1, 1);
     location         = [translator->window->window convertRectFromScreen:r].origin;
     location         = [translator->window->view convertPoint:location fromView:nil];
     NSSize view_size = [translator->window->view bounds].size;
@@ -195,7 +187,7 @@ void antares_event_translator_set_mouse_up_callback(
 
 void antares_event_translator_set_mouse_move_callback(
         AntaresEventTranslator* translator, void (*callback)(int32_t x, int32_t y, void* userdata),
-        void* userdata) {
+        void*                   userdata) {
     translator->mouse_move_callback = callback;
     translator->mouse_move_userdata = userdata;
 }
@@ -216,8 +208,8 @@ static void hide_unhide(AntaresWindow* window, NSPoint location) {
     if (!window) {
         return;
     }
-    NSSize size    = [window->view bounds].size;
-    bool in_window = location.x >= 0 && location.y >= 0 && location.x < size.width &&
+    NSSize size      = [window->view bounds].size;
+    bool   in_window = location.x >= 0 && location.y >= 0 && location.x < size.width &&
                      location.y < size.height;
     if (in_window) {
         antares_mouse_hide();
@@ -272,9 +264,9 @@ static void mouse_move(AntaresEventTranslator* translator, NSEvent* event) {
 }
 
 bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until) {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    NSDate* date            = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
-    bool    waiting         = true;
+    NSAutoreleasePool* pool    = [[NSAutoreleasePool alloc] init];
+    NSDate*            date    = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
+    bool               waiting = true;
     while (waiting) {
         NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask
                                             untilDate:date
@@ -336,8 +328,8 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
 }
 
 void antares_event_translator_cancel(AntaresEventTranslator* translator) {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    NSEvent* event          = [NSEvent otherEventWithType:NSApplicationDefined
+    NSAutoreleasePool* pool  = [[NSAutoreleasePool alloc] init];
+    NSEvent*           event = [NSEvent otherEventWithType:NSApplicationDefined
                                         location:NSMakePoint(0, 0)
                                    modifierFlags:0
                                        timestamp:[[NSDate date] timeIntervalSinceSystemStart]

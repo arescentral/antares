@@ -20,13 +20,12 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <algorithm>
+#include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "mac/core-foundation.hpp"
 
-using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
 using std::min;
 using std::swap;
@@ -59,7 +58,7 @@ namespace cf {
 namespace {
 
 template <typename T>
-bool get_preference(const StringSlice& key, T& value) {
+bool get_preference(pn::string_view key, T& value) {
     PropertyList plist(
             CFPreferencesCopyAppValue(cf::wrap(key).c_obj(), kCFPreferencesCurrentApplication));
     if (plist.c_obj()) {
@@ -70,7 +69,7 @@ bool get_preference(const StringSlice& key, T& value) {
 }
 
 template <typename T>
-void set_preference(const StringSlice& key, const T& value) {
+void set_preference(pn::string_view key, const T& value) {
     CFPreferencesSetAppValue(
             cf::wrap(key).c_obj(), value.c_obj(), kCFPreferencesCurrentApplication);
 }
@@ -85,7 +84,7 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
             cf::Number number = cf::cast<cf::Number>(cf::Type(CFRetain(key_settings.get(i))));
             int        key;
             if (cf::unwrap(number, key)) {
-                _current.keys[i] = key;
+                _current.keys[i] = static_cast<Key>(key - 1);
             }
         }
     }
@@ -113,9 +112,9 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
     }
 
     cf::String cfstr;
-    String     id;
+    pn::string id;
     if (cf::get_preference(kScenarioPreference, cfstr) && cf::unwrap(cfstr, id)) {
-        _current.scenario_identifier.assign(id);
+        _current.scenario_identifier = id.copy();
     }
 }
 
@@ -124,7 +123,7 @@ void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
 
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
     for (int i : range<int>(KEY_COUNT)) {
-        int key = preferences.keys[i];
+        int key = 1 + static_cast<int>(preferences.keys[i]);
         key_settings.append(cf::wrap(key).c_obj());
     }
     cf::set_preference(kKeySettingsPreference, key_settings);

@@ -18,36 +18,29 @@
 
 #include "data/races.hpp"
 
-#include <sfz/sfz.hpp>
-
+#include "data/field.hpp"
 #include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "game/globals.hpp"
 #include "lang/defines.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::ReadSource;
-using sfz::read;
 using std::unique_ptr;
 
 namespace antares {
 
-int16_t GetRaceIDFromNum(size_t raceNum) {
-    if (raceNum < plug.races.size()) {
-        return plug.races[raceNum].id;
-    } else {
-        return -1;
-    }
-}
+Race* Race::get(pn::string_view name) { return &plug.races[name.copy()]; }
 
-void read_from(ReadSource in, Race& race) {
-    read(in, race.id);
-    read(in, race.apparentColor);
-    in.shift(1);
-    read(in, race.illegalColors);
-    read(in, race.advantage);
+Race race(path_value x) {
+    return required_struct<Race>(
+            x, {{"numeric", nullptr},
+                {"adjective", &Race::adjective},
+                {"plural", &Race::plural},
+                {"military", &Race::military},
+                {"homeworld", &Race::homeworld},
+                {"hue", &Race::hue},
+                {"not_hue", &Race::not_hue},
+                {"advantage", &Race::advantage}});
 }
 
 }  // namespace antares

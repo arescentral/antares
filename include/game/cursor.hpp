@@ -19,8 +19,6 @@
 #ifndef ANTARES_GAME_CURSOR_HPP_
 #define ANTARES_GAME_CURSOR_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
@@ -38,9 +36,6 @@ class Cursor {
 
     void draw() const;
     void draw_at(Point where) const;
-
-  private:
-    NatePixTable _sprite;
 };
 
 class GameCursor : public Cursor, public EventReceiver {
@@ -60,14 +55,14 @@ class GameCursor : public Cursor, public EventReceiver {
 
   private:
     static Point clamp(Point p);
-    void wake();
+    void         wake();
 
     wall_time _show_crosshairs_until;
 };
 
 class HintLine {
   public:
-    static void show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness);
+    static void show(Point fromWhere, Point toWhere, Hue hue, uint8_t brightness);
     static void hide();
     static void reset();
     static void draw();

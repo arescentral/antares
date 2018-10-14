@@ -28,7 +28,6 @@
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
@@ -38,22 +37,20 @@ const int kScrollTextHeight = 200;
 
 }  // namespace
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval)
-        : _build_pix(BuildPix(text_id, width)),
-          _interval(interval),
-          _play_song(false),
-          _song_id(0) {}
+ScrollTextScreen::ScrollTextScreen(pn::string_view text, int width, ticks interval)
+        : _build_pix(BuildPix(text, width)), _interval(interval), _play_song(false) {}
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int song_id)
-        : _build_pix(BuildPix(text_id, width)),
+ScrollTextScreen::ScrollTextScreen(
+        pn::string_view text, int width, ticks interval, pn::string_view song)
+        : _build_pix(BuildPix(text, width)),
           _interval(interval),
           _play_song(true),
-          _song_id(song_id) {}
+          _song(song.copy()) {}
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
     if (_play_song) {
-        sys.music.play(Music::IDLE, _song_id);
+        sys.music.play(Music::IDLE, _song);
     }
 
     _start      = now();

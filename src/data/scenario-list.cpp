@@ -20,20 +20,14 @@
 
 #include <glob.h>
 #include <string.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
+
 #include "config/dirs.hpp"
+#include "data/field.hpp"
 #include "data/level.hpp"
 
-using sfz::BytesSlice;
-using sfz::CString;
-using sfz::MappedFile;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::read;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -41,100 +35,58 @@ namespace {
 
 struct ScopedGlob {
     glob_t data;
-    ScopedGlob() { memset(&data, sizeof(data), 0); }
+    ScopedGlob() { memset(&data, 0, sizeof(data)); }
     ~ScopedGlob() { globfree(&data); }
 };
 
 }  // namespace
 
-Version u32_to_version(uint32_t in) {
-    using std::swap;
-    vector<int> components;
-    components.push_back((in & 0xff000000) >> 24);
-    components.push_back((in & 0x00ff0000) >> 16);
-    if (in & 0x0000ffff) {
-        components.push_back((in & 0x0000ff00) >> 8);
-    }
-    if (in & 0x000000ff) {
-        components.push_back(in & 0x000000ff);
-    }
-    return Version{components};
-}
+std::vector<Info> scenario_list() {
+    std::vector<Info> scenarios;
 
-ScenarioList::ScenarioList() {
-    _scenarios.emplace_back();
-    Entry& factory_scenario = _scenarios.back();
-    factory_scenario.identifier.assign(kFactoryScenarioIdentifier);
-
-    const String factory_path(
-            format("{0}/scenario-info/128.nlAG", scenario_dir(kFactoryScenarioIdentifier)));
-    if (sfz::path::isfile(factory_path)) {
-        MappedFile       file(factory_path);
-        BytesSlice       data(file.data());
-        scenarioInfoType info;
-        read(data, info);
-        factory_scenario.title.assign(info.titleString);
-        factory_scenario.download_url.assign(info.downloadURLString);
-        factory_scenario.author.assign(info.authorNameString);
-        factory_scenario.author_url.assign(info.authorURLString);
-        factory_scenario.version   = u32_to_version(info.version);
-        factory_scenario.installed = true;
-    } else {
-        factory_scenario.title.assign("Ares");
-        factory_scenario.download_url.assign("http://www.arescentral.com");
-        factory_scenario.author.assign("Bigger Planet");
-        factory_scenario.author_url.assign("http://www.biggerplanet.com");
-        factory_scenario.version   = u32_to_version(0x01010100);
-        factory_scenario.installed = false;
+    const pn::string factory_info_path = pn::format("{0}/info.pn", application_path());
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(pn::open(factory_info_path, "r").check(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
+        }
+        scenarios.emplace_back(info(path_value{x}));
+        scenarios.back().identifier.hash = kFactoryScenarioIdentifier;
+    } catch (...) {
+        // ignore
     }
 
-    ScopedGlob        g;
-    const StringSlice info("scenario-info/128.nlAG");
-    String            str(format("{0}/*/{1}", dirs().scenarios, info));
-    CString           c_str(str);
-    glob(c_str.data(), 0, NULL, &g.data);
+    ScopedGlob g;
+    pn::string str = pn::format("{0}/*/info.pn", dirs().scenarios);
+    glob(str.c_str(), 0, NULL, &g.data);
 
     size_t prefix_len = dirs().scenarios.size() + 1;
-    size_t suffix_len = info.size() + 1;
+    size_t suffix_len = 8;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
-        const String path(utf8::decode(g.data.gl_pathv[i]));
-        StringSlice  identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
-        if (identifier == _scenarios[0].identifier) {
+        const pn::string path = g.data.gl_pathv[i];
+        pn::string_view  identifier =
+                path.substr(prefix_len, path.size() - prefix_len - suffix_len);
+        if (identifier == kFactoryScenarioIdentifier) {
             continue;
         }
 
-        MappedFile       file(path);
-        BytesSlice       data(file.data());
-        scenarioInfoType info;
-        read(data, info);
-        _scenarios.emplace_back();
-        Entry& entry = _scenarios.back();
-        entry.identifier.assign(identifier);
-        entry.title.assign(info.titleString);
-        entry.download_url.assign(info.downloadURLString);
-        entry.author.assign(info.authorNameString);
-        entry.author_url.assign(info.authorURLString);
-        entry.version   = u32_to_version(info.version);
-        entry.installed = true;
-    }
-}
-
-size_t ScenarioList::size() const {
-    return _scenarios.size();
-}
-
-const ScenarioList::Entry& ScenarioList::at(size_t index) const {
-    return _scenarios.at(index);
-}
-
-void print_to(sfz::PrintTarget out, const Version& v) {
-    for (vector<int>::const_iterator begin = v.components.begin(), end = v.components.end();
-         begin != end; ++begin) {
-        if (begin != v.components.begin()) {
-            print(out, ".");
+        try {
+            sfz::mapped_file file(path);
+            pn::file         in = file.data().open();
+            pn::value        x;
+            pn_error_t       e;
+            if (!pn::parse(in, x, &e)) {
+                continue;
+            }
+            scenarios.emplace_back(info(path_value{x}));
+        } catch (...) {
+            // ignore
         }
-        print(out, *begin);
     }
+
+    return scenarios;
 }
 
 }  // namespace antares

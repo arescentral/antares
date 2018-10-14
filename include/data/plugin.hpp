@@ -19,26 +19,36 @@
 #ifndef ANTARES_DATA_PLUGIN_HPP_
 #define ANTARES_DATA_PLUGIN_HPP_
 
+#include <map>
 #include <vector>
 
-#include "data/level.hpp"
+#include "data/handle.hpp"
+#include "data/info.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
+class BaseObject;
+union Level;
+struct Race;
+
 struct ScenarioGlobals {
-    scenarioInfoType                  meta;
-    std::vector<Level>                levels;
-    std::vector<Level::InitialObject> initials;
-    std::vector<Level::Condition>     conditions;
-    std::vector<Level::BriefPoint>    briefings;
-    std::vector<BaseObject>           objects;
-    std::vector<Action>               actions;
-    std::vector<Race>                 races;
+    Info                             info;
+    std::map<int, const Level*>      chapters;
+    std::map<pn::string, Level>      levels;
+    std::map<pn::string, BaseObject> objects;
+    std::map<pn::string, Race>       races;
+
+    Texture splash;
+    Texture starmap;
 };
 
 extern ScenarioGlobals plug;
 
 void PluginInit();
+
+void load_race(const NamedHandle<const Race>& r);
+void load_object(const NamedHandle<const BaseObject>& o);
 
 }  // namespace antares
 

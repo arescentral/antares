@@ -17,26 +17,18 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <fcntl.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/shapes.hpp"
+#include "lang/exception.hpp"
 
-using sfz::Optional;
-using sfz::ScopedFd;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::args::help;
-using sfz::args::store;
 using sfz::dec;
-using sfz::format;
 using sfz::path::dirname;
-using sfz::write;
 using std::unique_ptr;
 
-namespace io   = sfz::io;
-namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
 namespace antares {
@@ -71,39 +63,71 @@ void draw(Shape shape, PixMap& pix) {
 
 class ShapeBuilder {
   public:
-    ShapeBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
+    ShapeBuilder(const sfz::optional<pn::string>& output_dir) {
+        if (output_dir.has_value()) {
+            _output_dir.emplace(output_dir->copy());
+        }
+    }
+    ShapeBuilder(const ShapeBuilder&) = delete;
+    ShapeBuilder& operator=(const ShapeBuilder&) = delete;
 
     void save(Shape shape, int size) {
         ArrayPixMap pix(size, size);
         pix.fill(RgbColor::clear());
         draw(shape, pix);
-        if (_output_dir.has()) {
-            const String path(format("{0}/{1}/{2}.png", *_output_dir, name(shape), dec(size, 2)));
-            makedirs(dirname(path), 0755);
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(fd, pix);
+        if (_output_dir.has_value()) {
+            const pn::string path =
+                    pn::format("{0}/{1}/{2}.png", *_output_dir, name(shape), dec(size, 2));
+            sfz::makedirs(dirname(path), 0755);
+            pn::file file = pn::open(path, "w");
+            pix.encode(file);
         }
     }
 
   private:
-    const Optional<String> _output_dir;
-
-    DISALLOW_COPY_AND_ASSIGN(ShapeBuilder);
+    sfz::optional<pn::string> _output_dir;
 };
 
-int main(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Draws shapes used in the long-range view");
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Draws shapes used in the long-range view\n"
+            "\n"
+            "  options:\n"
+            "    -o, --output=OUTPUT place output in this directory\n"
+            "    -h, --help          display this help screen\n",
+            progname);
+    exit(retcode);
+}
 
-    Optional<String> output_dir;
-    parser.add_argument("-o", "--output", store(output_dir))
-            .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
 
-    String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
-        exit(1);
-    }
+    callbacks.argument = [](pn::string_view arg) { return false; };
+
+    sfz::optional<pn::string> output_dir;
+    callbacks.short_option = [&argv, &output_dir](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "output") {
+                    return callbacks.short_option(pn::rune{'o'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
 
     ShapeBuilder builder(output_dir);
     Shape        shapes[] = {SQUARE, PLUS, TRIANGLE, DIAMOND};
@@ -112,13 +136,9 @@ int main(int argc, char* const* argv) {
             builder.save(shapes[i], size);
         }
     }
-
-    return 0;
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) {
-    return antares::main(argc, argv);
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

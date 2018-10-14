@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_SCREEN_HPP_
 #define ANTARES_UI_SCREEN_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/interface.hpp"
@@ -27,13 +26,13 @@
 #include "game/cursor.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
+#include "ui/widget.hpp"
 
 namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(sfz::PrintItem name, const Rect& bounds, bool full_screen);
-    InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen);
+    InterfaceScreen(pn::string_view name, const Rect& bounds);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -51,16 +50,15 @@ class InterfaceScreen : public Card {
 
   protected:
     virtual void overlay() const;
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button) = 0;
 
-    void truncate(size_t size);
-    void extend(const sfz::Json& json);
+    Point offset() const;
 
-    Point                offset() const;
-    size_t               size() const;
-    const InterfaceItem& item(int index) const;
-    InterfaceItem& mutable_item(int index);
+    const PlainButton*    button(int id) const;
+    PlainButton*          button(int id);
+    const CheckboxButton* checkbox(int id) const;
+    CheckboxButton*       checkbox(int id);
+    const Widget*         widget(int id) const;
+    Widget*               widget(int id);
 
   private:
     enum State {
@@ -69,19 +67,20 @@ class InterfaceScreen : public Card {
         KEY_DOWN,
         GAMEPAD_DOWN,
     };
-    State _state;
+    State _state = NORMAL;
 
-    sfz::Json load_json(sfz::PrintItem id);
-    void become_normal();
+    pn::value load_pn(pn::string_view id);
+    void      set_state(
+                 State state, Widget* widget = nullptr, Key key = Key::NONE,
+                 Gamepad::Button gamepad = Gamepad::Button::NONE);
 
-    const Rect                                  _bounds;
-    const bool                                  _full_screen;
-    std::vector<std::unique_ptr<InterfaceItem>> _items;
-    Button*                                     _hit_button;
-    uint32_t                                    _pressed;
-    Cursor                                      _cursor;
-
-    DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
+    const Rect                           _bounds;
+    bool                                 _full_screen = false;
+    std::vector<std::unique_ptr<Widget>> _widgets;
+    Widget*                              _active_widget   = nullptr;
+    Key                                  _key_pressed     = Key::NONE;
+    Gamepad::Button                      _gamepad_pressed = Gamepad::Button::NONE;
+    Cursor                               _cursor;
 };
 
 }  // namespace antares

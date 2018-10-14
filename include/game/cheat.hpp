@@ -19,8 +19,6 @@
 #ifndef ANTARES_GAME_CHEAT_HPP_
 #define ANTARES_GAME_CHEAT_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "game/globals.hpp"
 
 namespace antares {
@@ -60,8 +58,8 @@ enum {
     kCheatBit32      = 0x80000000,
 };
 
-int16_t GetCheatNumFromString(const sfz::StringSlice& string);
-void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
+int16_t GetCheatNumFromString(pn::string_view string);
+void    ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
 
 }  // namespace antares
 

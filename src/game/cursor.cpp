@@ -18,8 +18,7 @@
 
 #include "game/cursor.hpp"
 
-#include <sfz/sfz.hpp>
-
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
@@ -28,8 +27,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
@@ -37,28 +34,23 @@ namespace antares {
 static const int   kCursorBoundsSize = 16;
 static const usecs kTimeout          = secs(1);
 
-Cursor::Cursor() : _sprite(500, GRAY) {}
+Cursor::Cursor() = default;
 
-void Cursor::draw() const {
-    draw_at(sys.video->get_mouse());
-}
+void Cursor::draw() const { draw_at(sys.video->get_mouse()); }
 
 void Cursor::draw_at(Point where) const {
     if (world().contains(where)) {
-        where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
-        _sprite.at(0).texture().draw(where.h, where.v);
+        const NatePixTable* sprite = sys.pix.cursor();
+        where.offset(-sprite->at(0).center().h, -sprite->at(0).center().v);
+        sprite->at(0).texture().draw(where.h, where.v);
     }
 }
 
 GameCursor::GameCursor() : show(true), _show_crosshairs_until(now() + kTimeout) {}
 
-bool GameCursor::active() const {
-    return show && (_show_crosshairs_until > now());
-}
+bool GameCursor::active() const { return show && (_show_crosshairs_until > now()); }
 
-Point GameCursor::clamped_location() {
-    return clamp(sys.video->get_mouse());
-}
+Point GameCursor::clamped_location() { return clamp(sys.video->get_mouse()); }
 
 Point GameCursor::clamp(Point p) {
     // Do the cursor, too, unless this is a replay.
@@ -91,9 +83,7 @@ void GameCursor::mouse_move(const MouseMoveEvent& event) {
     }
 }
 
-void GameCursor::wake() {
-    _show_crosshairs_until = now() + kTimeout;
-}
+void GameCursor::wake() { _show_crosshairs_until = now() + kTimeout; }
 
 ANTARES_GLOBAL bool HintLine::show_hint_line = false;
 ANTARES_GLOBAL Point HintLine::hint_line_start;
@@ -101,18 +91,16 @@ ANTARES_GLOBAL Point HintLine::hint_line_end;
 ANTARES_GLOBAL RgbColor HintLine::hint_line_color;
 ANTARES_GLOBAL RgbColor HintLine::hint_line_color_dark;
 
-void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness) {
+void HintLine::show(Point fromWhere, Point toWhere, Hue hue, uint8_t brightness) {
     hint_line_start = fromWhere;
     hint_line_end   = toWhere;
     show_hint_line  = true;
 
-    hint_line_color      = GetRGBTranslateColorShade(color, brightness);
-    hint_line_color_dark = GetRGBTranslateColorShade(color, VERY_DARK);
+    hint_line_color      = GetRGBTranslateColorShade(hue, brightness);
+    hint_line_color_dark = GetRGBTranslateColorShade(hue, VERY_DARK);
 }
 
-void HintLine::hide() {
-    show_hint_line = false;
-}
+void HintLine::hide() { show_hint_line = false; }
 
 void HintLine::reset() {
     show_hint_line    = false;
@@ -131,7 +119,7 @@ void GameCursor::draw() const {
     where = clamp(where);
     if (active()) {
         const Rect     clip_rect = viewport();
-        const RgbColor color     = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+        const RgbColor color     = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
 
         Point top_a    = Point(where.h, clip_rect.top);
         Point top_b    = Point(where.h, (where.v - kCursorBoundsSize));

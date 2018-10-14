@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_OBJECT_DATA_HPP_
 #define ANTARES_UI_SCREENS_OBJECT_DATA_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
@@ -34,7 +32,9 @@ class ObjectDataScreen : public Card {
   public:
     enum Trigger { MOUSE, KEY, GAMEPAD };
 
-    ObjectDataScreen(Point origin, Handle<BaseObject> object, Trigger trigger, int which);
+    ObjectDataScreen(
+            Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key,
+            Gamepad::Button gamepad);
     ~ObjectDataScreen();
 
     virtual void become_front();
@@ -49,8 +49,10 @@ class ObjectDataScreen : public Card {
     virtual void draw() const;
 
   private:
-    const Trigger _trigger;
-    const int     _which;
+    const Trigger         _trigger;
+    const int             _mouse;
+    const Key             _key;
+    const Gamepad::Button _gamepad;
 
     enum State { TYPING, DONE };
     State     _state;
@@ -60,8 +62,6 @@ class ObjectDataScreen : public Card {
 
     Rect                        _bounds;
     std::unique_ptr<StyledText> _text;
-
-    DISALLOW_COPY_AND_ASSIGN(ObjectDataScreen);
 };
 
 }  // namespace antares

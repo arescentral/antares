@@ -19,77 +19,80 @@
 #ifndef ANTARES_SOUND_DRIVER_HPP_
 #define ANTARES_SOUND_DRIVER_HPP_
 
-#include <sfz/sfz.hpp>
+#include <memory>
+#include <pn/file>
+#include <pn/string>
 
 namespace antares {
 
 class Sound {
   public:
     Sound() {}
+    Sound(const Sound&) = delete;
+    Sound& operator=(const Sound&) = delete;
+
     virtual ~Sound() {}
 
-    virtual void play() = 0;
-    virtual void loop() = 0;
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(Sound);
+    virtual void play(uint8_t volume) = 0;
+    virtual void loop(uint8_t volume) = 0;
 };
 
 class SoundChannel {
   public:
     SoundChannel() {}
+    SoundChannel(const SoundChannel&) = delete;
+    SoundChannel& operator=(const SoundChannel&) = delete;
+
     virtual ~SoundChannel() {}
 
-    virtual void activate()          = 0;
-    virtual void amp(uint8_t volume) = 0;
-    virtual void quiet()             = 0;
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SoundChannel);
+    virtual void activate() = 0;
+    virtual void quiet()    = 0;
 };
 
 class SoundDriver {
   public:
     SoundDriver();
+    SoundDriver(const SoundDriver&) = delete;
+    SoundDriver& operator=(const SoundDriver&) = delete;
+
     virtual ~SoundDriver();
 
-    virtual std::unique_ptr<SoundChannel> open_channel()           = 0;
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path) = 0;
-    virtual void set_global_volume(uint8_t volume)                 = 0;
+    virtual std::unique_ptr<SoundChannel> open_channel()                    = 0;
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path)  = 0;
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path)  = 0;
+    virtual void                          set_global_volume(uint8_t volume) = 0;
 
     static SoundDriver* driver();
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SoundDriver);
 };
 
 class NullSoundDriver : public SoundDriver {
   public:
     NullSoundDriver() {}
+    NullSoundDriver(const NullSoundDriver&) = delete;
+    NullSoundDriver& operator=(const NullSoundDriver&) = delete;
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path);
-    virtual void set_global_volume(uint8_t volume);
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(NullSoundDriver);
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path);
+    virtual void                          set_global_volume(uint8_t volume);
 };
 
 class LogSoundDriver : public SoundDriver {
   public:
-    LogSoundDriver(const sfz::StringSlice& path);
+    LogSoundDriver(pn::string_view path);
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path);
-    virtual void set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
+    virtual std::unique_ptr<Sound>        open_music(pn::string_view path);
+    virtual void                          set_global_volume(uint8_t volume);
 
   private:
     class LogSound;
     class LogChannel;
 
-    sfz::ScopedFd _sound_log;
-    int           _last_id;
-    LogChannel*   _active_channel;
+    pn::file    _sound_log;
+    int         _last_id;
+    LogChannel* _active_channel;
 };
 
 }  // namespace antares

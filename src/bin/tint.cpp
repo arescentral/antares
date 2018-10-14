@@ -17,49 +17,28 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <fcntl.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/pix-table.hpp"
+#include "lang/exception.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::Optional;
-using sfz::ScopedFd;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::args::help;
-using sfz::args::store;
-using sfz::format;
 using sfz::hex;
 using sfz::path::dirname;
-using sfz::write;
 using std::unique_ptr;
 
-namespace io   = sfz::io;
-namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
 namespace antares {
 namespace {
 
-const char* name(int16_t id) {
-    switch (id) {
-        case 501: return "ishiman/cruiser";
-        case 510: return "ishiman/fighter";
-        case 515: return "ishiman/transport";
-        case 532: return "obish/escort";
-        case 550: return "gaitori/cruiser";
-        case 551: return "gaitori/fighter";
-        case 563: return "gaitori/transport";
-        case 567: return "obish/transport";
-    }
-    abort();
-}
-
-void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
-    NatePixTable               table(id, color);
+void draw(pn::string_view name, Hue hue, ArrayPixMap& pix) {
+    NatePixTable               table(name, hue);
     const NatePixTable::Frame& frame = table.at(9);
     pix.resize(Size(frame.width(), frame.height()));
     pix.copy(frame.pix_map());
@@ -67,55 +46,91 @@ void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
 
 class ShapeBuilder {
   public:
-    ShapeBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
+    ShapeBuilder(const sfz::optional<pn::string>& output_dir) {
+        if (output_dir.has_value()) {
+            _output_dir.emplace(output_dir->copy());
+        }
+    }
+    ShapeBuilder(const ShapeBuilder&) = delete;
+    ShapeBuilder& operator=(const ShapeBuilder&) = delete;
 
-    void save(int16_t id, uint8_t color) {
+    void save(pn::string_view name, pn::string_view out, Hue hue) {
         ArrayPixMap pix(0, 0);
-        draw(id, color, pix);
-        if (_output_dir.has()) {
-            const String path(format("{0}/{1}/{2}.png", *_output_dir, name(id), hex(color)));
-            makedirs(dirname(path), 0755);
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(fd, pix);
+        draw(name, hue, pix);
+        if (_output_dir.has_value()) {
+            const pn::string path =
+                    pn::format("{0}/{1}/{2}.png", *_output_dir, out, hex(static_cast<int>(hue)));
+            sfz::makedirs(dirname(path), 0755);
+            pn::file file = pn::open(path, "w");
+            pix.encode(file);
         }
     }
 
   private:
-    const Optional<String> _output_dir;
-
-    DISALLOW_COPY_AND_ASSIGN(ShapeBuilder);
+    sfz::optional<pn::string> _output_dir;
 };
 
-int main(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Draws shapes used in the long-range view");
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Draws shapes used in the long-range view\n"
+            "\n"
+            "  options:\n"
+            "    -o, --output=OUTPUT place output in this directory\n"
+            "    -h, --help          display this help screen\n",
+            progname);
+    exit(retcode);
+}
 
-    Optional<String> output_dir;
-    parser.add_argument("-o", "--output", store(output_dir))
-            .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
 
-    String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
-        exit(1);
-    }
+    callbacks.argument = [](pn::string_view arg) { return false; };
+
+    sfz::optional<pn::string> output_dir;
+    callbacks.short_option = [&argv, &output_dir](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "output") {
+                    return callbacks.short_option(pn::rune{'o'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
+
+    struct {
+        pn::string_view name, out;
+    } ids[] = {
+            {"ish/cruiser", "ishiman/cruiser"},     {"ish/fighter", "ishiman/fighter"},
+            {"ish/transport", "ishiman/transport"}, {"obi/escort", "obish/escort"},
+            {"gai/cruiser", "gaitori/cruiser"},     {"gai/fighter", "gaitori/fighter"},
+            {"gai/transport", "gaitori/transport"}, {"obi/transport", "obish/transport"},
+    };
 
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, output_dir);
     ShapeBuilder    builder(output_dir);
-    int16_t         ids[] = {501, 510, 515, 532, 550, 551, 563, 567};
-    for (int16_t id : ids) {
+    for (auto id : ids) {
         for (int tint = 0; tint < 16; ++tint) {
-            builder.save(id, tint);
+            builder.save(id.name, id.out, static_cast<Hue>(tint));
         }
     }
-
-    return 0;
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) {
-    return antares::main(argc, argv);
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

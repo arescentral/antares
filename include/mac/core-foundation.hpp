@@ -22,7 +22,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <algorithm>
 #include <initializer_list>
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 namespace antares {
 namespace cf {
@@ -34,8 +34,10 @@ class UnownedObject {
 
     UnownedObject() : _c_obj(NULL) {}
     UnownedObject(type c_obj) : _c_obj(c_obj) {}
+    UnownedObject(const UnownedObject&) = delete;
     UnownedObject(UnownedObject&& other) : _c_obj(other.release()) {}
-    UnownedObject& operator=(UnownedObject&& other) {
+    UnownedObject& operator=(const UnownedObject&) = delete;
+    UnownedObject& operator                        =(UnownedObject&& other) {
         reset(other.release());
         return *this;
     }
@@ -54,8 +56,6 @@ class UnownedObject {
 
   private:
     type _c_obj;
-
-    DISALLOW_COPY_AND_ASSIGN(UnownedObject);
 };
 
 template <typename T>
@@ -105,7 +105,7 @@ class Boolean : public UnownedObject<CFBooleanRef> {
     Boolean& operator=(Boolean&&) = default;
 };
 Boolean wrap(bool value);
-bool unwrap(const Boolean& cfvalue, bool& value);
+bool    unwrap(const Boolean& cfvalue, bool& value);
 
 class Number : public Object<CFNumberRef> {
   public:
@@ -121,12 +121,12 @@ Number wrap(long value);
 Number wrap(long long value);
 Number wrap(float value);
 Number wrap(double value);
-bool unwrap(const Number& cfvalue, short& value);
-bool unwrap(const Number& cfvalue, int& value);
-bool unwrap(const Number& cfvalue, long& value);
-bool unwrap(const Number& cfvalue, long long& value);
-bool unwrap(const Number& cfvalue, float& value);
-bool unwrap(const Number& cfvalue, double& value);
+bool   unwrap(const Number& cfvalue, short& value);
+bool   unwrap(const Number& cfvalue, int& value);
+bool   unwrap(const Number& cfvalue, long& value);
+bool   unwrap(const Number& cfvalue, long long& value);
+bool   unwrap(const Number& cfvalue, float& value);
+bool   unwrap(const Number& cfvalue, double& value);
 
 class String : public Object<CFStringRef> {
   public:
@@ -136,9 +136,8 @@ class String : public Object<CFStringRef> {
     String(String&&) = default;
     String& operator=(String&&) = default;
 };
-String wrap(const char* value);
-String wrap(sfz::StringSlice value);
-bool unwrap(const String& cfvalue, sfz::String& value);
+String wrap(pn::string_view value);
+bool   unwrap(const String& cfvalue, pn::string& value);
 
 class Array : public Object<CFArrayRef> {
   public:
@@ -159,8 +158,8 @@ class MutableArray : public Object<CFMutableArrayRef> {
     MutableArray(MutableArray&&) = default;
     MutableArray& operator=(MutableArray&&) = default;
     size_t        size() const;
-    const void* get(size_t index) const;
-    void append(const void* key);
+    const void*   get(size_t index) const;
+    void          append(const void* key);
 };
 
 class Dictionary : public Object<CFDictionaryRef> {
@@ -179,7 +178,7 @@ class MutableDictionary : public Object<CFMutableDictionaryRef> {
     MutableDictionary(type c_obj);
     MutableDictionary(MutableDictionary&&) = default;
     MutableDictionary& operator=(MutableDictionary&&) = default;
-    void set(const void* key, const void* value);
+    void               set(const void* key, const void* value);
 };
 
 class Data : public Object<CFDataRef> {
@@ -190,9 +189,8 @@ class Data : public Object<CFDataRef> {
     Data(Data&&)  = default;
     Data& operator=(Data&&) = default;
 
-    sfz::BytesSlice data() const;
+    pn::data_view data() const;
 };
-void write_to(sfz::WriteTarget out, const Data& data);
 
 class PropertyList : public Object<CFPropertyListRef> {
   public:
@@ -207,7 +205,7 @@ class Url : public Object<CFURLRef> {
     static CFTypeID type_id();
     Url();
     Url(type c_obj);
-    Url(const sfz::StringSlice& string);
+    Url(pn::string_view string);
     Url(Url&&)   = default;
     Url& operator=(Url&&) = default;
 };

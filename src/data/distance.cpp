@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,33 +16,19 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_PICTURE_HPP_
-#define ANTARES_DATA_PICTURE_HPP_
+#include "data/distance.hpp"
 
-#include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <pn/map>
+#include <pn/value>
 
-#include "drawing/pix-map.hpp"
+#include "data/field.hpp"
 
 namespace antares {
 
-class Texture;
-
-class Picture : public ArrayPixMap {
-  public:
-    Picture(int32_t id, bool hidpi = false);
-    Picture(sfz::StringSlice resource, bool hidpi = false);
-
-    sfz::StringSlice path() const { return _path; }
-    int              scale() const { return _scale; }
-
-    Texture texture() const;
-
-  private:
-    sfz::String _path;
-    int         _scale;
-};
+DEFINE_FIELD_READER(Distance) {
+    double  d = read_field<double>(x);
+    int64_t u = floor(pow(d, 2));
+    return Distance{u};
+}
 
 }  // namespace antares
-
-#endif  // ANTARES_DATA_PICTURE_HPP_

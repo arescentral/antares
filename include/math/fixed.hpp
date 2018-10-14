@@ -20,7 +20,8 @@
 #define ANTARES_MATH_FIXED_HPP_
 
 #include <math.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
+#include <pn/string>
 
 namespace antares {
 
@@ -29,105 +30,51 @@ class Fixed {
     Fixed() = default;
 
     static constexpr Fixed from_long(int32_t x) { return Fixed(x << 8); }
-    static constexpr Fixed from_float(float x) { return Fixed(roundf(x * 256.0)); }
+    static constexpr Fixed from_float(double x) { return Fixed(round(x * 256.0)); }
     static constexpr Fixed from_val(int32_t value) { return Fixed(value); }
-    static constexpr Fixed                  zero() { return Fixed(0); }
+    static constexpr Fixed zero() { return Fixed(0); }
 
     int32_t val() const { return _value; }
 
+    bool operator==(Fixed y) const { return _value == y._value; }
+    bool operator!=(Fixed y) const { return _value != y._value; }
+    bool operator<(Fixed y) const { return _value < y._value; }
+    bool operator<=(Fixed y) const { return _value <= y._value; }
+    bool operator>(Fixed y) const { return _value > y._value; }
+    bool operator>=(Fixed y) const { return _value >= y._value; }
+
+    Fixed operator+(Fixed y) const { return Fixed{_value + y._value}; }
+    Fixed operator-(Fixed y) const { return Fixed{_value - y._value}; }
+    Fixed operator%(Fixed y) const { return Fixed{_value % y._value}; }
+    Fixed operator*(int32_t y) const { return Fixed{_value * y}; }
+    Fixed operator/(int32_t y) const { return Fixed{_value / y}; }
+    Fixed operator<<(int n) const { return Fixed{_value << n}; }
+    Fixed operator>>(int n) const { return Fixed{_value >> n}; }
+
+    // the max safe # we can do is 181 for signed multiply if we don't know other value
+    // if -1 <= other value <= 1 then we can do 32767
+    Fixed operator*(Fixed y) const { return Fixed{_value * y._value} >> 8; }
+    Fixed operator/(Fixed y) const { return Fixed{_value << 8} / y._value; }
+    Fixed operator%(int32_t y) const { return Fixed{*this % Fixed::from_long(y)}; }
+
+    Fixed& operator+=(Fixed y) { return *this = *this + y; }
+    Fixed& operator-=(Fixed y) { return *this = *this - y; }
+    Fixed& operator*=(Fixed y) { return *this = *this * y; }
+    Fixed& operator*=(int32_t y) { return *this = *this * y; }
+    Fixed& operator/=(Fixed y) { return *this = *this / y; }
+    Fixed& operator/=(int32_t y) { return *this = *this / y; }
+    Fixed& operator<<=(int n) { return *this = *this << n; }
+    Fixed& operator>>=(int n) { return *this = *this >> n; }
+
+    Fixed operator-() const { return Fixed{-_value}; }
+
   private:
     explicit constexpr Fixed(int32_t value) : _value(value) {}
-    int32_t                          _value;
+
+    int32_t _value;
 };
 
-inline bool operator==(Fixed x, Fixed y) {
-    return x.val() == y.val();
-}
-inline bool operator!=(Fixed x, Fixed y) {
-    return x.val() != y.val();
-}
-inline bool operator<(Fixed x, Fixed y) {
-    return x.val() < y.val();
-}
-inline bool operator<=(Fixed x, Fixed y) {
-    return x.val() <= y.val();
-}
-inline bool operator>(Fixed x, Fixed y) {
-    return x.val() > y.val();
-}
-inline bool operator>=(Fixed x, Fixed y) {
-    return x.val() >= y.val();
-}
-
-inline Fixed operator+(Fixed x, Fixed y) {
-    return Fixed::from_val(x.val() + y.val());
-}
-inline Fixed operator-(Fixed x, Fixed y) {
-    return Fixed::from_val(x.val() - y.val());
-}
-inline Fixed operator%(Fixed x, Fixed y) {
-    return Fixed::from_val(x.val() % y.val());
-}
-inline Fixed operator*(Fixed x, int32_t y) {
-    return Fixed::from_val(x.val() * y);
-}
-inline Fixed operator*(int32_t x, Fixed y) {
-    return Fixed::from_val(x * y.val());
-}
-inline Fixed operator/(Fixed x, int32_t y) {
-    return Fixed::from_val(x.val() / y);
-}
-inline Fixed operator<<(Fixed x, int n) {
-    return Fixed::from_val(x.val() << n);
-}
-inline Fixed operator>>(Fixed x, int n) {
-    return Fixed::from_val(x.val() >> n);
-}
-
-// the max safe # we can do is 181 for signed multiply if we don't know other value
-// if -1 <= other value <= 1 then we can do 32767
-inline Fixed operator*(Fixed x, Fixed y) {
-    return (x * y.val()) >> 8;
-}
-inline Fixed operator/(Fixed x, Fixed y) {
-    return (x << 8) / y.val();
-}
-inline Fixed operator%(Fixed x, int32_t y) {
-    return x % Fixed::from_long(y);
-}
-
-inline Fixed& operator+=(Fixed& x, Fixed y) {
-    return x = x + y;
-}
-inline Fixed& operator-=(Fixed& x, Fixed y) {
-    return x = x - y;
-}
-inline Fixed& operator*=(Fixed& x, Fixed y) {
-    return x = x * y;
-}
-inline Fixed& operator*=(Fixed& x, int32_t y) {
-    return x = x * y;
-}
-inline Fixed& operator/=(Fixed& x, Fixed y) {
-    return x = x / y;
-}
-inline Fixed& operator/=(Fixed& x, int32_t y) {
-    return x = x / y;
-}
-inline Fixed& operator<<=(Fixed& x, int n) {
-    return x = x << n;
-}
-inline Fixed& operator>>=(Fixed& x, int n) {
-    return x = x >> n;
-}
-
-inline Fixed operator-(Fixed x) {
-    return Fixed::from_val(-x.val());
-}
-
-inline void read_from(sfz::ReadSource in, Fixed& f) {
-    f = Fixed::from_val(sfz::read<int32_t>(in));
-}
+inline Fixed operator*(int32_t x, Fixed y) { return y * x; }
 
 static const Fixed kFixedNone = Fixed::from_val(-1);
 
@@ -154,24 +101,17 @@ inline int32_t evil_fixed_to_long(Fixed value) {
         return value.val() >> 8;
     }
 }
-inline int32_t more_evil_fixed_to_long(Fixed value) {
-    return (value >> 8).val();
-}
+inline int32_t more_evil_fixed_to_long(Fixed value) { return (value >> 8).val(); }
 
-inline float mFixedToFloat(Fixed m_f) {
-    return floorf(m_f.val() * 1e3 / 256.0) / 1e3;
-}
-inline int32_t mFixedToLong(Fixed m_f) {
-    return evil_fixed_to_long(m_f);
-}
+inline float   mFixedToFloat(Fixed m_f) { return floorf(m_f.val() * 1e3 / 256.0) / 1e3; }
+inline int32_t mFixedToLong(Fixed m_f) { return evil_fixed_to_long(m_f); }
 
-void print_to(sfz::PrintTarget out, const Fixed& fixed);
+pn::string stringify(Fixed fixed);
 
 struct fixedPointType {
     Fixed h;
     Fixed v;
 };
-void read_from(sfz::ReadSource in, fixedPointType& point);
 
 }  // namespace antares
 

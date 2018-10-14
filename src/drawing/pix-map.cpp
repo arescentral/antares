@@ -19,34 +19,22 @@
 #include "drawing/pix-map.hpp"
 
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "lang/casts.hpp"
-
-using sfz::Exception;
-using sfz::WriteTarget;
-using sfz::format;
-using sfz::write;
 
 namespace antares {
 
 PixMap::~PixMap() {}
 
-const RgbColor* PixMap::row(int y) const {
-    return bytes() + y * row_bytes();
-}
+const RgbColor* PixMap::row(int y) const { return bytes() + y * row_bytes(); }
 
-RgbColor* PixMap::mutable_row(int y) {
-    return mutable_bytes() + y * row_bytes();
-}
+RgbColor* PixMap::mutable_row(int y) { return mutable_bytes() + y * row_bytes(); }
 
-const RgbColor& PixMap::get(int x, int y) const {
-    return row(y)[x];
-}
+const RgbColor& PixMap::get(int x, int y) const { return row(y)[x]; }
 
-void PixMap::set(int x, int y, const RgbColor& color) {
-    mutable_row(y)[x] = color;
-}
+void PixMap::set(int x, int y, const RgbColor& color) { mutable_row(y)[x] = color; }
 
 void PixMap::fill(const RgbColor& color) {
     if (size().height > 0) {
@@ -61,7 +49,7 @@ void PixMap::fill(const RgbColor& color) {
 
 void PixMap::copy(const PixMap& pix) {
     if (size() != pix.size()) {
-        throw Exception("Mismatch in PixMap sizes");
+        throw std::runtime_error("Mismatch in PixMap sizes");
     }
     for (int i = 0; i < size().height; ++i) {
         memcpy(mutable_row(i), pix.row(i), size().width * sizeof(RgbColor));
@@ -70,7 +58,7 @@ void PixMap::copy(const PixMap& pix) {
 
 void PixMap::composite(const PixMap& pix) {
     if (size() != pix.size()) {
-        throw Exception("Mismatch in PixMap sizes");
+        throw std::runtime_error("Mismatch in PixMap sizes");
     }
     for (int y = 0; y < size().height; ++y) {
         for (int x = 0; x < size().width; ++x) {
@@ -100,8 +88,8 @@ ArrayPixMap::ArrayPixMap(Size size)
 ArrayPixMap::~ArrayPixMap() {}
 
 void ArrayPixMap::resize(Size new_size) {
-    using sfz::swap;
     using std::min;
+    using std::swap;
     ArrayPixMap new_pix_map(new_size.width, new_size.height);
     Size        min_size(min(size().width, new_size.width), min(size().height, new_size.height));
     Rect        transfer = min_size.as_rect();
@@ -110,24 +98,15 @@ void ArrayPixMap::resize(Size new_size) {
     swap(_bytes, new_pix_map._bytes);
 }
 
-const Size& ArrayPixMap::size() const {
-    return _size;
-}
+const Size& ArrayPixMap::size() const { return _size; }
 
-int ArrayPixMap::row_bytes() const {
-    return _size.width;
-}
+int ArrayPixMap::row_bytes() const { return _size.width; }
 
-const RgbColor* ArrayPixMap::bytes() const {
-    return _bytes.get();
-}
+const RgbColor* ArrayPixMap::bytes() const { return _bytes.get(); }
 
-RgbColor* ArrayPixMap::mutable_bytes() {
-    return _bytes.get();
-}
+RgbColor* ArrayPixMap::mutable_bytes() { return _bytes.get(); }
 
 void ArrayPixMap::swap(ArrayPixMap& other) {
-    using sfz::swap;
     using std::swap;
     swap(_size, other._size);
     swap(_bytes, other._bytes);
@@ -137,19 +116,17 @@ PixMap::View::View(PixMap* pix, const Rect& bounds)
         : _parent(pix), _offset(bounds.origin()), _size(bounds.size()) {
     Rect pix_bounds(Point(0, 0), pix->size());
     if (!pix_bounds.encloses(bounds)) {
-        throw Exception(
-                format("tried to take view {0} outside of parent PixMap with bounds {1}", bounds,
-                       pix_bounds));
+        throw std::runtime_error(
+                pn::format(
+                        "tried to take view {0} outside of parent PixMap with bounds {1}",
+                        stringify(bounds), stringify(pix_bounds))
+                        .c_str());
     }
 }
 
-const Size& PixMap::View::size() const {
-    return _size;
-}
+const Size& PixMap::View::size() const { return _size; }
 
-int PixMap::View::row_bytes() const {
-    return _parent->row_bytes();
-}
+int PixMap::View::row_bytes() const { return _parent->row_bytes(); }
 
 const RgbColor* PixMap::View::bytes() const {
     return _parent->bytes() + _offset.v * row_bytes() + _offset.h;
@@ -159,8 +136,6 @@ RgbColor* PixMap::View::mutable_bytes() {
     return _parent->mutable_bytes() + _offset.v * row_bytes() + _offset.h;
 }
 
-PixMap::View PixMap::view(const Rect& bounds) {
-    return View(this, bounds);
-}
+PixMap::View PixMap::view(const Rect& bounds) { return View(this, bounds); }
 
 }  // namespace antares

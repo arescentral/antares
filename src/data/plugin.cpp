@@ -18,77 +18,72 @@
 
 #include "data/plugin.hpp"
 
+#include <algorithm>
+#include <pn/file>
+
+#include "config/dirs.hpp"
+#include "config/preferences.hpp"
 #include "data/base-object.hpp"
+#include "data/condition.hpp"
+#include "data/field.hpp"
+#include "data/initial.hpp"
+#include "data/level.hpp"
+#include "data/races.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::StringSlice;
-using sfz::format;
 using sfz::range;
 using std::vector;
 
 namespace antares {
 
-static const int16_t kLevelNameID               = 4600;
-static const int16_t kSpaceObjectNameResID      = 5000;
-static const int16_t kSpaceObjectShortNameResID = 5001;
+static constexpr int kPluginFormat = 21;
 
-static const int16_t kPackedResID = 500;
+static constexpr const char kSplashPicture[]  = "splash";
+static constexpr const char kStarmapPicture[] = "starmap";
 
 ANTARES_GLOBAL ScenarioGlobals plug;
 
-template <typename T>
-static void read_all(StringSlice name, StringSlice type, StringSlice extension, vector<T>& v) {
-    Resource   rsrc(type, extension, kPackedResID);
-    BytesSlice in(rsrc.data());
-    size_t     count = rsrc.data().size() / T::byte_size;
-    v.resize(count);
-    for (size_t i = 0; i < count; ++i) {
-        read(in, v[i]);
-    }
-    if (!in.empty()) {
-        throw Exception(format("didn't consume all of {0} data", name));
+static void read_all_levels() {
+    plug.levels.clear();
+    plug.chapters.clear();
+    for (pn::string_view name : Resource::list_levels()) {
+        auto it = plug.levels.emplace(name.copy(), Resource::level(name)).first;
+        if (it->second.base.chapter.has_value()) {
+            plug.chapters[*it->second.base.chapter] = &it->second;
+        }
     }
 }
 
 void PluginInit() {
-    {
-        Resource   rsrc("scenario-info", "nlAG", 128);
-        BytesSlice in(rsrc.data());
-        read(in, plug.meta);
-        if (!in.empty()) {
-            throw Exception("didn't consume all of scenario file info data");
+    plug.info = Resource::info();
+    try {
+        if (plug.info.format != kPluginFormat) {
+            throw std::runtime_error(
+                    pn::format("unknown plugin format {0}", plug.info.format).c_str());
         }
+        plug.splash  = Resource::texture(kSplashPicture);
+        plug.starmap = Resource::texture(kStarmapPicture);
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error("info.pn"));
     }
 
-    read_all("level", "scenarios", "snro", plug.levels);
-    read_all("initials", "scenario-initial-objects", "snit", plug.initials);
-    read_all("conditions", "scenario-conditions", "sncd", plug.conditions);
-    read_all("briefings", "scenario-briefing-points", "snbf", plug.briefings);
-    read_all("objects", "objects", "bsob", plug.objects);
-    read_all("actions", "object-actions", "obac", plug.actions);
-    read_all("races", "races", "race", plug.races);
+    read_all_levels();
+}
 
-    StringList level_names(kLevelNameID);
-    for (auto& level : plug.levels) {
-        level.name.assign(level_names.at(level.levelNameStrNum - 1));
+void load_race(const NamedHandle<const Race>& r) {
+    if (plug.races.find(r.name().copy()) != plug.races.end()) {
+        return;  // already loaded.
     }
-    for (int i : range(plug.levels.size())) {
-        while (i != plug.levels[i].levelNameStrNum - 1) {
-            using std::swap;
-            swap(plug.levels[i], plug.levels[plug.levels[i].levelNameStrNum - 1]);
-        }
-    }
+    plug.races.emplace(r.name().copy(), Resource::race(r.name()));
+}
 
-    StringList object_names(kSpaceObjectNameResID);
-    StringList object_short_names(kSpaceObjectShortNameResID);
-    for (size_t i = 0; i < plug.objects.size(); ++i) {
-        plug.objects[i].name.assign(object_names.at(i));
-        plug.objects[i].short_name.assign(object_short_names.at(i));
+void load_object(const NamedHandle<const BaseObject>& o) {
+    if (plug.objects.find(o.name().copy()) != plug.objects.end()) {
+        return;  // already loaded.
     }
+    plug.objects.emplace(o.name().copy(), Resource::object(o.name()));
 }
 
 }  // namespace antares

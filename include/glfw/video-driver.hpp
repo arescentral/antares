@@ -20,7 +20,6 @@
 #define ANTARES_GLFW_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <sfz/sfz.hpp>
 #include <stack>
 
 #include "config/keys.hpp"
@@ -50,10 +49,10 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    void key(int key, int scancode, int action, int mods);
-    void mouse_button(int button, int action, int mods);
-    void mouse_move(double x, double y);
-    void window_size(int width, int height);
+    void        key(int key, int scancode, int action, int mods);
+    void        mouse_button(int button, int action, int mods);
+    void        mouse_move(double x, double y);
+    void        window_size(int width, int height);
     static void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods);
     static void mouse_button_callback(GLFWwindow* w, int button, int action, int mods);
     static void mouse_move_callback(GLFWwindow* w, double x, double y);
@@ -65,8 +64,6 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     MainLoop*   _loop;
     wall_time   _last_click_usecs;
     int         _last_click_count;
-
-    DISALLOW_COPY_AND_ASSIGN(GLFWVideoDriver);
 };
 
 }  // namespace antares

@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+#include <vector>
+
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/units.hpp"
@@ -35,13 +37,13 @@ class SoundFX {
     ~SoundFX();
 
     void init();
-    void load(int16_t id);
+    void load(pn::string_view id);
     void reset();
     void stop();
 
-    void play(int16_t id, uint8_t volume, usecs persistence, uint8_t priority);
+    void play(pn::string_view id, uint8_t volume, usecs persistence, uint8_t priority);
     void play_at(
-            int16_t id, int32_t volume, usecs persistence, uint8_t priority,
+            pn::string_view id, int32_t volume, usecs persistence, uint8_t priority,
             Handle<SpaceObject> object);
 
     void select();
@@ -67,12 +69,12 @@ class SoundFX {
     struct smartSoundHandle;
     struct smartSoundChannel;
 
-    bool same_sound_channel(int& channel, int16_t id, uint8_t amplitude, uint8_t priority);
+    bool same_sound_channel(int& channel, pn::string_view id, uint8_t amplitude, uint8_t priority);
     bool quieter_channel(int& channel, uint8_t amplitude);
     bool lower_priority_channel(int& channel, uint8_t priority);
     bool oldest_available_channel(int& channel);
     bool best_channel(
-            int& channel, int16_t sound_id, uint8_t amplitude, usecs persistence,
+            int& channel, pn::string_view sound_id, uint8_t amplitude, usecs persistence,
             uint8_t priority);
 
     std::vector<smartSoundHandle>  sounds;

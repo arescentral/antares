@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <algorithm>
+#include <pn/file>
 #include <set>
 
 #include "config/gamepad.hpp"
@@ -28,8 +29,8 @@
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
 #include "data/replay.hpp"
+#include "data/resource.hpp"
 #include "data/scenario-list.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
@@ -67,19 +68,10 @@
 #include "ui/screens/play-again.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::ScopedFd;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::makedirs;
-using sfz::open;
 using std::max;
 using std::min;
 using std::set;
 using std::unique_ptr;
-
-namespace path = sfz::path;
 
 namespace antares {
 
@@ -88,9 +80,7 @@ extern set<int32_t> covered_objects;
 extern set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
-Rect world() {
-    return Rect({0, 0}, sys.video->screen_size());
-}
+Rect world() { return Rect({0, 0}, sys.video->screen_size()); }
 
 Rect play_screen() {
     const Size size = sys.video->screen_size();
@@ -156,7 +146,7 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
+        const Level& level, bool replay, InputSource* input, bool show_loading_screen,
         GameResult* game_result)
         : _state(NEW),
           _level(level),
@@ -176,24 +166,18 @@ void MainPlay::become_front() {
             // _replay_builder.init(
             //         sys.prefs->scenario_identifier(),
             //         String(u32_to_version(plug.meta.version)),
-            //         _level->chapter_number(),
+            //         *_level->chapter,
             //         g.random.seed);
 
-            sys.music.play(Music::IDLE, 3000);
+            sys.music.play(Music::IDLE, Music::briefing_song);
 
             if (_show_loading_screen) {
                 stack()->push(new LoadingScreen(_level, &_cancelled));
                 break;
             } else {
-                int32_t max;
-                int32_t current = 0;
-                if (!start_construct_level(_level, &max)) {
-                    *_game_result = QUIT_GAME;
-                    stack()->pop(this);
-                    return;
-                }
-                while (current < max) {
-                    construct_level(_level, &current);
+                LoadState s = start_construct_level(_level);
+                while (!s.done) {
+                    construct_level(&s);
                 }
             }
         }
@@ -207,7 +191,7 @@ void MainPlay::become_front() {
             }
             if (!_replay) {
                 _state = BRIEFING;
-                stack()->push(new BriefingScreen(_level.get(), &_cancelled));
+                stack()->push(new BriefingScreen(_level, &_cancelled));
                 break;
             }
         }
@@ -226,7 +210,9 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            sys.music.play(Music::IN_GAME, g.level->songID);
+            if (g.level->base.song.has_value()) {
+                sys.music.play(Music::IN_GAME, *g.level->base.song);
+            }
 
             stack()->push(new GamePlay(_replay, _input_source, _game_result));
         } break;
@@ -237,38 +223,30 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                sfz::print(
-                        sfz::io::err,
-                        sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
+                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->base.chapter);
                 const char* sep = "";
-                sfz::print(sfz::io::err, "  \"objects\": [");
+                pn::format(stderr, "  \"objects\": [");
                 for (auto object : covered_objects) {
-                    sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, object));
+                    pn::format(stderr, "{0}{1}", sep, object);
                     sep = ", ";
                 }
-                sfz::print(sfz::io::err, "],\n");
+                pn::format(stderr, "],\n");
                 covered_objects.clear();
 
                 sep = "";
-                sfz::print(sfz::io::err, "  \"actions\": [");
+                pn::format(stderr, "  \"actions\": [");
                 for (auto action : covered_actions) {
-                    sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, action));
+                    pn::format(stderr, "{0}{1}", sep, action);
                     sep = ", ";
                 }
-                sfz::print(sfz::io::err, "]\n");
-                sfz::print(sfz::io::err, "}\n");
+                pn::format(stderr, "]\n");
+                pn::format(stderr, "}\n");
                 covered_actions.clear();
             }
 #endif  // DATA_COVERAGE
             stack()->pop(this);
             break;
     }
-}
-
-int new_replay_file() {
-    String path;
-    makedirs(path::basename(path), 0755);
-    return open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
 }
 
 GamePlay::GamePlay(bool replay, InputSource* input, GameResult* game_result)
@@ -290,12 +268,11 @@ static const usecs kSleepAfter  = secs(60);
 class PauseScreen : public Card {
   public:
     PauseScreen() {
-        const StringList list(3100);
-        _pause_string.assign(list.at(10));
-        int32_t width = sys.fonts.title->string_width(_pause_string);
-        Rect    bounds(0, 0, width, sys.fonts.title->height);
+        _pause_string = Messages::pause_string().copy();
+        int32_t width = sys.fonts.title.string_width(_pause_string);
+        Rect    bounds(0, 0, width, sys.fonts.title.height);
         bounds.center_in(play_screen());
-        _text_origin = Point(bounds.left, bounds.top + sys.fonts.title->ascent);
+        _text_origin = Point(bounds.left, bounds.top + sys.fonts.title.ascent);
 
         bounds.inset(-4, -4);
         _bracket_bounds = bounds;
@@ -316,7 +293,7 @@ class PauseScreen : public Card {
 
     virtual void key_up(const KeyUpEvent& event) {
         wake();
-        if (event.key() == Keys::CAPS_LOCK) {
+        if (event.key() == Key::CAPS_LOCK) {
             stack()->pop(this);
         }
     }
@@ -331,8 +308,8 @@ class PauseScreen : public Card {
     virtual void draw() const {
         next()->draw();
         if (asleep() || _visible) {
-            const RgbColor& light_green = GetRGBTranslateColorShade(GREEN, LIGHTER);
-            const RgbColor& dark_green  = GetRGBTranslateColorShade(GREEN, DARKER);
+            const RgbColor& light_green = GetRGBTranslateColorShade(Hue::GREEN, LIGHTER);
+            const RgbColor& dark_green  = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
 
             {
                 Rects rects;
@@ -343,7 +320,7 @@ class PauseScreen : public Card {
                 draw_vbracket(rects, _bracket_bounds, light_green);
             }
 
-            sys.fonts.title->draw(_text_origin, _pause_string, light_green);
+            sys.fonts.title.draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
             Rects().fill(world(), rgba(0, 0, 0, 63));
@@ -363,14 +340,12 @@ class PauseScreen : public Card {
 
     void wake() { _sleep_at = now() + kSleepAfter; }
 
-    bool      _visible;
-    wall_time _next_switch;
-    wall_time _sleep_at;
-    String    _pause_string;
-    Point     _text_origin;
-    Rect      _bracket_bounds;
-
-    DISALLOW_COPY_AND_ASSIGN(PauseScreen);
+    bool       _visible;
+    wall_time  _next_switch;
+    wall_time  _sleep_at;
+    pn::string _pause_string;
+    Point      _text_origin;
+    Rect       _bracket_bounds;
 };
 
 void GamePlay::become_front() {
@@ -395,16 +370,16 @@ void GamePlay::become_front() {
                 case PlayAgainScreen::QUIT:
                     *_game_result  = QUIT_GAME;
                     g.game_over    = true;
-                    g.next_level   = -1;
-                    g.victory_text = -1;
+                    g.next_level   = nullptr;
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
                 case PlayAgainScreen::RESTART:
                     *_game_result  = RESTART_GAME;
                     g.game_over    = true;
-                    g.next_level   = -1;
-                    g.victory_text = -1;
+                    g.next_level   = nullptr;
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
@@ -414,12 +389,15 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = g.level->chapter_number() + 1;
-                    g.victory_text = -1;
+                    g.next_level   = g.level->solo.skip->get();
+                    g.victory_text = sfz::nullopt;
                     stack()->pop(this);
                     break;
 
-                default: throw Exception(format("invalid play again result {0}", _play_again));
+                default:
+                    throw std::runtime_error(
+                            pn::format("invalid play again result {0}", stringify(_play_again))
+                                    .c_str());
             }
             break;
 
@@ -434,9 +412,7 @@ void GamePlay::become_front() {
     }
 }
 
-void GamePlay::resign_front() {
-    minicomputer_cancel();
-}
+void GamePlay::resign_front() { minicomputer_cancel(); }
 
 void GamePlay::draw() const {
     globals()->starfield.draw();
@@ -564,23 +540,34 @@ void GamePlay::fire_timer() {
         case RESTART_GAME: stack()->pop(this); break;
 
         case WIN_GAME:
-            if (_replay || (g.victory_text < 0)) {
+            if (_replay || !g.victory_text.has_value()) {
                 stack()->pop(this);
             } else {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
-                stack()->push(new DebriefingScreen(
-                        g.victory_text, g.time, g.level->parTime, GetAdmiralLoss(a),
-                        g.level->parLosses, GetAdmiralKill(a), g.level->parKills));
+                switch (g.level->type()) {
+                    case Level::Type::SOLO:
+                        stack()->push(new DebriefingScreen(
+                                *g.victory_text, g.time, g.level->solo.par.time, GetAdmiralLoss(a),
+                                g.level->solo.par.losses, GetAdmiralKill(a),
+                                g.level->solo.par.kills));
+                        break;
+
+                    default: stack()->push(new DebriefingScreen(*g.victory_text)); break;
+                }
             }
             break;
 
         case LOSE_GAME:
-            if (_replay || (g.victory_text < 0)) {
+            if (_replay) {
+                *_game_result = QUIT_GAME;
                 stack()->pop(this);
+            } else if (!g.victory_text.has_value()) {
+                _state = PLAY_AGAIN;
+                stack()->push(new PlayAgainScreen(false, false, &_play_again));
             } else {
                 _state = DEBRIEFING;
-                stack()->push(new DebriefingScreen(g.victory_text));
+                stack()->push(new DebriefingScreen(*g.victory_text));
             }
             break;
 
@@ -592,24 +579,27 @@ void GamePlay::fire_timer() {
 
 void GamePlay::key_down(const KeyDownEvent& event) {
     switch (event.key()) {
-        case Keys::CAPS_LOCK:
+        case Key::CAPS_LOCK:
             _state         = PAUSED;
             _player_paused = true;
             stack()->push(new PauseScreen);
             return;
 
-        case Keys::ESCAPE:
+        case Key::ESCAPE:
             if (_replay) {
                 break;
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+                stack()->push(new PlayAgainScreen(
+                        true,
+                        (g.level->type() == Level::Type::SOLO) && g.level->solo.skip.has_value(),
+                        &_play_again));
                 return;
             }
 
         default:
-            if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
+            if (event.key() == sys.prefs->key(kHelpKeyNum)) {
                 if (_replay) {
                     break;
                 } else {
@@ -618,20 +608,20 @@ void GamePlay::key_down(const KeyDownEvent& event) {
                     stack()->push(new HelpScreen);
                     return;
                 }
-            } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
-                sys.prefs->set_volume(sys.prefs->volume() - 1);
+            } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum)) {
+                sys.prefs->set_volume(sys.prefs->volume());
                 sys.audio->set_global_volume(sys.prefs->volume());
                 return;
-            } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum)) {
                 sys.prefs->set_volume(sys.prefs->volume() + 1);
                 sys.audio->set_global_volume(sys.prefs->volume());
                 return;
-            } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kActionMusicKeyNum)) {
                 if (sys.prefs->play_music_in_game()) {
                     sys.music.toggle();
                 }
                 return;
-            } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+            } else if (event.key() == sys.prefs->key(kFastMotionKeyNum)) {
                 _fast_motion = true;
                 return;
             }
@@ -641,7 +631,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
-    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kFastMotionKeyNum)) {
         _fast_motion = false;
         return;
     }
@@ -649,29 +639,27 @@ void GamePlay::key_up(const KeyUpEvent& event) {
     _input_source->key_up(event);
 }
 
-void GamePlay::mouse_down(const MouseDownEvent& event) {
-    _input_source->mouse_down(event);
-}
+void GamePlay::mouse_down(const MouseDownEvent& event) { _input_source->mouse_down(event); }
 
-void GamePlay::mouse_up(const MouseUpEvent& event) {
-    _input_source->mouse_up(event);
-}
+void GamePlay::mouse_up(const MouseUpEvent& event) { _input_source->mouse_up(event); }
 
-void GamePlay::mouse_move(const MouseMoveEvent& event) {
-    _input_source->mouse_move(event);
-}
+void GamePlay::mouse_move(const MouseMoveEvent& event) { _input_source->mouse_move(event); }
 
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
-        case Gamepad::START:
+        case Gamepad::Button::START:
             if (_replay) {
                 break;
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+                stack()->push(new PlayAgainScreen(
+                        true,
+                        (g.level->type() == Level::Type::SOLO) && g.level->solo.skip.has_value(),
+                        &_play_again));
                 return;
             }
+        default: break;
     }
 
     _input_source->gamepad_button_down(event);

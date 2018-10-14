@@ -21,7 +21,9 @@
 #include <set>
 #include <sfz/sfz.hpp>
 
+#include "data/condition.hpp"
 #include "data/plugin.hpp"
+#include "data/races.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
@@ -44,124 +46,120 @@
 #include "math/rotation.hpp"
 #include "math/units.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::PrintTarget;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
-using sfz::read;
 using std::set;
 
 namespace antares {
 
 namespace {
 
-const uint32_t kNeutralColorNeededFlag = 0x00010000u;
-const uint32_t kNeutralColorLoadedFlag = 0x00000001u;
-const uint32_t kAnyColorLoadedFlag     = 0x0000ffffu;
-
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> possible_objects;
 ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
-void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, HandleList<Action>(BaseObject::*whichType), uint8_t color,
-        uint32_t all_colors);
-void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors);
+enum class Required : bool {
+    NO  = false,
+    YES = true,
+};
 
-void SetAllBaseObjectsUnchecked() {
-    for (auto aBase : BaseObject::all()) {
-        aBase->internalFlags = 0;
+void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16> all_colors);
+void AddActionMedia(const Action& action, std::bitset<16> all_colors);
+
+void AddBaseObjectMedia(
+        const NamedHandle<const BaseObject>& base, std::bitset<16> all_colors, Required required) {
+    if (base.get()) {
+        return;
     }
-}
+    if (required == Required::YES) {
+        load_object(base);
+    } else {
+        try {
+            load_object(base);
+        } catch (...) {
+            return;
+        }
+    }
 
-void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_colors) {
 #ifdef DATA_COVERAGE
     possible_objects.insert(base.number());
 #endif  // DATA_COVERAGE
 
-    if (!(base->attributes & kCanThink)) {
-        color = GRAY;
+    // Load sprites in all possible colors.
+    //
+    // For non-thinking objects, just load the gray ones. For thinking
+    // objects, load gray, plus all admiral colors.
+    //
+    // This actually loads more colors than are possible in practice;
+    // there was older code that determined which objects were possible
+    // per admiral, and which could change ownership, but that wasn’t
+    // worth the extra complication.
+    std::bitset<16> colors;
+    if (base->attributes & kCanThink) {
+        colors = all_colors;
+    } else {
+        colors[0] = true;
     }
-    base->internalFlags |= (kNeutralColorNeededFlag << color);
     for (int i = 0; i < 16; ++i) {
-        if (base->internalFlags & (kNeutralColorLoadedFlag << i)) {
-            continue;  // color already loaded.
-        } else if (!(base->internalFlags & (kNeutralColorNeededFlag << i))) {
-            continue;  // color not needed.
+        if (colors[i] && sprite_resource(*base).has_value()) {
+            sys.pix.add(*sprite_resource(*base), Hue(i));
         }
-        base->internalFlags |= kNeutralColorLoadedFlag << i;
+    }
 
-        if (base->pixResID != kNoSpriteTable) {
-            int16_t id = base->pixResID + (i << kSpriteTableColorShift);
-            sys.pix.add(id);
-        }
+    AddBaseObjectActionMedia(base->destroy.action, all_colors);
+    AddBaseObjectActionMedia(base->expire.action, all_colors);
+    AddBaseObjectActionMedia(base->create.action, all_colors);
+    AddBaseObjectActionMedia(base->collide.action, all_colors);
+    AddBaseObjectActionMedia(base->activate.action, all_colors);
+    AddBaseObjectActionMedia(base->arrive.action, all_colors);
 
-        AddBaseObjectActionMedia(base, &BaseObject::destroy, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::expire, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::create, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::collide, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::activate, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::arrive, i, all_colors);
-
-        for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
-            if (weapon.get()) {
-                AddBaseObjectMedia(weapon, i, all_colors);
-            }
+    for (const sfz::optional<BaseObject::Weapon>* weapon :
+         {&base->weapons.pulse, &base->weapons.beam, &base->weapons.special}) {
+        if (weapon->has_value()) {
+            AddBaseObjectMedia((*weapon)->base, all_colors, Required::YES);
         }
     }
 }
 
-void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, HandleList<Action>(BaseObject::*whichType), uint8_t color,
-        uint32_t all_colors) {
-    for (auto action : (*base.*whichType)) {
-        if (action.get()) {
-            AddActionMedia(action, color, all_colors);
-        }
+void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16> all_colors) {
+    for (const auto& action : actions) {
+        AddActionMedia(action, all_colors);
     }
 }
 
-void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
-    int32_t l1, l2;
+void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
 #ifdef DATA_COVERAGE
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    if (!action.get()) {
-        return;
-    }
-    switch (action->verb) {
-        case kCreateObject:
-        case kCreateObjectSetDest:
-            AddBaseObjectMedia(action->argument.createObject.whichBaseType, color, all_colors);
+    switch (action.type()) {
+        case Action::Type::CREATE:
+            AddBaseObjectMedia(action.create.base, all_colors, Required::YES);
+            break;
+        case Action::Type::MORPH:
+            AddBaseObjectMedia(action.morph.base, all_colors, Required::YES);
+            break;
+        case Action::Type::EQUIP:
+            AddBaseObjectMedia(action.equip.base, all_colors, Required::YES);
             break;
 
-        case kPlaySound:
-            l1 = action->argument.playSound.idMinimum;
-            l2 = action->argument.playSound.idMinimum + action->argument.playSound.idRange;
-            for (int32_t count = l1; count <= l2; count++) {
-                sys.sound.load(count);
-            }
-            break;
-
-        case kAlterBaseType:
-            AddBaseObjectMedia(action->argument.alterBaseType.base, color, all_colors);
-            break;
-
-        case kAlterOwner:
-            for (auto baseObject : BaseObject::all()) {
-                if (action_filter_applies_to(*action, baseObject)) {
-                    baseObject->internalFlags |= all_colors;
-                }
-                if (baseObject->internalFlags & kAnyColorLoadedFlag) {
-                    AddBaseObjectMedia(baseObject, color, all_colors);
+        case Action::Type::PLAY:
+            if (action.play.sound.has_value()) {
+                sys.sound.load(*action.play.sound);
+            } else {
+                for (const auto& s : action.play.any) {
+                    sys.sound.load(s.sound);
                 }
             }
             break;
+
+        case Action::Type::GROUP:
+            for (const auto& a : action.group.of) {
+                AddActionMedia(a, all_colors);
+            }
+            break;
+
+        default: break;
     }
 }
 
@@ -179,45 +177,26 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(Level::InitialObject* initial, coordPointType* coord, int32_t rotation) {
-    *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
+void GetInitialCoord(Handle<const Initial> initial, coordPointType* coord, int32_t rotation) {
+    *coord = rotate_coords(initial->at.h, initial->at.v, rotation);
 }
 
 }  // namespace
 
-Level::BriefPoint* Level::brief_point(size_t at) const {
-    return &plug.briefings[briefPointFirst + at];
-}
-
-size_t Level::brief_point_size() const {
-    return briefPointNum & kLevelBriefMask;
-}
-
-int32_t Level::angle() const {
-    if (briefPointNum & kLevelAngleMask) {
-        return (((briefPointNum & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
-    } else {
-        return -1;
+template <typename Players>
+static void construct_players(const Players& players) {
+    int i = 0;
+    for (const auto& player : players) {
+        auto admiral = Admiral::make(i++, player);
+        if (admiral->attributes() & kAIsHuman) {
+            g.admiral = admiral;
+        }
+        admiral->pay(Cash{Fixed::from_long(5000)});
+        load_race(admiral->race());
     }
 }
 
-Point Level::star_map_point() const {
-    return Point(starMapH, starMapV);
-}
-
-int32_t Level::chapter_number() const {
-    return levelNameStrNum;
-}
-
-int32_t Level::prologue_id() const {
-    return prologueID;
-}
-
-int32_t Level::epilogue_id() const {
-    return epilogueID;
-}
-
-bool start_construct_level(Handle<Level> level, int32_t* max) {
+LoadState start_construct_level(const Level& level) {
     ResetAllSpaceObjects();
     reset_action_queue();
     Vectors::reset();
@@ -227,140 +206,107 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
     Admiral::reset();
     ResetAllDestObjectData();
     ResetMotionGlobals();
+    plug.races.clear();
+    plug.objects.clear();
     gAbsoluteScale = kTimesTwoScale;
     g.sync         = 0;
 
-    g.level = level;
+    g.level = &level;
 
-    {
-        int32_t angle = g.level->angle();
-        if (angle < 0) {
-            g.angle = g.random.next(ROT_POS);
-        } else {
-            g.angle = angle;
-        }
+    if (g.level->base.angle.has_value()) {
+        g.angle = *g.level->base.angle;
+    } else {
+        g.angle = g.random.next(ROT_POS);
     }
 
     g.victor       = Admiral::none();
-    g.next_level   = -1;
-    g.victory_text = -1;
+    g.next_level   = nullptr;
+    g.victory_text = sfz::nullopt;
 
-    SetMiniScreenStatusStrList(g.level->scoreStringResID);
-
-    for (int i = 0; i < g.level->playerNum; i++) {
-        if (g.level->player[i].playerType == kSingleHumanPlayer) {
-            auto admiral = Admiral::make(i, kAIsHuman, g.level->player[i]);
-            admiral->pay(Fixed::from_long(5000));
-            g.admiral = admiral;
-        } else {
-            auto admiral = Admiral::make(i, kAIsComputer, g.level->player[i]);
-            admiral->pay(Fixed::from_long(5000));
-        }
+    switch (g.level->type()) {
+        case Level::Type::NONE: throw std::runtime_error("level with type NONE?");
+        case Level::Type::DEMO: construct_players(g.level->demo.players); break;
+        case Level::Type::SOLO: construct_players(g.level->solo.players); break;
+        case Level::Type::NET: throw std::runtime_error("can’t construct net player");
     }
-
     // *** END INIT ADMIRALS ***
 
-    ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
+    g.initials.clear();
+    g.initials.resize(Initial::all().size());
+    g.initial_ids.clear();
+    g.initial_ids.resize(Initial::all().size());
+    g.condition_enabled.clear();
+    g.condition_enabled.resize(g.level->base.conditions.size());
 
-    // uncheck all base objects
-    SetAllBaseObjectsUnchecked();
-    // uncheck all sounds
+    ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
 
     sys.pix.reset();
     sys.sound.reset();
 
-    *max = g.level->initialNum * 3L + 1 +
-           g.level->startTime.count();  // for each run through the initial num
+    LoadState s;
+    s.max = Initial::all().size() * 3L + 1 +
+            g.level->base.start_time.value_or(secs(0))
+                    .count();  // for each run through the initial num
 
-    return true;
+    return s;
 }
 
-static void load_blessed_objects(uint32_t all_colors) {
-    if (!plug.meta.energyBlobID.get()) {
-        throw Exception("No energy blob defined");
-    }
-    if (!plug.meta.warpInFlareID.get()) {
-        throw Exception("No warp in flare defined");
-    }
-    if (!plug.meta.warpOutFlareID.get()) {
-        throw Exception("No warp out flare defined");
-    }
-    if (!plug.meta.playerBodyID.get()) {
-        throw Exception("No player body defined");
-    }
-
+static void load_blessed_objects(std::bitset<16> all_colors) {
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
-    plug.meta.playerBodyID->internalFlags |= all_colors;
-    for (int i = 0; i < g.level->playerNum; i++) {
-        const auto&        meta      = plug.meta;
-        Handle<BaseObject> blessed[] = {
-                meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
-        };
-        for (auto id : blessed) {
-            AddBaseObjectMedia(id, GRAY, all_colors);
-        }
+    const NamedHandle<const BaseObject>* blessed[] = {
+            &kEnergyBlob, &kWarpInFlare, &kWarpOutFlare, &kPlayerBody,
+    };
+    for (auto id : blessed) {
+        AddBaseObjectMedia(*id, all_colors, Required::YES);
     }
 }
 
-static void load_initial(int i, uint32_t all_colors) {
-    Level::InitialObject* initial    = g.level->initial(i);
-    Handle<Admiral>       owner      = initial->owner;
-    auto                  baseObject = initial->type;
-    // TODO(sfiera): remap objects in networked games.
+static void load_initial(Handle<const Initial> initial, std::bitset<16> all_colors) {
+    Handle<Admiral>               owner           = initial->owner.value_or(Admiral::none());
+    const BuildableObject&        buildableObject = initial->base;
+    NamedHandle<const BaseObject> baseObject;
+    if (owner.get()) {
+        baseObject = get_buildable_object_handle(buildableObject, owner->race());
+    } else {
+        baseObject = NamedHandle<const BaseObject>{buildableObject.name.copy()};
+    }
 
     // Load the media for this object
-    //
-    // I don't think that it's necessary to treat kIsDestination
-    // objects specially here.  If their ownership can change, there
-    // will be a transport or something that does it, and we will
-    // mark the necessity of having all colors through action
-    // checking.
-    if (baseObject->attributes & kIsDestination) {
-        baseObject->internalFlags |= all_colors;
-    }
-    AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors);
+    AddBaseObjectMedia(baseObject, all_colors, Required::YES);
 
     // make sure we're not overriding the sprite
-    if (initial->spriteIDOverride >= 0) {
+    if (initial->override_.sprite.has_value()) {
         if (baseObject->attributes & kCanThink) {
-            sys.pix.add(
-                    initial->spriteIDOverride +
-                    (GetAdmiralColor(owner) << kSpriteTableColorShift));
+            sys.pix.add(*initial->override_.sprite, GetAdmiralColor(owner));
         } else {
-            sys.pix.add(initial->spriteIDOverride);
+            sys.pix.add(*initial->override_.sprite, Hue::GRAY);
         }
     }
 
     // check any objects this object can build
-    for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-        initial = g.level->initial(i);
-        if (initial->canBuild[j] != kNoClass) {
-            // check for each player
-            for (auto a : Admiral::all()) {
-                if (a->active()) {
-                    auto baseObject =
-                            mGetBaseObjectFromClassRace(initial->canBuild[j], GetAdmiralRace(a));
-                    if (baseObject.get()) {
-                        AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
-                    }
-                }
+    for (int j = 0; j < initial->build.size(); j++) {
+        // check for each player
+        for (auto a : Admiral::all()) {
+            if (a->active()) {
+                NamedHandle<const BaseObject> baseObject =
+                        get_buildable_object_handle(initial->build[j], a->race());
+                AddBaseObjectMedia(baseObject, all_colors, Required::NO);
             }
         }
     }
 }
 
-static void load_condition(int i, uint32_t all_colors) {
-    Level::Condition* condition = g.level->condition(i);
-    for (auto action : condition->action) {
-        AddActionMedia(action, GRAY, all_colors);
+static void load_condition(Handle<const Condition> condition, std::bitset<16> all_colors) {
+    for (const auto& action : condition->action) {
+        AddActionMedia(action, all_colors);
     }
-    condition->set_true_yet(condition->flags & kInitiallyTrue);
+    g.condition_enabled[condition.number()] = !condition->disabled.value_or(false);
 }
 
 static void run_game_1s() {
-    game_ticks start_time = game_ticks(-g.level->startTime);
+    game_ticks start_time = game_ticks(-g.level->base.start_time.value_or(secs(0)));
     do {
         g.time += kMajorTick;
         MoveSpaceObjects(kMajorTick);
@@ -376,56 +322,60 @@ static void run_game_1s() {
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 
-void construct_level(Handle<Level> level, int32_t* current) {
-    int32_t  step       = *current;
-    uint32_t all_colors = kNeutralColorNeededFlag;
+void construct_level(LoadState* state) {
+    int32_t         step = state->step;
+    std::bitset<16> all_colors;
+    all_colors[0] = true;
     for (auto adm : Admiral::all()) {
         if (adm->active()) {
-            all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(adm);
+            all_colors[static_cast<int>(GetAdmiralColor(adm))] = true;
         }
     }
 
     if (step == 0) {
         load_blessed_objects(all_colors);
-        load_initial(step, all_colors);
-    } else if (step < g.level->initialNum) {
-        load_initial(step, all_colors);
-    } else if (step == g.level->initialNum) {
+        load_initial(Handle<const Initial>(step), all_colors);
+    } else if (step < Initial::all().size()) {
+        load_initial(Handle<const Initial>(step), all_colors);
+    } else if (step == Initial::all().size()) {
         // add media for all condition actions
-        step -= g.level->initialNum;
-        for (int i = 0; i < g.level->conditionNum; i++) {
-            load_condition(i, all_colors);
+        step -= Initial::all().size();
+        for (auto c : Condition::all()) {
+            load_condition(c, all_colors);
         }
-        create_initial(g.level->initial(step), all_colors);
-    } else if (step < (2 * g.level->initialNum)) {
-        step -= g.level->initialNum;
-        create_initial(g.level->initial(step), all_colors);
-    } else if (step < (3 * g.level->initialNum)) {
+        create_initial(Handle<const Initial>(step));
+    } else if (step < (2 * Initial::all().size())) {
+        step -= Initial::all().size();
+        create_initial(Handle<const Initial>(step));
+    } else if (step < (3 * Initial::all().size())) {
         // double back and set up any defined initial destinations
-        step -= (2 * g.level->initialNum);
-        set_initial_destination(g.level->initial(step), false);
-    } else if (step == (3 * g.level->initialNum)) {
+        step -= (2 * Initial::all().size());
+        set_initial_destination(Handle<const Initial>(step), false);
+    } else if (step == (3 * Initial::all().size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
-        g.time = game_ticks(-g.level->startTime);
+        g.time = game_ticks(-g.level->base.start_time.value_or(secs(0)));
     } else {
         run_game_1s();
     }
-    ++*current;
+    ++state->step;
+    if (state->step == state->max) {
+        state->done = true;
+    }
     return;
 }
 
-void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {
+void DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::string_view text) {
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
         g.next_level   = nextLevel;
-        g.victory_text = textID;
+        g.victory_text = sfz::make_optional(text.copy());
         g.game_over    = true;
         g.game_over_at = g.time;
     } else {
         if (!g.victor.get()) {
             g.victor       = whichPlayer;
-            g.victory_text = textID;
+            g.victory_text = sfz::make_optional(text.copy());
             g.next_level   = nextLevel;
             if (!g.game_over) {
                 g.game_over    = true;
@@ -440,25 +390,21 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
 //  at which to show the entire scenario.
 
 void GetLevelFullScaleAndCorner(
-        const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
-        Rect* bounds) {
-    int32_t               biggest, mustFit;
-    Point                 coord, otherCoord, tempCoord;
-    Level::InitialObject* initial;
+        int32_t rotation, coordPointType* corner, int32_t* scale, Rect* bounds) {
+    int32_t biggest, mustFit;
+    Point   coord, otherCoord, tempCoord;
 
     mustFit = bounds->bottom - bounds->top;
     if ((bounds->right - bounds->left) < mustFit)
         mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for (int32_t count = 0; count < level->initialNum; count++) {
-        initial = level->initial(count);
-        if (!(initial->attributes & kInitiallyHidden)) {
+    for (const auto& initial : Initial::all()) {
+        if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
-            for (int32_t otherCount = 0; otherCount < level->initialNum; otherCount++) {
-                initial = level->initial(otherCount);
-                GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
+            for (const auto& other : Initial::all()) {
+                GetInitialCoord(other, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
                     biggest = ABS(otherCoord.h - coord.h);
@@ -479,9 +425,8 @@ void GetLevelFullScaleAndCorner(
     otherCoord.v = kUniversalCenter;
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
-    initial      = level->initial(0);
-    for (int32_t count = 0; count < level->initialNum; count++) {
-        if (!(initial->attributes & kInitiallyHidden)) {
+    for (const auto& initial : Initial::all()) {
+        if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {
@@ -498,7 +443,6 @@ void GetLevelFullScaleAndCorner(
                 otherCoord.v = tempCoord.v;
             }
         }
-        initial++;
     }
 
     biggest = bounds->right - bounds->left;

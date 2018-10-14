@@ -26,11 +26,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::String;
-using sfz::format;
-
 namespace antares {
 
 namespace {
@@ -61,13 +56,14 @@ Rect object_data_bounds(Point origin, Size size) {
 }  // namespace
 
 ObjectDataScreen::ObjectDataScreen(
-        Point origin, Handle<BaseObject> object, Trigger trigger, int which)
-        : _trigger(trigger), _which(which), _state(TYPING) {
-    String text;
-    CreateObjectDataText(&text, object);
+        Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key,
+        Gamepad::Button gamepad)
+        : _trigger(trigger), _mouse(mouse), _key(key), _gamepad(gamepad), _state(TYPING) {
+    pn::string text;
+    CreateObjectDataText(text, object);
     _text.reset(new StyledText(sys.fonts.button));
-    _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
-    _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));
+    _text->set_fore_color(GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
+    _text->set_back_color(GetRGBTranslateColorShade(Hue::GREEN, DARKEST));
     _text->set_retro_text(text);
     _text->wrap_to(kShipDataWidth, 0, 0);
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
@@ -112,19 +108,19 @@ void ObjectDataScreen::fire_timer() {
 }
 
 void ObjectDataScreen::mouse_up(const MouseUpEvent& event) {
-    if ((_trigger == MOUSE) && (event.button() == _which)) {
+    if ((_trigger == MOUSE) && (event.button() == _mouse)) {
         stack()->pop(this);
     }
 }
 
 void ObjectDataScreen::key_up(const KeyUpEvent& event) {
-    if ((_trigger == KEY) && (event.key() == _which)) {
+    if ((_trigger == KEY) && (event.key() == _key)) {
         stack()->pop(this);
     }
 }
 
 void ObjectDataScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if ((_trigger == GAMEPAD) && (event.button == _which)) {
+    if ((_trigger == GAMEPAD) && (event.button == _gamepad)) {
         stack()->pop(this);
     }
 }
@@ -133,7 +129,7 @@ void ObjectDataScreen::draw() const {
     next()->draw();
     Rect outside = _bounds;
     outside.inset(-8, -4);
-    const RgbColor light_green = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
+    const RgbColor light_green = GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST);
     Rects().fill(outside, light_green);
     outside.inset(1, 1);
     Rects().fill(outside, RgbColor::black());

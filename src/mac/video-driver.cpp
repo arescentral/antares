@@ -26,7 +26,7 @@
 #include <strings.h>
 #include <sys/time.h>
 #include <algorithm>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "game/time.hpp"
 #include "mac/c/CocoaVideoDriver.h"
@@ -36,7 +36,6 @@
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
-using sfz::Exception;
 using std::min;
 using std::unique_ptr;
 
@@ -69,11 +68,21 @@ class InputModeTracker : public EventReceiver {
 
   private:
     InputMode* _mode;
-
-    DISALLOW_COPY_AND_ASSIGN(InputModeTracker);
 };
 
 }  // namespace
+
+static int32_t get_iohid_property(IOHIDDeviceRef device, CFStringRef key) {
+    int32_t    vendor      = 0;
+    cf::Type   vendor_type = CFRetain(IOHIDDeviceGetProperty(device, key));
+    cf::Number vendor_number;
+    if (vendor_type.c_obj() &&
+        (vendor_number = cf::cast<cf::Number>(std::move(vendor_type))).c_obj() &&
+        cf::unwrap(vendor_number, vendor)) {
+        return vendor;
+    }
+    return 0;
+}
 
 CocoaVideoDriver::CocoaVideoDriver() {}
 
@@ -95,13 +104,9 @@ Point CocoaVideoDriver::get_mouse() {
     return p;
 }
 
-InputMode CocoaVideoDriver::input_mode() const {
-    return _input_mode;
-}
+InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
-wall_time CocoaVideoDriver::now() const {
-    return _now();
-}
+wall_time CocoaVideoDriver::now() const { return _now(); }
 
 struct CocoaVideoDriver::EventBridge {
     InputMode&         input_mode;
@@ -111,6 +116,7 @@ struct CocoaVideoDriver::EventBridge {
     std::queue<Event*> event_queue;
 
     double gamepad[6];
+    bool   switch_dpad[4];
 
     static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
@@ -129,12 +135,12 @@ struct CocoaVideoDriver::EventBridge {
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(_now(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyDownEvent(_now(), Key::CAPS_LOCK));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(_now(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyUpEvent(_now(), Key::CAPS_LOCK));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -145,7 +151,6 @@ struct CocoaVideoDriver::EventBridge {
             case kHIDPage_KeyboardOrKeypad: self->key_event(result, element, value); break;
             case kHIDPage_GenericDesktop: self->analog_event(result, element, value); break;
             case kHIDPage_Button: self->button_event(result, element, value); break;
-            default: sfz::print(sfz::io::err, sfz::format("{0}\n", usage_page)); break;
         }
     }
 
@@ -157,14 +162,16 @@ struct CocoaVideoDriver::EventBridge {
         uint16_t scan_code = IOHIDElementGetUsage(element);
         if ((scan_code < 4) || (231 < scan_code)) {
             return;
-        } else if (scan_code == Keys::CAPS_LOCK) {
+        }
+        Key usb_key = static_cast<Key>(scan_code);
+        if (usb_key == Key::CAPS_LOCK) {
             return;
         }
 
         if (down) {
-            enqueue(new KeyDownEvent(_now(), scan_code));
+            enqueue(new KeyDownEvent(_now(), usb_key));
         } else {
-            enqueue(new KeyUpEvent(_now(), scan_code));
+            enqueue(new KeyUpEvent(_now(), usb_key));
         }
     }
 
@@ -172,41 +179,240 @@ struct CocoaVideoDriver::EventBridge {
         if (!antares_is_active()) {
             return;
         }
-        bool     down  = IOHIDValueGetIntegerValue(value);
-        uint16_t usage = IOHIDElementGetUsage(element);
-        if (down) {
-            enqueue(new GamepadButtonDownEvent(_now(), usage));
-        } else {
-            enqueue(new GamepadButtonUpEvent(_now(), usage));
+
+        IOHIDDeviceRef device  = IOHIDElementGetDevice(element);
+        int32_t        vendor  = get_iohid_property(device, CFSTR(kIOHIDVendorIDKey));
+        int32_t        product = get_iohid_property(device, CFSTR(kIOHIDProductIDKey));
+        switch (vendor) {
+            case 0x057e:  // Nintendo
+                switch (product) {
+                    case 0x2006:  // Joy-Con (L)
+                        return joy_con_l_button_event(element, value);
+                    case 0x2007:  // Joy-Con (R)
+                        return joy_con_r_button_event(element, value);
+                    case 0x2009:  // Switch Pro controller
+                        return switch_pro_button_event(element, value);
+                }
         }
+        default_button_event(element, value);
     }
 
     void analog_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
-        int      int_value = IOHIDValueGetIntegerValue(value);
+        if (!antares_is_active()) {
+            return;
+        }
+
+        IOHIDDeviceRef device  = IOHIDElementGetDevice(element);
+        int32_t        vendor  = get_iohid_property(device, CFSTR(kIOHIDVendorIDKey));
+        int32_t        product = get_iohid_property(device, CFSTR(kIOHIDProductIDKey));
+        switch (vendor) {
+            case 0x057e:  // Nintendo
+                switch (product) {
+                    case 0x2006:  // Joy-Con (L)
+                        return joy_con_l_analog_event(element, value);
+                    case 0x2007:  // Joy-Con (R)
+                        return joy_con_r_analog_event(element, value);
+                    case 0x2009:  // Switch Pro controller
+                        return switch_pro_analog_event(element, value);
+                }
+        }
+        default_analog_event(element, value);
+    }
+
+    void joy_con_l_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        bool            down   = IOHIDValueGetIntegerValue(value);
+        uint16_t        usage  = IOHIDElementGetUsage(element);
+        Gamepad::Button button = Gamepad::Button::NONE;
+
+        switch (usage) {
+            case 1: button = Gamepad::Button::LEFT; break;
+            case 2: button = Gamepad::Button::DOWN; break;
+            case 3: button = Gamepad::Button::UP; break;
+            case 4: button = Gamepad::Button::RIGHT; break;
+            case 9: button = Gamepad::Button::BACK; break;
+            case 11: button = Gamepad::Button::LSB; break;
+            case 14: button = Gamepad::Button::NONE; break;
+            case 15: button = Gamepad::Button::LB; break;
+            case 16: button = Gamepad::Button::LT; break;
+        }
+
+        if (button == Gamepad::Button::NONE) {
+            return;
+        } else if (down) {
+            enqueue(new GamepadButtonDownEvent(_now(), button));
+        } else {
+            enqueue(new GamepadButtonUpEvent(_now(), button));
+        }
+    }
+
+    void joy_con_r_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        bool            down   = IOHIDValueGetIntegerValue(value);
+        uint16_t        usage  = IOHIDElementGetUsage(element);
+        Gamepad::Button button = Gamepad::Button::NONE;
+
+        switch (usage) {
+            case 1: button = Gamepad::Button::A; break;
+            case 2: button = Gamepad::Button::X; break;
+            case 3: button = Gamepad::Button::B; break;
+            case 4: button = Gamepad::Button::Y; break;
+            case 10: button = Gamepad::Button::START; break;
+            case 12: button = Gamepad::Button::RSB; break;
+            case 13: button = Gamepad::Button::NONE; break;
+            case 15: button = Gamepad::Button::RB; break;
+            case 16: button = Gamepad::Button::RT; break;
+        }
+
+        if (button == Gamepad::Button::NONE) {
+            return;
+        } else if (down) {
+            enqueue(new GamepadButtonDownEvent(_now(), button));
+        } else {
+            enqueue(new GamepadButtonUpEvent(_now(), button));
+        }
+    }
+
+    void joy_con_l_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        using Stick       = Gamepad::Stick;
+        int64_t int_value = IOHIDValueGetIntegerValue(value);
+        switch (int_value) {
+            case 0: enqueue(new GamepadStickEvent(_now(), Stick::LS, +1.000, +0.000)); break;
+            case 1: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.707, +0.707)); break;
+            case 2: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.000, +1.000)); break;
+            case 3: enqueue(new GamepadStickEvent(_now(), Stick::LS, -0.707, +0.707)); break;
+            case 4: enqueue(new GamepadStickEvent(_now(), Stick::LS, -1.000, +0.000)); break;
+            case 5: enqueue(new GamepadStickEvent(_now(), Stick::LS, -0.707, -0.707)); break;
+            case 6: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.000, -1.000)); break;
+            case 7: enqueue(new GamepadStickEvent(_now(), Stick::LS, +0.707, -0.707)); break;
+            case 8: enqueue(new GamepadStickEvent(_now(), Stick::LS, 0.000, 0.000)); break;
+        }
+    }
+
+    void joy_con_r_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        using Stick       = Gamepad::Stick;
+        int64_t int_value = IOHIDValueGetIntegerValue(value);
+        switch (int_value) {
+            case 0: enqueue(new GamepadStickEvent(_now(), Stick::RS, +1.000, +0.000)); break;
+            case 1: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.707, +0.707)); break;
+            case 2: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.000, +1.000)); break;
+            case 3: enqueue(new GamepadStickEvent(_now(), Stick::RS, -0.707, +0.707)); break;
+            case 4: enqueue(new GamepadStickEvent(_now(), Stick::RS, -1.000, +0.000)); break;
+            case 5: enqueue(new GamepadStickEvent(_now(), Stick::RS, -0.707, -0.707)); break;
+            case 6: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.000, -1.000)); break;
+            case 7: enqueue(new GamepadStickEvent(_now(), Stick::RS, +0.707, -0.707)); break;
+            case 8: enqueue(new GamepadStickEvent(_now(), Stick::RS, 0.000, 0.000)); break;
+        }
+    }
+
+    void switch_pro_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        if (!antares_is_active()) {
+            return;
+        }
+        bool            down   = IOHIDValueGetIntegerValue(value);
+        uint16_t        usage  = IOHIDElementGetUsage(element);
+        Gamepad::Button button = Gamepad::Button::NONE;
+
+        switch (usage) {
+            case 1: button = Gamepad::Button::B; break;
+            case 2: button = Gamepad::Button::A; break;
+            case 3: button = Gamepad::Button::Y; break;
+            case 4: button = Gamepad::Button::X; break;
+            case 5: button = Gamepad::Button::LB; break;
+            case 6: button = Gamepad::Button::RB; break;
+            case 7: button = Gamepad::Button::LT; break;
+            case 8: button = Gamepad::Button::RT; break;
+            case 9: button = Gamepad::Button::BACK; break;
+            case 10: button = Gamepad::Button::START; break;
+            case 11: button = Gamepad::Button::LSB; break;
+            case 12: button = Gamepad::Button::RSB; break;
+            case 13: button = Gamepad::Button::NONE; break;
+            case 14: button = Gamepad::Button::NONE; break;
+        }
+
+        if (button == Gamepad::Button::NONE) {
+            return;
+        } else if (down) {
+            enqueue(new GamepadButtonDownEvent(_now(), button));
+        } else {
+            enqueue(new GamepadButtonUpEvent(_now(), button));
+        }
+    }
+
+    void switch_pro_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        uint16_t usage = IOHIDElementGetUsage(element);
+        if (usage == 57) {  // D-Pad
+            int64_t int_value = IOHIDValueGetIntegerValue(value);
+            switch (int_value) {
+                case 0: set_switch_dpad(true, false, false, false); break;
+                case 1: set_switch_dpad(true, true, false, false); break;
+                case 2: set_switch_dpad(false, true, false, false); break;
+                case 3: set_switch_dpad(false, true, true, false); break;
+                case 4: set_switch_dpad(false, false, true, false); break;
+                case 5: set_switch_dpad(false, false, true, true); break;
+                case 6: set_switch_dpad(false, false, false, true); break;
+                case 7: set_switch_dpad(true, false, false, true); break;
+                case 8: set_switch_dpad(false, false, false, false); break;
+            }
+            return;
+        }
+
+        return default_analog_event(element, value);
+    }
+
+    void set_switch_dpad(bool up, bool right, bool down, bool left) {
+        set_switch_dpad_button(Gamepad::Button::UP, 0, up);
+        set_switch_dpad_button(Gamepad::Button::RIGHT, 1, right);
+        set_switch_dpad_button(Gamepad::Button::DOWN, 2, down);
+        set_switch_dpad_button(Gamepad::Button::LEFT, 3, left);
+    }
+
+    void set_switch_dpad_button(Gamepad::Button button, int index, bool pressed) {
+        if (pressed != switch_dpad[index]) {
+            if (pressed) {
+                enqueue(new GamepadButtonDownEvent(_now(), button));
+            } else {
+                enqueue(new GamepadButtonUpEvent(_now(), button));
+            }
+            switch_dpad[index] = pressed;
+        }
+    }
+
+    void default_button_event(IOHIDElementRef element, IOHIDValueRef value) {
+        if (!antares_is_active()) {
+            return;
+        }
+        bool     down  = IOHIDValueGetIntegerValue(value);
+        uint16_t usage = IOHIDElementGetUsage(element);
+        if (down) {
+            enqueue(new GamepadButtonDownEvent(_now(), static_cast<Gamepad::Button>(usage)));
+        } else {
+            enqueue(new GamepadButtonUpEvent(_now(), static_cast<Gamepad::Button>(usage)));
+        }
+    }
+
+    void default_analog_event(IOHIDElementRef element, IOHIDValueRef value) {
+        int64_t  int_value = IOHIDValueGetIntegerValue(value);
         uint16_t usage     = IOHIDElementGetUsage(element);
         switch (usage) {
             case kHIDUsage_GD_X:
             case kHIDUsage_GD_Y:
             case kHIDUsage_GD_Rx:
             case kHIDUsage_GD_Ry: {
-                int    min          = IOHIDElementGetLogicalMin(element);
-                int    max          = IOHIDElementGetLogicalMax(element);
-                double double_value = int_value;
-                if (int_value < 0) {
-                    double_value = -(double_value / min);
-                } else {
-                    double_value = (double_value / max);
-                }
+                int64_t min          = IOHIDElementGetLogicalMin(element);
+                int64_t max          = IOHIDElementGetLogicalMax(element);
+                int64_t range        = max - min;
+                double  double_value = ((double(int_value - min) / range) * 2.0) - 1.0;
 
                 usage -= kHIDUsage_GD_X;
                 gamepad[usage]                 = double_value;
                 static const int x_component[] = {0, 0, -1, 3, 3, -1};
                 double           x             = gamepad[x_component[usage]];
                 double           y             = gamepad[x_component[usage] + 1];
-                enqueue(new GamepadStickEvent(_now(), kHIDUsage_GD_X + x_component[usage], x, y));
+                enqueue(new GamepadStickEvent(
+                        _now(), static_cast<Gamepad::Stick>(kHIDUsage_GD_X + x_component[usage]),
+                        x, y));
             } break;
             case kHIDUsage_GD_Z:
-            case kHIDUsage_GD_Rz: button_event(result, element, value); break;
+            case kHIDUsage_GD_Rz: default_button_event(element, value); break;
         }
     }
 
@@ -232,11 +438,16 @@ struct CocoaVideoDriver::EventBridge {
 
 void CocoaVideoDriver::loop(Card* initial) {
     CGLPixelFormatAttribute attrs[] = {
-            kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
-            kCGLPFADisplayMask, static_cast<CGLPixelFormatAttribute>(
-                                        CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
-            kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24), kCGLPFADoubleBuffer,
-            kCGLPFAAccelerated, static_cast<CGLPixelFormatAttribute>(0),
+            kCGLPFAOpenGLProfile,
+            (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
+            kCGLPFADisplayMask,
+            static_cast<CGLPixelFormatAttribute>(
+                    CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
+            kCGLPFAColorSize,
+            static_cast<CGLPixelFormatAttribute>(24),
+            kCGLPFADoubleBuffer,
+            kCGLPFAAccelerated,
+            static_cast<CGLPixelFormatAttribute>(0),
     };
 
     cgl::PixelFormat pixel_format(attrs);
@@ -281,7 +492,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     IOHIDManagerScheduleWithRunLoop(hid_manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     IOReturn r = IOHIDManagerOpen(hid_manager, kIOHIDOptionsTypeNone);
     if (r != 0) {
-        throw Exception("IOHIDManagerOpen");
+        throw std::runtime_error("IOHIDManagerOpen");
     }
     IOHIDManagerRegisterInputValueCallback(hid_manager, EventBridge::hid_event, &bridge);
 

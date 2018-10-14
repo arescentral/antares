@@ -20,188 +20,168 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/briefing.hpp"
+#include "data/condition.hpp"
+#include "data/field.hpp"
+#include "data/initial.hpp"
 #include "data/plugin.hpp"
+#include "data/races.hpp"
+#include "data/resource.hpp"
 
-using sfz::BytesSlice;
-using sfz::ReadSource;
-using sfz::String;
-using sfz::read;
 namespace macroman = sfz::macroman;
 
 namespace antares {
 
-static const int16_t kLevel_StartTimeMask  = 0x7fff;
-static const int16_t kLevel_IsTraining_Bit = 0x8000;
+Level::Type Level::type() const { return base.type; }
 
-namespace {
+Level::Level() : base{} {}
+Level::Level(DemoLevel l) : demo(std::move(l)) {}
+Level::Level(SoloLevel l) : solo(std::move(l)) {}
+Level::Level(NetLevel l) : net(std::move(l)) {}
 
-void read_pstr(ReadSource in, String& out) {
-    uint8_t bytes[256];
-    read(in, bytes, 256);
-    BytesSlice encoded(bytes + 1, bytes[0]);
-    out.assign(macroman::decode(encoded));
-}
-
-}  // namespace
-
-Level* Level::get(int n) {
-    return &plug.levels[n];
-}
-
-void read_from(ReadSource in, scenarioInfoType& scenario_info) {
-    scenario_info.warpInFlareID  = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.warpOutFlareID = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.playerBodyID   = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.energyBlobID   = Handle<BaseObject>(read<int32_t>(in));
-    read_pstr(in, scenario_info.downloadURLString);
-    read_pstr(in, scenario_info.titleString);
-    read_pstr(in, scenario_info.authorNameString);
-    read_pstr(in, scenario_info.authorURLString);
-    read(in, scenario_info.version);
-    in.shift(12);
-}
-
-void read_from(ReadSource in, Level& level) {
-    read(in, level.netRaceFlags);
-    read(in, level.playerNum);
-    read(in, level.player, kMaxPlayerNum);
-    read(in, level.scoreStringResID);
-    read(in, level.initialFirst);
-    read(in, level.prologueID);
-    read(in, level.initialNum);
-    read(in, level.songID);
-    read(in, level.conditionFirst);
-    read(in, level.epilogueID);
-    read(in, level.conditionNum);
-    read(in, level.starMapH);
-    read(in, level.briefPointFirst);
-    read(in, level.starMapV);
-    read(in, level.briefPointNum);
-    level.parTime = game_ticks(secs(read<int16_t>(in)));
-    in.shift(2);
-    read(in, level.parKills);
-    read(in, level.levelNameStrNum);
-    read(in, level.parKillRatio);
-    read(in, level.parLosses);
-    int16_t start_time = read<int16_t>(in);
-    level.startTime    = secs(start_time & kLevel_StartTimeMask);
-    level.is_training  = start_time & kLevel_IsTraining_Bit;
-}
-
-void read_from(ReadSource in, Level::Player& level_player) {
-    read(in, level_player.playerType);
-    read(in, level_player.playerRace);
-    read(in, level_player.nameResID);
-    read(in, level_player.nameStrNum);
-    in.shift(4);
-    read(in, level_player.earningPower);
-    read(in, level_player.netRaceFlags);
-    in.shift(2);
-}
-
-static void read_action(sfz::ReadSource in, Level::Condition& condition) {
-    auto start       = read<int32_t>(in);
-    auto count       = read<int32_t>(in);
-    auto end         = (start >= 0) ? (start + count) : start;
-    condition.action = {start, end};
-}
-
-void read_from(ReadSource in, Level::Condition& level_condition) {
-    uint8_t section[12];
-
-    read(in, level_condition.condition);
-    in.shift(1);
-    read(in, section, 12);
-    read(in, level_condition.subjectObject);
-    read(in, level_condition.directObject);
-    read_action(in, level_condition);
-    read(in, level_condition.flags);
-    read(in, level_condition.direction);
-
-    BytesSlice sub(section, 12);
-    switch (level_condition.condition) {
-        case kCounterCondition:
-        case kCounterGreaterCondition:
-        case kCounterNotCondition: read(sub, level_condition.conditionArgument.counter); break;
-
-        case kDestructionCondition:
-        case kOwnerCondition:
-        case kNoShipsLeftCondition:
-        case kZoomLevelCondition: read(sub, level_condition.conditionArgument.longValue); break;
-
-        case kVelocityLessThanEqualToCondition:
-            read(sub, level_condition.conditionArgument.fixedValue);
-
-        case kTimeCondition:
-            level_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
-            break;
-
-        case kProximityCondition:
-        case kDistanceGreaterCondition:
-            read(sub, level_condition.conditionArgument.unsignedLongValue);
-            break;
-
-        case kCurrentMessageCondition:
-        case kCurrentComputerCondition:
-            read(sub, level_condition.conditionArgument.location);
-            break;
+Level::Level(Level&& l) {
+    switch (l.type()) {
+        case Level::Type::NONE: new (this) Level(); break;
+        case Level::Type::DEMO: new (this) Level(std::move(l.demo)); break;
+        case Level::Type::SOLO: new (this) Level(std::move(l.solo)); break;
+        case Level::Type::NET: new (this) Level(std::move(l.net)); break;
     }
 }
 
-void read_from(ReadSource in, Level::Condition::CounterArgument& counter_argument) {
-    counter_argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
-    read(in, counter_argument.whichCounter);
-    read(in, counter_argument.amount);
+Level& Level::operator=(Level&& l) {
+    this->~Level();
+    new (this) Level(std::move(l));
+    return *this;
 }
 
-void read_from(ReadSource in, Level::BriefPoint& brief_point) {
-    uint8_t section[8];
-
-    read(in, brief_point.briefPointKind);
-    in.shift(1);
-    read(in, section, 8);
-    read(in, brief_point.range);
-    read(in, brief_point.titleResID);
-    read(in, brief_point.titleNum);
-    read(in, brief_point.contentResID);
-
-    BytesSlice sub(section, 8);
-    switch (brief_point.briefPointKind) {
-        case kNoPointKind:
-        case kBriefFreestandingKind: break;
-
-        case kBriefObjectKind: read(sub, brief_point.briefPointData.objectBriefType); break;
-
-        case kBriefAbsoluteKind: read(sub, brief_point.briefPointData.absoluteBriefType); break;
+Level::~Level() {
+    switch (type()) {
+        case Level::Type::NONE: base.~LevelBase(); break;
+        case Level::Type::DEMO: demo.~DemoLevel(); break;
+        case Level::Type::SOLO: solo.~SoloLevel(); break;
+        case Level::Type::NET: net.~NetLevel(); break;
     }
 }
 
-void read_from(ReadSource in, Level::BriefPoint::ObjectBrief& object_brief) {
-    read(in, object_brief.objectNum);
-    read(in, object_brief.objectVisible);
+const Level* Level::get(int number) { return plug.chapters[number]; }
+
+const Level* Level::get(pn::string_view name) {
+    auto it = plug.levels.find(name.copy());
+    if (it == plug.levels.end()) {
+        return nullptr;
+    } else {
+        return &it->second;
+    }
 }
 
-void read_from(ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief) {
-    read(in, absolute_brief.location);
+FIELD_READER(LevelBase::PlayerType) {
+    return required_enum<LevelBase::PlayerType>(
+            x, {{"human", LevelBase::PlayerType::HUMAN}, {"cpu", LevelBase::PlayerType::CPU}});
 }
 
-void read_from(ReadSource in, Level::InitialObject& level_initial) {
-    level_initial.type  = Handle<BaseObject>(read<int32_t>(in));
-    level_initial.owner = Handle<Admiral>(read<int32_t>(in));
-    in.shift(4);
-    level_initial.realObject = Handle<SpaceObject>(-1);
-    read(in, level_initial.realObjectID);
-    read(in, level_initial.location);
-    read(in, level_initial.earning);
-    read(in, level_initial.distanceRange);
-    read(in, level_initial.rotationMinimum);
-    read(in, level_initial.rotationRange);
-    read(in, level_initial.spriteIDOverride);
-    read(in, level_initial.canBuild, kMaxTypeBaseCanBuild);
-    read(in, level_initial.initialDestination);
-    read(in, level_initial.nameResID);
-    read(in, level_initial.nameStrNum);
-    read(in, level_initial.attributes);
+FIELD_READER(DemoLevel::Player) {
+    return required_struct<DemoLevel::Player>(
+            x, {{"name", &DemoLevel::Player::name},
+                {"race", &DemoLevel::Player::race},
+                {"earning_power", &DemoLevel::Player::earning_power}});
+}
+
+FIELD_READER(SoloLevel::Player) {
+    return required_struct<SoloLevel::Player>(
+            x, {{"type", &SoloLevel::Player::type},
+                {"name", &SoloLevel::Player::name},
+                {"race", &SoloLevel::Player::race},
+                {"hue", &SoloLevel::Player::hue},
+                {"earning_power", &SoloLevel::Player::earning_power}});
+}
+
+FIELD_READER(NetLevel::Player) {
+    return required_struct<NetLevel::Player>(
+            x, {{"type", &NetLevel::Player::type},
+                {"earning_power", &NetLevel::Player::earning_power},
+                {"races", nullptr}});  // TODO(sfiera): populate field
+}
+
+FIELD_READER(game_ticks) { return game_ticks{read_field<ticks>(x)}; }
+
+FIELD_READER(SoloLevel::Par) {
+    return optional_struct<SoloLevel::Par>(
+                   x, {{"time", &SoloLevel::Par::time},
+                       {"kills", &SoloLevel::Par::kills},
+                       {"losses", &SoloLevel::Par::losses}})
+            .value_or(SoloLevel::Par{game_ticks{ticks{0}}, 0, 0});
+}
+
+FIELD_READER(LevelBase::StatusLine) {
+    return required_struct<LevelBase::StatusLine>(
+            x, {{"text", &LevelBase::StatusLine::text},
+                {"prefix", &LevelBase::StatusLine::prefix},
+
+                {"condition", &LevelBase::StatusLine::condition},
+                {"true", &LevelBase::StatusLine::true_},
+                {"false", &LevelBase::StatusLine::false_},
+
+                {"minuend", &LevelBase::StatusLine::minuend},
+                {"counter", &LevelBase::StatusLine::counter},
+
+                {"suffix", &LevelBase::StatusLine::suffix},
+                {"underline", &LevelBase::StatusLine::underline}});
+};
+
+// clang-format off
+#define COMMON_LEVEL_FIELDS                                                                      \
+            {"type", &LevelBase::type},                                                          \
+            {"chapter", &LevelBase::chapter},                                                    \
+            {"title", &LevelBase::name},                                                         \
+            {"initials", &LevelBase::initials},                                                  \
+            {"conditions", &LevelBase::conditions},                                              \
+            {"briefings", &LevelBase::briefings},                                                \
+            {"starmap", &LevelBase::starmap},                                                    \
+            {"song", &LevelBase::song},                                                          \
+            {"status", &LevelBase::status},                                                      \
+            {"start_time", &LevelBase::start_time},                                              \
+            {"angle", &LevelBase::angle}
+// clang-format on
+
+FIELD_READER(LevelBase::Type) {
+    return required_enum<LevelBase::Type>(
+            x, {{"solo", LevelBase::Type::SOLO},
+                {"net", LevelBase::Type::NET},
+                {"demo", LevelBase::Type::DEMO}});
+}
+
+static Level demo_level(path_value x) {
+    return required_struct<DemoLevel>(x, {COMMON_LEVEL_FIELDS, {"players", &DemoLevel::players}});
+}
+
+static Level solo_level(path_value x) {
+    return required_struct<SoloLevel>(
+            x, {COMMON_LEVEL_FIELDS,
+                {"players", &SoloLevel::players},
+                {"par", &SoloLevel::par},
+                {"skip", &SoloLevel::skip},
+                {"no_ships", &SoloLevel::no_ships},
+                {"prologue", &SoloLevel::prologue},
+                {"epilogue", &SoloLevel::epilogue}});
+}
+
+static Level net_level(path_value x) {
+    return required_struct<NetLevel>(
+            x, {COMMON_LEVEL_FIELDS,
+                {"players", &NetLevel::players},
+                {"description", &NetLevel::description},
+                {"own_no_ships", &NetLevel::own_no_ships},
+                {"foe_no_ships", &NetLevel::foe_no_ships}});
+}
+
+Level level(pn::value_cref x0) {
+    path_value x{x0};
+    switch (required_object_type(x, read_field<Level::Type>)) {
+        case Level::Type::NONE: throw std::runtime_error("level type NONE?");
+        case Level::Type::DEMO: return demo_level(x);
+        case Level::Type::SOLO: return solo_level(x);
+        case Level::Type::NET: return net_level(x);
+    }
 }
 
 }  // namespace antares

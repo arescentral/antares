@@ -16,12 +16,9 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include <limits>
+
 #include "math/special.hpp"
-
-#include <sfz/sfz.hpp>
-
-using sfz::ReadSource;
-using sfz::read;
 
 namespace antares {
 
@@ -267,11 +264,6 @@ int16_t ratio_to_angle(Fixed x, Fixed y) {
     return angle;
 }
 
-void read_from(ReadSource in, fixedPointType& point) {
-    read(in, point.h);
-    read(in, point.v);
-}
-
 struct AngleFromSlopeData {
     int32_t min_slope;
     int32_t angle;
@@ -464,12 +456,12 @@ static const AngleFromSlopeData angle_from_slope_data[angle_from_slope_data_coun
 };
 
 int32_t AngleFromSlope(Fixed slope) {
-    for (int i = 1; i < angle_from_slope_data_count; ++i) {
-        if (angle_from_slope_data[i].min_slope > slope.val()) {
-            return angle_from_slope_data[i - 1].angle;
-        }
-    }
-    return 90;
+    const auto* begin = angle_from_slope_data;
+    const auto* end   = begin + angle_from_slope_data_count;
+    const auto* next  = std::upper_bound(begin + 1, end, slope, [](Fixed f, AngleFromSlopeData a) {
+        return f.val() < a.min_slope;
+    });
+    return (next - 1)->angle;
 }
 
 }  // namespace antares

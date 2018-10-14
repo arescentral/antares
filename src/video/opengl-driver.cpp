@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 #include <algorithm>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -44,18 +44,9 @@
 #include <GL/glu.h>
 #endif
 
-using sfz::Exception;
-using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::hex;
-using sfz::print;
 using std::min;
 using std::max;
 using std::unique_ptr;
-
-namespace io = sfz::io;
 
 namespace antares {
 
@@ -111,7 +102,7 @@ static const char* _gl_error_string(GLenum err) {
 static void _gl_check(const char* fn, const char* file, int line) {
     int error = glGetError();
     if (error != GL_NO_ERROR) {
-        print(io::err, format("{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line));
+        pn::format(stderr, "{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line);
     }
 }
 
@@ -191,15 +182,19 @@ void gl_log(GLint object) {
     } else {
         glGetProgramInfoLog(object, log_size, &log_size, log.get());
     }
-    print(io::err, format("object {0} log: {1}\n", object, (const char*)log.get()));
+    pn::format(stderr, "object {0} log: {1}\n", object, (const char*)log.get());
 }
 
 class OpenGlTextureImpl : public Texture::Impl {
   public:
     OpenGlTextureImpl(
-            PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms,
-            GLuint vbuf[3])
-            : _name(name), _size(image.size()), _uniforms(uniforms), _vbuf(vbuf) {
+            pn::string_view name, const PixMap& image, int scale,
+            const OpenGlVideoDriver::Uniforms& uniforms, GLuint vbuf[3])
+            : _name(name.copy()),
+              _size(image.size()),
+              _scale(scale),
+              _uniforms(uniforms),
+              _vbuf(vbuf) {
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -225,7 +220,7 @@ class OpenGlTextureImpl : public Texture::Impl {
                 copy.bytes());
     }
 
-    virtual StringSlice name() const { return _name; }
+    virtual pn::string_view name() const { return _name; }
 
     virtual void draw(const Rect& draw_rect) const {
         _uniforms.color_mode.set(DRAW_SPRITE_MODE);
@@ -287,8 +282,8 @@ class OpenGlTextureImpl : public Texture::Impl {
         glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
         glBindBuffer(GL_ARRAY_BUFFER, _vbuf[2]);
-        const int32_t w            = _size.width;
-        const int32_t h            = _size.height;
+        const int32_t w            = _size.width / _scale;
+        const int32_t h            = _size.height / _scale;
         GLshort       tex_coords[] = {
                 GLshort(1),     GLshort(1),     GLshort(1),     GLshort(h + 1),
                 GLshort(w + 1), GLshort(h + 1), GLshort(w + 1), GLshort(1),
@@ -337,6 +332,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
         Rect texture_rect = source;
+        texture_rect.scale(_scale, _scale);
         texture_rect.offset(1, 1);
         glBindBuffer(GL_ARRAY_BUFFER, _vbuf[2]);
         GLshort tex_coords[] = {
@@ -359,36 +355,33 @@ class OpenGlTextureImpl : public Texture::Impl {
 
     struct Texture {
         Texture() { glGenTextures(1, &id); }
+        Texture(const Texture&) = delete;
+        Texture& operator=(const Texture&) = delete;
         ~Texture() { glDeleteTextures(1, &id); }
 
         GLuint id;
-        DISALLOW_COPY_AND_ASSIGN(Texture);
     };
 
-    const String                       _name;
+    const pn::string                   _name;
     Texture                            _texture;
     Size                               _size;
+    int                                _scale;
     const OpenGlVideoDriver::Uniforms& _uniforms;
     GLuint*                            _vbuf;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenGlTextureImpl);
 };
 
 }  // namespace
 
 OpenGlVideoDriver::OpenGlVideoDriver() : _static_seed{0} {}
 
-int OpenGlVideoDriver::scale() const {
-    return viewport_size().width / screen_size().width;
+int OpenGlVideoDriver::scale() const { return viewport_size().width / screen_size().width; }
+
+Texture OpenGlVideoDriver::texture(pn::string_view name, const PixMap& content, int scale) {
+    return unique_ptr<Texture::Impl>(
+            new OpenGlTextureImpl(name, content, scale, _uniforms, _vbuf));
 }
 
-Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
-    return unique_ptr<Texture::Impl>(new OpenGlTextureImpl(name, content, _uniforms, _vbuf));
-}
-
-void OpenGlVideoDriver::begin_rects() {
-    _uniforms.color_mode.set(FILL_MODE);
-}
+void OpenGlVideoDriver::begin_rects() { _uniforms.color_mode.set(FILL_MODE); }
 
 void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     glEnableVertexAttribArray(0);
@@ -424,9 +417,7 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     batch_rect(rect, color);
 }
 
-void OpenGlVideoDriver::begin_points() {
-    _uniforms.color_mode.set(FILL_MODE);
-}
+void OpenGlVideoDriver::begin_points() { _uniforms.color_mode.set(FILL_MODE); }
 
 void OpenGlVideoDriver::end_points() {}
 
@@ -458,9 +449,7 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
     end_points();
 }
 
-void OpenGlVideoDriver::begin_lines() {
-    _uniforms.color_mode.set(FILL_MODE);
-}
+void OpenGlVideoDriver::begin_lines() { _uniforms.color_mode.set(FILL_MODE); }
 
 void OpenGlVideoDriver::end_lines() {}
 
@@ -533,7 +522,7 @@ void OpenGlVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
         ArrayPixMap pix(size, size);
         pix.fill(RgbColor::clear());
         draw_triangle_up(&pix, RgbColor::white());
-        _triangles[size] = texture("", pix);
+        _triangles[size] = texture("", pix, 1);
     }
     _triangles[size].draw_shaded(to, color);
 }
@@ -546,7 +535,7 @@ void OpenGlVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
         ArrayPixMap pix(size, size);
         pix.fill(RgbColor::clear());
         draw_compat_diamond(&pix, RgbColor::white());
-        _diamonds[size] = texture("", pix);
+        _diamonds[size] = texture("", pix, 1);
     }
     _diamonds[size].draw_shaded(to, color);
 }
@@ -559,7 +548,7 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
         ArrayPixMap pix(size, size);
         pix.fill(RgbColor::clear());
         draw_compat_plus(&pix, RgbColor::white());
-        _pluses[size] = texture("", pix);
+        _pluses[size] = texture("", pix, 1);
     }
     _pluses[size].draw_shaded(to, color);
 }
@@ -572,7 +561,7 @@ static GLuint make_shader(GLenum shader_type, const GLchar* source) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (compiled == GL_FALSE) {
         gl_log(shader);
-        throw Exception("compilation failed");
+        throw std::runtime_error("compilation failed");
     }
     return shader;
 }
@@ -601,7 +590,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
     if (linked == GL_FALSE) {
         gl_log(program);
-        throw Exception("linking failed");
+        throw std::runtime_error("linking failed");
     }
 
     GLuint array;
@@ -667,12 +656,8 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glFinish();
 }
 
-bool OpenGlVideoDriver::MainLoop::done() const {
-    return _stack.empty();
-}
+bool OpenGlVideoDriver::MainLoop::done() const { return _stack.empty(); }
 
-Card* OpenGlVideoDriver::MainLoop::top() const {
-    return _stack.top();
-}
+Card* OpenGlVideoDriver::MainLoop::top() const { return _stack.top(); }
 
 }  // namespace antares

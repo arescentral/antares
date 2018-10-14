@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,26 +16,35 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_REPLAY_LIST_HPP_
-#define ANTARES_DATA_REPLAY_LIST_HPP_
+#ifndef ANTARES_DATA_OBJECT_REF_HPP_
+#define ANTARES_DATA_OBJECT_REF_HPP_
+
+#include "data/handle.hpp"
 
 #include <sfz/sfz.hpp>
-#include <vector>
 
 namespace antares {
 
-class ReplayList {
-  public:
-    ReplayList();
-    size_t  size() const;
-    int16_t at(size_t index) const;
+struct Initial;
+class path_value;
 
-  private:
-    std::vector<int16_t> _replays;
+struct ObjectRef {
+    enum class Type { INITIAL, FLAGSHIP, CONTROL, TARGET } type;
+    Handle<const Initial> initial;
+    Handle<Admiral>       admiral;
+};
 
-    DISALLOW_COPY_AND_ASSIGN(ReplayList);
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<ObjectRef> {
+    static ObjectRef read(path_value x);
+};
+template <>
+struct field_reader<sfz::optional<ObjectRef>> {
+    static sfz::optional<ObjectRef> read(path_value x);
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_DATA_REPLAY_LIST_HPP_
+#endif  // ANTARES_DATA_OBJECT_REF_HPP_

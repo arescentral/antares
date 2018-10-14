@@ -18,20 +18,11 @@
 
 #include "sound/openal-driver.hpp"
 
-#include <libmodplug/modplug.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
+#include "data/audio.hpp"
 #include "data/resource.hpp"
-#include "sound/sndfile.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::quote;
 using std::unique_ptr;
 
 namespace antares {
@@ -50,49 +41,13 @@ const char* al_error_to_string(int error) {
     }
 }
 
-void check_al_error(const StringSlice& method) {
+void check_al_error(pn::string_view method) {
     int error = alGetError();
     if (error != AL_NO_ERROR) {
-        throw Exception(format("{0}: {1}", method, al_error_to_string(error)));
+        throw std::runtime_error(
+                pn::format("{0}: {1}", method, al_error_to_string(error)).c_str());
     }
 }
-
-class ModPlugFile {
-  public:
-    ModPlugFile(BytesSlice data) {
-        ModPlug_Settings settings;
-        ModPlug_GetSettings(&settings);
-        settings.mFlags          = MODPLUG_ENABLE_OVERSAMPLING;
-        settings.mChannels       = 2;
-        settings.mBits           = 16;
-        settings.mFrequency      = 44100;
-        settings.mResamplingMode = MODPLUG_RESAMPLE_LINEAR;
-        ModPlug_SetSettings(&settings);
-        file = ModPlug_Load(data.data(), data.size());
-    }
-
-    ModPlugFile(const ModPlugFile&) = delete;
-
-    ~ModPlugFile() {
-        if (file) {
-            ModPlug_Unload(file);
-        }
-    }
-
-    void convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
-        format    = AL_FORMAT_STEREO16;
-        frequency = 44100;
-        uint8_t buffer[1024];
-        ssize_t read;
-        do {
-            read = ModPlug_Read(file, buffer, 1024);
-            data.push(BytesSlice(buffer, read));
-        } while (read > 0);
-    }
-
-  private:
-    ::ModPlugFile* file;
-};
 
 }  // namespace
 
@@ -105,16 +60,12 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
         alGetError();  // discard.
     }
 
-    virtual void play();
-    virtual void loop();
+    virtual void play(uint8_t volume);
+    virtual void loop(uint8_t volume);
 
-    template <typename T>
-    void buffer(const T& file) {
-        Bytes   data;
-        ALenum  format;
-        ALsizei frequency;
-        file.convert(data, format, frequency);
-        alBufferData(_buffer, format, data.data(), data.size(), frequency);
+    void buffer(const SoundData& s) {
+        ALenum format = (s.channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+        alBufferData(_buffer, format, s.data.data(), s.data.size(), s.frequency);
         check_al_error("alBufferData");
     }
 
@@ -130,8 +81,6 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
 
     const OpenAlSoundDriver& _driver;
     ALuint                   _buffer;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenAlSound);
 };
 
 class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
@@ -149,9 +98,13 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         alGetError();  // discard.
     }
 
-    virtual void activate() { _driver._active_channel = this; }
+    void activate() override { _driver._active_channel = this; }
 
-    void play(const OpenAlSound& sound) {
+    void play(const OpenAlSound& sound, uint8_t volume) {
+        quiet();
+
+        alSourcef(_source, AL_GAIN, volume / 255.0f);
+        check_al_error("alSourcef");
         alSourcei(_source, AL_LOOPING, AL_FALSE);
         check_al_error("alSourcei");
         alSourcei(_source, AL_BUFFER, sound.buffer());
@@ -160,7 +113,11 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         check_al_error("alSourcePlay");
     }
 
-    void loop(const OpenAlSound& sound) {
+    void loop(const OpenAlSound& sound, uint8_t volume) {
+        quiet();
+
+        alSourcef(_source, AL_GAIN, volume / 255.0f);
+        check_al_error("alSourcef");
         alSourcei(_source, AL_LOOPING, AL_TRUE);
         check_al_error("alSourcei");
         alSourcei(_source, AL_BUFFER, sound.buffer());
@@ -169,12 +126,7 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         check_al_error("alSourcePlay");
     }
 
-    virtual void amp(uint8_t volume) {
-        alSourcef(_source, AL_GAIN, volume / 256.0f);
-        check_al_error("alSourcef");
-    }
-
-    virtual void quiet() {
+    void quiet() override {
         alSourceStop(_source);
         check_al_error("alSourceStop");
     }
@@ -182,16 +134,14 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
   private:
     OpenAlSoundDriver& _driver;
     ALuint             _source;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenAlChannel);
 };
 
-void OpenAlSoundDriver::OpenAlSound::play() {
-    _driver._active_channel->play(*this);
+void OpenAlSoundDriver::OpenAlSound::play(uint8_t volume) {
+    _driver._active_channel->play(*this, volume);
 }
 
-void OpenAlSoundDriver::OpenAlSound::loop() {
-    _driver._active_channel->loop(*this);
+void OpenAlSoundDriver::OpenAlSound::loop(uint8_t volume) {
+    _driver._active_channel->loop(*this, volume);
 }
 
 OpenAlSoundDriver::OpenAlSoundDriver() : _active_channel(NULL) {
@@ -210,38 +160,20 @@ unique_ptr<SoundChannel> OpenAlSoundDriver::open_channel() {
     return unique_ptr<SoundChannel>(new OpenAlChannel(*this));
 }
 
-template <typename T>
-void OpenAlSoundDriver::read_sound(BytesSlice data, OpenAlSound& sound) {
-    T file(data);
-    sound.buffer(file);
-}
-
-unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
-    static const struct {
-        const char ext[6];
-        void (*fn)(BytesSlice, OpenAlSound&);
-    } fmts[] = {
-            {".aiff", read_sound<Sndfile>},
-            {".s3m", read_sound<ModPlugFile>},
-            {".xm", read_sound<ModPlugFile>},
-    };
-
-    String                  path_string(path);
+unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
-    for (const auto& fmt : fmts) {
-        try {
-            Resource rsrc(format("{0}{1}", path_string, fmt.ext));
-            fmt.fn(rsrc.data(), *sound);
-            return std::move(sound);
-        } catch (Exception& e) {
-            continue;
-        }
-    }
-    throw Exception(format("couldn't load sound {0}", quote(path_string)));
+    SoundData               s = Resource::sound(path);
+    sound->buffer(s);
+    return std::move(sound);
 }
 
-void OpenAlSoundDriver::set_global_volume(uint8_t volume) {
-    alListenerf(AL_GAIN, volume / 8.0);
+unique_ptr<Sound> OpenAlSoundDriver::open_music(pn::string_view path) {
+    unique_ptr<OpenAlSound> music(new OpenAlSound(*this));
+    SoundData               s = Resource::music(path);
+    music->buffer(s);
+    return std::move(music);
 }
+
+void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }
 
 }  // namespace antares

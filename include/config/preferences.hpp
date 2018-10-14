@@ -19,8 +19,9 @@
 #ifndef ANTARES_CONFIG_PREFERENCES_HPP_
 #define ANTARES_CONFIG_PREFERENCES_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
+#include "config/keys.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -29,12 +30,12 @@ struct Preferences {
     Preferences();
     Preferences copy() const;
 
-    int16_t     keys[44];
-    bool        play_idle_music;
-    bool        play_music_in_game;
-    bool        speech_on;
-    int16_t     volume;
-    sfz::String scenario_identifier;
+    Key        keys[44];
+    bool       play_idle_music;
+    bool       play_music_in_game;
+    bool       speech_on;
+    int16_t    volume;
+    pn::string scenario_identifier;
 };
 
 class PrefsDriver {
@@ -42,22 +43,22 @@ class PrefsDriver {
     PrefsDriver();
     virtual ~PrefsDriver();
 
-    virtual const Preferences& get() const     = 0;
-    virtual void set(const Preferences& prefs) = 0;
+    virtual const Preferences& get() const                   = 0;
+    virtual void               set(const Preferences& prefs) = 0;
 
-    uint32_t key(size_t index) const { return get().keys[index]; }
-    bool                play_idle_music() const { return get().play_idle_music; }
-    bool                play_music_in_game() const { return get().play_music_in_game; }
-    bool                speech_on() const { return get().speech_on; }
-    int                 volume() const { return get().volume; }
-    sfz::StringSlice    scenario_identifier() const { return get().scenario_identifier; }
+    Key             key(size_t index) const { return get().keys[index]; }
+    bool            play_idle_music() const { return get().play_idle_music; }
+    bool            play_music_in_game() const { return get().play_music_in_game; }
+    bool            speech_on() const { return get().speech_on; }
+    int             volume() const { return get().volume; }
+    pn::string_view scenario_identifier() const { return get().scenario_identifier; }
 
-    void set_key(size_t index, uint32_t key);
+    void set_key(size_t index, Key key);
     void set_play_idle_music(bool on);
     void set_play_music_in_game(bool on);
     void set_speech_on(bool on);
     void set_volume(int volume);
-    void set_scenario_identifier(sfz::StringSlice id);
+    void set_scenario_identifier(pn::string_view id);
 
     static PrefsDriver* driver();
 };
@@ -68,7 +69,7 @@ class NullPrefsDriver : public PrefsDriver {
     NullPrefsDriver(Preferences defaults);
 
     virtual const Preferences& get() const;
-    virtual void set(const Preferences& prefs);
+    virtual void               set(const Preferences& prefs);
 
   private:
     Preferences _saved;

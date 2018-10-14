@@ -21,12 +21,32 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <map>
+#include <pn/string>
+#include <vector>
+
+#include "data/enums.hpp"
+#include "data/handle.hpp"
+#include "math/fixed.hpp"
 
 namespace antares {
 
-void    InitRaces();
-void    CleanupRaces();
-int16_t GetRaceIDFromNum(size_t raceNum);
+class BaseObject;
+class path_value;
+
+struct Race {
+    pn::string       adjective;
+    pn::string       plural;
+    pn::string       military;
+    pn::string       homeworld;
+    Hue              hue;
+    std::vector<Hue> not_hue;
+    Fixed            advantage;
+
+    static Race* get(pn::string_view name);
+};
+
+Race race(path_value x);
 
 }  // namespace antares
 

@@ -19,7 +19,6 @@
 #include "ui/event-scheduler.hpp"
 
 #include <algorithm>
-#include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
@@ -28,7 +27,6 @@
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
-using sfz::Exception;
 using std::greater;
 using std::max;
 using std::unique_ptr;
@@ -47,8 +45,6 @@ class MouseReader : public EventReceiver {
 
   private:
     Point* _mouse;
-
-    DISALLOW_COPY_AND_ASSIGN(MouseReader);
 };
 
 }  // namespace
@@ -65,7 +61,7 @@ void EventScheduler::schedule_event(unique_ptr<Event> event) {
     push_heap(_event_heap.begin(), _event_heap.end(), is_later);
 }
 
-void EventScheduler::schedule_key(int32_t key, int64_t down, int64_t up) {
+void EventScheduler::schedule_key(Key key, int64_t down, int64_t up) {
     schedule_event(unique_ptr<Event>(new KeyDownEvent(wall_time(ticks(down)), key)));
     schedule_event(unique_ptr<Event>(new KeyUpEvent(wall_time(ticks(up)), key)));
 }
@@ -92,7 +88,7 @@ void EventScheduler::loop(EventScheduler::MainLoop& loop) {
             event->send(loop.top());
         } else {
             if (!has_timer) {
-                throw Exception("Event heap empty and timer not set to fire.");
+                throw std::runtime_error("Event heap empty and timer not set to fire.");
             }
             advance_tick_count(loop, max(_ticks + kMinorTick, at_ticks));
             loop.top()->fire_timer();

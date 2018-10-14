@@ -18,53 +18,13 @@
 
 #include "mac/c/DataExtractor.h"
 
-#include <sfz/sfz.hpp>
-
 #include "data/extractor.hpp"
+#include "lang/exception.hpp"
+#include "mac/core-foundation.hpp"
 
-using sfz::CString;
-using sfz::String;
-using sfz::StringSlice;
 using std::unique_ptr;
 
-namespace utf8 = sfz::utf8;
-
-struct AntaresDataExtractor {
-    antares::DataExtractor cxx_obj;
-
-    AntaresDataExtractor(const StringSlice& downloads_dir, const StringSlice& output_dir)
-            : cxx_obj(downloads_dir, output_dir) {}
-};
-
 namespace antares {
-
-extern "C" AntaresDataExtractor* antares_data_extractor_create(
-        const char* downloads_dir, const char* output_dir) {
-    const String downloads_dir_string(utf8::decode(downloads_dir));
-    const String output_dir_string(utf8::decode(output_dir));
-    return new AntaresDataExtractor(downloads_dir_string, output_dir_string);
-}
-
-extern "C" void antares_data_extractor_destroy(AntaresDataExtractor* extractor) {
-    delete extractor;
-}
-
-extern "C" void antares_data_extractor_set_scenario(
-        AntaresDataExtractor* extractor, const char* scenario) {
-    const String scenario_string(utf8::decode(scenario));
-    extractor->cxx_obj.set_scenario(scenario_string);
-}
-
-extern "C" void antares_data_extractor_set_plugin_file(
-        AntaresDataExtractor* extractor, const char* path) {
-    const String path_string(utf8::decode(path));
-    extractor->cxx_obj.set_plugin_file(path_string);
-}
-
-extern "C" int antares_data_extractor_current(AntaresDataExtractor* extractor) {
-    return extractor->cxx_obj.current();
-}
-
 namespace {
 
 class UserDataObserver : public DataExtractor::Observer {
@@ -72,10 +32,7 @@ class UserDataObserver : public DataExtractor::Observer {
     UserDataObserver(void (*callback)(const char*, void*), void* userdata)
             : _callback(callback), _userdata(userdata) {}
 
-    virtual void status(const StringSlice& status) {
-        CString c_str(status);
-        _callback(c_str.data(), _userdata);
-    }
+    virtual void status(pn::string_view status) { _callback(status.copy().c_str(), _userdata); }
 
   private:
     void (*_callback)(const char*, void*);
@@ -84,10 +41,38 @@ class UserDataObserver : public DataExtractor::Observer {
 
 }  // namespace
 
-extern "C" void antares_data_extractor_extract(
-        AntaresDataExtractor* extractor, void (*callback)(const char*, void*), void* userdata) {
-    UserDataObserver observer(callback, userdata);
-    extractor->cxx_obj.extract(&observer);
+extern "C" bool antares_data_extract_path(
+        const char* download_dir, const char* scenario_dir, const char* plugin_file,
+        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message) {
+    try {
+        DataExtractor extractor(download_dir, scenario_dir);
+        extractor.set_plugin_file(plugin_file);
+        if (!extractor.current()) {
+            UserDataObserver observer(callback, userdata);
+            extractor.extract(&observer);
+        }
+    } catch (std::exception& e) {
+        *error_message = cf::wrap(pn::string_view{full_exception_string(e)}).release();
+        return false;
+    }
+    return true;
+}
+
+extern "C" bool antares_data_extract_identifier(
+        const char* download_dir, const char* scenario_dir, const char* identifier,
+        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message) {
+    try {
+        DataExtractor extractor(download_dir, scenario_dir);
+        extractor.set_scenario(identifier);
+        if (!extractor.current()) {
+            UserDataObserver observer(callback, userdata);
+            extractor.extract(&observer);
+        }
+    } catch (std::exception& e) {
+        *error_message = cf::wrap(pn::string_view{full_exception_string(e)}).release();
+        return false;
+    }
+    return true;
 }
 
 }  // namespace antares

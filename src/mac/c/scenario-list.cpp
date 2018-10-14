@@ -18,65 +18,49 @@
 
 #include "mac/c/scenario-list.h"
 
-#include <sfz/sfz.hpp>
-
 #include "data/scenario-list.hpp"
 
-using sfz::CString;
-using sfz::String;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
+static sfz::optional<pn::string> copy(const sfz::optional<pn::string>& s) {
+    if (s.has_value()) {
+        return sfz::make_optional(s->copy());
+    }
+    return sfz::nullopt;
+}
 
 struct AntaresScenarioListEntry {
-    AntaresScenarioListEntry(const antares::ScenarioList::Entry& entry)
-            : identifier(entry.identifier),
-              title(entry.title),
-              download_url(entry.download_url),
-              author(entry.author),
-              author_url(entry.author_url),
-              version_string(entry.version),
-              version(version_string) {}
+    AntaresScenarioListEntry(const antares::Info& entry)
+            : identifier(entry.identifier.hash.copy()),
+              title(entry.title.copy()),
+              download_url(copy(entry.download_url)),
+              author(entry.author.copy()),
+              author_url(copy(entry.author_url)),
+              version(entry.version.copy()) {}
 
-    // TODO(sfiera): give CString a move constructor so we don't need to define this.
-    AntaresScenarioListEntry(AntaresScenarioListEntry&& other)
-            : identifier(String(utf8::decode(other.identifier.data()))),
-              title(String(utf8::decode(other.title.data()))),
-              download_url(String(utf8::decode(other.download_url.data()))),
-              author(String(utf8::decode(other.author.data()))),
-              author_url(String(utf8::decode(other.author_url.data()))),
-              version_string(other.version_string),
-              version(String(utf8::decode(other.version.data()))) {}
-
-    CString identifier;
-    CString title;
-    CString download_url;
-    CString author;
-    CString author_url;
-    String  version_string;
-    CString version;
+    pn::string                identifier;
+    pn::string                title;
+    sfz::optional<pn::string> download_url;
+    pn::string                author;
+    sfz::optional<pn::string> author_url;
+    pn::string                version;
 };
 
 struct AntaresScenarioList {
-    antares::ScenarioList            cxx_obj;
     vector<AntaresScenarioListEntry> entries;
 
     AntaresScenarioList() {
-        for (size_t i = 0; i < cxx_obj.size(); ++i) {
-            entries.emplace_back(cxx_obj.at(i));
+        for (const antares::Info& s : antares::scenario_list()) {
+            entries.emplace_back(s);
         }
     }
 };
 
 namespace antares {
 
-extern "C" AntaresScenarioList* antares_scenario_list_create() {
-    return new AntaresScenarioList;
-}
+extern "C" AntaresScenarioList* antares_scenario_list_create() { return new AntaresScenarioList; }
 
-extern "C" void antares_scenario_list_destroy(AntaresScenarioList* list) {
-    delete list;
-}
+extern "C" void antares_scenario_list_destroy(AntaresScenarioList* list) { delete list; }
 
 extern "C" size_t antares_scenario_list_size(AntaresScenarioList* list) {
     return list->entries.size();
@@ -99,7 +83,10 @@ extern "C" const char* antares_scenario_list_entry_title(AntaresScenarioListEntr
 }
 
 extern "C" const char* antares_scenario_list_entry_download_url(AntaresScenarioListEntry* entry) {
-    return entry->download_url.data();
+    if (entry->download_url.has_value()) {
+        return entry->download_url->data();
+    }
+    return nullptr;
 }
 
 extern "C" const char* antares_scenario_list_entry_author(AntaresScenarioListEntry* entry) {
@@ -107,7 +94,10 @@ extern "C" const char* antares_scenario_list_entry_author(AntaresScenarioListEnt
 }
 
 extern "C" const char* antares_scenario_list_entry_author_url(AntaresScenarioListEntry* entry) {
-    return entry->author_url.data();
+    if (entry->author_url.has_value()) {
+        return entry->author_url->data();
+    }
+    return nullptr;
 }
 
 extern "C" const char* antares_scenario_list_entry_version(AntaresScenarioListEntry* entry) {

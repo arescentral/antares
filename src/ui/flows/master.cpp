@@ -18,7 +18,9 @@
 
 #include "ui/flows/master.hpp"
 
+#include "config/preferences.hpp"
 #include "data/plugin.hpp"
+#include "data/resource.hpp"
 #include "game/admiral.hpp"
 #include "game/cheat.hpp"
 #include "game/cursor.hpp"
@@ -45,7 +47,7 @@ namespace {
 
 class TitleScreenFade : public PictFade {
   public:
-    TitleScreenFade(bool* fast) : PictFade(502, fast), _fast(fast) {}
+    TitleScreenFade(bool* fast) : PictFade(&plug.splash, fast), _fast(fast) {}
 
   protected:
     virtual usecs fade_time() const { return ticks(*_fast ? 20 : 100); }
@@ -67,17 +69,19 @@ void Master::become_front() {
         case START:
             init();
             _state = PUBLISHER_PICT;
-        // We don't have permission to display the Ambrosia logo.
-        // stack()->push(new PictFade(2000, &_skipped));
-        // break;
+            if (_publisher_screen) {
+                stack()->push(new PictFade(&_publisher_screen, &_skipped));
+                break;
+            }
+            [[clang::fallthrough]];
 
         case PUBLISHER_PICT:
             _state = EGO_PICT;
             if (!_skipped) {
-                stack()->push(new PictFade(2001, &_skipped));
+                stack()->push(new PictFade(&_ego_screen, &_skipped));
                 break;
             }
-        // fall through.
+            [[clang::fallthrough]];
 
         case EGO_PICT:
             _state = TITLE_SCREEN_PICT;
@@ -87,8 +91,11 @@ void Master::become_front() {
         case TITLE_SCREEN_PICT:
             _state = INTRO_SCROLL;
             // TODO(sfiera): prevent the intro screen from displaying on subsequent launches.
-            stack()->push(new ScrollTextScreen(5600, 450, kSlowScrollInterval));
-            break;
+            if (plug.info.intro.has_value()) {
+                stack()->push(new ScrollTextScreen(*plug.info.intro, 450, kSlowScrollInterval));
+                break;
+            }
+            [[clang::fallthrough]];
 
         case INTRO_SCROLL:
             _state = MAIN_SCREEN;
@@ -126,7 +133,10 @@ void Master::init() {
     Admiral::init();
     Vectors::init();
 
-    sys.music.play(Music::IDLE, kTitleSongID);
+    sys.music.play(Music::IDLE, Music::title_song);
+
+    _publisher_screen = nullptr;
+    _ego_screen       = Resource::texture("credit");
 }
 
 }  // namespace antares

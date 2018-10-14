@@ -18,14 +18,13 @@
 
 #include "ui/screens/play-again.hpp"
 
+#include <pn/file>
+
 #include "drawing/interface.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
 #include "ui/card.hpp"
 #include "video/transitions.hpp"
-
-using sfz::Exception;
-using sfz::format;
 
 namespace antares {
 
@@ -40,7 +39,7 @@ const char* interface_id(bool allow_resume, bool allow_skip) {
         }
     } else {
         if (allow_skip) {
-            throw Exception("allow_skip specified without allow_resume");
+            throw std::runtime_error("allow_skip specified without allow_resume");
         } else {
             return "play-again/lose";
         }
@@ -50,9 +49,40 @@ const char* interface_id(bool allow_resume, bool allow_skip) {
 }  // namespace
 
 PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed)
-        : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}, false),
+        : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}),
           _state(ASKING),
-          _button_pressed(button_pressed) {}
+          _button_pressed(button_pressed) {
+    button(RESTART)->bind(
+            {[this] {
+                 _state           = FADING_OUT;
+                 *_button_pressed = Item::RESTART;
+                 stack()->push(new ColorFade(
+                         ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+             },
+             [] {
+                 // TODO(sfiera): disable if networked.
+                 return true;
+             }});
+
+    button(QUIT)->bind({[this] {
+        *_button_pressed = Item::QUIT;
+        stack()->pop(this);
+    }});
+
+    if (button(RESUME)) {
+        button(RESUME)->bind({[this] {
+            *_button_pressed = Item::RESUME;
+            stack()->pop(this);
+        }});
+    }
+
+    if (button(SKIP)) {
+        button(SKIP)->bind({[this] {
+            *_button_pressed = Item::SKIP;
+            stack()->pop(this);
+        }});
+    }
+}
 
 PlayAgainScreen::~PlayAgainScreen() {}
 
@@ -64,40 +94,14 @@ void PlayAgainScreen::become_front() {
     }
 }
 
-void PlayAgainScreen::adjust_interface() {
-    // TODO(sfiera): disable if networked.
-    dynamic_cast<Button&>(mutable_item(RESTART)).status = kActive;
-}
-
-void PlayAgainScreen::handle_button(Button& button) {
-    switch (button.id) {
-        case RESTART:
-            _state           = FADING_OUT;
-            *_button_pressed = static_cast<Item>(button.id);
-            stack()->push(
-                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-            break;
-
-        case QUIT:
-        case RESUME:
-        case SKIP:
-            *_button_pressed = static_cast<Item>(button.id);
-            stack()->pop(this);
-            break;
-
-        default: throw Exception(format("Got unknown button {0}.", button.id));
-    }
-}
-
-void print_to(sfz::PrintTarget out, PlayAgainScreen::Item item) {
+const char* stringify(PlayAgainScreen::Item item) {
     switch (item) {
-        case PlayAgainScreen::RESTART: print(out, "RESTART"); return;
-        case PlayAgainScreen::QUIT: print(out, "QUIT"); return;
-        case PlayAgainScreen::RESUME: print(out, "RESUME"); return;
-        case PlayAgainScreen::SKIP: print(out, "SKIP"); return;
-        case PlayAgainScreen::BOX: print(out, "BOX"); return;
+        case PlayAgainScreen::RESTART: return "RESTART";
+        case PlayAgainScreen::QUIT: return "QUIT";
+        case PlayAgainScreen::RESUME: return "RESUME";
+        case PlayAgainScreen::SKIP: return "SKIP";
     }
-    print(out, static_cast<int64_t>(item));
+    return "?";
 }
 
 }  // namespace antares

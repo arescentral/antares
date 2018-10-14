@@ -39,6 +39,12 @@ if (host_os == "mac") {
 }
 
 _default_configs = [ "//build/lib:c++11" ]
+
+# libc++ is necessary because libstdc++ does not allow move construction of std::map<> when the key
+# type is movable but not copyable:
+# https://stackoverflow.com/questions/36475497/error-by-move-assignment-of-map-with-non-copyable-but-movable-key
+_default_configs += [ "//build/lib:libc++" ]
+
 if (mode == "dev") {
   _default_configs += [ "//build/lib:dev" ]
 } else if (mode == "opt") {
@@ -47,9 +53,6 @@ if (mode == "dev") {
   _default_configs += [ "//build/lib:dbg" ]
 } else {
   assert(false, "unsupported mode $mode")
-}
-if (current_os == "mac") {
-  _default_configs += [ "//build/lib:libc++" ]
 }
 
 set_defaults("executable") {

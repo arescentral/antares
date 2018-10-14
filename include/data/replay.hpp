@@ -20,7 +20,8 @@
 #define ANTARES_DATA_REPLAY_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
+#include <pn/string>
 #include <vector>
 
 #include "ui/event.hpp"
@@ -29,14 +30,16 @@ namespace antares {
 
 struct ReplayData {
     struct Scenario {
-        sfz::String identifier;
-        sfz::String version;
+        pn::string identifier;
+        pn::string version;
+        void       write_to(pn::file_view out) const;
     };
 
     struct Action {
         uint64_t             at;
         std::vector<uint8_t> keys_down;
         std::vector<uint8_t> keys_up;
+        void                 write_to(pn::file_view out) const;
     };
 
     Scenario            scenario;
@@ -46,37 +49,35 @@ struct ReplayData {
     std::vector<Action> actions;
 
     ReplayData();
-    ReplayData(sfz::BytesSlice in);
+    ReplayData(pn::data_view in);
 
+    void write_to(pn::file_view out) const;
     void key_down(uint64_t at, uint32_t key);
     void key_up(uint64_t at, uint32_t key);
 };
-void read_from(sfz::ReadSource in, ReplayData& replay);
-void read_from(sfz::ReadSource in, ReplayData::Scenario& scenario);
-void read_from(sfz::ReadSource in, ReplayData::Action& action);
-void write_to(sfz::WriteTarget out, const ReplayData& replay);
-void write_to(sfz::WriteTarget out, const ReplayData::Scenario& scenario);
-void write_to(sfz::WriteTarget out, const ReplayData::Action& action);
+bool read_from(pn::file_view in, ReplayData* replay);
+bool read_from(pn::file_view in, ReplayData::Scenario* scenario);
+bool read_from(pn::file_view in, ReplayData::Action* action);
 
 class ReplayBuilder : public EventReceiver {
   public:
     ReplayBuilder();
 
     void init(
-            sfz::StringSlice scenario_identifier, sfz::StringSlice scenario_version,
+            pn::string_view scenario_identifier, pn::string_view scenario_version,
             int32_t chapter_id, int32_t global_seed);
     void         start();
     virtual void key_down(const KeyDownEvent& key);
     virtual void key_up(const KeyUpEvent& key);
-    void next();
-    void finish();
+    void         next();
+    void         finish();
 
   private:
-    std::unique_ptr<sfz::ScopedFd> _file;
-    ReplayData::Scenario           _scenario;
-    int32_t                        _chapter_id;
-    int32_t                        _global_seed;
-    uint64_t                       _at;
+    pn::file             _file;
+    ReplayData::Scenario _scenario;
+    int32_t              _chapter_id;
+    int32_t              _global_seed;
+    uint64_t             _at;
 };
 
 }  // namespace antares

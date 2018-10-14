@@ -19,7 +19,7 @@
 #ifndef ANTARES_GAME_LABELS_HPP_
 #define ANTARES_GAME_LABELS_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 #include "data/base-object.hpp"
 
@@ -31,7 +31,7 @@ class Label {
     static const int32_t kMaxLabelNum = 16;
     static const ticks   kVisibleTime;
 
-    static Label* get(int number);
+    static Label*            get(int number);
     static Handle<Label>     none() { return Handle<Label>(-1); }
     static HandleList<Label> all() { return {0, kMaxLabelNum}; }
 
@@ -39,7 +39,7 @@ class Label {
     static void          reset();
     static Handle<Label> add(
             int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
-            bool objectLink, uint8_t color);
+            bool objectLink, Hue hue);
     static void draw();
     static void update_contents(ticks units_done);
     static void update_positions(ticks units_done);
@@ -47,16 +47,16 @@ class Label {
 
     void remove();
 
-    void set_position(int16_t h, int16_t v);
-    void set_object(Handle<SpaceObject> object);
-    void set_age(ticks age);
-    void set_string(const sfz::StringSlice& string);
-    void clear_string();
-    void set_color(uint8_t color);
-    void set_offset(int32_t hoff, int32_t voff);
+    void    set_position(int16_t h, int16_t v);
+    void    set_object(Handle<SpaceObject> object);
+    void    set_age(ticks age);
+    void    set_string(pn::string_view string);
+    void    clear_string();
+    void    set_hue(Hue hue);
+    void    set_offset(int32_t hoff, int32_t voff);
     int32_t get_width() { return width; }
-    void set_keep_on_screen_anyway(bool keepOnScreenAnyWay);
-    void set_attached_hint_line(bool attachedHintLine, Point toWhere);
+    void    set_keep_on_screen_anyway(bool keepOnScreenAnyWay);
+    void    set_attached_hint_line(bool attachedHintLine, Point toWhere);
 
   private:
     static Handle<Label> next_free_label();
@@ -68,8 +68,8 @@ class Label {
     int32_t             width;
     int32_t             height;
     ticks               age = ticks(0);
-    sfz::String         text;
-    uint8_t             color;
+    pn::string          text;
+    Hue                 hue;
     bool                active  = false;
     bool                killMe  = false;
     bool                visible = false;

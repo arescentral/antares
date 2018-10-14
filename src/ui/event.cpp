@@ -26,17 +26,11 @@ Event::Event(wall_time at) : _at(at) {}
 
 Event::~Event() {}
 
-wall_time Event::at() const {
-    return _at;
-}
+wall_time Event::at() const { return _at; }
 
-void KeyDownEvent::send(EventReceiver* receiver) const {
-    receiver->key_down(*this);
-}
+void KeyDownEvent::send(EventReceiver* receiver) const { receiver->key_down(*this); }
 
-void KeyUpEvent::send(EventReceiver* receiver) const {
-    receiver->key_up(*this);
-}
+void KeyUpEvent::send(EventReceiver* receiver) const { receiver->key_up(*this); }
 
 void GamepadButtonDownEvent::send(EventReceiver* receiver) const {
     receiver->gamepad_button_down(*this);
@@ -46,21 +40,13 @@ void GamepadButtonUpEvent::send(EventReceiver* receiver) const {
     receiver->gamepad_button_up(*this);
 }
 
-void GamepadStickEvent::send(EventReceiver* receiver) const {
-    receiver->gamepad_stick(*this);
-}
+void GamepadStickEvent::send(EventReceiver* receiver) const { receiver->gamepad_stick(*this); }
 
-void MouseDownEvent::send(EventReceiver* receiver) const {
-    receiver->mouse_down(*this);
-}
+void MouseDownEvent::send(EventReceiver* receiver) const { receiver->mouse_down(*this); }
 
-void MouseUpEvent::send(EventReceiver* receiver) const {
-    receiver->mouse_up(*this);
-}
+void MouseUpEvent::send(EventReceiver* receiver) const { receiver->mouse_up(*this); }
 
-void MouseMoveEvent::send(EventReceiver* receiver) const {
-    receiver->mouse_move(*this);
-}
+void MouseMoveEvent::send(EventReceiver* receiver) const { receiver->mouse_move(*this); }
 
 EventReceiver::~EventReceiver() {}
 

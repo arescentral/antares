@@ -20,20 +20,39 @@
 
 #include <sfz/sfz.hpp>
 
+#include "config/preferences.hpp"
+#include "game/sys.hpp"
+
 namespace antares {
 
-static sfz::String app_data;
-const char         kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
+static sfz::optional<pn::string> app_data;
+static sfz::optional<pn::string> factory_scenario;
+const char kFactoryScenarioIdentifier[] = "4cab7415715aeeacf1486a352267ae82c0efb220";
 
-sfz::String application_path() {
-    if (app_data.empty()) {
-        return default_application_path();
+pn::string_view application_path() {
+    if (app_data.has_value()) {
+        return *app_data;
     }
-    return sfz::String(app_data);
+    return default_application_path();
 }
 
-void set_application_path(sfz::StringSlice path) {
-    app_data.assign(path);
+void set_application_path(pn::string_view path) { app_data.emplace(path.copy()); }
+
+pn::string_view factory_scenario_path() {
+    if (factory_scenario.has_value()) {
+        return *factory_scenario;
+    }
+    return default_factory_scenario_path();
+}
+
+void set_factory_scenario_path(pn::string_view path) { factory_scenario.emplace(path.copy()); }
+
+pn::string scenario_path() {
+    pn::string_view identifier = sys.prefs->scenario_identifier();
+    if (identifier == kFactoryScenarioIdentifier) {
+        return factory_scenario_path().copy();
+    }
+    return pn::format("{0}/{1}", dirs().scenarios, identifier);
 }
 
 }  // namespace antares

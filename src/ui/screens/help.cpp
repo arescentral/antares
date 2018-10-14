@@ -18,6 +18,9 @@
 
 #include "ui/screens/help.hpp"
 
+#include <pn/file>
+
+#include "config/preferences.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -30,49 +33,34 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::String;
-using sfz::format;
-
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
-HelpScreen::HelpScreen()
-        : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
-    Resource rsrc("text", "txt", 6002);
-    String   text(utf8::decode(rsrc.data()));
-    Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
+HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sys.fonts.computer) {
+    pn::string text = Resource::text(6002);
+    Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
-    RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-    RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
+    RgbColor fore = GetRGBTranslateColorShade(Hue::RED, LIGHTEST);
+    RgbColor back = GetRGBTranslateColorShade(Hue::RED, VERY_DARK);
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(item(BOX).bounds().width(), 0, 0);
+    _text.wrap_to(widget(BOX)->inner_bounds().width(), 0, 0);
+
+    button(DONE)->bind({[this] { stack()->pop(this); }});
 }
 
 HelpScreen::~HelpScreen() {}
 
 void HelpScreen::key_down(const KeyDownEvent& event) {
-    if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kHelpKeyNum)) {
         stack()->pop(this);
     } else {
         InterfaceScreen::key_down(event);
     }
 }
 
-void HelpScreen::handle_button(Button& button) {
-    switch (button.id) {
-        case DONE: stack()->pop(this); break;
-
-        default: throw Exception(format("Got unknown button {0}.", button.id));
-    }
-}
-
 void HelpScreen::overlay() const {
-    Rect  bounds = item(BOX).bounds();
+    Rect  bounds = widget(BOX)->inner_bounds();
     Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);

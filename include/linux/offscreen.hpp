@@ -38,7 +38,7 @@ class Offscreen {
   private:
     struct ContextDestroyer {
         Display* display;
-        void operator()(GLXContext context) { glXDestroyContext(display, context); }
+        void     operator()(GLXContext context) { glXDestroyContext(display, context); }
     };
 
     std::unique_ptr<Display, decltype(&XCloseDisplay)>                       _display;

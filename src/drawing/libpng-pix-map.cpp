@@ -19,57 +19,35 @@
 #include "drawing/pix-map.hpp"
 
 #include <png.h>
-#include <sfz/sfz.hpp>
-
-using sfz::Exception;
-using sfz::ReadSource;
-using sfz::WriteTarget;
-using sfz::read;
-using sfz::write;
 
 namespace antares {
 
-namespace {
-
-void png_read_data(png_struct* png, png_byte* data, png_size_t length) {
-    ReadSource* in = reinterpret_cast<ReadSource*>(png_get_io_ptr(png));
-    read(*in, data, length);
-}
-
-void png_write_data(png_struct* png, png_byte* data, png_size_t length) {
-    WriteTarget* out = reinterpret_cast<WriteTarget*>(png_get_io_ptr(png));
-    write(*out, data, length);
-}
-
-void png_flush_data(png_struct*) {}
-
-}  // namespace
-
-void read_from(ReadSource in, ArrayPixMap& pix) {
-    png_byte sig[8];
-    sfz::read(in, sig, 8);
+ArrayPixMap read_png(pn::file_view in) {
+    ArrayPixMap pix{0, 0};
+    png_byte    sig[8];
+    fread(sig, 1, 8, in.c_obj());
     if (png_sig_cmp(sig, 0, 8) != 0) {
-        throw Exception("invalid png signature");
+        throw std::runtime_error("invalid png signature");
     }
 
     png_struct* png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
-        throw Exception("couldn't create png_struct");
+        throw std::runtime_error("couldn't create png_struct");
     }
 
     png_info* info = png_create_info_struct(png);
     if (!info) {
         png_destroy_read_struct(&png, NULL, NULL);
-        throw Exception("couldn't create png_info");
+        throw std::runtime_error("couldn't create png_info");
     }
 
     if (setjmp(png_jmpbuf(png))) {
         png_destroy_read_struct(&png, &info, NULL);
-        throw Exception("reading png failed");
+        throw std::runtime_error("reading png failed");
     }
 
     png_set_sig_bytes(png, 8);
-    png_set_read_fn(png, &in, png_read_data);
+    png_init_io(png, in.c_obj());
     png_read_info(png, info);
 
     png_uint_32 width;
@@ -97,9 +75,8 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
     // If we are reading an image with an alpha channel, we want the alpha channel to be the
     // first component, rather than the last.  If we are reading an image without an alpha
     // channel, add a 0xFF byte before each RGB triplet.
-    if (color_type & PNG_COLOR_MASK_ALPHA) {
-        png_set_swap_alpha(png);
-    } else {
+    png_set_swap_alpha(png);
+    if (!(color_type & PNG_COLOR_MASK_ALPHA)) {
         png_set_filler(png, 0xFF, PNG_FILLER_BEFORE);
     }
 
@@ -109,32 +86,33 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
     }
 
     png_destroy_read_struct(&png, &info, NULL);
+    return pix;
 }
 
-void write_to(WriteTarget out, const PixMap& pix) {
+void PixMap::encode(pn::file_view out) {
     png_struct* png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
-        throw Exception("couldn't create png_struct");
+        throw std::runtime_error("couldn't create png_struct");
     }
 
     png_info* info = png_create_info_struct(png);
     if (!info) {
         png_destroy_write_struct(&png, NULL);
-        throw Exception("couldn't create png_info");
+        throw std::runtime_error("couldn't create png_info");
     }
 
     if (setjmp(png_jmpbuf(png))) {
         png_destroy_write_struct(&png, &info);
-        throw Exception("reading png failed");
+        throw std::runtime_error("reading png failed");
     }
 
-    png_set_write_fn(png, &out, png_write_data, png_flush_data);
-    png_set_IHDR(png, info, pix.size().width, pix.size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
+    png_init_io(png, out.c_obj());
+    png_set_IHDR(png, info, size().width, size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
     png_set_swap_alpha(png);
 
     png_write_info(png, info);
-    for (int i = 0; i < pix.size().height; ++i) {
-        png_write_row(png, const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(pix.row(i))));
+    for (int i = 0; i < size().height; ++i) {
+        png_write_row(png, const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(row(i))));
     }
 
     png_write_end(png, NULL);

@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_EVENT_SCHEDULER_HPP_
 #define ANTARES_UI_EVENT_SCHEDULER_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "config/keys.hpp"
@@ -33,18 +32,20 @@ class EventScheduler {
   public:
     struct MainLoop {
         virtual ~MainLoop() {}
-        virtual bool takes_snapshots()          = 0;
-        virtual void snapshot(wall_ticks ticks) = 0;
-        virtual void  draw()                    = 0;
-        virtual bool  done() const              = 0;
-        virtual Card* top() const               = 0;
+        virtual bool  takes_snapshots()          = 0;
+        virtual void  snapshot(wall_ticks ticks) = 0;
+        virtual void  draw()                     = 0;
+        virtual bool  done() const               = 0;
+        virtual Card* top() const                = 0;
     };
 
     EventScheduler();
+    EventScheduler(const EventScheduler&) = delete;
+    EventScheduler& operator=(const EventScheduler&) = delete;
 
     void schedule_snapshot(int64_t at);
     void schedule_event(std::unique_ptr<Event> event);
-    void schedule_key(int32_t key, int64_t down, int64_t up);
+    void schedule_key(Key key, int64_t down, int64_t up);
     void schedule_mouse(int button, const Point& where, int64_t down, int64_t up);
 
     void loop(MainLoop& loop);
@@ -63,8 +64,6 @@ class EventScheduler {
     std::vector<wall_ticks>             _snapshot_times;
     std::vector<std::unique_ptr<Event>> _event_heap;
     Point                               _mouse;
-
-    DISALLOW_COPY_AND_ASSIGN(EventScheduler);
 };
 
 }  // namespace antares

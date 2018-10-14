@@ -31,12 +31,12 @@ def main():
         path = "./antares-%s.%s" % (version, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk(archive_root):
-                    z.write(real_path, archive_path)
+                z.write(real_path, archive_path)
     elif archive_format in ["gz", "bz2"]:
         path = "./antares-%s.t%s" % (version, archive_format)
         with tarfile.open(path, "w:%s" % archive_format) as t:
             for real_path, archive_path in walk(archive_root):
-                    t.add(real_path, arcname=archive_path)
+                t.add(real_path, arcname=archive_path)
     else:
         raise RuntimeError(archive_format)
 
@@ -58,8 +58,6 @@ def should_write(base):
     if base == ".gn":
         return True
     elif base.startswith("."):
-        return False
-    elif base == "gn":
         return False
     elif ext in [".pyc", ".zip", ".tgz", ".tbz2"]:
         return False

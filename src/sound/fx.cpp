@@ -18,7 +18,7 @@
 
 #include "sound/fx.hpp"
 
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
@@ -33,35 +33,31 @@
 #include "sound/driver.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::format;
-
 namespace antares {
 
 static const int32_t kMaxChannelNum = 3;
 
-// sound 0-14 always used -- loaded at start; 15+ may be swapped around
-static const int kMinVolatileSound = 15;
+// sound 0-13 always used -- loaded at start; 14+ may be swapped around
+static const int kMinVolatileSound = 14;
 
-enum {
-    kMorseBeepSound = 506,  // ship receives order
-    kComputerBeep1  = 507,  // ship selected
-    kComputerBeep2  = 508,  // ship built
-    kComputerBeep3  = 509,  // button push
-    kComputerBeep4  = 510,  // change range
-    kWarningTone    = 511,  // naughty beep
-    kLandingWoosh   = 513,
-    kCloakOff       = 522,
-    kCloakOn        = 523,
-    kKlaxon         = 525,
-    kWarp           = 526,
-    kTeletype       = 535,
+static const pn::string_view kOrderSound   = "gui/beep/order";
+static const pn::string_view kSelectSound  = "gui/beep/select";
+static const pn::string_view kBuildSound   = "gui/beep/build";
+static const pn::string_view kButtonSound  = "gui/beep/button";
+static const pn::string_view kZoomSound    = "gui/beep/zoom";
+static const pn::string_view kNaughtySound = "gui/beep/naughty";
+static const pn::string_view kKlaxonSound  = "gui/klaxon";
+static const pn::string_view kMessageSound = "gui/beep/message";
+static const pn::string_view kCloakOn      = "dev/stealth/on";
+static const pn::string_view kCloakOff     = "dev/stealth/off";
+static const pn::string_view kWarp[4]      = {
+        "sfx/warp/charge/1", "sfx/warp/charge/2", "sfx/warp/charge/3", "sfx/warp/charge/4",
 };
 
-static const int16_t kFixedSounds[kMinVolatileSound] = {
-        kComputerBeep4, kComputerBeep1, kComputerBeep2, kComputerBeep3, kMorseBeepSound,
-        kWarningTone,   kLandingWoosh,  kCloakOn,       kCloakOff,      kKlaxon,
-        kWarp + 0,      kWarp + 1,      kWarp + 2,      kWarp + 3,      kTeletype,
+static const pn::string_view kFixedSounds[kMinVolatileSound] = {
+        kZoomSound,    kSelectSound, kBuildSound, kButtonSound,  kOrderSound,
+        kNaughtySound, kCloakOn,     kCloakOff,   kKlaxonSound,  kWarp[0],
+        kWarp[1],      kWarp[2],     kWarp[3],    kMessageSound,
 };
 
 enum {
@@ -86,7 +82,7 @@ enum {
 };
 
 struct SoundFX::smartSoundChannel {
-    int32_t                       whichSound;
+    pn::string                    whichSound;
     wall_time                     reserved_until;
     int16_t                       soundVolume;
     uint8_t                       soundPriority;
@@ -94,12 +90,13 @@ struct SoundFX::smartSoundChannel {
 };
 
 struct SoundFX::smartSoundHandle {
-    int16_t                id;
+    pn::string             id;
     std::unique_ptr<Sound> soundHandle;
 };
 
 // see if there's a channel with the same sound at same or lower volume
-bool SoundFX::same_sound_channel(int& channel, int16_t id, uint8_t amplitude, uint8_t priority) {
+bool SoundFX::same_sound_channel(
+        int& channel, pn::string_view id, uint8_t amplitude, uint8_t priority) {
     if (priority > kVeryLowPrioritySound) {
         for (int i = 0; i < kMaxChannelNum; ++i) {
             if ((channels[i].whichSound == id) && (channels[i].soundVolume <= amplitude)) {
@@ -149,44 +146,44 @@ bool SoundFX::oldest_available_channel(int& channel) {
 }
 
 bool SoundFX::best_channel(
-        int& channel, int16_t sound_id, uint8_t amplitude, usecs persistence, uint8_t priority) {
+        int& channel, pn::string_view sound_id, uint8_t amplitude, usecs persistence,
+        uint8_t priority) {
     return same_sound_channel(channel, sound_id, amplitude, priority) ||
            quieter_channel(channel, amplitude) || lower_priority_channel(channel, priority) ||
            oldest_available_channel(channel);
 }
 
-void SoundFX::play(int16_t whichSoundID, uint8_t amplitude, usecs persistence, uint8_t priority) {
+void SoundFX::play(pn::string_view id, uint8_t amplitude, usecs persistence, uint8_t priority) {
     int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
-        if (!best_channel(whichChannel, whichSoundID, amplitude, persistence, priority)) {
+        if (!best_channel(whichChannel, id, amplitude, persistence, priority)) {
             return;
         }
 
         int whichSound = 0;
-        while ((sounds[whichSound].id != whichSoundID) && (whichSound < sounds.size())) {
-            whichSound++;
+        for (; whichSound < sounds.size(); ++whichSound) {
+            if (sounds[whichSound].id == id) {
+                break;
+            }
         }
         if (whichSound == sounds.size()) {
             return;
         }
 
-        channels[whichChannel].whichSound     = whichSoundID;
+        channels[whichChannel].whichSound     = id.copy();
         channels[whichChannel].reserved_until = now() + persistence;
         channels[whichChannel].soundPriority  = priority;
         channels[whichChannel].soundVolume    = amplitude;
 
-        channels[whichChannel].channelPtr->quiet();
-
-        channels[whichChannel].channelPtr->amp(amplitude);
         channels[whichChannel].channelPtr->activate();
-        sounds[whichSound].soundHandle->play();
+        sounds[whichSound].soundHandle->play(amplitude);
     }
 }
 
 static void PlayLocalizedSound(
         uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy, Fixed hvel, Fixed vvel,
-        int16_t whichSoundID, int16_t amplitude, usecs persistence, uint8_t priority) {
+        pn::string_view whichSoundID, int16_t amplitude, usecs persistence, uint8_t priority) {
     static_cast<void>(sx);
     static_cast<void>(sy);
     static_cast<void>(dx);
@@ -206,8 +203,8 @@ void SoundFX::init() {
         channels[i].reserved_until = wall_time();
         channels[i].soundPriority  = kNoSound;
         channels[i].soundVolume    = 0;
-        channels[i].whichSound     = -1;
         channels[i].channelPtr     = sys.audio->open_channel();
+        channels[i].whichSound.clear();
     }
 
     reset();
@@ -218,22 +215,22 @@ void SoundFX::reset() {
     for (int i = 0; i < kMinVolatileSound; ++i) {
         if (!sounds[i].soundHandle.get()) {
             auto id               = kFixedSounds[i];
-            sounds[i].id          = id;
-            sounds[i].soundHandle = sys.audio->open_sound(format("/sounds/{0}", id));
+            sounds[i].id          = id.copy();
+            sounds[i].soundHandle = sys.audio->open_sound(id);
         }
     }
 }
 
-void SoundFX::load(int16_t id) {
+void SoundFX::load(pn::string_view id) {
     int whichSound = 0;
-    while ((sounds[whichSound].id != id) && (whichSound < sounds.size())) {
+    while ((whichSound < sounds.size()) && (sounds[whichSound].id != id)) {
         whichSound++;
     }
 
     if (whichSound == sounds.size()) {
         sounds.emplace_back();
-        sounds.back().id          = id;
-        sounds.back().soundHandle = sys.audio->open_sound(format("/sounds/{0}", id));
+        sounds.back().id          = id.copy();
+        sounds.back().soundHandle = sys.audio->open_sound(id);
     }
 }
 
@@ -267,7 +264,7 @@ void SoundFX::stop() {
 //
 
 void SoundFX::play_at(
-        int16_t msoundid, int32_t mvolume, usecs msoundpersistence, uint8_t msoundpriority,
+        pn::string_view id, int32_t mvolume, usecs msoundpersistence, uint8_t msoundpriority,
         Handle<SpaceObject> mobjectptr) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t  mdistance = mobjectptr->distanceFromPlayer;
@@ -299,7 +296,7 @@ void SoundFX::play_at(
                     PlayLocalizedSound(
                             player->location.h, player->location.v, mobjectptr->location.h,
                             mobjectptr->location.v, player->velocity.h - mobjectptr->velocity.h,
-                            player->velocity.v - mobjectptr->velocity.v, msoundid, mvolume,
+                            player->velocity.v - mobjectptr->velocity.v, id, mvolume,
                             msoundpersistence, msoundpriority);
                 }
             } else {
@@ -325,7 +322,7 @@ void SoundFX::play_at(
                     PlayLocalizedSound(
                             gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h,
                             mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v,
-                            msoundid, mvolume, msoundpersistence, msoundpriority);
+                            id, mvolume, msoundpersistence, msoundpriority);
                 }
             }
         } else {
@@ -343,7 +340,7 @@ void SoundFX::play_at(
                     PlayLocalizedSound(
                             player->location.h, player->location.v, mobjectptr->location.h,
                             mobjectptr->location.v, player->velocity.h - mobjectptr->velocity.h,
-                            player->velocity.v - mobjectptr->velocity.v, msoundid, mvolume,
+                            player->velocity.v - mobjectptr->velocity.v, id, mvolume,
                             msoundpersistence, msoundpriority);
                 }
             } else {
@@ -351,7 +348,7 @@ void SoundFX::play_at(
                     PlayLocalizedSound(
                             gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h,
                             mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v,
-                            msoundid, mvolume, msoundpersistence, msoundpriority);
+                            id, mvolume, msoundpersistence, msoundpriority);
                 }
             }
         }
@@ -359,55 +356,43 @@ void SoundFX::play_at(
 }
 
 void SoundFX::select() {
-    play(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+    play(kSelectSound, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
 }
 
-void SoundFX::build() {
-    play(kComputerBeep2, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-}
+void SoundFX::build() { play(kBuildSound, kMediumVolume, kMediumPersistence, kLowPrioritySound); }
 
-void SoundFX::click() {
-    play(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-}
+void SoundFX::click() { play(kButtonSound, kMediumVolume, kMediumPersistence, kLowPrioritySound); }
 
-void SoundFX::zoom() {
-    play(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-}
+void SoundFX::zoom() { play(kZoomSound, kMediumVolume, kMediumPersistence, kLowPrioritySound); }
 
-void SoundFX::pause() {
-    play(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
-}
+void SoundFX::pause() { play(kZoomSound, kMaxSoundVolume, kShortPersistence, kMustPlaySound); }
 
 void SoundFX::klaxon() {
-    play(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
+    play(kKlaxonSound, kMediumVolume, kMediumLongPersistence, kPrioritySound);
 }
 
 void SoundFX::loud_klaxon() {
-    play(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
+    play(kKlaxonSound, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
 }
 
-void SoundFX::order() {
-    play(kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-}
+void SoundFX::order() { play(kOrderSound, kMediumVolume, kMediumPersistence, kLowPrioritySound); }
 
 void SoundFX::warning() {
-    play(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+    play(kNaughtySound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
 }
 
 void SoundFX::teletype() {
-    play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+    play(kMessageSound, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
 }
 
-void SoundFX::cloak_on() {
-    play(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
-}
+void SoundFX::cloak_on() { play(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound); }
 
 void SoundFX::cloak_off() {
     play(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
 }
 
 void SoundFX::warp(int n, Handle<SpaceObject> object) {
-    play_at(kWarp + n, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
+    play_at(kWarp[n], kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
 }
 
 void SoundFX::cloak_on_at(Handle<SpaceObject> object) {

@@ -6,30 +6,38 @@
 from __future__ import division, print_function, unicode_literals
 
 import gi
+import json
 import os
 import subprocess
 import sys
 
-gi.require_version('Gtk', '3.0')
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-
 PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-if os.path.exists(os.path.join(PREFIX, "share", "games", "antares", "app")):
+if os.path.exists(os.path.join(PREFIX, "games", "antares-glfw")):
     BIN_PREFIX = os.path.join(PREFIX, "games")
-    DATADIR = os.path.join(PREFIX, "share", "games", "antares", "app")
+    DATADIR = ""
     ANTARES_ICON = os.path.join(PREFIX, "share", "icons", "hicolor", "128x128", "apps",
                                 "antares.png")
+    APP_DATA = ""
+    SCENARIOS = os.path.join(PREFIX, "share", "games", "antares", "scenarios")
+    FACTORY_SCENARIO = ""
 else:
     BIN_PREFIX = os.path.join(PREFIX, "out", "cur")
     DATADIR = os.path.join(PREFIX, "resources")
-    ANTARES_ICON = os.path.join(PREFIX, "resources", "antares.iconset", "icon_128x128.png")
+    ANTARES_ICON = os.path.join(DATADIR, "antares.iconset", "icon_128x128.png")
+    APP_DATA = os.path.join(PREFIX, "data")
+    SCENARIOS = os.path.join(PREFIX, "scenarios")
+    FACTORY_SCENARIO = os.path.join(SCENARIOS, "4cab7415715aeeacf1486a352267ae82c0efb220")
 
 ANTARES_BIN = os.path.join(BIN_PREFIX, "antares-glfw")
+INSTALL_DATA_BIN = os.path.join(BIN_PREFIX, "antares-install-data")
 LS_SCENARIOS_BIN = os.path.join(BIN_PREFIX, "antares-ls-scenarios")
 
 
 def main():
+    reinstall_or_check_scenario()
     scenarios = ls_scenarios()
     win = LauncherWindow(scenarios)
     win.show_all()
@@ -37,12 +45,15 @@ def main():
 
 
 class LauncherWindow(Gtk.Dialog):
-
     def __init__(self, scenarios):
         Gtk.Dialog.__init__(
-                self, "Antares", None, 0,
-                ("Quit", Gtk.ResponseType.CANCEL, "Start", Gtk.ResponseType.OK),
-                window_position=Gtk.WindowPosition.CENTER)
+            self,
+            "Antares",
+            None,
+            0, ("Quit", Gtk.ResponseType.CANCEL, "Start", Gtk.ResponseType.OK),
+            window_position=Gtk.WindowPosition.CENTER)
+        self.set_resizable(False)
+
         self.set_default_response(Gtk.ResponseType.OK)
         self.connect("response", self.on_response)
 
@@ -60,7 +71,7 @@ class LauncherWindow(Gtk.Dialog):
 
         plugin.attach(Gtk.Label("Version", xalign=1), 0, 3, 1, 1)
         self.version = Gtk.Label(
-                "", hexpand=True, justify=Gtk.Justification.LEFT, xalign=0, margin_left=10)
+            "", hexpand=True, justify=Gtk.Justification.LEFT, xalign=0, margin_left=10)
         plugin.attach(self.version, 1, 3, 1, 1)
 
         scenario_combo = Gtk.ComboBoxText()
@@ -84,9 +95,9 @@ class LauncherWindow(Gtk.Dialog):
     def set_scenario(self, s):
         self.scenario = s["id"]
         self.download.set_label(s["title"])
-        self.download.set_uri(s["download url"])
+        self.download.set_uri(s["download_url"])
         self.author.set_label(s["author"])
-        self.author.set_uri(s["author url"])
+        self.author.set_uri(s["author_url"])
         self.version.set_label(s["version"])
 
     def on_change_scenario(self, combo):
@@ -95,21 +106,44 @@ class LauncherWindow(Gtk.Dialog):
     def on_response(self, widget, value):
         if value == Gtk.ResponseType.OK:
             args = [ANTARES_BIN, self.scenario]
+            if APP_DATA:
+                args += ["--app-data", APP_DATA]
+            if FACTORY_SCENARIO:
+                args += ["--factory-scenario", FACTORY_SCENARIO]
             print(" ".join(args))
             os.execvp(args[0], args)
         else:
             Gtk.main_quit()
 
 
+def reinstall_or_check_scenario():
+    args = [INSTALL_DATA_BIN]
+    args += ["--dest", SCENARIOS]
+    if FACTORY_SCENARIO:
+        # Running from build dir: reinstall.
+        pass
+    else:
+        # Running from installation: just check.
+        args += ["--check"]
+    print(" ".join(args))
+    subprocess.check_call(args)
+
+
 def ls_scenarios():
-    out = subprocess.check_output(LS_SCENARIOS_BIN)
+    args = [LS_SCENARIOS_BIN]
+    if APP_DATA:
+        args += ["--application-data", APP_DATA]
+    if FACTORY_SCENARIO:
+        args += ["--factory-scenario", FACTORY_SCENARIO]
+    print(" ".join(args))
+    out = subprocess.check_output(args)
     scenarios = []
     for line in out.splitlines():
         if not line[0].isspace():
             scenarios.append({"id": line[:-1]})
         else:
-            key, val = line.strip().split(": ", 1)
-            scenarios[-1][key] = val
+            key, val = line.strip().split(":", 1)
+            scenarios[-1][key] = json.loads(val)
     return scenarios
 
 

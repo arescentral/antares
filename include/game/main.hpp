@@ -26,7 +26,7 @@
 namespace antares {
 
 class InputSource;
-struct Level;
+union Level;
 
 enum GameResult {
     NO_GAME      = -1,
@@ -39,7 +39,7 @@ enum GameResult {
 class MainPlay : public Card {
   public:
     MainPlay(
-            Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
+            const Level& level, bool replay, InputSource* input, bool show_loading_screen,
             GameResult* game_result);
 
     virtual void become_front();
@@ -53,7 +53,7 @@ class MainPlay : public Card {
     };
     State _state;
 
-    Handle<Level>     _level;
+    const Level&      _level;
     const bool        _replay;
     const bool        _show_loading_screen;
     bool              _cancelled;

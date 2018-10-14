@@ -36,11 +36,11 @@ void antares_mouse_show();
 
 typedef struct AntaresWindow AntaresWindow;
 AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextObj context);
-void antares_window_destroy(AntaresWindow* window);
-int32_t antares_window_screen_width(const AntaresWindow* window);
-int32_t antares_window_screen_height(const AntaresWindow* window);
-int32_t antares_window_viewport_width(const AntaresWindow* window);
-int32_t antares_window_viewport_height(const AntaresWindow* window);
+void           antares_window_destroy(AntaresWindow* window);
+int32_t        antares_window_screen_width(const AntaresWindow* window);
+int32_t        antares_window_screen_height(const AntaresWindow* window);
+int32_t        antares_window_viewport_width(const AntaresWindow* window);
+int32_t        antares_window_viewport_height(const AntaresWindow* window);
 
 typedef struct AntaresEventTranslator AntaresEventTranslator;
 AntaresEventTranslator*               antares_event_translator_create();
@@ -59,7 +59,7 @@ void antares_event_translator_set_mouse_up_callback(
         void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata);
 void antares_event_translator_set_mouse_move_callback(
         AntaresEventTranslator* translator, void (*callback)(int32_t x, int32_t y, void* userdata),
-        void* userdata);
+        void*                   userdata);
 void antares_event_translator_set_caps_lock_callback(
         AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata);
 void antares_event_translator_set_caps_unlock_callback(

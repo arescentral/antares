@@ -28,7 +28,7 @@ class FilePrefsDriver : public PrefsDriver {
     FilePrefsDriver();
 
     virtual const Preferences& get() const { return _current; }
-    virtual void set(const Preferences& preferences);
+    virtual void               set(const Preferences& preferences);
 
   private:
     Preferences _current;

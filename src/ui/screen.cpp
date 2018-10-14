@@ -18,7 +18,8 @@
 
 #include "ui/screen.hpp"
 
-#include <sfz/sfz.hpp>
+#include <pn/array>
+#include <pn/file>
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
@@ -31,86 +32,74 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::Json;
-using sfz::PrintItem;
-using sfz::String;
-using sfz::StringMap;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::range;
-using sfz::read;
-using sfz::string_to_json;
 using std::unique_ptr;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
-InterfaceScreen::InterfaceScreen(PrintItem name, const Rect& bounds, bool full_screen)
-        : InterfaceScreen(load_json(name), bounds, full_screen) {}
-
-InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen)
-        : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
-    _items = interface_items(0, json);
-    for (auto& item : _items) {
-        item->bounds().offset(bounds.left, bounds.top);
+InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bounds(bounds) {
+    try {
+        InterfaceData data = Resource::interface(name);
+        _full_screen       = data.fullscreen;
+        for (auto& item : data.items) {
+            _widgets.push_back(Widget::from(item));
+        }
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(name.copy().c_str()));
     }
 }
 
 InterfaceScreen::~InterfaceScreen() {}
 
-Json InterfaceScreen::load_json(sfz::PrintItem id) {
-    Resource rsrc(sfz::format("interfaces/{0}.json", id));
-    String   in(utf8::decode(rsrc.data()));
-    Json     json;
-    if (!string_to_json(in, json)) {
-        throw Exception("invalid interface JSON");
-    }
-    return json;
-}
-
 void InterfaceScreen::become_front() {
-    this->adjust_interface();
     // half-second fade from black.
 }
 
-void InterfaceScreen::resign_front() {
-    become_normal();
+void InterfaceScreen::resign_front() { set_state(NORMAL); }
+
+void InterfaceScreen::set_state(State state, Widget* widget, Key key, Gamepad::Button gamepad) {
+    _state           = state;
+    _key_pressed     = key;
+    _gamepad_pressed = gamepad;
+    if (widget) {  // Even if already the active widget.
+        sys.sound.select();
+    }
+    if (widget != _active_widget) {
+        if (_active_widget) {
+            _active_widget->deactivate();
+            _active_widget = nullptr;
+        }
+        if (widget) {
+            widget->activate();
+            _active_widget = widget;
+        }
+    }
 }
 
-void InterfaceScreen::become_normal() {
-    _state      = NORMAL;
-    _hit_button = nullptr;
-    for (auto& item : _items) {
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->status == kIH_Hilite) {
-            button->status = kActive;
-        }
+template <typename Widgets>
+static void enlarge_to_outer_bounds(Rect* r, const Widgets& widgets) {
+    for (const auto& w : widgets) {
+        r->enlarge_to(w->outer_bounds());
+        enlarge_to_outer_bounds(r, w->children());
     }
 }
 
 void InterfaceScreen::draw() const {
-    Point off = offset();
-    Rect  copy_area;
+    Rect copy_area;
     if (_full_screen) {
         copy_area = _bounds;
     } else {
         next()->draw();
-        GetAnyInterfaceItemGraphicBounds(*_items[0], &copy_area);
-        for (const auto& item : _items) {
-            Rect r;
-            GetAnyInterfaceItemGraphicBounds(*item, &r);
-            copy_area.enlarge_to(r);
-        }
+        copy_area = _widgets[0]->outer_bounds();
+        enlarge_to_outer_bounds(&copy_area, _widgets);
     }
+    Point off = offset();
     copy_area.offset(off.h, off.v);
 
     Rects().fill(copy_area, RgbColor::black());
 
-    for (const auto& item : _items) {
-        draw_interface_item(*item, sys.video->input_mode(), off);
+    for (const auto& w : _widgets) {
+        w->draw(off, sys.video->input_mode());
     }
     overlay();
     if (stack()->top() == this) {
@@ -121,21 +110,13 @@ void InterfaceScreen::draw() const {
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     Point where = event.where();
     Point off   = offset();
-    where.h -= off.h;
-    where.v -= off.v;
+    where.offset(-off.h, -off.v);
     if (event.button() != 0) {
         return;
     }
-    for (auto& item : _items) {
-        Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(*item, &bounds);
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && (button->status != kDimmed) && (bounds.contains(where))) {
-            become_normal();
-            _state         = MOUSE_DOWN;
-            button->status = kIH_Hilite;
-            sys.sound.select();
-            _hit_button = button;
+    for (auto& widget : _widgets) {
+        if (Widget* item = widget->accept_click(where)) {
+            set_state(MOUSE_DOWN, item);
             return;
         }
     }
@@ -144,18 +125,17 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
 void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
     Point where = event.where();
     Point off   = offset();
-    where.h -= _bounds.left + off.h;
-    where.v -= _bounds.top + off.v;
+    where.offset(-off.h, -off.v);
     if (event.button() != 0) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        _state = NORMAL;
-        Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(*_hit_button, &bounds);
-        _hit_button->status = kActive;
-        if (bounds.contains(where)) {
-            handle_button(*_hit_button);
+        if (_active_widget->accept_click(where)) {
+            Widget* w = _active_widget;
+            set_state(NORMAL);
+            w->action();
+        } else {
+            set_state(NORMAL);
         }
     }
 }
@@ -166,95 +146,77 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 }
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
-    const int32_t key_code = event.key() + 1;
-    for (auto& item : _items) {
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->status != kDimmed && button->key == key_code) {
-            become_normal();
-            _state         = KEY_DOWN;
-            button->status = kIH_Hilite;
-            sys.sound.select();
-            _hit_button = button;
-            _pressed    = key_code;
+    for (auto& widget : _widgets) {
+        if (Widget* item = widget->accept_key(event.key())) {
+            set_state(KEY_DOWN, item, event.key());
             return;
         }
     }
 }
 
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
-    const int32_t key_code = event.key() + 1;
-    if ((_state == KEY_DOWN) && (_pressed == key_code)) {
-        _state              = NORMAL;
-        _hit_button->status = kActive;
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
-            b->on = true;
-        }
-        handle_button(*_hit_button);
+    if ((_state == KEY_DOWN) && (_key_pressed == event.key())) {
+        Widget* w = _active_widget;
+        set_state(NORMAL);
+        w->action();
     }
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    for (auto& item : _items) {
-        Button* button = dynamic_cast<Button*>(item.get());
-        if (button && button->status != kDimmed && button->gamepad == event.button) {
-            become_normal();
-            _state         = GAMEPAD_DOWN;
-            button->status = kIH_Hilite;
-            sys.sound.select();
-            _hit_button = button;
-            _pressed    = event.button;
+    for (auto& widget : _widgets) {
+        if (Widget* item = widget->accept_button(event.button)) {
+            set_state(GAMEPAD_DOWN, item, Key::NONE, event.button);
             return;
         }
     }
 }
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
-        _state              = NORMAL;
-        _hit_button->status = kActive;
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
-            b->on = true;
-        }
-        handle_button(*_hit_button);
+    if ((_state == GAMEPAD_DOWN) && (_gamepad_pressed == event.button)) {
+        Widget* w = _active_widget;
+        set_state(NORMAL);
+        w->action();
     }
 }
 
 void InterfaceScreen::overlay() const {}
 
-void InterfaceScreen::adjust_interface() {}
-
-void InterfaceScreen::truncate(size_t size) {
-    if (size > _items.size()) {
-        throw Exception("");
-    }
-    _items.resize(size);
-}
-
-void InterfaceScreen::extend(const Json& json) {
-    const int offset_x = (_bounds.width() / 2) - 320;
-    const int offset_y = (_bounds.height() / 2) - 240;
-    for (auto&& item : interface_items(_items.size(), json)) {
-        _items.emplace_back(std::move(item));
-        _items.back()->bounds().offset(offset_x, offset_y);
-    }
-}
-
 Point InterfaceScreen::offset() const {
-    Rect bounds = {0, 0, 640, 480};
-    bounds.center_in(sys.video->screen_size().as_rect());
-    return bounds.origin();
+    Rect screen = {0, 0, 640, 480};
+    screen.center_in(sys.video->screen_size().as_rect());
+    return {_bounds.left + screen.left, _bounds.top + screen.top};
 }
 
-size_t InterfaceScreen::size() const {
-    return _items.size();
+template <typename Vector>
+static Widget* find_id(const Vector& v, int64_t id) {
+    for (auto& widget : v) {
+        if (widget->id().has_value() && (*widget->id() == id)) {
+            return &*widget;
+        }
+        auto in_children = find_id(widget->children(), id);
+        if (in_children) {
+            return in_children;
+        }
+    }
+    return nullptr;
 }
 
-const InterfaceItem& InterfaceScreen::item(int i) const {
-    return *_items[i];
+const Widget* InterfaceScreen::widget(int id) const { return find_id(_widgets, id); }
+
+Widget* InterfaceScreen::widget(int id) { return find_id(_widgets, id); }
+
+const PlainButton* InterfaceScreen::button(int id) const {
+    return dynamic_cast<const PlainButton*>(widget(id));
 }
 
-InterfaceItem& InterfaceScreen::mutable_item(int i) {
-    return *_items[i];
+PlainButton* InterfaceScreen::button(int id) { return dynamic_cast<PlainButton*>(widget(id)); }
+
+const CheckboxButton* InterfaceScreen::checkbox(int id) const {
+    return dynamic_cast<const CheckboxButton*>(widget(id));
+}
+
+CheckboxButton* InterfaceScreen::checkbox(int id) {
+    return dynamic_cast<CheckboxButton*>(widget(id));
 }
 
 }  // namespace antares

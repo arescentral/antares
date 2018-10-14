@@ -88,6 +88,7 @@ td.unreachable.level { background: white; color: darkgray; }
 ObjectData = collections.namedtuple("ObjectData", "name short_name note race class_ frame".split())
 ActionData = collections.namedtuple("ActionData", "kind what".split())
 
+
 def main():
     level_names = load_level_names()
     objects = load_objects()
@@ -191,12 +192,14 @@ def main():
                             else:
                                 td(content, class_="unreachable level")
 
+
 def load_level_names():
     with open(os.path.expanduser(FACTORY + "strings/4600.json")) as f:
         level_names = json.load(f)
         level_names = [l.split("\\i")[1] for l in level_names]
         level_names = [re.sub("[^A-Z0-9]+", "", l) for l in level_names]
         return level_names
+
 
 def load_objects():
     object_names = json.load(open(os.path.expanduser(FACTORY + "strings/5000.json")))
@@ -226,6 +229,7 @@ def load_objects():
             objects.append(ObjectData(name, short_name, note, race, class_, frame))
         return objects
 
+
 def load_actions(objects):
     with open(os.path.expanduser(FACTORY + "object-actions/500.obac")) as f:
         action_data = f.read()
@@ -245,6 +249,7 @@ def load_actions(objects):
             actions.append(ActionData(kind, what))
         return actions
 
+
 def load_reachable():
     reachable = {None: {"objects": set(), "actions": set()}}
     for data in json.load(open("cov/reachable.json")):
@@ -256,6 +261,7 @@ def load_reachable():
         reachable[None]["actions"].update(data["actions"])
     return reachable
 
+
 def load_covered(levels, paths):
     covered = dict((level, {"objects": set(), "actions": set()}) for level in levels)
     for path in paths:
@@ -266,11 +272,14 @@ def load_covered(levels, paths):
                 covered[level]["actions"].update(data["actions"])
     return covered
 
+
 indent = ""
+
 
 def open_tag(tag, **kwds):
     attrs = [" %s=\"%s\"" % (k.strip("_"), cgi.escape(v, quote=True)) for k, v in kwds.iteritems()]
     return "<%s%s>" % (tag, "".join(attrs))
+
 
 @contextlib.contextmanager
 def context_tag(tag, **kwds):
@@ -283,6 +292,7 @@ def context_tag(tag, **kwds):
         indent = indent[:-2]
         sys.stdout.write("%s</%s>\n" % (indent, tag))
 
+
 def tag(tag, *args, **kwds):
     if args:
         content = " ".join(cgi.escape(str(t)) for t in args)
@@ -290,9 +300,11 @@ def tag(tag, *args, **kwds):
     else:
         return context_tag(tag, **kwds)
 
+
 def text(s):
     global indent
     sys.stdout.write("%s%s\n" % (indent, cgi.escape(s.replace("\n", "\n" + indent))))
+
 
 html = lambda *args, **kwds: tag("html", *args, **kwds)
 head = lambda *args, **kwds: tag("head", *args, **kwds)

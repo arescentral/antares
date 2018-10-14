@@ -20,7 +20,7 @@
 #define ANTARES_VIDEO_OPEN_GL_DRIVER_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <map>
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
@@ -56,13 +56,13 @@ class OpenGlVideoDriver : public VideoDriver {
 
     virtual int scale() const;
 
-    virtual Texture texture(sfz::PrintItem name, const PixMap& content);
-    virtual void dither_rect(const Rect& rect, const RgbColor& color);
-    virtual void draw_point(const Point& at, const RgbColor& color);
-    virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
-    virtual void draw_triangle(const Rect& rect, const RgbColor& color);
-    virtual void draw_diamond(const Rect& rect, const RgbColor& color);
-    virtual void draw_plus(const Rect& rect, const RgbColor& color);
+    virtual Texture texture(pn::string_view name, const PixMap& content, int scale);
+    virtual void    dither_rect(const Rect& rect, const RgbColor& color);
+    virtual void    draw_point(const Point& at, const RgbColor& color);
+    virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color);
+    virtual void    draw_triangle(const Rect& rect, const RgbColor& color);
+    virtual void    draw_diamond(const Rect& rect, const RgbColor& color);
+    virtual void    draw_plus(const Rect& rect, const RgbColor& color);
 
     struct Uniforms {
         Uniform<vec2>          screen          = {"screen"};
@@ -80,6 +80,9 @@ class OpenGlVideoDriver : public VideoDriver {
     class MainLoop {
       public:
         MainLoop(OpenGlVideoDriver& driver, Card* initial);
+        MainLoop(const MainLoop&) = delete;
+        MainLoop& operator=(const MainLoop&) = delete;
+
         void  draw();
         bool  done() const;
         Card* top() const;
@@ -91,8 +94,6 @@ class OpenGlVideoDriver : public VideoDriver {
         const Setup        _setup;
         OpenGlVideoDriver& _driver;
         CardStack          _stack;
-
-        DISALLOW_COPY_AND_ASSIGN(MainLoop);
     };
 
     virtual Size viewport_size() const = 0;
@@ -119,8 +120,6 @@ class OpenGlVideoDriver : public VideoDriver {
     std::map<size_t, Texture> _pluses;
 
     uint32_t _vbuf[3];
-
-    DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };
 
 }  // namespace antares

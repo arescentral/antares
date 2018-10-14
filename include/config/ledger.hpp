@@ -20,7 +20,6 @@
 #define ANTARES_CONFIG_LEDGER_HPP_
 
 #include <set>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 namespace antares {
@@ -39,18 +38,22 @@ class Ledger {
 class NullLedger : public Ledger {
   public:
     NullLedger();
+    NullLedger(const NullLedger&) = delete;
+    NullLedger& operator=(const NullLedger&) = delete;
+
     virtual void unlock_chapter(int chapter);
     virtual void unlocked_chapters(std::vector<int>* chapters);
 
   private:
     std::set<int> _chapters;
-
-    DISALLOW_COPY_AND_ASSIGN(NullLedger);
 };
 
 class DirectoryLedger : public Ledger {
   public:
     DirectoryLedger();
+    DirectoryLedger(const DirectoryLedger&) = delete;
+    DirectoryLedger& operator=(const DirectoryLedger&) = delete;
+
     virtual void unlock_chapter(int chapter);
     virtual void unlocked_chapters(std::vector<int>* chapters);
 
@@ -61,8 +64,6 @@ class DirectoryLedger : public Ledger {
     void save();
 
     std::set<int> _chapters;
-
-    DISALLOW_COPY_AND_ASSIGN(DirectoryLedger);
 };
 
 }  // namespace antares

@@ -19,9 +19,10 @@
 #ifndef ANTARES_UI_SCREENS_MAIN_HPP_
 #define ANTARES_UI_SCREENS_MAIN_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
+#include <vector>
 
-#include "data/replay-list.hpp"
+#include "math/units.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -43,10 +44,6 @@ class MainScreen : public InterfaceScreen {
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(antares::Button& button);
-
   private:
     enum Button {
         START_NEW_GAME     = 0,
@@ -61,11 +58,9 @@ class MainScreen : public InterfaceScreen {
         NORMAL   = 0,
         QUITTING = 1,
     };
-    State      _state;
-    ReplayList _replays;
-    wall_time  _next_timer;
-
-    DISALLOW_COPY_AND_ASSIGN(MainScreen);
+    State                   _state;
+    std::vector<pn::string> _replays;
+    wall_time               _next_timer;
 };
 
 }  // namespace antares

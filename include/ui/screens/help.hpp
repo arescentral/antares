@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_HELP_HPP_
 #define ANTARES_UI_SCREENS_HELP_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/styled-text.hpp"
 #include "ui/screen.hpp"
 
@@ -34,9 +32,6 @@ class HelpScreen : public InterfaceScreen {
     virtual void key_down(const KeyDownEvent& event);
     virtual void overlay() const;
 
-  protected:
-    virtual void handle_button(Button& button);
-
   private:
     enum Item {
         DONE = 0,
@@ -45,8 +40,6 @@ class HelpScreen : public InterfaceScreen {
     };
 
     StyledText _text;
-
-    DISALLOW_COPY_AND_ASSIGN(HelpScreen);
 };
 
 }  // namespace antares

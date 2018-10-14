@@ -19,7 +19,7 @@
 #include "video/transitions.hpp"
 
 #include "config/keys.hpp"
-#include "data/picture.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -29,49 +29,22 @@
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
-
 namespace antares {
 
-namespace {
-
-const int32_t kStartAnimation = -255;
-const int32_t kEndAnimation   = 255;
-
-}  // namespace
-
-Transitions::Transitions() : _active(false) {}
+Transitions::Transitions() {}
 Transitions::~Transitions() {}
 
-void Transitions::reset() {
-    _active = false;
+void Transitions::reset() { _end = game_ticks{ticks{0}}; }
+
+void Transitions::start_boolean(ticks duration, RgbColor goal_color) {
+    _end   = g.time + duration;
+    _color = goal_color;
 }
 
-void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
-    _step        = kStartAnimation;
-    _in_speed    = in_speed;
-    _out_speed   = out_speed;
-    _color       = GetRGBTranslateColor(goal_color);
-    _color.alpha = 127;
-    if (!_active) {
-        _active = true;
-    }
-}
-
-void Transitions::update_boolean(ticks time_passed) {
-    if (_active) {
-        if (_step < 0) {
-            _step += _in_speed * time_passed.count();
-        } else if ((_step + _out_speed * time_passed.count()) < kEndAnimation) {
-            _step += _out_speed * time_passed.count();
-        } else {
-            _active = false;
-        }
-    }
-}
+void Transitions::update_boolean(ticks time_passed) {}
 
 void Transitions::draw() const {
-    if (_active) {
+    if (g.time < _end) {
         Rects().fill(world(), _color);
     }
 }
@@ -145,8 +118,8 @@ void ColorFade::draw() const {
     Rects().fill(world(), fill_color);
 }
 
-PictFade::PictFade(int pict_id, bool* skipped)
-        : _state(NEW), _skipped(skipped), _texture(Picture(pict_id).texture()) {}
+PictFade::PictFade(const Texture* texture, bool* skipped)
+        : _state(NEW), _skipped(skipped), _texture(texture) {}
 
 PictFade::~PictFade() {}
 
@@ -205,9 +178,9 @@ void PictFade::fire_timer() {
 }
 
 void PictFade::draw() const {
-    Rect bounds = _texture.size().as_rect();
+    Rect bounds = _texture->size().as_rect();
     bounds.center_in(world());
-    _texture.draw(bounds.left, bounds.top);
+    _texture->draw(bounds.left, bounds.top);
 }
 
 void PictFade::wax() {
@@ -222,16 +195,10 @@ void PictFade::wane() {
             ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
-usecs PictFade::fade_time() const {
-    return ticks(100);
-}
+usecs PictFade::fade_time() const { return ticks(100); }
 
-usecs PictFade::display_time() const {
-    return ticks(80);
-}
+usecs PictFade::display_time() const { return ticks(80); }
 
-bool PictFade::skip() const {
-    return *_skipped;
-}
+bool PictFade::skip() const { return *_skipped; }
 
 }  // namespace antares

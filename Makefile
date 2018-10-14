@@ -3,7 +3,7 @@
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
 -include out/cur/args.gn
-NINJA=build/lib/scripts/ninja -C out/cur
+NINJA=build/lib/bin/ninja -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 
 BINDIR=$(prefix)/games
@@ -41,7 +41,7 @@ distclean:
 .PHONY: run
 run: all
 	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
-	@[ ! -f $(MAC_BIN) ] && scripts/antares-launcher || true
+	@[ ! -f $(MAC_BIN) ] && scripts/antares_launcher.py || true
 
 .PHONY: sign
 sign:
@@ -50,6 +50,10 @@ sign:
 		--entitlements resources/entitlements.plist \
 		out/cur/Antares.app
 
+.PHONY: install-deps
+install-deps:
+	@scripts/installdeps.py
+
 ifeq ($(target_os), "linux")
 .PHONY: install
 install: install-bin install-data install-scenario
@@ -57,7 +61,7 @@ install: install-bin install-data install-scenario
 .PHONY: install-bin
 install-bin: all
 	install -m 755 -d $(DESTDIR)$(BINDIR)
-	install -m 755 scripts/antares-launcher $(DESTDIR)$(BINDIR)/antares
+	install -m 755 scripts/antares_launcher.py $(DESTDIR)$(BINDIR)/antares
 	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
 	install -m 755 out/cur/antares-install-data $(DESTDIR)$(BINDIR)/antares-install-data
 	install -m 755 out/cur/antares-ls-scenarios $(DESTDIR)$(BINDIR)/antares-ls-scenarios
@@ -72,24 +76,47 @@ install-data: all
 	install -m 644 resources/antares.iconset/icon_128x128.png $(DESTDIR)$(ICONDIR)/hicolor/128x128/apps/antares.png
 	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/512x512/apps
 	install -m 644 resources/antares.iconset/icon_512x512.png $(DESTDIR)$(ICONDIR)/hicolor/512x512/apps/antares.png
+	
 	install -m 755 -d $(DESTDIR)$(APPDIR)
 	install -m 644 resources/antares.desktop $(DESTDIR)$(APPDIR)
+	
 	install -m 755 -d $(DESTDIR)$(DATADIR)/app
 	install -m 644 data/COPYING $(DESTDIR)$(DATADIR)/app
 	install -m 644 data/AUTHORS $(DESTDIR)$(DATADIR)/app
 	install -m 644 data/README.md $(DESTDIR)$(DATADIR)/app
+	install -m 644 data/info.pn $(DESTDIR)$(DATADIR)/app
+	install -m 644 data/rotation-table $(DESTDIR)$(DATADIR)/app
 	cp -r data/fonts $(DESTDIR)$(DATADIR)/app
 	cp -r data/interfaces $(DESTDIR)$(DATADIR)/app
+	cp -r data/levels $(DESTDIR)$(DATADIR)/app
 	cp -r data/music $(DESTDIR)$(DATADIR)/app
+	cp -r data/objects $(DESTDIR)$(DATADIR)/app
 	cp -r data/pictures $(DESTDIR)$(DATADIR)/app
-	cp -r data/rotation-table $(DESTDIR)$(DATADIR)/app
+	cp -r data/races $(DESTDIR)$(DATADIR)/app
+	cp -r data/replays $(DESTDIR)$(DATADIR)/app
+	cp -r data/sounds $(DESTDIR)$(DATADIR)/app
+	cp -r data/sprites $(DESTDIR)$(DATADIR)/app
 	cp -r data/strings $(DESTDIR)$(DATADIR)/app
-	cp -r data/text $(DESTDIR)$(DATADIR)/app
 
 .PHONY: install-scenario
 install-scenario: all
 	out/cur/antares-install-data -s $(DESTDIR)$(DATADIR)/downloads -d $(DESTDIR)$(DATADIR)/scenarios
 endif
+
+.PHONY: travis-test-mac
+travis-test-mac: smoke-test
+
+.PHONY: travis-test-linux
+travis-test-linux: smoke-test
+
+	# Check that deps for launcher were installed:
+	python -c "from scripts import antares_launcher"
+
+	# Check that antares-ls-scenarios finds scenario only after installation:
+	sudo rm -Rf $(prefix)/share/games/antares
+	! out/cur/antares-ls-scenarios
+	sudo make install
+	$(prefix)/games/antares-ls-scenarios
 
 .PHONY: friends
 friends:

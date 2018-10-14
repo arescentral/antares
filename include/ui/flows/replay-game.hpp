@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
 #define ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "data/replay.hpp"
 #include "data/resource.hpp"
 #include "game/input-source.hpp"
@@ -30,11 +28,11 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class ReplayGame : public Card {
   public:
-    ReplayGame(int16_t replay_id);
+    ReplayGame(pn::string_view replay_name);
     ~ReplayGame();
 
     virtual void become_front();
@@ -47,10 +45,9 @@ class ReplayGame : public Card {
     };
     State _state;
 
-    Resource          _resource;
     ReplayData        _data;
     Random            _random_seed;
-    Handle<Level>     _level;
+    const Level&      _level;
     GameResult        _game_result;
     ReplayInputSource _input_source;
 };

@@ -25,12 +25,60 @@
 
 namespace antares {
 
+struct BuildableObject;
+
+const int32_t kMaxSpaceObject = 250;
+
+const ticks kTimeToCheckHome = secs(15);
+
+const int32_t kEnergyPodAmount = 500;  // average (calced) of 500 energy units/pod
+
+const int32_t kWarpAcceleration = 1;  // how fast we warp in & out
+
+const int32_t kNoShip              = -1;
+const int32_t kNoDestinationCoord  = 0;
+const int32_t kNoDestinationObject = -1;
+const int32_t kNoOwner             = -1;
+
+const int16_t kObjectInUse     = 1;
+const int16_t kObjectToBeFreed = 2;
+const int16_t kObjectAvailable = 0;
+
+const int32_t kHitStateMax      = 128;
+const int32_t kCloakOnStateMax  = 254;
+const int32_t kCloakOffStateMax = -252;
+
+const int32_t kEngageRange = 1048576;  // range at which to engage closest ship
+                                       // about 2 subsectors (512 * 2)^2
+
+extern const NamedHandle<const BaseObject> kWarpInFlare;
+extern const NamedHandle<const BaseObject> kWarpOutFlare;
+extern const NamedHandle<const BaseObject> kPlayerBody;
+extern const NamedHandle<const BaseObject> kEnergyBlob;
+
 enum dutyType {
     eNoDuty          = 0,
     eEscortDuty      = 1,
     eGuardDuty       = 2,
     eAssaultDuty     = 3,
     eHostileBaseDuty = 4
+};
+
+// RUNTIME FLAG BITS
+enum {
+    kHasArrived   = 0x00000001,
+    kTargetLocked = 0x00000002,  // if some foe has locked on, you will be visible
+    kIsCloaked    = 0x00000004,  // if you are near a naturally shielding object
+    kIsHidden     = 0x00000008,  // overrides natural shielding
+    kIsTarget     = 0x00000010,  // preserve target lock in case you become invisible
+};
+
+enum kPresenceStateType {
+    kNormalPresence  = 0,
+    kLandingPresence = 1,
+    kWarpInPresence  = 3,
+    kWarpingPresence = 4,
+    kWarpOutPresence = 5
 };
 
 class SpaceObject {
@@ -47,12 +95,14 @@ class SpaceObject {
 
     SpaceObject() = default;
     SpaceObject(
-            Handle<BaseObject> type, Random seed, int32_t object_id,
+            const BaseObject& type, Random seed, int32_t object_id,
             const coordPointType& initial_location, int32_t relative_direction,
             fixedPointType* relative_velocity, Handle<Admiral> new_owner,
-            int16_t spriteIDOverride);
+            sfz::optional<pn::string_view> spriteIDOverride);
 
-    void change_base_type(Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
+    void change_base_type(
+            const BaseObject& base, sfz::optional<pn::string_view> spriteIDOverride,
+            bool relative);
     void set_owner(Handle<Admiral> owner, bool message);
     void set_cloak(bool cloak);
     void alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool message);
@@ -60,20 +110,18 @@ class SpaceObject {
     void free();
     void create_floating_player_body();
 
-    sfz::StringSlice name() const;
-    sfz::StringSlice short_name() const;
-    bool engages(const SpaceObject& b) const;
-    Fixed turn_rate() const;
+    pn::string_view long_name() const;
+    pn::string_view short_name() const;
+    bool            engages(const SpaceObject& b) const;
+    Fixed           turn_rate() const;
 
-    uint32_t           attributes = 0;
-    BaseObject*        baseType   = nullptr;
-    Handle<BaseObject> base;
-    int32_t            number() const;
+    uint32_t          attributes = 0;
+    const BaseObject* base       = nullptr;
+    int32_t           number() const;
 
     uint32_t keysDown = 0;
 
-    int32_t  tinySize = 0;
-    RgbColor tinyColor;
+    sfz::optional<BaseObject::Icon> icon;
 
     int32_t direction     = 0;
     int32_t directionGoal = 0;
@@ -111,7 +159,7 @@ class SpaceObject {
     ticks          timeFromOrigin    = ticks(0);  // time it's been since we left
     fixedPointType idealLocationCalc = {Fixed::zero(),
                                         Fixed::zero()};  // calced when we got origin
-    coordPointType originLocation = {0, 0};              // coords of our origin
+    coordPointType originLocation    = {0, 0};           // coords of our origin
 
     fixedPointType motionFraction = {Fixed::zero(), Fixed::zero()};
     fixedPointType velocity       = {Fixed::zero(), Fixed::zero()};
@@ -122,10 +170,11 @@ class SpaceObject {
 
     struct {
         struct {
-            Fixed   thisShape;
-            Fixed   frameFraction;
-            int32_t frameDirection;
-            Fixed   frameSpeed;
+            using Direction = BaseObject::Animation::Direction;
+            Fixed     thisShape;
+            Fixed     frameFraction;
+            Direction direction;
+            Fixed     speed;
         } animation;
         Handle<Vector> vector;
     } frame;
@@ -135,19 +184,19 @@ class SpaceObject {
     int32_t _battery = 0;
 
     int32_t health() const { return _health; }
-    void alter_health(int32_t amount);
-    int32_t max_health() const { return baseType->health; }
+    void    alter_health(int32_t amount);
+    int32_t max_health() const { return base->health; }
 
     int32_t energy() const { return _energy; }
-    void alter_energy(int32_t amount);
-    int32_t max_energy() const { return baseType->energy; }
+    void    alter_energy(int32_t amount);
+    int32_t max_energy() const { return base->energy; }
 
     int32_t battery() const { return _battery; }
-    void alter_battery(int32_t amount);
+    void    alter_battery(int32_t amount);
     int32_t max_battery() const { return 5 * max_energy(); }
 
-    void recharge();
-    bool collect_warp_energy(int32_t amount);
+    void    recharge();
+    bool    collect_warp_energy(int32_t amount);
     void    refund_warp_energy();
     int32_t warpEnergyCollected = 0;
 
@@ -159,8 +208,8 @@ class SpaceObject {
     ticks           rechargeTime = ticks(0);
     int16_t         active       = kObjectAvailable;
 
-    int16_t        layer = 0;
-    Handle<Sprite> sprite;
+    BaseObject::Layer layer = BaseObject::Layer::NONE;
+    Handle<Sprite>    sprite;
 
     uint64_t            distanceFromPlayer = 0;
     uint32_t            closestDistance    = kMaximumRelevantDistanceSquared;
@@ -191,14 +240,19 @@ class SpaceObject {
     int32_t  hitState   = 0;
     int32_t  cloakState = 0;
     dutyType duty       = eNoDuty;
-    int      pixResID   = -1;
+
+    struct PixID {
+        pn::string_view name;
+        Hue             hue = Hue::GRAY;
+    };
+    sfz::optional<PixID> pix_id;
 
     struct Weapon {
-        Handle<BaseObject> base;
-        game_ticks         time;
-        int32_t            ammo     = 0;
-        int32_t            position = 0;
-        int16_t            charge   = 0;
+        const BaseObject* base;
+        game_ticks        time;
+        int32_t           ammo     = 0;
+        int32_t           position = 0;
+        int16_t           charge   = 0;
     };
     Weapon pulse;
     Weapon beam;
@@ -210,8 +264,8 @@ class SpaceObject {
     uint32_t seenByPlayerFlags   = 0xffffffff;
     uint32_t hostileTowardsFlags = 0;
 
-    uint8_t shieldColor   = 0;
-    uint8_t originalColor = 0;
+    sfz::optional<RgbColor> shieldColor;
+    uint8_t                 originalColor = 0;
 };
 
 void SpaceObjectHandlingInit(void);
@@ -219,15 +273,22 @@ void ResetAllSpaceObjects(void);
 void RemoveAllSpaceObjects(void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        Handle<BaseObject> whichBase, fixedPointType* velocity, coordPointType* location,
+        const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
-        int16_t spriteIDOverride);
-int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner);
+        sfz::optional<pn::string_view> spriteIDOverride);
+int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);
 
-Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);
+NamedHandle<const BaseObject> get_buildable_object_handle(
+        const BuildableObject& o, const NamedHandle<const Race>& race);
+const BaseObject* get_buildable_object(
+        const BuildableObject& o, const NamedHandle<const Race>& race);
 
-sfz::StringSlice get_object_name(Handle<BaseObject> id);
-sfz::StringSlice get_object_short_name(Handle<BaseObject> id);
+bool tags_match(const BaseObject& o, const Tags& query);
+
+sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
+BaseObject::Layer              sprite_layer(const BaseObject& o);
+int32_t                        sprite_scale(const BaseObject& o);
+int32_t                        rotation_resolution(const BaseObject& o);
 
 }  // namespace antares
 

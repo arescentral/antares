@@ -30,7 +30,7 @@ namespace antares {
 
 class TextVideoDriver : public VideoDriver {
   public:
-    TextVideoDriver(Size screen_size, const sfz::Optional<sfz::String>& output_dir);
+    TextVideoDriver(Size screen_size, const sfz::optional<pn::string>& output_dir);
 
     virtual Point     get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return KEYBOARD_MOUSE; }
@@ -39,7 +39,7 @@ class TextVideoDriver : public VideoDriver {
 
     virtual wall_time now() const { return _scheduler->now(); }
 
-    virtual Texture texture(sfz::PrintItem name, const PixMap& content);
+    virtual Texture texture(pn::string_view name, const PixMap& content, int scale);
     virtual void    dither_rect(const Rect& rect, const RgbColor& color);
     virtual void    draw_point(const Point& at, const RgbColor& color);
     virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color);
@@ -48,7 +48,7 @@ class TextVideoDriver : public VideoDriver {
     virtual void    draw_plus(const Rect& rect, const RgbColor& color);
 
     void loop(Card* initial, EventScheduler& scheduler);
-    void capture(std::vector<std::pair<std::unique_ptr<Card>, sfz::String>>& pix);
+    void capture(std::vector<std::pair<std::unique_ptr<Card>, pn::string>>& pix);
 
   private:
     class MainLoop;
@@ -56,21 +56,20 @@ class TextVideoDriver : public VideoDriver {
 
     virtual void batch_rect(const Rect& rect, const RgbColor& color);
 
-    void             add_arg(sfz::StringSlice arg, std::vector<std::pair<size_t, size_t>>& args);
-    void             dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args);
-    sfz::StringSlice last_arg(size_t index) const;
+    void            add_arg(pn::string_view arg, std::vector<std::pair<size_t, size_t>>& args);
+    void            dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args);
+    pn::string_view last_arg(size_t index) const;
 
-    void log(sfz::StringSlice command, const std::vector<sfz::PrintItem>& args);
+    template <typename... Args>
+    void log(pn::string_view command, const Args&... args);
 
-    const Size                       _size;
-    const sfz::Optional<sfz::String> _output_dir;
+    const Size                _size;
+    sfz::optional<pn::string> _output_dir;
 
-    sfz::String                            _log;
+    pn::string                             _log;
     std::vector<std::pair<size_t, size_t>> _last_args;
 
     EventScheduler* _scheduler = nullptr;
-
-    DISALLOW_COPY_AND_ASSIGN(TextVideoDriver);
 };
 
 }  // namespace antares

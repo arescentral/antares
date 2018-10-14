@@ -18,9 +18,12 @@
 
 #include "ui/flows/solo-game.hpp"
 
+#include <pn/file>
+
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
@@ -35,9 +38,6 @@
 #include "ui/screens/scroll-text.hpp"
 #include "ui/screens/select-level.hpp"
 #include "video/transitions.hpp"
-
-using sfz::Exception;
-using sfz::format;
 
 namespace antares {
 
@@ -63,9 +63,9 @@ void SoloGame::become_front() {
 
         case START_LEVEL:
             _state = PROLOGUE;
-            if (_level->prologue_id() > 0) {
+            if ((_level->type() == Level::Type::SOLO) && _level->solo.prologue.has_value()) {
                 stack()->push(new ScrollTextScreen(
-                        _level->prologue_id(), 450, kSlowScrollInterval, 4002));
+                        *_level->solo.prologue, 450, kSlowScrollInterval, Music::prologue_song));
                 break;
             }
         // else fall through
@@ -74,7 +74,7 @@ void SoloGame::become_front() {
         case RESTART_LEVEL:
             _state       = PLAYING;
             _game_result = NO_GAME;
-            stack()->push(new MainPlay(_level, false, &_input_source, true, &_game_result));
+            stack()->push(new MainPlay(*_level, false, &_input_source, true, &_game_result));
             break;
 
         case PLAYING: handle_game_result(); break;
@@ -88,17 +88,11 @@ void SoloGame::become_front() {
 void SoloGame::handle_game_result() {
     switch (_game_result) {
         case WIN_GAME: {
-            _state             = EPILOGUE;
-            const int epilogue = _level->epilogue_id();
-            if (epilogue > 0) {
-                // normal scrolltext song
-                int scroll_song = 4002;
-                if (g.next_level == -1) {
-                    // we win but no next level? Play triumph song
-                    scroll_song = 4003;
-                }
-                stack()->push(
-                        new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
+            _state = EPILOGUE;
+            if ((_level->type() == Level::Type::SOLO) && _level->solo.epilogue.has_value()) {
+                stack()->push(new ScrollTextScreen(
+                        *_level->solo.epilogue, 450, kSlowScrollInterval,
+                        g.next_level ? Music::prologue_song : Music::victory_song));
             } else {
                 become_front();
             }
@@ -114,32 +108,23 @@ void SoloGame::handle_game_result() {
             become_front();
             break;
 
-        default:
-            throw Exception(format("_play_again was invalid after PLAY_AGAIN ({0})", _play_again));
+        case LOSE_GAME: throw std::runtime_error("_game_result was invalid (LOSE_GAME)");
+        case NO_GAME: throw std::runtime_error("_game_result was invalid (NO_GAME)");
     }
 }
 
 void SoloGame::epilogue_done() {
-    if (g.next_level < 0) {
-        _level = Level::none();
-    } else {
-        _level = Handle<Level>(g.next_level - 1);
-    }
+    _level = nullptr;
+    _state = QUIT;
 
-    if (_level.get()) {
-        const int32_t chapter = _level->chapter_number();
-        if (chapter >= 0) {
-            Ledger::ledger()->unlock_chapter(chapter);
-        } else {
-            _level = Level::none();
+    if (g.next_level) {
+        if (g.next_level && g.next_level->base.chapter.has_value()) {
+            Ledger::ledger()->unlock_chapter(*g.next_level->base.chapter);
+            _level = g.next_level;
+            _state = START_LEVEL;
         }
     }
 
-    if (_level.get()) {
-        _state = START_LEVEL;
-    } else {
-        _state = QUIT;
-    }
     become_front();
 }
 

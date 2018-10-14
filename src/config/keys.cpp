@@ -20,18 +20,21 @@
 
 #include <string.h>
 
+#include "config/preferences.hpp"
 #include "game/sys.hpp"
 
 namespace antares {
 
 KeyMap::KeyMap() : _data{} {}
 
-bool KeyMap::get(size_t index) const {
+bool KeyMap::get(Key k) const {
+    size_t index = static_cast<size_t>(k);
     return _data[index >> 3] & (1 << (index & 0x7));
 }
 
-void KeyMap::set(size_t index, bool value) {
-    if (get(index) != value) {
+void KeyMap::set(Key k, bool value) {
+    if (get(k) != value) {
+        size_t index = static_cast<size_t>(k);
         _data[index >> 3] ^= (1 << (index & 0x7));
     }
 }
@@ -45,45 +48,23 @@ bool KeyMap::equals(const KeyMap& other) const {
     return memcmp(_data, other._data, kDataSize) == 0;
 }
 
-void KeyMap::copy(const KeyMap& other) {
-    memcpy(_data, other._data, kDataSize);
+void KeyMap::copy(const KeyMap& other) { memcpy(_data, other._data, kDataSize); }
+
+void KeyMap::clear() { bzero(_data, kDataSize); }
+
+bool operator==(const KeyMap& a, const KeyMap& b) { return a.equals(b); }
+
+bool operator!=(const KeyMap& a, const KeyMap& b) { return !a.equals(b); }
+
+void GetKeyNumName(Key key_num, pn::string& out) {
+    out = sys.key_names.at(static_cast<int>(key_num)).copy();
 }
 
-void KeyMap::clear() {
-    bzero(_data, kDataSize);
-}
-
-bool operator==(const KeyMap& a, const KeyMap& b) {
-    return a.equals(b);
-}
-
-bool operator!=(const KeyMap& a, const KeyMap& b) {
-    return !a.equals(b);
-}
-
-void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map) {
-    key_map->clear();
-    key_map->set(key_num, true);
-}
-
-int GetKeyNumFromKeyMap(const KeyMap& key_map) {
-    for (int i = 0; i < 256; ++i) {
-        if (key_map.get(i)) {
-            return i + 1;
-        }
-    }
-    return 0;
-}
-
-void GetKeyNumName(int key_num, sfz::String* out) {
-    out->assign(sys.key_names.at(key_num - 1));
-}
-
-bool GetKeyNameNum(sfz::StringSlice name, int& out) {
+bool GetKeyNameNum(pn::string_view name, Key& out) {
     bool result = false;
     for (int i = 0; i < sys.key_names.size(); ++i) {
         if (sys.key_names.at(i) == name) {
-            out    = i + 1;
+            out    = static_cast<Key>(i);
             result = true;
         }
     }
@@ -92,42 +73,40 @@ bool GetKeyNameNum(sfz::StringSlice name, int& out) {
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
 
-bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
+bool AnyKeyButThisOne(const KeyMap& key_map, Key k) {
     KeyMap others;
     others.copy(key_map);
-    others.set(key_num, false);
+    others.set(k, false);
     return others.any();
 }
 
-int key_digit(uint32_t k) {
+int key_digit(Key k) {
     switch (k) {
-        case Keys::K0:
-        case Keys::N0: return 0;
-        case Keys::K1:
-        case Keys::N1: return 1;
-        case Keys::K2:
-        case Keys::N2: return 2;
-        case Keys::K3:
-        case Keys::N3: return 3;
-        case Keys::K4:
-        case Keys::N4: return 4;
-        case Keys::K5:
-        case Keys::N5: return 5;
-        case Keys::K6:
-        case Keys::N6: return 6;
-        case Keys::K7:
-        case Keys::N7: return 7;
-        case Keys::K8:
-        case Keys::N8: return 8;
-        case Keys::K9:
-        case Keys::N9: return 9;
+        case Key::K0:
+        case Key::N0: return 0;
+        case Key::K1:
+        case Key::N1: return 1;
+        case Key::K2:
+        case Key::N2: return 2;
+        case Key::K3:
+        case Key::N3: return 3;
+        case Key::K4:
+        case Key::N4: return 4;
+        case Key::K5:
+        case Key::N5: return 5;
+        case Key::K6:
+        case Key::N6: return 6;
+        case Key::K7:
+        case Key::N7: return 7;
+        case Key::K8:
+        case Key::N8: return 8;
+        case Key::K9:
+        case Key::N9: return 9;
         default: return -1;
     }
 }
 
-bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
-    return mKeyMap.get(sys.prefs->key(mki) - 1);
-}
+bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) { return mKeyMap.get(sys.prefs->key(mki)); }
 
 int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
     // TODO(sfiera): write a new implementation of this method.

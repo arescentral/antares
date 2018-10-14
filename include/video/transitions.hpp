@@ -19,8 +19,6 @@
 #ifndef ANTARES_VIDEO_TRANSITIONS_HPP_
 #define ANTARES_VIDEO_TRANSITIONS_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/color.hpp"
 #include "math/units.hpp"
 #include "ui/card.hpp"
@@ -33,21 +31,18 @@ class Sprite;
 class Transitions {
   public:
     Transitions();
+    Transitions(const Transitions&) = delete;
+    Transitions& operator=(const Transitions&) = delete;
     ~Transitions();
 
     void reset();
-    void start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color);
+    void start_boolean(ticks duration, RgbColor goal_color);
     void update_boolean(ticks time_passed);
     void draw() const;
 
   private:
-    bool     _active;
-    int32_t  _step;
-    int32_t  _in_speed;
-    int32_t  _out_speed;
-    RgbColor _color;
-
-    DISALLOW_COPY_AND_ASSIGN(Transitions);
+    game_ticks _end = game_ticks{ticks{0}};
+    RgbColor   _color;
 };
 
 class ColorFade : public Card {
@@ -81,13 +76,11 @@ class ColorFade : public Card {
     wall_time   _start;
     wall_time   _next_event;
     const usecs _duration;
-
-    DISALLOW_COPY_AND_ASSIGN(ColorFade);
 };
 
 class PictFade : public Card {
   public:
-    PictFade(int pict_id, bool* skipped);
+    PictFade(const Texture* texture, bool* skipped);
     ~PictFade();
 
     virtual void become_front();
@@ -119,9 +112,7 @@ class PictFade : public Card {
     bool*     _skipped;
     wall_time _wane_start;
 
-    Texture _texture;
-
-    DISALLOW_COPY_AND_ASSIGN(PictFade);
+    const Texture* _texture;
 };
 
 }  // namespace antares

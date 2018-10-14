@@ -8,7 +8,7 @@ declare_args() {
   prefix = "/usr/local"
 
   # Antares version. Can be overridden for nightlies and release builds.
-  antares_version = "0.8.3"
+  antares_version = "0.9.0"
 }
 
 import("//build/lib/embed.gni")
@@ -21,6 +21,7 @@ group("default") {
     ":antares-install-data",
     ":antares-ls-scenarios",
     ":build-pix",
+    ":color-test",
     ":fixed-test",
     ":hash-data",
     ":object-data",
@@ -44,6 +45,7 @@ config("antares_private") {
     "-Werror",
     "-Wno-sign-compare",
     "-Wno-deprecated-declarations",
+    "-ftemplate-depth=1024",
   ]
 }
 
@@ -54,6 +56,7 @@ source_set("libantares") {
     ":libantares-data",
     ":libantares-drawing",
     ":libantares-game",
+    ":libantares-lang",
     ":libantares-math",
     ":libantares-sound",
     ":libantares-ui",
@@ -87,11 +90,9 @@ source_set("libantares-config") {
     "include/config/ledger.hpp",
     "include/config/preferences.hpp",
 
-    # These don't really belong here, but there aren't any
-    # associated sources, and ninja doesn't like when you have a
-    # library with just includes in the sources list.
-    "include/lang/casts.hpp",
-    "include/lang/defines.hpp",
+    # This doesn't really belong here, but there isn't an associated
+    # source, and ninja doesn't like when you have a library with just
+    # includes in the sources list.
     "include/net/http.hpp",
     "src/config/dirs.cpp",
     "src/config/file-prefs-driver.cpp",
@@ -101,6 +102,8 @@ source_set("libantares-config") {
     "src/config/preferences.cpp",
   ]
   public_deps = [
+    ":libantares-data",
+    ":libantares-lang",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -109,38 +112,64 @@ source_set("libantares-config") {
 source_set("libantares-data") {
   sources = [
     "include/data/action.hpp",
+    "include/data/audio.hpp",
     "include/data/base-object.hpp",
+    "include/data/briefing.hpp",
+    "include/data/cash.hpp",
+    "include/data/condition.hpp",
+    "include/data/counter.hpp",
+    "include/data/distance.hpp",
+    "include/data/enums.hpp",
     "include/data/extractor.hpp",
+    "include/data/field.hpp",
+    "include/data/font-data.hpp",
     "include/data/handle.hpp",
+    "include/data/info.hpp",
+    "include/data/initial.hpp",
     "include/data/interface.hpp",
     "include/data/level.hpp",
-    "include/data/picture.hpp",
+    "include/data/object-ref.hpp",
     "include/data/plugin.hpp",
     "include/data/races.hpp",
-    "include/data/replay-list.hpp",
+    "include/data/range.hpp",
     "include/data/replay.hpp",
     "include/data/resource.hpp",
     "include/data/scenario-list.hpp",
-    "include/data/string-list.hpp",
+    "include/data/sprite-data.hpp",
+    "include/data/tags.hpp",
     "src/data/action.cpp",
+    "src/data/audio.cpp",
     "src/data/base-object.cpp",
+    "src/data/briefing.cpp",
+    "src/data/cash.cpp",
+    "src/data/condition.cpp",
+    "src/data/counter.cpp",
+    "src/data/distance.cpp",
     "src/data/extractor.cpp",
+    "src/data/field.cpp",
+    "src/data/font-data.cpp",
+    "src/data/info.cpp",
+    "src/data/initial.cpp",
     "src/data/interface.cpp",
     "src/data/level.cpp",
-    "src/data/picture.cpp",
+    "src/data/object-ref.cpp",
     "src/data/plugin.cpp",
     "src/data/races.cpp",
-    "src/data/replay-list.cpp",
     "src/data/replay.cpp",
     "src/data/resource.cpp",
     "src/data/scenario-list.cpp",
-    "src/data/string-list.cpp",
+    "src/data/sprite-data.cpp",
   ]
   public_deps = [
+    ":libantares-lang",
     "//ext/libpng",
     "//ext/libsfz",
     "//ext/libzipxx",
-    "//ext/rezin:librezin",
+    "//ext/procyon:procyon-cpp",
+  ]
+  deps = [
+    "//ext/libmodplug",
+    "//ext/libsndfile",
   ]
   configs += [ ":antares_private" ]
 }
@@ -169,7 +198,9 @@ source_set("libantares-drawing") {
     "src/drawing/styled-text.cpp",
     "src/drawing/text.cpp",
   ]
-  deps = [
+  public_deps = [
+    ":libantares-data",
+    ":libantares-lang",
     "//ext/libpng",
     "//ext/libsfz",
   ]
@@ -223,7 +254,24 @@ source_set("libantares-game") {
     "src/game/vector.cpp",
   ]
   public_deps = [
+    ":libantares-drawing",
+    ":libantares-lang",
     "//ext/libsfz",
+    "//ext/procyon:procyon-cpp",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-lang") {
+  sources = [
+    "include/lang/casts.hpp",
+    "include/lang/defines.hpp",
+    "include/lang/exception.hpp",
+    "src/lang/exception.cpp",
+  ]
+  public_deps = [
+    "//ext/libsfz",
+    "//ext/procyon:procyon-cpp",
   ]
   configs += [ ":antares_private" ]
 }
@@ -244,6 +292,8 @@ source_set("libantares-math") {
     "src/math/special.cpp",
   ]
   public_deps = [
+    ":libantares-game",
+    ":libantares-lang",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -255,17 +305,15 @@ source_set("libantares-sound") {
     "include/sound/fx.hpp",
     "include/sound/music.hpp",
     "include/sound/openal-driver.hpp",
-    "include/sound/sndfile.hpp",
     "src/sound/driver.cpp",
     "src/sound/fx.cpp",
     "src/sound/music.cpp",
     "src/sound/openal-driver.cpp",
-    "src/sound/sndfile.cpp",
   ]
   public_deps = [
-    "//ext/libmodplug",
+    ":libantares-game",
+    ":libantares-lang",
     "//ext/libsfz",
-    "//ext/libsndfile",
   ]
   libs = []
   if (target_os == "mac") {
@@ -296,6 +344,7 @@ source_set("libantares-ui") {
     "include/ui/screens/play-again.hpp",
     "include/ui/screens/scroll-text.hpp",
     "include/ui/screens/select-level.hpp",
+    "include/ui/widget.hpp",
     "src/ui/card.cpp",
     "src/ui/event-scheduler.cpp",
     "src/ui/event.cpp",
@@ -314,8 +363,10 @@ source_set("libantares-ui") {
     "src/ui/screens/play-again.cpp",
     "src/ui/screens/scroll-text.cpp",
     "src/ui/screens/select-level.cpp",
+    "src/ui/widget.cpp",
   ]
   public_deps = [
+    ":libantares-data",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -339,6 +390,8 @@ source_set("libantares-video") {
     ":embed_glsl_vertex",
   ]
   public_deps = [
+    ":libantares-game",
+    ":libantares-lang",
     "//ext/libpng",
     "//ext/libsfz",
   ]
@@ -469,6 +522,18 @@ source_set("libantares-test") {
   configs += [ ":antares_private" ]
 }
 
+executable("color-test") {
+  testonly = true
+  sources = [
+    "src/drawing/color.test.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+    "//ext/gmock:gmock_main",
+  ]
+  configs += [ ":antares_private" ]
+}
+
 executable("fixed-test") {
   testonly = true
   sources = [
@@ -544,10 +609,8 @@ if (target_os == "mac") {
 
   source_set("libantares-mac") {
     sources = [
-      "include/mac/audio-file.hpp",
       "include/mac/core-foundation.hpp",
       "include/mac/core-opengl.hpp",
-      "src/mac/audio-file.cpp",
       "src/mac/core-foundation.cpp",
       "src/mac/core-opengl.cpp",
       "src/mac/http.cpp",
@@ -555,6 +618,7 @@ if (target_os == "mac") {
     public_deps = [
       "//ext/libpng",
       "//ext/libsfz",
+      "//ext/procyon:procyon-cpp",
     ]
     libs = [
       "AudioToolbox.framework",
@@ -613,10 +677,17 @@ if (target_os == "mac") {
   app_resources("antares_app_embedded_scenario_data") {
     sources = [
       "data/fonts",
+      "data/info.pn",
       "data/interfaces",
+      "data/levels",
       "data/music",
+      "data/objects",
       "data/pictures",
+      "data/races",
+      "data/replays",
       "data/rotation-table",
+      "data/sounds",
+      "data/sprites",
       "data/strings",
       "data/text",
     ]
@@ -637,6 +708,7 @@ if (target_os == "mac") {
     ]
     public_deps = [
       "//ext/libsfz",
+      "//ext/procyon:procyon-cpp",
     ]
     libs = [ "-lneon" ]
     configs += [ ":antares_private" ]

@@ -19,6 +19,8 @@
 #ifndef ANTARES_UI_CARD_HPP_
 #define ANTARES_UI_CARD_HPP_
 
+#include <memory>
+
 #include "math/units.hpp"
 #include "ui/event.hpp"
 

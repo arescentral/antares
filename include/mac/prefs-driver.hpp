@@ -19,8 +19,6 @@
 #ifndef ANTARES_MAC_PREFS_DRIVER_HPP_
 #define ANTARES_MAC_PREFS_DRIVER_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "config/preferences.hpp"
 
 namespace antares {
@@ -30,7 +28,7 @@ class CoreFoundationPrefsDriver : public PrefsDriver {
     CoreFoundationPrefsDriver();
 
     virtual const Preferences& get() const { return _current; }
-    virtual void set(const Preferences& prefs);
+    virtual void               set(const Preferences& prefs);
 
   private:
     Preferences _current;

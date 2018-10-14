@@ -19,7 +19,6 @@
 #ifndef ANTARES_DRAWING_BUILD_PIX_HPP_
 #define ANTARES_DRAWING_BUILD_PIX_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
@@ -29,7 +28,7 @@ namespace antares {
 
 class BuildPix {
   public:
-    BuildPix(int text_id, int width);
+    BuildPix(pn::string_view text, int width);
 
     Size size() const { return _size; }
     void draw(Point origin) const;

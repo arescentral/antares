@@ -19,7 +19,8 @@
 #ifndef ANTARES_DRAWING_PIX_MAP_HPP_
 #define ANTARES_DRAWING_PIX_MAP_HPP_
 
-#include <sfz/sfz.hpp>
+#include <memory>
+#include <pn/file>
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
@@ -33,8 +34,8 @@ class RgbColor;
 // Defines an interface for objects which store pixel data, as well as some utility methods for
 // manipulating the pixels.
 //
-// PixMap objects can be written to WriteTarget objects, but not read back in, as that would
-// potentially require resizing the PixMap, which is not a required part of the interface.
+// PixMap objects can be written to file objects, but not read back in, as that would potentially
+// require resizing the PixMap, which is not a required part of the interface.
 class PixMap {
   public:
     virtual ~PixMap();
@@ -108,8 +109,8 @@ class PixMap {
     // The sizes of the two PixMap objects must be identical.  As with `fill()`, there are no
     // `Rect` parameters given by this method; use views instead.
     //
-    // @param [in] pix      the PixMap to copy from.
-    // @throws Exception if `this->size()` and `pix.size()` are not equal.
+    // @param [in] pix            the PixMap to copy from.
+    // @throws std::runtime_error if `this->size()` and `pix.size()` are not equal.
     virtual void copy(const PixMap& pix);
 
     // Draws another PixMap over this one.
@@ -117,8 +118,8 @@ class PixMap {
     // This is like `copy()`, except that in places that `pix` is not opaque, the resultant pixel
     // will be created by combining the two colors, rather than simply copying.
     //
-    // @param [in] pix      the PixMap to copy from.
-    // @throws Exception if `this->size()` and `pix.size()` are not equal.
+    // @param [in] pix            the PixMap to copy from.
+    // @throws std::runtime_error if `this->size()` and `pix.size()` are not equal.
     virtual void composite(const PixMap& pix);
 
     // See class documentation below.
@@ -133,10 +134,12 @@ class PixMap {
     // @param [in] bounds   the region to make a view of.  Must be enclosed by
     // `Rect(Point(0, 0), this->size())`.
     View view(const Rect& bounds);
-};
 
-// Serializes a PixMap to a WriteTarget.
-void write_to(sfz::WriteTarget out, const PixMap& image);
+    // Encodes this object to a file in PNG format.
+    //
+    // @param [in] out      the file to write to
+    void encode(pn::file_view out);
+};
 
 // PixMap subclass which provides its own storage.
 //
@@ -152,7 +155,10 @@ class ArrayPixMap : public PixMap {
     // @param [in] size     the desired size of the PixMap.
     ArrayPixMap(int32_t width, int32_t height);
     ArrayPixMap(Size size);
-    ArrayPixMap(ArrayPixMap&&) = default;
+    ArrayPixMap(const ArrayPixMap&) = delete;
+    ArrayPixMap(ArrayPixMap&&)      = default;
+    ArrayPixMap& operator=(const ArrayPixMap&) = delete;
+    ArrayPixMap& operator=(ArrayPixMap&&) = default;
 
     // Deletes memory associated with the PixMap.
     ~ArrayPixMap();
@@ -184,16 +190,12 @@ class ArrayPixMap : public PixMap {
     // stores all rows of pixels contiguously.  This permits the optimization of `fill()` provided
     // above.
     std::unique_ptr<RgbColor[]> _bytes;
-
-    DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };
 
-// Deserializes an ArrayPixMap from a WriteTarget.
-void read_from(sfz::ReadSource out, ArrayPixMap& image);
+// Deserializes an ArrayPixMap from its serialized PNG form.
+ArrayPixMap read_png(pn::file_view in);
 
-inline void swap(ArrayPixMap& x, ArrayPixMap& y) {
-    x.swap(y);
-}
+inline void swap(ArrayPixMap& x, ArrayPixMap& y) { x.swap(y); }
 
 // A clipped view of another PixMap.
 //

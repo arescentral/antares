@@ -20,25 +20,21 @@
 
 #include <algorithm>
 #include <limits>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
-#include "data/picture.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
 
 namespace {
 
-int hex_digit(uint32_t c) {
+int hex_digit(pn::rune r) {
+    int32_t c = r.value();
     if ('0' <= c && c <= '9') {
         return c - '0';
     } else if ('A' <= c && c <= 'Z') {
@@ -46,12 +42,12 @@ int hex_digit(uint32_t c) {
     } else if ('a' <= c && c <= 'z') {
         return c - 'a' + 10;
     }
-    throw Exception(format("{0} is not a valid hex digit", c));
+    throw std::runtime_error(pn::format("{0} is not a valid hex digit", c).c_str());
 }
 
 }  // namespace
 
-StyledText::StyledText(const Font* font)
+StyledText::StyledText(const Font& font)
         : _fore_color(RgbColor::white()),
           _back_color(RgbColor::black()),
           _tab_width(0),
@@ -59,65 +55,53 @@ StyledText::StyledText(const Font* font)
 
 StyledText::~StyledText() {}
 
-void StyledText::set_fore_color(RgbColor fore_color) {
-    _fore_color = fore_color;
-}
+void StyledText::set_fore_color(RgbColor fore_color) { _fore_color = fore_color; }
 
-void StyledText::set_back_color(RgbColor back_color) {
-    _back_color = back_color;
-}
+void StyledText::set_back_color(RgbColor back_color) { _back_color = back_color; }
 
-void StyledText::set_tab_width(int tab_width) {
-    _tab_width = tab_width;
-}
+void StyledText::set_tab_width(int tab_width) { _tab_width = tab_width; }
 
-void StyledText::set_retro_text(sfz::StringSlice text) {
+void StyledText::set_retro_text(pn::string_view text) {
     const RgbColor original_fore_color = _fore_color;
     const RgbColor original_back_color = _back_color;
     RgbColor       fore_color          = _fore_color;
     RgbColor       back_color          = _back_color;
+    pn::rune       r1;
 
-    for (size_t i = 0; i < text.size(); ++i) {
-        switch (text.at(i)) {
-            case '\n':
-                _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
-                break;
+    enum { START, SLASH, FG1, FG2, BG1, BG2 } state = START;
 
-            case '_':
-                // TODO(sfiera): replace use of "_" with e.g. "\_".
-                _chars.push_back(StyledChar(' ', NONE, fore_color, back_color));
-                break;
+    for (pn::rune r : text) {
+        switch (state) {
+            case START:
+                switch (r.value()) {
+                    case '\n':
+                        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+                        break;
 
-            case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color)); break;
+                    case '_':
+                        // TODO(sfiera): replace use of "_" with e.g. "\_".
+                        _chars.push_back(StyledChar(' ', NONE, fore_color, back_color));
+                        break;
 
-            case '\\':
-                if (i + 1 >= text.size()) {
-                    throw Exception(format("not enough input for special code."));
+                    case ' ':
+                        _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
+                        break;
+
+                    case '\\': state = SLASH; break;
+
+                    default:
+                        _chars.push_back(StyledChar(r.value(), NONE, fore_color, back_color));
+                        break;
                 }
-                ++i;
-                switch (text.at(i)) {
+                break;
+
+            case SLASH:
+                switch (r.value()) {
                     case 'i':
                         std::swap(fore_color, back_color);
                         _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
                         _chars.push_back(StyledChar('i', DELAY, fore_color, back_color));
-                        break;
-
-                    case 'f':
-                        if (i + 2 >= text.size()) {
-                            throw Exception(format("not enough input for foreground code."));
-                        }
-                        fore_color = GetRGBTranslateColorShade(
-                                hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
-                        i += 2;
-                        break;
-
-                    case 'b':
-                        if (i + 2 >= text.size()) {
-                            throw Exception(format("not enough input for foreground code."));
-                        }
-                        back_color = GetRGBTranslateColorShade(
-                                hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
-                        i += 2;
+                        state = START;
                         break;
 
                     case 'r':
@@ -125,85 +109,108 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
                         back_color = original_back_color;
                         _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
                         _chars.push_back(StyledChar('r', DELAY, fore_color, back_color));
+                        state = START;
                         break;
 
                     case 't':
                         _chars.push_back(StyledChar('\\', TAB, fore_color, back_color));
+                        state = START;
                         break;
 
                     case '\\':
                         _chars.push_back(StyledChar('\\', NONE, fore_color, back_color));
+                        state = START;
                         break;
 
+                    case 'f': state = FG1; break;
+                    case 'b': state = BG1; break;
+
                     default:
-                        throw Exception(format("found bad special character {0}.", text.at(i)));
+                        throw std::runtime_error(
+                                pn::format("found bad special character {0}.", r.value()).c_str());
                 }
                 break;
 
-            default: _chars.push_back(StyledChar(text.at(i), NONE, fore_color, back_color)); break;
+            case FG1: r1 = r, state = FG2; break;
+            case FG2:
+                fore_color =
+                        GetRGBTranslateColorShade(static_cast<Hue>(hex_digit(r1)), hex_digit(r));
+                state = START;
+                break;
+
+            case BG1: r1 = r, state = BG2; break;
+            case BG2:
+                back_color =
+                        GetRGBTranslateColorShade(static_cast<Hue>(hex_digit(r1)), hex_digit(r));
+                state = START;
+                break;
         }
     }
-    _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+
+    if (state != START) {
+        throw std::runtime_error(pn::format("not enough input for special code.").c_str());
+    }
+
+    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
+        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+    }
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
 
-void StyledText::set_interface_text(sfz::StringSlice text) {
-    for (size_t i = 0; i < text.size(); ++i) {
-        switch (text.at(i)) {
-            case '\n':
-                _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+void StyledText::set_interface_text(pn::string_view text) {
+    const auto f = _fore_color;
+    const auto b = _back_color;
+    pn::string id;
+    enum { START, CODE, ID } state = START;
+
+    for (auto r : text) {
+        switch (state) {
+            case START:
+                switch (r.value()) {
+                    case '\n': _chars.push_back(StyledChar('\n', LINE_BREAK, f, b)); break;
+                    case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, f, b)); break;
+                    default: _chars.push_back(StyledChar(r.value(), NONE, f, b)); break;
+                    case '^': state = CODE; break;
+                }
                 break;
 
-            case ' ':
-                _chars.push_back(StyledChar(' ', WORD_BREAK, _fore_color, _back_color));
+            case CODE:
+                if ((r != pn::rune{'P'}) && (r != pn::rune{'p'})) {
+                    throw std::runtime_error(
+                            pn::format(
+                                    "found bad inline pict code {0}", pn::dump(r, pn::dump_short))
+                                    .c_str());
+                }
+                state = ID;
                 break;
 
-            case '^': {
-                bool found_code = false;
-                if (i + 1 >= text.size()) {
-                    throw Exception(format("not enough input for inline code."));
+            case ID:
+                if (r != pn::rune{'^'}) {
+                    id += r;
+                    continue;
                 }
-                if ((text.at(i + 1) != 'P') && (text.at(i + 1) != 'p')) {
-                    throw Exception(format("found bad inline pict code {0}", text.at(i)));
+                inlinePictType inline_pict;
+                if ((inline_pict.object = BaseObject::get(id)) &&
+                    inline_pict.object->portrait.has_value()) {
+                    inline_pict.picture = inline_pict.object->portrait->copy();
+                } else {
+                    inline_pict.picture = std::move(id);
                 }
-                String id_string;
-                for (size_t j = i + 2; j < text.size(); ++j) {
-                    if (text.at(j) == '^') {
-                        inlinePictType inline_pict;
-                        int32_t        id;
-                        if (!string_to_int(id_string, id, 10)) {
-                            throw Exception(format("invalid numeric literal {0}", id_string));
-                        }
-                        inline_pict.id = id;
-                        // TODO(sfiera): report an error if the picture is not loadable, instead of
-                        // silently ignoring it.
-                        try {
-                            Picture pict(id);
-                            inline_pict.bounds = pict.size().as_rect();
-                            _inline_picts.push_back(inline_pict);
-                            _textures.push_back(pict.texture());
-                            _chars.push_back(StyledChar(
-                                    _inline_picts.size() - 1, PICTURE, _fore_color, _back_color));
-                        } catch (sfz::Exception& e) {
-                        }
-                        found_code = true;
-                        i          = j;
-                        break;
-                    }
-                    id_string.push(1, text.at(j));
-                }
-                if (!found_code) {
-                    throw Exception(format("malformed inline code"));
-                }
-            } break;
 
-            default:
-                _chars.push_back(StyledChar(text.at(i), NONE, _fore_color, _back_color));
+                _textures.push_back(Resource::texture(inline_pict.picture));
+                inline_pict.bounds = _textures.back().size().as_rect();
+                _inline_picts.emplace_back(std::move(inline_pict));
+                _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
+                id.clear();
+                state = START;
                 break;
         }
     }
-    _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+
+    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
+        _chars.push_back(StyledChar('\n', LINE_BREAK, f, b));
+    }
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
@@ -223,9 +230,9 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
         _chars[i].v = v;
         switch (_chars[i].special) {
             case NONE:
-                h += _font->char_width(_chars[i].character);
+                h += _font.char_width(_chars[i].character);
                 if (h >= wrap_distance) {
-                    v += _font->height + _line_spacing;
+                    v += _font.height + _line_spacing;
                     h = move_word_down(i, v);
                 }
                 _auto_width = std::max(_auto_width, h);
@@ -238,21 +245,21 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
 
             case LINE_BREAK:
                 h = _side_margin;
-                v += _font->height + _line_spacing;
+                v += _font.height + _line_spacing;
                 break;
 
-            case WORD_BREAK: h += _font->char_width(_chars[i].character); break;
+            case WORD_BREAK: h += _font.char_width(_chars[i].character); break;
 
             case PICTURE: {
-                inlinePictType* pict = &_inline_picts[_chars[i].character];
+                inlinePictType* pict = &_inline_picts[_chars[i].character.value()];
                 if (h != _side_margin) {
-                    v += _font->height + _line_spacing;
+                    v += _font.height + _line_spacing;
                 }
                 h = _side_margin;
                 pict->bounds.offset(0, v - pict->bounds.top);
                 v += pict->bounds.height() + _line_spacing + 3;
                 if (_chars[i + 1].special == LINE_BREAK) {
-                    v -= (_font->height + _line_spacing);
+                    v -= (_font.height + _line_spacing);
                 }
             } break;
 
@@ -262,9 +269,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _height = v;
 }
 
-int StyledText::size() const {
-    return _chars.size();
-}
+int StyledText::size() const { return _chars.size(); }
 
 int StyledText::tab_width() const {
     if (_tab_width > 0) {
@@ -274,29 +279,19 @@ int StyledText::tab_width() const {
     }
 }
 
-int StyledText::width() const {
-    return _width;
-}
+int StyledText::width() const { return _width; }
 
-int StyledText::height() const {
-    return _height;
-}
+int StyledText::height() const { return _height; }
 
-int StyledText::auto_width() const {
-    return _auto_width;
-}
+int StyledText::auto_width() const { return _auto_width; }
 
-const std::vector<inlinePictType>& StyledText::inline_picts() const {
-    return _inline_picts;
-}
+const std::vector<inlinePictType>& StyledText::inline_picts() const { return _inline_picts; }
 
-void StyledText::draw(const Rect& bounds) const {
-    draw_range(bounds, 0, _chars.size());
-}
+void StyledText::draw(const Rect& bounds) const { draw_range(bounds, 0, _chars.size()); }
 
 void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
-    const int line_height = _font->height + _line_spacing;
-    const int char_adjust = _font->ascent + _line_spacing;
+    const int line_height = _font.height + _line_spacing;
+    const int char_adjust = _font.ascent + _line_spacing;
     {
         Rects rects;
         for (size_t i = begin; i < end; ++i) {
@@ -308,7 +303,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
                 case WORD_BREAK:
                     corner.offset(ch.h, ch.v);
                     if (ch.back_color != RgbColor::black()) {
-                        Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
+                        Rect char_rect(0, 0, _font.char_width(ch.character), line_height);
                         char_rect.offset(corner.h, corner.v);
                         rects.fill(char_rect, ch.back_color);
                     }
@@ -338,13 +333,13 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
     }
 
     {
-        Quads quads(_font->texture);
+        Quads quads(_font.texture);
         for (size_t i = begin; i < end; ++i) {
             const StyledChar& ch = _chars[i];
             if (ch.special == NONE) {
-                _font->draw(
+                _font.draw(
                         quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
-                        String(1, ch.character), ch.fore_color);
+                        ch.character, ch.fore_color);
             }
         }
     }
@@ -353,8 +348,8 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         const StyledChar& ch     = _chars[i];
         Point             corner = bounds.origin();
         if (ch.special == PICTURE) {
-            const inlinePictType& inline_pict = _inline_picts[ch.character];
-            const Texture&        texture     = _textures[_chars[i].character];
+            const inlinePictType& inline_pict = _inline_picts[ch.character.value()];
+            const Texture&        texture     = _textures[_chars[i].character.value()];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             texture.draw(corner.h, corner.v);
         }
@@ -370,10 +365,10 @@ void StyledText::draw_cursor(const Rect& bounds, int index) const {
 }
 
 void StyledText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
-    const int         line_height = _font->height + _line_spacing;
+    const int         line_height = _font.height + _line_spacing;
     const StyledChar& ch          = _chars[index];
     Point             corner(bounds.left + ch.h, bounds.top + ch.v);
-    Rect              char_rect(0, 0, _font->logicalWidth, line_height);
+    Rect              char_rect(0, 0, _font.logicalWidth, line_height);
     char_rect.offset(corner.h, corner.v);
     char_rect.clip_to(bounds);
     if ((char_rect.width() > 0) && (char_rect.height() > 0)) {
@@ -398,7 +393,7 @@ int StyledText::move_word_down(int index, int v) {
                 for (int j = i + 1; j <= index; ++j) {
                     _chars[j].h = h;
                     _chars[j].v = v;
-                    h += _font->char_width(_chars[j].character);
+                    h += _font.char_width(_chars[j].character);
                 }
                 return h;
             }

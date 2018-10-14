@@ -20,227 +20,470 @@
 
 #include "data/base-object.hpp"
 
-#include <sfz/sfz.hpp>
-
-using sfz::BytesSlice;
-using sfz::ReadSource;
-using sfz::read;
+#include "data/field.hpp"
 
 namespace antares {
 
-static const uint32_t kPeriodicActionTimeMask   = 0xff000000;
-static const uint32_t kPeriodicActionRangeMask  = 0x00ff0000;
-static const uint32_t kPeriodicActionNotMask    = 0x0000ffff;
-static const int32_t  kPeriodicActionTimeShift  = 24;
-static const int32_t  kPeriodicActionRangeShift = 16;
-
-static const uint32_t kDestroyActionNotMask     = 0x7fffffff;
-static const uint32_t kDestroyActionDontDieFlag = 0x80000000;
-
-static void read_destroy(ReadSource in, BaseObject& object) {
-    auto start            = read<int32_t>(in);
-    auto count            = read<int32_t>(in);
-    object.destroyDontDie = count & kDestroyActionDontDieFlag;
-    count &= kDestroyActionNotMask;
-    auto end       = (start >= 0) ? (start + count) : start;
-    object.destroy = {start, end};
+FIELD_READER(fixedPointType) {
+    return required_struct<fixedPointType>(
+            x, {{"x", &fixedPointType::h}, {"y", &fixedPointType::v}});
 }
 
-static void read_expire(ReadSource in, BaseObject& object) {
-    auto start           = read<int32_t>(in);
-    auto count           = read<int32_t>(in);
-    object.expireDontDie = count & kDestroyActionDontDieFlag;
-    count &= kDestroyActionNotMask;
-    auto end      = (start >= 0) ? (start + count) : start;
-    object.expire = {start, end};
+FIELD_READER(sfz::optional<BaseObject::Weapon>) {
+    return optional_struct<BaseObject::Weapon>(
+            x,
+            {{"base", &BaseObject::Weapon::base}, {"positions", &BaseObject::Weapon::positions}});
 }
 
-static void read_create(ReadSource in, BaseObject& object) {
-    auto start    = read<int32_t>(in);
-    auto count    = read<int32_t>(in);
-    auto end      = (start >= 0) ? (start + count) : start;
-    object.create = {start, end};
+FIELD_READER(BaseObject::Layer) {
+    return static_cast<BaseObject::Layer>(int_field_within(x, {1, 4}));
 }
 
-static void read_collide(ReadSource in, BaseObject& object) {
-    auto start     = read<int32_t>(in);
-    auto count     = read<int32_t>(in);
-    auto end       = (start >= 0) ? (start + count) : start;
-    object.collide = {start, end};
+FIELD_READER(BaseObject::Scale) { return BaseObject::Scale{read_field<Fixed>(x).val() << 4}; }
+
+FIELD_READER(sfz::optional<BaseObject::Rotation>) {
+    using Rotation = BaseObject::Rotation;
+    return optional_struct<Rotation>(
+            x, {{"sprite", &Rotation::sprite},
+                {"layer", &Rotation::layer},
+                {"scale", &Rotation::scale},
+                {"frames", &Rotation::frames}});
 }
 
-static void read_activate(ReadSource in, BaseObject& object) {
-    auto start            = read<int32_t>(in);
-    auto count            = read<int32_t>(in);
-    object.activatePeriod = ticks((count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift);
-    object.activatePeriodRange =
-            ticks((count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift);
-    count &= kPeriodicActionNotMask;
-    auto end        = (start >= 0) ? (start + count) : start;
-    object.activate = {start, end};
+FIELD_READER(BaseObject::Animation::Direction) {
+    using Direction = BaseObject::Animation::Direction;
+    return required_enum<Direction>(
+            x, {{"+", Direction::PLUS}, {"-", Direction::MINUS}, {"?", Direction::RANDOM}});
 }
 
-static void read_arrive(ReadSource in, BaseObject& object) {
-    auto start    = read<int32_t>(in);
-    auto count    = read<int32_t>(in);
-    auto end      = (start >= 0) ? (start + count) : start;
-    object.arrive = {start, end};
+FIELD_READER(sfz::optional<BaseObject::Animation>) {
+    using Animation = BaseObject::Animation;
+    return optional_struct<Animation>(
+            x, {{"sprite", &Animation::sprite},
+                {"layer", &Animation::layer},
+                {"scale", &Animation::scale},
+                {"frames", &Animation::frames},
+                {"direction", &Animation::direction},
+                {"speed", &Animation::speed},
+                {"first", &Animation::first}});
 }
 
-void read_from(ReadSource in, BaseObject& object) {
-    uint8_t section[32];
+FIELD_READER(BaseObject::Ray::To) {
+    return required_enum<BaseObject::Ray::To>(
+            x, {{"object", BaseObject::Ray::To::OBJECT}, {"coord", BaseObject::Ray::To::COORD}});
+}
 
-    read(in, object.attributes);
-    if (object.attributes & kIsSelfAnimated) {
-        object.attributes &= ~(kShapeFromDirection | kIsVector);
-    } else if (object.attributes & kShapeFromDirection) {
-        object.attributes &= ~kIsVector;
-    }
+FIELD_READER(sfz::optional<BaseObject::Ray>) {
+    using Ray = BaseObject::Ray;
+    return optional_struct<Ray>(
+            x, {
+                       {"hue", &Ray::hue},
+                       {"to", &Ray::to},
+                       {"lightning", &Ray::lightning},
+                       {"accuracy", &Ray::accuracy},
+                       {"range", &Ray::range},
+               });
+}
 
-    read(in, object.baseClass);
-    read(in, object.baseRace);
-    read(in, object.price);
+FIELD_READER(sfz::optional<BaseObject::Bolt>) {
+    using Bolt = BaseObject::Bolt;
+    return optional_struct<Bolt>(x, {{"color", &Bolt::color}});
+}
 
-    read(in, object.offenseValue);
-    read(in, object.destinationClass);
+FIELD_READER(BaseObject::Device::Usage) {
+    using Usage = BaseObject::Device::Usage;
+    return optional_struct<Usage>(
+                   x, {{"attacking", &Usage::attacking},
+                       {"defense", &Usage::defense},
+                       {"transportation", &Usage::transportation}})
+            .value_or(Usage{});
+}
 
-    read(in, object.maxVelocity);
-    read(in, object.warpSpeed);
-    read(in, object.warpOutDistance);
+FIELD_READER(BaseObject::Device::Direction) {
+    return required_enum<BaseObject::Device::Direction>(
+            x, {{"fore", BaseObject::Device::Direction::FORE},
+                {"omni", BaseObject::Device::Direction::OMNI}});
+}
 
-    read(in, object.initialVelocity);
-    read(in, object.initialVelocityRange);
+FIELD_READER(InvertableSpeed) {
+    auto    speed   = read_field<double>(x);
+    double  inverse = 256 / speed;
+    int32_t rounded = round(inverse);
+    return InvertableSpeed{Fixed::from_val(rounded)};
+}
 
-    read(in, object.mass);
-    read(in, object.maxThrust);
+FIELD_READER(sfz::optional<BaseObject::Device>) {
+    using Device = BaseObject::Device;
+    return optional_struct<Device>(
+            x, {{"usage", &Device::usage},
+                {"direction", &Device::direction},
+                {"energy_cost", &Device::energyCost},
+                {"fire_time", &Device::fireTime},
+                {"ammo", &Device::ammo},
+                {"range", &Device::range},
+                {"speed", &Device::speed},
+                {"restock_cost", &Device::restockCost}});
+}
 
-    read(in, object.health);
-    read(in, object.damage);
-    read(in, object.energy);
+FIELD_READER(BaseObject::Icon::Shape) {
+    using Shape = BaseObject::Icon::Shape;
+    return required_enum<Shape>(
+            x, {{"square", Shape::SQUARE},
+                {"triangle", Shape::TRIANGLE},
+                {"diamond", Shape::DIAMOND},
+                {"plus", Shape::PLUS}});
+}
 
-    object.initialAge = ticks(read<int32_t>(in));
+FIELD_READER(sfz::optional<BaseObject::Icon>) {
+    return optional_struct<BaseObject::Icon>(
+            x, {{"shape", &BaseObject::Icon::shape}, {"size", &BaseObject::Icon::size}});
+}
 
-    int32_t age_range = read<int32_t>(in);
-    if (age_range >= 0) {
-        object.initialAgeRange = ticks(age_range);
-    } else {
-        object.initialAgeRange = ticks(0);
-    }
+FIELD_READER(BaseObject::Targeting) {
+    return required_struct<BaseObject::Targeting>(
+            x, {{"base", &BaseObject::Targeting::base},
+                {"hide", &BaseObject::Targeting::hide},
+                {"radar", &BaseObject::Targeting::radar},
+                {"order", &BaseObject::Targeting::order},
+                {"select", &BaseObject::Targeting::select},
+                {"lock", &BaseObject::Targeting::lock}});
+}
 
-    if (object.attributes & kNeutralDeath) {
-        object.occupy_count = age_range;
-    } else {
-        object.occupy_count = -1;
-    }
+FIELD_READER(BaseObject::Loadout) {
+    return optional_struct<BaseObject::Loadout>(
+                   x, {{"pulse", &BaseObject::Loadout::pulse},
+                       {"beam", &BaseObject::Loadout::beam},
+                       {"special", &BaseObject::Loadout::special}})
+            .value_or(BaseObject::Loadout{});
+}
 
-    read(in, object.naturalScale);
-
-    read(in, object.pixLayer);
-    read(in, object.pixResID);
-    read(in, object.tinySize);
-    read(in, object.shieldColor);
-    if ((object.shieldColor != 0xFF) && (object.shieldColor != 0)) {
-        object.shieldColor = GetTranslateColorShade(object.shieldColor, 15);
-    }
-    in.shift(1);
-
-    read(in, object.initialDirection);
-    read(in, object.initialDirectionRange);
-
-    object.pulse.base   = Handle<BaseObject>(read<int32_t>(in));
-    object.beam.base    = Handle<BaseObject>(read<int32_t>(in));
-    object.special.base = Handle<BaseObject>(read<int32_t>(in));
-
-    read(in, object.pulse.positionNum);
-    read(in, object.beam.positionNum);
-    read(in, object.special.positionNum);
-
-    read(in, object.pulse.position, kMaxWeaponPosition);
-    read(in, object.beam.position, kMaxWeaponPosition);
-    read(in, object.special.position, kMaxWeaponPosition);
-
-    read(in, object.friendDefecit);
-    read(in, object.dangerThreshold);
-    read(in, object.specialDirection);
-
-    read(in, object.arriveActionDistance);
-
-    read_destroy(in, object);
-    read_expire(in, object);
-    read_create(in, object);
-    read_collide(in, object);
-    read_activate(in, object);
-    read_arrive(in, object);
-
-    read(in, section, 32);
-
-    read(in, object.buildFlags);
-    read(in, object.orderFlags);
-
-    object.levelKeyTag  = (object.buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
-    object.engageKeyTag = (object.buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
-    object.orderKeyTag  = (object.orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
-
-    read(in, object.buildRatio);
-    object.buildTime = 3 * ticks(read<uint32_t>(in) / 10);
-    read(in, object.skillNum);
-    read(in, object.skillDen);
-    read(in, object.skillNumAdj);
-    read(in, object.skillDenAdj);
-    read(in, object.pictPortraitResID);
-    in.shift(6);
-    read(in, object.internalFlags);
-
-    BytesSlice sub(BytesSlice(section, 32));
-    if (object.attributes & kShapeFromDirection) {
-        read(sub, object.frame.rotation);
-    } else if (object.attributes & kIsSelfAnimated) {
-        read(sub, object.frame.animation);
-    } else if (object.attributes & kIsVector) {
-        read(sub, object.frame.vector);
-        if (object.frame.vector.color > 16) {
-            object.frame.vector.color = object.frame.vector.color;
-        } else {
-            object.frame.vector.color = 0;
+static BaseObject set_attributes(BaseObject o) {
+    if (((o.rotation.has_value() + o.animation.has_value() + o.ray.has_value() +
+          o.bolt.has_value() + o.device.has_value()) != 1)) {
+        throw std::runtime_error(
+                "must have single rotation, animation, ray, bolt, or device block");
+    } else if (o.rotation.has_value()) {
+        o.attributes |= kShapeFromDirection;
+    } else if (o.animation.has_value()) {
+        o.attributes |= kIsSelfAnimated;
+        if (!o.expire.after.animation) {
+            o.attributes |= kAnimationCycle;
         }
+    } else if (o.ray.has_value() || o.bolt.has_value()) {
+        o.attributes |= kIsVector;
+    } else if (o.device.has_value()) {
+        if (o.device->direction == BaseObject::Device::Direction::OMNI) {
+            o.attributes |= kAutoTarget;
+        }
+    }
+
+    if (o.target.base) {
+        o.attributes |= kIsDestination;
+    }
+    if (o.target.hide) {
+        o.attributes |= kHideEffect;
+    }
+    if (o.target.radar) {
+        o.attributes |= kAppearOnRadar;
+    }
+    if (o.target.order) {
+        o.attributes |= kCanAcceptDestination;
+    }
+    if (o.target.select) {
+        o.attributes |= kCanBeDestination;
+    }
+    if (o.target.lock) {
+        o.attributes |= kStaticDestination;
+    }
+    if (o.autotarget) {
+        o.attributes |= kAutoTarget;
+    }
+
+    if (o.turn_rate > Fixed::zero()) {
+        o.attributes |= (kCanTurn | kHasDirectionGoal);
+    }
+    if (o.destroy.neutralize) {
+        o.attributes |= kNeutralDeath;
+    }
+    if (o.destroy.release_energy) {
+        o.attributes |= kReleaseEnergyOnDeath;
+    }
+    if (o.collide.as.subject) {
+        o.attributes |= kCanCollide;
+    }
+    if (o.collide.as.direct) {
+        o.attributes |= kCanBeHit;
+    }
+    if (o.collide.solid) {
+        o.attributes |= kOccupiesSpace;
+    }
+    if (o.collide.edge) {
+        o.attributes |= kDoesBounce;
+    }
+
+    if (o.ai.combat.hated) {
+        o.attributes |= kHated;
+    }
+    if (o.ai.combat.guided) {
+        o.attributes |= kIsGuided;
+    }
+    if (o.ai.combat.engages.unconditional.value_or(true)) {
+        o.attributes |= kCanEngage;
+    }
+    if (o.ai.combat.engaged.unconditional.value_or(true)) {
+        o.attributes |= kCanBeEngaged;
+    }
+    if (o.ai.combat.evades) {
+        o.attributes |= kCanEvade;
+    }
+    if (o.ai.combat.evaded) {
+        o.attributes |= kCanBeEvaded;
+    }
+
+    if ((o.attributes & kIsDestination) && !o.ai.build.legacy_non_builder) {
+        o.attributes |= kCanAcceptBuild;
+    }
+
+    if (o.ai.target.prefer.base.has_value()) {
+        if (*o.ai.target.prefer.base) {
+            o.orderFlags |= kSoftTargetIsBase;
+        } else {
+            o.orderFlags |= kSoftTargetIsNotBase;
+        }
+    }
+    if (o.ai.target.prefer.local.has_value()) {
+        if (*o.ai.target.prefer.local) {
+            o.orderFlags |= kSoftTargetIsLocal;
+        } else {
+            o.orderFlags |= kSoftTargetIsRemote;
+        }
+    }
+    if (o.ai.target.prefer.owner == Owner::DIFFERENT) {
+        o.orderFlags |= kSoftTargetIsFoe;
+    } else if (o.ai.target.prefer.owner == Owner::SAME) {
+        o.orderFlags |= kSoftTargetIsFriend;
+    }
+    if (!o.ai.target.prefer.tags.tags.empty()) {
+        o.orderFlags |= kSoftTargetMatchesTags;
+    }
+
+    if (o.ai.target.force.base.has_value()) {
+        if (*o.ai.target.force.base) {
+            o.orderFlags |= kHardTargetIsBase;
+        } else {
+            o.orderFlags |= kHardTargetIsNotBase;
+        }
+    }
+    if (o.ai.target.force.local.has_value()) {
+        if (*o.ai.target.force.local) {
+            o.orderFlags |= kHardTargetIsLocal;
+        } else {
+            o.orderFlags |= kHardTargetIsRemote;
+        }
+    }
+    if (o.ai.target.force.owner == Owner::DIFFERENT) {
+        o.orderFlags |= kHardTargetIsFoe;
+    } else if (o.ai.target.force.owner == Owner::SAME) {
+        o.orderFlags |= kHardTargetIsFriend;
+    }
+    if (!o.ai.target.force.tags.tags.empty()) {
+        o.orderFlags |= kHardTargetMatchesTags;
+    }
+
+    return o;
+}
+
+FIELD_READER(BaseObject::Destroy) {
+    return optional_struct<BaseObject::Destroy>(
+                   x, {{"die", &BaseObject::Destroy::die},
+                       {"neutralize", &BaseObject::Destroy::neutralize},
+                       {"release_energy", &BaseObject::Destroy::release_energy},
+                       {"action", &BaseObject::Destroy::action}})
+            .value_or(BaseObject::Destroy{});
+}
+
+FIELD_READER(BaseObject::Expire::After) {
+    return optional_struct<BaseObject::Expire::After>(
+                   x, {{"age", &BaseObject::Expire::After::age},
+                       {"animation", &BaseObject::Expire::After::animation}})
+            .value_or(BaseObject::Expire::After{});
+}
+
+FIELD_READER(BaseObject::Expire) {
+    return optional_struct<BaseObject::Expire>(
+                   x, {{"after", &BaseObject::Expire::after},
+                       {"die", &BaseObject::Expire::die},
+                       {"action", &BaseObject::Expire::action}})
+            .value_or(BaseObject::Expire{});
+}
+
+FIELD_READER(BaseObject::Create) {
+    return optional_struct<BaseObject::Create>(x, {{"action", &BaseObject::Create::action}})
+            .value_or(BaseObject::Create{});
+}
+
+FIELD_READER(BaseObject::Collide::As) {
+    return optional_struct<BaseObject::Collide::As>(
+                   x,
+                   {
+                           {"subject", &BaseObject::Collide::As::subject},
+                           {"direct", &BaseObject::Collide::As::direct},
+                   })
+            .value_or(BaseObject::Collide::As{});
+}
+
+FIELD_READER(BaseObject::Collide) {
+    return optional_struct<BaseObject::Collide>(
+                   x, {{"as", &BaseObject::Collide::as},
+                       {"damage", &BaseObject::Collide::damage},
+                       {"solid", &BaseObject::Collide::solid},
+                       {"edge", &BaseObject::Collide::edge},
+                       {"action", &BaseObject::Collide::action}})
+            .value_or(BaseObject::Collide{});
+}
+
+FIELD_READER(BaseObject::Activate) {
+    return optional_struct<BaseObject::Activate>(
+                   x, {{"period", &BaseObject::Activate::period},
+                       {"action", &BaseObject::Activate::action}})
+            .value_or(BaseObject::Activate{});
+}
+
+FIELD_READER(BaseObject::Arrive) {
+    return optional_struct<BaseObject::Arrive>(
+                   x, {{"distance", &BaseObject::Arrive::distance},
+                       {"action", &BaseObject::Arrive::action}})
+            .value_or(BaseObject::Arrive{});
+}
+
+FIELD_READER(BaseObject::AI::Combat::Skill) {
+    using Skill = BaseObject::AI::Combat::Skill;
+    return optional_struct<Skill>(x, {{"num", &Skill::num}, {"den", &Skill::den}})
+            .value_or(Skill{});
+}
+
+FIELD_READER(BaseObject::AI::Combat::Engage::If) {
+    using If = BaseObject::AI::Combat::Engage::If;
+    return required_struct<If>(x, {{"tags", &If::tags}});
+}
+
+FIELD_READER(BaseObject::AI::Combat::Engage) {
+    using Engage = BaseObject::AI::Combat::Engage;
+    if (x.value().is_bool()) {
+        Engage e;
+        e.unconditional = sfz::make_optional(x.value().as_bool());
+        return e;
+    } else if (x.value().is_map()) {
+        return required_struct<Engage>(x, {{"if", &Engage::if_}});
     } else {
-        read(sub, object.frame.weapon);
+        throw std::runtime_error(pn::format("{0}must be bool or map", x.prefix()).c_str());
     }
 }
 
-void read_from(ReadSource in, objectFrameType::Rotation& rotation) {
-    read(in, rotation.shapeOffset);
-    read(in, rotation.rotRes);
-    read(in, rotation.maxTurnRate);
-    read(in, rotation.turnAcceleration);
+FIELD_READER(BaseObject::AI::Combat) {
+    using Combat = BaseObject::AI::Combat;
+    return optional_struct<Combat>(
+                   x, {{"hated", &Combat::hated},
+                       {"guided", &Combat::guided},
+                       {"engages", &Combat::engages},
+                       {"engaged", &Combat::engaged},
+                       {"evades", &Combat::evades},
+                       {"evaded", &Combat::evaded},
+                       {"skill", &Combat::skill}})
+            .value_or(Combat{});
 }
 
-void read_from(ReadSource in, objectFrameType::Animation& animation) {
-    animation.firstShape = Fixed::from_long(read<int32_t>(in));
-    animation.lastShape  = Fixed::from_long(read<int32_t>(in));
-    read(in, animation.frameDirection);
-    read(in, animation.frameDirectionRange);
-    read(in, animation.frameSpeed);
-    read(in, animation.frameSpeedRange);
-    animation.frameShape      = Fixed::from_long(read<int32_t>(in));
-    animation.frameShapeRange = Fixed::from_long(read<int32_t>(in));
+FIELD_READER(BaseObject::AI::Target::Filter) {
+    using Filter = BaseObject::AI::Target::Filter;
+    return optional_struct<Filter>(
+                   x, {{"base", &Filter::base},
+                       {"local", &Filter::local},
+                       {"owner", &Filter::owner},
+                       {"tags", &Filter::tags}})
+            .value_or(Filter{});
 }
 
-void read_from(ReadSource in, objectFrameType::Vector& vector) {
-    read(in, vector.color);
-    read(in, vector.kind);
-    read(in, vector.accuracy);
-    read(in, vector.range);
+FIELD_READER(BaseObject::AI::Target) {
+    using Target = BaseObject::AI::Target;
+    return optional_struct<Target>(x, {{"prefer", &Target::prefer}, {"force", &Target::force}})
+            .value_or(Target{});
 }
 
-void read_from(ReadSource in, objectFrameType::Weapon& weapon) {
-    read(in, weapon.usage);
-    read(in, weapon.energyCost);
-    weapon.fireTime = ticks(read<int32_t>(in));
-    read(in, weapon.ammo);
-    read(in, weapon.range);
-    read(in, weapon.inverseSpeed);
-    read(in, weapon.restockCost);
+FIELD_READER(BaseObject::AI::Escort) {
+    using Escort = BaseObject::AI::Escort;
+    return optional_struct<Escort>(
+                   x, {{"class", &Escort::class_},
+                       {"power", &Escort::power},
+                       {"need", &Escort::need}})
+            .value_or(Escort{});
+}
+
+FIELD_READER(BaseObject::AI::Build) {
+    using Build = BaseObject::AI::Build;
+    return optional_struct<Build>(
+                   x, {{"ratio", &Build::ratio},
+                       {"needs_escort", &Build::needs_escort},
+                       {"legacy_non_builder", &Build::legacy_non_builder}})
+            .value_or(Build{});
+}
+
+FIELD_READER(BaseObject::AI) {
+    return optional_struct<BaseObject::AI>(
+                   x, {{"combat", &BaseObject::AI::combat},
+                       {"target", &BaseObject::AI::target},
+                       {"escort", &BaseObject::AI::escort},
+                       {"build", &BaseObject::AI::build}})
+            .value_or(BaseObject::AI{});
+}
+
+BaseObject base_object(pn::value_cref x0) {
+    return set_attributes(required_struct<BaseObject>(
+            path_value{x0}, {{"long_name", &BaseObject::long_name},
+                             {"short_name", &BaseObject::short_name},
+                             {"tags", &BaseObject::tags},
+
+                             {"notes", nullptr},
+                             {"class", nullptr},
+                             {"race", nullptr},
+
+                             {"portrait", &BaseObject::portrait},
+
+                             {"price", &BaseObject::price},
+                             {"build_time", &BaseObject::buildTime},
+                             {"health", &BaseObject::health},
+                             {"energy", &BaseObject::energy},
+                             {"shield_color", &BaseObject::shieldColor},
+                             {"occupy_count", &BaseObject::occupy_count},
+
+                             {"mass", &BaseObject::mass},
+                             {"max_velocity", &BaseObject::maxVelocity},
+                             {"thrust", &BaseObject::thrust},
+                             {"warp_speed", &BaseObject::warpSpeed},
+                             {"warp_out_distance", &BaseObject::warpOutDistance},
+                             {"turn_rate", &BaseObject::turn_rate},
+
+                             {"initial_velocity", &BaseObject::initial_velocity},
+                             {"initial_direction", &BaseObject::initial_direction},
+                             {"autotarget", &BaseObject::autotarget},
+
+                             {"destroy", &BaseObject::destroy},
+                             {"expire", &BaseObject::expire},
+                             {"create", &BaseObject::create},
+                             {"collide", &BaseObject::collide},
+                             {"activate", &BaseObject::activate},
+                             {"arrive", &BaseObject::arrive},
+
+                             {"target", &BaseObject::target},
+                             {"icon", &BaseObject::icon},
+                             {"weapons", &BaseObject::weapons},
+
+                             {"rotation", &BaseObject::rotation},
+                             {"animation", &BaseObject::animation},
+                             {"ray", &BaseObject::ray},
+                             {"bolt", &BaseObject::bolt},
+                             {"device", &BaseObject::device},
+
+                             {"ai", &BaseObject::ai}}));
 }
 
 }  // namespace antares

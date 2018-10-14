@@ -19,45 +19,47 @@
 #ifndef ANTARES_GAME_SYS_HPP_
 #define ANTARES_GAME_SYS_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 #include <vector>
 
 #include "drawing/sprite-handling.hpp"
+#include "drawing/text.hpp"
 #include "sound/fx.hpp"
 #include "sound/music.hpp"
 
 namespace antares {
 
 class SoundDriver;
-class Font;
 class PrefsDriver;
 class VideoDriver;
 
 struct SystemGlobals {
     struct {
-        const Font* tactical;
-        const Font* computer;
-        const Font* button;
-        const Font* title;
-        const Font* small_button;
+        Font tactical;
+        Font computer;
+        Font button;
+        Font title;
+        Font small_button;
     } fonts;
 
-    std::vector<sfz::String> key_names;
-    std::vector<sfz::String> key_long_names;
-    std::vector<sfz::String> gamepad_names;
-    std::vector<sfz::String> gamepad_long_names;
+    std::vector<pn::string> key_names;
+    std::vector<pn::string> key_long_names;
+    std::vector<pn::string> gamepad_names;
+    std::vector<pn::string> gamepad_long_names;
 
     enum { ROT_TABLE_SIZE = 720 };
-    int32_t rot_table[ROT_TABLE_SIZE];
+    std::vector<int32_t> rot_table;
 
     SoundDriver* audio = nullptr;
     VideoDriver* video = nullptr;
     PrefsDriver* prefs = nullptr;
 
+    std::vector<pn::string> messages;
+
     struct {
-        std::vector<sfz::String> codes;
-        std::vector<sfz::String> on;
-        std::vector<sfz::String> off;
+        std::vector<pn::string> codes;
+        std::vector<pn::string> on;
+        std::vector<pn::string> off;
     } cheat;
 
     SoundFX sound;

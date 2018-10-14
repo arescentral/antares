@@ -19,44 +19,47 @@
 #include "math/fixed.hpp"
 
 #include <gmock/gmock.h>
-#include <sfz/sfz.hpp>
 
-using sfz::String;
-using sfz::dec;
-using sfz::format;
+using testing::Eq;
+using testing::Ge;
+using testing::Gt;
+using testing::Le;
+using testing::Lt;
+using testing::Ne;
 
 namespace antares {
 namespace {
 
-typedef testing::Test FixedTest;
+using FixedTest = testing::Test;
 
 TEST_F(FixedTest, Print) {
-    EXPECT_EQ("0.0", String(Fixed::from_val(0)));
+    EXPECT_EQ("0.0", stringify(Fixed::from_val(0)));
 
-    EXPECT_EQ("1.0", String(Fixed::from_val(256)));
-    EXPECT_EQ("-1.0", String(Fixed::from_val(-256)));
-    EXPECT_EQ("1.125", String(Fixed::from_val(288)));
-    EXPECT_EQ("-1.125", String(Fixed::from_val(-288)));
+    EXPECT_EQ("1.0", stringify(Fixed::from_val(256)));
+    EXPECT_EQ("-1.0", stringify(Fixed::from_val(-256)));
+    EXPECT_EQ("1.125", stringify(Fixed::from_val(288)));
+    EXPECT_EQ("-1.125", stringify(Fixed::from_val(-288)));
 
-    EXPECT_EQ("8388607.996", String(Fixed::from_val(std::numeric_limits<int32_t>::max())));
-    EXPECT_EQ("-8388607.996", String(Fixed::from_val(-std::numeric_limits<int32_t>::max())));
-    EXPECT_EQ("-8388608.0", String(Fixed::from_val(std::numeric_limits<int32_t>::min())));
+    EXPECT_EQ("8388607.996", stringify(Fixed::from_val(std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388607.996", stringify(Fixed::from_val(-std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388608.0", stringify(Fixed::from_val(std::numeric_limits<int32_t>::min())));
 
-    EXPECT_EQ("1.38", String(Fixed::from_val(353)));
-    EXPECT_EQ("1.383", String(Fixed::from_val(354)));
-    EXPECT_EQ("1.387", String(Fixed::from_val(355)));
-    EXPECT_EQ("1.39", String(Fixed::from_val(356)));
-    EXPECT_EQ("1.395", String(Fixed::from_val(357)));
-    EXPECT_EQ("1.4", String(Fixed::from_val(358)));
-    EXPECT_EQ("1.402", String(Fixed::from_val(359)));
-    EXPECT_EQ("1.406", String(Fixed::from_val(360)));
-    EXPECT_EQ("1.41", String(Fixed::from_val(361)));
-    EXPECT_EQ("1.414", String(Fixed::from_val(362)));
+    EXPECT_EQ("1.38", stringify(Fixed::from_val(353)));
+    EXPECT_EQ("1.383", stringify(Fixed::from_val(354)));
+    EXPECT_EQ("1.387", stringify(Fixed::from_val(355)));
+    EXPECT_EQ("1.39", stringify(Fixed::from_val(356)));
+    EXPECT_EQ("1.395", stringify(Fixed::from_val(357)));
+    EXPECT_EQ("1.4", stringify(Fixed::from_val(358)));
+    EXPECT_EQ("1.402", stringify(Fixed::from_val(359)));
+    EXPECT_EQ("1.406", stringify(Fixed::from_val(360)));
+    EXPECT_EQ("1.41", stringify(Fixed::from_val(361)));
+    EXPECT_EQ("1.414", stringify(Fixed::from_val(362)));
 
     // All 2.x values should be printed with 1 digit of precision.
     for (int i = 0; i < 10; ++i) {
-        String expected(format("2.{0}", i));
-        EXPECT_EQ(expected, String(Fixed::from_float(2.0 + (i / 10.0))));
+        char expected[4];
+        sprintf(expected, "2.%d", i);
+        EXPECT_EQ(pn::string_view{expected}, stringify(Fixed::from_float(2.0 + (i / 10.0))));
     }
 
     // All 3.xy values should be printed with 2 digits of precision
@@ -65,8 +68,9 @@ TEST_F(FixedTest, Print) {
         if ((i % 10) == 0) {
             continue;
         }
-        String expected(format("3.{0}", dec(i, 2)));
-        EXPECT_EQ(expected, String(Fixed::from_float(3.0 + (i / 100.0))));
+        char expected[5];
+        sprintf(expected, "3.%02d", i);
+        EXPECT_EQ(pn::string_view{expected}, stringify(Fixed::from_float(3.0 + (i / 100.0))));
     }
 }
 
@@ -94,6 +98,10 @@ TEST_F(FixedTest, FloatToFixed) {
     EXPECT_EQ(361, Fixed::from_float(1.41).val());
     EXPECT_EQ(361, Fixed::from_float(1.410).val());
     EXPECT_EQ(362, Fixed::from_float(1.414).val());
+
+    EXPECT_EQ(2147483647, Fixed::from_float(8388607.996).val());
+    EXPECT_EQ(-2147483647, Fixed::from_float(-8388607.996).val());
+    EXPECT_EQ(-2147483648, Fixed::from_float(-8388608.0).val());
 }
 
 TEST_F(FixedTest, FixedToFloat) {
@@ -115,6 +123,38 @@ TEST_F(FixedTest, FixedToFloat) {
     EXPECT_FLOAT_EQ(1.406, mFixedToFloat(Fixed::from_val(360)));
     EXPECT_FLOAT_EQ(1.410, mFixedToFloat(Fixed::from_val(361)));
     EXPECT_FLOAT_EQ(1.414, mFixedToFloat(Fixed::from_val(362)));
+
+    EXPECT_FLOAT_EQ(8388607.996, mFixedToFloat(Fixed::from_val(2147483647)));
+    EXPECT_FLOAT_EQ(-8388607.996, mFixedToFloat(Fixed::from_val(-2147483647)));
+    EXPECT_FLOAT_EQ(-8388608.0, mFixedToFloat(Fixed::from_val(-2147483648)));
+}
+
+TEST_F(FixedTest, Comparison) {
+    EXPECT_THAT(Fixed::from_long(1), Eq(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(1), Ne(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1), Lt(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1), Le(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(2), Gt(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(2), Ge(Fixed::from_long(1)));
+}
+
+TEST_F(FixedTest, Math) {
+    EXPECT_THAT(Fixed::from_long(1) + Fixed::from_long(2), Eq(Fixed::from_long(3)));
+    EXPECT_THAT(Fixed::from_long(3) - Fixed::from_long(2), Eq(Fixed::from_long(1)));
+
+    EXPECT_THAT(Fixed::from_long(1) * 2, Eq(Fixed::from_long(2)));
+    EXPECT_THAT(2 * Fixed::from_long(1), Eq(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1) * 2, Eq(Fixed::from_long(2)));
+    EXPECT_THAT(Fixed::from_long(1) * Fixed::from_long(2), Eq(Fixed::from_long(2)));
+
+    EXPECT_THAT(Fixed::from_long(3) / 2, Eq(Fixed::from_float(1.5)));
+    EXPECT_THAT(Fixed::from_long(3) / Fixed::from_long(2), Eq(Fixed::from_float(1.5)));
+
+    EXPECT_THAT(Fixed::from_long(5) % 2, Eq(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(5) % Fixed::from_long(2), Eq(Fixed::from_long(1)));
+
+    EXPECT_THAT(Fixed::from_long(2) >> 1, Eq(Fixed::from_long(1)));
+    EXPECT_THAT(Fixed::from_long(2) << 1, Eq(Fixed::from_long(4)));
 }
 
 }  // namespace

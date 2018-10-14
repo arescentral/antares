@@ -19,7 +19,9 @@
 #include "drawing/sprite-handling.hpp"
 
 #include <numeric>
+#include <sfz/sfz.hpp>
 
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/shapes.hpp"
@@ -31,24 +33,11 @@
 #include "math/rotation.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::Range;
-using sfz::StringSlice;
-using sfz::format;
 using sfz::range;
 using std::map;
 using std::unique_ptr;
 
 namespace antares {
-
-static const uint32_t kSolidSquareBlip  = 0x00000000;
-static const uint32_t kTriangleUpBlip   = 0x00000010;
-static const uint32_t kDiamondBlip      = 0x00000020;
-static const uint32_t kPlusBlip         = 0x00000030;
-static const uint32_t kFramedSquareBlip = 0x00000040;
-
-static const uint32_t kBlipSizeMask = 0x0000000f;
-static const uint32_t kBlipTypeMask = 0x000000f0;
 
 static void draw_tiny_square(const Rect& rect, const RgbColor& color) {
     Rects().fill(rect, color);
@@ -66,18 +55,15 @@ static void draw_tiny_plus(const Rect& rect, const RgbColor& color) {
     sys.video->draw_plus(rect, color);
 }
 
-static draw_tiny_t draw_tiny_function(uint8_t id) {
-    uint8_t size = id & kBlipSizeMask;
-    uint8_t type = id & kBlipTypeMask;
+static draw_tiny_t draw_tiny_function(BaseObject::Icon::Shape shape, int size) {
     if (size <= 0) {
         return NULL;
     }
-    switch (type) {
-        case kTriangleUpBlip: return draw_tiny_triangle;
-        case kFramedSquareBlip:
-        case kSolidSquareBlip: return draw_tiny_square;
-        case kPlusBlip: return draw_tiny_plus;
-        case kDiamondBlip: return draw_tiny_diamond;
+    switch (shape) {
+        case BaseObject::Icon::Shape::TRIANGLE: return draw_tiny_triangle;
+        case BaseObject::Icon::Shape::SQUARE: return draw_tiny_square;
+        case BaseObject::Icon::Shape::PLUS: return draw_tiny_plus;
+        case BaseObject::Icon::Shape::DIAMOND: return draw_tiny_diamond;
         default: return NULL;
     }
 }
@@ -102,11 +88,10 @@ Sprite* Sprite::get(int number) {
 
 Sprite::Sprite()
         : table(NULL),
-          resID(-1),
           style(spriteNormal),
           styleColor(RgbColor::white()),
           styleData(0),
-          whichLayer(kNoSpriteLayer),
+          whichLayer(BaseObject::Layer::NONE),
           killMe(false),
           draw_tiny(NULL) {}
 
@@ -117,43 +102,44 @@ void ResetAllSprites() {
 }
 
 void Pix::reset() {
-    pix.clear();
+    _pix.clear();
+    _cursor.reset(new NatePixTable("gui/cursor", Hue::GRAY));
 }
 
-NatePixTable* Pix::add(int16_t resource_id) {
-    NatePixTable* result = get(resource_id);
+NatePixTable* Pix::add(pn::string_view name, Hue hue) {
+    NatePixTable* result = get(name, hue);
     if (result) {
         return result;
     }
 
-    int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
-    int16_t color            = (resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift;
-    auto    it = pix.emplace(resource_id, NatePixTable(real_resource_id, color)).first;
+    auto it = _pix.emplace(std::make_pair(name.copy(), hue), NatePixTable(name, hue)).first;
     return &it->second;
 }
 
-NatePixTable* Pix::get(int16_t resource_id) {
-    auto it = pix.find(resource_id);
-    if (it != pix.end()) {
+NatePixTable* Pix::get(pn::string_view id, Hue hue) {
+    auto it = _pix.find({id.copy(), hue});
+    if (it != _pix.end()) {
         return &it->second;
     }
     return nullptr;
 }
 
+const NatePixTable* Pix::cursor() { return _cursor.get(); }
+
 Handle<Sprite> AddSprite(
-        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
-        int32_t size, int16_t layer, const RgbColor& color) {
+        Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
+        int32_t scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
+        uint8_t tiny_shade) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
             sprite->where      = where;
             sprite->table      = table;
-            sprite->resID      = resID;
             sprite->whichShape = whichShape;
             sprite->scale      = scale;
             sprite->whichLayer = layer;
-            sprite->tinySize   = size;
-            sprite->tinyColor  = color;
-            sprite->draw_tiny  = draw_tiny_function(size);
+            sprite->icon = icon.value_or(BaseObject::Icon{BaseObject::Icon::Shape::SQUARE, 0});
+            sprite->tinyColor  = {tiny_hue, tiny_shade};
+            sprite->draw_tiny  = draw_tiny_function(sprite->icon.shape, sprite->icon.size);
             sprite->killMe     = false;
             sprite->style      = spriteNormal;
             sprite->styleColor = RgbColor::white();
@@ -169,20 +155,13 @@ Handle<Sprite> AddSprite(
 void RemoveSprite(Handle<Sprite> sprite) {
     sprite->killMe = false;
     sprite->table  = NULL;
-    sprite->resID  = -1;
 }
 
-Fixed scale_by(Fixed value, int32_t scale) {
-    return (value * scale) / SCALE_SCALE;
-}
+Fixed scale_by(Fixed value, int32_t scale) { return (value * scale) / SCALE_SCALE; }
 
-Fixed evil_scale_by(Fixed value, int32_t scale) {
-    return (value * scale) >> SHIFT_SCALE;
-}
+Fixed evil_scale_by(Fixed value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
 
-int32_t evil_scale_by(int32_t value, int32_t scale) {
-    return (value * scale) >> SHIFT_SCALE;
-}
+int32_t evil_scale_by(int32_t value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
 
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale) {
     Rect draw_rect =
@@ -195,7 +174,8 @@ Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t sc
 
 void draw_sprites() {
     if (gAbsoluteScale >= kBlipThreshhold) {
-        for (int layer : range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
+        for (BaseObject::Layer layer :
+             {BaseObject::Layer::BASES, BaseObject::Layer::SHIPS, BaseObject::Layer::SHOTS}) {
             for (auto aSprite : Sprite::all()) {
                 if ((aSprite->table != NULL) && !aSprite->killMe &&
                     (aSprite->whichLayer == layer)) {
@@ -224,14 +204,17 @@ void draw_sprites() {
             }
         }
     } else {
-        for (int layer : range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
+        for (BaseObject::Layer layer :
+             {BaseObject::Layer::BASES, BaseObject::Layer::SHIPS, BaseObject::Layer::SHOTS}) {
             for (auto aSprite : Sprite::all()) {
-                int tinySize = aSprite->tinySize & kBlipSizeMask;
+                int tinySize = aSprite->icon.size;
                 if ((aSprite->table != NULL) && !aSprite->killMe && tinySize &&
                     (aSprite->draw_tiny != NULL) && (aSprite->whichLayer == layer)) {
                     Rect tiny_rect(-tinySize, -tinySize, tinySize, tinySize);
                     tiny_rect.offset(aSprite->where.h, aSprite->where.v);
-                    aSprite->draw_tiny(tiny_rect, aSprite->tinyColor);
+                    aSprite->draw_tiny(
+                            tiny_rect, GetRGBTranslateColorShade(
+                                               aSprite->tinyColor.hue, aSprite->tinyColor.shade));
                 }
             }
         }

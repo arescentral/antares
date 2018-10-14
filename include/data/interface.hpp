@@ -19,160 +19,139 @@
 #ifndef ANTARES_DATA_INTERFACE_HPP_
 #define ANTARES_DATA_INTERFACE_HPP_
 
+#include <pn/array>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
-#include "data/picture.hpp"
+#include "config/gamepad.hpp"
+#include "config/keys.hpp"
+#include "data/enums.hpp"
 #include "math/geometry.hpp"
-#include "video/driver.hpp"
 
 namespace antares {
 
-enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
+class path_value;
+union WidgetData;
+struct WidgetDataBase;
 
-enum interfaceStyleType { kLarge = 1, kSmall = 2 };
+enum class InterfaceStyle { LARGE, SMALL };
 
 struct interfaceLabelType {
-    int16_t stringID;
-    int16_t stringNumber;
+    int64_t stringID;
+    int64_t stringNumber;
 };
 
-class InterfaceItem {
+struct InterfaceData {
+    bool                    fullscreen = false;
+    std::vector<WidgetData> items;
+};
+
+struct WidgetDataBase {
   public:
     class Visitor;
 
-    InterfaceItem(InterfaceItem&&) = default;
-    InterfaceItem& operator=(InterfaceItem&&) = default;
-    virtual ~InterfaceItem() {}
+    enum Type {
+        NONE,
+        RECT,
+        BUTTON,
+        CHECKBOX,
+        RADIO,
+        PICTURE,
+        TEXT,
+        TAB_BOX,
+    };
 
-    const int    id;
-    const Rect&  bounds() const { return _bounds; }
-    Rect&        bounds() { return _bounds; }
-    virtual void accept(const Visitor& visitor) const = 0;
+    WidgetDataBase()                 = default;
+    WidgetDataBase(WidgetDataBase&&) = default;
+    WidgetDataBase& operator=(WidgetDataBase&&) = default;
+    virtual ~WidgetDataBase() {}
 
-  protected:
-    InterfaceItem(int id, Rect bounds);
-
-  private:
-    friend std::vector<std::unique_ptr<InterfaceItem>> interface_items(
-            int id0, const sfz::Json& json);
-
-    Rect _bounds;
+    Type                   type;
+    Rect                   bounds;
+    sfz::optional<int64_t> id;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, const sfz::Json& json);
+InterfaceData interface(path_value x);
 
-struct PlainRect : public InterfaceItem {
-    PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
-
-    uint8_t            hue;
-    interfaceStyleType style;
+struct BoxRectData : public WidgetDataBase {
+    sfz::optional<pn::string> label;
+    Hue                       hue   = Hue::GRAY;
+    InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
-struct LabeledItem : public InterfaceItem {
-    LabeledItem(int id, Rect bounds, interfaceLabelType label);
-
-    sfz::String label;
+struct TextRectData : public WidgetDataBase {
+    sfz::optional<pn::string> text;
+    Hue                       hue   = Hue::GRAY;
+    InterfaceStyle            style = InterfaceStyle::LARGE;
 };
 
-struct LabeledRect : public LabeledItem {
-    LabeledRect(
-            int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
-
-    uint8_t            hue;
-    interfaceStyleType style;
+struct PictureRectData : public WidgetDataBase {
+    pn::string picture;
 };
 
-struct TextRect : public InterfaceItem {
-    TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
-    TextRect(int id, Rect bounds, sfz::StringSlice name, uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
-
-    sfz::String        text;
-    uint8_t            hue;
-    interfaceStyleType style;
+struct ButtonData : public WidgetDataBase {
+    pn::string      label;
+    Key             key     = Key::NONE;
+    Gamepad::Button gamepad = Gamepad::Button::NONE;
+    Hue             hue     = Hue::GRAY;
+    InterfaceStyle  style   = InterfaceStyle::LARGE;
 };
 
-struct PictureRect : public InterfaceItem {
-    PictureRect(int id, Rect bounds, sfz::StringSlice name);
-    virtual void accept(const Visitor& visitor) const;
+struct PlainButtonData : public ButtonData {};
+struct CheckboxButtonData : public ButtonData {};
+struct RadioButtonData : public ButtonData {};
 
-    Picture            picture;
-    Texture            texture;
-    bool               visible_bounds;
-    uint8_t            hue;
-    interfaceStyleType style;
+struct TabBoxData : public WidgetDataBase {
+    Hue            hue   = Hue::GRAY;
+    InterfaceStyle style = InterfaceStyle::LARGE;
+
+    struct Tab {
+        sfz::optional<int64_t>  id;
+        int64_t                 width;
+        pn::string              label;
+        std::vector<WidgetData> content;
+    };
+    std::vector<Tab> tabs;
 };
 
-struct Button : public LabeledItem {
-    Button(int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-           uint8_t hue, interfaceStyleType style);
-
-    int16_t                 key;
-    int16_t                 gamepad;
-    uint8_t                 hue;
-    interfaceStyleType      style;
-    interfaceItemStatusType status;
-};
-
-struct PlainButton : public Button {
-    PlainButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
-};
-
-struct CheckboxButton : public Button {
-    CheckboxButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
-
-    bool on;
-};
-
-struct RadioButton : public Button {
-    RadioButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
-
-    bool on;
-};
-
-struct TabBoxButton : public Button {
-    TabBoxButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style, const sfz::Json& tab_content);
-    virtual void accept(const Visitor& visitor) const;
-
-    bool      on;
-    sfz::Json tab_content;
-};
-
-struct TabBox : public InterfaceItem {
-    TabBox(int id, Rect bounds, uint8_t hue, interfaceStyleType style,
-           int16_t top_right_border_size);
-    virtual void accept(const Visitor& visitor) const;
-
-    uint8_t            hue;
-    interfaceStyleType style;
-    int16_t            top_right_border_size;
-};
-
-class InterfaceItem::Visitor {
+class WidgetDataBase::Visitor {
   public:
     ~Visitor();
-    virtual void visit_plain_rect(const PlainRect&) const           = 0;
-    virtual void visit_labeled_rect(const LabeledRect&) const       = 0;
-    virtual void visit_text_rect(const TextRect&) const             = 0;
-    virtual void visit_picture_rect(const PictureRect&) const       = 0;
-    virtual void visit_plain_button(const PlainButton&) const       = 0;
-    virtual void visit_radio_button(const RadioButton&) const       = 0;
-    virtual void visit_checkbox_button(const CheckboxButton&) const = 0;
-    virtual void visit_tab_box(const TabBox&) const                 = 0;
-    virtual void visit_tab_box_button(const TabBoxButton&) const    = 0;
+    virtual void visit_box_rect(const BoxRectData&) const               = 0;
+    virtual void visit_text_rect(const TextRectData&) const             = 0;
+    virtual void visit_picture_rect(const PictureRectData&) const       = 0;
+    virtual void visit_plain_button(const PlainButtonData&) const       = 0;
+    virtual void visit_radio_button(const RadioButtonData&) const       = 0;
+    virtual void visit_checkbox_button(const CheckboxButtonData&) const = 0;
+    virtual void visit_tab_box(const TabBoxData&) const                 = 0;
+};
+
+union WidgetData {
+    using Type = WidgetDataBase::Type;
+
+    WidgetDataBase       base;
+    WidgetDataBase::Type type() const;
+
+    BoxRectData        rect;
+    TextRectData       text;
+    PictureRectData    picture;
+    PlainButtonData    button;
+    CheckboxButtonData checkbox;
+    RadioButtonData    radio;
+    TabBoxData         tab_box;
+
+    WidgetData();
+    WidgetData(BoxRectData d);
+    WidgetData(TextRectData d);
+    WidgetData(PictureRectData d);
+    WidgetData(PlainButtonData d);
+    WidgetData(CheckboxButtonData d);
+    WidgetData(RadioButtonData d);
+    WidgetData(TabBoxData d);
+
+    ~WidgetData();
+    WidgetData(WidgetData&&);
+    WidgetData& operator=(WidgetData&&);
 };
 
 }  // namespace antares

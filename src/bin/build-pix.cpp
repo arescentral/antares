@@ -18,32 +18,26 @@
 
 #include <fcntl.h>
 #include <getopt.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/level.hpp"
+#include "data/plugin.hpp"
+#include "data/resource.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
+#include "lang/exception.hpp"
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::Optional;
-using sfz::ScopedFd;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::args::help;
-using sfz::args::store;
-using sfz::args::store_const;
 using sfz::dec;
-using sfz::format;
-using sfz::write;
 using std::pair;
 using std::unique_ptr;
 using std::vector;
 
-namespace io   = sfz::io;
-namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
 namespace antares {
@@ -51,86 +45,128 @@ namespace {
 
 class DrawPix : public Card {
   public:
-    DrawPix(OffscreenVideoDriver* driver, int16_t id, int32_t width)
-            : _driver(driver), _id(id), _width(width) {}
+    DrawPix(std::function<pn::string_view()> text, int32_t width,
+            std::function<void(Rect)> set_capture_rect)
+            : _set_capture_rect(set_capture_rect), _text(text), _width(width) {}
 
     virtual void draw() const {
-        BuildPix pix(_id, _width);
+        PluginInit();
+        BuildPix pix(_text(), _width);
         pix.draw({0, 0});
-        if (_driver) {
-            _driver->set_capture_rect({0, 0, _width, pix.size().height});
-        }
+        _set_capture_rect({0, 0, _width, pix.size().height});
     }
 
   private:
-    OffscreenVideoDriver* _driver;
-    const int16_t         _id;
-    const int32_t         _width;
+    const std::function<void(Rect)>        _set_capture_rect;
+    const std::function<pn::string_view()> _text;
+    const int32_t                          _width;
 };
 
-int main(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Builds all of the scrolling text images in the game\n"
+            "\n"
+            "  options:\n"
+            "    -o, --output=OUTPUT place output in this directory\n"
+            "    -h, --help          display this help screen\n"
+            "    -t, --text          produce text output\n",
+            progname);
+    exit(retcode);
+}
 
-    Optional<String> output_dir;
-    bool             text = false;
-    parser.add_argument("-o", "--output", store(output_dir))
-            .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
-    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
+std::function<pn::string_view()> prologue(pn::string_view chapter) {
+    return [chapter]() -> pn::string_view {
+        return *plug.levels.find(chapter.copy())->second.solo.prologue;
+    };
+}
 
-    String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
-        exit(1);
+std::function<pn::string_view()> epilogue(pn::string_view chapter) {
+    return [chapter]() -> pn::string_view {
+        return *plug.levels.find(chapter.copy())->second.solo.epilogue;
+    };
+}
+
+template <typename VideoDriver>
+void run(
+        VideoDriver* video, pn::string_view extension,
+        std::function<void(Rect)> set_capture_rect) {
+    struct Spec {
+        pn::string_view                  name;
+        int                              width;
+        std::function<pn::string_view()> text;
+    };
+    vector<Spec> specs{
+            {"gai-prologue", 450, prologue("ch01")},
+            {"tut-prologue", 450, prologue("tut1")},
+            {"can-prologue", 450, prologue("ch07")},
+            {"can-epilogue", 450, epilogue("ch07")},
+            {"sal-prologue", 450, prologue("ch11")},
+            {"outro", 450, epilogue("ch20")},
+            {"baz-prologue", 450, prologue("ch14")},
+            {"ele-prologue", 450, prologue("ch13")},
+            {"aud-prologue", 450, prologue("ch16")},
+            {"intro", 450, []() -> pn::string_view { return *plug.info.intro; }},
+            {"about", 540, []() -> pn::string_view { return *plug.info.about; }},
+    };
+
+    vector<pair<unique_ptr<Card>, pn::string>> pix;
+    for (const auto& spec : specs) {
+        pix.emplace_back(
+                unique_ptr<Card>(new DrawPix(spec.text, spec.width, set_capture_rect)),
+                pn::format("{0}.{1}", spec.name, extension));
     }
+    video->capture(pix);
+}
 
-    if (output_dir.has()) {
-        makedirs(*output_dir, 0755);
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
+
+    callbacks.argument = [](pn::string_view arg) { return false; };
+
+    sfz::optional<pn::string> output_dir;
+    bool                      text = false;
+    callbacks.short_option         = [&argv, &output_dir, &text](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 't': text = true; return true;
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "output") {
+                    return callbacks.short_option(pn::rune{'o'}, get_value);
+                } else if (opt == "text") {
+                    return callbacks.short_option(pn::rune{'t'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
+
+    if (output_dir.has_value()) {
+        sfz::makedirs(*output_dir, 0755);
     }
 
     NullPrefsDriver prefs;
-
-    vector<pair<int, int>> specs = {
-            {3020, 450},   // Gaitori prologue
-            {3025, 450},   // Tutorial prologue
-            {3080, 450},   // Cantharan prologue
-            {3081, 450},   // Cantharan epilogue
-            {3120, 450},   // Salrilian prologue
-            {3211, 450},   // Game epilogue
-            {4063, 450},   // Bazidanese prologue
-            {4509, 450},   // Elejeetian prologue
-            {4606, 450},   // Audemedon prologue
-            {5600, 450},   // Story introduction
-            {6500, 540},   // Credits text
-            {6501, 450},   // Please register
-            {10199, 450},  // Unused Gaitori prologue
-    };
-
-    vector<pair<unique_ptr<Card>, String>> pix;
     if (text) {
         TextVideoDriver video({540, 2000}, output_dir);
-        for (auto spec : specs) {
-            pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
-                    String(format("{0}.txt", dec(spec.first, 5))));
-        }
-        video.capture(pix);
+        run(&video, "txt", [](Rect) {});
     } else {
         OffscreenVideoDriver video({540, 2000}, output_dir);
-        for (auto spec : specs) {
-            pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
-                    String(format("{0}.png", dec(spec.first, 5))));
-        }
-        video.capture(pix);
+        run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
     }
-
-    return 0;
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) {
-    return antares::main(argc, argv);
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

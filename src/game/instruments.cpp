@@ -19,9 +19,9 @@
 #include "game/instruments.hpp"
 
 #include <algorithm>
+#include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
-#include "data/picture.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "game/admiral.hpp"
@@ -40,7 +40,6 @@
 #include "math/units.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
 using sfz::range;
 using std::max;
 using std::min;
@@ -54,7 +53,7 @@ const int32_t kRadarScale   = 50;
 const int32_t kRadarRange   = kRadarSize * kRadarScale;
 const ticks   kRadarSpeed   = ticks(30);
 const int32_t kRadarBlipNum = 50;
-const uint8_t kRadarColor   = GREEN;
+const Hue     kRadarColor   = Hue::GREEN;
 
 const int32_t kRadarLeft       = 6;
 const int32_t kRadarTop        = 6;
@@ -89,8 +88,8 @@ const int32_t kGrossMoneyVBuffer   = 4;
 const int32_t kGrossMoneyBarWidth  = 10;
 const int32_t kGrossMoneyBarHeight = 5;
 const int32_t kGrossMoneyBarNum    = 7;
-const int32_t kGrossMoneyBarValue  = 20000;
-const uint8_t kGrossMoneyColor     = YELLOW;
+const Cash    kGrossMoneyBarValue  = Cash{Fixed::from_long(20000)};
+const Hue     kGrossMoneyColor     = Hue::YELLOW;
 
 const int32_t kFineMoneyLeft      = 25;
 const int32_t kFineMoneyTop       = 48;
@@ -99,14 +98,13 @@ const int32_t kFineMoneyVBuffer   = 1;
 const int32_t kFineMoneyBarWidth  = 2;
 const int32_t kFineMoneyBarHeight = 4;
 const int32_t kFineMoneyBarNum    = 100;
-const int32_t kFineMoneyBarMod    = kGrossMoneyBarValue;
-const int32_t kFineMoneyBarValue  = 200;
-const int32_t kFineMoneyColor     = PALE_GREEN;
-const int32_t kFineMoneyNeedColor = ORANGE;
-const uint8_t kFineMoneyUseColor  = SKY_BLUE;
+const Cash    kFineMoneyBarMod    = kGrossMoneyBarValue;
+const Cash    kFineMoneyBarValue  = Cash{Fixed::from_long(200)};
+const Hue     kFineMoneyColor     = Hue::PALE_GREEN;
+const Hue     kFineMoneyNeedColor = Hue::ORANGE;
+const Hue     kFineMoneyUseColor  = Hue::SKY_BLUE;
 
-const Fixed kMaxMoneyValue =
-        Fixed::from_long(kGrossMoneyBarValue * kGrossMoneyBarNum) - Fixed::from_val(1);
+const Cash kMaxMoneyValue{(kGrossMoneyBarValue.amount * kGrossMoneyBarNum) - Fixed::from_val(1)};
 
 Rect mini_build_time_rect() {
     Rect result(play_screen().right + 10, 8, play_screen().right + 22, 37);
@@ -123,7 +121,7 @@ namespace {
 struct barIndicatorType {
     int16_t top;
     int32_t thisValue;
-    uint8_t color;
+    Hue     hue;
 };
 
 static ANTARES_GLOBAL coordPointType gLastGlobalCorner;
@@ -163,15 +161,13 @@ void InstrumentInit() {
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
 
-    site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-    site.dark  = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
+    site.light = GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM);
+    site.dark  = GetRGBTranslateColorShade(Hue::PALE_GREEN, DARKER + kSlightlyDarkerColor);
 
     MiniScreenInit();
 }
 
-int32_t instrument_top() {
-    return (world().height() / 2) - (kPanelHeight / 2);
-}
+int32_t instrument_top() { return (world().height() / 2) - (kPanelHeight / 2); }
 
 void InstrumentCleanup() {
     g.radar_blips.reset();
@@ -196,14 +192,14 @@ void ResetInstruments() {
         gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    gBarIndicator[kShieldBar].top   = 359;
-    gBarIndicator[kShieldBar].color = SKY_BLUE;
+    gBarIndicator[kShieldBar].top = 359;
+    gBarIndicator[kShieldBar].hue = Hue::SKY_BLUE;
 
-    gBarIndicator[kEnergyBar].top   = 231;
-    gBarIndicator[kEnergyBar].color = GOLD;
+    gBarIndicator[kEnergyBar].top = 231;
+    gBarIndicator[kEnergyBar].hue = Hue::GOLD;
 
-    gBarIndicator[kBatteryBar].top   = 103;
-    gBarIndicator[kBatteryBar].color = SALMON;
+    gBarIndicator[kBatteryBar].top = 103;
+    gBarIndicator[kBatteryBar].hue = Hue::SALMON;
 
     lp = g.radar_blips.get();
     for (i = 0; i < kRadarBlipNum; i++) {
@@ -281,8 +277,8 @@ void UpdateRadar(ticks unitsDone) {
 
     uint32_t bestScale = MIN_SCALE;
     switch (g.zoom) {
-        case kNearestFoeZoom:
-        case kNearestAnythingZoom: {
+        case Zoom::FOE:
+        case Zoom::OBJECT: {
             auto     anObject     = g.closest;
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) {  // if this is true, then we haven't calced its distance
@@ -294,32 +290,32 @@ void UpdateRadar(ticks unitsDone) {
             bestScale = wsqrt(hugeDistance);
             if (bestScale == 0)
                 bestScale = 1;
-            bestScale     = center_scale().height / bestScale;
+            bestScale = center_scale().height / bestScale;
             if (bestScale < SCALE_SCALE)
                 bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale     = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
 
-        case kActualSizeZoom: bestScale = SCALE_SCALE; break;
+        case Zoom::ACTUAL: bestScale = SCALE_SCALE; break;
 
-        case kEighthSizeZoom: bestScale = kOneEighthScale; break;
+        case Zoom::SIXTEENTH: bestScale = kOneEighthScale; break;
 
-        case kQuarterSizeZoom: bestScale = kOneQuarterScale; break;
+        case Zoom::QUARTER: bestScale = kOneQuarterScale; break;
 
-        case kHalfSizeZoom: bestScale = kOneHalfScale; break;
+        case Zoom::HALF: bestScale = kOneHalfScale; break;
 
-        case kTimesTwoZoom: bestScale = kTimesTwoScale; break;
+        case Zoom::DOUBLE: bestScale = kTimesTwoScale; break;
 
-        case kSmallestZoom: {
+        case Zoom::ALL: {
             auto     anObject = g.farthest;
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale         = wsqrt(tempWide);
             if (bestScale == 0)
                 bestScale = 1;
-            bestScale     = center_scale().height / bestScale;
+            bestScale = center_scale().height / bestScale;
             if (bestScale < SCALE_SCALE)
                 bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale     = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
     }
 
@@ -348,7 +344,7 @@ void draw_radar() {
     bounds.offset(0, instrument_top());
     bounds.inset(1, 1);
 
-    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
+    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, LIGHTEST);
     const RgbColor darkest    = GetRGBTranslateColorShade(kRadarColor, DARKEST);
     const RgbColor very_dark  = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
     if (g.radar_on) {
@@ -385,11 +381,12 @@ void draw_radar() {
 
 // SHOW ME THE MONEY
 static void draw_money() {
-    auto&       admiral = g.admiral;
-    const Fixed cash    = clamp(admiral->cash(), Fixed::zero(), kMaxMoneyValue);
+    auto&      admiral = g.admiral;
+    const Cash cash    = clamp(admiral->cash(), Cash{Fixed::zero()}, kMaxMoneyValue);
     gBarIndicator[kFineMoneyBar].thisValue =
-            mFixedToLong((cash % kFineMoneyBarMod) / kFineMoneyBarValue);
-    const int price = mFixedToLong(MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue);
+            mFixedToLong((cash.amount % kFineMoneyBarMod.amount) / kFineMoneyBarValue.amount);
+    const int price = mFixedToLong(
+            MiniComputerGetPriceOfCurrentSelection().amount / kFineMoneyBarValue.amount);
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
     box.offset(
@@ -414,16 +411,16 @@ static void draw_money() {
     RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
 
     if (gBarIndicator[kFineMoneyBar].thisValue < price) {
-        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHTEST);
         first_color_minor  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
         second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
         first_threshold    = gBarIndicator[kFineMoneyBar].thisValue;
         second_threshold   = price;
     } else {
-        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_major  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHTEST);
         first_color_minor  = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
-        second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
+        second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHTEST);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
         first_threshold    = gBarIndicator[kFineMoneyBar].thisValue - price;
         second_threshold   = gBarIndicator[kFineMoneyBar].thisValue;
@@ -451,14 +448,14 @@ static void draw_money() {
     gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = gBarIndicator + kGrossMoneyBar;
-    gross->thisValue        = mFixedToLong(admiral->cash() / kGrossMoneyBarValue);
+    gross->thisValue        = mFixedToLong(admiral->cash().amount / kGrossMoneyBarValue.amount);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
     box.offset(
             play_screen().right + kGrossMoneyLeft + kGrossMoneyHBuffer,
             kGrossMoneyTop + instrument_top() + kGrossMoneyVBuffer);
 
-    const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
+    const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, LIGHTEST);
     const RgbColor dark  = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
     for (int i = 0; i < kGrossMoneyBarNum; ++i) {
         if (i < gross->thisValue) {
@@ -471,7 +468,7 @@ static void draw_money() {
 }
 
 void set_up_instruments() {
-    g.zoom = kNearestFoeZoom;
+    g.zoom = Zoom::FOE;
 
     MiniComputerDoCancel();  // i.e., go to main screen
     ResetInstruments();
@@ -488,26 +485,20 @@ void draw_instruments() {
     sys.left_instrument_texture.draw(left_rect.left, left_rect.top);
     sys.right_instrument_texture.draw(right_rect.left, right_rect.top);
 
-    if (g.ship.get()) {
-        auto player = g.ship;
-        if (player->active) {
-            draw_player_ammo(
-                    (player->pulse.base.get() && (player->pulse.base->frame.weapon.ammo > 0))
-                            ? player->pulse.ammo
-                            : -1,
-                    (player->beam.base.get() && (player->beam.base->frame.weapon.ammo > 0))
-                            ? player->beam.ammo
-                            : -1,
-                    (player->special.base.get() && (player->special.base->frame.weapon.ammo > 0))
-                            ? player->special.ammo
-                            : -1);
-        }
+    if (g.ship.get() && g.ship->active) {
+        const SpaceObject::Weapon& pulse   = g.ship->pulse;
+        const SpaceObject::Weapon& beam    = g.ship->beam;
+        const SpaceObject::Weapon& special = g.ship->special;
+        draw_player_ammo(
+                (pulse.base && (pulse.base->device->ammo > 0)) ? pulse.ammo : -1,
+                (beam.base && (beam.base->device->ammo > 0)) ? beam.ammo : -1,
+                (special.base && (special.base->device->ammo > 0)) ? special.ammo : -1);
+
+        draw_bar_indicator(kShieldBar, g.ship->health(), g.ship->max_health());
+        draw_bar_indicator(kEnergyBar, g.ship->energy(), g.ship->max_energy());
+        draw_bar_indicator(kBatteryBar, g.ship->battery(), g.ship->max_battery());
     }
 
-    auto o = g.ship;
-    draw_bar_indicator(kShieldBar, o->health(), o->max_health());
-    draw_bar_indicator(kEnergyBar, o->energy(), o->max_energy());
-    draw_bar_indicator(kBatteryBar, o->battery(), o->max_battery());
     draw_build_time_bar();
     draw_money();
     draw_radar();
@@ -575,12 +566,12 @@ void draw_site(const PlayerShip& player) {
 
         SiteData control = {};
         if (player.show_select()) {
-            control.light       = GetRGBTranslateColorShade(YELLOW, MEDIUM);
-            control.dark        = GetRGBTranslateColorShade(YELLOW, DARKER + kSlightlyDarkerColor);
+            control.light = GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM);
+            control.dark  = GetRGBTranslateColorShade(Hue::YELLOW, DARKER + kSlightlyDarkerColor);
             control.should_draw = true;
         } else if (player.show_target()) {
-            control.light = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
-            control.dark  = GetRGBTranslateColorShade(SKY_BLUE, DARKER + kSlightlyDarkerColor);
+            control.light = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
+            control.dark = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER + kSlightlyDarkerColor);
             control.should_draw = true;
         }
         if (control.should_draw) {
@@ -614,7 +605,6 @@ void draw_sector_lines() {
     Rects    rects;
     int32_t  x;
     uint32_t size, level, h, division;
-    RgbColor color;
 
     size  = kSubSectorSize / 4;
     level = 1;
@@ -634,11 +624,11 @@ void draw_sector_lines() {
         while ((x < implicit_cast<uint32_t>(viewport().right)) && (h > 0)) {
             RgbColor color;
             if (!division) {
-                color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
             } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(SKY_BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
             } else {
-                color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
             }
 
             // TODO(sfiera): +1 on bottom no longer needed.
@@ -657,11 +647,11 @@ void draw_sector_lines() {
         while ((x < implicit_cast<uint32_t>(viewport().bottom)) && (h > 0)) {
             RgbColor color;
             if (!division) {
-                color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
             } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(SKY_BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
             } else {
-                color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
             }
 
             // TODO(sfiera): +1 on right no longer needed.
@@ -730,11 +720,11 @@ void draw_arbitrary_sector_lines(
 
     while ((x < implicit_cast<uint32_t>(bounds.right)) && (h > 0)) {
         if (!division) {
-            color = GetRGBTranslateColorShade(GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
         } else {
-            color = GetRGBTranslateColorShade(BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
         }
 
         rects.fill({x, bounds.top, x + 1, bounds.bottom}, color);
@@ -757,11 +747,11 @@ void draw_arbitrary_sector_lines(
 
     while ((x < implicit_cast<uint32_t>(bounds.bottom)) && (h > 0)) {
         if (!division) {
-            color = GetRGBTranslateColorShade(GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
         } else {
-            color = GetRGBTranslateColorShade(BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
         }
 
         rects.fill({bounds.left, x, bounds.right, x + 1}, color);
@@ -880,11 +870,8 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         graphicValue = 0;
     }
 
-    RgbColor color, lightColor, darkColor;
-    Rect     rrect;
-
-    int8_t hue = gBarIndicator[which].color;
-    Rect   bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
+    Hue  hue = gBarIndicator[which].hue;
+    Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
     bar.offset(
             kBarIndicatorLeft + play_screen().right, gBarIndicator[which].top + instrument_top());
     if (graphicValue < kBarIndicatorHeight) {
@@ -900,7 +887,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         Rect bottom_bar            = bar;
         bottom_bar.top             = bottom_bar.bottom - graphicValue;
         const RgbColor fill_color  = GetRGBTranslateColorShade(hue, LIGHTER);
-        const RgbColor light_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
+        const RgbColor light_color = GetRGBTranslateColorShade(hue, LIGHTEST);
         const RgbColor dark_color  = GetRGBTranslateColorShade(hue, MEDIUM);
         draw_shaded_rect(rects, bottom_bar, fill_color, light_color, dark_color);
     }
@@ -925,7 +912,7 @@ void draw_build_time_bar() {
     const Rect clip = mini_build_time_rect();
 
     {
-        const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, MEDIUM);
+        const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, MEDIUM);
         draw_vbracket(rects, clip, color);
     }
 
@@ -933,13 +920,13 @@ void draw_build_time_bar() {
     bar.inset(2, 2);
 
     {
-        const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, DARK);
+        const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, DARK);
         rects.fill(bar, color);
     }
 
     if (value > 0) {
         bar.top += value;
-        const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, LIGHT);
+        const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, LIGHT);
         rects.fill(bar, color);
     }
 }

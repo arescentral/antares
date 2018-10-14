@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_SELECT_LEVEL_HPP_
 #define ANTARES_UI_SCREENS_SELECT_LEVEL_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -27,19 +26,17 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class SelectLevelScreen : public InterfaceScreen {
   public:
-    SelectLevelScreen(bool* cancelled, Handle<Level>* level);
+    SelectLevelScreen(bool* cancelled, const Level** level);
     ~SelectLevelScreen();
 
     virtual void become_front();
     virtual void key_down(const KeyDownEvent& event);
 
   protected:
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button);
     virtual void overlay() const;
 
   private:
@@ -65,12 +62,10 @@ class SelectLevelScreen : public InterfaceScreen {
 
     bool*            _cancelled;
     size_t           _index;
-    Handle<Level>*   _level;
+    const Level**    _level;
     std::vector<int> _chapters;
     int              _unlock_digits;
     size_t           _unlock_chapter;
-
-    DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);
 };
 
 }  // namespace antares

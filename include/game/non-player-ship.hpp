@@ -33,10 +33,10 @@ enum Allegiance {
 };
 
 void fire_weapon(
-        Handle<SpaceObject> subject, Handle<SpaceObject> target,
-        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon);
-void NonplayerShipThink();
-void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject);
+        Handle<SpaceObject> subject, Handle<SpaceObject> target, SpaceObject::Weapon& weapon,
+        const std::vector<fixedPointType>& positions);
+void                NonplayerShipThink();
+void                HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject);
 Handle<SpaceObject> GetManualSelectObject(
         Handle<SpaceObject> sourceObject, int32_t direction, uint32_t inclusiveAttributes,
         uint32_t exclusiveAttributes, const uint64_t* fartherThan, Handle<SpaceObject> currentShip,

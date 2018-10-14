@@ -19,6 +19,7 @@
 #include "ui/screens/main.hpp"
 
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/level.hpp"
@@ -34,8 +35,6 @@
 #include "ui/screens/scroll-text.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-
 namespace antares {
 
 namespace {
@@ -45,7 +44,58 @@ const int  kTitleTextScrollWidth = 450;
 
 }  // namespace
 
-MainScreen::MainScreen() : InterfaceScreen("main", {0, 0, 640, 480}, true), _state(NORMAL) {}
+MainScreen::MainScreen()
+        : InterfaceScreen("main", {0, 0, 640, 480}),
+          _state(NORMAL),
+          _replays(Resource::list_replays()) {
+    button(START_NEW_GAME)
+            ->bind({
+                    [this] { stack()->push(new SoloGame); },
+                    [] { return plug.chapters.find(1) != plug.chapters.end(); },
+            });
+
+    button(START_NETWORK_GAME)
+            ->bind({
+                    [] { throw std::runtime_error("Networked games not yet implemented."); },
+                    [] { return false; },
+            });
+
+    button(REPLAY_INTRO)
+            ->bind({
+                    [this] {
+                        stack()->push(new ScrollTextScreen(
+                                *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
+                    },
+                    [] { return plug.info.intro.has_value(); },
+            });
+
+    button(DEMO)->bind({
+            [this] { stack()->push(new ReplayGame(_replays.at(rand() % _replays.size()))); },
+            [this] { return !_replays.empty(); },
+    });
+
+    button(ABOUT_ARES)
+            ->bind({
+                    [this] {
+                        stack()->push(
+                                new ScrollTextScreen(*plug.info.about, 540, kFastScrollInterval));
+                    },
+                    [] { return plug.info.about.has_value(); },
+            });
+
+    button(OPTIONS)->bind({
+            [this] { stack()->push(new OptionsScreen); },
+    });
+
+    button(QUIT)->bind({
+            [this] {
+                // 1-second fade-out.
+                _state = QUITTING;
+                stack()->push(new ColorFade(
+                        ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            },
+    });
+}
 
 MainScreen::~MainScreen() {}
 
@@ -53,7 +103,7 @@ void MainScreen::become_front() {
     switch (_state) {
         case NORMAL:
             InterfaceScreen::become_front();
-            sys.music.play(Music::IDLE, kTitleSongID);
+            sys.music.play(Music::IDLE, Music::title_song);
             _next_timer = (now() + kMainDemoTimeOutTime);
             break;
         case QUITTING: stack()->pop(this); break;
@@ -61,17 +111,25 @@ void MainScreen::become_front() {
 }
 
 bool MainScreen::next_timer(wall_time& time) {
-    time = _next_timer;
-    return true;
+    if (_replays.size() || plug.info.intro.has_value()) {
+        time = _next_timer;
+        return true;
+    }
+    return false;
 }
 
 void MainScreen::fire_timer() {
     Randomize(1);
-    size_t demo = rand() % (_replays.size() + 1);
-    if (demo == _replays.size()) {
-        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
+    int option_count = _replays.size() + (plug.info.intro.has_value() ? 1 : 0);
+    if (option_count == 0) {
+        return;
+    }
+    int option = rand() % option_count;
+    if (option == _replays.size()) {
+        stack()->push(new ScrollTextScreen(
+                *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
     } else {
-        stack()->push(new ReplayGame(_replays.at(demo)));
+        stack()->push(new ReplayGame(_replays[option]));
     }
 }
 
@@ -103,45 +161,6 @@ void MainScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     InterfaceScreen::gamepad_button_up(event);
     _next_timer = (now() + kMainDemoTimeOutTime);
-}
-
-void MainScreen::adjust_interface() {
-    // TODO(sfiera): switch on whether or not network games are available.
-    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).status = kDimmed;
-
-    // TODO(sfiera): switch on whether or not there is a single-player campaign.
-    dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).status = kActive;
-
-    if (_replays.size() == 0) {
-        dynamic_cast<PlainButton&>(mutable_item(DEMO)).status = kDimmed;
-    }
-}
-
-void MainScreen::handle_button(antares::Button& button) {
-    switch (button.id) {
-        case QUIT:
-            // 1-second fade-out.
-            _state = QUITTING;
-            stack()->push(
-                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-            break;
-
-        case DEMO: stack()->push(new ReplayGame(_replays.at(rand() % _replays.size()))); break;
-
-        case REPLAY_INTRO:
-            stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
-            break;
-
-        case START_NEW_GAME: stack()->push(new SoloGame); break;
-
-        case START_NETWORK_GAME: throw Exception("Networked games not yet implemented."); break;
-
-        case ABOUT_ARES:
-            stack()->push(new ScrollTextScreen(6500, 540, kFastScrollInterval));
-            break;
-
-        case OPTIONS: stack()->push(new OptionsScreen); break;
-    }
 }
 
 }  // namespace antares

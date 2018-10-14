@@ -20,12 +20,10 @@
 
 #include <stdlib.h>
 #include <algorithm>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
@@ -38,9 +36,7 @@ void Card::become_front() {}
 
 void Card::resign_front() {}
 
-void Card::draw() const {
-    next()->draw();
-}
+void Card::draw() const { next()->draw(); }
 
 bool Card::next_timer(wall_time& time) {
     static_cast<void>(time);
@@ -49,21 +45,13 @@ bool Card::next_timer(wall_time& time) {
 
 void Card::fire_timer() {}
 
-CardStack* Card::stack() const {
-    return _stack;
-}
+CardStack* Card::stack() const { return _stack; }
 
-Card* Card::next() const {
-    return _next.get();
-}
+Card* Card::next() const { return _next.get(); }
 
-CardStack::CardStack(Card* top) {
-    push(top);
-}
+CardStack::CardStack(Card* top) { push(top); }
 
-bool CardStack::empty() const {
-    return _top == nullptr;
-}
+bool CardStack::empty() const { return _top == nullptr; }
 
 void CardStack::push(Card* card) {
     if (!empty()) {
@@ -78,7 +66,9 @@ void CardStack::push(Card* card) {
 
 void CardStack::pop(Card* card) {
     if (card != _top.get()) {
-        throw Exception(format("tried to pop card {0} when not frontmost", card));
+        throw std::runtime_error(
+                pn::format("tried to pop card {0} when not frontmost", static_cast<void*>(card))
+                        .c_str());
     }
     unique_ptr<Card> old;
     card->resign_front();
@@ -89,8 +79,6 @@ void CardStack::pop(Card* card) {
     }
 }
 
-Card* CardStack::top() const {
-    return _top.get();
-}
+Card* CardStack::top() const { return _top.get(); }
 
 }  // namespace antares

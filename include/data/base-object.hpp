@@ -19,54 +19,25 @@
 #ifndef ANTARES_DATA_BASE_OBJECT_HPP_
 #define ANTARES_DATA_BASE_OBJECT_HPP_
 
+#include <pn/string>
+
 #include "data/action.hpp"
+#include "data/cash.hpp"
+#include "data/distance.hpp"
+#include "data/range.hpp"
+#include "data/tags.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"
 
 namespace antares {
 
-const int32_t kMaxSpaceObject = 250;
-
-const ticks kTimeToCheckHome = secs(15);
-
-const int32_t kEnergyPodAmount = 500;  // average (calced) of 500 energy units/pod
-
-const int32_t kWarpAcceleration = 1;  // how fast we warp in & out
-
-const int32_t kNoWeapon          = -1;
-const int32_t kMaxWeaponPosition = 3;
-
-const int32_t kNoShip              = -1;
-const int32_t kNoDestinationCoord  = 0;
-const int32_t kNoDestinationObject = -1;
-const int32_t kNoOwner             = -1;
-
-const int16_t kObjectInUse     = 1;
-const int16_t kObjectToBeFreed = 2;
-const int16_t kObjectAvailable = 0;
-
-const int32_t kNoClass = -1;
-
-// any class > 10000 = direct map to base object - 10000
-const int32_t kLiteralClass = 10000;
-
-const int32_t kHitStateMax      = 128;
-const int32_t kCloakOnStateMax  = 254;
-const int32_t kCloakOffStateMax = -252;
-
-const int32_t kEngageRange = 1048576;  // range at which to engage closest ship
-                                       // about 2 subsectors (512 * 2)^2
-
 enum {
-    kCanTurn           = 0x00000001,  // we have to worry about its rotation velocity
-    kCanBeEngaged      = 0x00000002,  // if it's worth going after
-    kHasDirectionGoal  = 0x00000004,  // we must turn it towards its goal
-    kIsRemote          = 0x00000008,  // is controlled by remote computer
-    kIsHumanControlled = 0x00000010,  // human is controlling it
-    kIsVector          = 0x00000020,  // a vector shot, no sprite
-    kDoesBounce =
-            0x00000040,  // when it hits the edge, it bounces FORMER: can't move, so don't try
+    kCanTurn              = 0x00000001,  // we have to worry about its rotation velocity
+    kCanBeEngaged         = 0x00000002,  // if it's worth going after
+    kHasDirectionGoal     = 0x00000004,  // we must turn it towards its goal
+    kIsVector             = 0x00000020,  // a vector shot, no sprite
+    kDoesBounce           = 0x00000040,  // when it hits the edge, it bounces
     kIsSelfAnimated       = 0x00000080,  // cycles through animation frames
     kShapeFromDirection   = 0x00000100,  // its appearence is based on its direction
     kIsPlayerShip         = 0x00000200,  // this is the ship we focus on
@@ -92,7 +63,6 @@ enum {
     kIsGuided =
             0x10000000,  // doesn't really think; can't accept orders; if not yours, it is feared
     kAppearOnRadar = 0x20000000,  // shows up on radar
-    kBit31         = 0x40000000,
     kOnAutoPilot = 0x80000000,  // if human controlled, this temporarily gives the computer control
 
     kCanThink         = kCanEngage | kCanEvade | kCanAcceptDestination,  // not just "dumb"
@@ -114,248 +84,252 @@ enum {
 };
 
 enum {
-    kUncapturedBaseExists    = 0x00000001,
-    kSufficientEscortsExist  = 0x00000002,
-    kThisBaseNeedsProtection = 0x00000004,
-    kFriendUpTrend           = 0x00000008,
-    kFriendDownTrend         = 0x00000010,
-    kFoeUpTrend              = 0x00000020,
-    kFoeDownTrend            = 0x00000040,
-    kMatchingFoeExists       = 0x00000080,  // unowned object with same level-key exists
-    kBuildFlagBit9           = 0x00000100,
-    kBuildFlagBit10          = 0x00000200,
-    kBuildFlagBit11          = 0x00000400,
-    kBuildFlagBit12          = 0x00000800,
-    kBuildFlagBit13          = 0x00001000,
-    kBuildFlagBit14          = 0x00002000,
-    kBuildFlagBit15          = 0x00004000,
-    kBuildFlagBit16          = 0x00008000,
-    kBuildFlagBit17          = 0x00010000,
-    kBuildFlagBit18          = 0x00020000,
-    kBuildFlagBit19          = 0x00040000,
-    kBuildFlagBit20          = 0x00080000,
-    kBuildFlagBit21          = 0x00100000,
-    kBuildFlagBit22          = 0x00200000,
-    kOnlyEngagedBy           = 0x00400000,
-    kCanOnlyEngage           = 0x00800000,
-
-    kEngageKeyTag      = 0x0f000000,
-    kEngageKeyTagShift = 24,
-    kLevelKeyTag       = 0xf0000000,
-    kLevelKeyTagShift  = 28,
+    kSoftTargetIsBase      = 0x00000002,
+    kHardTargetIsBase      = 0x08000000,
+    kSoftTargetIsNotBase   = 0x00000004,
+    kHardTargetIsNotBase   = 0x04000000,
+    kSoftTargetIsLocal     = 0x00000008,
+    kHardTargetIsLocal     = 0x00800000,
+    kSoftTargetIsRemote    = 0x00000010,
+    kHardTargetIsRemote    = 0x00400000,
+    kSoftTargetIsFriend    = 0x00000040,
+    kHardTargetIsFriend    = 0x02000000,
+    kSoftTargetIsFoe       = 0x00000080,
+    kHardTargetIsFoe       = 0x01000000,
+    kSoftTargetMatchesTags = 0x10000000,
+    kHardTargetMatchesTags = 0x00080000,
 };
 
-//
-// Well, this is a hack. If a verb's exclusive filter == 0xffffffff
-// then we treat the high four bits of the inclusive filter like
-// a special tag, matching to the high four bits of an baseObject's
-// build flag.
-//
-
-enum {
-    kStrongerThanTarget     = 0x00000001,
-    kTargetIsBase           = 0x00000002,
-    kTargetIsNotBase        = 0x00000004,
-    kTargetIsLocal          = 0x00000008,
-    kTargetIsRemote         = 0x00000010,
-    kOnlyEscortNotBase      = 0x00000020,
-    kTargetIsFriend         = 0x00000040,
-    kTargetIsFoe            = 0x00000080,
-    kOrderFlagBit9          = 0x00000100,
-    kOrderFlagBit10         = 0x00000200,
-    kOrderFlagBit11         = 0x00000400,
-    kOrderFlagBit12         = 0x00000800,
-    kOrderFlagBit13         = 0x00001000,
-    kOrderFlagBit14         = 0x00002000,
-    kOrderFlagBit15         = 0x00004000,
-    kOrderFlagBit16         = 0x00008000,
-    kOrderFlagBit17         = 0x00010000,
-    kOrderFlagBit18         = 0x00020000,
-    kHardMatchingFriend     = 0x00040000,
-    kHardMatchingFoe        = 0x00080000,
-    kHardFriendlyEscortOnly = 0x00100000,
-    kHardNoFriendlyEscort   = 0x00200000,
-    kHardTargetIsRemote     = 0x00400000,
-    kHardTargetIsLocal      = 0x00800000,
-    kHardTargetIsFoe        = 0x01000000,
-    kHardTargetIsFriend     = 0x02000000,
-    kHardTargetIsNotBase    = 0x04000000,
-    kHardTargetIsBase       = 0x08000000,
-
-    kOrderKeyTag      = 0xf0000000,
-    kOrderKeyTagShift = 28,
+struct InvertableSpeed {
+    Fixed inverse;
 };
-
-// RUNTIME FLAG BITS
-enum {
-    kHasArrived   = 0x00000001,
-    kTargetLocked = 0x00000002,  // if some foe has locked on, you will be visible
-    kIsCloaked    = 0x00000004,  // if you are near a naturally shielding object
-    kIsHidden     = 0x00000008,  // overrides natural shielding
-    kIsTarget     = 0x00000010,  // preserve target lock in case you become invisible
-};
-
-const uint32_t kPresenceDataHiWordMask  = 0xffff0000;
-const uint32_t kPresenceDataLoWordMask  = 0x0000ffff;
-const int32_t  kPresenceDataHiWordShift = 16;
-
-enum kPresenceStateType {
-    kNormalPresence  = 0,
-    kLandingPresence = 1,
-    kWarpInPresence  = 3,
-    kWarpingPresence = 4,
-    kWarpOutPresence = 5
-};
-
-union objectFrameType {
-    // rotation: for objects whose shapes depend on their direction
-    struct Rotation {
-        int32_t shapeOffset;       // offset for 1st shape
-        int32_t rotRes;            // ROT_POS / rotRes = # of discrete shapes
-        Fixed   maxTurnRate;       // max rate at which object can turn
-        Fixed   turnAcceleration;  // rate at which object reaches maxTurnRate
-    };
-    Rotation rotation;
-
-    // animation: objects whose appearence does not depend on direction
-    struct Animation {
-        Fixed firstShape;  // first shape in range
-        Fixed lastShape;   // last shape (inclusive)
-
-        int32_t frameDirection;       // direction (either -1, 0, or 1)
-        int32_t frameDirectionRange;  // either 0, 1, or 2
-
-        Fixed frameSpeed;       // speed at which object animates
-        Fixed frameSpeedRange;  // random addition to speed
-
-        Fixed frameShape;       // starting shape #
-        Fixed frameShapeRange;  // random addition to starting shape #
-    };
-    Animation animation;
-
-    // vector: have no associated sprite
-    struct Vector {
-        uint8_t color;  // color of line
-        uint8_t kind;
-        int32_t accuracy;  // for non-normal vector objects, how accurate
-        int32_t range;
-    };
-    Vector vector;
-
-    // weapon: weapon objects have no physical form, and can only be activated
-    struct Weapon {
-        uint32_t usage;         // when is this used?
-        int32_t  energyCost;    // cost to fire
-        ticks    fireTime;      // time between shots
-        int32_t  ammo;          // initial ammo
-        int32_t  range;         // range (= age * max velocity)
-        Fixed    inverseSpeed;  // for AI = 1/max velocity
-        int32_t  restockCost;   // energy to make new ammo
-    };
-    Weapon weapon;
-};
-void read_from(sfz::ReadSource in, objectFrameType::Rotation& rotation);
-void read_from(sfz::ReadSource in, objectFrameType::Animation& animation);
-void read_from(sfz::ReadSource in, objectFrameType::Vector& vector);
-void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 
 class BaseObject {
   public:
     static BaseObject* get(int number);
-    static Handle<BaseObject>     none() { return Handle<BaseObject>(-1); }
-    static HandleList<BaseObject> all();
+    static BaseObject* get(pn::string_view name);
 
-    sfz::String name;
-    sfz::String short_name;
+    pn::string                long_name;
+    pn::string                short_name;
+    sfz::optional<pn::string> portrait;
 
-    uint32_t attributes;  // initial attributes (see flags)
-    int32_t  baseClass;
-    int32_t  baseRace;
-    int32_t  price;
-
-    Fixed offenseValue;
-    //  Fixed                   defenseValue;
-    int32_t destinationClass;  // for computer
+    uint32_t attributes = 0;  // initial attributes (see flags)
+    Cash     price;
 
     Fixed    maxVelocity;      // maximum speed
     Fixed    warpSpeed;        // multiplier of speed at warp (0 if cannot)
-    uint32_t warpOutDistance;  // distance at which to come out of warp
-
-    Fixed initialVelocity;       // initial minimum velocity (usually relative)
-    Fixed initialVelocityRange;  // random addition to initial velocity
+    Distance warpOutDistance;  // distance at which to come out of warp
 
     Fixed mass;       // how quickly thrust acheives max
-    Fixed maxThrust;  // maximum amount of thrust
+    Fixed turn_rate;  // max rate at which object can turn
+    Fixed thrust;     // maximum amount of thrust
 
     int32_t health;  // starting health
-    int32_t damage;  // damage caused by impact
     int32_t energy;  // starting energy for material objects
 
-    ticks initialAge;       // starting minimum age
-    ticks initialAgeRange;  // random addition to starting age
+    sfz::optional<Range<Fixed>> initial_velocity;  // initial random velocity (usually relative)
+                                                   // Default: max velocity
+    Range<int64_t> initial_direction;              // initial random direction (usually relative)
+    bool           autotarget = false;
 
     int32_t occupy_count;  // size of occupying force
 
-    int32_t naturalScale;  // natural scale relative to %100
+    sfz::optional<RgbColor> shieldColor;  // color on radar (!has_value() = don't draw shields)
 
-    int16_t pixLayer;     // 0 = no layer 1->3 = back to front
-    int16_t pixResID;     // resID of SMIV
-    int32_t tinySize;     // size of representation on radar (0 = 1 pixel)
-    uint8_t shieldColor;  // color on radar (0 = don't put on radar)
+    struct Icon {
+        enum class Shape {
+            SQUARE,
+            TRIANGLE,
+            DIAMOND,
+            PLUS,
+        } shape;
+        int64_t size;
+    };
+    sfz::optional<Icon> icon;
 
-    int32_t initialDirection;       // initial direction (usually relative)
-    int32_t initialDirectionRange;  // random addition to initial direction
+    struct Targeting {
+        bool base   = false;
+        bool hide   = false;
+        bool radar  = false;
+        bool order  = false;
+        bool select = false;
+        bool lock   = false;
+    } target;
 
     struct Weapon {
-        Handle<BaseObject> base;
-        int32_t            positionNum;  // # of places from which weapon can fire
-        fixedPointType
-                position[kMaxWeaponPosition];  // relative positions (unrotated) of fire points
+        NamedHandle<const BaseObject> base;
+        std::vector<fixedPointType>   positions;  // relative positions (unrotated) of fire points
     };
-    Weapon pulse;
-    Weapon beam;
-    Weapon special;
+    struct Loadout {
+        sfz::optional<Weapon> pulse;
+        sfz::optional<Weapon> beam;
+        sfz::optional<Weapon> special;
+    } weapons;
 
-    Fixed   friendDefecit;
-    Fixed   dangerThreshold;
-    int32_t specialDirection;  // direction relative to shooter
+    struct Destroy {
+        bool                die;
+        bool                neutralize;
+        bool                release_energy;
+        std::vector<Action> action;
+    } destroy;
 
-    int32_t arriveActionDistance;  // distance^2 at which arrive action is triggered on dest
+    struct Expire {
+        struct After {
+            sfz::optional<Range<ticks>> age;  // starting random age
+            bool                        animation = false;
+        } after;
+        bool                die;
+        std::vector<Action> action;
+    } expire;
 
-    HandleList<Action> destroy;
-    HandleList<Action> expire;
-    HandleList<Action> create;
-    HandleList<Action> collide;
-    HandleList<Action> activate;
-    HandleList<Action> arrive;
+    struct Create {
+        std::vector<Action> action;
+    } create;
 
-    bool  destroyDontDie;
-    bool  expireDontDie;
-    ticks activatePeriod;
-    ticks activatePeriodRange;
+    struct Collide {
+        struct As {
+            bool subject = false;
+            bool direct  = false;
+        } as;
+        bool                solid  = false;
+        bool                edge   = false;
+        int32_t             damage = 0;
+        std::vector<Action> action;
+    } collide;
 
-    objectFrameType frame;
+    struct Activate {
+        sfz::optional<Range<ticks>> period;
+        std::vector<Action>         action;
+    } activate;
 
-    uint32_t buildFlags;
-    uint32_t orderFlags;
-    uint8_t  levelKeyTag;
-    uint8_t  engageKeyTag;
-    uint8_t  orderKeyTag;
-    Fixed    buildRatio;
+    struct Arrive {
+        Distance            distance;
+        std::vector<Action> action;
+    } arrive;
+
+    enum class Layer { NONE = 0, BASES = 1, SHIPS = 2, SHOTS = 3 };
+    struct Scale {
+        int64_t factor;  // sprite scale; 4096 = 100%
+    };
+
+    // rotation: for objects whose shapes depend on their direction
+    struct Rotation {
+        pn::string sprite;  // ID of sprite resource
+        Layer      layer;
+        Scale      scale;
+
+        Range<int64_t> frames;
+    };
+    sfz::optional<Rotation> rotation;
+
+    // animation: objects whose appearence does not depend on direction
+    struct Animation {
+        enum class Direction {
+            PLUS   = +1,  // +
+            MINUS  = -1,  // -
+            RANDOM = 0,   // ?
+        };
+
+        pn::string sprite;  // ID of sprite resource
+        Layer      layer;
+        Scale      scale;
+
+        Range<Fixed> frames;     // range of frames from sprite
+        Direction    direction;  // frame sequence
+        Fixed        speed;      // speed at which object animates
+        Range<Fixed> first;      // starting shape #
+    };
+    sfz::optional<Animation> animation;
+
+    // ray: point-to-point vector object
+    struct Ray {
+        sfz::optional<Hue> hue;  // if present, override color and cycle through shades
+        enum To {
+            OBJECT,
+            COORD,
+        } to              = To::OBJECT;
+        bool    lightning = false;
+        int32_t accuracy  = 0;  // for non-normal vector objects, how accurate
+        int32_t range     = 0;
+    };
+    sfz::optional<Ray> ray;
+
+    // bolt: moving vector object
+    struct Bolt {
+        RgbColor color;
+    };
+    sfz::optional<Bolt> bolt;
+
+    // weapon: weapon objects have no physical form, and can only be activated
+    struct Device {
+        struct Usage {
+            bool attacking;
+            bool defense;
+            bool transportation;
+        } usage;
+        enum Direction {
+            FORE,  // should use when foe is in front of bearer
+            OMNI,  // should use when foe is anywhere near bearer
+        } direction = Direction::FORE;
+        int32_t         energyCost;   // cost to fire
+        ticks           fireTime;     // time between shots
+        int32_t         ammo;         // initial ammo
+        Distance        range;        // range (= age * max velocity)
+        InvertableSpeed speed;        // for AI: inverse = 1/max velocity
+        int32_t         restockCost;  // energy to make new ammo
+    };
+    sfz::optional<Device> device;
+
+    uint32_t orderFlags = 0;
+    Tags     tags;
     ticks    buildTime;
-    //  int32_t             reserved1;
-    uint8_t  skillNum;
-    uint8_t  skillDen;
-    uint8_t  skillNumAdj;
-    uint8_t  skillDenAdj;
-    int16_t  pictPortraitResID;
-    int16_t  reserved2;
-    int32_t  reserved3;
-    uint32_t internalFlags;
 
-    static const int byte_size = 318;
+    struct AI {
+        struct Combat {
+            struct Engage {
+                sfz::optional<bool> unconditional;  // if has value, ignore if_.
+                struct If {
+                    Tags tags;
+                } if_;
+            };
+
+            bool   hated  = false;
+            bool   guided = false;
+            Engage engages;
+            Engage engaged;
+            bool   evades = false;
+            bool   evaded = false;
+            struct Skill {
+                uint8_t num;
+                uint8_t den;
+            } skill;
+        } combat;
+
+        struct Target {
+            struct Filter {
+                sfz::optional<bool> base;
+                sfz::optional<bool> local;
+                Owner               owner;
+                Tags                tags;
+            };
+            Filter prefer;
+            Filter force;
+        } target;
+
+        struct Escort {
+            int   class_ = 0;
+            Fixed power  = Fixed::zero();
+            Fixed need   = Fixed::zero();
+        } escort;
+
+        struct Build {
+            Fixed ratio              = Fixed::zero();
+            bool  needs_escort       = false;
+            bool  legacy_non_builder = false;
+        } build;
+    } ai;
 };
-void read_from(sfz::ReadSource in, BaseObject& object);
+BaseObject base_object(pn::value_cref x);
 
 }  // namespace antares
 

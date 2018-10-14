@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_FLOWS_MASTER_HPP_
 #define ANTARES_UI_FLOWS_MASTER_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "game/main.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/play-again.hpp"
@@ -49,6 +47,8 @@ class Master : public Card {
     State         _state;
     const int32_t _seed;
     bool          _skipped;
+    Texture       _publisher_screen;
+    Texture       _ego_screen;
 };
 
 }  // namespace antares

@@ -20,12 +20,14 @@
 #define ANTARES_CONFIG_GAMEPAD_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 namespace antares {
 
 struct Gamepad {
-    enum Button {
+    enum class Button {
+        NONE = 0x00,
+
         A      = 0x01,
         B      = 0x02,
         X      = 0x03,
@@ -46,20 +48,20 @@ struct Gamepad {
         RT = 0x35,
     };
 
-    enum Stick {
+    enum class Stick {
         LS = 0x30,
         RS = 0x33,
     };
 
     enum {
-        BEGIN      = A,
-        END        = RT + 1,
+        BEGIN      = static_cast<int>(Button::A),
+        END        = static_cast<int>(Button::RT) + 1,
         NAMES      = 1001,
         LONG_NAMES = 1003,
     };
 
-    static int16_t num(sfz::StringSlice name);
-    static bool name(int16_t button, sfz::String& out);
+    static Gamepad::Button num(pn::string_view name);
+    static bool            name(Gamepad::Button button, pn::string& out);
 };
 
 }  // namespace antares

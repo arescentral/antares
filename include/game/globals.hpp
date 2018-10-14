@@ -20,12 +20,11 @@
 #define ANTARES_GAME_GLOBALS_HPP_
 
 #include <queue>
-#include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/level.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
 #include "math/random.hpp"
@@ -42,22 +41,11 @@ const int32_t kRightPanelWidth  = 32;
 const int32_t kSmallScreenWidth = 640;
 const int32_t kRadarSize        = 110;
 
-enum ZoomType {
-    kTimesTwoZoom        = 0,
-    kActualSizeZoom      = 1,
-    kHalfSizeZoom        = 2,
-    kQuarterSizeZoom     = 3,
-    kEighthSizeZoom      = 4,
-    kNearestFoeZoom      = 5,
-    kNearestAnythingZoom = 6,
-    kSmallestZoom        = 7,
-};
-
 struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
     int32_t                               selectLine;
-    int32_t                               currentScreen;
+    Screen                                currentScreen;
     int32_t                               clickLine;
 };
 
@@ -73,15 +61,14 @@ struct proximityUnitType;
 struct scrollStarType;
 class Sprite;
 class InputSource;
-class StringList;
 
 struct GlobalState {
     uint32_t   sync;    // Indicates when net games are desynchronized.
     game_ticks time;    // Current game time.
     Random     random;  // Global random number generator.
 
-    Handle<Level> level;
-    int32_t       angle;
+    const Level* level = nullptr;
+    int32_t      angle;
 
     std::unique_ptr<Admiral[]> admirals;  // All admirals (whether active or not).
     Handle<Admiral>            admiral;   // Local player.
@@ -94,11 +81,16 @@ struct GlobalState {
     std::unique_ptr<Destination[]> destinations;  // Auxiliary info for kIsDestination objects.
     std::unique_ptr<Sprite[]>      sprites;       // Auxiliary info for objects with sprites.
 
-    bool            game_over;     // True if an admiral won or lost the level.
-    game_ticks      game_over_at;  // The time to stop the game (ignored unless game_over).
-    Handle<Admiral> victor;        // The winner (or none).
-    int             next_level;    // Next level (or -1 for none).
-    int16_t         victory_text;  // Text resource to show in debriefing.
+    std::vector<Handle<SpaceObject>> initials;     // May change due to assume initial.
+    std::vector<int32_t>             initial_ids;  // Ditto.
+
+    std::vector<bool> condition_enabled;  // Check conditions if enabled or persistent.
+
+    bool            game_over;             // True if an admiral won or lost the level.
+    game_ticks      game_over_at;          // The time to stop the game (ignored unless game_over).
+    Handle<Admiral> victor;                // The winner (or none).
+    const Level*    next_level = nullptr;  // Next level (or null for none).
+    sfz::optional<pn::string> victory_text;  // Text to show in debriefing.
 
     ticks                    radar_count;  // Counts down to a radar pulse every 5/6 seconds.
     std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.
@@ -117,7 +109,7 @@ struct GlobalState {
 
     miniComputerDataType mini;
 
-    ZoomType            zoom;
+    Zoom                zoom;
     Handle<SpaceObject> closest;   // Nearest object or hostile, depending on zoom.
     Handle<SpaceObject> farthest;  // Farthest object (sufficient for zoom-to-all).
 };

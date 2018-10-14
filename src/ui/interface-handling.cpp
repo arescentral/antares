@@ -23,16 +23,14 @@
 
 #include "ui/interface-handling.hpp"
 
-#include <sfz/sfz.hpp>
+#include <pn/file>
 #include <vector>
 
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/interface.hpp"
-#include "data/picture.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -53,21 +51,12 @@
 #include "video/driver.hpp"
 #include "video/transitions.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::PrintItem;
-using sfz::ReadSource;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::read;
 using std::make_pair;
 using std::max;
 using std::min;
 using std::pair;
 using std::unique_ptr;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -106,12 +95,11 @@ enum {
 
 const int16_t kHelpScreenKeyStringID = 6003;
 
-int find_replace(String& data, int pos, const StringSlice& search, const PrintItem& replace) {
+pn::string_view::size_type find_replace(
+        pn::string_ref data, int pos, pn::string_view search, pn::string_view replace) {
     size_t at = data.find(search, pos);
-    if (at != String::npos) {
-        String replace_string;
-        replace.print_to(replace_string);
-        data.replace(at, search.size(), replace_string);
+    if (at != data.npos) {
+        data.replace(at, search.size(), replace);
     }
     return at;
 }
@@ -119,7 +107,8 @@ int find_replace(String& data, int pos, const StringSlice& search, const PrintIt
 }  // namespace
 
 void CreateWeaponDataText(
-        String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName);
+        pn::string* text, const sfz::optional<BaseObject::Weapon>& weapon,
+        pn::string_view weaponName);
 
 //
 // BothCommandAndQ:
@@ -132,108 +121,110 @@ bool BothCommandAndQ() {
     bool q       = false;
 
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
-        uint32_t key = sys.prefs->key(i);
-        q |= (key == Keys::Q);
-        command |= (key == Keys::L_COMMAND);
+        Key key = sys.prefs->key(i);
+        q |= (key == Key::Q);
+        command |= (key == Key::L_COMMAND);
     }
 
     return command && q;
 }
 
-void CreateObjectDataText(String* text, Handle<BaseObject> object) {
-    Resource rsrc("text", "txt", kShipDataTextID);
-    String   data(utf8::decode(rsrc.data()));
+void CreateObjectDataText(pn::string& text, const BaseObject& object) {
+    pn::string data = Resource::text(kShipDataTextID);
 
-    StringList keys(kShipDataKeyStringID);
-    StringList values(kShipDataNameID);
+    auto keys   = Resource::strings(kShipDataKeyStringID);
+    auto values = Resource::strings(kShipDataNameID);
 
     // *** Replace place-holders in text with real data, using the fabulous find_replace routine
     // an object or a ship?
-    if (object->attributes & kCanThink) {
-        const StringSlice& name = values.at(0);
+    if (object.attributes & kCanThink) {
+        pn::string_view name = values.at(0);
         find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
     } else {
-        const StringSlice& name = values.at(1);
+        pn::string_view name = values.at(1);
         find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
     }
 
     // ship name
-    {
-        const StringSlice& name = get_object_name(object);
-        find_replace(data, 0, keys.at(kShipTypeStringNum), name);
-    }
+    find_replace(data, 0, keys.at(kShipTypeStringNum), object.long_name);
 
     // ship mass
-    find_replace(data, 0, keys.at(kMassStringNum), Fixed(object->mass));
+    find_replace(data, 0, keys.at(kMassStringNum), stringify(Fixed(object.mass)));
 
     // ship shields
-    find_replace(data, 0, keys.at(kShieldStringNum), object->health);
+    find_replace(data, 0, keys.at(kShieldStringNum), pn::dump(object.health, pn::dump_short));
 
     // light speed
-    find_replace(data, 0, keys.at(kHasLightStringNum), object->warpSpeed.val());
+    find_replace(
+            data, 0, keys.at(kHasLightStringNum),
+            pn::dump(object.warpSpeed.val(), pn::dump_short));
 
     // max velocity
-    find_replace(data, 0, keys.at(kMaxSpeedStringNum), Fixed(object->maxVelocity));
+    find_replace(data, 0, keys.at(kMaxSpeedStringNum), stringify(Fixed(object.maxVelocity)));
 
     // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), Fixed(object->maxThrust));
+    find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object.thrust)));
 
     // par turn
-    find_replace(data, 0, keys.at(kTurnStringNum), Fixed(object->frame.rotation.turnAcceleration));
+    find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed(object.turn_rate)));
 
     // now, check for weapons!
-    CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));
-    CreateWeaponDataText(&data, object->beam.base, values.at(kShipDataBeamStringNum));
-    CreateWeaponDataText(&data, object->special.base, values.at(kShipDataSpecialStringNum));
+    CreateWeaponDataText(&data, object.weapons.pulse, values.at(kShipDataPulseStringNum));
+    CreateWeaponDataText(&data, object.weapons.beam, values.at(kShipDataBeamStringNum));
+    CreateWeaponDataText(&data, object.weapons.special, values.at(kShipDataSpecialStringNum));
 
-    print(*text, data);
+    text = std::move(data);
 }
 
 void CreateWeaponDataText(
-        String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
+        pn::string* text, const sfz::optional<BaseObject::Weapon>& weapon,
+        pn::string_view weaponName) {
     int32_t mostDamage;
     bool    isGuided = false;
 
-    if (!weaponObject.get()) {
+    if (!weapon.has_value()) {
         return;
     }
+    const auto& weaponObject = weapon->base;
 
     // TODO(sfiera): catch exception.
-    Resource rsrc("text", "txt", kWeaponDataTextID);
-    String   data(utf8::decode(rsrc.data()));
+    pn::string data = Resource::text(kWeaponDataTextID);
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided
 
     mostDamage = 0;
     isGuided   = false;
-    if (weaponObject->activate.size() > 0) {
-        for (auto action : weaponObject->activate) {
-            if ((action->verb == kCreateObject) || (action->verb == kCreateObjectSetDest)) {
-                Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;
-                if (missileObject->attributes & kIsGuided)
-                    isGuided = true;
-                if (missileObject->damage > mostDamage)
-                    mostDamage = missileObject->damage;
+    if (weaponObject->activate.action.size() > 0) {
+        for (const auto& action : weaponObject->activate.action) {
+            const NamedHandle<const BaseObject>* created_base;
+            switch (action.type()) {
+                case Action::Type::CREATE: created_base = &action.create.base; break;
+                case Action::Type::MORPH: created_base = &action.morph.base; break;
+                case Action::Type::EQUIP: created_base = &action.equip.base; break;
+                default: continue;
+            }
+            if ((*created_base)->attributes & kIsGuided) {
+                isGuided = true;
+            }
+            if ((*created_base)->collide.damage > mostDamage) {
+                mostDamage = (*created_base)->collide.damage;
             }
         }
     }
 
-    StringList keys(kShipDataKeyStringID);
-    StringList values(kShipDataNameID);
+    auto keys   = Resource::strings(kShipDataKeyStringID);
+    auto values = Resource::strings(kShipDataNameID);
 
     // weapon name #
     find_replace(data, 0, keys.at(kWeaponNumberStringNum), weaponName);
 
     // weapon name
-    {
-        const StringSlice& name = get_object_name(weaponObject);
-        find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
-    }
+    find_replace(data, 0, keys.at(kWeaponNameStringNum), weaponObject->long_name);
 
-    const StringSlice& yes  = values.at(kShipDataYesStringNum);
-    const StringSlice& no   = values.at(kShipDataNoStringNum);
-    const StringSlice& dash = values.at(kShipDataDashStringNum);
+    pn::string_view yes  = values.at(kShipDataYesStringNum);
+    pn::string_view no   = values.at(kShipDataNoStringNum);
+    pn::string_view dash = values.at(kShipDataDashStringNum);
 
     // is guided
     if (isGuided) {
@@ -250,38 +241,41 @@ void CreateWeaponDataText(
     }
 
     // range
-    find_replace(data, 0, keys.at(kWeaponRangeStringNum), lsqrt(weaponObject->frame.weapon.range));
+    find_replace(
+            data, 0, keys.at(kWeaponRangeStringNum),
+            pn::dump((int64_t)lsqrt(weaponObject->device->range.squared), pn::dump_short));
 
     if (mostDamage > 0) {
-        find_replace(data, 0, keys.at(kWeaponDamageStringNum), mostDamage);
+        find_replace(
+                data, 0, keys.at(kWeaponDamageStringNum), pn::dump(mostDamage, pn::dump_short));
     } else {
         find_replace(data, 0, keys.at(kWeaponDamageStringNum), dash);
     }
-    print(*text, data);
+    *text += data;
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, size_t padTo) {
-    StringList keys(kHelpScreenKeyStringID);
-    StringList values(resID);
+void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo) {
+    auto keys   = Resource::strings(kHelpScreenKeyStringID);
+    auto values = Resource::strings(resID);
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-        const StringSlice& search = keys.at(i);
-        String             replace(values.at(sys.prefs->key(i) - 1));
+        pn::string_view search  = keys.at(i);
+        pn::string      replace = values.at(static_cast<int>(sys.prefs->key(i))).copy();
         // First, pad to the desired width.
-        if (replace.size() < padTo) {
-            replace.resize(padTo, ' ');
+        while (replace.size() < padTo) {
+            replace += pn::rune{' '};
         }
 
         // Double backslashes.  The text produced here will be fed into
         // StyledText.set_retro_text(), which interprets backslashes
         // specially.  Don't do this until after padding, though.
         size_t pos = 0;
-        while ((pos = find_replace(replace, pos, "\\", "\\\\")) != String::npos) {
+        while ((pos = find_replace(replace, pos, pn::string{"\\"}, "\\\\")) != replace.npos) {
             pos += 2;  // Don't find the just-inserted backslashes again.
         }
 
         // Replace search string with value string in resulting text.
-        while (find_replace(*text, 0, search, replace) != String::npos) {
+        while (find_replace(text, 0, search, replace) != text.npos) {
             pos += 1;
         };
     }

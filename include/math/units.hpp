@@ -39,7 +39,7 @@ namespace antares {
 // ticks in a second, which gives us 1000020 microseconds in a second.
 // This makes it possible to implicitly convert seconds to ticks to
 // microseconds.
-typedef std::chrono::microseconds usecs;
+typedef std::chrono::microseconds                                       usecs;
 typedef std::chrono::duration<usecs::rep, std::ratio<1000020, 1000000>> secs;
 typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>>   ticks;
 
@@ -55,8 +55,8 @@ struct Wall {
     typedef usecs duration;
 };
 
-typedef std::chrono::time_point<GameStart> game_ticks;
-typedef std::chrono::time_point<Wall>      wall_time;
+typedef std::chrono::time_point<GameStart>   game_ticks;
+typedef std::chrono::time_point<Wall>        wall_time;
 typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 
 // Spatial units

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,35 +16,32 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_STRING_LIST_HPP_
-#define ANTARES_DATA_STRING_LIST_HPP_
+#ifndef ANTARES_DATA_BRIEFING_HPP_
+#define ANTARES_DATA_BRIEFING_HPP_
 
-#include <sfz/sfz.hpp>
-#include <vector>
+#include <pn/string>
+#include <sfz/optional.hpp>
+
+#include "data/handle.hpp"
 
 namespace antares {
 
-class StringList {
-  public:
-    StringList(int id);
+class path_value;
+struct Initial;
 
-    ssize_t index_of(const sfz::StringSlice& result) const;
-    size_t             size() const;
-    const sfz::String& at(size_t index) const;
-
-  private:
-    friend std::vector<sfz::String> to_vector(StringList&& strl);
-    std::vector<sfz::String> _strings;
-
-    DISALLOW_COPY_AND_ASSIGN(StringList);
+struct Briefing {
+    sfz::optional<Handle<const Initial>> initial;  // Object to focus on, or none for freestanding.
+    pn::string                           title;    // Plain text, used for title bar.
+    pn::string                           content;  // Styled text, used for body.
 };
 
-inline std::vector<sfz::String> to_vector(StringList&& strl) {
-    std::vector<sfz::String> result;
-    std::swap(result, strl._strings);
-    return result;
-}
+template <typename T>
+struct field_reader;
+template <>
+struct field_reader<Briefing> {
+    static Briefing read(path_value x);
+};
 
 }  // namespace antares
 
-#endif  // ANTARES_DATA_STRING_LIST_HPP_
+#endif  // ANTARES_DATA_BRIEFING_HPP_

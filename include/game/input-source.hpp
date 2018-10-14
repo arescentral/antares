@@ -20,7 +20,8 @@
 #define ANTARES_GAME_INPUT_SOURCE_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <map>
+#include <memory>
 
 #include "config/keys.hpp"
 #include "data/handle.hpp"
@@ -32,6 +33,9 @@ struct ReplayData;
 
 class InputSource : public EventReceiver {
   public:
+    InputSource() {}
+    InputSource(const InputSource&) = delete;
+    InputSource& operator=(const InputSource&) = delete;
     virtual ~InputSource();
 
     virtual void start() = 0;
@@ -75,8 +79,6 @@ class ReplayInputSource : public InputSource {
     game_ticks _duration;
     std::multimap<std::pair<int, game_ticks>, std::unique_ptr<Event>> _events;
     bool _exit;
-
-    DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
 };
 
 }  // namespace antares

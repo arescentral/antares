@@ -18,25 +18,31 @@
 
 #include "sound/music.hpp"
 
+#include <pn/file>
+
 #include "config/preferences.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
 
+const pn::string_view Music::title_song    = "doomtroopers-unite";
+const pn::string_view Music::prologue_song = "autoregret";
+const pn::string_view Music::victory_song  = "moonrise-patrol";
+const pn::string_view Music::briefing_song = "freds-theme";
+
 void Music::init() {
     _playing   = false;
     _song_type = IDLE;
-    _song_id   = kTitleSongID;
-    _song.reset();
+    _song      = title_song.copy();
+    _song_sound.reset();
     _channel = sys.audio->open_channel();
 }
 
-void Music::play(Type type, int16_t id) {
+void Music::play(Type type, pn::string_view song) {
     bool   play   = false;
     double volume = 1.0;
     if (type == IDLE) {
@@ -46,18 +52,17 @@ void Music::play(Type type, int16_t id) {
         volume = 0.84375;
     }
 
-    if (_playing && play && (_song_id == id)) {
+    if (_playing && play && (_song == song)) {
         return;
     }
     stop();
     _song_type = type;
-    _song_id   = id;
+    _song      = song.copy();
 
     if (play) {
-        _song = sys.audio->open_sound(format("/music/{0}", id));
+        _song_sound = sys.audio->open_music(song);
         _channel->activate();
-        _channel->amp(255 * volume);
-        _song->loop();
+        _song_sound->loop(255 * volume);
         _playing = true;
     }
 }
@@ -71,20 +76,20 @@ void Music::toggle() {
     if (_playing) {
         stop();
     } else {
-        play(_song_type, _song_id);
+        play(_song_type, _song);
     }
 }
 
 void Music::sync() {
     if (_song_type == IDLE) {
         if (sys.prefs->play_idle_music()) {
-            play(_song_type, _song_id);
+            play(_song_type, _song);
         } else {
             stop();
         }
     } else if (_song_type == IN_GAME) {
         if (sys.prefs->play_music_in_game()) {
-            play(_song_type, _song_id);
+            play(_song_type, _song);
         } else {
             stop();
         }

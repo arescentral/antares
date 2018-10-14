@@ -19,38 +19,14 @@
 #ifndef ANTARES_DATA_SCENARIO_LIST_HPP_
 #define ANTARES_DATA_SCENARIO_LIST_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 #include <vector>
+
+#include "data/info.hpp"
 
 namespace antares {
 
-struct Version {
-    std::vector<int> components;
-};
-void print_to(sfz::PrintTarget out, const Version& v);
-Version u32_to_version(uint32_t in);
-
-class ScenarioList {
-  public:
-    struct Entry {
-        sfz::String identifier;
-        sfz::String title;
-        sfz::String download_url;
-        sfz::String author;
-        sfz::String author_url;
-        Version     version;
-        bool        installed;
-    };
-
-    ScenarioList();
-    size_t       size() const;
-    const Entry& at(size_t index) const;
-
-  private:
-    std::vector<Entry> _scenarios;
-
-    DISALLOW_COPY_AND_ASSIGN(ScenarioList);
-};
+std::vector<Info> scenario_list();
 
 }  // namespace antares
 

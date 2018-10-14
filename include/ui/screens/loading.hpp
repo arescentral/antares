@@ -20,21 +20,21 @@
 #ifndef ANTARES_UI_SCREENS_LOADING_HPP_
 #define ANTARES_UI_SCREENS_LOADING_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
+#include "game/level.hpp"
 #include "math/units.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class LoadingScreen : public InterfaceScreen {
   public:
-    LoadingScreen(Handle<Level> level, bool* cancelled);
+    LoadingScreen(const Level& level, bool* cancelled);
     ~LoadingScreen();
 
     virtual void become_front();
@@ -44,7 +44,6 @@ class LoadingScreen : public InterfaceScreen {
     void update(int32_t current, int32_t max);
 
   protected:
-    virtual void handle_button(Button& button);
     virtual void overlay() const;
 
   private:
@@ -55,17 +54,14 @@ class LoadingScreen : public InterfaceScreen {
     };
     State _state;
 
-    Handle<Level> const _level;
-    bool* const         _cancelled;
+    const Level& _level;
+    bool* const  _cancelled;
 
     std::unique_ptr<StyledText> _name_text;
     wall_time                   _next_update;
     int32_t                     _chars_typed;
 
-    int32_t _current;
-    int32_t _max;
-
-    DISALLOW_COPY_AND_ASSIGN(LoadingScreen);
+    LoadState _load_state;
 };
 
 }  // namespace antares

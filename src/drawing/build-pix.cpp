@@ -18,25 +18,16 @@
 
 #include "drawing/build-pix.hpp"
 
-#include <sfz/sfz.hpp>
+#include <pn/file>
 #include <vector>
 
-#include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::string_to_int;
 using std::unique_ptr;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -100,60 +91,49 @@ class PixDraw {
 
 }  // namespace
 
-BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
-    Resource rsrc("text", "txt", text_id);
-
-    BytesSlice     data = rsrc.data();
-    String         text(utf8::decode(data));
-    bool           in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
-    size_t         start             = 0;
-    const size_t   end               = text.size();
-    vector<String> raw_lines;
+BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
+    bool                    in_section_header = (text.size() >= 2) && (text.substr(0, 2) == "#+");
+    size_t                  start             = 0;
+    const size_t            end               = text.size();
+    vector<pn::string_view> raw_lines;
     for (size_t i = start; i != end; ++i) {
-        if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
-            raw_lines.emplace_back(text.slice(start, i - start));
+        if (((end - i) >= 3) && (text.substr(i, 3) == "\n#+")) {
+            raw_lines.emplace_back(text.substr(start, i - start));
             start             = i + 1;
             in_section_header = true;
-        } else if (in_section_header && (text.at(i) == '\n')) {
-            raw_lines.emplace_back(text.slice(start, i - start));
+        } else if (in_section_header && (text.data()[i] == '\n')) {
+            raw_lines.emplace_back(text.substr(start, i - start));
             start             = i + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        raw_lines.emplace_back(text.slice(start));
+        raw_lines.emplace_back(text.substr(start));
     }
 
-    for (const auto& line : raw_lines) {
-        if (line.size() >= 2 && line.slice(0, 2) == "#+") {
+    for (pn::string_view line : raw_lines) {
+        if (line.size() >= 2 && line.substr(0, 2) == "#+") {
             if (line.size() > 2) {
-                if (line.at(2) == 'B') {
-                    int32_t id = 2005;
+                if (line.data()[2] == 'B') {
+                    pn::string_view id = "log/starfield/a";
                     if (line.size() > 3) {
-                        if (!string_to_int(line.slice(3), id)) {
-                            throw Exception(format("malformed header line {0}", quote(line)));
-                        }
+                        id = line.substr(3);
                     }
-                    Picture pict(id);
-                    _lines.push_back(Line{
-                            Line::BACKGROUND, Picture(id).texture(), nullptr,
-                    });
+                    _lines.push_back(Line{Line::BACKGROUND, Resource::texture(id), nullptr});
                 } else {
-                    int32_t id;
-                    if (!string_to_int(line.slice(2), id)) {
-                        throw Exception(format("malformed header line {0}", quote(line)));
-                    }
-                    Picture pict(id);
-                    _lines.push_back(Line{
-                            Line::PICTURE, Picture(id).texture(), nullptr,
-                    });
+                    pn::string_view id = line.substr(2);
+                    _lines.push_back(Line{Line::PICTURE, Resource::texture(id), nullptr});
                 }
             }
         } else {
             unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
-            auto                   red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
+            auto                   red = GetRGBTranslateColorShade(Hue::RED, LIGHTEST);
             styled->set_fore_color(red);
-            styled->set_retro_text(line);
+            if (line.data() == raw_lines.back().data()) {
+                styled->set_retro_text(line);
+            } else {
+                styled->set_retro_text(pn::format("{0}\n", line));
+            }
             styled->wrap_to(_size.width - 11, 0, 2);
             _lines.push_back(Line{Line::TEXT, nullptr, std::move(styled)});
         }

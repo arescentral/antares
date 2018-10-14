@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_BRIEFING_HPP_
 #define ANTARES_UI_SCREENS_BRIEFING_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "drawing/interface.hpp"
@@ -29,11 +28,11 @@
 
 namespace antares {
 
-struct Level;
+union Level;
 
 class BriefingScreen : public InterfaceScreen {
   public:
-    BriefingScreen(const Level* level, bool* cancelled);
+    BriefingScreen(const Level& level, bool* cancelled);
     ~BriefingScreen();
 
     virtual void become_front();
@@ -42,10 +41,6 @@ class BriefingScreen : public InterfaceScreen {
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
-
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(Button& button);
 
   private:
     enum Item {
@@ -66,30 +61,29 @@ class BriefingScreen : public InterfaceScreen {
 
     void show_object_data(int index, const KeyDownEvent& event);
     void show_object_data(int index, const GamepadButtonDownEvent& event);
-    void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
+    void show_object_data(
+            int index, ObjectDataScreen::Trigger trigger, int mouse, Key key,
+            Gamepad::Button gamepad);
 
-    const Level* const  _level;
-    bool* const         _cancelled;
-    int                 _briefing_point;
-    const int           _briefing_point_count;
-    mutable LabeledRect _data_item;
+    const Level&    _level;
+    bool* const     _cancelled;
+    int             _briefing_point;
+    const int       _briefing_point_start;
+    const int       _briefing_point_end;
+    mutable BoxRect _data_item;
 
     Rect _bounds;
-
-    Texture _star_map;
-    Rect    _star_rect;
+    Rect _star_rect;
 
     struct Star {
         Point   location;
         uint8_t shade;
     };
-    std::vector<Star>           _system_stars;
-    std::vector<inlinePictType> _inline_pict;
-    Rect                        _highlight_rect;
+    std::vector<Star>                    _system_stars;
+    std::vector<inlinePictType>          _inline_pict;
+    Rect                                 _highlight_rect;
     std::vector<std::pair<Point, Point>> _highlight_lines;
-    sfz::String _text;
-
-    DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
+    pn::string                           _text;
 };
 
 }  // namespace antares
