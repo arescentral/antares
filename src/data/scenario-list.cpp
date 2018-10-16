@@ -35,7 +35,7 @@ namespace {
 
 struct ScopedGlob {
     glob_t data;
-    ScopedGlob() { memset(&data, sizeof(data), 0); }
+    ScopedGlob() { memset(&data, 0, sizeof(data)); }
     ~ScopedGlob() { globfree(&data); }
 };
 

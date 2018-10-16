@@ -59,10 +59,6 @@ def should_write(base):
         return True
     elif base.startswith("."):
         return False
-    elif base == "gn":
-        return False
-    elif base == "ninja":
-        return False
     elif ext in [".pyc", ".zip", ".tgz", ".tbz2"]:
         return False
     return True

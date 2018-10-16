@@ -440,6 +440,7 @@ BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
             path_value{x0}, {{"long_name", &BaseObject::long_name},
                              {"short_name", &BaseObject::short_name},
+                             {"tags", &BaseObject::tags},
 
                              {"notes", nullptr},
                              {"class", nullptr},
@@ -448,20 +449,18 @@ BaseObject base_object(pn::value_cref x0) {
                              {"portrait", &BaseObject::portrait},
 
                              {"price", &BaseObject::price},
-                             {"warp_out_distance", &BaseObject::warpOutDistance},
+                             {"build_time", &BaseObject::buildTime},
                              {"health", &BaseObject::health},
                              {"energy", &BaseObject::energy},
+                             {"shield_color", &BaseObject::shieldColor},
                              {"occupy_count", &BaseObject::occupy_count},
 
-                             {"max_velocity", &BaseObject::maxVelocity},
-                             {"warp_speed", &BaseObject::warpSpeed},
                              {"mass", &BaseObject::mass},
-                             {"turn_rate", &BaseObject::turn_rate},
+                             {"max_velocity", &BaseObject::maxVelocity},
                              {"thrust", &BaseObject::thrust},
-
-                             {"build_time", &BaseObject::buildTime},
-
-                             {"shield_color", &BaseObject::shieldColor},
+                             {"warp_speed", &BaseObject::warpSpeed},
+                             {"warp_out_distance", &BaseObject::warpOutDistance},
+                             {"turn_rate", &BaseObject::turn_rate},
 
                              {"initial_velocity", &BaseObject::initial_velocity},
                              {"initial_direction", &BaseObject::initial_direction},
@@ -484,7 +483,6 @@ BaseObject base_object(pn::value_cref x0) {
                              {"bolt", &BaseObject::bolt},
                              {"device", &BaseObject::device},
 
-                             {"tags", &BaseObject::tags},
                              {"ai", &BaseObject::ai}}));
 }
 
