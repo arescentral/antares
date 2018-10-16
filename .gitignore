@@ -3,3 +3,6 @@
 
 *.pyc
 /scenarios
+
+# Generated distfiles
+/antares-*.zip

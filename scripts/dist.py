@@ -30,25 +30,30 @@ def main():
     if archive_format == "zip":
         path = "./antares-%s.%s" % (version, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            for real_path, archive_path in walk(archive_root):
+            for real_path, archive_path in walk(archive_root, "."):
                 z.write(real_path, archive_path)
     elif archive_format in ["gz", "bz2"]:
         path = "./antares-%s.t%s" % (version, archive_format)
         with tarfile.open(path, "w:%s" % archive_format) as t:
-            for real_path, archive_path in walk(archive_root):
+            for real_path, archive_path in walk(archive_root, "."):
                 t.add(real_path, arcname=archive_path)
+    elif archive_format == "mac":
+        path = "./antares-mac-%s.zip" % version
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
+            for real_path, archive_path in walk("Antares.app", "out/mac/opt/Antares.app"):
+                z.write(real_path, archive_path)
     else:
         raise RuntimeError(archive_format)
 
 
-def walk(archive_root):
-    for root, dirs, files in os.walk("."):
-        root = root[2:]
+def walk(archive_root, walk_root):
+    for root, dirs, files in os.walk(walk_root):
+        root = root[1 + len(walk_root):]
         files[:] = [f for f in files if should_write(f)]
         dirs[:] = [d for d in dirs if should_recurse(root, d)]
 
         for f in files:
-            real_path = os.path.join(root, f)
+            real_path = os.path.join(walk_root, root, f)
             archive_path = os.path.join(archive_root, root, f)
             yield real_path, archive_path
 
