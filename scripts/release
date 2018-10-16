@@ -59,14 +59,4 @@ else
     git checkout stable
     git merge --no-ff release/$VERSION
     git tag v$VERSION
-    ./configure --mode=opt
-    make
-    make sign
-    (cd out/cur && zip -r ../../antares-mac-$VERSION.zip Antares.app)
-    scripts/dist.py zip
-    scripts/dist.py gz
-    scripts/dist.py bz2
-
-    git checkout master
-    git merge --no-ff release/$VERSION
 fi

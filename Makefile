@@ -33,6 +33,10 @@ dist:
 	scripts/dist.py gz
 	scripts/dist.py bz2
 
+.PHONY: macdist
+macdist: sign
+	scripts/dist.py mac
+
 .PHONY: distclean
 distclean:
 	rm -Rf out/
@@ -44,7 +48,7 @@ run: all
 	@[ ! -f $(MAC_BIN) ] && scripts/antares_launcher.py || true
 
 .PHONY: sign
-sign:
+sign: all
 	codesign --force \
 		--sign "Developer ID Application" \
 		--entitlements resources/entitlements.plist \

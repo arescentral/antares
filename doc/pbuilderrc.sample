@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Example:
+# $ sudo OS=ubuntu ARCH=amd64 DIST=xenial pbuilder create
+# $ OS=ubuntu ARCH=amd64 DIST=xenial pdebuild
+
+set -o errexit
+
+case "$OS" in
+    ubuntu)
+        MIRRORSITE="http://archive.ubuntu.com/ubuntu/"
+        OTHERMIRROR="deb http://archive.ubuntu.com/ubuntu/ ${DIST}-updates main universe multiverse"
+        COMPONENTS="main universe multiverse"
+        DEBOOTSTRAPOPTS=("${DEBOOTSTRAPOPTS[@]}"
+            "--keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg")
+        ;;
+    *)
+        echo "$OS: unknown OS"
+        exit 1
+        ;;
+esac
+
+if [ "$DIST" == "" ]; then
+    echo "DIST is not set"
+    exit 1
+fi
+
+if [ "$ARCH" == "" ]; then
+    echo "ARCH is not set"
+    exit 1
+fi
+
+NAME="$OS-$DIST-$ARCH"
+
+DEBOOTSTRAPOPTS=("${DEBOOTSTRAPOPTS[@]}" "--arch=$ARCH")
+BASETGZ="/var/cache/pbuilder/$NAME/base.tgz"
+DISTRIBUTION="$DIST"
+BUILDRESULT="/var/cache/pbuilder/$NAME/result/"
+APTCACHE="/var/cache/pbuilder/$NAME/aptcache/"
+BUILDPLACE="/var/cache/pbuilder/build"
+HOOKDIR="/var/cache/pbuilder/hook.d/"
+USENETWORK="no"
