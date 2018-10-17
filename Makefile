@@ -107,6 +107,10 @@ install-scenario: all
 	out/cur/antares-install-data -s $(DESTDIR)$(DATADIR)/downloads -d $(DESTDIR)$(DATADIR)/scenarios
 endif
 
+.PHONY: pull-request
+pull-request:
+	hub pull-request -b arescentral:master
+
 .PHONY: travis-test-mac
 travis-test-mac: smoke-test
 
