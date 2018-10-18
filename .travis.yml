@@ -8,7 +8,8 @@ matrix:
         - scripts/load-cert.sh
 
       script:
-        - ./configure --antares-version=$(git describe --tags HEAD)
+        - scripts/set-version $(git describe --tags HEAD)
+        - ./configure
         - make build
         - make smoke-test
 
@@ -33,7 +34,8 @@ matrix:
         - sudo scripts/installdeps.py
 
       script:
-        - ./configure --antares-version=$(git describe --tags HEAD)
+        - scripts/set-version $(git describe --tags HEAD)
+        - ./configure
         - make build
         - make smoke-test
         - make test-install

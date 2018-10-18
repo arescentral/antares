@@ -17,7 +17,6 @@ def main():
     with open("./BUILD.gn") as f:
         version = None
         for line in f.readlines():
-            line = line.strip()
             if line.startswith("antares_version = "):
                 version = line.split("=", 1)[1].strip().strip('"')
                 break

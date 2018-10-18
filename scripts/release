@@ -35,11 +35,6 @@ else
     usage
 fi
 
-update-gn() {
-    sed 's/  antares_version = ".*"/  antares_version = "'$1'"/' BUILD.gn >.BUILD.gn.tmp
-    mv .BUILD.gn.tmp BUILD.gn
-}
-
 update-readme() {
     sed 's/\(Antares[- ]\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst >.README.rst.tmp
     mv .README.rst.tmp README.rst
@@ -48,11 +43,11 @@ update-readme() {
 if [[ $ACTION == start ]]; then
     set -o verbose
     git checkout -b release/$VERSION
-    update-gn ${VERSION}~rc1
+    scripts/set-version ${VERSION}~rc1
     git commit BUILD.gn README.rst -m "Create release branch for $VERSION."
 else
     set -o verbose
-    update-gn $VERSION
+    scripts/set-version $VERSION
     update-readme $VERSION
     git commit BUILD.gn README.rst -m "Release Antares $VERSION."
 
