@@ -64,7 +64,7 @@ def should_write(base):
         return True
     elif base.startswith("."):
         return False
-    elif ext in [".pyc", ".zip", ".tgz", ".tbz2"]:
+    elif ext in [".pyc", ".zip", ".tgz", ".tbz2", "cer", "p12"]:
         return False
     return True
 
