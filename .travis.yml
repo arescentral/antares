@@ -7,7 +7,8 @@ matrix:
   include:
     - os:         osx
       env:
-        - TESTS=travis-test-mac
+        - TEST:  travis-test-mac
+        - DIST:  dist
 
     - os:       linux
       dist:     trusty
@@ -23,7 +24,8 @@ matrix:
         sudo dpkg -i libpng*.deb libglfw3*.deb && \
         sudo scripts/installdeps.py
       env:
-        - TESTS=travis-test-linux
+        - TEST:  travis-test-linux
+        - DIST:  dist
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
@@ -32,4 +34,8 @@ git:
 before_install:
   - git submodule update --init
 
-script: ./configure && make && make $TESTS
+script:
+  - ./configure --antares-version=$(git describe --tags HEAD)
+  - make
+  - make $TEST
+  - make $DIST
