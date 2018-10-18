@@ -1,29 +1,38 @@
 language:  cpp
 
-env:
-  - TESTS=test
-
 matrix:
   include:
     - os:         osx
-      env:
-        - TESTS=travis-test-mac
+
+      install:
+        - scripts/load-cert.sh
+
+      script:
+        - ./configure --antares-version=$(git describe --tags HEAD)
+        - make
+        - make travis-test-mac
+        - make dist macdist
 
     - os:       linux
       dist:     trusty
-      install: |
-        sudo apt-get remove -y libpng12-dev && \
-        sudo apt-get install libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev && \
-        curl -fO https://sfiera.net/~sfiera/deb/libpng16-16_1.6.20-2_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libpng16-devtools_1.6.20-2_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libpng16-dev_1.6.20-2_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libglfw3_3.1.2-3_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libglfw3-dev_3.1.2-3_amd64.deb && \
-        file libpng*.deb libglfw3*.deb && \
-        sudo dpkg -i libpng*.deb libglfw3*.deb && \
-        sudo scripts/installdeps.py
-      env:
-        - TESTS=travis-test-linux
+
+      install:
+        - sudo apt-get remove -y libpng12-dev
+        - sudo apt-get install libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev
+        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-16_1.6.20-2_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-devtools_1.6.20-2_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-dev_1.6.20-2_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libglfw3_3.1.2-3_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libglfw3-dev_3.1.2-3_amd64.deb
+        - file libpng*.deb libglfw3*.deb
+        - sudo dpkg -i libpng*.deb libglfw3*.deb
+        - sudo scripts/installdeps.py
+
+      script:
+        - ./configure --antares-version=$(git describe --tags HEAD)
+        - make
+        - make travis-test-linux
+        - make dist
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
@@ -31,5 +40,3 @@ git:
   submodules: false
 before_install:
   - git submodule update --init
-
-script: ./configure && make && make $TESTS
