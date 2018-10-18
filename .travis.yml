@@ -4,11 +4,14 @@ matrix:
   include:
     - os:         osx
 
+      install:
+        - scripts/load-cert.sh
+
       script:
         - ./configure --antares-version=$(git describe --tags HEAD)
         - make
         - make travis-test-mac
-        - make dist
+        - make dist macdist
 
     - os:       linux
       dist:     trusty
