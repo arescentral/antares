@@ -9,9 +9,13 @@ matrix:
 
       script:
         - ./configure --antares-version=$(git describe --tags HEAD)
-        - make
-        - make travis-test-mac
-        - make dist macdist
+        - make build
+        - make smoke-test
+
+      before_deploy:
+        - make dist
+        - make macdist
+        - 'ls -l antares-*'
 
     - os:       linux
       dist:     trusty
@@ -30,9 +34,13 @@ matrix:
 
       script:
         - ./configure --antares-version=$(git describe --tags HEAD)
-        - make
-        - make travis-test-linux
+        - make build
+        - make smoke-test
+        - make test-install
+
+      before_deploy:
         - make dist
+        - 'ls -l antares-*'
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
