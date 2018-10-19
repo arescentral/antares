@@ -24,20 +24,35 @@ def main():
         print("couldn't determine antares version")
         sys.exit(1)
 
+    filename_version = version
+    if os.environ.get("TRAVIS") == "true":
+        if os.environ["TRAVIS_BRANCH"] != "master":
+            print("not building distfiles; not on master")
+            sys.exit(1)
+        if os.environ["TRAVIS_PULL_REQUEST"] != "false":
+            filename_version = "pull"
+        elif not os.environ["TRAVIS_TAG"]:
+            filename_version = "git"
+
     archive_root = "antares-%s" % version
 
+    try:
+        os.makedirs("dist")
+    except OSError:
+        pass
+
     if archive_format == "zip":
-        path = "./antares-%s.%s" % (version, archive_format)
+        path = "dist/antares-%s.%s" % (filename_version, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk(archive_root, "."):
                 z.write(real_path, archive_path)
     elif archive_format in ["gz", "bz2"]:
-        path = "./antares-%s.t%s" % (version, archive_format)
+        path = "dist/antares-%s.t%s" % (filename_version, archive_format)
         with tarfile.open(path, "w:%s" % archive_format) as t:
             for real_path, archive_path in walk(archive_root, "."):
                 t.add(real_path, arcname=archive_path)
     elif archive_format == "mac":
-        path = "./antares-mac-%s.zip" % version
+        path = "dist/antares-mac-%s.zip" % filename_version
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk("Antares.app", "out/mac/opt/Antares.app"):
                 z.write(real_path, archive_path)

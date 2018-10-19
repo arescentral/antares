@@ -12,11 +12,11 @@ matrix:
         - ./configure
         - make build
         - make smoke-test
-
-      before_deploy:
         - make dist
         - make macdist
-        - 'ls -l antares-*'
+
+      after_success:
+        - 'ls -l dist'
 
     - os:       linux
       dist:     trusty
@@ -39,10 +39,10 @@ matrix:
         - make build
         - make smoke-test
         - make test-install
-
-      before_deploy:
         - make dist
-        - 'ls -l antares-*'
+
+      after_success:
+        - 'ls -l dist'
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
