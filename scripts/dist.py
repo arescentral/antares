@@ -26,12 +26,16 @@ def main():
 
     filename_version = version
     if os.environ.get("TRAVIS") == "true":
-        if os.environ["TRAVIS_BRANCH"] != "master":
+        if os.environ["TRAVIS_TAG"]:
+            travis_version = os.environ["TRAVIS_TAG"]
+            assert travis_version == version, "%s != %s" % (travis_version, version)
+        elif os.environ["TRAVIS_BRANCH"] != "master":
             print("not building distfiles; not on master")
             sys.exit(1)
-        if os.environ["TRAVIS_PULL_REQUEST"] != "false":
-            filename_version = "pull"
-        elif not os.environ["TRAVIS_TAG"]:
+        elif os.environ["TRAVIS_PULL_REQUEST"] != "false":
+            print("not building distfiles; pull request")
+            sys.exit(1)
+        else:
             filename_version = "git"
 
     archive_root = "antares-%s" % version

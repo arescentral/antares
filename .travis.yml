@@ -12,11 +12,22 @@ matrix:
         - ./configure
         - make build
         - make smoke-test
+
+      before_deploy:
         - make dist
         - make macdist
 
-      after_success:
-        - 'ls -l dist'
+      deploy:
+        provider:       gcs
+        skip_cleanup:   true
+        access_key_id:  GOOG5V7J5HCR4SRF4YCUI7EL
+        secret_access_key:
+          secure: BSha8nkjJqEnsqW12HZshAs00Q8BKniDhJ7W94ecbYMxm7ZKcTWIVGZ1I8r+1TmgFFXaqxaTYEvQ7Ga7GUfdon9ow2zq9Z/T6nsCYIYax7pXuc2mWk8ndX504dTLue72XhXRlXIUvqJyIAAips8cIsSybnt1KKOlYuoAcNonQtY=
+        bucket:      downloads.arescentral.org
+        local-dir:   dist
+        upload-dir:  Antares
+        on:
+          all_branches:  true
 
     - os:       linux
       dist:     trusty
@@ -39,10 +50,6 @@ matrix:
         - make build
         - make smoke-test
         - make test-install
-        - make dist
-
-      after_success:
-        - 'ls -l dist'
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
