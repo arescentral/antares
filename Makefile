@@ -11,16 +11,16 @@ APPDIR=$(prefix)/share/applications
 ICONDIR=$(prefix)/share/icons
 DATADIR=$(prefix)/share/games/antares
 
-.PHONY: all
-all:
+.PHONY: build
+build:
 	@$(NINJA)
 
 .PHONY: test
-test: all
+test: build
 	scripts/test.py
 
 .PHONY: smoke-test
-smoke-test: all
+smoke-test: build
 	scripts/test.py --smoke
 
 .PHONY: clean
@@ -43,12 +43,12 @@ distclean:
 	rm -f build/lib/scripts/*.pyc build/lib/scripts/gn build/lib/scripts/ninja
 
 .PHONY: run
-run: all
+run: build
 	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
 	@[ ! -f $(MAC_BIN) ] && scripts/antares_launcher.py || true
 
 .PHONY: sign
-sign: all
+sign: build
 	codesign --force \
 		--sign "Developer ID Application" \
 		--entitlements resources/entitlements.plist \
@@ -63,7 +63,7 @@ ifeq ($(target_os), "linux")
 install: install-bin install-data install-scenario
 
 .PHONY: install-bin
-install-bin: all
+install-bin: build
 	install -m 755 -d $(DESTDIR)$(BINDIR)
 	install -m 755 scripts/antares_launcher.py $(DESTDIR)$(BINDIR)/antares
 	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
@@ -71,7 +71,7 @@ install-bin: all
 	install -m 755 out/cur/antares-ls-scenarios $(DESTDIR)$(BINDIR)/antares-ls-scenarios
 
 .PHONY: install-data
-install-data: all
+install-data: build
 	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/16x16/apps
 	install -m 644 resources/antares.iconset/icon_16x16.png $(DESTDIR)$(ICONDIR)/hicolor/16x16/apps/antares.png
 	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/32x32/apps
@@ -103,7 +103,7 @@ install-data: all
 	cp -r data/strings $(DESTDIR)$(DATADIR)/app
 
 .PHONY: install-scenario
-install-scenario: all
+install-scenario: build
 	out/cur/antares-install-data -s $(DESTDIR)$(DATADIR)/downloads -d $(DESTDIR)$(DATADIR)/scenarios
 endif
 
@@ -111,12 +111,8 @@ endif
 pull-request:
 	hub pull-request -b arescentral:master
 
-.PHONY: travis-test-mac
-travis-test-mac: smoke-test
-
-.PHONY: travis-test-linux
-travis-test-linux: smoke-test
-
+.PHONY: test-install
+test-install: build
 	# Check that deps for launcher were installed:
 	python -c "from scripts import antares_launcher"
 

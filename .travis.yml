@@ -1,29 +1,55 @@
 language:  cpp
 
-env:
-  - TESTS=test
-
 matrix:
   include:
     - os:         osx
-      env:
-        - TESTS=travis-test-mac
+
+      install:
+        - scripts/load-cert.sh
+
+      script:
+        - scripts/set-version $(git describe --tags HEAD)
+        - ./configure
+        - make build
+        - make smoke-test
+
+      before_deploy:
+        - make dist
+        - make macdist
+
+      deploy:
+        provider:       gcs
+        skip_cleanup:   true
+        access_key_id:  GOOG5V7J5HCR4SRF4YCUI7EL
+        secret_access_key:
+          secure: BSha8nkjJqEnsqW12HZshAs00Q8BKniDhJ7W94ecbYMxm7ZKcTWIVGZ1I8r+1TmgFFXaqxaTYEvQ7Ga7GUfdon9ow2zq9Z/T6nsCYIYax7pXuc2mWk8ndX504dTLue72XhXRlXIUvqJyIAAips8cIsSybnt1KKOlYuoAcNonQtY=
+        bucket:      downloads.arescentral.org
+        local-dir:   dist
+        upload-dir:  Antares
+        on:
+          all_branches:  true
 
     - os:       linux
       dist:     trusty
-      install: |
-        sudo apt-get remove -y libpng12-dev && \
-        sudo apt-get install libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev && \
-        curl -fO https://sfiera.net/~sfiera/deb/libpng16-16_1.6.20-2_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libpng16-devtools_1.6.20-2_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libpng16-dev_1.6.20-2_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libglfw3_3.1.2-3_amd64.deb && \
-        curl -fO https://sfiera.net/~sfiera/deb/libglfw3-dev_3.1.2-3_amd64.deb && \
-        file libpng*.deb libglfw3*.deb && \
-        sudo dpkg -i libpng*.deb libglfw3*.deb && \
-        sudo scripts/installdeps.py
-      env:
-        - TESTS=travis-test-linux
+
+      install:
+        - sudo apt-get remove -y libpng12-dev
+        - sudo apt-get install libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev
+        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-16_1.6.20-2_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-devtools_1.6.20-2_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-dev_1.6.20-2_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libglfw3_3.1.2-3_amd64.deb
+        - curl -fO https://sfiera.net/~sfiera/deb/libglfw3-dev_3.1.2-3_amd64.deb
+        - file libpng*.deb libglfw3*.deb
+        - sudo dpkg -i libpng*.deb libglfw3*.deb
+        - sudo scripts/installdeps.py
+
+      script:
+        - scripts/set-version $(git describe --tags HEAD)
+        - ./configure
+        - make build
+        - make smoke-test
+        - make test-install
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
@@ -31,5 +57,3 @@ git:
   submodules: false
 before_install:
   - git submodule update --init
-
-script: ./configure && make && make $TESTS
