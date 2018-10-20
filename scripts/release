@@ -53,5 +53,5 @@ else
 
     git checkout stable
     git merge --no-ff release/$VERSION
-    git tag v$VERSION
+    git tag $VERSION
 fi
