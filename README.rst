@@ -1,9 +1,23 @@
 Antares
 =======
 
-Download: `Antares 0.9.0 for Mac OS X`_
+*   Download |antares-latest-osx|_.
+*   Install |antares-latest-ubuntu|_.
+*   Download the |antares-latest-src|_.
 
-..  _Antares 0.9.0 for Mac OS X: http://downloads.arescentral.org/Antares/Antares-0.9.0.zip
+..  |antares-latest| replace:: 0.9.0
+..  |antares-latest-date| replace:: 15 October, 2018
+..  |antares-latest-osx-version| replace:: 10.7+
+..  |antares-latest-osx| replace:: Antares 0.9.0 for Mac OS X 10.7+
+..  |antares-latest-ubuntu| replace:: Antares 0.9.0 for Ubuntu
+..  |antares-latest-src| replace:: Antares 0.9.0 sources
+..  |antares-latest-src-url| replace:: http://downloads.arescentral.org/Antares/antares-0.9.0.zip
+
+..  _antares-latest-src: http://downloads.arescentral.org/Antares/antares-0.9.0.zip
+..  _antares-latest-ubuntu: https://arescentral.org/antares/linux/
+..  _antares-latest-osx: http://downloads.arescentral.org/Antares/antares-mac-0.9.0.zip
+
+..  _Antares 0.9.0 for Mac OS X 10.7+: http://downloads.arescentral.org/Antares/Antares-0.9.0.zip
 
 ..  image:: https://travis-ci.org/arescentral/antares.svg?branch=master
     :target: https://travis-ci.org/arescentral/antares
