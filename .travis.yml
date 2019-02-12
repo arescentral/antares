@@ -30,18 +30,10 @@ matrix:
           all_branches:  true
 
     - os:       linux
-      dist:     trusty
+      dist:     xenial
 
       install:
-        - sudo apt-get remove -y libpng12-dev
-        - sudo apt-get install libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev
-        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-16_1.6.20-2_amd64.deb
-        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-devtools_1.6.20-2_amd64.deb
-        - curl -fO https://sfiera.net/~sfiera/deb/libpng16-dev_1.6.20-2_amd64.deb
-        - curl -fO https://sfiera.net/~sfiera/deb/libglfw3_3.1.2-3_amd64.deb
-        - curl -fO https://sfiera.net/~sfiera/deb/libglfw3-dev_3.1.2-3_amd64.deb
-        - file libpng*.deb libglfw3*.deb
-        - sudo dpkg -i libpng*.deb libglfw3*.deb
+        - sudo apt-get update
         - sudo scripts/installdeps.py
 
       script:
