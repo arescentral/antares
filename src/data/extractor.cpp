@@ -219,7 +219,7 @@ Info info_for_zip_archive(ZipArchive& archive) {
     try {
         pn::value  x;
         pn_error_t e;
-        if (!pn::parse(file.data().open(), x, &e)) {
+        if (!pn::parse(file.data().open(), &x, &e)) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }

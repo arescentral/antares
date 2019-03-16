@@ -103,7 +103,7 @@ FilePrefsDriver::FilePrefsDriver() {
     pn::string path = pn::format("{0}/config.pn", dirs().root);
     pn::value  x;
     pn::file   f = pn::open(path, "r");
-    if (!f || !pn::parse(f, x, nullptr)) {
+    if (!f || !pn::parse(f, &x, nullptr)) {
         return;
     }
     pn::map_cref m = x.as_map();
@@ -129,12 +129,11 @@ void FilePrefsDriver::set(const Preferences& p) {
     pn::string path = pn::format("{0}/config.pn", dirs().root);
     makedirs(dirname(path), 0755);
     pn::file file = pn::open(path, "w");
-    pn::dump(
-            file, pn::map{{"sound", pn::map{{"volume", p.volume},
-                                            {"speech", p.speech_on},
-                                            {"idle music", p.play_idle_music},
-                                            {"game music", p.play_music_in_game}}},
-                          {"keys", std::move(keys)}});
+    file.dump(pn::map{{"sound", pn::map{{"volume", p.volume},
+                                        {"speech", p.speech_on},
+                                        {"idle music", p.play_idle_music},
+                                        {"game music", p.play_music_in_game}}},
+                      {"keys", std::move(keys)}});
 }
 
 }  // namespace antares

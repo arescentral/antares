@@ -48,7 +48,7 @@ std::vector<Info> scenario_list() {
     try {
         pn::value  x;
         pn_error_t e;
-        if (!pn::parse(pn::open(factory_info_path, "r").check(), x, &e)) {
+        if (!pn::parse(pn::open(factory_info_path, "r").check(), &x, &e)) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
@@ -77,7 +77,7 @@ std::vector<Info> scenario_list() {
             pn::file         in = file.data().open();
             pn::value        x;
             pn_error_t       e;
-            if (!pn::parse(in, x, &e)) {
+            if (!pn::parse(in, &x, &e)) {
                 continue;
             }
             scenarios.emplace_back(info(path_value{x}));

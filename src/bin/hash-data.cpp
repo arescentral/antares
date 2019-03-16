@@ -27,8 +27,7 @@ namespace antares {
 namespace {
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS] directory\n"
             "\n"
             "  Prints the tree digest of a directory\n"
@@ -76,7 +75,7 @@ void main(int argc, char* const* argv) {
         throw std::runtime_error("missing required argument 'replay'");
     }
 
-    pn::format(stdout, "{0}\n", sfz::tree_digest(*directory).hex());
+    pn::file_view{stdout}.format("{0}\n", sfz::tree_digest(*directory).hex());
 }
 
 }  // namespace

@@ -47,8 +47,7 @@ void mission_briefing(EventScheduler& scheduler, Ledger& ledger);
 void pause(EventScheduler& scheduler);
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS] SCRIPT\n"
             "\n"
             "Simulates a game off-screen\n"

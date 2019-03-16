@@ -41,8 +41,7 @@ namespace antares {
 namespace {
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS] [scenario]\n"
             "\n"
             "  Antares: a tactical space combat game\n"

@@ -31,12 +31,11 @@ namespace {
 
 class PrintStatusObserver : public DataExtractor::Observer {
   public:
-    virtual void status(pn::string_view status) { pn::format(stderr, "{0}\n", status); }
+    virtual void status(pn::string_view status) { pn::file_view{stderr}.format("{0}\n", status); }
 };
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS] [plugin]\n"
             "\n"
             "  Downloads and extracts game data\n"
@@ -103,15 +102,15 @@ void main(int argc, char* const* argv) {
     }
 
     if (extractor.current()) {
-        pn::format(stderr, "{0} is up-to-date!\n", dest);
+        pn::file_view{stderr}.format("{0} is up-to-date!\n", dest);
     } else if (check) {
-        pn::format(stderr, "{0} is not up-to-date.\n", dest);
+        pn::file_view{stderr}.format("{0} is not up-to-date.\n", dest);
         exit(1);
     } else {
-        pn::format(stderr, "Extracting to {0}...\n", dest);
+        pn::file_view{stderr}.format("Extracting to {0}...\n", dest);
         PrintStatusObserver observer;
         extractor.extract(&observer);
-        pn::format(stderr, "done.\n");
+        pn::file_view{stderr}.format("done.\n");
     }
 }
 

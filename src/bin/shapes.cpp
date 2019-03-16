@@ -89,8 +89,7 @@ class ShapeBuilder {
 };
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
             "  Draws shapes used in the long-range view\n"

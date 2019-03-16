@@ -63,8 +63,7 @@ class DrawPix : public Card {
 };
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
             "  Builds all of the scrolling text images in the game\n"

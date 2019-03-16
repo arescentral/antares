@@ -29,8 +29,7 @@ namespace args = sfz::args;
 namespace antares {
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
             "  Lists installed Antares scenarios\n"
@@ -97,7 +96,7 @@ void main(int argc, char* const* argv) {
     if (m.empty()) {
         exit(1);
     }
-    pn::dump(stdout, m);
+    pn::file_view{stdout}.dump(m);
 }
 
 }  // namespace antares

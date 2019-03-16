@@ -86,7 +86,7 @@ void DirectoryLedger::load() {
     }
 
     pn::value x;
-    if (!pn::parse(file, x, nullptr)) {
+    if (!pn::parse(file, &x, nullptr)) {
         throw std::runtime_error("bad ledger");
     }
 
@@ -111,13 +111,12 @@ void DirectoryLedger::save() {
 
     makedirs(path::dirname(path), 0755);
     pn::file file = pn::open(path, "w");
-    pn::dump(
-            file, pn::map{
-                          {"unlocked",
-                           pn::map{
-                                   {"chapters", std::move(unlocked_chapters)},
-                           }},
-                  });
+    file.dump(pn::map{
+            {"unlocked",
+             pn::map{
+                     {"chapters", std::move(unlocked_chapters)},
+             }},
+    });
 }
 
 }  // namespace antares
