@@ -146,8 +146,7 @@ void ReplayMaster::init() {
 }
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+    out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
             "  Plays a replay into a set of images and a log of sounds\n"

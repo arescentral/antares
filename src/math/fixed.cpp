@@ -59,7 +59,7 @@ pn::string stringify(Fixed fixed) {
     }
     int64_t       value    = llabs(fixed.val());
     const int32_t integral = (value & 0xffffff00) >> 8;
-    format(s.open("a"), "{0}", integral);
+    s.open("a").format("{0}", integral);
     value &= 0xff;
     s += kFractions[value];
     return s;

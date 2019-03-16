@@ -116,7 +116,7 @@ static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
 static pn::value procyon(pn::string_view path) {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(load(path)->data().open(), x, &e)) {
+    if (!pn::parse(load(path)->data().open(), &x, &e)) {
         throw std::runtime_error(
                 pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
                         .c_str());
@@ -262,7 +262,7 @@ static pn::value merged_object(pn::string_view name) {
     try {
         pn::value x = procyon(path);
         pn::value tpl;
-        if (!x.is_map() || !x.to_map().pop("template", tpl) || tpl.is_null()) {
+        if (!x.is_map() || !x.to_map().pop("template", &tpl) || tpl.is_null()) {
             return x;
         } else if (tpl.is_string()) {
             pn::value base = merged_object(tpl.as_string());

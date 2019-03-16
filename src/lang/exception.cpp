@@ -50,7 +50,8 @@ int wrap_main(
     try {
         main(argc, argv);
     } catch (std::exception& e) {
-        pn::format(stderr, "{0}: {1}\n", sfz::path::basename(argv[0]), full_exception_string(e));
+        pn::file_view{stderr}.format(
+                "{0}: {1}\n", sfz::path::basename(argv[0]), full_exception_string(e));
         return 1;
     }
     return 0;
