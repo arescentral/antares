@@ -106,10 +106,6 @@ static ANTARES_GLOBAL actionQueueType* gFirstActionQueue = NULL;
 
 static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 
-#ifdef DATA_COVERAGE
-ANTARES_GLOBAL set<int32_t> covered_actions;
-#endif  // DATA_COVERAGE
-
 static void queue_action(ActionCursor cursor, ticks delayTime);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {

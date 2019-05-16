@@ -63,10 +63,6 @@ const Hue kFriendlyColor               = Hue::GREEN;
 const Hue kHostileColor[kMaxPlayerNum] = {Hue::PINK, Hue::RED, Hue::YELLOW, Hue::ORANGE};
 const Hue kNeutralColor                = Hue::SKY_BLUE;
 
-#ifdef DATA_COVERAGE
-ANTARES_GLOBAL set<int32_t> covered_objects;
-#endif  // DATA_COVERAGE
-
 void SpaceObjectHandlingInit() {
     g.objects.reset(new SpaceObject[kMaxSpaceObject]);
     ResetAllSpaceObjects();
@@ -388,15 +384,6 @@ void SpaceObject::change_base_type(
     int32_t       r;
     NatePixTable* spriteTable;
 
-#ifdef DATA_COVERAGE
-    covered_objects.insert(base.number());
-    for (auto weapon : {base->pulse.base, base->beam.base, base->special.base}) {
-        if (weapon.get()) {
-            covered_objects.insert(weapon.number());
-        }
-    }
-#endif  // DATA_COVERAGE
-
     obj->attributes  = base.attributes | (obj->attributes & (kIsPlayerShip | kStaticDestination));
     obj->base        = &base;
     obj->icon        = base.icon;
@@ -546,15 +533,6 @@ Handle<SpaceObject> CreateAnySpaceObject(
     if (!obj.get()) {
         return SpaceObject::none();
     }
-
-#ifdef DATA_COVERAGE
-    covered_objects.insert(whichBase.number());
-    for (auto weapon : {whichBase->pulse.base, whichBase->beam.base, whichBase->special.base}) {
-        if (!weapon.get()) {
-            covered_objects.insert(weapon.number());
-        }
-    }
-#endif  // DATA_COVERAGE
 
     obj->attributes |= specialAttributes;
     exec(obj->base->create.action, obj, SpaceObject::none(), {0, 0});

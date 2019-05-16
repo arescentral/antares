@@ -75,11 +75,6 @@ using std::unique_ptr;
 
 namespace antares {
 
-#ifdef DATA_COVERAGE
-extern set<int32_t> covered_objects;
-extern set<int32_t> covered_actions;
-#endif  // DATA_COVERAGE
-
 Rect world() { return Rect({0, 0}, sys.video->screen_size()); }
 
 Rect play_screen() {
@@ -221,29 +216,6 @@ void MainPlay::become_front() {
             globals()->transitions.reset();
             sys.sound.stop();
             sys.music.stop();
-#ifdef DATA_COVERAGE
-            {
-                pn::format(pn::err, "{{ \"level\": {0},\n", *g.level->base.chapter);
-                const char* sep = "";
-                pn::format(pn::err, "  \"objects\": [");
-                for (auto object : covered_objects) {
-                    pn::format(pn::err, "{0}{1}", sep, object);
-                    sep = ", ";
-                }
-                pn::format(pn::err, "],\n");
-                covered_objects.clear();
-
-                sep = "";
-                pn::format(pn::err, "  \"actions\": [");
-                for (auto action : covered_actions) {
-                    pn::format(pn::err, "{0}{1}", sep, action);
-                    sep = ", ";
-                }
-                pn::format(pn::err, "]\n");
-                pn::format(pn::err, "}\n");
-                covered_actions.clear();
-            }
-#endif  // DATA_COVERAGE
             stack()->pop(this);
             break;
     }
