@@ -53,11 +53,6 @@ namespace antares {
 
 namespace {
 
-#ifdef DATA_COVERAGE
-ANTARES_GLOBAL set<int32_t> possible_objects;
-ANTARES_GLOBAL set<int32_t> possible_actions;
-#endif  // DATA_COVERAGE
-
 enum class Required : bool {
     NO  = false,
     YES = true,
@@ -80,10 +75,6 @@ void AddBaseObjectMedia(
             return;
         }
     }
-
-#ifdef DATA_COVERAGE
-    possible_objects.insert(base.number());
-#endif  // DATA_COVERAGE
 
     // Load sprites in all possible colors.
     //
@@ -128,10 +119,6 @@ void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16
 }
 
 void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
-#ifdef DATA_COVERAGE
-    possible_actions.insert(action.number());
-#endif  // DATA_COVERAGE
-
     switch (action.type()) {
         case Action::Type::CREATE:
             AddBaseObjectMedia(action.create.base, all_colors, Required::YES);
