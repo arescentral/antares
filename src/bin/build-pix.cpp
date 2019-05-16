@@ -18,7 +18,7 @@
 
 #include <fcntl.h>
 #include <getopt.h>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -62,7 +62,7 @@ class DrawPix : public Card {
     const int32_t                          _width;
 };
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
@@ -132,7 +132,7 @@ void main(int argc, char* const* argv) {
         switch (opt.value()) {
             case 'o': output_dir.emplace(get_value().copy()); return true;
             case 't': text = true; return true;
-            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            case 'h': usage(pn::out, sfz::path::basename(argv[0]), 0); return true;
             default: return false;
         }
     };

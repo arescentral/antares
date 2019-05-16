@@ -19,7 +19,7 @@
 #include "ui/screen.hpp"
 
 #include <pn/array>
-#include <pn/file>
+#include <pn/output>
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"

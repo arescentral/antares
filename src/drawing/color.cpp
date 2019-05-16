@@ -19,7 +19,7 @@
 #include "drawing/color.hpp"
 
 #include <stdint.h>
-#include <pn/file>
+#include <pn/output>
 
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"

@@ -19,7 +19,7 @@
 #include "game/minicomputer.hpp"
 
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"

@@ -22,7 +22,7 @@
 #include <sndfile.h>
 #include <string.h>
 #include <memory>
-#include <pn/file>
+#include <pn/output>
 
 namespace antares {
 

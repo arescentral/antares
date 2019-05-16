@@ -20,7 +20,7 @@
 
 #include <algorithm>
 #include <limits>
-#include <pn/file>
+#include <pn/output>
 
 #include "data/resource.hpp"
 #include "drawing/color.hpp"

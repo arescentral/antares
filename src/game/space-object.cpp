@@ -18,7 +18,7 @@
 
 #include "game/space-object.hpp"
 
-#include <pn/file>
+#include <pn/output>
 #include <set>
 
 #include "data/base-object.hpp"

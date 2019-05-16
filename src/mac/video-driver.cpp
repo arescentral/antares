@@ -26,7 +26,7 @@
 #include <strings.h>
 #include <sys/time.h>
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 
 #include "game/time.hpp"
 #include "mac/c/CocoaVideoDriver.h"

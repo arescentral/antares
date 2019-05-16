@@ -19,7 +19,7 @@
 #include "sound/driver.hpp"
 
 #include <fcntl.h>
-#include <pn/file>
+#include <pn/output>
 
 #include "game/sys.hpp"
 #include "game/time.hpp"
@@ -128,7 +128,7 @@ class LogSoundDriver::LogSound : public Sound {
 };
 
 LogSoundDriver::LogSoundDriver(pn::string_view path)
-        : _sound_log(pn::open(path, "w")), _last_id(-1), _active_channel(NULL) {}
+        : _sound_log(pn::output(path, pn::text)), _last_id(-1), _active_channel(NULL) {}
 
 unique_ptr<SoundChannel> LogSoundDriver::open_channel() {
     return unique_ptr<SoundChannel>(new LogChannel(*this));

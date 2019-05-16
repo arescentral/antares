@@ -18,7 +18,7 @@
 
 #include "game/player-ship.hpp"
 
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/gamepad.hpp"

@@ -21,7 +21,7 @@
 #include <GLFW/glfw3.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"

@@ -18,7 +18,7 @@
 
 #include "ui/screens/briefing.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"

@@ -19,7 +19,7 @@
 #include "net/http.hpp"
 
 #include <CoreFoundation/CoreFoundation.h>
-#include <pn/file>
+#include <pn/output>
 
 #include "mac/core-foundation.hpp"
 #include "net/http.hpp"
@@ -27,7 +27,7 @@
 namespace antares {
 namespace http {
 
-void get(pn::string_view url, pn::file_view out) {
+void get(pn::string_view url, pn::output_view out) {
     cf::Url  cfurl(url);
     cf::Data cfdata;
     SInt32   error;

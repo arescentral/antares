@@ -20,7 +20,8 @@
 #define ANTARES_DRAWING_PIX_MAP_HPP_
 
 #include <memory>
-#include <pn/file>
+#include <pn/input>
+#include <pn/output>
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
@@ -138,7 +139,7 @@ class PixMap {
     // Encodes this object to a file in PNG format.
     //
     // @param [in] out      the file to write to
-    void encode(pn::file_view out);
+    void encode(pn::output_view out);
 };
 
 // PixMap subclass which provides its own storage.
@@ -193,7 +194,7 @@ class ArrayPixMap : public PixMap {
 };
 
 // Deserializes an ArrayPixMap from its serialized PNG form.
-ArrayPixMap read_png(pn::file_view in);
+ArrayPixMap read_png(pn::input_view in);
 
 inline void swap(ArrayPixMap& x, ArrayPixMap& y) { x.swap(y); }
 

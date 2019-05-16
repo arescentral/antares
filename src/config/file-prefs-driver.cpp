@@ -19,8 +19,9 @@
 #include "config/file-prefs-driver.hpp"
 
 #include <fcntl.h>
-#include <pn/file>
+#include <pn/input>
 #include <pn/map>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -102,8 +103,8 @@ static void set_from(
 FilePrefsDriver::FilePrefsDriver() {
     pn::string path = pn::format("{0}/config.pn", dirs().root);
     pn::value  x;
-    pn::file   f = pn::open(path, "r");
-    if (!f || !pn::parse(f, &x, nullptr)) {
+    pn::input  in = pn::input{path, pn::text};
+    if (!in || !pn::parse(in, &x, nullptr)) {
         return;
     }
     pn::map_cref m = x.as_map();
@@ -128,12 +129,12 @@ void FilePrefsDriver::set(const Preferences& p) {
 
     pn::string path = pn::format("{0}/config.pn", dirs().root);
     makedirs(dirname(path), 0755);
-    pn::file file = pn::open(path, "w");
-    file.dump(pn::map{{"sound", pn::map{{"volume", p.volume},
-                                        {"speech", p.speech_on},
-                                        {"idle music", p.play_idle_music},
-                                        {"game music", p.play_music_in_game}}},
-                      {"keys", std::move(keys)}});
+    pn::output output = pn::output{path, pn::text};
+    output.dump(pn::map{{"sound", pn::map{{"volume", p.volume},
+                                          {"speech", p.speech_on},
+                                          {"idle music", p.play_idle_music},
+                                          {"game music", p.play_music_in_game}}},
+                        {"keys", std::move(keys)}});
 }
 
 }  // namespace antares

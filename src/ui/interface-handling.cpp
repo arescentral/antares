@@ -23,7 +23,7 @@
 
 #include "ui/interface-handling.hpp"
 
-#include <pn/file>
+#include <pn/output>
 #include <vector>
 
 #include "config/keys.hpp"

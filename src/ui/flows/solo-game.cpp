@@ -18,7 +18,7 @@
 
 #include "ui/flows/solo-game.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"

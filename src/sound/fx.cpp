@@ -18,7 +18,7 @@
 
 #include "sound/fx.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"

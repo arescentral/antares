@@ -20,7 +20,6 @@
 #define ANTARES_MATH_GEOMETRY_HPP_
 
 #include <stdint.h>
-#include <pn/file>
 #include <pn/string>
 
 namespace antares {

@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "lang/exception.hpp"
@@ -26,7 +26,7 @@ namespace args = sfz::args;
 namespace antares {
 namespace {
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
             "usage: {0} [OPTIONS] directory\n"
             "\n"
@@ -56,7 +56,7 @@ void main(int argc, char* const* argv) {
 
     callbacks.short_option = [&argv](pn::rune opt, const args::callbacks::get_value_f& get_value) {
         switch (opt.value()) {
-            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            case 'h': usage(pn::out, sfz::path::basename(argv[0]), 0); return true;
             default: return false;
         }
     };
@@ -75,7 +75,7 @@ void main(int argc, char* const* argv) {
         throw std::runtime_error("missing required argument 'replay'");
     }
 
-    pn::file_view{stdout}.format("{0}\n", sfz::tree_digest(*directory).hex());
+    pn::out.format("{0}\n", sfz::tree_digest(*directory).hex());
 }
 
 }  // namespace

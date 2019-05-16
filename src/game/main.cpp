@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 #include <set>
 
 #include "config/gamepad.hpp"
@@ -223,24 +223,24 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->base.chapter);
+                pn::format(pn::err, "{{ \"level\": {0},\n", *g.level->base.chapter);
                 const char* sep = "";
-                pn::format(stderr, "  \"objects\": [");
+                pn::format(pn::err, "  \"objects\": [");
                 for (auto object : covered_objects) {
-                    pn::format(stderr, "{0}{1}", sep, object);
+                    pn::format(pn::err, "{0}{1}", sep, object);
                     sep = ", ";
                 }
-                pn::format(stderr, "],\n");
+                pn::format(pn::err, "],\n");
                 covered_objects.clear();
 
                 sep = "";
-                pn::format(stderr, "  \"actions\": [");
+                pn::format(pn::err, "  \"actions\": [");
                 for (auto action : covered_actions) {
-                    pn::format(stderr, "{0}{1}", sep, action);
+                    pn::format(pn::err, "{0}{1}", sep, action);
                     sep = ", ";
                 }
-                pn::format(stderr, "]\n");
-                pn::format(stderr, "}\n");
+                pn::format(pn::err, "]\n");
+                pn::format(pn::err, "}\n");
                 covered_actions.clear();
             }
 #endif  // DATA_COVERAGE
