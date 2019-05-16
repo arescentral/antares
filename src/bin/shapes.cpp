@@ -17,7 +17,7 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <fcntl.h>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
@@ -79,8 +79,8 @@ class ShapeBuilder {
             const pn::string path =
                     pn::format("{0}/{1}/{2}.png", *_output_dir, name(shape), dec(size, 2));
             sfz::makedirs(dirname(path), 0755);
-            pn::file file = pn::open(path, "w");
-            pix.encode(file);
+            pn::output out{path, pn::binary};
+            pix.encode(out);
         }
     }
 
@@ -88,7 +88,7 @@ class ShapeBuilder {
     sfz::optional<pn::string> _output_dir;
 };
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
@@ -111,7 +111,7 @@ void main(int argc, char* const* argv) {
                                      pn::rune opt, const args::callbacks::get_value_f& get_value) {
         switch (opt.value()) {
             case 'o': output_dir.emplace(get_value().copy()); return true;
-            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            case 'h': usage(pn::out, sfz::path::basename(argv[0]), 0); return true;
             default: return false;
         }
     };

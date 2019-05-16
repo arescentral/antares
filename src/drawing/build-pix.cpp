@@ -18,7 +18,7 @@
 
 #include "drawing/build-pix.hpp"
 
-#include <pn/file>
+#include <pn/output>
 #include <vector>
 
 #include "data/resource.hpp"

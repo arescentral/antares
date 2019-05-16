@@ -18,7 +18,7 @@
 
 #include "lang/exception.hpp"
 
-#include <pn/file>
+#include <pn/output>
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
@@ -50,8 +50,7 @@ int wrap_main(
     try {
         main(argc, argv);
     } catch (std::exception& e) {
-        pn::file_view{stderr}.format(
-                "{0}: {1}\n", sfz::path::basename(argv[0]), full_exception_string(e));
+        pn::err.format("{0}: {1}\n", sfz::path::basename(argv[0]), full_exception_string(e));
         return 1;
     }
     return 0;

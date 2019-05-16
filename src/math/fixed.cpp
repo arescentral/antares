@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include <cmath>
-#include <pn/file>
+#include <pn/output>
 
 namespace antares {
 
@@ -53,16 +53,14 @@ static const char kFractions[][5] = {
 };
 
 pn::string stringify(Fixed fixed) {
-    pn::string s;
+    const char* prefix = "";
     if (fixed < Fixed::zero()) {
-        s += "-";
+        prefix = "-";
     }
     int64_t       value    = llabs(fixed.val());
     const int32_t integral = (value & 0xffffff00) >> 8;
-    s.open("a").format("{0}", integral);
     value &= 0xff;
-    s += kFractions[value];
-    return s;
+    return pn::format("{}{}{}", prefix, integral, kFractions[value]);
 }
 
 }  // namespace antares

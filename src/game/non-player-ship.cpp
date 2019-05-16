@@ -18,7 +18,7 @@
 
 #include "game/non-player-ship.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "config/keys.hpp"
 #include "data/plugin.hpp"

@@ -18,8 +18,8 @@
 
 #include "data/interface.hpp"
 
-#include <pn/file>
 #include <pn/map>
+#include <pn/output>
 
 #include <sfz/sfz.hpp>
 #include "config/gamepad.hpp"

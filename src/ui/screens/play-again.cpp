@@ -18,7 +18,7 @@
 
 #include "ui/screens/play-again.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "drawing/interface.hpp"
 #include "drawing/pix-map.hpp"

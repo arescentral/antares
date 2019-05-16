@@ -23,7 +23,7 @@
 #include <neon/ne_uri.h>
 #include <unistd.h>
 #include <memory>
-#include <pn/file>
+#include <pn/output>
 #include <pn/string>
 
 using std::unique_ptr;
@@ -32,8 +32,8 @@ namespace antares {
 namespace http {
 
 struct ne_userdata {
-    pn::file_view out;
-    size_t        total;
+    pn::output_view out;
+    size_t          total;
 };
 
 static int accept(void* userdata, ne_request* req, const ne_status* st) {
@@ -51,7 +51,7 @@ static int reader(void* userdata, const char* buf, size_t len) {
     return 0;
 }
 
-void get(pn::string_view url, pn::file_view out) {
+void get(pn::string_view url, pn::output_view out) {
     static int inited = ne_sock_init();
     if (inited != 0) {
         throw std::runtime_error("ne_sock_init()");

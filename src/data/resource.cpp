@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <array>
-#include <pn/file>
+#include <pn/input>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -116,7 +116,7 @@ static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
 static pn::value procyon(pn::string_view path) {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(load(path)->data().open(), &x, &e)) {
+    if (!pn::parse(load(path)->data().input(), &x, &e)) {
         throw std::runtime_error(
                 pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
                         .c_str());
@@ -151,7 +151,7 @@ static Texture load_hidpi_texture(pn::string_view name) {
             continue;
         }
         try {
-            ArrayPixMap pix = read_png(load(path)->data().open());
+            ArrayPixMap pix = read_png(load(path)->data().input());
             return sys.video->texture(pn::format("/{0}", path), pix, scale);
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
@@ -307,7 +307,7 @@ std::vector<int32_t> Resource::rotation_table() {
     const char path[] = "rotation-table";
     try {
         auto                 mapped_file = load(path);
-        pn::file             in          = mapped_file->data().open();
+        pn::input            in          = mapped_file->data().input();
         std::vector<int32_t> v;
         v.resize(SystemGlobals::ROT_TABLE_SIZE);
         for (int32_t& i : v) {
@@ -354,7 +354,7 @@ SpriteData Resource::sprite_data(pn::string_view name) {
 ArrayPixMap Resource::sprite_image(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/image.png", name);
     try {
-        return read_png(load(path)->data().open());
+        return read_png(load(path)->data().input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -363,7 +363,7 @@ ArrayPixMap Resource::sprite_image(pn::string_view name) {
 ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/overlay.png", name);
     try {
-        return read_png(load(path)->data().open());
+        return read_png(load(path)->data().input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }

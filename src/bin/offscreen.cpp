@@ -18,7 +18,7 @@
 
 #include <getopt.h>
 #include <sys/time.h>
-#include <pn/file>
+#include <pn/output>
 #include <queue>
 #include <sfz/sfz.hpp>
 
@@ -46,7 +46,7 @@ void options(EventScheduler& scheduler);
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger);
 void pause(EventScheduler& scheduler);
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
             "usage: {0} [OPTIONS] SCRIPT\n"
             "\n"
@@ -87,7 +87,7 @@ void main(int argc, char* const* argv) {
         switch (opt.value()) {
             case 'o': output_dir.emplace(get_value().copy()); return true;
             case 't': text = true; return true;
-            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            case 'h': usage(pn::out, sfz::path::basename(argv[0]), 0); return true;
             default: return false;
         }
     };

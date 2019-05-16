@@ -18,7 +18,7 @@
 
 #include "ui/screens/help.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "config/preferences.hpp"
 #include "data/resource.hpp"

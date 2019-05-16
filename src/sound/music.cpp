@@ -18,7 +18,7 @@
 
 #include "sound/music.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "config/preferences.hpp"
 #include "game/sys.hpp"

@@ -20,7 +20,7 @@
 
 #include <sys/param.h>
 #include <unistd.h>
-#include <pn/file>
+#include <pn/output>
 
 namespace antares {
 

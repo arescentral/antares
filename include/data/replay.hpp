@@ -20,7 +20,8 @@
 #define ANTARES_DATA_REPLAY_HPP_
 
 #include <stdint.h>
-#include <pn/file>
+#include <pn/input>
+#include <pn/output>
 #include <pn/string>
 #include <vector>
 
@@ -32,14 +33,14 @@ struct ReplayData {
     struct Scenario {
         pn::string identifier;
         pn::string version;
-        void       write_to(pn::file_view out) const;
+        void       write_to(pn::output_view out) const;
     };
 
     struct Action {
         uint64_t             at;
         std::vector<uint8_t> keys_down;
         std::vector<uint8_t> keys_up;
-        void                 write_to(pn::file_view out) const;
+        void                 write_to(pn::output_view out) const;
     };
 
     Scenario            scenario;
@@ -51,13 +52,13 @@ struct ReplayData {
     ReplayData();
     ReplayData(pn::data_view in);
 
-    void write_to(pn::file_view out) const;
+    void write_to(pn::output_view out) const;
     void key_down(uint64_t at, uint32_t key);
     void key_up(uint64_t at, uint32_t key);
 };
-bool read_from(pn::file_view in, ReplayData* replay);
-bool read_from(pn::file_view in, ReplayData::Scenario* scenario);
-bool read_from(pn::file_view in, ReplayData::Action* action);
+bool read_from(pn::input_view in, ReplayData* replay);
+bool read_from(pn::input_view in, ReplayData::Scenario* scenario);
+bool read_from(pn::input_view in, ReplayData::Action* action);
 
 class ReplayBuilder : public EventReceiver {
   public:
@@ -73,7 +74,7 @@ class ReplayBuilder : public EventReceiver {
     void         finish();
 
   private:
-    pn::file             _file;
+    pn::output           _out;
     ReplayData::Scenario _scenario;
     int32_t              _chapter_id;
     int32_t              _global_seed;

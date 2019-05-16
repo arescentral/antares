@@ -20,7 +20,7 @@
 #define ANTARES_SOUND_DRIVER_HPP_
 
 #include <memory>
-#include <pn/file>
+#include <pn/output>
 #include <pn/string>
 
 namespace antares {
@@ -90,7 +90,7 @@ class LogSoundDriver : public SoundDriver {
     class LogSound;
     class LogChannel;
 
-    pn::file    _sound_log;
+    pn::output  _sound_log;
     int         _last_id;
     LogChannel* _active_channel;
 };

@@ -22,8 +22,9 @@
 #include <unistd.h>
 #include <cmath>
 #include <pn/array>
-#include <pn/file>
+#include <pn/input>
 #include <pn/map>
+#include <pn/output>
 #include <pn/value>
 #include <sfz/sfz.hpp>
 
@@ -79,14 +80,14 @@ void DirectoryLedger::load() {
     pn::string            path        = pn::format("{0}/{1}.pn", dirs().registry, scenario_id);
 
     _chapters.clear();
-    pn::file file = pn::open(path, "r");
-    if (!file) {
+    pn::input in{path, pn::text};
+    if (!in) {
         _chapters.insert(1);
         return;
     }
 
     pn::value x;
-    if (!pn::parse(file, &x, nullptr)) {
+    if (!pn::parse(in, &x, nullptr)) {
         throw std::runtime_error("bad ledger");
     }
 
@@ -110,8 +111,8 @@ void DirectoryLedger::save() {
     }
 
     makedirs(path::dirname(path), 0755);
-    pn::file file = pn::open(path, "w");
-    file.dump(pn::map{
+    pn::output out{path, pn::text};
+    out.dump(pn::map{
             {"unlocked",
              pn::map{
                      {"chapters", std::move(unlocked_chapters)},

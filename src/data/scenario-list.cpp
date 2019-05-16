@@ -20,7 +20,7 @@
 
 #include <glob.h>
 #include <string.h>
-#include <pn/file>
+#include <pn/input>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -48,7 +48,7 @@ std::vector<Info> scenario_list() {
     try {
         pn::value  x;
         pn_error_t e;
-        if (!pn::parse(pn::open(factory_info_path, "r").check(), &x, &e)) {
+        if (!pn::parse(pn::input{factory_info_path, pn::text}.check(), &x, &e)) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
@@ -74,7 +74,7 @@ std::vector<Info> scenario_list() {
 
         try {
             sfz::mapped_file file(path);
-            pn::file         in = file.data().open();
+            pn::input        in = file.data().input();
             pn::value        x;
             pn_error_t       e;
             if (!pn::parse(in, &x, &e)) {

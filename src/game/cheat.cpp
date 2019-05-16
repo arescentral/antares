@@ -19,7 +19,7 @@
 #include "game/cheat.hpp"
 
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 
 #include "game/admiral.hpp"
 #include "game/globals.hpp"

@@ -18,7 +18,7 @@
 
 #include "sound/openal-driver.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "data/audio.hpp"
 #include "data/resource.hpp"
