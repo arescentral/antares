@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "drawing/briefing.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
 #include "ui/screen.hpp"
@@ -84,6 +85,7 @@ class BriefingScreen : public InterfaceScreen {
     Rect                                 _highlight_rect;
     std::vector<std::pair<Point, Point>> _highlight_lines;
     pn::string                           _text;
+    std::vector<BriefingSprite>          _sprites;
 };
 
 }  // namespace antares

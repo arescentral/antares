@@ -330,6 +330,14 @@ void BriefingScreen::build_star_map() {
         }
         _star_rect.offset(_bounds.left, _bounds.top);
     }
+
+    coordPointType corner;
+    int32_t        scale;
+    pix_bounds = _bounds.size().as_rect();
+    GetLevelFullScaleAndCorner(0, &corner, &scale, &pix_bounds);
+    Rect bounds = _bounds;
+    bounds.offset(offset().h, offset().v);
+    _sprites = render_briefing(32, pix_bounds, corner, scale);
 }
 
 void BriefingScreen::build_brief_point() {
@@ -349,8 +357,8 @@ void BriefingScreen::build_brief_point() {
 }
 
 void BriefingScreen::draw_system_map() const {
-    Point off = offset();
     {
+        Point  off = offset();
         Points points;
         for (int i = 0; i < _system_stars.size(); ++i) {
             const Star& star       = _system_stars[i];
@@ -366,10 +374,10 @@ void BriefingScreen::draw_system_map() const {
     Rect           pix_bounds = _bounds.size().as_rect();
     GetLevelFullScaleAndCorner(0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
-    bounds.offset(off.h, off.v);
+    bounds.offset(offset().h, offset().v);
     draw_arbitrary_sector_lines(corner, scale, 16, bounds);
 
-    for (const auto& sprite : render_briefing(32, pix_bounds, corner, scale)) {
+    for (const auto& sprite : _sprites) {
         Rect sprite_rect = sprite.sprite_rect;
         sprite_rect.offset(bounds.left, bounds.top);
         if (sprite.outline) {
