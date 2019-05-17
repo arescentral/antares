@@ -309,7 +309,6 @@ static void render_briefing_with(
         const coordPointType& corner, int32_t scale) {
     int32_t thisScale, gridWidth, gridHeight, i, j;
     Point   where;
-    Rect    clipRect;
     bool*   gridCells = NULL;
 
     gridWidth  = (bounds.right - bounds.left) / kBriefing_Grid_Size;
@@ -343,11 +342,6 @@ static void render_briefing_with(
                     maxSize, bounds, corner, scale, &thisScale, &frame, &where, &spriteRect);
             if (frame != NULL) {
                 thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
-                clipRect  = bounds;
-
-                clipRect.left = clipRect.top = 0;
-                clipRect.right -= 1;
-                clipRect.bottom -= 1;
 
                 where = BriefingSprite_GetBestLocation(
                         *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
@@ -355,7 +349,7 @@ static void render_briefing_with(
                 BriefingSprite_UseLocation(
                         *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
+                renderer.draw(*frame, where, thisScale, &spriteRect);
 
                 rect = spriteRect;
             }
@@ -367,11 +361,6 @@ static void render_briefing_with(
             if (frame != NULL) {
                 thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
-                clipRect = bounds;
-
-                clipRect.left = clipRect.top = 0;
-                clipRect.right -= 1;
-                clipRect.bottom -= 1;
                 where = BriefingSprite_GetBestLocation(
                         *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
                 BriefingSprite_UseLocation(
@@ -385,8 +374,7 @@ static void render_briefing_with(
                 const RgbColor light_color = GetRGBTranslateColorShade(hue, LIGHT);
                 const RgbColor dark_color  = GetRGBTranslateColorShade(hue, DARK);
 
-                renderer.outline(
-                        *frame, where, thisScale, &spriteRect, clipRect, light_color, dark_color);
+                renderer.outline(*frame, where, thisScale, &spriteRect, light_color, dark_color);
 
                 rect = spriteRect;
             }
@@ -401,15 +389,14 @@ struct DriverRenderer {
     Point origin;
     void  outline(
              const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
-             Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
+             RgbColor outline_color, RgbColor fill_color) const {
         *sprite_rect   = scale_sprite_rect(frame, where, scale);
         Rect draw_rect = *sprite_rect;
         draw_rect.offset(origin.h, origin.v);
         frame.texture().draw_outlined(draw_rect, outline_color, fill_color);
     }
-    void draw(
-            const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
-            Rect clip_rect) const {
+    void draw(const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect)
+            const {
         *sprite_rect   = scale_sprite_rect(frame, where, scale);
         Rect draw_rect = *sprite_rect;
         draw_rect.offset(origin.h, origin.v);
