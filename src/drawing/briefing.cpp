@@ -293,24 +293,22 @@ static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, int3
     return bounds;
 }
 
-template <typename Renderer>
-static void render_briefing_with(
-        const Renderer& renderer, int32_t maxSize, const Rect& bounds,
-        const coordPointType& corner, int32_t scale) {
-    int32_t thisScale, gridWidth, gridHeight, i, j;
-    Point   where;
-    bool*   gridCells = NULL;
+std::vector<BriefingSprite> render_briefing(
+        int32_t maxSize, const Rect& bounds, const coordPointType& corner, int32_t scale) {
+    std::vector<BriefingSprite> result;
+    int32_t                     thisScale, gridWidth, gridHeight, i, j;
+    Point                       where;
 
     gridWidth  = (bounds.right - bounds.left) / kBriefing_Grid_Size;
     gridHeight = (bounds.bottom - bounds.top) / kBriefing_Grid_Size;
 
-    gridCells = new bool[gridWidth * gridHeight];
-
-    if (gridCells == NULL)
-        return;
+    std::unique_ptr<bool[]> gridCells(new bool[gridWidth * gridHeight]);
+    if (gridCells == nullptr) {
+        return result;
+    }
     for (j = 0; j < gridHeight; j++) {
         for (i = 0; i < gridWidth; i++) {
-            Briefing_Grid_Set(gridCells, i, j, gridWidth, gridHeight, false);
+            Briefing_Grid_Set(gridCells.get(), i, j, gridWidth, gridHeight, false);
         }
     }
 
@@ -333,13 +331,13 @@ static void render_briefing_with(
                 thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
                 where = BriefingSprite_GetBestLocation(
-                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
 
                 BriefingSprite_UseLocation(
-                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
 
                 *sprite_rect = scale_sprite_rect(*frame, where, thisScale);
-                renderer.draw(*frame, *sprite_rect);
+                result.push_back(BriefingSprite{*frame, *sprite_rect, false});
             }
         } else {
             const NatePixTable::Frame* frame = NULL;
@@ -350,9 +348,9 @@ static void render_briefing_with(
                 thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
                 where = BriefingSprite_GetBestLocation(
-                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
                 BriefingSprite_UseLocation(
-                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
 
                 Hue hue = Hue::BLUE;
                 if (anObject->owner.number() >= 0) {
@@ -363,33 +361,12 @@ static void render_briefing_with(
                 const RgbColor dark_color  = GetRGBTranslateColorShade(hue, DARK);
 
                 *sprite_rect = scale_sprite_rect(*frame, where, thisScale);
-                renderer.outline(*frame, *sprite_rect, light_color, dark_color);
+                result.push_back(
+                        BriefingSprite{*frame, *sprite_rect, true, light_color, dark_color});
             }
         }
     }
-    if (gridCells != NULL) {
-        delete[] gridCells;
-    }
-}
-
-struct DriverRenderer {
-    Point origin;
-    void  outline(
-             const NatePixTable::Frame& frame, Rect sprite_rect, RgbColor outline_color,
-             RgbColor fill_color) const {
-        sprite_rect.offset(origin.h, origin.v);
-        frame.texture().draw_outlined(sprite_rect, outline_color, fill_color);
-    }
-    void draw(const NatePixTable::Frame& frame, Rect sprite_rect) const {
-        sprite_rect.offset(origin.h, origin.v);
-        frame.texture().draw(sprite_rect);
-    }
-};
-
-void draw_briefing_objects(
-        Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale) {
-    DriverRenderer renderer = {origin};
-    render_briefing_with(renderer, maxSize, bounds, corner, scale);
+    return result;
 }
 
 BriefPointInfo BriefPoint_Data_Get(

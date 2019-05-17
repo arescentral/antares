@@ -368,7 +368,17 @@ void BriefingScreen::draw_system_map() const {
     Rect bounds = _bounds;
     bounds.offset(off.h, off.v);
     draw_arbitrary_sector_lines(corner, scale, 16, bounds);
-    draw_briefing_objects(bounds.origin(), 32, pix_bounds, corner, scale);
+
+    for (const auto& sprite : render_briefing(32, pix_bounds, corner, scale)) {
+        Rect sprite_rect = sprite.sprite_rect;
+        sprite_rect.offset(bounds.left, bounds.top);
+        if (sprite.outline) {
+            sprite.frame.texture().draw_outlined(
+                    sprite_rect, sprite.outline_color, sprite.fill_color);
+        } else {
+            sprite.frame.texture().draw(sprite_rect);
+        }
+    }
 }
 
 void BriefingScreen::draw_brief_point() const {
