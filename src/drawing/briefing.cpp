@@ -38,16 +38,15 @@ namespace antares {
 
 const int32_t kBriefing_Grid_Size = 16;
 
-static ANTARES_GLOBAL vector<Rect> gBriefingSpriteBounds;
-
 static Point BriefingSprite_GetBestLocation(
         const NatePixTable::Frame& frame, int32_t scale, Point fromWhere, bool* grid,
         int32_t gridWidth, int32_t gridHeight, const Rect& bounds);
 
 static void GetInitialObjectSpriteData(
         Handle<const Initial> whichObject, int32_t maxSize, const Rect& bounds,
-        const coordPointType& corner, int32_t scale, int32_t* thisScale, Point* where,
-        Rect* spriteRect);
+        const coordPointType& corner, int32_t scale,
+        const std::vector<sfz::optional<BriefingSprite>>& sprites, int32_t* thisScale,
+        Point* where, Rect* spriteRect);
 
 static void GetRealObjectSpriteData(
         const coordPointType& realCoord, const BaseObject& baseObject, Handle<Admiral> owner,
@@ -216,8 +215,9 @@ static void Briefing_Grid_Set(
 
 static void GetInitialObjectSpriteData(
         Handle<const Initial> whichObject, int32_t maxSize, const Rect& bounds,
-        const coordPointType& corner, int32_t scale, int32_t* thisScale, Point* where,
-        Rect* spriteRect) {
+        const coordPointType& corner, int32_t scale,
+        const std::vector<sfz::optional<BriefingSprite>>& sprites, int32_t* thisScale,
+        Point* where, Rect* spriteRect) {
     spriteRect->right = spriteRect->left = -1;
 
     auto sObject = GetObjectFromInitialNumber(whichObject);
@@ -228,7 +228,7 @@ static void GetInitialObjectSpriteData(
                 sObject->location, *sObject->base, sObject->owner, *sObject->pix_id, maxSize,
                 bounds, corner, scale, thisScale, &frame, where);
 
-        *spriteRect = gBriefingSpriteBounds[sObject.number()];
+        *spriteRect = sprites[sObject.number()]->sprite_rect;
     }
 }
 
@@ -293,11 +293,11 @@ static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, int3
     return bounds;
 }
 
-std::vector<BriefingSprite> render_briefing(
+std::vector<sfz::optional<BriefingSprite>> render_briefing(
         int32_t maxSize, const Rect& bounds, const coordPointType& corner, int32_t scale) {
-    std::vector<BriefingSprite> result;
-    int32_t                     thisScale, gridWidth, gridHeight, i, j;
-    Point                       where;
+    std::vector<sfz::optional<BriefingSprite>> result;
+    int32_t                                    thisScale, gridWidth, gridHeight, i, j;
+    Point                                      where;
 
     gridWidth  = (bounds.right - bounds.left) / kBriefing_Grid_Size;
     gridHeight = (bounds.bottom - bounds.top) / kBriefing_Grid_Size;
@@ -312,11 +312,9 @@ std::vector<BriefingSprite> render_briefing(
         }
     }
 
-    gBriefingSpriteBounds.resize(kMaxSpaceObject);
+    result.resize(kMaxSpaceObject);
 
     for (auto anObject : SpaceObject::all()) {
-        Rect* sprite_rect = &gBriefingSpriteBounds[anObject.number()];
-        *sprite_rect      = Rect(0, 0, 0, 0);
         if (!((anObject->active == kObjectInUse) && anObject->sprite.get())) {
             continue;
         }
@@ -336,8 +334,8 @@ std::vector<BriefingSprite> render_briefing(
                 BriefingSprite_UseLocation(
                         *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
 
-                *sprite_rect = scale_sprite_rect(*frame, where, thisScale);
-                result.push_back(BriefingSprite{*frame, *sprite_rect, false});
+                result[anObject.number()].emplace(BriefingSprite{
+                        *frame, scale_sprite_rect(*frame, where, thisScale), false});
             }
         } else {
             const NatePixTable::Frame* frame = NULL;
@@ -360,9 +358,9 @@ std::vector<BriefingSprite> render_briefing(
                 const RgbColor light_color = GetRGBTranslateColorShade(hue, LIGHT);
                 const RgbColor dark_color  = GetRGBTranslateColorShade(hue, DARK);
 
-                *sprite_rect = scale_sprite_rect(*frame, where, thisScale);
-                result.push_back(
-                        BriefingSprite{*frame, *sprite_rect, true, light_color, dark_color});
+                result[anObject.number()].emplace(
+                        BriefingSprite{*frame, scale_sprite_rect(*frame, where, thisScale), true,
+                                       light_color, dark_color});
             }
         }
     }
@@ -371,7 +369,8 @@ std::vector<BriefingSprite> render_briefing(
 
 BriefPointInfo BriefPoint_Data_Get(
         int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
-        int32_t maxSize, const Rect& bounds) {
+        int32_t maxSize, const Rect& bounds,
+        const std::vector<sfz::optional<BriefingSprite>>& sprites) {
     const Briefing& brief = level.base.briefings[whichPoint];
 
     BriefPointInfo info;
@@ -384,7 +383,7 @@ BriefPointInfo BriefPoint_Data_Get(
         Rect    spriteRect;
         int32_t thisScale;
         GetInitialObjectSpriteData(
-                brief.initial.value_or(Initial::none()), maxSize, bounds, corner, scale,
+                brief.initial.value_or(Initial::none()), maxSize, bounds, corner, scale, sprites,
                 &thisScale, &where, &spriteRect);
         info.highlight = spriteRect;
         info.highlight.inset(-2, -2);

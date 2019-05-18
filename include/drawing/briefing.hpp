@@ -19,6 +19,8 @@
 #ifndef ANTARES_DRAWING_BRIEFING_HPP_
 #define ANTARES_DRAWING_BRIEFING_HPP_
 
+#include <sfz/sfz.hpp>
+
 #include "data/handle.hpp"
 #include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
@@ -35,7 +37,7 @@ struct BriefingSprite {
     RgbColor                   outline_color, fill_color;
 };
 
-std::vector<BriefingSprite> render_briefing(
+std::vector<sfz::optional<BriefingSprite>> render_briefing(
         int32_t maxSize, const Rect& bounds, const coordPointType& corner, int32_t scale);
 
 struct BriefPointInfo {
@@ -45,7 +47,8 @@ struct BriefPointInfo {
 };
 BriefPointInfo BriefPoint_Data_Get(
         int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
-        int32_t maxSize, const Rect& bounds);
+        int32_t maxSize, const Rect& bounds,
+        const std::vector<sfz::optional<BriefingSprite>>& sprites);
 
 }  // namespace antares
 
