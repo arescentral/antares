@@ -80,8 +80,21 @@ const uint32_t kThinkiverseBottomRight = (kUniversalCenter + (2 * 65534));
 // same grid in a way I have yet to comprehend.
 const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
+const int32_t kUnitsToCheckNumber = 5;
+
+struct adjacentUnitType {
+    uint8_t adjacentUnit;  // the normal adjacent unit
+    Point   superOffset;   // the offset of the super unit (for wrap-around)
+};
+
+struct proximityUnitType {
+    Handle<SpaceObject> nearObject;                         // for collision checking
+    Handle<SpaceObject> farObject;                          // for distance checking
+    adjacentUnitType    unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
+};
+
 ANTARES_GLOBAL coordPointType gGlobalCorner;
-static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
+static ANTARES_GLOBAL proximityUnitType gProximityGrid[kProximityGridDataLength];
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
@@ -92,8 +105,6 @@ Size center_scale() {
 }
 
 void InitMotion() {
-    gProximityGrid.reset(new proximityUnitType[kProximityGridDataLength]);
-
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
     for (int y = 0; y < kProximitySuperSize; y++) {
         for (int x = 0; x < kProximitySuperSize; x++) {
@@ -139,7 +150,7 @@ void ResetMotionGlobals() {
     }
 }
 
-void MotionCleanup() { gProximityGrid.reset(); }
+void MotionCleanup() {}
 
 static void move_object(SpaceObject* o) {
     if ((o->maxVelocity == Fixed::zero()) && !(o->attributes & kCanTurn)) {

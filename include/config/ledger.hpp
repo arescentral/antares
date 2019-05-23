@@ -29,8 +29,6 @@ class Ledger {
     Ledger();
     virtual ~Ledger();
 
-    static Ledger* ledger();
-
     virtual void unlock_chapter(int chapter)                   = 0;
     virtual void unlocked_chapters(std::vector<int>* chapters) = 0;
 };

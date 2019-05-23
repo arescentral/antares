@@ -43,18 +43,14 @@ namespace path = sfz::path;
 
 namespace antares {
 
-static ANTARES_GLOBAL Ledger* ledger;
-
 Ledger::Ledger() {
-    if (antares::ledger) {
+    if (sys.ledger) {
         throw std::runtime_error("Ledger is a singleton");
     }
-    antares::ledger = this;
+    sys.ledger = this;
 }
 
-Ledger::~Ledger() { antares::ledger = NULL; }
-
-Ledger* Ledger::ledger() { return ::antares::ledger; }
+Ledger::~Ledger() { sys.ledger = nullptr; }
 
 NullLedger::NullLedger() : _chapters{1} {}
 

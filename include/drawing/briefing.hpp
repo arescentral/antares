@@ -19,7 +19,10 @@
 #ifndef ANTARES_DRAWING_BRIEFING_HPP_
 #define ANTARES_DRAWING_BRIEFING_HPP_
 
+#include <sfz/sfz.hpp>
+
 #include "data/handle.hpp"
+#include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -27,13 +30,15 @@ namespace antares {
 union Level;
 class PixMap;
 
-struct BriefingSpriteBounds {
-    Rect                bounds;
-    Handle<SpaceObject> object;
+struct BriefingSprite {
+    const NatePixTable::Frame& frame;
+    Rect                       sprite_rect;
+    bool                       outline;
+    RgbColor                   outline_color, fill_color;
 };
 
-void draw_briefing_objects(
-        Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale);
+std::vector<sfz::optional<BriefingSprite>> render_briefing(
+        int32_t maxSize, const Rect& bounds, const coordPointType& corner, int32_t scale);
 
 struct BriefPointInfo {
     pn::string header;
@@ -42,7 +47,8 @@ struct BriefPointInfo {
 };
 BriefPointInfo BriefPoint_Data_Get(
         int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
-        int32_t maxSize, const Rect& bounds);
+        int32_t maxSize, const Rect& bounds,
+        const std::vector<sfz::optional<BriefingSprite>>& sprites);
 
 }  // namespace antares
 

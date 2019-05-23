@@ -24,19 +24,6 @@
 
 namespace antares {
 
-const int32_t kUnitsToCheckNumber = 5;
-
-struct adjacentUnitType {
-    uint8_t adjacentUnit;  // the normal adjacent unit
-    Point   superOffset;   // the offset of the super unit (for wrap-around)
-};
-
-struct proximityUnitType {
-    Handle<SpaceObject> nearObject;                         // for collision checking
-    Handle<SpaceObject> farObject;                          // for distance checking
-    adjacentUnitType    unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
-};
-
 extern coordPointType gGlobalCorner;
 
 void InitMotion();
