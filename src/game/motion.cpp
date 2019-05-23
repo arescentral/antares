@@ -80,6 +80,19 @@ const uint32_t kThinkiverseBottomRight = (kUniversalCenter + (2 * 65534));
 // same grid in a way I have yet to comprehend.
 const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
+const int32_t kUnitsToCheckNumber = 5;
+
+struct adjacentUnitType {
+    uint8_t adjacentUnit;  // the normal adjacent unit
+    Point   superOffset;   // the offset of the super unit (for wrap-around)
+};
+
+struct proximityUnitType {
+    Handle<SpaceObject> nearObject;                         // for collision checking
+    Handle<SpaceObject> farObject;                          // for distance checking
+    adjacentUnitType    unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
+};
+
 ANTARES_GLOBAL coordPointType gGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
 
