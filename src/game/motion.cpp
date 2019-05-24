@@ -69,32 +69,32 @@ const uint32_t kThinkiverseBottomRight = (kUniversalCenter + (2 * 65534));
 //     2 3 4
 //
 // The point of this is, if we iterate through a grid such as
-// gProximityGrid, and at each cell, check the cell at each of these
+// {near,far}_objects, and at each cell, check the cell at each of these
 // relative locations, we will make a pairwise comparison between all
 // adjacent cells exactly once.
 //
 // InitMotion() turns the relative locations to absolute indices, and
-// keeps that information in unitsToCheck[k].adjacentUnit.  If the
-// relative location would be outside the 16x16 grid of gProximityGrid,
-// then superOffset points into the adjacent grid, which is also the
-// same grid in a way I have yet to comprehend.
+// keeps that information in adjacent_cells[k].  If the relative
+// location would be outside the 16x16 grid of near_object, then
+// super_offset points into the adjacent grid, which is also the same
+// grid in a way I have yet to comprehend.
 const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
 const int32_t kUnitsToCheckNumber = 5;
 
-struct adjacentUnitType {
-    uint8_t adjacentUnit;  // the normal adjacent unit
-    Point   superOffset;   // the offset of the super unit (for wrap-around)
+struct AdjacentCell {
+    uint8_t index_offset;  // the normal adjacent unit
+    Point   super_offset;  // the offset of the super unit (for wrap-around)
 };
 
-struct proximityUnitType {
-    Handle<SpaceObject> nearObject;                         // for collision checking
-    Handle<SpaceObject> farObject;                          // for distance checking
-    adjacentUnitType    unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
+struct AdjacentCellList {
+    AdjacentCell cells[kUnitsToCheckNumber];  // adjacent units to check
 };
 
 ANTARES_GLOBAL coordPointType gGlobalCorner;
-static ANTARES_GLOBAL proximityUnitType gProximityGrid[kProximityGridDataLength];
+static ANTARES_GLOBAL AdjacentCellList adjacent_cells[kProximityGridDataLength];
+static ANTARES_GLOBAL Handle<SpaceObject> near_objects[kProximityGridDataLength];
+static ANTARES_GLOBAL Handle<SpaceObject> far_objects[kProximityGridDataLength];
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
@@ -105,16 +105,14 @@ Size center_scale() {
 }
 
 static int proximity_index(int32_t x, int32_t y) { return (y << kProximityWidthShift) + x; }
-static proximityUnitType* proximity_grid(int32_t x, int32_t y) {
-    return &gProximityGrid[proximity_index(x, y)];
-}
 
 void InitMotion() {
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
     for (int y = 0; y < kProximitySuperSize; y++) {
         for (int x = 0; x < kProximitySuperSize; x++) {
-            proximityUnitType* p = proximity_grid(x, y);
-            p->nearObject = p->farObject = SpaceObject::none();
+            int i           = proximity_index(x, y);
+            near_objects[i] = far_objects[i] = SpaceObject::none();
+            AdjacentCell* cells              = adjacent_cells[i].cells;
             for (int i = 0; i < kUnitsToCheckNumber; i++) {
                 int32_t ux = x;
                 int32_t uy = y;
@@ -137,9 +135,10 @@ void InitMotion() {
                     uy -= kProximitySuperSize;
                     sy++;
                 }
-                p->unitsToCheck[i].adjacentUnit  = proximity_index(ux, uy);
-                p->unitsToCheck[i].superOffset.h = sx;
-                p->unitsToCheck[i].superOffset.v = sy;
+
+                cells[i].index_offset   = proximity_index(ux, uy);
+                cells[i].super_offset.h = sx;
+                cells[i].super_offset.v = sy;
             }
         }
     }
@@ -151,7 +150,7 @@ void ResetMotionGlobals() {
     g.farthest                        = Handle<SpaceObject>(0);
 
     for (int i = 0; i < kProximityGridDataLength; i++) {
-        gProximityGrid[i].nearObject = gProximityGrid[i].farObject = SpaceObject::none();
+        near_objects[i] = far_objects[i] = SpaceObject::none();
     }
 }
 
@@ -512,7 +511,7 @@ static void calc_misc() {
 
     // reset the collision grid
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
-        gProximityGrid[i].nearObject = gProximityGrid[i].farObject = SpaceObject::none();
+        near_objects[i] = far_objects[i] = SpaceObject::none();
     }
 
     SpaceObject* o = nullptr;
@@ -568,11 +567,11 @@ static void calc_misc() {
 
             const auto& loc = o->location;
             {
-                int32_t x1 = (loc.h >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
-                int32_t y1 = (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
-                auto*   proximityObject     = proximity_grid(x1, y1);
-                o->nextNearObject           = proximityObject->nearObject;
-                proximityObject->nearObject = o_handle;
+                int32_t x1          = (loc.h >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
+                int32_t y1          = (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
+                auto*   near_object = &near_objects[proximity_index(x1, y1)];
+                o->nextNearObject   = *near_object;
+                *near_object        = o_handle;
 
                 int32_t x2       = loc.h >> kCollisionSuperUnitBitShift;
                 int32_t y2       = loc.v >> kCollisionSuperUnitBitShift;
@@ -580,11 +579,11 @@ static void calc_misc() {
             }
 
             {
-                int32_t x1 = (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
-                int32_t y1 = (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
-                auto*   proximityObject    = proximity_grid(x1, y1);
-                o->nextFarObject           = proximityObject->farObject;
-                proximityObject->farObject = o_handle;
+                int32_t x1         = (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
+                int32_t y1         = (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
+                auto*   far_object = &far_objects[proximity_index(x1, y1)];
+                o->nextFarObject   = *far_object;
+                *far_object        = o_handle;
 
                 int32_t x2      = loc.h >> kDistanceSuperUnitBitShift;
                 int32_t y2      = loc.v >> kDistanceSuperUnitBitShift;
@@ -734,16 +733,16 @@ static bool can_hit(const SpaceObject& a, const SpaceObject& b) {
 // Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
 static void calc_impacts() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
-        const auto&  cell = gProximityGrid[i];
-        SpaceObject* a    = nullptr;
-        for (auto a_handle = cell.nearObject; (a = a_handle.get()); a_handle = a->nextNearObject) {
+        const auto*  cells = adjacent_cells[i].cells;
+        SpaceObject* a     = nullptr;
+        for (auto a_handle = near_objects[i]; (a = a_handle.get()); a_handle = a->nextNearObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                 Handle<SpaceObject> b_handle = a->nextNearObject;
                 Point               super    = a->collisionGrid;
                 if (k > 0) {
-                    const auto& adj = cell.unitsToCheck[k];
-                    b_handle        = gProximityGrid[adj.adjacentUnit].nearObject;
-                    super.offset(adj.superOffset.h, adj.superOffset.v);
+                    const auto& adj = cells[k];
+                    b_handle        = near_objects[adj.index_offset];
+                    super.offset(adj.super_offset.h, adj.super_offset.v);
                 }
 
                 if ((super.h < 0) || (super.v < 0)) {
@@ -794,16 +793,16 @@ static void calc_impacts() {
 // Also sets seenByPlayerFlags and kIsHidden based on object proximity.
 static void calc_locality() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
-        const auto&  cell = gProximityGrid[i];
-        SpaceObject* a    = nullptr;
-        for (auto a_handle = cell.farObject; (a = a_handle.get()); a_handle = a->nextFarObject) {
+        const auto*  cells = adjacent_cells[i].cells;
+        SpaceObject* a     = nullptr;
+        for (auto a_handle = far_objects[i]; (a = a_handle.get()); a_handle = a->nextFarObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                 Handle<SpaceObject> b_handle = a->nextFarObject;
                 Point               super    = a->distanceGrid;
                 if (k > 0) {
-                    const auto& adj = cell.unitsToCheck[k];
-                    b_handle        = gProximityGrid[adj.adjacentUnit].farObject;
-                    super.offset(adj.superOffset.h, adj.superOffset.v);
+                    const auto& adj = cells[k];
+                    b_handle        = far_objects[adj.index_offset];
+                    super.offset(adj.super_offset.h, adj.super_offset.v);
                 }
                 if ((super.h < 0) || (super.v < 0)) {
                     continue;
