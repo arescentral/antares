@@ -45,7 +45,7 @@ const int32_t kProximitySuperSize      = 16;  // number of cUnits in cSuperUnits
 const int32_t kProximityGridDataLength = kProximitySuperSize * kProximitySuperSize;
 const int32_t kProximityUnitAndModulo =
         kProximitySuperSize - 1;  // & a int32_t with this and get modulo kCollisionSuperSize
-const int32_t kProximityWidthMultiply = 4;  // for speed = * kCollisionSuperSize
+const int32_t kProximityWidthShift = 4;  // for speed = * kCollisionSuperSize
 
 const int32_t kCollisionUnitBitShift      = 7;   // >> 7 = / 128
 const int32_t kCollisionSuperUnitBitShift = 11;  // >> 11 = / 2048
@@ -104,11 +104,16 @@ Size center_scale() {
     };
 }
 
+static int proximity_index(int32_t x, int32_t y) { return (y << kProximityWidthShift) + x; }
+static proximityUnitType* proximity_grid(int32_t x, int32_t y) {
+    return &gProximityGrid[proximity_index(x, y)];
+}
+
 void InitMotion() {
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
     for (int y = 0; y < kProximitySuperSize; y++) {
         for (int x = 0; x < kProximitySuperSize; x++) {
-            proximityUnitType* p = &gProximityGrid[(y << kProximityWidthMultiply) + x];
+            proximityUnitType* p = proximity_grid(x, y);
             p->nearObject = p->farObject = SpaceObject::none();
             for (int i = 0; i < kUnitsToCheckNumber; i++) {
                 int32_t ux = x;
@@ -132,7 +137,7 @@ void InitMotion() {
                     uy -= kProximitySuperSize;
                     sy++;
                 }
-                p->unitsToCheck[i].adjacentUnit  = (uy << kProximityWidthMultiply) + ux;
+                p->unitsToCheck[i].adjacentUnit  = proximity_index(ux, uy);
                 p->unitsToCheck[i].superOffset.h = sx;
                 p->unitsToCheck[i].superOffset.v = sy;
             }
@@ -564,24 +569,26 @@ static void calc_misc() {
             const auto& loc = o->location;
             {
                 int32_t x1 = (loc.h >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
-                int32_t x2 = loc.h >> kCollisionSuperUnitBitShift;
                 int32_t y1 = (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
-                int32_t y2 = loc.v >> kCollisionSuperUnitBitShift;
-                auto&   proximityObject    = gProximityGrid[(y1 << kProximityWidthMultiply) + x1];
-                o->nextNearObject          = proximityObject.nearObject;
-                proximityObject.nearObject = o_handle;
-                o->collisionGrid           = {x2, y2};
+                auto*   proximityObject     = proximity_grid(x1, y1);
+                o->nextNearObject           = proximityObject->nearObject;
+                proximityObject->nearObject = o_handle;
+
+                int32_t x2       = loc.h >> kCollisionSuperUnitBitShift;
+                int32_t y2       = loc.v >> kCollisionSuperUnitBitShift;
+                o->collisionGrid = {x2, y2};
             }
 
             {
-                int32_t x3 = (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
-                int32_t x4 = loc.h >> kDistanceSuperUnitBitShift;
-                int32_t y3 = (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
-                int32_t y4 = loc.v >> kDistanceSuperUnitBitShift;
-                auto&   proximityObject   = gProximityGrid[(y3 << kProximityWidthMultiply) + x3];
-                o->nextFarObject          = proximityObject.farObject;
-                proximityObject.farObject = o_handle;
-                o->distanceGrid           = {x4, y4};
+                int32_t x1 = (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
+                int32_t y1 = (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
+                auto*   proximityObject    = proximity_grid(x1, y1);
+                o->nextFarObject           = proximityObject->farObject;
+                proximityObject->farObject = o_handle;
+
+                int32_t x2      = loc.h >> kDistanceSuperUnitBitShift;
+                int32_t y2      = loc.v >> kDistanceSuperUnitBitShift;
+                o->distanceGrid = {x2, y2};
             }
 
             if (!(o->attributes & kIsDestination)) {
