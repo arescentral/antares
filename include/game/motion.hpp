@@ -24,7 +24,7 @@
 
 namespace antares {
 
-extern coordPointType gGlobalCorner;
+extern Point gGlobalCorner;
 
 void InitMotion();
 void ResetMotionGlobals();

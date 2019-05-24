@@ -218,9 +218,8 @@ void RemoveAllSpaceObjects() {
 }
 
 SpaceObject::SpaceObject(
-        const BaseObject& type, Random seed, int32_t object_id,
-        const coordPointType& initial_location, int32_t relative_direction,
-        fixedPointType* relative_velocity, Handle<Admiral> new_owner,
+        const BaseObject& type, Random seed, int32_t object_id, const Point& initial_location,
+        int32_t relative_direction, fixedPointType* relative_velocity, Handle<Admiral> new_owner,
         sfz::optional<pn::string_view> spriteIDOverride) {
     base       = &type;
     active     = kObjectInUse;
@@ -521,8 +520,8 @@ void SpaceObject::change_base_type(
 }
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
-        int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
+        const BaseObject& whichBase, fixedPointType* velocity, Point* location, int32_t direction,
+        Handle<Admiral> owner, uint32_t specialAttributes,
         sfz::optional<pn::string_view> spriteIDOverride) {
     Random      random{g.random.next(32766)};
     int32_t     id = g.random.next(16384);

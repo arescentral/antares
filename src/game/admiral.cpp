@@ -369,7 +369,7 @@ pn::string_view GetAdmiralName(Handle<Admiral> a) {
     }
 }
 
-void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType* where) {
+void SetObjectLocationDestination(Handle<SpaceObject> o, Point* where) {
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
         o->destObject            = SpaceObject::none();

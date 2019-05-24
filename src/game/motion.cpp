@@ -50,8 +50,8 @@ const int32_t kProximityWidthShift = 4;  // for speed = * kCollisionSuperSize
 const int32_t kCollisionUnitBitShift      = 7;   // >> 7 = / 128
 const int32_t kCollisionSuperUnitBitShift = 11;  // >> 11 = / 2048
 
-const int32_t kDistanceUnitBitShift      = 11;  // >> 14L = / 2048
-const int32_t kDistanceSuperUnitBitShift = 15;  // >> 18L = / 262144
+const int32_t kDistanceUnitBitShift      = 11;  // >> 11 = / 2048
+const int32_t kDistanceSuperUnitBitShift = 15;  // >> 15 = / 32768
 
 const int32_t kConsiderDistanceAttributes =
         (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |
@@ -90,7 +90,7 @@ struct AdjacentCellList {
     AdjacentCell cells[kUnitsToCheckNumber];  // adjacent units to check
 };
 
-ANTARES_GLOBAL coordPointType gGlobalCorner;
+ANTARES_GLOBAL Point  gGlobalCorner;
 static ANTARES_GLOBAL AdjacentCellList adjacent_cells[kProximityGridDataLength];
 static ANTARES_GLOBAL Handle<SpaceObject> near_objects[kProximityGridDataLength];
 static ANTARES_GLOBAL Handle<SpaceObject> far_objects[kProximityGridDataLength];

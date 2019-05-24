@@ -83,7 +83,7 @@ void Vectors::reset() {
     }
 }
 
-Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Ray& r) {
+Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;
@@ -119,7 +119,7 @@ Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Ray& r) 
     return Vector::none();
 }
 
-Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Bolt& b) {
+Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;

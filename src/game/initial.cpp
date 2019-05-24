@@ -44,7 +44,7 @@ void create_initial(Handle<const Initial> initial) {
         return;
     }
 
-    coordPointType coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
+    Point coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
 
     Handle<Admiral> owner = initial->owner.value_or(Admiral::none());
 
@@ -134,7 +134,7 @@ void UnhideInitialObject(Handle<const Initial> initial) {
         return;  // Already visible.
     }
 
-    coordPointType coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
+    Point coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
 
     Handle<Admiral> owner = initial->owner.value_or(Admiral::none());
 

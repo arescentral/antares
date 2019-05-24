@@ -39,9 +39,8 @@ struct LoadState {
 LoadState start_construct_level(const Level& level);
 void      construct_level(LoadState* state);
 void      DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::string_view text);
-void      GetLevelFullScaleAndCorner(
-             int32_t rotation, coordPointType* corner, int32_t* scale, Rect* bounds);
-coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v);
+void  GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, int32_t* scale, Rect* bounds);
+Point Translate_Coord_To_Level_Rotation(int32_t h, int32_t v);
 
 }  // namespace antares
 

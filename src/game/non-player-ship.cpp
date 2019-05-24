@@ -68,13 +68,12 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject);
 uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject);
 uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject);
 void     ThinkObjectGetCoordVector(
-            Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance, int16_t* angle);
-void ThinkObjectGetCoordDistance(
-        Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance);
+            Handle<SpaceObject> anObject, Point* dest, uint32_t* distance, int16_t* angle);
+void ThinkObjectGetCoordDistance(Handle<SpaceObject> anObject, Point* dest, uint32_t* distance);
 void ThinkObjectResolveDestination(
-        Handle<SpaceObject> anObject, coordPointType* dest, Handle<SpaceObject>* targetObject);
+        Handle<SpaceObject> anObject, Point* dest, Handle<SpaceObject>* targetObject);
 bool ThinkObjectResolveTarget(
-        Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance,
+        Handle<SpaceObject> anObject, Point* dest, uint32_t* distance,
         Handle<SpaceObject>* targetObject);
 uint32_t ThinkObjectEngageTarget(
         Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject, uint32_t distance,
@@ -427,7 +426,7 @@ uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
 
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
     uint32_t            keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    coordPointType      dest;
+    Point               dest;
     Handle<SpaceObject> targetObject;
     int32_t             difference;
     Fixed               slope;
@@ -873,7 +872,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
 
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
     uint32_t            keysDown = anObject->keysDown & kSpecialKeyMask, distance;
-    coordPointType      dest;
+    Point               dest;
     Handle<SpaceObject> targetObject;
     int16_t             angle, theta;
 
@@ -956,7 +955,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
         keysDown |= kDownKey;
         distance = 0;
     } else {
-        coordPointType dest;
+        Point dest;
         if (anObject->destObject.get()) {
             target = anObject->destObject;
             if (target.get() && target->active && (target->id == anObject->destObjectID)) {
@@ -1080,7 +1079,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
 
 // this gets the distance & angle between an object and arbitrary coords
 void ThinkObjectGetCoordVector(
-        Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance, int16_t* angle) {
+        Handle<SpaceObject> anObject, Point* dest, uint32_t* distance, int16_t* angle) {
     int32_t  difference;
     uint32_t dcalc;
     int16_t  shortx, shorty;
@@ -1125,8 +1124,7 @@ void ThinkObjectGetCoordVector(
     }
 }
 
-void ThinkObjectGetCoordDistance(
-        Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance) {
+void ThinkObjectGetCoordDistance(Handle<SpaceObject> anObject, Point* dest, uint32_t* distance) {
     int32_t  difference;
     uint32_t dcalc;
 
@@ -1151,7 +1149,7 @@ void ThinkObjectGetCoordDistance(
 
 // this resolves an object's destination to its coordinates, returned in dest
 void ThinkObjectResolveDestination(
-        Handle<SpaceObject> anObject, coordPointType* dest, Handle<SpaceObject>* targetObject) {
+        Handle<SpaceObject> anObject, Point* dest, Handle<SpaceObject>* targetObject) {
     *targetObject = SpaceObject::none();
 
     if ((anObject->attributes & kIsDestination) ||
@@ -1229,7 +1227,7 @@ void ThinkObjectResolveDestination(
 }
 
 bool ThinkObjectResolveTarget(
-        Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance,
+        Handle<SpaceObject> anObject, Point* dest, uint32_t* distance,
         Handle<SpaceObject>* targetObject) {
     dest->h = dest->v = 0xffffffff;
     *distance         = 0xffffffff;
@@ -1356,11 +1354,11 @@ bool ThinkObjectResolveTarget(
 uint32_t ThinkObjectEngageTarget(
         Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject, uint32_t distance,
         int16_t* theta) {
-    uint32_t       keysDown = 0;
-    coordPointType dest;
-    int32_t        difference;
-    int16_t        angle, beta;
-    Fixed          slope;
+    uint32_t keysDown = 0;
+    Point    dest;
+    int32_t  difference;
+    int16_t  angle, beta;
+    Fixed    slope;
 
     *theta = 0xffff;
 

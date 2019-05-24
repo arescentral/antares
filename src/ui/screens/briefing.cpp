@@ -81,7 +81,7 @@ static vector<inlinePictType> populate_inline_picts(
 }
 
 static BoxRect update_mission_brief_point(
-        int32_t whichBriefPoint, const Level& level, const coordPointType& corner, int32_t scale,
+        int32_t whichBriefPoint, const Level& level, const Point& corner, int32_t scale,
         const Rect& bounds, const std::vector<sfz::optional<BriefingSprite>>& sprites,
         vector<inlinePictType>* inlinePict, Rect* highlight_rect,
         vector<pair<Point, Point>>* lines, pn::string_ref text) {
@@ -332,8 +332,8 @@ void BriefingScreen::build_star_map() {
         _star_rect.offset(_bounds.left, _bounds.top);
     }
 
-    coordPointType corner;
-    int32_t        scale;
+    Point   corner;
+    int32_t scale;
     pix_bounds = _bounds.size().as_rect();
     GetLevelFullScaleAndCorner(0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
@@ -343,9 +343,9 @@ void BriefingScreen::build_star_map() {
 
 void BriefingScreen::build_brief_point() {
     if (_briefing_point >= 0) {
-        coordPointType corner;
-        int32_t        scale;
-        Rect           map_rect = widget(MAP_RECT)->inner_bounds();
+        Point   corner;
+        int32_t scale;
+        Rect    map_rect = widget(MAP_RECT)->inner_bounds();
         GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
@@ -370,9 +370,9 @@ void BriefingScreen::draw_system_map() const {
         }
     }
 
-    coordPointType corner;
-    int32_t        scale;
-    Rect           pix_bounds = _bounds.size().as_rect();
+    Point   corner;
+    int32_t scale;
+    Rect    pix_bounds = _bounds.size().as_rect();
     GetLevelFullScaleAndCorner(0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
     bounds.offset(offset().h, offset().v);

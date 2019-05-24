@@ -124,7 +124,7 @@ struct barIndicatorType {
     Hue     hue;
 };
 
-static ANTARES_GLOBAL coordPointType gLastGlobalCorner;
+static ANTARES_GLOBAL Point gLastGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL int32_t gLastScale;
@@ -688,7 +688,7 @@ void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
 }
 
 void draw_arbitrary_sector_lines(
-        const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
+        const Point& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
     Rects    rects;
     uint32_t size, level, h, division;
     int32_t  x;
@@ -762,8 +762,8 @@ void draw_arbitrary_sector_lines(
 }
 
 void GetArbitrarySingleSectorBounds(
-        coordPointType* corner, coordPointType* location, int32_t scale, int32_t minSectorSize,
-        Rect* bounds, Rect* destRect) {
+        Point* corner, Point* location, int32_t scale, int32_t minSectorSize, Rect* bounds,
+        Rect* destRect) {
     uint32_t size, level, x, h, division, scaledLoc;
     Rect     clipRect;
 
