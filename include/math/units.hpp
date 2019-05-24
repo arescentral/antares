@@ -61,10 +61,10 @@ typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 
 // Spatial units
 
-const int32_t kUniversalCenter         = 1073741823;
-const int32_t kMaximumRelevantDistance = 46340;
+const int32_t kUniversalCenter         = 0x3fffffff;
+const int32_t kMaximumRelevantDistance = 46340;  // floor(sqrt(0x7fffffff)
 const int32_t kMaximumRelevantDistanceSquared =
-        kMaximumRelevantDistance * kMaximumRelevantDistance;
+        kMaximumRelevantDistance * kMaximumRelevantDistance;  // Slightly < 0x7fffffff
 const int32_t kMaximumAngleDistance = 32767;  // maximum distance we can calc angle for
 
 const int32_t kSubSectorSize  = 512;

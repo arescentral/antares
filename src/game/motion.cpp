@@ -57,9 +57,8 @@ const int32_t kConsiderDistanceAttributes =
         (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |
          kIsPlayerShip);
 
-const uint32_t kThinkiverseTopLeft =
-        (kUniversalCenter - (2 * 65534));  // universe for thinking or owned objects
-const uint32_t kThinkiverseBottomRight = (kUniversalCenter + (2 * 65534));
+const Rect kThinkiverse{0x3ffe0000, 0x3ffe0000, 0x40020000,
+                        0x40020000};  // universe for thinking or owned objects
 
 // kAdjacentUnits encodes the following set of locations relative to the
 // center:
@@ -269,24 +268,23 @@ static void move_object(SpaceObject* o) {
 static void bounce_object(SpaceObject* o) {
     // check to see if it's out of bounds
     if (!(o->attributes & kDoesBounce)) {
-        if ((o->location.h < kThinkiverseTopLeft) || (o->location.v < kThinkiverseTopLeft) ||
-            (o->location.h > kThinkiverseBottomRight) ||
-            (o->location.v > kThinkiverseBottomRight)) {
+        if (!kThinkiverse.contains(
+                    {static_cast<int32_t>(o->location.h), static_cast<int32_t>(o->location.v)})) {
             o->active = kObjectToBeFreed;
         }
     } else {
-        if (o->location.h < kThinkiverseTopLeft) {
-            o->location.h = kThinkiverseTopLeft;
+        if (o->location.h < kThinkiverse.left) {
+            o->location.h = kThinkiverse.left;
             o->velocity.h = -o->velocity.h;
-        } else if (o->location.h > kThinkiverseBottomRight) {
-            o->location.h = kThinkiverseBottomRight;
+        } else if (o->location.h >= kThinkiverse.right) {
+            o->location.h = kThinkiverse.right - 1;
             o->velocity.h = -o->velocity.h;
         }
-        if (o->location.v < kThinkiverseTopLeft) {
-            o->location.v = kThinkiverseTopLeft;
+        if (o->location.v < kThinkiverse.top) {
+            o->location.v = kThinkiverse.top;
             o->velocity.v = -o->velocity.v;
-        } else if (o->location.v > kThinkiverseBottomRight) {
-            o->location.v = kThinkiverseBottomRight;
+        } else if (o->location.v >= kThinkiverse.bottom) {
+            o->location.v = kThinkiverse.bottom - 1;
             o->velocity.v = -o->velocity.v;
         }
     }
@@ -745,10 +743,6 @@ static void calc_impacts() {
                     super.offset(adj.super_offset.h, adj.super_offset.v);
                 }
 
-                if ((super.h < 0) || (super.v < 0)) {
-                    continue;
-                }
-
                 SpaceObject* b = nullptr;
                 for (; (b = b_handle.get()); b_handle = b->nextNearObject) {
                     if ((!can_hit(*a, *b) &&
@@ -803,9 +797,6 @@ static void calc_locality() {
                     const auto& adj = cells[k];
                     b_handle        = far_objects[adj.index_offset];
                     super.offset(adj.super_offset.h, adj.super_offset.v);
-                }
-                if ((super.h < 0) || (super.v < 0)) {
-                    continue;
                 }
 
                 SpaceObject* b = nullptr;
