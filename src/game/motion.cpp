@@ -266,27 +266,26 @@ static void move_object(SpaceObject* o) {
 }
 
 static void bounce_object(SpaceObject* o) {
-    // check to see if it's out of bounds
     if (!(o->attributes & kDoesBounce)) {
-        if (!kThinkiverse.contains(
-                    {static_cast<int32_t>(o->location.h), static_cast<int32_t>(o->location.v)})) {
+        if (!kThinkiverse.contains(o->location)) {
             o->active = kObjectToBeFreed;
         }
-    } else {
-        if (o->location.h < kThinkiverse.left) {
-            o->location.h = kThinkiverse.left;
-            o->velocity.h = -o->velocity.h;
-        } else if (o->location.h >= kThinkiverse.right) {
-            o->location.h = kThinkiverse.right - 1;
-            o->velocity.h = -o->velocity.h;
-        }
-        if (o->location.v < kThinkiverse.top) {
-            o->location.v = kThinkiverse.top;
-            o->velocity.v = -o->velocity.v;
-        } else if (o->location.v >= kThinkiverse.bottom) {
-            o->location.v = kThinkiverse.bottom - 1;
-            o->velocity.v = -o->velocity.v;
-        }
+        return;
+    }
+
+    if (o->location.h < kThinkiverse.left) {
+        o->location.h = kThinkiverse.left;
+        o->velocity.h = -o->velocity.h;
+    } else if (o->location.h >= kThinkiverse.right) {
+        o->location.h = kThinkiverse.right - 1;
+        o->velocity.h = -o->velocity.h;
+    }
+    if (o->location.v < kThinkiverse.top) {
+        o->location.v = kThinkiverse.top;
+        o->velocity.v = -o->velocity.v;
+    } else if (o->location.v >= kThinkiverse.bottom) {
+        o->location.v = kThinkiverse.bottom - 1;
+        o->velocity.v = -o->velocity.v;
     }
 }
 
@@ -565,27 +564,25 @@ static void calc_misc() {
 
             const auto& loc = o->location;
             {
-                int32_t x1          = (loc.h >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
-                int32_t y1          = (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
-                auto*   near_object = &near_objects[proximity_index(x1, y1)];
-                o->nextNearObject   = *near_object;
-                *near_object        = o_handle;
+                auto* near_object = &near_objects[proximity_index(
+                        (loc.h >> kCollisionUnitBitShift) & kProximityUnitAndModulo,
+                        (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo)];
+                o->nextNearObject = *near_object;
+                *near_object      = o_handle;
 
-                int32_t x2       = loc.h >> kCollisionSuperUnitBitShift;
-                int32_t y2       = loc.v >> kCollisionSuperUnitBitShift;
-                o->collisionGrid = {x2, y2};
+                o->collisionGrid = {loc.h >> kCollisionSuperUnitBitShift,
+                                    loc.v >> kCollisionSuperUnitBitShift};
             }
 
             {
-                int32_t x1         = (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
-                int32_t y1         = (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
-                auto*   far_object = &far_objects[proximity_index(x1, y1)];
-                o->nextFarObject   = *far_object;
-                *far_object        = o_handle;
+                auto* far_object = &far_objects[proximity_index(
+                        (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo,
+                        (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo)];
+                o->nextFarObject = *far_object;
+                *far_object      = o_handle;
 
-                int32_t x2      = loc.h >> kDistanceSuperUnitBitShift;
-                int32_t y2      = loc.v >> kDistanceSuperUnitBitShift;
-                o->distanceGrid = {x2, y2};
+                o->distanceGrid = {loc.h >> kDistanceSuperUnitBitShift,
+                                   loc.v >> kDistanceSuperUnitBitShift};
             }
 
             if (!(o->attributes & kIsDestination)) {
