@@ -602,65 +602,11 @@ void update_sector_lines() {
 }
 
 void draw_sector_lines() {
-    Rects    rects;
-    int32_t  x;
-    uint32_t size, level, h, division;
-
-    size  = kSubSectorSize / 4;
-    level = 1;
-    do {
-        level *= 2;
-        size *= 4;
-        h = (size * gLastScale) >> SHIFT_SCALE;
-    } while (h < kMinGraphicSectorSize);
-    level /= 2;
-    level *= level;
-
-    x        = size - (gLastGlobalCorner.h & (size - 1));
-    division = ((gLastGlobalCorner.h + x) >> kSubSectorShift) & 0x0000000f;
-    x        = ((x * gLastScale) >> SHIFT_SCALE) + viewport().left;
-
-    if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport().right)) && (h > 0)) {
-            RgbColor color;
-            if (!division) {
-                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
-            } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
-            } else {
-                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
-            }
-
-            rects.fill({x, viewport().top, x + 1, viewport().bottom}, color);
-            division += level;
-            division &= 0x0000000f;
-            x += h;
-        }
+    if (!should_draw_sector_lines) {
+        return;
     }
 
-    x        = size - (gLastGlobalCorner.v & (size - 1));
-    division = ((gLastGlobalCorner.v + x) >> kSubSectorShift) & 0x0000000f;
-    x        = ((x * gLastScale) >> SHIFT_SCALE) + viewport().top;
-
-    if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport().bottom)) && (h > 0)) {
-            RgbColor color;
-            if (!division) {
-                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
-            } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
-            } else {
-                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
-            }
-
-            rects.fill({viewport().left, x, viewport().right, x + 1}, color);
-
-            division += level;
-            division &= 0x0000000f;
-
-            x += h;
-        }
-    }
+    draw_arbitrary_sector_lines(gLastGlobalCorner, gLastScale, kMinGraphicSectorSize, viewport());
 }
 
 void InstrumentsHandleClick(const GameCursor& cursor) {
@@ -687,42 +633,30 @@ void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
 
 void draw_arbitrary_sector_lines(
         const Point& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
-    Rects    rects;
-    uint32_t size, level, h, division;
-    int32_t  x;
-    RgbColor color;
+    Rects rects;
 
-    size  = kSubSectorSize >> 2L;
-    level = 1;
-    do {
-        level <<= 1L;
-        size <<= 2L;
-        h = size;
-        h *= scale;
-        h >>= SHIFT_SCALE;
-    } while (h < implicit_cast<uint32_t>(minSectorSize));
-    level >>= 1L;
+    int32_t level = 1;
+    int32_t size  = SECTOR_SMALL;
+    int32_t h     = (SECTOR_SMALL * scale) >> SHIFT_SCALE;
+    while (h < minSectorSize) {
+        level *= 2;
+        size *= 4;
+        h = (size * scale) >> SHIFT_SCALE;
+    }
     level *= level;
 
-    x = corner.h;
-    x &= size - 1;
-    x = size - x;
+    int32_t x        = size - (corner.h & (size - 1));
+    int32_t division = ((corner.h + x) / SECTOR_SMALL) & 0x0000000f;
+    x                = ((x * scale) >> SHIFT_SCALE) + bounds.left;
 
-    division = corner.h + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds.left;
-
-    while ((x < implicit_cast<uint32_t>(bounds.right)) && (h > 0)) {
+    while (x < bounds.right) {
+        RgbColor color;
         if (!division) {
-            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
         } else {
-            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
         }
 
         rects.fill({x, bounds.top, x + 1, bounds.bottom}, color);
@@ -731,121 +665,23 @@ void draw_arbitrary_sector_lines(
         x += h;
     }
 
-    x = corner.v;
-    x &= size - 1;
-    x = size - x;
+    x        = size - (corner.v & (size - 1));
+    division = ((corner.v + x) / SECTOR_SMALL) & 0x0000000f;
+    x        = ((x * scale) >> SHIFT_SCALE) + bounds.top;
 
-    division = corner.v + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds.top;
-
-    while ((x < implicit_cast<uint32_t>(bounds.bottom)) && (h > 0)) {
+    while (x < bounds.bottom) {
+        RgbColor color;
         if (!division) {
-            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
         } else {
-            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
         }
 
         rects.fill({bounds.left, x, bounds.right, x + 1}, color);
         division += level;
         division &= 0x0000000f;
-        x += h;
-    }
-}
-
-void GetArbitrarySingleSectorBounds(
-        Point* corner, Point* location, int32_t scale, int32_t minSectorSize, Rect* bounds,
-        Rect* destRect) {
-    uint32_t size, level, x, h, division, scaledLoc;
-    Rect     clipRect;
-
-    clipRect.left   = bounds->left;
-    clipRect.right  = bounds->right;
-    clipRect.top    = bounds->top;
-    clipRect.bottom = bounds->bottom;
-
-    destRect->left   = bounds->left;
-    destRect->right  = bounds->right;
-    destRect->top    = bounds->top;
-    destRect->bottom = bounds->bottom;
-
-    size  = kSubSectorSize >> 2L;
-    level = 1;
-    do {
-        level <<= 1L;
-        size <<= 2L;
-        h = size;
-        h *= scale;
-        h >>= SHIFT_SCALE;
-    } while (h < implicit_cast<uint32_t>(minSectorSize));
-    level >>= 1L;
-    level *= level;
-
-    x = corner->h;
-    x &= size - 1;
-    x = size - x;
-
-    division = corner->h + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds->left;
-
-    scaledLoc = location->h - corner->h;
-    scaledLoc *= scale;
-    scaledLoc >>= SHIFT_SCALE;
-    scaledLoc += bounds->left;
-
-    while ((x < implicit_cast<uint32_t>(bounds->right)) && (h > 0)) {
-        division += level;
-        division &= 0x0000000f;
-
-        if ((x < scaledLoc) && (x > implicit_cast<uint32_t>(destRect->left))) {
-            destRect->left = x;
-        }
-        if ((x > scaledLoc) && (x < implicit_cast<uint32_t>(destRect->right))) {
-            destRect->right = x;
-        }
-
-        x += h;
-    }
-
-    x = corner->v;
-    x &= size - 1;
-    x = size - x;
-
-    division = corner->v + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds->top;
-
-    scaledLoc = location->v - corner->v;
-    scaledLoc *= scale;
-    scaledLoc >>= SHIFT_SCALE;
-    scaledLoc += bounds->top;
-
-    while ((x < implicit_cast<uint32_t>(bounds->bottom)) && (h > 0)) {
-        division += level;
-        division &= 0x0000000f;
-
-        if ((x < scaledLoc) && (x > implicit_cast<uint32_t>(destRect->top))) {
-            destRect->top = x;
-        }
-        if ((x > scaledLoc) && (x < implicit_cast<uint32_t>(destRect->bottom))) {
-            destRect->bottom = x;
-        }
-
         x += h;
     }
 }

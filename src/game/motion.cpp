@@ -41,24 +41,23 @@ using std::unique_ptr;
 
 namespace antares {
 
-const int32_t kProximitySuperSize      = 16;  // number of cUnits in cSuperUnits
-const int32_t kProximityGridDataLength = kProximitySuperSize * kProximitySuperSize;
-const int32_t kProximityUnitAndModulo =
-        kProximitySuperSize - 1;  // & a int32_t with this and get modulo kCollisionSuperSize
-const int32_t kProximityWidthShift = 4;  // for speed = * kCollisionSuperSize
-
-const int32_t kCollisionUnitBitShift      = 7;   // >> 7 = / 128
-const int32_t kCollisionSuperUnitBitShift = 11;  // >> 11 = / 2048
-
-const int32_t kDistanceUnitBitShift      = 11;  // >> 11 = / 2048
-const int32_t kDistanceSuperUnitBitShift = 15;  // >> 15 = / 32768
+enum {
+    PROXIMITY_GRID_WIDTH = 16,
+    PROXIMITY_GRID_AREA  = 256,  // WIDTH * WIDTH
+    PROXIMITY_GRID_MASK  = 0xf,
+    PROXIMITY_GRID_SHIFT = 4,
+};
 
 const int32_t kConsiderDistanceAttributes =
         (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |
          kIsPlayerShip);
 
-const Rect kThinkiverse{0x3ffe0000, 0x3ffe0000, 0x40020000,
-                        0x40020000};  // universe for thinking or owned objects
+const int32_t kThinkiverseCenter = 0x40000000;
+const int32_t kThinkiverseRadius = SECTOR_MAX / 2;
+const Rect    kThinkiverse{
+        // universe for thinking or owned objects
+        kThinkiverseCenter - kThinkiverseRadius, kThinkiverseCenter - kThinkiverseRadius,
+        kThinkiverseCenter + kThinkiverseRadius, kThinkiverseCenter + kThinkiverseRadius};
 
 // kAdjacentUnits encodes the following set of locations relative to the
 // center:
@@ -91,9 +90,9 @@ struct AdjacentCellList {
 };
 
 ANTARES_GLOBAL Point  gGlobalCorner;
-static ANTARES_GLOBAL AdjacentCellList adjacent_cells[kProximityGridDataLength];
-static ANTARES_GLOBAL Handle<SpaceObject> near_objects[kProximityGridDataLength];
-static ANTARES_GLOBAL Handle<SpaceObject> far_objects[kProximityGridDataLength];
+static ANTARES_GLOBAL AdjacentCellList adjacent_cells[PROXIMITY_GRID_AREA];
+static ANTARES_GLOBAL Handle<SpaceObject> near_objects[PROXIMITY_GRID_AREA];
+static ANTARES_GLOBAL Handle<SpaceObject> far_objects[PROXIMITY_GRID_AREA];
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
@@ -103,12 +102,12 @@ Size center_scale() {
     };
 }
 
-static int proximity_index(int32_t x, int32_t y) { return (y << kProximityWidthShift) + x; }
+static int proximity_index(int32_t x, int32_t y) { return (y << PROXIMITY_GRID_SHIFT) + x; }
 
 void InitMotion() {
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
-    for (int y = 0; y < kProximitySuperSize; y++) {
-        for (int x = 0; x < kProximitySuperSize; x++) {
+    for (int y = 0; y < PROXIMITY_GRID_WIDTH; y++) {
+        for (int x = 0; x < PROXIMITY_GRID_WIDTH; x++) {
             int i           = proximity_index(x, y);
             near_objects[i] = far_objects[i] = SpaceObject::none();
             AdjacentCell* cells              = adjacent_cells[i].cells;
@@ -119,19 +118,19 @@ void InitMotion() {
 
                 ux += kAdjacentUnits[i].h;
                 if (ux < 0) {
-                    ux += kProximitySuperSize;
+                    ux += PROXIMITY_GRID_WIDTH;
                     sx--;
-                } else if (ux >= kProximitySuperSize) {
-                    ux -= kProximitySuperSize;
+                } else if (ux >= PROXIMITY_GRID_WIDTH) {
+                    ux -= PROXIMITY_GRID_WIDTH;
                     sx++;
                 }
 
                 uy += kAdjacentUnits[i].v;
                 if (uy < 0) {
-                    uy += kProximitySuperSize;
+                    uy += PROXIMITY_GRID_WIDTH;
                     sy--;
-                } else if (uy >= kProximitySuperSize) {
-                    uy -= kProximitySuperSize;
+                } else if (uy >= PROXIMITY_GRID_WIDTH) {
+                    uy -= PROXIMITY_GRID_WIDTH;
                     sy++;
                 }
 
@@ -148,7 +147,7 @@ void ResetMotionGlobals() {
     g.closest                         = Handle<SpaceObject>(0);
     g.farthest                        = Handle<SpaceObject>(0);
 
-    for (int i = 0; i < kProximityGridDataLength; i++) {
+    for (int i = 0; i < PROXIMITY_GRID_AREA; i++) {
         near_objects[i] = far_objects[i] = SpaceObject::none();
     }
 }
@@ -507,7 +506,7 @@ static void calc_misc() {
     g.closest = g.farthest = Handle<SpaceObject>(0);
 
     // reset the collision grid
-    for (int32_t i = 0; i < kProximityGridDataLength; i++) {
+    for (int32_t i = 0; i < PROXIMITY_GRID_AREA; i++) {
         near_objects[i] = far_objects[i] = SpaceObject::none();
     }
 
@@ -565,24 +564,22 @@ static void calc_misc() {
             const auto& loc = o->location;
             {
                 auto* near_object = &near_objects[proximity_index(
-                        (loc.h >> kCollisionUnitBitShift) & kProximityUnitAndModulo,
-                        (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo)];
+                        (loc.h / SUBSECTOR) & PROXIMITY_GRID_MASK,
+                        (loc.v / SUBSECTOR) & PROXIMITY_GRID_MASK)];
                 o->nextNearObject = *near_object;
                 *near_object      = o_handle;
 
-                o->collisionGrid = {loc.h >> kCollisionSuperUnitBitShift,
-                                    loc.v >> kCollisionSuperUnitBitShift};
+                o->collisionGrid = {loc.h / SECTOR_MEDIUM, loc.v / SECTOR_MEDIUM};
             }
 
             {
                 auto* far_object = &far_objects[proximity_index(
-                        (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo,
-                        (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo)];
+                        (loc.h / SECTOR_MEDIUM) & PROXIMITY_GRID_MASK,
+                        (loc.v / SECTOR_MEDIUM) & PROXIMITY_GRID_MASK)];
                 o->nextFarObject = *far_object;
                 *far_object      = o_handle;
 
-                o->distanceGrid = {loc.h >> kDistanceSuperUnitBitShift,
-                                   loc.v >> kDistanceSuperUnitBitShift};
+                o->distanceGrid = {loc.h / SECTOR_HUGE, loc.v / SECTOR_HUGE};
             }
 
             if (!(o->attributes & kIsDestination)) {
@@ -727,7 +724,7 @@ static bool can_hit(const SpaceObject& a, const SpaceObject& b) {
 
 // Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
 static void calc_impacts() {
-    for (int32_t i = 0; i < kProximityGridDataLength; i++) {
+    for (int32_t i = 0; i < PROXIMITY_GRID_AREA; i++) {
         const auto*  cells = adjacent_cells[i].cells;
         SpaceObject* a     = nullptr;
         for (auto a_handle = near_objects[i]; (a = a_handle.get()); a_handle = a->nextNearObject) {
@@ -783,7 +780,7 @@ static void calc_impacts() {
 //   * localFoeStrength
 // Also sets seenByPlayerFlags and kIsHidden based on object proximity.
 static void calc_locality() {
-    for (int32_t i = 0; i < kProximityGridDataLength; i++) {
+    for (int32_t i = 0; i < PROXIMITY_GRID_AREA; i++) {
         const auto*  cells = adjacent_cells[i].cells;
         SpaceObject* a     = nullptr;
         for (auto a_handle = far_objects[i]; (a = a_handle.get()); a_handle = a->nextFarObject) {

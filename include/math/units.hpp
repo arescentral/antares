@@ -67,8 +67,14 @@ const int32_t kMaximumRelevantDistanceSquared =
         kMaximumRelevantDistance * kMaximumRelevantDistance;  // Slightly < 0x7fffffff
 const int32_t kMaximumAngleDistance = 32767;  // maximum distance we can calc angle for
 
-const int32_t kSubSectorSize  = 512;
-const int32_t kSubSectorShift = 9;
+enum {
+    SUBSECTOR     = 128,     // 2^7 (near object grid)
+    SECTOR_SMALL  = 512,     // 2^9 (blue lines)
+    SECTOR_MEDIUM = 2048,    // 2^11 (sky blue lines, near object super-grid, far object grid)
+    SECTOR_LARGE  = 8192,    // 2^13 (green lines)
+    SECTOR_HUGE   = 32768,   // 2^15 (far object super-grid)
+    SECTOR_MAX    = 262144,  // 2^18 (universe width)
+};
 
 const int32_t SCALE_SCALE   = 4096;
 const int32_t MIN_SCALE     = 256;
