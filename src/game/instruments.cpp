@@ -124,7 +124,6 @@ struct barIndicatorType {
     Hue     hue;
 };
 
-static ANTARES_GLOBAL Rect last_scaled_screen;
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL int32_t gLastScale;
@@ -181,7 +180,6 @@ void ResetInstruments() {
     g.radar_count = ticks(0);
     gLastScale = gAbsoluteScale = SCALE_SCALE;
     gWhichScaleNum              = 0;
-    last_scaled_screen          = Rect{};
     l                           = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
@@ -597,8 +595,7 @@ void update_sector_lines() {
         sys.sound.zoom();
     }
 
-    gLastScale         = gAbsoluteScale;
-    last_scaled_screen = scaled_screen;
+    gLastScale = gAbsoluteScale;
 }
 
 void draw_sector_lines() {
@@ -607,7 +604,7 @@ void draw_sector_lines() {
     }
 
     draw_arbitrary_sector_lines(
-            last_scaled_screen.origin(), gLastScale, kMinGraphicSectorSize, viewport());
+            scaled_screen.origin(), gAbsoluteScale, kMinGraphicSectorSize, viewport());
 }
 
 void InstrumentsHandleClick(const GameCursor& cursor) {
