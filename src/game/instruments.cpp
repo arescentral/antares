@@ -631,8 +631,7 @@ void draw_sector_lines() {
                 color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
             }
 
-            // TODO(sfiera): +1 on bottom no longer needed.
-            rects.fill({x, viewport().top, x + 1, viewport().bottom + 1}, color);
+            rects.fill({x, viewport().top, x + 1, viewport().bottom}, color);
             division += level;
             division &= 0x0000000f;
             x += h;
@@ -654,8 +653,7 @@ void draw_sector_lines() {
                 color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
             }
 
-            // TODO(sfiera): +1 on right no longer needed.
-            rects.fill({viewport().left, x, viewport().right + 1, x + 1}, color);
+            rects.fill({viewport().left, x, viewport().right, x + 1}, color);
 
             division += level;
             division &= 0x0000000f;
