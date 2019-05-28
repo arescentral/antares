@@ -300,9 +300,9 @@ void SoundFX::play_at(
                             msoundpersistence, msoundpriority);
                 }
             } else {
-                mul1      = ABS<int>(gGlobalCorner.h - mobjectptr->location.h);
+                mul1      = ABS<int>(scaled_screen.left - mobjectptr->location.h);
                 mul2      = mul1;
-                mul1      = ABS<int>(gGlobalCorner.v - mobjectptr->location.v);
+                mul1      = ABS<int>(scaled_screen.top - mobjectptr->location.v);
                 mdistance = mul1;
                 if ((mul2 < kMaximumRelevantDistance) && (mdistance < kMaximumRelevantDistance)) {
                     mdistance = mdistance * mdistance + mul2 * mul2;
@@ -320,7 +320,7 @@ void SoundFX::play_at(
                 }
                 if (mvolume > 0) {
                     PlayLocalizedSound(
-                            gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h,
+                            scaled_screen.left, scaled_screen.top, mobjectptr->location.h,
                             mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v,
                             id, mvolume, msoundpersistence, msoundpriority);
                 }
@@ -346,7 +346,7 @@ void SoundFX::play_at(
             } else {
                 if (mvolume > 0) {
                     PlayLocalizedSound(
-                            gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h,
+                            scaled_screen.left, scaled_screen.top, mobjectptr->location.h,
                             mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v,
                             id, mvolume, msoundpersistence, msoundpriority);
                 }

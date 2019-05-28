@@ -24,7 +24,7 @@
 
 namespace antares {
 
-extern Point gGlobalCorner;
+extern Rect scaled_screen;
 
 void InitMotion();
 void ResetMotionGlobals();

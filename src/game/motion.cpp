@@ -89,7 +89,7 @@ struct AdjacentCellList {
     AdjacentCell cells[kUnitsToCheckNumber];  // adjacent units to check
 };
 
-ANTARES_GLOBAL Point  gGlobalCorner;
+ANTARES_GLOBAL Rect   scaled_screen;
 static ANTARES_GLOBAL AdjacentCellList adjacent_cells[PROXIMITY_GRID_AREA];
 static ANTARES_GLOBAL Handle<SpaceObject> near_objects[PROXIMITY_GRID_AREA];
 static ANTARES_GLOBAL Handle<SpaceObject> far_objects[PROXIMITY_GRID_AREA];
@@ -143,9 +143,9 @@ void InitMotion() {
 }
 
 void ResetMotionGlobals() {
-    gGlobalCorner.h = gGlobalCorner.v = 0;
-    g.closest                         = Handle<SpaceObject>(0);
-    g.farthest                        = Handle<SpaceObject>(0);
+    scaled_screen = Rect{};
+    g.closest     = Handle<SpaceObject>(0);
+    g.farthest    = Handle<SpaceObject>(0);
 
     for (int i = 0; i < PROXIMITY_GRID_AREA; i++) {
         near_objects[i] = far_objects[i] = SpaceObject::none();
@@ -426,8 +426,14 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     }
 
     if (g.ship.get() && g.ship->active) {
-        gGlobalCorner.h = g.ship->location.h - (center_scale().width / gAbsoluteScale);
-        gGlobalCorner.v = g.ship->location.v - (center_scale().height / gAbsoluteScale);
+        Size scale = center_scale();
+        scale.width /= gAbsoluteScale;
+        scale.height /= gAbsoluteScale;
+
+        scaled_screen = Rect{
+                g.ship->location.h - scale.width, g.ship->location.v - scale.height,
+                g.ship->location.h + scale.width, g.ship->location.v + scale.height,
+        };
     }
 
     // !!!!!!!!
@@ -444,7 +450,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
         auto& sprite = *o->sprite;
 
-        int32_t h = (o->location.h - gGlobalCorner.h) * gAbsoluteScale;
+        int32_t h = (o->location.h - scaled_screen.left) * gAbsoluteScale;
         h >>= SHIFT_SCALE;
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
             sprite.where.h = h + viewport.left;
@@ -452,7 +458,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
             sprite.where.h = -kSpriteMaxSize;
         }
 
-        int32_t v = (o->location.v - gGlobalCorner.v) * gAbsoluteScale;
+        int32_t v = (o->location.v - scaled_screen.top) * gAbsoluteScale;
         v >>= SHIFT_SCALE;
         if ((v > -kSpriteMaxSize) && (v < kSpriteMaxSize)) {
             sprite.where.v = v;
