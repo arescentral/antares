@@ -26,12 +26,10 @@ namespace antares {
 
 extern Rect scaled_screen;
 
-void InitMotion();
 void ResetMotionGlobals();
 
 Size center_scale();
 
-void MotionCleanup();
 void MoveSpaceObjects(ticks unitsToDo);
 void CollideSpaceObjects();
 

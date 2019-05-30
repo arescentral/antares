@@ -71,11 +71,11 @@ const Rect    kThinkiverse{
 // relative locations, we will make a pairwise comparison between all
 // adjacent cells exactly once.
 //
-// InitMotion() turns the relative locations to absolute indices, and
-// keeps that information in kAdjacentCells[k].  If the relative
+// make_adjacent_cells turns the relative locations to absolute indices,
+// and keeps that information in kAdjacentCells[k].  If the relative
 // location would be outside the 16x16 grid of near_object, then
-// super_offset points into the adjacent grid, which is also the same
-// grid in a way I have yet to comprehend.
+// super_offset gets added to the object in question’s super location.
+// An object is only really in a cell if the super location matches too.
 const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
 struct AdjacentCells {
@@ -142,15 +142,11 @@ Size center_scale() {
     };
 }
 
-void InitMotion() {}
-
 void ResetMotionGlobals() {
     scaled_screen = Rect{};
     g.closest     = Handle<SpaceObject>(0);
     g.farthest    = Handle<SpaceObject>(0);
 }
-
-void MotionCleanup() {}
 
 static void move_object(SpaceObject* o) {
     if ((o->maxVelocity == Fixed::zero()) && !(o->attributes & kCanTurn)) {
