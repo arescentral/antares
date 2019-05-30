@@ -189,14 +189,6 @@ struct Rect {
 
 pn::string stringify(Rect r);
 
-struct coordPointType {
-    uint32_t h;
-    uint32_t v;
-};
-
-inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
-inline bool operator!=(coordPointType x, coordPointType y) { return (x.h != y.h) || (x.v != y.v); }
-
 }  // namespace antares
 
 #endif  // ANTARES_MATH_GEOMETRY_HPP_

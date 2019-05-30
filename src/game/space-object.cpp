@@ -153,11 +153,6 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
 
     *obj = *sourceObject;
 
-    Point where(
-            (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) +
-                    viewport().left,
-            (int32_t((obj->location.v - gGlobalCorner.v) * gAbsoluteScale) >> SHIFT_SCALE));
-
     if (obj->sprite.get()) {
         RemoveSprite(obj->sprite);
     }
@@ -174,6 +169,10 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
             whichShape = angle / rotation_resolution(*obj->base);
         }
 
+        Point where{(((obj->location.h - scaled_screen.left) * gAbsoluteScale) >> SHIFT_SCALE) +
+                            viewport().left,
+                    (((obj->location.v - scaled_screen.top) * gAbsoluteScale) >> SHIFT_SCALE) +
+                            viewport().top};
         obj->sprite = AddSprite(
                 where, spriteTable, sourceObject->pix_id->name, sourceObject->pix_id->hue,
                 whichShape, obj->naturalScale, obj->icon, obj->layer, get_tiny_color(*obj),
@@ -218,9 +217,8 @@ void RemoveAllSpaceObjects() {
 }
 
 SpaceObject::SpaceObject(
-        const BaseObject& type, Random seed, int32_t object_id,
-        const coordPointType& initial_location, int32_t relative_direction,
-        fixedPointType* relative_velocity, Handle<Admiral> new_owner,
+        const BaseObject& type, Random seed, int32_t object_id, const Point& initial_location,
+        int32_t relative_direction, fixedPointType* relative_velocity, Handle<Admiral> new_owner,
         sfz::optional<pn::string_view> spriteIDOverride) {
     base       = &type;
     active     = kObjectInUse;
@@ -345,21 +343,18 @@ SpaceObject::SpaceObject(
     engageRange         = max(kEngageRange, longestWeaponRange);
 
     if (attributes & (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kRemoteOrHuman)) {
-        uint32_t ydiff, xdiff;
-        auto     player = g.ship;
+        int64_t ydiff, xdiff;
+        auto    player = g.ship;
+        Point   center;
         if (player.get() && player->active) {
-            xdiff = ABS<int>(player->location.h - location.h);
-            ydiff = ABS<int>(player->location.v - location.v);
+            center = player->location;
         } else {
-            xdiff = ABS<int>(gGlobalCorner.h - location.h);
-            ydiff = ABS<int>(gGlobalCorner.v - location.v);
+            center = scaled_screen.center();
         }
-        if ((xdiff > kMaximumRelevantDistance) || (ydiff > kMaximumRelevantDistance)) {
-            distanceFromPlayer =
-                    MyWideMul<uint64_t>(xdiff, xdiff) + MyWideMul<uint64_t>(ydiff, ydiff);
-        } else {
-            distanceFromPlayer = ydiff * ydiff + xdiff * xdiff;
-        }
+        xdiff = abs(center.h - location.h);
+        ydiff = abs(center.v - location.v);
+
+        distanceFromPlayer = (ydiff * ydiff) + (xdiff * xdiff);
     }
 }
 
@@ -521,8 +516,8 @@ void SpaceObject::change_base_type(
 }
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
-        int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
+        const BaseObject& whichBase, fixedPointType* velocity, Point* location, int32_t direction,
+        Handle<Admiral> owner, uint32_t specialAttributes,
         sfz::optional<pn::string_view> spriteIDOverride) {
     Random      random{g.random.next(32766)};
     int32_t     id = g.random.next(16384);

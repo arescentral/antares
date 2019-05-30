@@ -130,6 +130,7 @@ class GamePlay : public Card {
     bool                  _player_paused;
     PlayAgainScreen::Item _play_again;
     PlayerShip            _player_ship;
+    bool                  _should_draw_sector_lines;
 
     // The wall_time that g.time corresponds to. Under normal operation,
     // this increases in lockstep with g.time, but during fast motion or
@@ -388,7 +389,9 @@ void GamePlay::resign_front() { minicomputer_cancel(); }
 
 void GamePlay::draw() const {
     globals()->starfield.draw();
-    draw_sector_lines();
+    if (_should_draw_sector_lines) {
+        draw_sector_lines();
+    }
     Vectors::draw();
     draw_sprites();
     Label::draw();
@@ -479,7 +482,7 @@ void GamePlay::fire_timer() {
         Messages::clip();
         Messages::draw_long_message(unitsToDo);
 
-        update_sector_lines();
+        _should_draw_sector_lines = update_sector_lines();
         Vectors::update();
         Label::update_positions(unitsToDo);
         Label::update_contents(unitsToDo);

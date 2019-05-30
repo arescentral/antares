@@ -38,7 +38,7 @@ struct BriefingSprite {
 };
 
 std::vector<sfz::optional<BriefingSprite>> render_briefing(
-        int32_t maxSize, const Rect& bounds, const coordPointType& corner, int32_t scale);
+        int32_t maxSize, const Rect& bounds, const Point& corner, int32_t scale);
 
 struct BriefPointInfo {
     pn::string header;
@@ -46,7 +46,7 @@ struct BriefPointInfo {
     Rect       highlight;
 };
 BriefPointInfo BriefPoint_Data_Get(
-        int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
+        int32_t whichPoint, const Level& level, const Point& corner, int32_t scale,
         int32_t maxSize, const Rect& bounds,
         const std::vector<sfz::optional<BriefingSprite>>& sprites);
 

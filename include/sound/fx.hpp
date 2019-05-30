@@ -44,7 +44,7 @@ class SoundFX {
     void play(pn::string_view id, uint8_t volume, usecs persistence, uint8_t priority);
     void play_at(
             pn::string_view id, int32_t volume, usecs persistence, uint8_t priority,
-            Handle<SpaceObject> object);
+            Handle<SpaceObject> origin);
 
     void select();
     void build();

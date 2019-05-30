@@ -167,7 +167,7 @@ static void apply(
         } else if (a.relative_direction.value_or(false)) {
             direction = direct->direction;
         }
-        coordPointType at = direct->location;
+        Point at = direct->location;
         at.h += offset.h;
         at.v += offset.v;
 
@@ -244,7 +244,7 @@ static void apply(
         location.h = direct->sprite->where.h;
         location.v = direct->sprite->where.v;
     } else {
-        int32_t l = (direct->location.h - gGlobalCorner.h) * gAbsoluteScale;
+        int32_t l = (direct->location.h - scaled_screen.left) * gAbsoluteScale;
         l >>= SHIFT_SCALE;
         if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
             location.h = l + viewport().left;
@@ -252,7 +252,7 @@ static void apply(
             location.h = -kSpriteMaxSize;
         }
 
-        l = (direct->location.v - gGlobalCorner.v) * gAbsoluteScale;
+        l = (direct->location.v - scaled_screen.top) * gAbsoluteScale;
         l >>= SHIFT_SCALE; /*+ CLIP_TOP*/
         if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
             location.v = l + viewport().top;
@@ -507,7 +507,7 @@ static void apply(
 static void apply(
         const MoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    coordPointType newLocation;
+    Point newLocation;
     switch (a.origin.value_or(MoveAction::Origin::LEVEL)) {
         case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
         case MoveAction::Origin::SUBJECT:
@@ -518,8 +518,8 @@ static void apply(
             break;
     }
 
-    coordPointType off = a.to.value_or(coordPointType{0, 0});
-    off                = Translate_Coord_To_Level_Rotation(off.h, off.v);
+    Point off = a.to.value_or(Point{0, 0});
+    off       = Translate_Coord_To_Level_Rotation(off.h, off.v);
     newLocation.h += off.h - kUniversalCenter;
     newLocation.v += off.v - kUniversalCenter;
 

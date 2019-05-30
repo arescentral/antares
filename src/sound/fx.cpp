@@ -181,19 +181,6 @@ void SoundFX::play(pn::string_view id, uint8_t amplitude, usecs persistence, uin
     }
 }
 
-static void PlayLocalizedSound(
-        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy, Fixed hvel, Fixed vvel,
-        pn::string_view whichSoundID, int16_t amplitude, usecs persistence, uint8_t priority) {
-    static_cast<void>(sx);
-    static_cast<void>(sy);
-    static_cast<void>(dx);
-    static_cast<void>(dy);
-    static_cast<void>(hvel);
-    static_cast<void>(vvel);
-
-    sys.sound.play(whichSoundID, amplitude, persistence, priority);
-}
-
 SoundFX::SoundFX() {}
 SoundFX::~SoundFX() {}
 
@@ -264,94 +251,38 @@ void SoundFX::stop() {
 //
 
 void SoundFX::play_at(
-        pn::string_view id, int32_t mvolume, usecs msoundpersistence, uint8_t msoundpriority,
-        Handle<SpaceObject> mobjectptr) {
-    if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
-        int32_t  mdistance = mobjectptr->distanceFromPlayer;
-        uint32_t mul1;
-        uint32_t mul2;
-        auto     player = g.ship;
+        pn::string_view id, int32_t volume, usecs persistence, uint8_t priority,
+        Handle<SpaceObject> origin) {
+    if (origin->distanceFromPlayer >= kMaximumRelevantDistanceSquared) {
+        return;
+    }
 
-        if (mdistance == 0) {
-            if (player.get() && player->active) {
-                mul1      = ABS<int>(player->location.h - mobjectptr->location.h);
-                mul2      = mul1;
-                mul1      = ABS<int>(player->location.v - mobjectptr->location.v);
-                mdistance = mul1;
-                if ((mul2 < kMaximumRelevantDistance) && (mdistance < kMaximumRelevantDistance)) {
-                    mdistance = mdistance * mdistance + mul2 * mul2;
-                } else {
-                    mdistance = kMaximumRelevantDistanceSquared;
-                }
-                mdistance = lsqrt(mdistance);
-                if (mdistance > 480) {
-                    mdistance -= 480;
-                    if (mdistance > 1920) {
-                        mvolume = 0;
-                    } else {
-                        mvolume = ((1920 - mdistance) * mvolume) / 1920;
-                    }
-                }
-                if (mvolume > 0) {
-                    PlayLocalizedSound(
-                            player->location.h, player->location.v, mobjectptr->location.h,
-                            mobjectptr->location.v, player->velocity.h - mobjectptr->velocity.h,
-                            player->velocity.v - mobjectptr->velocity.v, id, mvolume,
-                            msoundpersistence, msoundpriority);
-                }
-            } else {
-                mul1      = ABS<int>(gGlobalCorner.h - mobjectptr->location.h);
-                mul2      = mul1;
-                mul1      = ABS<int>(gGlobalCorner.v - mobjectptr->location.v);
-                mdistance = mul1;
-                if ((mul2 < kMaximumRelevantDistance) && (mdistance < kMaximumRelevantDistance)) {
-                    mdistance = mdistance * mdistance + mul2 * mul2;
-                } else {
-                    mdistance = kMaximumRelevantDistanceSquared;
-                }
-                mdistance = lsqrt(mdistance);
-                if (mdistance > 480) {
-                    mdistance -= 480;
-                    if (mdistance > 1920) {
-                        mvolume = 0;
-                    } else {
-                        mvolume = ((1920 - mdistance) * mvolume) / 1920;
-                    }
-                }
-                if (mvolume > 0) {
-                    PlayLocalizedSound(
-                            gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h,
-                            mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v,
-                            id, mvolume, msoundpersistence, msoundpriority);
-                }
-            }
+    int32_t distance = origin->distanceFromPlayer;
+    if (distance == 0) {
+        Point center;
+        if (g.ship.get() && g.ship->active) {
+            center = g.ship->location;
         } else {
-            mdistance = lsqrt(mdistance);
-            if (mdistance > 480) {
-                mdistance -= 480;
-                if (mdistance > 1920) {
-                    mvolume = 0;
-                } else {
-                    mvolume = ((1920 - mdistance) * mvolume) / 1920;
-                }
-            }
-            if (player.get() && player->active) {
-                if (mvolume > 0) {
-                    PlayLocalizedSound(
-                            player->location.h, player->location.v, mobjectptr->location.h,
-                            mobjectptr->location.v, player->velocity.h - mobjectptr->velocity.h,
-                            player->velocity.v - mobjectptr->velocity.v, id, mvolume,
-                            msoundpersistence, msoundpriority);
-                }
-            } else {
-                if (mvolume > 0) {
-                    PlayLocalizedSound(
-                            gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h,
-                            mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v,
-                            id, mvolume, msoundpersistence, msoundpriority);
-                }
-            }
+            center = scaled_screen.center();
         }
+        int32_t xdiff = abs(center.h - origin->location.h);
+        int32_t ydiff = abs(center.v - origin->location.v);
+        if ((xdiff < kMaximumRelevantDistance) && (ydiff < kMaximumRelevantDistance)) {
+            distance = ydiff * ydiff + xdiff * xdiff;
+        } else {
+            distance = kMaximumRelevantDistanceSquared;
+        }
+    }
+
+    distance = lsqrt(distance);
+    if (distance > 2400) {
+        return;
+    } else if (distance > 480) {
+        distance -= 480;
+        volume = ((1920 - distance) * volume) / 1920;
+    }
+    if (volume > 0) {
+        sys.sound.play(id, volume, persistence, priority);
     }
 }
 

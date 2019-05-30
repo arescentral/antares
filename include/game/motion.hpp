@@ -24,14 +24,12 @@
 
 namespace antares {
 
-extern coordPointType gGlobalCorner;
+extern Rect scaled_screen;
 
-void InitMotion();
 void ResetMotionGlobals();
 
 Size center_scale();
 
-void MotionCleanup();
 void MoveSpaceObjects(ticks unitsToDo);
 void CollideSpaceObjects();
 

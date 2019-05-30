@@ -83,7 +83,7 @@ void Vectors::reset() {
     }
 }
 
-Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Ray& r) {
+Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;
@@ -95,10 +95,10 @@ Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Ray& r) 
             vector->color                = RgbColor::clear();
             vector->hue                  = r.hue;
 
-            const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
-            const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
-            vector->thisLocation = Rect(0, 0, 0, 0);
-            vector->thisLocation.offset(x + viewport().left, y + viewport().top);
+            const int32_t x = scale(location->h - scaled_screen.left, gAbsoluteScale);
+            const int32_t y = scale(location->v - scaled_screen.top, gAbsoluteScale);
+            vector->thisLocation =
+                    Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
 
             vector->is_ray          = true;
             vector->to_coord        = (r.to == BaseObject::Ray::To::COORD);
@@ -119,7 +119,7 @@ Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Ray& r) 
     return Vector::none();
 }
 
-Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Bolt& b) {
+Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;
@@ -131,10 +131,10 @@ Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Bolt& b)
             vector->hue                  = sfz::nullopt;
             vector->color                = b.color;
 
-            const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
-            const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
-            vector->thisLocation = Rect(0, 0, 0, 0);
-            vector->thisLocation.offset(x + viewport().left, y + viewport().top);
+            const int32_t x = scale(location->h - scaled_screen.left, gAbsoluteScale);
+            const int32_t y = scale(location->v - scaled_screen.top, gAbsoluteScale);
+            vector->thisLocation =
+                    Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
 
             vector->is_ray          = false;
             vector->to_coord        = false;
@@ -205,10 +205,10 @@ void Vectors::update() {
         if (vector->active) {
             if (vector->lastApparentLocation != vector->objectLocation) {
                 vector->thisLocation = Rect(
-                        scale(vector->objectLocation.h - gGlobalCorner.h, gAbsoluteScale),
-                        scale(vector->objectLocation.v - gGlobalCorner.v, gAbsoluteScale),
-                        scale(vector->lastApparentLocation.h - gGlobalCorner.h, gAbsoluteScale),
-                        scale(vector->lastApparentLocation.v - gGlobalCorner.v, gAbsoluteScale));
+                        scale(vector->objectLocation.h - scaled_screen.left, gAbsoluteScale),
+                        scale(vector->objectLocation.v - scaled_screen.top, gAbsoluteScale),
+                        scale(vector->lastApparentLocation.h - scaled_screen.left, gAbsoluteScale),
+                        scale(vector->lastApparentLocation.v - scaled_screen.top, gAbsoluteScale));
                 vector->thisLocation.offset(viewport().left, viewport().top);
                 vector->lastApparentLocation = vector->objectLocation;
             }

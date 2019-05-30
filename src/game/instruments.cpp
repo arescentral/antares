@@ -124,11 +124,8 @@ struct barIndicatorType {
     Hue     hue;
 };
 
-static ANTARES_GLOBAL coordPointType gLastGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
-static ANTARES_GLOBAL int32_t gLastScale;
-static ANTARES_GLOBAL bool    should_draw_sector_lines = false;
 static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
@@ -178,11 +175,10 @@ void ResetInstruments() {
     int32_t *l, i;
     Point*   lp;
 
-    g.radar_count = ticks(0);
-    gLastScale = gAbsoluteScale = SCALE_SCALE;
-    gWhichScaleNum              = 0;
-    gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
-    l                                         = gScaleList.get();
+    g.radar_count  = ticks(0);
+    gAbsoluteScale = SCALE_SCALE;
+    gWhichScaleNum = 0;
+    l              = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
         l++;
@@ -235,7 +231,7 @@ void UpdateRadar(ticks unitsDone) {
             Rect radar = bounds;
             radar.inset(1, 1);
 
-            int32_t dx = g.ship->location.h - gGlobalCorner.h;
+            int32_t dx = g.ship->location.h - scaled_screen.left;
             dx         = dx / kRadarScale;
             view_range = Rect(-dx, -dx, dx, dx);
             view_range.center_in(bounds);
@@ -336,6 +332,9 @@ void UpdateRadar(ticks unitsDone) {
     }
     absolute_scale >>= kScaleListShift;
 
+    if ((gAbsoluteScale < kBlipThreshhold) != (absolute_scale < kBlipThreshhold)) {
+        sys.sound.zoom();
+    }
     gAbsoluteScale = absolute_scale;
 }
 
@@ -583,86 +582,13 @@ void draw_site(const PlayerShip& player) {
     }
 }
 
-void update_sector_lines() {
-    should_draw_sector_lines = false;
-    if (g.ship.get()) {
-        if (g.ship->offlineTime <= 0) {
-            should_draw_sector_lines = true;
-        } else if (Randomize(g.ship->offlineTime) < 5) {
-            should_draw_sector_lines = true;
-        }
-    }
-
-    if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
-        sys.sound.zoom();
-    }
-
-    gLastScale        = gAbsoluteScale;
-    gLastGlobalCorner = gGlobalCorner;
+bool update_sector_lines() {
+    return g.ship.get() && ((g.ship->offlineTime <= 0) || (Randomize(g.ship->offlineTime) < 5));
 }
 
 void draw_sector_lines() {
-    Rects    rects;
-    int32_t  x;
-    uint32_t size, level, h, division;
-
-    size  = kSubSectorSize / 4;
-    level = 1;
-    do {
-        level *= 2;
-        size *= 4;
-        h = (size * gLastScale) >> SHIFT_SCALE;
-    } while (h < kMinGraphicSectorSize);
-    level /= 2;
-    level *= level;
-
-    x        = size - (gLastGlobalCorner.h & (size - 1));
-    division = ((gLastGlobalCorner.h + x) >> kSubSectorShift) & 0x0000000f;
-    x        = ((x * gLastScale) >> SHIFT_SCALE) + viewport().left;
-
-    if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport().right)) && (h > 0)) {
-            RgbColor color;
-            if (!division) {
-                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
-            } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
-            } else {
-                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
-            }
-
-            // TODO(sfiera): +1 on bottom no longer needed.
-            rects.fill({x, viewport().top, x + 1, viewport().bottom + 1}, color);
-            division += level;
-            division &= 0x0000000f;
-            x += h;
-        }
-    }
-
-    x        = size - (gLastGlobalCorner.v & (size - 1));
-    division = ((gLastGlobalCorner.v + x) >> kSubSectorShift) & 0x0000000f;
-    x        = ((x * gLastScale) >> SHIFT_SCALE) + viewport().top;
-
-    if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport().bottom)) && (h > 0)) {
-            RgbColor color;
-            if (!division) {
-                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
-            } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
-            } else {
-                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
-            }
-
-            // TODO(sfiera): +1 on right no longer needed.
-            rects.fill({viewport().left, x, viewport().right + 1, x + 1}, color);
-
-            division += level;
-            division &= 0x0000000f;
-
-            x += h;
-        }
-    }
+    draw_arbitrary_sector_lines(
+            scaled_screen.origin(), gAbsoluteScale, kMinGraphicSectorSize, viewport());
 }
 
 void InstrumentsHandleClick(const GameCursor& cursor) {
@@ -688,43 +614,31 @@ void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
 }
 
 void draw_arbitrary_sector_lines(
-        const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
-    Rects    rects;
-    uint32_t size, level, h, division;
-    int32_t  x;
-    RgbColor color;
+        const Point& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
+    Rects rects;
 
-    size  = kSubSectorSize >> 2L;
-    level = 1;
-    do {
-        level <<= 1L;
-        size <<= 2L;
-        h = size;
-        h *= scale;
-        h >>= SHIFT_SCALE;
-    } while (h < implicit_cast<uint32_t>(minSectorSize));
-    level >>= 1L;
+    int32_t level = 1;
+    int32_t size  = SECTOR_SMALL;
+    int32_t h     = (SECTOR_SMALL * scale) >> SHIFT_SCALE;
+    while (h < minSectorSize) {
+        level *= 2;
+        size *= 4;
+        h = (size * scale) >> SHIFT_SCALE;
+    }
     level *= level;
 
-    x = corner.h;
-    x &= size - 1;
-    x = size - x;
+    int32_t x        = size - (corner.h & (size - 1));
+    int32_t division = ((corner.h + x) / SECTOR_SMALL) & 0x0000000f;
+    x                = ((x * scale) >> SHIFT_SCALE) + bounds.left;
 
-    division = corner.h + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds.left;
-
-    while ((x < implicit_cast<uint32_t>(bounds.right)) && (h > 0)) {
+    while (x < bounds.right) {
+        RgbColor color;
         if (!division) {
-            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
         } else {
-            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
         }
 
         rects.fill({x, bounds.top, x + 1, bounds.bottom}, color);
@@ -733,121 +647,23 @@ void draw_arbitrary_sector_lines(
         x += h;
     }
 
-    x = corner.v;
-    x &= size - 1;
-    x = size - x;
+    x        = size - (corner.v & (size - 1));
+    division = ((corner.v + x) / SECTOR_SMALL) & 0x0000000f;
+    x        = ((x * scale) >> SHIFT_SCALE) + bounds.top;
 
-    division = corner.v + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds.top;
-
-    while ((x < implicit_cast<uint32_t>(bounds.bottom)) && (h > 0)) {
+    while (x < bounds.bottom) {
+        RgbColor color;
         if (!division) {
-            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
         } else {
-            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
         }
 
         rects.fill({bounds.left, x, bounds.right, x + 1}, color);
         division += level;
         division &= 0x0000000f;
-        x += h;
-    }
-}
-
-void GetArbitrarySingleSectorBounds(
-        coordPointType* corner, coordPointType* location, int32_t scale, int32_t minSectorSize,
-        Rect* bounds, Rect* destRect) {
-    uint32_t size, level, x, h, division, scaledLoc;
-    Rect     clipRect;
-
-    clipRect.left   = bounds->left;
-    clipRect.right  = bounds->right;
-    clipRect.top    = bounds->top;
-    clipRect.bottom = bounds->bottom;
-
-    destRect->left   = bounds->left;
-    destRect->right  = bounds->right;
-    destRect->top    = bounds->top;
-    destRect->bottom = bounds->bottom;
-
-    size  = kSubSectorSize >> 2L;
-    level = 1;
-    do {
-        level <<= 1L;
-        size <<= 2L;
-        h = size;
-        h *= scale;
-        h >>= SHIFT_SCALE;
-    } while (h < implicit_cast<uint32_t>(minSectorSize));
-    level >>= 1L;
-    level *= level;
-
-    x = corner->h;
-    x &= size - 1;
-    x = size - x;
-
-    division = corner->h + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds->left;
-
-    scaledLoc = location->h - corner->h;
-    scaledLoc *= scale;
-    scaledLoc >>= SHIFT_SCALE;
-    scaledLoc += bounds->left;
-
-    while ((x < implicit_cast<uint32_t>(bounds->right)) && (h > 0)) {
-        division += level;
-        division &= 0x0000000f;
-
-        if ((x < scaledLoc) && (x > implicit_cast<uint32_t>(destRect->left))) {
-            destRect->left = x;
-        }
-        if ((x > scaledLoc) && (x < implicit_cast<uint32_t>(destRect->right))) {
-            destRect->right = x;
-        }
-
-        x += h;
-    }
-
-    x = corner->v;
-    x &= size - 1;
-    x = size - x;
-
-    division = corner->v + x;
-    division >>= kSubSectorShift;
-    division &= 0x0000000f;
-
-    x *= scale;
-    x >>= SHIFT_SCALE;
-    x += bounds->top;
-
-    scaledLoc = location->v - corner->v;
-    scaledLoc *= scale;
-    scaledLoc >>= SHIFT_SCALE;
-    scaledLoc += bounds->top;
-
-    while ((x < implicit_cast<uint32_t>(bounds->bottom)) && (h > 0)) {
-        division += level;
-        division &= 0x0000000f;
-
-        if ((x < scaledLoc) && (x > implicit_cast<uint32_t>(destRect->top))) {
-            destRect->top = x;
-        }
-        if ((x > scaledLoc) && (x < implicit_cast<uint32_t>(destRect->bottom))) {
-            destRect->bottom = x;
-        }
-
         x += h;
     }
 }

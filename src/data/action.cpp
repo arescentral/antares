@@ -449,14 +449,6 @@ static Action morph_action(path_value x) {
                 {"keep_ammo", &MorphAction::keep_ammo}});
 }
 
-FIELD_READER(sfz::optional<coordPointType>) {
-    auto p = read_field<sfz::optional<Point>>(x);
-    if (!p.has_value()) {
-        return sfz::nullopt;
-    }
-    return sfz::make_optional(coordPointType{(uint32_t)p->h, (uint32_t)p->v});
-}
-
 FIELD_READER(sfz::optional<MoveAction::Origin>) {
     return optional_enum<MoveAction::Origin>(
             x, {{"level", MoveAction::Origin::LEVEL},

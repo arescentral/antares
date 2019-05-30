@@ -44,15 +44,14 @@ static Point BriefingSprite_GetBestLocation(
 
 static void GetInitialObjectSpriteData(
         Handle<const Initial> whichObject, int32_t maxSize, const Rect& bounds,
-        const coordPointType& corner, int32_t scale,
+        const Point& corner, int32_t scale,
         const std::vector<sfz::optional<BriefingSprite>>& sprites, int32_t* thisScale,
         Point* where, Rect* spriteRect);
 
 static void GetRealObjectSpriteData(
-        const coordPointType& realCoord, const BaseObject& baseObject, Handle<Admiral> owner,
-        const SpaceObject::PixID& sprite, int32_t maxSize, const Rect& bounds,
-        const coordPointType& corner, int32_t scale, int32_t* thisScale,
-        const NatePixTable::Frame** frame, Point* where);
+        const Point& realCoord, const BaseObject& baseObject, Handle<Admiral> owner,
+        const SpaceObject::PixID& sprite, int32_t maxSize, const Rect& bounds, const Point& corner,
+        int32_t scale, int32_t* thisScale, const NatePixTable::Frame** frame, Point* where);
 
 static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, int32_t scale);
 
@@ -215,7 +214,7 @@ static void Briefing_Grid_Set(
 
 static void GetInitialObjectSpriteData(
         Handle<const Initial> whichObject, int32_t maxSize, const Rect& bounds,
-        const coordPointType& corner, int32_t scale,
+        const Point& corner, int32_t scale,
         const std::vector<sfz::optional<BriefingSprite>>& sprites, int32_t* thisScale,
         Point* where, Rect* spriteRect) {
     spriteRect->right = spriteRect->left = -1;
@@ -233,12 +232,11 @@ static void GetInitialObjectSpriteData(
 }
 
 static void GetRealObjectSpriteData(
-        const coordPointType& realCoord, const BaseObject& baseObject, Handle<Admiral> owner,
-        const SpaceObject::PixID& sprite, int32_t maxSize, const Rect& bounds,
-        const coordPointType& corner, int32_t scale, int32_t* thisScale,
-        const NatePixTable::Frame** frame, Point* where) {
-    int            whichShape;
-    coordPointType coord = realCoord;
+        const Point& realCoord, const BaseObject& baseObject, Handle<Admiral> owner,
+        const SpaceObject::PixID& sprite, int32_t maxSize, const Rect& bounds, const Point& corner,
+        int32_t scale, int32_t* thisScale, const NatePixTable::Frame** frame, Point* where) {
+    int   whichShape;
+    Point coord = realCoord;
 
     NatePixTable* pixTable = sys.pix.get(sprite.name, sprite.hue);
     if (pixTable == NULL) {
@@ -294,7 +292,7 @@ static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, int3
 }
 
 std::vector<sfz::optional<BriefingSprite>> render_briefing(
-        int32_t maxSize, const Rect& bounds, const coordPointType& corner, int32_t scale) {
+        int32_t maxSize, const Rect& bounds, const Point& corner, int32_t scale) {
     std::vector<sfz::optional<BriefingSprite>> result;
     int32_t                                    thisScale, gridWidth, gridHeight, i, j;
     Point                                      where;
@@ -368,7 +366,7 @@ std::vector<sfz::optional<BriefingSprite>> render_briefing(
 }
 
 BriefPointInfo BriefPoint_Data_Get(
-        int32_t whichPoint, const Level& level, const coordPointType& corner, int32_t scale,
+        int32_t whichPoint, const Level& level, const Point& corner, int32_t scale,
         int32_t maxSize, const Rect& bounds,
         const std::vector<sfz::optional<BriefingSprite>>& sprites) {
     const Briefing& brief = level.base.briefings[whichPoint];
