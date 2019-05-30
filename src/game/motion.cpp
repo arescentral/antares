@@ -132,9 +132,7 @@ static AdjacentCells make_adjacent_cells() {
 
 static const AdjacentCells kAdjacentCells = make_adjacent_cells();
 
-ANTARES_GLOBAL Rect   scaled_screen;
-static ANTARES_GLOBAL Handle<SpaceObject> near_objects[PROXIMITY_GRID_AREA];
-static ANTARES_GLOBAL Handle<SpaceObject> far_objects[PROXIMITY_GRID_AREA];
+ANTARES_GLOBAL Rect scaled_screen;
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
@@ -144,20 +142,12 @@ Size center_scale() {
     };
 }
 
-void InitMotion() {
-    for (int i = 0; i < PROXIMITY_GRID_AREA; i++) {
-        near_objects[i] = far_objects[i] = SpaceObject::none();
-    }
-}
+void InitMotion() {}
 
 void ResetMotionGlobals() {
     scaled_screen = Rect{};
     g.closest     = Handle<SpaceObject>(0);
     g.farthest    = Handle<SpaceObject>(0);
-
-    for (int i = 0; i < PROXIMITY_GRID_AREA; i++) {
-        near_objects[i] = far_objects[i] = SpaceObject::none();
-    }
 }
 
 void MotionCleanup() {}
@@ -513,7 +503,9 @@ static void activate_object(const Handle<SpaceObject>& o) {
     }
 }
 
-static void calc_misc() {
+static void calc_misc(
+        Handle<SpaceObject> near_objects[PROXIMITY_GRID_AREA],
+        Handle<SpaceObject> far_objects[PROXIMITY_GRID_AREA]) {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist  = 0x7fffffffffffffffull;
@@ -737,7 +729,7 @@ static bool can_hit(const SpaceObject& a, const SpaceObject& b) {
 }
 
 // Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
-static void calc_impacts() {
+static void calc_impacts(Handle<SpaceObject> near_objects[PROXIMITY_GRID_AREA]) {
     for (int32_t i = 0; i < PROXIMITY_GRID_AREA; i++) {
         const auto*  cells = kAdjacentCells.at[i];
         SpaceObject* a     = nullptr;
@@ -793,7 +785,7 @@ static void calc_impacts() {
 //   * localFriendStrength
 //   * localFoeStrength
 // Also sets seenByPlayerFlags and kIsHidden based on object proximity.
-static void calc_locality() {
+static void calc_locality(Handle<SpaceObject> far_objects[PROXIMITY_GRID_AREA]) {
     for (int32_t i = 0; i < PROXIMITY_GRID_AREA; i++) {
         const auto*  cells = kAdjacentCells.at[i];
         SpaceObject* a     = nullptr;
@@ -909,10 +901,13 @@ static void update_last_vector_locations() {
 }
 
 void CollideSpaceObjects() {
-    calc_misc();
+    Handle<SpaceObject> near_objects[PROXIMITY_GRID_AREA];
+    Handle<SpaceObject> far_objects[PROXIMITY_GRID_AREA];
+
+    calc_misc(near_objects, far_objects);
     calc_bounds();
-    calc_impacts();
-    calc_locality();
+    calc_impacts(near_objects);
+    calc_locality(far_objects);
     calc_visibility();
     update_last_vector_locations();
 }
