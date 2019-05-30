@@ -126,7 +126,6 @@ struct barIndicatorType {
 
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
-static ANTARES_GLOBAL int32_t gLastScale;
 static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
@@ -176,10 +175,10 @@ void ResetInstruments() {
     int32_t *l, i;
     Point*   lp;
 
-    g.radar_count = ticks(0);
-    gLastScale = gAbsoluteScale = SCALE_SCALE;
-    gWhichScaleNum              = 0;
-    l                           = gScaleList.get();
+    g.radar_count  = ticks(0);
+    gAbsoluteScale = SCALE_SCALE;
+    gWhichScaleNum = 0;
+    l              = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
         l++;
@@ -333,6 +332,9 @@ void UpdateRadar(ticks unitsDone) {
     }
     absolute_scale >>= kScaleListShift;
 
+    if ((gAbsoluteScale < kBlipThreshhold) != (absolute_scale < kBlipThreshhold)) {
+        sys.sound.zoom();
+    }
     gAbsoluteScale = absolute_scale;
 }
 
@@ -581,11 +583,6 @@ void draw_site(const PlayerShip& player) {
 }
 
 bool update_sector_lines() {
-    if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
-        sys.sound.zoom();
-    }
-    gLastScale = gAbsoluteScale;
-
     return g.ship.get() && ((g.ship->offlineTime <= 0) || (Randomize(g.ship->offlineTime) < 5));
 }
 
