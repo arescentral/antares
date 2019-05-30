@@ -72,25 +72,67 @@ const Rect    kThinkiverse{
 // adjacent cells exactly once.
 //
 // InitMotion() turns the relative locations to absolute indices, and
-// keeps that information in adjacent_cells[k].  If the relative
+// keeps that information in kAdjacentCells[k].  If the relative
 // location would be outside the 16x16 grid of near_object, then
 // super_offset points into the adjacent grid, which is also the same
 // grid in a way I have yet to comprehend.
 const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
-const int32_t kUnitsToCheckNumber = 5;
+struct AdjacentCells {
+    struct AdjacentCell {
+        uint8_t index_offset;  // the normal adjacent unit
+        Point   super_offset;  // the offset of the super unit (for wrap-around)
+    };
 
-struct AdjacentCell {
-    uint8_t index_offset;  // the normal adjacent unit
-    Point   super_offset;  // the offset of the super unit (for wrap-around)
+    static const int size  = 5;
+    using AdjacentCellList = AdjacentCell[AdjacentCells::size];
+
+    AdjacentCellList at[PROXIMITY_GRID_AREA];
 };
 
-struct AdjacentCellList {
-    AdjacentCell cells[kUnitsToCheckNumber];  // adjacent units to check
-};
+static int proximity_index(int32_t x, int32_t y) { return (y << PROXIMITY_GRID_SHIFT) + x; }
+
+static AdjacentCells make_adjacent_cells() {
+    // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
+    AdjacentCells a;
+    for (int y = 0; y < PROXIMITY_GRID_WIDTH; y++) {
+        for (int x = 0; x < PROXIMITY_GRID_WIDTH; x++) {
+            int   i     = proximity_index(x, y);
+            auto* cells = a.at[i];
+            for (int i = 0; i < AdjacentCells::size; i++) {
+                auto*   cell         = &cells[i];
+                int32_t ux           = x;
+                int32_t uy           = y;
+                cell->super_offset.h = cell->super_offset.v = 0;
+
+                ux += kAdjacentUnits[i].h;
+                if (ux < 0) {
+                    ux += PROXIMITY_GRID_WIDTH;
+                    cell->super_offset.h = -1;
+                } else if (ux >= PROXIMITY_GRID_WIDTH) {
+                    ux -= PROXIMITY_GRID_WIDTH;
+                    cell->super_offset.h = +1;
+                }
+
+                uy += kAdjacentUnits[i].v;
+                if (uy < 0) {
+                    uy += PROXIMITY_GRID_WIDTH;
+                    cell->super_offset.v = -1;
+                } else if (uy >= PROXIMITY_GRID_WIDTH) {
+                    uy -= PROXIMITY_GRID_WIDTH;
+                    cell->super_offset.v = +1;
+                }
+
+                cells[i].index_offset = proximity_index(ux, uy);
+            }
+        }
+    }
+    return a;
+}
+
+static const AdjacentCells kAdjacentCells = make_adjacent_cells();
 
 ANTARES_GLOBAL Rect   scaled_screen;
-static ANTARES_GLOBAL AdjacentCellList adjacent_cells[PROXIMITY_GRID_AREA];
 static ANTARES_GLOBAL Handle<SpaceObject> near_objects[PROXIMITY_GRID_AREA];
 static ANTARES_GLOBAL Handle<SpaceObject> far_objects[PROXIMITY_GRID_AREA];
 
@@ -102,43 +144,9 @@ Size center_scale() {
     };
 }
 
-static int proximity_index(int32_t x, int32_t y) { return (y << PROXIMITY_GRID_SHIFT) + x; }
-
 void InitMotion() {
-    // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
-    for (int y = 0; y < PROXIMITY_GRID_WIDTH; y++) {
-        for (int x = 0; x < PROXIMITY_GRID_WIDTH; x++) {
-            int i           = proximity_index(x, y);
-            near_objects[i] = far_objects[i] = SpaceObject::none();
-            AdjacentCell* cells              = adjacent_cells[i].cells;
-            for (int i = 0; i < kUnitsToCheckNumber; i++) {
-                int32_t ux = x;
-                int32_t uy = y;
-                int32_t sx = 0, sy = 0;
-
-                ux += kAdjacentUnits[i].h;
-                if (ux < 0) {
-                    ux += PROXIMITY_GRID_WIDTH;
-                    sx--;
-                } else if (ux >= PROXIMITY_GRID_WIDTH) {
-                    ux -= PROXIMITY_GRID_WIDTH;
-                    sx++;
-                }
-
-                uy += kAdjacentUnits[i].v;
-                if (uy < 0) {
-                    uy += PROXIMITY_GRID_WIDTH;
-                    sy--;
-                } else if (uy >= PROXIMITY_GRID_WIDTH) {
-                    uy -= PROXIMITY_GRID_WIDTH;
-                    sy++;
-                }
-
-                cells[i].index_offset   = proximity_index(ux, uy);
-                cells[i].super_offset.h = sx;
-                cells[i].super_offset.v = sy;
-            }
-        }
+    for (int i = 0; i < PROXIMITY_GRID_AREA; i++) {
+        near_objects[i] = far_objects[i] = SpaceObject::none();
     }
 }
 
@@ -731,10 +739,10 @@ static bool can_hit(const SpaceObject& a, const SpaceObject& b) {
 // Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
 static void calc_impacts() {
     for (int32_t i = 0; i < PROXIMITY_GRID_AREA; i++) {
-        const auto*  cells = adjacent_cells[i].cells;
+        const auto*  cells = kAdjacentCells.at[i];
         SpaceObject* a     = nullptr;
         for (auto a_handle = near_objects[i]; (a = a_handle.get()); a_handle = a->nextNearObject) {
-            for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
+            for (int32_t k = 0; k < AdjacentCells::size; k++) {
                 Handle<SpaceObject> b_handle = a->nextNearObject;
                 Point               super    = a->collisionGrid;
                 if (k > 0) {
@@ -787,10 +795,10 @@ static void calc_impacts() {
 // Also sets seenByPlayerFlags and kIsHidden based on object proximity.
 static void calc_locality() {
     for (int32_t i = 0; i < PROXIMITY_GRID_AREA; i++) {
-        const auto*  cells = adjacent_cells[i].cells;
+        const auto*  cells = kAdjacentCells.at[i];
         SpaceObject* a     = nullptr;
         for (auto a_handle = far_objects[i]; (a = a_handle.get()); a_handle = a->nextFarObject) {
-            for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
+            for (int32_t k = 0; k < AdjacentCells::size; k++) {
                 Handle<SpaceObject> b_handle = a->nextFarObject;
                 Point               super    = a->distanceGrid;
                 if (k > 0) {
