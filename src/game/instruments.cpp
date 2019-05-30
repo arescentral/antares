@@ -130,7 +130,6 @@ static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
 struct SiteData {
-    bool     should_draw;
     Point    a, b, c;
     RgbColor light, dark;
 };
@@ -540,22 +539,19 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     site.c = c;
 }
 
-void update_site(bool replay) {
+bool update_site() {
     if (!g.ship.get()) {
-        site.should_draw = false;
+        return false;
     } else if (!(g.ship->active && g.ship->sprite.get())) {
-        site.should_draw = false;
+        return false;
     } else if (g.ship->offlineTime <= 0) {
-        site.should_draw = true;
+        return true;
     } else {
-        site.should_draw = (Randomize(g.ship->offlineTime) < 5);
+        return (Randomize(g.ship->offlineTime) < 5);
     }
 }
 
 void draw_site(const PlayerShip& player) {
-    if (!site.should_draw) {
-        return;
-    }
     if (g.ship.get()) {
         update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
     }
@@ -569,18 +565,16 @@ void draw_site(const PlayerShip& player) {
     if (player.show_select()) {
         control.light = GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM);
         control.dark  = GetRGBTranslateColorShade(Hue::YELLOW, DARKER + kSlightlyDarkerColor);
-        control.should_draw = true;
     } else if (player.show_target()) {
         control.light = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
         control.dark  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER + kSlightlyDarkerColor);
-        control.should_draw = true;
+    } else {
+        return;
     }
-    if (control.should_draw) {
-        update_triangle(control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
-        lines.draw(control.a, control.b, control.light);
-        lines.draw(control.a, control.c, control.light);
-        lines.draw(control.b, control.c, control.dark);
-    }
+    update_triangle(control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
+    lines.draw(control.a, control.b, control.light);
+    lines.draw(control.a, control.c, control.light);
+    lines.draw(control.b, control.c, control.dark);
 }
 
 bool update_sector_lines() {

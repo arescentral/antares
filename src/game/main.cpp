@@ -131,6 +131,7 @@ class GamePlay : public Card {
     PlayAgainScreen::Item _play_again;
     PlayerShip            _player_ship;
     bool                  _should_draw_sector_lines;
+    bool                  _should_draw_site;
 
     // The wall_time that g.time corresponds to. Under normal operation,
     // this increases in lockstep with g.time, but during fast motion or
@@ -397,7 +398,9 @@ void GamePlay::draw() const {
     Label::draw();
 
     Messages::draw_message();
-    draw_site(_player_ship);
+    if (_should_draw_site) {
+        draw_site(_player_ship);
+    }
     draw_instruments();
     if (stack()->top() == this) {
         _player_ship.cursor().draw();
@@ -486,7 +489,7 @@ void GamePlay::fire_timer() {
         Vectors::update();
         Label::update_positions(unitsToDo);
         Label::update_contents(unitsToDo);
-        update_site(_replay);
+        _should_draw_site = update_site();
 
         CullSprites();
         Label::show_all();
