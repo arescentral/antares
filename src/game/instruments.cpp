@@ -127,7 +127,6 @@ struct barIndicatorType {
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL int32_t gLastScale;
-static ANTARES_GLOBAL bool    should_draw_sector_lines = false;
 static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
@@ -581,28 +580,16 @@ void draw_site(const PlayerShip& player) {
     }
 }
 
-void update_sector_lines() {
-    should_draw_sector_lines = false;
-    if (g.ship.get()) {
-        if (g.ship->offlineTime <= 0) {
-            should_draw_sector_lines = true;
-        } else if (Randomize(g.ship->offlineTime) < 5) {
-            should_draw_sector_lines = true;
-        }
-    }
-
+bool update_sector_lines() {
     if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
         sys.sound.zoom();
     }
-
     gLastScale = gAbsoluteScale;
+
+    return g.ship.get() && ((g.ship->offlineTime <= 0) || (Randomize(g.ship->offlineTime) < 5));
 }
 
 void draw_sector_lines() {
-    if (!should_draw_sector_lines) {
-        return;
-    }
-
     draw_arbitrary_sector_lines(
             scaled_screen.origin(), gAbsoluteScale, kMinGraphicSectorSize, viewport());
 }
