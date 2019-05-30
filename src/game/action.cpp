@@ -105,8 +105,6 @@ struct actionQueueType {
 ActionQueue::ActionQueue()  = default;
 ActionQueue::~ActionQueue() = default;
 
-static ANTARES_GLOBAL ActionQueue action_queue;
-
 static void queue_action(ActionCursor cursor, ticks delayTime);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
@@ -849,11 +847,11 @@ void exec(
 }
 
 void reset_action_queue() {
-    action_queue.data.reset(new actionQueueType[kActionQueueLength]);
+    g.action_queue.data.reset(new actionQueueType[kActionQueueLength]);
 
-    action_queue.first = NULL;
+    g.action_queue.first = NULL;
 
-    actionQueueType* action = action_queue.data.get();
+    actionQueueType* action = g.action_queue.data.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
         action->cursor.begin = action->cursor.end = nullptr;
         ++action;
@@ -862,7 +860,7 @@ void reset_action_queue() {
 
 static void queue_action(ActionCursor cursor, ticks delayTime) {
     int32_t          queueNumber = 0;
-    actionQueueType* actionQueue = action_queue.data.get();
+    actionQueueType* actionQueue = g.action_queue.data.get();
     while (!actionQueue->empty() && (queueNumber < kActionQueueLength)) {
         actionQueue++;
         queueNumber++;
@@ -875,7 +873,7 @@ static void queue_action(ActionCursor cursor, ticks delayTime) {
     actionQueue->scheduledTime = delayTime;
 
     actionQueueType* previousQueue = NULL;
-    actionQueueType* nextQueue     = action_queue.first;
+    actionQueueType* nextQueue     = g.action_queue.first;
     while (nextQueue && (nextQueue->scheduledTime < delayTime)) {
         previousQueue = nextQueue;
         nextQueue     = nextQueue->nextActionQueue;
@@ -885,38 +883,39 @@ static void queue_action(ActionCursor cursor, ticks delayTime) {
 
         previousQueue->nextActionQueue = actionQueue;
     } else {
-        actionQueue->nextActionQueue = action_queue.first;
-        action_queue.first           = actionQueue;
+        actionQueue->nextActionQueue = g.action_queue.first;
+        g.action_queue.first         = actionQueue;
     }
 }
 
 void execute_action_queue() {
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        auto actionQueue = &action_queue.data[i];
+        auto actionQueue = &g.action_queue.data[i];
         if (!actionQueue->empty()) {
             actionQueue->scheduledTime -= kMajorTick;
         }
     }
 
-    while (action_queue.first && !action_queue.first->empty() &&
-           (action_queue.first->scheduledTime <= ticks(0))) {
+    while (g.action_queue.first && !g.action_queue.first->empty() &&
+           (g.action_queue.first->scheduledTime <= ticks(0))) {
         int32_t subjectid = -1;
-        if (action_queue.first->cursor.subject.get() &&
-            action_queue.first->cursor.subject->active) {
-            subjectid = action_queue.first->cursor.subject->id;
+        if (g.action_queue.first->cursor.subject.get() &&
+            g.action_queue.first->cursor.subject->active) {
+            subjectid = g.action_queue.first->cursor.subject->id;
         }
 
         int32_t directid = -1;
-        if (action_queue.first->cursor.direct.get() && action_queue.first->cursor.direct->active) {
-            directid = action_queue.first->cursor.direct->id;
+        if (g.action_queue.first->cursor.direct.get() &&
+            g.action_queue.first->cursor.direct->active) {
+            directid = g.action_queue.first->cursor.direct->id;
         }
-        if ((subjectid == action_queue.first->cursor.subject_id) &&
-            (directid == action_queue.first->cursor.direct_id)) {
-            execute_actions(std::move(action_queue.first->cursor));
+        if ((subjectid == g.action_queue.first->cursor.subject_id) &&
+            (directid == g.action_queue.first->cursor.direct_id)) {
+            execute_actions(std::move(g.action_queue.first->cursor));
         }
 
-        action_queue.first->cursor.begin = action_queue.first->cursor.end = nullptr;
-        action_queue.first = action_queue.first->nextActionQueue;
+        g.action_queue.first->cursor.begin = g.action_queue.first->cursor.end = nullptr;
+        g.action_queue.first = g.action_queue.first->nextActionQueue;
     }
 }
 
