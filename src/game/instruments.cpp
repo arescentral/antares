@@ -133,7 +133,6 @@ struct SiteData {
     Point    a, b, c;
     RgbColor light, dark;
 };
-static ANTARES_GLOBAL SiteData site;
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -156,9 +155,6 @@ void InstrumentInit() {
     g.radar_blips.reset(new Point[kRadarBlipNum]);
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
-
-    site.light = GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM);
-    site.dark  = GetRGBTranslateColorShade(Hue::PALE_GREEN, DARKER + kSlightlyDarkerColor);
 
     MiniScreenInit();
 }
@@ -552,9 +548,10 @@ bool update_site() {
 }
 
 void draw_site(const PlayerShip& player) {
-    if (g.ship.get()) {
-        update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
-    }
+    SiteData site;
+    site.light = GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM);
+    site.dark  = GetRGBTranslateColorShade(Hue::PALE_GREEN, DARKER + kSlightlyDarkerColor);
+    update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
 
     Lines lines;
     lines.draw(site.a, site.b, site.light);
