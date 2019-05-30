@@ -550,35 +550,36 @@ void update_site(bool replay) {
     } else {
         site.should_draw = (Randomize(g.ship->offlineTime) < 5);
     }
-
-    if (site.should_draw) {
-        update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
-    }
 }
 
 void draw_site(const PlayerShip& player) {
-    if (site.should_draw) {
-        Lines lines;
-        lines.draw(site.a, site.b, site.light);
-        lines.draw(site.a, site.c, site.light);
-        lines.draw(site.b, site.c, site.dark);
+    if (!site.should_draw) {
+        return;
+    }
+    if (g.ship.get()) {
+        update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
+    }
 
-        SiteData control = {};
-        if (player.show_select()) {
-            control.light = GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM);
-            control.dark  = GetRGBTranslateColorShade(Hue::YELLOW, DARKER + kSlightlyDarkerColor);
-            control.should_draw = true;
-        } else if (player.show_target()) {
-            control.light = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
-            control.dark = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER + kSlightlyDarkerColor);
-            control.should_draw = true;
-        }
-        if (control.should_draw) {
-            update_triangle(control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
-            lines.draw(control.a, control.b, control.light);
-            lines.draw(control.a, control.c, control.light);
-            lines.draw(control.b, control.c, control.dark);
-        }
+    Lines lines;
+    lines.draw(site.a, site.b, site.light);
+    lines.draw(site.a, site.c, site.light);
+    lines.draw(site.b, site.c, site.dark);
+
+    SiteData control = {};
+    if (player.show_select()) {
+        control.light = GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM);
+        control.dark  = GetRGBTranslateColorShade(Hue::YELLOW, DARKER + kSlightlyDarkerColor);
+        control.should_draw = true;
+    } else if (player.show_target()) {
+        control.light = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
+        control.dark  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER + kSlightlyDarkerColor);
+        control.should_draw = true;
+    }
+    if (control.should_draw) {
+        update_triangle(control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
+        lines.draw(control.a, control.b, control.light);
+        lines.draw(control.a, control.c, control.light);
+        lines.draw(control.b, control.c, control.dark);
     }
 }
 
