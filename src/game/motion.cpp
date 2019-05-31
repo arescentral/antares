@@ -144,6 +144,7 @@ Size center_scale() {
 
 void ResetMotionGlobals() {
     scaled_screen.bounds = Rect{};
+    scaled_screen.scale  = SCALE_SCALE;
     g.closest            = Handle<SpaceObject>(0);
     g.farthest           = Handle<SpaceObject>(0);
 }
@@ -424,6 +425,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         scale.width /= gAbsoluteScale;
         scale.height /= gAbsoluteScale;
 
+        scaled_screen.scale  = gAbsoluteScale;
         scaled_screen.bounds = Rect{
                 g.ship->location.h - scale.width, g.ship->location.v - scale.height,
                 g.ship->location.h + scale.width, g.ship->location.v + scale.height,
@@ -444,7 +446,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
         auto& sprite = *o->sprite;
 
-        int32_t h = (o->location.h - scaled_screen.bounds.left) * gAbsoluteScale;
+        int32_t h = (o->location.h - scaled_screen.bounds.left) * scaled_screen.scale;
         h >>= SHIFT_SCALE;
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
             sprite.where.h = h + viewport.left;
@@ -452,7 +454,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
             sprite.where.h = -kSpriteMaxSize;
         }
 
-        int32_t v = (o->location.v - scaled_screen.bounds.top) * gAbsoluteScale;
+        int32_t v = (o->location.v - scaled_screen.bounds.top) * scaled_screen.scale;
         v >>= SHIFT_SCALE;
         if ((v > -kSpriteMaxSize) && (v < kSpriteMaxSize)) {
             sprite.where.v = v;

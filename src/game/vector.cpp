@@ -95,8 +95,8 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
             vector->color                = RgbColor::clear();
             vector->hue                  = r.hue;
 
-            const int32_t x = scale(location->h - scaled_screen.bounds.left, gAbsoluteScale);
-            const int32_t y = scale(location->v - scaled_screen.bounds.top, gAbsoluteScale);
+            const int32_t x = scale(location->h - scaled_screen.bounds.left, scaled_screen.scale);
+            const int32_t y = scale(location->v - scaled_screen.bounds.top, scaled_screen.scale);
             vector->thisLocation =
                     Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
 
@@ -131,8 +131,8 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
             vector->hue                  = sfz::nullopt;
             vector->color                = b.color;
 
-            const int32_t x = scale(location->h - scaled_screen.bounds.left, gAbsoluteScale);
-            const int32_t y = scale(location->v - scaled_screen.bounds.top, gAbsoluteScale);
+            const int32_t x = scale(location->h - scaled_screen.bounds.left, scaled_screen.scale);
+            const int32_t y = scale(location->v - scaled_screen.bounds.top, scaled_screen.scale);
             vector->thisLocation =
                     Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
 
@@ -204,14 +204,15 @@ void Vectors::update() {
     for (auto vector : Vector::all()) {
         if (vector->active) {
             if (vector->lastApparentLocation != vector->objectLocation) {
-                vector->thisLocation = Rect(
-                        scale(vector->objectLocation.h - scaled_screen.bounds.left,
-                              gAbsoluteScale),
-                        scale(vector->objectLocation.v - scaled_screen.bounds.top, gAbsoluteScale),
-                        scale(vector->lastApparentLocation.h - scaled_screen.bounds.left,
-                              gAbsoluteScale),
-                        scale(vector->lastApparentLocation.v - scaled_screen.bounds.top,
-                              gAbsoluteScale));
+                vector->thisLocation =
+                        Rect(scale(vector->objectLocation.h - scaled_screen.bounds.left,
+                                   scaled_screen.scale),
+                             scale(vector->objectLocation.v - scaled_screen.bounds.top,
+                                   scaled_screen.scale),
+                             scale(vector->lastApparentLocation.h - scaled_screen.bounds.left,
+                                   scaled_screen.scale),
+                             scale(vector->lastApparentLocation.v - scaled_screen.bounds.top,
+                                   scaled_screen.scale));
                 vector->thisLocation.offset(viewport().left, viewport().top);
                 vector->lastApparentLocation = vector->objectLocation;
             }
