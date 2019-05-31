@@ -126,7 +126,6 @@ struct barIndicatorType {
 
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
-static ANTARES_GLOBAL int32_t gLastScale;
 static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
@@ -173,9 +172,8 @@ void ResetInstruments() {
 
     g.radar_count  = ticks(0);
     gAbsoluteScale = SCALE_SCALE;
-    gLastScale = gAbsoluteScale = SCALE_SCALE;
-    gWhichScaleNum              = 0;
-    l                           = gScaleList.get();
+    gWhichScaleNum = 0;
+    l              = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
         l++;
@@ -577,13 +575,12 @@ void draw_site(const PlayerShip& player) {
 }
 
 bool update_sector_lines() {
-    gLastScale = gAbsoluteScale;
     return g.ship.get() && ((g.ship->offlineTime <= 0) || (Randomize(g.ship->offlineTime) < 5));
 }
 
 void draw_sector_lines() {
     draw_arbitrary_sector_lines(
-            scaled_screen.bounds.origin(), gLastScale, kMinGraphicSectorSize, viewport());
+            scaled_screen.bounds.origin(), scaled_screen.scale, kMinGraphicSectorSize, viewport());
 }
 
 void InstrumentsHandleClick(const GameCursor& cursor) {
