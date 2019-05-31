@@ -263,7 +263,7 @@ void SoundFX::play_at(
         if (g.ship.get() && g.ship->active) {
             center = g.ship->location;
         } else {
-            center = scaled_screen.center();
+            center = scaled_screen.bounds.center();
         }
         int32_t xdiff = abs(center.h - origin->location.h);
         int32_t ydiff = abs(center.v - origin->location.v);

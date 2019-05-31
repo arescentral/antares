@@ -24,7 +24,10 @@
 
 namespace antares {
 
-extern Rect scaled_screen;
+struct ScaledScreen {
+    Rect bounds;
+};
+extern ScaledScreen scaled_screen;
 
 void ResetMotionGlobals();
 
