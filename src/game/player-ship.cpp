@@ -312,17 +312,20 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 void PlayerShip::mouse_down(const MouseDownEvent& event) {
     _cursor.mouse_down(event);
 
+    Point where = event.where();
     switch (event.button()) {
         case 0:
             if (event.count() == 2) {
-                InstrumentsHandleDoubleClick(_cursor);
+                PlayerShipHandleClick(where, 0);
+                MiniComputerHandleDoubleClick(where);
             } else if (event.count() == 1) {
-                InstrumentsHandleClick(_cursor);
+                PlayerShipHandleClick(where, 0);
+                MiniComputerHandleClick(where);
             }
             break;
         case 1:
             if (event.count() == 1) {
-                PlayerShipHandleClick(event.where(), 1);
+                PlayerShipHandleClick(where, 1);
             }
             break;
     }
@@ -331,9 +334,10 @@ void PlayerShip::mouse_down(const MouseDownEvent& event) {
 void PlayerShip::mouse_up(const MouseUpEvent& event) {
     _cursor.mouse_up(event);
 
+    Point where = event.where();
     if (event.button() == 0) {
-        InstrumentsHandleMouseStillDown(_cursor);
-        InstrumentsHandleMouseUp(_cursor);
+        MiniComputerHandleMouseStillDown(where);
+        MiniComputerHandleMouseUp(where);
     }
 }
 
