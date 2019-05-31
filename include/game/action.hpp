@@ -19,6 +19,8 @@
 #ifndef ANTARES_GAME_ACTION_HPP_
 #define ANTARES_GAME_ACTION_HPP_
 
+#include <memory>
+
 #include "data/base-object.hpp"
 
 namespace antares {
@@ -33,8 +35,18 @@ void exec(
         const std::vector<Action>& actions, Handle<SpaceObject> sObject,
         Handle<SpaceObject> dObject, Point offset);
 
+struct actionQueueType;
+struct ActionQueue {
+    actionQueueType*                   first;
+    std::unique_ptr<actionQueueType[]> data;
+
+    ActionQueue();
+    ~ActionQueue();
+};
+
 void reset_action_queue();
 void execute_action_queue();
+
 }  // namespace antares
 
 #endif  // ANTARES_GAME_ACTION_HPP_

@@ -131,11 +131,9 @@ static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
 struct SiteData {
-    bool     should_draw;
     Point    a, b, c;
     RgbColor light, dark;
 };
-static ANTARES_GLOBAL SiteData site;
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -158,9 +156,6 @@ void InstrumentInit() {
     g.radar_blips.reset(new Point[kRadarBlipNum]);
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
-
-    site.light = GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM);
-    site.dark  = GetRGBTranslateColorShade(Hue::PALE_GREEN, DARKER + kSlightlyDarkerColor);
 
     MiniScreenInit();
 }
@@ -542,46 +537,43 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     site.c = c;
 }
 
-void update_site(bool replay) {
+bool update_site() {
     if (!g.ship.get()) {
-        site.should_draw = false;
+        return false;
     } else if (!(g.ship->active && g.ship->sprite.get())) {
-        site.should_draw = false;
+        return false;
     } else if (g.ship->offlineTime <= 0) {
-        site.should_draw = true;
+        return true;
     } else {
-        site.should_draw = (Randomize(g.ship->offlineTime) < 5);
-    }
-
-    if (site.should_draw) {
-        update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
+        return (Randomize(g.ship->offlineTime) < 5);
     }
 }
 
 void draw_site(const PlayerShip& player) {
-    if (site.should_draw) {
-        Lines lines;
-        lines.draw(site.a, site.b, site.light);
-        lines.draw(site.a, site.c, site.light);
-        lines.draw(site.b, site.c, site.dark);
+    SiteData site;
+    site.light = GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM);
+    site.dark  = GetRGBTranslateColorShade(Hue::PALE_GREEN, DARKER + kSlightlyDarkerColor);
+    update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
 
-        SiteData control = {};
-        if (player.show_select()) {
-            control.light = GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM);
-            control.dark  = GetRGBTranslateColorShade(Hue::YELLOW, DARKER + kSlightlyDarkerColor);
-            control.should_draw = true;
-        } else if (player.show_target()) {
-            control.light = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
-            control.dark = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER + kSlightlyDarkerColor);
-            control.should_draw = true;
-        }
-        if (control.should_draw) {
-            update_triangle(control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
-            lines.draw(control.a, control.b, control.light);
-            lines.draw(control.a, control.c, control.light);
-            lines.draw(control.b, control.c, control.dark);
-        }
+    Lines lines;
+    lines.draw(site.a, site.b, site.light);
+    lines.draw(site.a, site.c, site.light);
+    lines.draw(site.b, site.c, site.dark);
+
+    SiteData control = {};
+    if (player.show_select()) {
+        control.light = GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM);
+        control.dark  = GetRGBTranslateColorShade(Hue::YELLOW, DARKER + kSlightlyDarkerColor);
+    } else if (player.show_target()) {
+        control.light = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
+        control.dark  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER + kSlightlyDarkerColor);
+    } else {
+        return;
     }
+    update_triangle(control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
+    lines.draw(control.a, control.b, control.light);
+    lines.draw(control.a, control.c, control.light);
+    lines.draw(control.b, control.c, control.dark);
 }
 
 bool update_sector_lines() {
