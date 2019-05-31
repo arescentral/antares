@@ -604,7 +604,7 @@ void draw_sector_lines() {
     }
 
     draw_arbitrary_sector_lines(
-            scaled_screen.origin(), gAbsoluteScale, kMinGraphicSectorSize, viewport());
+            scaled_screen.origin(), gLastScale, kMinGraphicSectorSize, viewport());
 }
 
 void InstrumentsHandleClick(const GameCursor& cursor) {
