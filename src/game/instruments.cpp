@@ -127,7 +127,6 @@ struct barIndicatorType {
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL int32_t gLastScale;
-static ANTARES_GLOBAL bool    should_draw_sector_lines = false;
 static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
@@ -177,7 +176,8 @@ void ResetInstruments() {
     int32_t *l, i;
     Point*   lp;
 
-    g.radar_count = ticks(0);
+    g.radar_count  = ticks(0);
+    gAbsoluteScale = SCALE_SCALE;
     gLastScale = gAbsoluteScale = SCALE_SCALE;
     gWhichScaleNum              = 0;
     l                           = gScaleList.get();
@@ -334,6 +334,9 @@ void UpdateRadar(ticks unitsDone) {
     }
     absolute_scale >>= kScaleListShift;
 
+    if ((gAbsoluteScale < kBlipThreshhold) != (absolute_scale < kBlipThreshhold)) {
+        sys.sound.zoom();
+    }
     gAbsoluteScale = absolute_scale;
 }
 
@@ -581,28 +584,12 @@ void draw_site(const PlayerShip& player) {
     }
 }
 
-void update_sector_lines() {
-    should_draw_sector_lines = false;
-    if (g.ship.get()) {
-        if (g.ship->offlineTime <= 0) {
-            should_draw_sector_lines = true;
-        } else if (Randomize(g.ship->offlineTime) < 5) {
-            should_draw_sector_lines = true;
-        }
-    }
-
-    if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
-        sys.sound.zoom();
-    }
-
+bool update_sector_lines() {
     gLastScale = gAbsoluteScale;
+    return g.ship.get() && ((g.ship->offlineTime <= 0) || (Randomize(g.ship->offlineTime) < 5));
 }
 
 void draw_sector_lines() {
-    if (!should_draw_sector_lines) {
-        return;
-    }
-
     draw_arbitrary_sector_lines(
             scaled_screen.origin(), gLastScale, kMinGraphicSectorSize, viewport());
 }
