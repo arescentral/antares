@@ -226,7 +226,7 @@ void UpdateRadar(ticks unitsDone) {
             Rect radar = bounds;
             radar.inset(1, 1);
 
-            int32_t dx = g.ship->location.h - scaled_screen.left;
+            int32_t dx = g.ship->location.h - scaled_screen.bounds.left;
             dx         = dx / kRadarScale;
             view_range = Rect(-dx, -dx, dx, dx);
             view_range.center_in(bounds);
@@ -580,7 +580,7 @@ bool update_sector_lines() {
 
 void draw_sector_lines() {
     draw_arbitrary_sector_lines(
-            scaled_screen.origin(), gAbsoluteScale, kMinGraphicSectorSize, viewport());
+            scaled_screen.bounds.origin(), scaled_screen.scale, kMinGraphicSectorSize, viewport());
 }
 
 void InstrumentsHandleClick(const GameCursor& cursor) {

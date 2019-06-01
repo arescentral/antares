@@ -243,7 +243,7 @@ static void apply(
         location.h = direct->sprite->where.h;
         location.v = direct->sprite->where.v;
     } else {
-        int32_t l = (direct->location.h - scaled_screen.left) * gAbsoluteScale;
+        int32_t l = (direct->location.h - scaled_screen.bounds.left) * scaled_screen.scale;
         l >>= SHIFT_SCALE;
         if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
             location.h = l + viewport().left;
@@ -251,7 +251,7 @@ static void apply(
             location.h = -kSpriteMaxSize;
         }
 
-        l = (direct->location.v - scaled_screen.top) * gAbsoluteScale;
+        l = (direct->location.v - scaled_screen.bounds.top) * scaled_screen.scale;
         l >>= SHIFT_SCALE; /*+ CLIP_TOP*/
         if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
             location.v = l + viewport().top;

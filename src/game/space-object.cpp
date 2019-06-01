@@ -169,9 +169,11 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
             whichShape = angle / rotation_resolution(*obj->base);
         }
 
-        Point where{(((obj->location.h - scaled_screen.left) * gAbsoluteScale) >> SHIFT_SCALE) +
+        Point where{(((obj->location.h - scaled_screen.bounds.left) * scaled_screen.scale) >>
+                     SHIFT_SCALE) +
                             viewport().left,
-                    (((obj->location.v - scaled_screen.top) * gAbsoluteScale) >> SHIFT_SCALE) +
+                    (((obj->location.v - scaled_screen.bounds.top) * scaled_screen.scale) >>
+                     SHIFT_SCALE) +
                             viewport().top};
         obj->sprite = AddSprite(
                 where, spriteTable, sourceObject->pix_id->name, sourceObject->pix_id->hue,
@@ -349,7 +351,7 @@ SpaceObject::SpaceObject(
         if (player.get() && player->active) {
             center = player->location;
         } else {
-            center = scaled_screen.center();
+            center = scaled_screen.bounds.center();
         }
         xdiff = abs(center.h - location.h);
         ydiff = abs(center.v - location.v);

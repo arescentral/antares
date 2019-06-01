@@ -132,7 +132,7 @@ static AdjacentCells make_adjacent_cells() {
 
 static const AdjacentCells kAdjacentCells = make_adjacent_cells();
 
-ANTARES_GLOBAL Rect scaled_screen;
+ANTARES_GLOBAL ScaledScreen scaled_screen;
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
@@ -143,9 +143,10 @@ Size center_scale() {
 }
 
 void ResetMotionGlobals() {
-    scaled_screen = Rect{};
-    g.closest     = Handle<SpaceObject>(0);
-    g.farthest    = Handle<SpaceObject>(0);
+    scaled_screen.bounds = Rect{};
+    scaled_screen.scale  = SCALE_SCALE;
+    g.closest            = Handle<SpaceObject>(0);
+    g.farthest           = Handle<SpaceObject>(0);
 }
 
 static void move_object(SpaceObject* o) {
@@ -424,7 +425,8 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         scale.width /= gAbsoluteScale;
         scale.height /= gAbsoluteScale;
 
-        scaled_screen = Rect{
+        scaled_screen.scale  = gAbsoluteScale;
+        scaled_screen.bounds = Rect{
                 g.ship->location.h - scale.width, g.ship->location.v - scale.height,
                 g.ship->location.h + scale.width, g.ship->location.v + scale.height,
         };
@@ -444,7 +446,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
         auto& sprite = *o->sprite;
 
-        int32_t h = (o->location.h - scaled_screen.left) * gAbsoluteScale;
+        int32_t h = (o->location.h - scaled_screen.bounds.left) * scaled_screen.scale;
         h >>= SHIFT_SCALE;
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
             sprite.where.h = h + viewport.left;
@@ -452,7 +454,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
             sprite.where.h = -kSpriteMaxSize;
         }
 
-        int32_t v = (o->location.v - scaled_screen.top) * gAbsoluteScale;
+        int32_t v = (o->location.v - scaled_screen.bounds.top) * scaled_screen.scale;
         v >>= SHIFT_SCALE;
         if ((v > -kSpriteMaxSize) && (v < kSpriteMaxSize)) {
             sprite.where.v = v;
