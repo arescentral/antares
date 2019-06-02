@@ -33,8 +33,6 @@ extern ScaledScreen scaled_screen;
 
 void ResetMotionGlobals();
 
-Size center_scale();
-
 void MoveSpaceObjects(ticks unitsToDo);
 void CollideSpaceObjects();
 

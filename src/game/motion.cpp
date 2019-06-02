@@ -136,13 +136,6 @@ ANTARES_GLOBAL ScaledScreen scaled_screen;
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
-Size center_scale() {
-    return {
-            (play_screen().width() / 2) * SCALE_SCALE.factor,
-            (play_screen().height() / 2) * SCALE_SCALE.factor,
-    };
-}
-
 void ResetMotionGlobals() {
     scaled_screen.bounds = Rect{};
     scaled_screen.scale  = SCALE_SCALE;
@@ -422,9 +415,8 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     }
 
     if (g.ship.get() && g.ship->active) {
-        Size scale = center_scale();
-        scale.width /= gAbsoluteScale.factor;
-        scale.height /= gAbsoluteScale.factor;
+        Size scale{((play_screen().width() / 2) * SCALE_SCALE.factor) / gAbsoluteScale.factor,
+                   ((play_screen().height() / 2) * SCALE_SCALE.factor) / gAbsoluteScale.factor};
 
         scaled_screen.scale  = gAbsoluteScale;
         scaled_screen.bounds = Rect{

@@ -270,18 +270,18 @@ void UpdateRadar(ticks unitsDone) {
     switch (g.zoom) {
         case Zoom::FOE:
         case Zoom::OBJECT: {
-            auto     anObject     = g.closest;
-            uint64_t hugeDistance = anObject->distanceFromPlayer;
-            if (hugeDistance == 0) {  // if this is true, then we haven't calced its distance
-                uint64_t x_distance = ABS<int32_t>(g.ship->location.h - anObject->location.h);
-                uint64_t y_distance = ABS<int32_t>(g.ship->location.v - anObject->location.v);
+            auto    anObject         = g.closest;
+            int64_t squared_distance = anObject->distanceFromPlayer;
+            if (squared_distance == 0) {  // if this is true, then we haven't calced its distance
+                int64_t x_distance = abs(g.ship->location.h - anObject->location.h);
+                int64_t y_distance = abs(g.ship->location.v - anObject->location.v);
 
-                hugeDistance = y_distance * y_distance + x_distance * x_distance;
+                squared_distance = y_distance * y_distance + x_distance * x_distance;
             }
-            bestScale.factor = wsqrt(hugeDistance);
-            if (bestScale == Scale{0})
-                bestScale = Scale{1};
-            bestScale.factor = center_scale().height / bestScale.factor;
+            int32_t distance = wsqrt(squared_distance);
+            if (distance == 0)
+                distance = 1;
+            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / distance;
             if (bestScale < SCALE_SCALE)
                 bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
             bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
@@ -298,12 +298,12 @@ void UpdateRadar(ticks unitsDone) {
         case Zoom::DOUBLE: bestScale = kTimesTwoScale; break;
 
         case Zoom::ALL: {
-            auto     anObject = g.farthest;
-            uint64_t tempWide = anObject->distanceFromPlayer;
-            bestScale.factor  = wsqrt(tempWide);
-            if (bestScale == Scale{0})
-                bestScale = Scale{1};
-            bestScale.factor = center_scale().height / bestScale.factor;
+            auto    anObject         = g.farthest;
+            int64_t squared_distance = anObject->distanceFromPlayer;
+            int32_t distance         = wsqrt(squared_distance);
+            if (distance == 0)
+                distance = 1;
+            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / distance;
             if (bestScale < SCALE_SCALE)
                 bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
             bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
