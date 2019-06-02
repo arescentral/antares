@@ -415,8 +415,8 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     }
 
     if (g.ship.get() && g.ship->active) {
-        Size scale{((play_screen().width() / 2) * SCALE_SCALE.factor) / gAbsoluteScale.factor,
-                   ((play_screen().height() / 2) * SCALE_SCALE.factor) / gAbsoluteScale.factor};
+        Size scale{((play_screen().width() / 2) * SCALE_SCALE) / gAbsoluteScale,
+                   ((play_screen().height() / 2) * SCALE_SCALE) / gAbsoluteScale};
 
         scaled_screen.scale  = gAbsoluteScale;
         scaled_screen.bounds = Rect{
