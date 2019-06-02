@@ -49,9 +49,9 @@ static void GetInitialObjectSpriteData(
         Rect* spriteRect);
 
 static void GetRealObjectSpriteData(
-        const Point& realCoord, const BaseObject& baseObject, Handle<Admiral> owner,
-        const SpaceObject::PixID& sprite, int32_t maxSize, const Rect& bounds, const Point& corner,
-        Scale scale, Scale* thisScale, const NatePixTable::Frame** frame, Point* where);
+        const Point& location, const BaseObject& baseObject, const SpaceObject::PixID& sprite,
+        int32_t maxSize, const Rect& bounds, const Point& corner, Scale scale, Scale* thisScale,
+        const NatePixTable::Frame** frame, Point* where);
 
 static bool BriefingSprite_IsLocationLegal(
         const NatePixTable::Frame& frame, Scale scale, Point where, bool* grid, int32_t gridWidth,
@@ -215,43 +215,34 @@ static void GetInitialObjectSpriteData(
         const Point& corner, Scale scale,
         const std::vector<sfz::optional<BriefingSprite>>& sprites, Scale* thisScale, Point* where,
         Rect* spriteRect) {
-    spriteRect->right = spriteRect->left = -1;
-
     auto sObject = GetObjectFromInitialNumber(whichObject);
-
     if (sObject.get() && sObject->active) {
-        const NatePixTable::Frame* frame = NULL;
-        GetRealObjectSpriteData(
-                sObject->location, *sObject->base, sObject->owner, *sObject->pix_id, maxSize,
-                bounds, corner, scale, thisScale, &frame, where);
-
         *spriteRect = sprites[sObject.number()]->sprite_rect;
+    } else {
+        *spriteRect = Rect{};
     }
 }
 
 static void GetRealObjectSpriteData(
-        const Point& realCoord, const BaseObject& baseObject, Handle<Admiral> owner,
-        const SpaceObject::PixID& sprite, int32_t maxSize, const Rect& bounds, const Point& corner,
-        Scale scale, Scale* thisScale, const NatePixTable::Frame** frame, Point* where) {
-    int   whichShape;
-    Point coord = realCoord;
-
-    NatePixTable* pixTable = sys.pix.get(sprite.name, sprite.hue);
-    if (pixTable == NULL) {
+        const Point& location, const BaseObject& baseObject, const SpaceObject::PixID& sprite,
+        int32_t maxSize, const Rect& bounds, const Point& corner, Scale scale, Scale* thisScale,
+        const NatePixTable::Frame** frame, Point* where) {
+    NatePixTable* pix_table = sys.pix.get(sprite.name, sprite.hue);
+    if (pix_table == NULL) {
         throw std::runtime_error("Couldn't load a requested sprite");
     }
 
-    if (baseObject.attributes & kIsSelfAnimated)
-        whichShape = more_evil_fixed_to_long(baseObject.animation->frames.begin);
-    else
-        whichShape = 0;
+    int index = 0;
+    if (baseObject.attributes & kIsSelfAnimated) {
+        index = more_evil_fixed_to_long(baseObject.animation->frames.begin);
+    }
 
-    *frame     = &pixTable->at(whichShape);
+    *frame     = &pix_table->at(index);
     *thisScale = std::min(
             (maxSize * SCALE_SCALE) / (*frame)->width(),
             (maxSize * SCALE_SCALE) / (*frame)->height());
-    *where = Point{scale_by(coord.h - corner.h, scale) + bounds.left,
-                   scale_by(coord.v - corner.v, scale) + bounds.top};
+    *where = Point{scale_by(location.h - corner.h, scale) + bounds.left,
+                   scale_by(location.v - corner.v, scale) + bounds.top};
 }
 
 std::vector<sfz::optional<BriefingSprite>> render_briefing(
@@ -285,45 +276,41 @@ std::vector<sfz::optional<BriefingSprite>> render_briefing(
         if (baseObject->maxVelocity == Fixed::zero()) {
             const NatePixTable::Frame* frame = NULL;
             GetRealObjectSpriteData(
-                    anObject->location, *anObject->base, anObject->owner, *anObject->pix_id,
-                    maxSize, bounds, corner, scale, &thisScale, &frame, &where);
-            if (frame != NULL) {
-                thisScale = scale_by(kOneQuarterScale, sprite_scale(*baseObject));
+                    anObject->location, *anObject->base, *anObject->pix_id, maxSize, bounds,
+                    corner, scale, &thisScale, &frame, &where);
+            thisScale = scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
-                where = BriefingSprite_GetBestLocation(
-                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
+            where = BriefingSprite_GetBestLocation(
+                    *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
 
-                BriefingSprite_UseLocation(
-                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
+            BriefingSprite_UseLocation(
+                    *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
 
-                result[anObject.number()].emplace(BriefingSprite{
-                        *frame, scale_sprite_rect(*frame, where, thisScale), false});
-            }
+            result[anObject.number()].emplace(
+                    BriefingSprite{*frame, scale_sprite_rect(*frame, where, thisScale), false});
         } else {
             const NatePixTable::Frame* frame = NULL;
             GetRealObjectSpriteData(
-                    anObject->location, *anObject->base, anObject->owner, *anObject->pix_id,
-                    maxSize / 2, bounds, corner, scale, &thisScale, &frame, &where);
-            if (frame != NULL) {
-                thisScale = scale_by(kOneQuarterScale, sprite_scale(*baseObject));
+                    anObject->location, *anObject->base, *anObject->pix_id, maxSize / 2, bounds,
+                    corner, scale, &thisScale, &frame, &where);
+            thisScale = scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
-                where = BriefingSprite_GetBestLocation(
-                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
-                BriefingSprite_UseLocation(
-                        *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
+            where = BriefingSprite_GetBestLocation(
+                    *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
+            BriefingSprite_UseLocation(
+                    *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
 
-                Hue hue = Hue::BLUE;
-                if (anObject->owner.number() >= 0) {
-                    hue = anObject->sprite->tinyColor.hue;
-                }
-
-                const RgbColor light_color = GetRGBTranslateColorShade(hue, LIGHT);
-                const RgbColor dark_color  = GetRGBTranslateColorShade(hue, DARK);
-
-                result[anObject.number()].emplace(
-                        BriefingSprite{*frame, scale_sprite_rect(*frame, where, thisScale), true,
-                                       light_color, dark_color});
+            Hue hue = Hue::BLUE;
+            if (anObject->owner.number() >= 0) {
+                hue = anObject->sprite->tinyColor.hue;
             }
+
+            const RgbColor light_color = GetRGBTranslateColorShade(hue, LIGHT);
+            const RgbColor dark_color  = GetRGBTranslateColorShade(hue, DARK);
+
+            result[anObject.number()].emplace(
+                    BriefingSprite{*frame, scale_sprite_rect(*frame, where, thisScale), true,
+                                   light_color, dark_color});
         }
     }
     return result;
