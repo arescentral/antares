@@ -20,6 +20,7 @@
 #define ANTARES_GAME_MOTION_HPP_
 
 #include "data/base-object.hpp"
+#include "math/scale.hpp"
 #include "math/units.hpp"
 
 namespace antares {

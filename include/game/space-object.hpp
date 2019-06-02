@@ -21,6 +21,7 @@
 
 #include "data/base-object.hpp"
 #include "game/globals.hpp"
+#include "math/scale.hpp"
 #include "math/units.hpp"
 
 namespace antares {

@@ -29,6 +29,7 @@
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"
+#include "math/scale.hpp"
 
 namespace antares {
 

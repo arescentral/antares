@@ -20,6 +20,7 @@
 #define ANTARES_GAME_INSTRUMENTS_HPP_
 
 #include "drawing/sprite-handling.hpp"
+#include "math/scale.hpp"
 #include "math/units.hpp"
 
 namespace antares {

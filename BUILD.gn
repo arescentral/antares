@@ -282,12 +282,14 @@ source_set("libantares-math") {
     "include/math/macros.hpp",
     "include/math/random.hpp",
     "include/math/rotation.hpp",
+    "include/math/scale.hpp",
     "include/math/special.hpp",
     "include/math/units.hpp",
     "src/math/fixed.cpp",
     "src/math/geometry.cpp",
     "src/math/random.cpp",
     "src/math/rotation.cpp",
+    "src/math/scale.cpp",
     "src/math/special.cpp",
   ]
   public_deps = [

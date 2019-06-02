@@ -157,12 +157,6 @@ void RemoveSprite(Handle<Sprite> sprite) {
     sprite->table  = NULL;
 }
 
-Fixed scale_by(Fixed value, Scale scale) { return (value * scale.factor) / SCALE_SCALE.factor; }
-
-Fixed evil_scale_by(Fixed value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
-
-int32_t evil_scale_by(int32_t value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
-
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, Scale scale) {
     Rect draw_rect =
             Rect(0, 0, evil_scale_by(frame.width(), scale), evil_scale_by(frame.height(), scale));

@@ -26,6 +26,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "math/fixed.hpp"
+#include "math/scale.hpp"
 
 namespace antares {
 
@@ -78,15 +79,6 @@ class Sprite {
 };
 
 extern Scale gAbsoluteScale;
-
-// Scale `value` by `scale`.
-//
-// The regular variant calculates the final scale as ``(value * scale) / 4096``.  The evil variant
-// calculates the final scale as ``(value * scale) >> 12``, which results in off-by-one errors when
-// `value` is negative.
-Fixed   scale_by(Fixed value, Scale scale);
-Fixed   evil_scale_by(Fixed value, Scale scale);
-int32_t evil_scale_by(int32_t value, Scale scale);
 
 class Pix {
   public:

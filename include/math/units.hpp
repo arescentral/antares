@@ -76,19 +76,6 @@ enum {
     SECTOR_MAX    = 262144,  // 2^18 (universe width)
 };
 
-struct Scale {
-    int32_t factor;
-};
-
-const int32_t SHIFT_SCALE = 12;
-const Scale   SCALE_SCALE{1 << SHIFT_SCALE};
-const Scale   MIN_SCALE{256};
-
-const Scale kOneEighthScale{SCALE_SCALE.factor / 8};
-const Scale kOneQuarterScale{SCALE_SCALE.factor / 4};
-const Scale kOneHalfScale{SCALE_SCALE.factor / 2};
-const Scale kTimesTwoScale{SCALE_SCALE.factor * 2};
-
 }  // namespace antares
 
 #endif  // ANTARES_MATH_UNITS_HPP_

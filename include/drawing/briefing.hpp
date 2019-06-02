@@ -24,6 +24,7 @@
 #include "data/handle.hpp"
 #include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
+#include "math/scale.hpp"
 
 namespace antares {
 
