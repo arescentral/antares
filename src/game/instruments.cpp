@@ -614,17 +614,17 @@ void draw_arbitrary_sector_lines(
 
     int32_t level = 1;
     int32_t size  = SECTOR_SMALL;
-    int32_t h     = (SECTOR_SMALL * scale.factor) >> SHIFT_SCALE;
+    int32_t h     = evil_scale_by(SECTOR_SMALL, scale);
     while (h < minSectorSize) {
         level *= 2;
         size *= 4;
-        h = (size * scale.factor) >> SHIFT_SCALE;
+        h = evil_scale_by(size, scale);
     }
     level *= level;
 
     int32_t x        = size - (corner.h & (size - 1));
     int32_t division = ((corner.h + x) / SECTOR_SMALL) & 0x0000000f;
-    x                = ((x * scale.factor) >> SHIFT_SCALE) + bounds.left;
+    x                = evil_scale_by(x, scale) + bounds.left;
 
     while (x < bounds.right) {
         RgbColor color;
@@ -644,7 +644,7 @@ void draw_arbitrary_sector_lines(
 
     x        = size - (corner.v & (size - 1));
     division = ((corner.v + x) / SECTOR_SMALL) & 0x0000000f;
-    x        = ((x * scale.factor) >> SHIFT_SCALE) + bounds.top;
+    x        = evil_scale_by(x, scale) + bounds.top;
 
     while (x < bounds.bottom) {
         RgbColor color;

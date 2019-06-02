@@ -447,16 +447,14 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
         auto& sprite = *o->sprite;
 
-        int32_t h = (o->location.h - scaled_screen.bounds.left) * scaled_screen.scale.factor;
-        h >>= SHIFT_SCALE;
+        int32_t h = evil_scale_by(o->location.h - scaled_screen.bounds.left, scaled_screen.scale);
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
             sprite.where.h = h + viewport.left;
         } else {
             sprite.where.h = -kSpriteMaxSize;
         }
 
-        int32_t v = (o->location.v - scaled_screen.bounds.top) * scaled_screen.scale.factor;
-        v >>= SHIFT_SCALE;
+        int32_t v = evil_scale_by(o->location.v - scaled_screen.bounds.top, scaled_screen.scale);
         if ((v > -kSpriteMaxSize) && (v < kSpriteMaxSize)) {
             sprite.where.v = v;
         } else {
@@ -714,13 +712,11 @@ static void calc_bounds() {
     for (auto o_handle = g.root; (o = o_handle.get()); o_handle = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame = o->sprite->table->at(o->sprite->whichShape);
-            o->absoluteBounds                = Rect(
-                    Point(o->location.h -
-                                  ((frame.center().h * o->naturalScale.factor) >> SHIFT_SCALE),
-                          o->location.v -
-                                  ((frame.center().v * o->naturalScale.factor) >> SHIFT_SCALE)),
-                    Size((frame.width() * o->naturalScale.factor) >> SHIFT_SCALE,
-                         (frame.height() * o->naturalScale.factor) >> SHIFT_SCALE));
+            o->absoluteBounds =
+                    Rect(Point(o->location.h - evil_scale_by(frame.center().h, o->naturalScale),
+                               o->location.v - evil_scale_by(frame.center().v, o->naturalScale)),
+                         Size(evil_scale_by(frame.width(), o->naturalScale),
+                              evil_scale_by(frame.height(), o->naturalScale)));
         }
     }
 }

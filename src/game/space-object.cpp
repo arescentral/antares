@@ -170,11 +170,9 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
         }
 
         Point where{
-                (((obj->location.h - scaled_screen.bounds.left) * scaled_screen.scale.factor) >>
-                 SHIFT_SCALE) +
+                evil_scale_by(obj->location.h - scaled_screen.bounds.left, scaled_screen.scale) +
                         viewport().left,
-                (((obj->location.v - scaled_screen.bounds.top) * scaled_screen.scale.factor) >>
-                 SHIFT_SCALE) +
+                evil_scale_by(obj->location.v - scaled_screen.bounds.top, scaled_screen.scale) +
                         viewport().top};
         obj->sprite = AddSprite(
                 where, spriteTable, sourceObject->pix_id->name, sourceObject->pix_id->hue,
