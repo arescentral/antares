@@ -93,12 +93,11 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
             vector->color                = RgbColor::clear();
             vector->hue                  = r.hue;
 
-            vector->thisLocation = Rect{
+            vector->begin_location = vector->end_location =
                     Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
                                   viewport().left,
                           scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
-                                  viewport().top},
-                    Size{0, 0}};
+                                  viewport().top};
 
             vector->is_ray          = true;
             vector->to_coord        = (r.to == BaseObject::Ray::To::COORD);
@@ -131,12 +130,11 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
             vector->hue                  = sfz::nullopt;
             vector->color                = b.color;
 
-            vector->thisLocation = Rect{
+            vector->begin_location = vector->end_location =
                     Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
                                   viewport().left,
                           scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
-                                  viewport().top},
-                    Size{0, 0}};
+                                  viewport().top};
 
             vector->is_ray          = false;
             vector->to_coord        = false;
@@ -206,20 +204,24 @@ void Vectors::update() {
     for (auto vector : Vector::all()) {
         if (vector->active) {
             if (vector->lastApparentLocation != vector->objectLocation) {
-                vector->thisLocation =
-                        Rect(scale_by(
-                                     vector->objectLocation.h - scaled_screen.bounds.left,
-                                     scaled_screen.scale),
-                             scale_by(
-                                     vector->objectLocation.v - scaled_screen.bounds.top,
-                                     scaled_screen.scale),
-                             scale_by(
-                                     vector->lastApparentLocation.h - scaled_screen.bounds.left,
-                                     scaled_screen.scale),
-                             scale_by(
-                                     vector->lastApparentLocation.v - scaled_screen.bounds.top,
-                                     scaled_screen.scale));
-                vector->thisLocation.offset(viewport().left, viewport().top);
+                vector->begin_location =
+                        Point(viewport().left +
+                                      scale_by(
+                                              vector->objectLocation.h - scaled_screen.bounds.left,
+                                              scaled_screen.scale),
+                              viewport().top +
+                                      scale_by(
+                                              vector->objectLocation.v - scaled_screen.bounds.top,
+                                              scaled_screen.scale));
+                vector->end_location = Point(
+                        viewport().left +
+                                scale_by(
+                                        vector->lastApparentLocation.h - scaled_screen.bounds.left,
+                                        scaled_screen.scale),
+                        viewport().top +
+                                scale_by(
+                                        vector->lastApparentLocation.v - scaled_screen.bounds.top,
+                                        scaled_screen.scale));
                 vector->lastApparentLocation = vector->objectLocation;
             }
 
@@ -237,24 +239,21 @@ void Vectors::update() {
                         vector->color = GetRGBTranslateColor(currentColor);
                     }
                     if (vector->lightning) {
-                        vector->thisBoltPoint[0].h                 = vector->thisLocation.left;
-                        vector->thisBoltPoint[0].v                 = vector->thisLocation.top;
-                        vector->thisBoltPoint[kBoltPointNum - 1].h = vector->thisLocation.right;
-                        vector->thisBoltPoint[kBoltPointNum - 1].v = vector->thisLocation.bottom;
+                        vector->thisBoltPoint[0]                 = vector->begin_location;
+                        vector->thisBoltPoint[kBoltPointNum - 1] = vector->end_location;
 
-                        int32_t inaccuracy = max(abs(vector->thisLocation.width()),
-                                                 abs(vector->thisLocation.height())) /
-                                             kBoltPointNum / 2;
+                        Size    span{vector->end_location.h - vector->begin_location.h,
+                                  vector->end_location.v - vector->begin_location.v};
+                        int32_t inaccuracy =
+                                max(abs(span.width), abs(span.height)) / kBoltPointNum / 2;
 
                         for (int j : range(1, kBoltPointNum - 1)) {
-                            vector->thisBoltPoint[j].h =
-                                    vector->thisLocation.left +
-                                    ((vector->thisLocation.width() * j) / kBoltPointNum) -
-                                    inaccuracy + Randomize(inaccuracy * 2);
-                            vector->thisBoltPoint[j].v =
-                                    vector->thisLocation.top +
-                                    ((vector->thisLocation.height() * j) / kBoltPointNum) -
-                                    inaccuracy + Randomize(inaccuracy * 2);
+                            vector->thisBoltPoint[j].h = vector->begin_location.h +
+                                                         ((span.width * j) / kBoltPointNum) -
+                                                         inaccuracy + Randomize(inaccuracy * 2);
+                            vector->thisBoltPoint[j].v = vector->begin_location.v +
+                                                         ((span.height * j) / kBoltPointNum) -
+                                                         inaccuracy + Randomize(inaccuracy * 2);
                         }
                     }
                 }
@@ -276,10 +275,7 @@ void Vectors::draw() {
                                     vector->color);
                         }
                     } else {
-                        lines.draw(
-                                Point(vector->thisLocation.left, vector->thisLocation.top),
-                                Point(vector->thisLocation.right, vector->thisLocation.bottom),
-                                vector->color);
+                        lines.draw(vector->begin_location, vector->end_location, vector->color);
                     }
                 }
             }
