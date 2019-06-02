@@ -246,16 +246,10 @@ static void GetRealObjectSpriteData(
     else
         whichShape = 0;
 
-    *frame = &pixTable->at(whichShape);
-
-    Scale tlong;
-    tlong = *thisScale = maxSize * SCALE_SCALE;
-    *thisScale /= (*frame)->width();
-    tlong /= (*frame)->height();
-
-    if (tlong < *thisScale)
-        *thisScale = tlong;
-
+    *frame     = &pixTable->at(whichShape);
+    *thisScale = std::min(
+            (maxSize * SCALE_SCALE) / (*frame)->width(),
+            (maxSize * SCALE_SCALE) / (*frame)->height());
     *where = Point{scale_by(coord.h - corner.h, scale) + bounds.left,
                    scale_by(coord.v - corner.v, scale) + bounds.top};
 }
