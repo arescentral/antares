@@ -82,8 +82,7 @@ def call(args):
 
     queue.put((
         name,
-        START,
-    ))
+        START, ))
     try:
         start = time.time()
         result = fn(opts, queue, name, *args)
@@ -128,7 +127,7 @@ def main():
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
-        (offscreen_test, opts, queue, "fast-motion"),
+        (offscreen_test, opts, queue, "fast-motion", ["--text"]),
         (offscreen_test, opts, queue, "main-screen"),
         (offscreen_test, opts, queue, "mission-briefing", ["--text"]),
         (offscreen_test, opts, queue, "options"),
