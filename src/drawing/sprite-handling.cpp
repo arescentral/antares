@@ -68,7 +68,7 @@ static draw_tiny_t draw_tiny_function(BaseObject::Icon::Shape shape, int size) {
     }
 }
 
-int32_t ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
+Scale ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
 
 void SpriteHandlingInit() {
     g.sprites.reset(new Sprite[Sprite::size]);
@@ -128,7 +128,7 @@ const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
+        Scale scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
         uint8_t tiny_shade) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
@@ -157,19 +157,12 @@ void RemoveSprite(Handle<Sprite> sprite) {
     sprite->table  = NULL;
 }
 
-Fixed scale_by(Fixed value, int32_t scale) { return (value * scale) / SCALE_SCALE; }
-
-Fixed evil_scale_by(Fixed value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
-
-int32_t evil_scale_by(int32_t value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
-
-Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale) {
-    Rect draw_rect =
-            Rect(0, 0, evil_scale_by(frame.width(), scale), evil_scale_by(frame.height(), scale));
-    draw_rect.offset(
-            where.h - evil_scale_by(frame.center().h, scale),
-            where.v - evil_scale_by(frame.center().v, scale));
-    return draw_rect;
+Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, Scale scale) {
+    return Rect{
+            Point{where.h - scale_by(frame.center().h, scale),
+                  where.v - scale_by(frame.center().v, scale)},
+            scale_by(frame.size(), scale),
+    };
 }
 
 void draw_sprites() {
@@ -179,17 +172,10 @@ void draw_sprites() {
             for (auto aSprite : Sprite::all()) {
                 if ((aSprite->table != NULL) && !aSprite->killMe &&
                     (aSprite->whichLayer == layer)) {
-                    int32_t trueScale = evil_scale_by(aSprite->scale, gAbsoluteScale);
+                    Scale trueScale                  = scale_by(aSprite->scale, gAbsoluteScale);
                     const NatePixTable::Frame& frame = aSprite->table->at(aSprite->whichShape);
 
-                    const int32_t map_width  = evil_scale_by(frame.width(), trueScale);
-                    const int32_t map_height = evil_scale_by(frame.height(), trueScale);
-                    const int32_t scaled_h   = evil_scale_by(frame.center().h, trueScale);
-                    const int32_t scaled_v   = evil_scale_by(frame.center().v, trueScale);
-                    const Point   scaled_center(scaled_h, scaled_v);
-
-                    Rect draw_rect(0, 0, map_width, map_height);
-                    draw_rect.offset(aSprite->where.h - scaled_h, aSprite->where.v - scaled_v);
+                    Rect draw_rect = scale_sprite_rect(frame, aSprite->where, trueScale);
 
                     switch (aSprite->style) {
                         case spriteNormal: frame.texture().draw(draw_rect); break;

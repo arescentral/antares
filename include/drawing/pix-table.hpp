@@ -55,6 +55,7 @@ class NatePixTable::Frame {
 
     uint16_t       width() const;
     uint16_t       height() const;
+    Size           size() const { return Size{width(), height()}; };
     Point          center() const;
     const PixMap&  pix_map() const;
     const Texture& texture() const;

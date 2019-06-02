@@ -24,6 +24,7 @@
 #include "data/handle.hpp"
 #include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
+#include "math/scale.hpp"
 
 namespace antares {
 
@@ -38,7 +39,7 @@ struct BriefingSprite {
 };
 
 std::vector<sfz::optional<BriefingSprite>> render_briefing(
-        int32_t maxSize, const Rect& bounds, const Point& corner, int32_t scale);
+        int32_t maxSize, const Rect& bounds, const Point& corner, Scale scale);
 
 struct BriefPointInfo {
     pn::string header;
@@ -46,9 +47,8 @@ struct BriefPointInfo {
     Rect       highlight;
 };
 BriefPointInfo BriefPoint_Data_Get(
-        int32_t whichPoint, const Level& level, const Point& corner, int32_t scale,
-        int32_t maxSize, const Rect& bounds,
-        const std::vector<sfz::optional<BriefingSprite>>& sprites);
+        int32_t whichPoint, const Level& level, const Point& corner, Scale scale, int32_t maxSize,
+        const Rect& bounds, const std::vector<sfz::optional<BriefingSprite>>& sprites);
 
 }  // namespace antares
 

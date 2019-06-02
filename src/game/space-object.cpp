@@ -169,12 +169,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
             whichShape = angle / rotation_resolution(*obj->base);
         }
 
-        Point where{(((obj->location.h - scaled_screen.bounds.left) * scaled_screen.scale) >>
-                     SHIFT_SCALE) +
-                            viewport().left,
-                    (((obj->location.v - scaled_screen.bounds.top) * scaled_screen.scale) >>
-                     SHIFT_SCALE) +
-                            viewport().top};
+        Point where = scale_to_viewport(obj->location);
         obj->sprite = AddSprite(
                 where, spriteTable, sourceObject->pix_id->name, sourceObject->pix_id->hue,
                 whichShape, obj->naturalScale, obj->icon, obj->layer, get_tiny_color(*obj),
@@ -872,11 +867,11 @@ BaseObject::Layer sprite_layer(const BaseObject& o) {
     }
 }
 
-int32_t sprite_scale(const BaseObject& o) {
+Scale sprite_scale(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return o.rotation->scale.factor;
+        return o.rotation->scale;
     } else if (o.attributes & kIsSelfAnimated) {
-        return o.animation->scale.factor;
+        return o.animation->scale;
     } else {
         return SCALE_SCALE;
     }

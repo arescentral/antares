@@ -76,19 +76,6 @@ enum {
     SECTOR_MAX    = 262144,  // 2^18 (universe width)
 };
 
-const int32_t SCALE_SCALE   = 4096;
-const int32_t MIN_SCALE     = 256;
-const int32_t MAX_SCALE     = 32768;
-const int32_t MAX_SCALE_PIX = 32;  // the maximum size a single scaled pixel can be
-                                   // (should be 32)
-
-const int32_t kOneEighthScale  = SCALE_SCALE / 8;
-const int32_t kOneQuarterScale = SCALE_SCALE / 4;
-const int32_t kOneHalfScale    = SCALE_SCALE / 2;
-const int32_t kTimesTwoScale   = SCALE_SCALE * 2;
-
-const int32_t SHIFT_SCALE = 12;
-
 }  // namespace antares
 
 #endif  // ANTARES_MATH_UNITS_HPP_

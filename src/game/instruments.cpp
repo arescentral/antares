@@ -112,7 +112,7 @@ Rect mini_build_time_rect() {
     return result;
 }
 
-const int32_t kMinimumAutoScale = 2;
+const Scale kMinimumAutoScale{2};
 
 const int32_t kSectorLineBrightness = DARKER;
 
@@ -124,7 +124,7 @@ struct barIndicatorType {
     Hue     hue;
 };
 
-static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
+static ANTARES_GLOBAL unique_ptr<Scale[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
@@ -153,7 +153,7 @@ static void draw_build_time_bar();
 
 void InstrumentInit() {
     g.radar_blips.reset(new Point[kRadarBlipNum]);
-    gScaleList.reset(new int32_t[kScaleListNum]);
+    gScaleList.reset(new Scale[kScaleListNum]);
     ResetInstruments();
 
     MiniScreenInit();
@@ -167,13 +167,13 @@ void InstrumentCleanup() {
 }
 
 void ResetInstruments() {
-    int32_t *l, i;
-    Point*   lp;
+    int32_t i;
+    Point*  lp;
 
     g.radar_count  = ticks(0);
     gAbsoluteScale = SCALE_SCALE;
     gWhichScaleNum = 0;
-    l              = gScaleList.get();
+    Scale* l       = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
         l++;
@@ -266,25 +266,23 @@ void UpdateRadar(ticks unitsDone) {
         }
     }
 
-    uint32_t bestScale = MIN_SCALE;
+    Scale bestScale = MIN_SCALE;
     switch (g.zoom) {
         case Zoom::FOE:
         case Zoom::OBJECT: {
-            auto     anObject     = g.closest;
-            uint64_t hugeDistance = anObject->distanceFromPlayer;
-            if (hugeDistance == 0) {  // if this is true, then we haven't calced its distance
-                uint64_t x_distance = ABS<int32_t>(g.ship->location.h - anObject->location.h);
-                uint64_t y_distance = ABS<int32_t>(g.ship->location.v - anObject->location.v);
+            auto    anObject         = g.closest;
+            int64_t squared_distance = anObject->distanceFromPlayer;
+            if (squared_distance == 0) {  // if this is true, then we haven't calced its distance
+                int64_t x_distance = abs(g.ship->location.h - anObject->location.h);
+                int64_t y_distance = abs(g.ship->location.v - anObject->location.v);
 
-                hugeDistance = y_distance * y_distance + x_distance * x_distance;
+                squared_distance = y_distance * y_distance + x_distance * x_distance;
             }
-            bestScale = wsqrt(hugeDistance);
-            if (bestScale == 0)
-                bestScale = 1;
-            bestScale = center_scale().height / bestScale;
+            int32_t distance = wsqrt(squared_distance);
+            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / std::max(1, distance);
             if (bestScale < SCALE_SCALE)
-                bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+                bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
+            bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
 
         case Zoom::ACTUAL: bestScale = SCALE_SCALE; break;
@@ -298,19 +296,17 @@ void UpdateRadar(ticks unitsDone) {
         case Zoom::DOUBLE: bestScale = kTimesTwoScale; break;
 
         case Zoom::ALL: {
-            auto     anObject = g.farthest;
-            uint64_t tempWide = anObject->distanceFromPlayer;
-            bestScale         = wsqrt(tempWide);
-            if (bestScale == 0)
-                bestScale = 1;
-            bestScale = center_scale().height / bestScale;
+            auto    anObject         = g.farthest;
+            int64_t squared_distance = anObject->distanceFromPlayer;
+            int32_t distance         = wsqrt(squared_distance);
+            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / std::max(1, distance);
             if (bestScale < SCALE_SCALE)
-                bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+                bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
+            bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
     }
 
-    int32_t* scaleval;
+    Scale* scaleval;
     for (ticks x = ticks(0); x < unitsDone; x++) {
         scaleval  = gScaleList.get() + gWhichScaleNum;
         *scaleval = bestScale;
@@ -320,12 +316,12 @@ void UpdateRadar(ticks unitsDone) {
         }
     }
 
-    scaleval           = gScaleList.get();
-    int absolute_scale = 0;
+    scaleval = gScaleList.get();
+    Scale absolute_scale{0};
     for (int oCount = 0; oCount < kScaleListNum; oCount++) {
-        absolute_scale += *scaleval++;
+        absolute_scale.factor += scaleval++->factor;
     }
-    absolute_scale >>= kScaleListShift;
+    absolute_scale.factor >>= kScaleListShift;
 
     if ((gAbsoluteScale < kBlipThreshhold) != (absolute_scale < kBlipThreshhold)) {
         sys.sound.zoom();
@@ -606,22 +602,22 @@ void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
 }
 
 void draw_arbitrary_sector_lines(
-        const Point& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
+        const Point& corner, Scale scale, int32_t minSectorSize, const Rect& bounds) {
     Rects rects;
 
     int32_t level = 1;
     int32_t size  = SECTOR_SMALL;
-    int32_t h     = (SECTOR_SMALL * scale) >> SHIFT_SCALE;
+    int32_t h     = scale_by(SECTOR_SMALL, scale);
     while (h < minSectorSize) {
         level *= 2;
         size *= 4;
-        h = (size * scale) >> SHIFT_SCALE;
+        h = scale_by(size, scale);
     }
     level *= level;
 
     int32_t x        = size - (corner.h & (size - 1));
     int32_t division = ((corner.h + x) / SECTOR_SMALL) & 0x0000000f;
-    x                = ((x * scale) >> SHIFT_SCALE) + bounds.left;
+    x                = scale_by(x, scale) + bounds.left;
 
     while (x < bounds.right) {
         RgbColor color;
@@ -641,7 +637,7 @@ void draw_arbitrary_sector_lines(
 
     x        = size - (corner.v & (size - 1));
     division = ((corner.v + x) / SECTOR_SMALL) & 0x0000000f;
-    x        = ((x * scale) >> SHIFT_SCALE) + bounds.top;
+    x        = scale_by(x, scale) + bounds.top;
 
     while (x < bounds.bottom) {
         RgbColor color;

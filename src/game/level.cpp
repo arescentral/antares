@@ -376,7 +376,7 @@ void DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::stri
 //  This is really just for the mission briefing.  It calculates the best scale
 //  at which to show the entire scenario.
 
-void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, int32_t* scale, Rect* bounds) {
+void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, Scale* scale, Rect* bounds) {
     int32_t biggest, mustFit;
     Point   coord, otherCoord, tempCoord;
 
@@ -431,15 +431,9 @@ void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, int32_t* scale,
         }
     }
 
-    biggest = bounds->right - bounds->left;
-    biggest *= SCALE_SCALE;
-    biggest /= *scale;
-    biggest /= 2;
+    biggest   = (((bounds->right - bounds->left) * SCALE_SCALE) / *scale) / 2;
     corner->h = (coord.h + (otherCoord.h - coord.h) / 2) - biggest;
-    biggest   = (bounds->bottom - bounds->top);
-    biggest *= SCALE_SCALE;
-    biggest /= *scale;
-    biggest /= 2;
+    biggest   = (((bounds->bottom - bounds->top) * SCALE_SCALE) / *scale) / 2;
     corner->v = (coord.v + (otherCoord.v - coord.v) / 2) - biggest;
 }
 

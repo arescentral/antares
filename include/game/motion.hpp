@@ -20,19 +20,19 @@
 #define ANTARES_GAME_MOTION_HPP_
 
 #include "data/base-object.hpp"
+#include "math/scale.hpp"
 #include "math/units.hpp"
 
 namespace antares {
 
 struct ScaledScreen {
-    int32_t scale;
-    Rect    bounds;
+    Scale scale;
+    Rect  bounds;
 };
 extern ScaledScreen scaled_screen;
+Point               scale_to_viewport(Point p);
 
 void ResetMotionGlobals();
-
-Size center_scale();
 
 void MoveSpaceObjects(ticks unitsToDo);
 void CollideSpaceObjects();

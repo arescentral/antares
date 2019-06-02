@@ -136,10 +136,9 @@ ANTARES_GLOBAL ScaledScreen scaled_screen;
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
-Size center_scale() {
-    return {
-            (play_screen().width() / 2) * SCALE_SCALE, (play_screen().height() / 2) * SCALE_SCALE,
-    };
+Point scale_to_viewport(Point p) {
+    return Point{scale_by(p.h - scaled_screen.bounds.left, scaled_screen.scale) + viewport().left,
+                 scale_by(p.v - scaled_screen.bounds.top, scaled_screen.scale) + viewport().top};
 }
 
 void ResetMotionGlobals() {
@@ -421,9 +420,8 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     }
 
     if (g.ship.get() && g.ship->active) {
-        Size scale = center_scale();
-        scale.width /= gAbsoluteScale;
-        scale.height /= gAbsoluteScale;
+        Size scale{((play_screen().width() / 2) * SCALE_SCALE) / gAbsoluteScale,
+                   ((play_screen().height() / 2) * SCALE_SCALE) / gAbsoluteScale};
 
         scaled_screen.scale  = gAbsoluteScale;
         scaled_screen.bounds = Rect{
@@ -436,8 +434,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     // nothing below can effect any object actions (expire actions get executed)
     // (but they can effect objects thinking)
     // !!!!!!!!
-    const Rect   viewport = antares::viewport();
-    SpaceObject* o        = nullptr;
+    SpaceObject* o = nullptr;
     for (Handle<SpaceObject> o_handle = g.root; (o = o_handle.get()); o_handle = o->nextObject) {
         if (o->active != kObjectInUse) {
             continue;
@@ -446,21 +443,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
         auto& sprite = *o->sprite;
 
-        int32_t h = (o->location.h - scaled_screen.bounds.left) * scaled_screen.scale;
-        h >>= SHIFT_SCALE;
-        if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
-            sprite.where.h = h + viewport.left;
-        } else {
-            sprite.where.h = -kSpriteMaxSize;
-        }
-
-        int32_t v = (o->location.v - scaled_screen.bounds.top) * scaled_screen.scale;
-        v >>= SHIFT_SCALE;
-        if ((v > -kSpriteMaxSize) && (v < kSpriteMaxSize)) {
-            sprite.where.v = v;
-        } else {
-            sprite.where.v = -kSpriteMaxSize;
-        }
+        sprite.where = scale_to_viewport(o->location);
 
         update_static(o, unitsToDo);
 
@@ -713,11 +696,7 @@ static void calc_bounds() {
     for (auto o_handle = g.root; (o = o_handle.get()); o_handle = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame = o->sprite->table->at(o->sprite->whichShape);
-            o->absoluteBounds                = Rect(
-                    Point(o->location.h - ((frame.center().h * o->naturalScale) >> SHIFT_SCALE),
-                          o->location.v - ((frame.center().v * o->naturalScale) >> SHIFT_SCALE)),
-                    Size((frame.width() * o->naturalScale) >> SHIFT_SCALE,
-                         (frame.height() * o->naturalScale) >> SHIFT_SCALE));
+            o->absoluteBounds = scale_sprite_rect(frame, o->location, o->naturalScale);
         }
     }
 }
