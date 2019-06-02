@@ -243,19 +243,7 @@ static void apply(
         location.h = direct->sprite->where.h;
         location.v = direct->sprite->where.v;
     } else {
-        int32_t l = scale_by(direct->location.h - scaled_screen.bounds.left, scaled_screen.scale);
-        if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
-            location.h = l + viewport().left;
-        } else {
-            location.h = -kSpriteMaxSize;
-        }
-
-        l = scale_by(direct->location.v - scaled_screen.bounds.top, scaled_screen.scale);
-        if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
-            location.v = l + viewport().top;
-        } else {
-            location.v = -kSpriteMaxSize;
-        }
+        location = scale_to_viewport(direct->location);
     }
     int32_t decay = round(1023 / a.age.count());
     globals()->starfield.make_sparks(a.count, decay, a.velocity, a.hue, &location);
