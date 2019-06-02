@@ -166,7 +166,9 @@ static SoundData load_audio(pn::string_view name) {
         const char ext[6];
         SoundData (*fn)(pn::data_view);
     } fmts[] = {
-            {".aiff", sndfile::convert}, {".s3m", modplug::convert}, {".xm", modplug::convert},
+            {".aiff", sndfile::convert},
+            {".s3m", modplug::convert},
+            {".xm", modplug::convert},
     };
 
     for (const auto& fmt : fmts) {

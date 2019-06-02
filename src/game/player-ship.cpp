@@ -763,8 +763,10 @@ void PlayerShipHandleClick(Point where, int button) {
     if (g.ship.get()) {
         if ((g.ship->active) && (g.ship->attributes & kIsPlayerShip)) {
             Rect bounds = {
-                    where.h - kCursorBoundsSize, where.v - kCursorBoundsSize,
-                    where.h + kCursorBoundsSize, where.v + kCursorBoundsSize,
+                    where.h - kCursorBoundsSize,
+                    where.v - kCursorBoundsSize,
+                    where.h + kCursorBoundsSize,
+                    where.v + kCursorBoundsSize,
             };
 
             if ((g.ship->keysDown & kDestinationKey) || (button == 1)) {

@@ -33,9 +33,9 @@
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::StringMap;
 using sfz::makedirs;
 using sfz::range;
+using sfz::StringMap;
 using std::unique_ptr;
 using std::vector;
 

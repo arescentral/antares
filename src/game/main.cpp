@@ -178,7 +178,7 @@ void MainPlay::become_front() {
                 }
             }
         }
-        // fall through.
+            // fall through.
 
         case LOADING: {
             if (_cancelled) {
@@ -192,7 +192,7 @@ void MainPlay::become_front() {
                 break;
             }
         }
-        // fall through
+            // fall through
 
         case BRIEFING: {
             sys.music.stop();

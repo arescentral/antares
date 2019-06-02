@@ -51,7 +51,10 @@ static const pn::string_view kMessageSound = "gui/beep/message";
 static const pn::string_view kCloakOn      = "dev/stealth/on";
 static const pn::string_view kCloakOff     = "dev/stealth/off";
 static const pn::string_view kWarp[4]      = {
-        "sfx/warp/charge/1", "sfx/warp/charge/2", "sfx/warp/charge/3", "sfx/warp/charge/4",
+        "sfx/warp/charge/1",
+        "sfx/warp/charge/2",
+        "sfx/warp/charge/3",
+        "sfx/warp/charge/4",
 };
 
 static const pn::string_view kFixedSounds[kMinVolatileSound] = {

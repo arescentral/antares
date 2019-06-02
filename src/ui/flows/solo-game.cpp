@@ -59,7 +59,7 @@ void SoloGame::become_front() {
                 stack()->pop(this);
                 break;
             }
-        // else fall through.
+            // else fall through.
 
         case START_LEVEL:
             _state = PROLOGUE;
@@ -68,7 +68,7 @@ void SoloGame::become_front() {
                         *_level->solo.prologue, 450, kSlowScrollInterval, Music::prologue_song));
                 break;
             }
-        // else fall through
+            // else fall through
 
         case PROLOGUE:
         case RESTART_LEVEL:

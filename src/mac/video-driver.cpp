@@ -88,13 +88,15 @@ CocoaVideoDriver::CocoaVideoDriver() {}
 
 Size CocoaVideoDriver::viewport_size() const {
     return {
-            antares_window_viewport_width(_window), antares_window_viewport_height(_window),
+            antares_window_viewport_width(_window),
+            antares_window_viewport_height(_window),
     };
 }
 
 Size CocoaVideoDriver::screen_size() const {
     return {
-            antares_window_screen_width(_window), antares_window_screen_height(_window),
+            antares_window_screen_width(_window),
+            antares_window_screen_height(_window),
     };
 }
 
