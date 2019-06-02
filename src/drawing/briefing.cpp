@@ -251,11 +251,11 @@ static void GetRealObjectSpriteData(
     *frame = &pixTable->at(whichShape);
 
     Scale tlong;
-    tlong = *thisScale = Scale{maxSize * SCALE_SCALE.factor};
-    thisScale->factor /= (*frame)->width();
-    tlong.factor /= (*frame)->height();
+    tlong = *thisScale = maxSize * SCALE_SCALE;
+    *thisScale /= (*frame)->width();
+    tlong /= (*frame)->height();
 
-    if (tlong.factor < thisScale->factor)
+    if (tlong < *thisScale)
         *thisScale = tlong;
 
     coord.h = scale_by(coord.h - corner.h, scale);

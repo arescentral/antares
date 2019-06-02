@@ -112,7 +112,7 @@ Rect mini_build_time_rect() {
     return result;
 }
 
-const int32_t kMinimumAutoScale = 2;
+const Scale kMinimumAutoScale{2};
 
 const int32_t kSectorLineBrightness = DARKER;
 
@@ -279,13 +279,12 @@ void UpdateRadar(ticks unitsDone) {
                 hugeDistance = y_distance * y_distance + x_distance * x_distance;
             }
             bestScale.factor = wsqrt(hugeDistance);
-            if (bestScale.factor == 0)
-                bestScale.factor = 1;
+            if (bestScale == Scale{0})
+                bestScale = Scale{1};
             bestScale.factor = center_scale().height / bestScale.factor;
-            if (bestScale.factor < SCALE_SCALE.factor)
+            if (bestScale < SCALE_SCALE)
                 bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
-            bestScale.factor =
-                    clamp<uint32_t>(bestScale.factor, kMinimumAutoScale, SCALE_SCALE.factor);
+            bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
 
         case Zoom::ACTUAL: bestScale = SCALE_SCALE; break;
@@ -302,13 +301,12 @@ void UpdateRadar(ticks unitsDone) {
             auto     anObject = g.farthest;
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale.factor  = wsqrt(tempWide);
-            if (bestScale.factor == 0)
-                bestScale.factor = 1;
+            if (bestScale == Scale{0})
+                bestScale = Scale{1};
             bestScale.factor = center_scale().height / bestScale.factor;
-            if (bestScale.factor < SCALE_SCALE.factor)
+            if (bestScale < SCALE_SCALE)
                 bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
-            bestScale.factor =
-                    clamp<uint32_t>(bestScale.factor, kMinimumAutoScale, SCALE_SCALE.factor);
+            bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
     }
 
@@ -329,8 +327,7 @@ void UpdateRadar(ticks unitsDone) {
     }
     absolute_scale.factor >>= kScaleListShift;
 
-    if ((gAbsoluteScale.factor < kBlipThreshhold.factor) !=
-        (absolute_scale.factor < kBlipThreshhold.factor)) {
+    if ((gAbsoluteScale < kBlipThreshhold) != (absolute_scale < kBlipThreshhold)) {
         sys.sound.zoom();
     }
     gAbsoluteScale = absolute_scale;

@@ -27,7 +27,23 @@ namespace antares {
 
 struct Scale {
     int32_t factor;
+
+    bool operator==(Scale y) const { return factor == y.factor; }
+    bool operator!=(Scale y) const { return factor != y.factor; }
+    bool operator<(Scale y) const { return factor < y.factor; }
+    bool operator<=(Scale y) const { return factor <= y.factor; }
+    bool operator>(Scale y) const { return factor > y.factor; }
+    bool operator>=(Scale y) const { return factor >= y.factor; }
+
+    Scale   operator*(int32_t y) const { return Scale{factor * y}; }
+    Scale   operator/(int32_t y) const { return Scale{factor / y}; }
+    int32_t operator/(Scale y) const { return factor / y.factor; }
+
+    Scale& operator*=(int32_t y) { return *this = *this * y; }
+    Scale& operator/=(int32_t y) { return *this = *this / y; }
 };
+
+inline Scale operator*(int32_t x, Scale y) { return y * x; }
 
 // Scale `value` by `scale`.
 //

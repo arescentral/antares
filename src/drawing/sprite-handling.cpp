@@ -166,7 +166,7 @@ Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, Scale scal
 }
 
 void draw_sprites() {
-    if (gAbsoluteScale.factor >= kBlipThreshhold.factor) {
+    if (gAbsoluteScale >= kBlipThreshhold) {
         for (BaseObject::Layer layer :
              {BaseObject::Layer::BASES, BaseObject::Layer::SHIPS, BaseObject::Layer::SHOTS}) {
             for (auto aSprite : Sprite::all()) {

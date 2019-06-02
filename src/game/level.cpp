@@ -404,8 +404,8 @@ void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, Scale* scale, R
 
     biggest += biggest >> 2L;
 
-    scale->factor = SCALE_SCALE.factor * mustFit;
-    scale->factor /= biggest;
+    *scale = SCALE_SCALE * mustFit;
+    *scale /= biggest;
 
     otherCoord.h = kUniversalCenter;
     otherCoord.v = kUniversalCenter;
@@ -431,15 +431,9 @@ void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, Scale* scale, R
         }
     }
 
-    biggest = bounds->right - bounds->left;
-    biggest *= SCALE_SCALE.factor;
-    biggest /= scale->factor;
-    biggest /= 2;
+    biggest   = (((bounds->right - bounds->left) * SCALE_SCALE) / *scale) / 2;
     corner->h = (coord.h + (otherCoord.h - coord.h) / 2) - biggest;
-    biggest   = (bounds->bottom - bounds->top);
-    biggest *= SCALE_SCALE.factor;
-    biggest /= scale->factor;
-    biggest /= 2;
+    biggest   = (((bounds->bottom - bounds->top) * SCALE_SCALE) / *scale) / 2;
     corner->v = (coord.v + (otherCoord.v - coord.v) / 2) - biggest;
 }
 
