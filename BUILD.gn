@@ -318,7 +318,7 @@ source_set("libantares-sound") {
   if (target_os == "mac") {
     libs += [ "OpenAL.framework" ]
   } else if (target_os == "linux") {
-    libs += [ "-lopenal" ]
+    libs += [ "openal" ]
   }
   configs += [ ":antares_private" ]
 }
@@ -399,8 +399,8 @@ source_set("libantares-video") {
     libs += [ "OpenGL.framework" ]
   } else if (target_os == "linux") {
     libs += [
-      "-lGL",
-      "-lX11",
+      "GL",
+      "X11",
     ]
   }
   configs += [ ":antares_private" ]
@@ -709,7 +709,7 @@ if (target_os == "mac") {
       "//ext/libsfz",
       "//ext/procyon:procyon-cpp",
     ]
-    libs = [ "-lneon" ]
+    libs = [ "neon" ]
     configs += [ ":antares_private" ]
   }
 }
