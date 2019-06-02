@@ -51,9 +51,10 @@ inline Scale operator*(int32_t x, Scale y) { return y * x; }
 // 12``. The star variant calculates the final scale as ``(value *
 // scale) / 4096``, which is potentially more appropriate when negative
 // values are likely.
-Fixed   star_scale_by(Fixed value, Scale scale);
-Fixed   scale_by(Fixed value, Scale scale);
 int32_t scale_by(int32_t value, Scale scale);
+Fixed   scale_by(Fixed value, Scale scale);
+Scale   scale_by(Scale value, Scale scale);
+Fixed   star_scale_by(Fixed value, Scale scale);
 
 const int32_t SHIFT_SCALE = 12;
 const Scale   SCALE_SCALE{1 << SHIFT_SCALE};

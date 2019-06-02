@@ -325,7 +325,7 @@ std::vector<sfz::optional<BriefingSprite>> render_briefing(
                     anObject->location, *anObject->base, anObject->owner, *anObject->pix_id,
                     maxSize, bounds, corner, scale, &thisScale, &frame, &where);
             if (frame != NULL) {
-                thisScale.factor = scale_by(kOneQuarterScale.factor, sprite_scale(*baseObject));
+                thisScale = scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
                 where = BriefingSprite_GetBestLocation(
                         *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
@@ -342,7 +342,7 @@ std::vector<sfz::optional<BriefingSprite>> render_briefing(
                     anObject->location, *anObject->base, anObject->owner, *anObject->pix_id,
                     maxSize / 2, bounds, corner, scale, &thisScale, &frame, &where);
             if (frame != NULL) {
-                thisScale.factor = scale_by(kOneQuarterScale.factor, sprite_scale(*baseObject));
+                thisScale = scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
                 where = BriefingSprite_GetBestLocation(
                         *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);

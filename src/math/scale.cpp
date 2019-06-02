@@ -20,12 +20,14 @@
 
 namespace antares {
 
-Fixed star_scale_by(Fixed value, Scale scale) {
-    return (value * scale.factor) / SCALE_SCALE.factor;
-}
+int32_t scale_by(int32_t value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
+
+Scale scale_by(Scale value, Scale scale) { return Scale{scale_by(value.factor, scale)}; }
 
 Fixed scale_by(Fixed value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
 
-int32_t scale_by(int32_t value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
+Fixed star_scale_by(Fixed value, Scale scale) {
+    return (value * scale.factor) / SCALE_SCALE.factor;
+}
 
 }  // namespace antares

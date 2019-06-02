@@ -172,7 +172,7 @@ void draw_sprites() {
             for (auto aSprite : Sprite::all()) {
                 if ((aSprite->table != NULL) && !aSprite->killMe &&
                     (aSprite->whichLayer == layer)) {
-                    Scale trueScale{scale_by(aSprite->scale.factor, gAbsoluteScale)};
+                    Scale trueScale                  = scale_by(aSprite->scale, gAbsoluteScale);
                     const NatePixTable::Frame& frame = aSprite->table->at(aSprite->whichShape);
 
                     const int32_t map_width  = scale_by(frame.width(), trueScale);
