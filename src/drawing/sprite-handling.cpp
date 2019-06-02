@@ -158,11 +158,11 @@ void RemoveSprite(Handle<Sprite> sprite) {
 }
 
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, Scale scale) {
-    Rect draw_rect = Rect(0, 0, scale_by(frame.width(), scale), scale_by(frame.height(), scale));
-    draw_rect.offset(
-            where.h - scale_by(frame.center().h, scale),
-            where.v - scale_by(frame.center().v, scale));
-    return draw_rect;
+    return Rect{
+            Point{where.h - scale_by(frame.center().h, scale),
+                  where.v - scale_by(frame.center().v, scale)},
+            scale_by(frame.size(), scale),
+    };
 }
 
 void draw_sprites() {
@@ -175,14 +175,11 @@ void draw_sprites() {
                     Scale trueScale                  = scale_by(aSprite->scale, gAbsoluteScale);
                     const NatePixTable::Frame& frame = aSprite->table->at(aSprite->whichShape);
 
-                    const int32_t map_width  = scale_by(frame.width(), trueScale);
-                    const int32_t map_height = scale_by(frame.height(), trueScale);
-                    const int32_t scaled_h   = scale_by(frame.center().h, trueScale);
-                    const int32_t scaled_v   = scale_by(frame.center().v, trueScale);
-                    const Point   scaled_center(scaled_h, scaled_v);
-
-                    Rect draw_rect(0, 0, map_width, map_height);
-                    draw_rect.offset(aSprite->where.h - scaled_h, aSprite->where.v - scaled_v);
+                    Rect draw_rect{
+                            Point{aSprite->where.h - scale_by(frame.center().h, trueScale),
+                                  aSprite->where.v - scale_by(frame.center().v, trueScale)},
+                            scale_by(frame.size(), trueScale),
+                    };
 
                     switch (aSprite->style) {
                         case spriteNormal: frame.texture().draw(draw_rect); break;

@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 #include "math/fixed.hpp"
+#include "math/geometry.hpp"
 
 namespace antares {
 
@@ -54,6 +55,7 @@ inline Scale operator*(int32_t x, Scale y) { return y * x; }
 int32_t scale_by(int32_t value, Scale scale);
 Fixed   scale_by(Fixed value, Scale scale);
 Scale   scale_by(Scale value, Scale scale);
+Size    scale_by(Size s, Scale scale);
 Fixed   star_scale_by(Fixed value, Scale scale);
 
 const int32_t SHIFT_SCALE = 12;

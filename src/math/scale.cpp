@@ -26,6 +26,10 @@ Scale scale_by(Scale value, Scale scale) { return Scale{scale_by(value.factor, s
 
 Fixed scale_by(Fixed value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
 
+Size scale_by(Size s, Scale scale) {
+    return Size{scale_by(s.width, scale), scale_by(s.height, scale)};
+}
+
 Fixed star_scale_by(Fixed value, Scale scale) {
     return (value * scale.factor) / SCALE_SCALE.factor;
 }

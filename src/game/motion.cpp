@@ -707,8 +707,7 @@ static void calc_bounds() {
             o->absoluteBounds =
                     Rect(Point(o->location.h - scale_by(frame.center().h, o->naturalScale),
                                o->location.v - scale_by(frame.center().v, o->naturalScale)),
-                         Size(scale_by(frame.width(), o->naturalScale),
-                              scale_by(frame.height(), o->naturalScale)));
+                         scale_by(frame.size(), o->naturalScale));
         }
     }
 }

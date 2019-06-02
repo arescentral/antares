@@ -93,12 +93,12 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
             vector->color                = RgbColor::clear();
             vector->hue                  = r.hue;
 
-            const int32_t x =
-                    scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale);
-            const int32_t y =
-                    scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale);
-            vector->thisLocation =
-                    Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
+            vector->thisLocation = Rect{
+                    Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
+                                  viewport().left,
+                          scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
+                                  viewport().top},
+                    Size{0, 0}};
 
             vector->is_ray          = true;
             vector->to_coord        = (r.to == BaseObject::Ray::To::COORD);
@@ -131,12 +131,12 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
             vector->hue                  = sfz::nullopt;
             vector->color                = b.color;
 
-            const int32_t x =
-                    scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale);
-            const int32_t y =
-                    scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale);
-            vector->thisLocation =
-                    Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
+            vector->thisLocation = Rect{
+                    Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
+                                  viewport().left,
+                          scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
+                                  viewport().top},
+                    Size{0, 0}};
 
             vector->is_ray          = false;
             vector->to_coord        = false;

@@ -258,37 +258,18 @@ static void GetRealObjectSpriteData(
     if (tlong < *thisScale)
         *thisScale = tlong;
 
-    coord.h = scale_by(coord.h - corner.h, scale);
-    coord.h += bounds.left;
-
-    coord.v = scale_by(coord.v - corner.v, scale);
-    coord.v += bounds.top;
-
-    where->h = coord.h;
-    where->v = coord.v;
+    *where = Point{scale_by(coord.h - corner.h, scale) + bounds.left,
+                   scale_by(coord.v - corner.v, scale) + bounds.top};
 }
 
 static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, Scale scale) {
-    Rect    bounds;
-    int32_t tlong;
-
-    tlong       = scale_by(frame.center().h, scale);
-    tlong       = where.h - tlong;
-    bounds.left = tlong;
-
-    tlong        = scale_by(frame.width(), scale);
-    tlong        = bounds.left + tlong;
-    bounds.right = tlong;
-
-    tlong      = scale_by(frame.center().v, scale);
-    tlong      = where.v - tlong;
-    bounds.top = tlong;
-
-    tlong         = scale_by(frame.height(), scale);
-    tlong         = bounds.top + tlong;
-    bounds.bottom = tlong;
-
-    return bounds;
+    return Rect{
+            Point{
+                    where.h - scale_by(frame.center().h, scale),
+                    where.v - scale_by(frame.center().v, scale),
+            },
+            scale_by(frame.size(), scale),
+    };
 }
 
 std::vector<sfz::optional<BriefingSprite>> render_briefing(
