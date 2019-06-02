@@ -46,7 +46,7 @@ void    InstrumentsHandleDoubleClick(const GameCursor& cursor);
 void    InstrumentsHandleMouseUp(const GameCursor& cursor);
 void    InstrumentsHandleMouseStillDown(const GameCursor& cursor);
 void    draw_arbitrary_sector_lines(
-           const Point& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds);
+           const Point& corner, Scale scale, int32_t minSectorSize, const Rect& bounds);
 
 }  // namespace antares
 

@@ -68,7 +68,7 @@ static draw_tiny_t draw_tiny_function(BaseObject::Icon::Shape shape, int size) {
     }
 }
 
-int32_t ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
+Scale ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
 
 void SpriteHandlingInit() {
     g.sprites.reset(new Sprite[Sprite::size]);
@@ -128,7 +128,7 @@ const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
+        Scale scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
         uint8_t tiny_shade) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
@@ -157,13 +157,13 @@ void RemoveSprite(Handle<Sprite> sprite) {
     sprite->table  = NULL;
 }
 
-Fixed scale_by(Fixed value, int32_t scale) { return (value * scale) / SCALE_SCALE; }
+Fixed scale_by(Fixed value, Scale scale) { return (value * scale.factor) / SCALE_SCALE.factor; }
 
-Fixed evil_scale_by(Fixed value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
+Fixed evil_scale_by(Fixed value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
 
-int32_t evil_scale_by(int32_t value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
+int32_t evil_scale_by(int32_t value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
 
-Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale) {
+Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, Scale scale) {
     Rect draw_rect =
             Rect(0, 0, evil_scale_by(frame.width(), scale), evil_scale_by(frame.height(), scale));
     draw_rect.offset(
@@ -173,13 +173,13 @@ Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t sc
 }
 
 void draw_sprites() {
-    if (gAbsoluteScale >= kBlipThreshhold) {
+    if (gAbsoluteScale.factor >= kBlipThreshhold.factor) {
         for (BaseObject::Layer layer :
              {BaseObject::Layer::BASES, BaseObject::Layer::SHIPS, BaseObject::Layer::SHOTS}) {
             for (auto aSprite : Sprite::all()) {
                 if ((aSprite->table != NULL) && !aSprite->killMe &&
                     (aSprite->whichLayer == layer)) {
-                    int32_t trueScale = evil_scale_by(aSprite->scale, gAbsoluteScale);
+                    Scale trueScale{evil_scale_by(aSprite->scale.factor, gAbsoluteScale)};
                     const NatePixTable::Frame& frame = aSprite->table->at(aSprite->whichShape);
 
                     const int32_t map_width  = evil_scale_by(frame.width(), trueScale);

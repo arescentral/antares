@@ -36,7 +36,7 @@ const int16_t kSpriteTableColorIDMask = 0x7800;  // bits 11-14
 // this makes the max legal sprite id 2047
 
 const int32_t kSpriteMaxSize  = 2048;
-const int32_t kBlipThreshhold = kOneQuarterScale;
+const Scale   kBlipThreshhold = kOneQuarterScale;
 
 const size_t MAX_PIX_SIZE = 480;
 
@@ -58,7 +58,7 @@ class Sprite {
     Point             where;
     NatePixTable*     table;
     int               whichShape;
-    int32_t           scale;
+    Scale             scale;
     spriteStyleType   style;
     RgbColor          styleColor;
     int16_t           styleData;
@@ -77,16 +77,16 @@ class Sprite {
     static const size_t size = 500;
 };
 
-extern int32_t gAbsoluteScale;
+extern Scale gAbsoluteScale;
 
 // Scale `value` by `scale`.
 //
 // The regular variant calculates the final scale as ``(value * scale) / 4096``.  The evil variant
 // calculates the final scale as ``(value * scale) >> 12``, which results in off-by-one errors when
 // `value` is negative.
-Fixed   scale_by(Fixed value, int32_t scale);
-Fixed   evil_scale_by(Fixed value, int32_t scale);
-int32_t evil_scale_by(int32_t value, int32_t scale);
+Fixed   scale_by(Fixed value, Scale scale);
+Fixed   evil_scale_by(Fixed value, Scale scale);
+int32_t evil_scale_by(int32_t value, Scale scale);
 
 class Pix {
   public:
@@ -102,10 +102,10 @@ class Pix {
 
 void           SpriteHandlingInit();
 void           ResetAllSprites();
-Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
+Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, Scale scale);
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
+        Scale scale, sfz::optional<BaseObject::Icon> icon, BaseObject::Layer layer, Hue tiny_hue,
         uint8_t tiny_shade);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();

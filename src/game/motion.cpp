@@ -138,7 +138,8 @@ static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
 Size center_scale() {
     return {
-            (play_screen().width() / 2) * SCALE_SCALE, (play_screen().height() / 2) * SCALE_SCALE,
+            (play_screen().width() / 2) * SCALE_SCALE.factor,
+            (play_screen().height() / 2) * SCALE_SCALE.factor,
     };
 }
 
@@ -422,8 +423,8 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 
     if (g.ship.get() && g.ship->active) {
         Size scale = center_scale();
-        scale.width /= gAbsoluteScale;
-        scale.height /= gAbsoluteScale;
+        scale.width /= gAbsoluteScale.factor;
+        scale.height /= gAbsoluteScale.factor;
 
         scaled_screen.scale  = gAbsoluteScale;
         scaled_screen.bounds = Rect{
@@ -446,7 +447,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
         auto& sprite = *o->sprite;
 
-        int32_t h = (o->location.h - scaled_screen.bounds.left) * scaled_screen.scale;
+        int32_t h = (o->location.h - scaled_screen.bounds.left) * scaled_screen.scale.factor;
         h >>= SHIFT_SCALE;
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
             sprite.where.h = h + viewport.left;
@@ -454,7 +455,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
             sprite.where.h = -kSpriteMaxSize;
         }
 
-        int32_t v = (o->location.v - scaled_screen.bounds.top) * scaled_screen.scale;
+        int32_t v = (o->location.v - scaled_screen.bounds.top) * scaled_screen.scale.factor;
         v >>= SHIFT_SCALE;
         if ((v > -kSpriteMaxSize) && (v < kSpriteMaxSize)) {
             sprite.where.v = v;
@@ -714,10 +715,12 @@ static void calc_bounds() {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame = o->sprite->table->at(o->sprite->whichShape);
             o->absoluteBounds                = Rect(
-                    Point(o->location.h - ((frame.center().h * o->naturalScale) >> SHIFT_SCALE),
-                          o->location.v - ((frame.center().v * o->naturalScale) >> SHIFT_SCALE)),
-                    Size((frame.width() * o->naturalScale) >> SHIFT_SCALE,
-                         (frame.height() * o->naturalScale) >> SHIFT_SCALE));
+                    Point(o->location.h -
+                                  ((frame.center().h * o->naturalScale.factor) >> SHIFT_SCALE),
+                          o->location.v -
+                                  ((frame.center().v * o->naturalScale.factor) >> SHIFT_SCALE)),
+                    Size((frame.width() * o->naturalScale.factor) >> SHIFT_SCALE,
+                         (frame.height() * o->naturalScale.factor) >> SHIFT_SCALE));
         }
     }
 }

@@ -124,7 +124,7 @@ struct barIndicatorType {
     Hue     hue;
 };
 
-static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
+static ANTARES_GLOBAL unique_ptr<Scale[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL Rect view_range;
 static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
@@ -153,7 +153,7 @@ static void draw_build_time_bar();
 
 void InstrumentInit() {
     g.radar_blips.reset(new Point[kRadarBlipNum]);
-    gScaleList.reset(new int32_t[kScaleListNum]);
+    gScaleList.reset(new Scale[kScaleListNum]);
     ResetInstruments();
 
     MiniScreenInit();
@@ -167,13 +167,13 @@ void InstrumentCleanup() {
 }
 
 void ResetInstruments() {
-    int32_t *l, i;
-    Point*   lp;
+    int32_t i;
+    Point*  lp;
 
     g.radar_count  = ticks(0);
     gAbsoluteScale = SCALE_SCALE;
     gWhichScaleNum = 0;
-    l              = gScaleList.get();
+    Scale* l       = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
         l++;
@@ -266,7 +266,7 @@ void UpdateRadar(ticks unitsDone) {
         }
     }
 
-    uint32_t bestScale = MIN_SCALE;
+    Scale bestScale = MIN_SCALE;
     switch (g.zoom) {
         case Zoom::FOE:
         case Zoom::OBJECT: {
@@ -278,13 +278,14 @@ void UpdateRadar(ticks unitsDone) {
 
                 hugeDistance = y_distance * y_distance + x_distance * x_distance;
             }
-            bestScale = wsqrt(hugeDistance);
-            if (bestScale == 0)
-                bestScale = 1;
-            bestScale = center_scale().height / bestScale;
-            if (bestScale < SCALE_SCALE)
-                bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+            bestScale.factor = wsqrt(hugeDistance);
+            if (bestScale.factor == 0)
+                bestScale.factor = 1;
+            bestScale.factor = center_scale().height / bestScale.factor;
+            if (bestScale.factor < SCALE_SCALE.factor)
+                bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
+            bestScale.factor =
+                    clamp<uint32_t>(bestScale.factor, kMinimumAutoScale, SCALE_SCALE.factor);
         } break;
 
         case Zoom::ACTUAL: bestScale = SCALE_SCALE; break;
@@ -300,17 +301,18 @@ void UpdateRadar(ticks unitsDone) {
         case Zoom::ALL: {
             auto     anObject = g.farthest;
             uint64_t tempWide = anObject->distanceFromPlayer;
-            bestScale         = wsqrt(tempWide);
-            if (bestScale == 0)
-                bestScale = 1;
-            bestScale = center_scale().height / bestScale;
-            if (bestScale < SCALE_SCALE)
-                bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+            bestScale.factor  = wsqrt(tempWide);
+            if (bestScale.factor == 0)
+                bestScale.factor = 1;
+            bestScale.factor = center_scale().height / bestScale.factor;
+            if (bestScale.factor < SCALE_SCALE.factor)
+                bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
+            bestScale.factor =
+                    clamp<uint32_t>(bestScale.factor, kMinimumAutoScale, SCALE_SCALE.factor);
         } break;
     }
 
-    int32_t* scaleval;
+    Scale* scaleval;
     for (ticks x = ticks(0); x < unitsDone; x++) {
         scaleval  = gScaleList.get() + gWhichScaleNum;
         *scaleval = bestScale;
@@ -320,14 +322,15 @@ void UpdateRadar(ticks unitsDone) {
         }
     }
 
-    scaleval           = gScaleList.get();
-    int absolute_scale = 0;
+    scaleval = gScaleList.get();
+    Scale absolute_scale{0};
     for (int oCount = 0; oCount < kScaleListNum; oCount++) {
-        absolute_scale += *scaleval++;
+        absolute_scale.factor += scaleval++->factor;
     }
-    absolute_scale >>= kScaleListShift;
+    absolute_scale.factor >>= kScaleListShift;
 
-    if ((gAbsoluteScale < kBlipThreshhold) != (absolute_scale < kBlipThreshhold)) {
+    if ((gAbsoluteScale.factor < kBlipThreshhold.factor) !=
+        (absolute_scale.factor < kBlipThreshhold.factor)) {
         sys.sound.zoom();
     }
     gAbsoluteScale = absolute_scale;
@@ -606,22 +609,22 @@ void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
 }
 
 void draw_arbitrary_sector_lines(
-        const Point& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
+        const Point& corner, Scale scale, int32_t minSectorSize, const Rect& bounds) {
     Rects rects;
 
     int32_t level = 1;
     int32_t size  = SECTOR_SMALL;
-    int32_t h     = (SECTOR_SMALL * scale) >> SHIFT_SCALE;
+    int32_t h     = (SECTOR_SMALL * scale.factor) >> SHIFT_SCALE;
     while (h < minSectorSize) {
         level *= 2;
         size *= 4;
-        h = (size * scale) >> SHIFT_SCALE;
+        h = (size * scale.factor) >> SHIFT_SCALE;
     }
     level *= level;
 
     int32_t x        = size - (corner.h & (size - 1));
     int32_t division = ((corner.h + x) / SECTOR_SMALL) & 0x0000000f;
-    x                = ((x * scale) >> SHIFT_SCALE) + bounds.left;
+    x                = ((x * scale.factor) >> SHIFT_SCALE) + bounds.left;
 
     while (x < bounds.right) {
         RgbColor color;
@@ -641,7 +644,7 @@ void draw_arbitrary_sector_lines(
 
     x        = size - (corner.v & (size - 1));
     division = ((corner.v + x) / SECTOR_SMALL) & 0x0000000f;
-    x        = ((x * scale) >> SHIFT_SCALE) + bounds.top;
+    x        = ((x * scale.factor) >> SHIFT_SCALE) + bounds.top;
 
     while (x < bounds.bottom) {
         RgbColor color;

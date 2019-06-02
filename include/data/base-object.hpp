@@ -208,9 +208,6 @@ class BaseObject {
     } arrive;
 
     enum class Layer { NONE = 0, BASES = 1, SHIPS = 2, SHOTS = 3 };
-    struct Scale {
-        int64_t factor;  // sprite scale; 4096 = 100%
-    };
 
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {

@@ -203,7 +203,7 @@ class SpaceObject {
     Handle<Admiral> owner;
     bool            expires      = false;
     ticks           expire_after = ticks(-1);
-    int32_t         naturalScale = SCALE_SCALE;
+    Scale           naturalScale = SCALE_SCALE;
     int32_t         id           = kNoShip;
     ticks           rechargeTime = ticks(0);
     int16_t         active       = kObjectAvailable;
@@ -227,7 +227,7 @@ class SpaceObject {
     union {
         struct {
             int16_t speed;
-            int16_t scale;
+            Scale   scale;
         } landing;
         struct {
             uint8_t step;
@@ -287,7 +287,7 @@ bool tags_match(const BaseObject& o, const Tags& query);
 
 sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
 BaseObject::Layer              sprite_layer(const BaseObject& o);
-int32_t                        sprite_scale(const BaseObject& o);
+Scale                          sprite_scale(const BaseObject& o);
 int32_t                        rotation_resolution(const BaseObject& o);
 
 }  // namespace antares

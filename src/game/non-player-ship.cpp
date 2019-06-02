@@ -1064,10 +1064,10 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
         anObject->lastTargetDistance = distance;
     } else {
         keysDown |= kDownKey;
-        anObject->presence.landing.scale -= anObject->presence.landing.speed;
+        anObject->presence.landing.scale.factor -= anObject->presence.landing.speed;
     }
 
-    if (anObject->presence.landing.scale <= 0) {
+    if (anObject->presence.landing.scale.factor <= 0) {
         exec(anObject->base->expire.action, anObject, target, {0, 0});
         anObject->active = kObjectToBeFreed;
     } else if (anObject->sprite.get()) {

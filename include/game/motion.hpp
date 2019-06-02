@@ -25,8 +25,8 @@
 namespace antares {
 
 struct ScaledScreen {
-    int32_t scale;
-    Rect    bounds;
+    Scale scale;
+    Rect  bounds;
 };
 extern ScaledScreen scaled_screen;
 

@@ -76,14 +76,18 @@ enum {
     SECTOR_MAX    = 262144,  // 2^18 (universe width)
 };
 
-const int32_t SHIFT_SCALE = 12;
-const int32_t SCALE_SCALE = 1 << SHIFT_SCALE;
-const int32_t MIN_SCALE   = 256;
+struct Scale {
+    int32_t factor;
+};
 
-const int32_t kOneEighthScale  = SCALE_SCALE / 8;
-const int32_t kOneQuarterScale = SCALE_SCALE / 4;
-const int32_t kOneHalfScale    = SCALE_SCALE / 2;
-const int32_t kTimesTwoScale   = SCALE_SCALE * 2;
+const int32_t SHIFT_SCALE = 12;
+const Scale   SCALE_SCALE{1 << SHIFT_SCALE};
+const Scale   MIN_SCALE{256};
+
+const Scale kOneEighthScale{SCALE_SCALE.factor / 8};
+const Scale kOneQuarterScale{SCALE_SCALE.factor / 4};
+const Scale kOneHalfScale{SCALE_SCALE.factor / 2};
+const Scale kTimesTwoScale{SCALE_SCALE.factor * 2};
 
 }  // namespace antares
 

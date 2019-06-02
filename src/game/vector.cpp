@@ -62,7 +62,7 @@ void clear(T& t) {
     swap(t, u);
 }
 
-int32_t scale(int32_t value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
+int32_t scale(int32_t value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
 
 }  // namespace
 
