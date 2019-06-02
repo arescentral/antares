@@ -493,7 +493,7 @@ void GamePlay::fire_timer() {
 
         CullSprites();
         Label::show_all();
-        Vectors::show_all();
+        Vectors::cull();
         globals()->starfield.show();
 
         Messages::draw_message_screen(unitsToDo);

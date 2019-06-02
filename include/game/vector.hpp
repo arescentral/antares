@@ -73,7 +73,6 @@ class Vectors {
     static void set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObject> sourceObject);
     static void update();
     static void draw();
-    static void show_all();
     static void cull();
 };
 

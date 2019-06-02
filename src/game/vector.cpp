@@ -162,10 +162,8 @@ void Vectors::set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObjec
         auto target = sourceObject->targetObject;
 
         if ((target->active) && (target->id == sourceObject->targetObjectID)) {
-            const int32_t h =
-                    abs(implicit_cast<int32_t>(target->location.h - vectorObject->location.h));
-            const int32_t v =
-                    abs(implicit_cast<int32_t>(target->location.v - vectorObject->location.v));
+            const int32_t h = abs(target->location.h - vectorObject->location.h);
+            const int32_t v = abs(target->location.v - vectorObject->location.v);
 
             if ((((h * h) + (v * v)) > (vector.range * vector.range)) ||
                 (h > kMaximumRelevantDistance) || (v > kMaximumRelevantDistance)) {
@@ -262,36 +260,24 @@ void Vectors::update() {
 void Vectors::draw() {
     Lines lines;
     for (auto vector : Vector::all()) {
-        if (vector->active) {
-            if (!vector->killMe) {
-                if (vector->visible) {
-                    const auto& p = vector->thisBoltPoint;
-                    if (vector->lightning) {
-                        for (int j : range(0, kBoltPointNum - 1)) {
-                            lines.draw(p[j], p[j + 1], vector->color);
-                        }
-                    } else {
-                        lines.draw(p[0], p[kBoltPointNum - 1], vector->color);
+        if (vector->active && !vector->killMe) {
+            if (vector->visible) {
+                const auto& p = vector->thisBoltPoint;
+                if (vector->lightning) {
+                    for (int j : range(0, kBoltPointNum - 1)) {
+                        lines.draw(p[j], p[j + 1], vector->color);
                     }
+                } else {
+                    lines.draw(p[0], p[kBoltPointNum - 1], vector->color);
                 }
             }
         }
     }
 }
 
-void Vectors::show_all() {
-    for (auto vector : Vector::all()) {
-        vector->active = vector->active && !vector->killMe;
-    }
-}
-
 void Vectors::cull() {
     for (auto vector : Vector::all()) {
-        if (vector->active) {
-            if (vector->killMe) {
-                vector->active = false;
-            }
-        }
+        vector->active = vector->active && !vector->killMe;
     }
 }
 
