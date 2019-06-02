@@ -41,8 +41,6 @@ struct Vector {
     bool                is_ray    = false;
     bool                to_coord  = false;
     bool                lightning = false;
-    Point               begin_location;
-    Point               end_location;
     Point               lastGlobalLocation;
     Point               objectLocation;
     Point               lastApparentLocation;
@@ -60,7 +58,6 @@ struct Vector {
     int32_t             accuracy;
     int32_t             range;
     Point               thisBoltPoint[kBoltPointNum];
-    Point               lastBoltPoint[kBoltPointNum];
 
   private:
     friend class Vectors;

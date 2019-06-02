@@ -93,7 +93,7 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
             vector->color                = RgbColor::clear();
             vector->hue                  = r.hue;
 
-            vector->begin_location = vector->end_location =
+            vector->thisBoltPoint[0] = vector->thisBoltPoint[kBoltPointNum - 1] =
                     Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
                                   viewport().left,
                           scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
@@ -130,7 +130,7 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
             vector->hue                  = sfz::nullopt;
             vector->color                = b.color;
 
-            vector->begin_location = vector->end_location =
+            vector->thisBoltPoint[0] = vector->thisBoltPoint[kBoltPointNum - 1] =
                     Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
                                   viewport().left,
                           scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
@@ -204,7 +204,7 @@ void Vectors::update() {
     for (auto vector : Vector::all()) {
         if (vector->active) {
             if (vector->lastApparentLocation != vector->objectLocation) {
-                vector->begin_location =
+                vector->thisBoltPoint[0] =
                         Point(viewport().left +
                                       scale_by(
                                               vector->objectLocation.h - scaled_screen.bounds.left,
@@ -213,7 +213,7 @@ void Vectors::update() {
                                       scale_by(
                                               vector->objectLocation.v - scaled_screen.bounds.top,
                                               scaled_screen.scale));
-                vector->end_location = Point(
+                vector->thisBoltPoint[kBoltPointNum - 1] = Point(
                         viewport().left +
                                 scale_by(
                                         vector->lastApparentLocation.h - scaled_screen.bounds.left,
@@ -239,21 +239,18 @@ void Vectors::update() {
                         vector->color = GetRGBTranslateColor(currentColor);
                     }
                     if (vector->lightning) {
-                        vector->thisBoltPoint[0]                 = vector->begin_location;
-                        vector->thisBoltPoint[kBoltPointNum - 1] = vector->end_location;
-
-                        Size    span{vector->end_location.h - vector->begin_location.h,
-                                  vector->end_location.v - vector->begin_location.v};
+                        auto&   p     = vector->thisBoltPoint;
+                        Point   begin = p[0];
+                        Point   end   = p[kBoltPointNum - 1];
+                        Size    span{end.h - begin.h, end.v - begin.v};
                         int32_t inaccuracy =
                                 max(abs(span.width), abs(span.height)) / kBoltPointNum / 2;
 
                         for (int j : range(1, kBoltPointNum - 1)) {
-                            vector->thisBoltPoint[j].h = vector->begin_location.h +
-                                                         ((span.width * j) / kBoltPointNum) -
-                                                         inaccuracy + Randomize(inaccuracy * 2);
-                            vector->thisBoltPoint[j].v = vector->begin_location.v +
-                                                         ((span.height * j) / kBoltPointNum) -
-                                                         inaccuracy + Randomize(inaccuracy * 2);
+                            p[j].h = begin.h + ((span.width * j) / kBoltPointNum) - inaccuracy +
+                                     Randomize(inaccuracy * 2);
+                            p[j].v = begin.v + ((span.height * j) / kBoltPointNum) - inaccuracy +
+                                     Randomize(inaccuracy * 2);
                         }
                     }
                 }
@@ -268,14 +265,13 @@ void Vectors::draw() {
         if (vector->active) {
             if (!vector->killMe) {
                 if (vector->visible) {
+                    const auto& p = vector->thisBoltPoint;
                     if (vector->lightning) {
-                        for (int j : range(1, kBoltPointNum)) {
-                            lines.draw(
-                                    vector->thisBoltPoint[j - 1], vector->thisBoltPoint[j],
-                                    vector->color);
+                        for (int j : range(0, kBoltPointNum - 1)) {
+                            lines.draw(p[j], p[j + 1], vector->color);
                         }
                     } else {
-                        lines.draw(vector->begin_location, vector->end_location, vector->color);
+                        lines.draw(p[0], p[kBoltPointNum - 1], vector->color);
                     }
                 }
             }
@@ -285,18 +281,7 @@ void Vectors::draw() {
 
 void Vectors::show_all() {
     for (auto vector : Vector::all()) {
-        if (vector->active) {
-            if (vector->killMe) {
-                vector->active = false;
-            }
-            if (vector->visible) {
-                if (vector->lightning) {
-                    for (int j : range(kBoltPointNum)) {
-                        vector->lastBoltPoint[j] = vector->thisBoltPoint[j];
-                    }
-                }
-            }
-        }
+        vector->active = vector->active && !vector->killMe;
     }
 }
 
