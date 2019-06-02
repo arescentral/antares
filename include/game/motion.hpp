@@ -30,6 +30,7 @@ struct ScaledScreen {
     Rect  bounds;
 };
 extern ScaledScreen scaled_screen;
+Point               scale_to_viewport(Point p);
 
 void ResetMotionGlobals();
 

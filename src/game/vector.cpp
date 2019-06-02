@@ -94,10 +94,7 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
             vector->hue                  = r.hue;
 
             vector->thisBoltPoint[0] = vector->thisBoltPoint[kBoltPointNum - 1] =
-                    Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
-                                  viewport().left,
-                          scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
-                                  viewport().top};
+                    scale_to_viewport(*location);
 
             vector->is_ray          = true;
             vector->to_coord        = (r.to == BaseObject::Ray::To::COORD);
@@ -131,10 +128,7 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
             vector->color                = b.color;
 
             vector->thisBoltPoint[0] = vector->thisBoltPoint[kBoltPointNum - 1] =
-                    Point{scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale) +
-                                  viewport().left,
-                          scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale) +
-                                  viewport().top};
+                    scale_to_viewport(*location);
 
             vector->is_ray          = false;
             vector->to_coord        = false;
@@ -202,24 +196,9 @@ void Vectors::update() {
     for (auto vector : Vector::all()) {
         if (vector->active) {
             if (vector->lastApparentLocation != vector->objectLocation) {
-                vector->thisBoltPoint[0] =
-                        Point(viewport().left +
-                                      scale_by(
-                                              vector->objectLocation.h - scaled_screen.bounds.left,
-                                              scaled_screen.scale),
-                              viewport().top +
-                                      scale_by(
-                                              vector->objectLocation.v - scaled_screen.bounds.top,
-                                              scaled_screen.scale));
-                vector->thisBoltPoint[kBoltPointNum - 1] = Point(
-                        viewport().left +
-                                scale_by(
-                                        vector->lastApparentLocation.h - scaled_screen.bounds.left,
-                                        scaled_screen.scale),
-                        viewport().top +
-                                scale_by(
-                                        vector->lastApparentLocation.v - scaled_screen.bounds.top,
-                                        scaled_screen.scale));
+                vector->thisBoltPoint[0] = scale_to_viewport(vector->objectLocation);
+                vector->thisBoltPoint[kBoltPointNum - 1] =
+                        scale_to_viewport(vector->lastApparentLocation);
                 vector->lastApparentLocation = vector->objectLocation;
             }
 

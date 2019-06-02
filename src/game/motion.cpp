@@ -136,6 +136,11 @@ ANTARES_GLOBAL ScaledScreen scaled_screen;
 
 static void correct_physical_space(SpaceObject* a, SpaceObject* b);
 
+Point scale_to_viewport(Point p) {
+    return Point{scale_by(p.h - scaled_screen.bounds.left, scaled_screen.scale) + viewport().left,
+                 scale_by(p.v - scaled_screen.bounds.top, scaled_screen.scale) + viewport().top};
+}
+
 void ResetMotionGlobals() {
     scaled_screen.bounds = Rect{};
     scaled_screen.scale  = SCALE_SCALE;
