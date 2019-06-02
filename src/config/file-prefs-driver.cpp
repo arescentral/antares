@@ -27,10 +27,10 @@
 #include "config/dirs.hpp"
 #include "config/keys.hpp"
 
-using sfz::StringMap;
 using sfz::makedirs;
-using sfz::path::dirname;
 using sfz::range;
+using sfz::StringMap;
+using sfz::path::dirname;
 using std::vector;
 
 namespace antares {

@@ -425,8 +425,10 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 
         scaled_screen.scale  = gAbsoluteScale;
         scaled_screen.bounds = Rect{
-                g.ship->location.h - scale.width, g.ship->location.v - scale.height,
-                g.ship->location.h + scale.width, g.ship->location.v + scale.height,
+                g.ship->location.h - scale.width,
+                g.ship->location.v - scale.height,
+                g.ship->location.h + scale.width,
+                g.ship->location.v + scale.height,
         };
     }
 

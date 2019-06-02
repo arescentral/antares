@@ -243,7 +243,10 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
     // in all colors; the other three are needed only as neutral
     // objects by default.
     const NamedHandle<const BaseObject>* blessed[] = {
-            &kEnergyBlob, &kWarpInFlare, &kWarpOutFlare, &kPlayerBody,
+            &kEnergyBlob,
+            &kWarpInFlare,
+            &kWarpOutFlare,
+            &kPlayerBody,
     };
     for (auto id : blessed) {
         AddBaseObjectMedia(*id, all_colors, Required::YES);

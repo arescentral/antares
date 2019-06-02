@@ -444,7 +444,7 @@ static void make_mini_screen(Screen screen, const miniScreenLineType (&lines)[si
                 if (g.mini.selectLine == kMiniScreenNoLineSelected) {
                     g.mini.selectLine = item - g.mini.lineData.get();
                 }
-            // fall through
+                // fall through
 
             case MINI_NONE: dst = item++; break;
 
@@ -586,8 +586,7 @@ void UpdateMiniScreenLines() {
 
         case Screen::MAIN:
         case Screen::MESSAGE:
-        case Screen::SPECIAL:
-            break;  // nothing to do
+        case Screen::SPECIAL: break;  // nothing to do
     }
 }
 
@@ -595,8 +594,10 @@ static void draw_player_ammo_in_rect(int32_t value, Hue hue, const Rect& rect) {
     if (value >= 0) {
         const RgbColor text_color = GetRGBTranslateColorShade(hue, LIGHTEST);
         const char     digits[]   = {
-                char(((value % 1000) / 100) + '0'), char(((value % 100) / 10) + '0'),
-                char((value % 10) + '0'), '\0',
+                char(((value % 1000) / 100) + '0'),
+                char(((value % 100) / 10) + '0'),
+                char((value % 10) + '0'),
+                '\0',
         };
         Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);
         sys.fonts.computer.draw(origin, digits, text_color);
@@ -628,7 +629,8 @@ static void draw_mini_ship_data(
 
     // Icon
     Rect icon_rect = {
-            {kMiniIconLeft, screen_top + MiniIconMacLineTop()}, {kMiniIconWidth, kMiniIconHeight},
+            {kMiniIconLeft, screen_top + MiniIconMacLineTop()},
+            {kMiniIconWidth, kMiniIconHeight},
     };
     if (!obj.get()) {
         draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM));
@@ -918,7 +920,8 @@ static void show_status_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     const miniScreenLineType lines[] = {
-            text("MISSION STATUS", true), cancel("Main Menu"),
+            text("MISSION STATUS", true),
+            cancel("Main Menu"),
     };
     make_mini_screen(Screen::STATUS, lines);
     MiniComputerSetStatusStrings();

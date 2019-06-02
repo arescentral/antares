@@ -118,16 +118,20 @@ static void set_label(const char* status, void* userdata) {
     CFStringRef error_message;
     if (_path) {
         if (!antares_data_extract_path(
-                [downloads UTF8String], [scenarios UTF8String], [_path UTF8String], set_label,
-                self, &error_message)) {
-            [self performSelectorOnMainThread:@selector(done:) withObject:(NSString*)error_message waitUntilDone:NO];
+                    [downloads UTF8String], [scenarios UTF8String], [_path UTF8String], set_label,
+                    self, &error_message)) {
+            [self performSelectorOnMainThread:@selector(done:)
+                                     withObject:(NSString*)error_message
+                                  waitUntilDone:NO];
             return;
         }
     } else {
         if (!antares_data_extract_identifier(
-                [downloads UTF8String], [scenarios UTF8String], [_scenario UTF8String], set_label,
-                self, &error_message)) {
-            [self performSelectorOnMainThread:@selector(done:) withObject:(NSString*)error_message waitUntilDone:NO];
+                    [downloads UTF8String], [scenarios UTF8String], [_scenario UTF8String],
+                    set_label, self, &error_message)) {
+            [self performSelectorOnMainThread:@selector(done:)
+                                     withObject:(NSString*)error_message
+                                  waitUntilDone:NO];
             return;
         }
     }

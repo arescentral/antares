@@ -241,7 +241,7 @@ static void mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
     hide_unhide(translator->window, where);
     int button = button_for(event);
     translator->mouse_down_callback(
-            button, where.x, where.y, [event clickCount], translator->mouse_down_userdata);
+            button, where.x, where.y, [event clickCount], translator -> mouse_down_userdata);
 }
 
 static void mouse_up(AntaresEventTranslator* translator, NSEvent* event) {

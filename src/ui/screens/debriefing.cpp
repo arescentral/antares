@@ -36,9 +36,9 @@
 #include "video/driver.hpp"
 
 using sfz::dec;
-using std::chrono::duration_cast;
 using std::unique_ptr;
 using std::vector;
+using std::chrono::duration_cast;
 
 namespace antares {
 

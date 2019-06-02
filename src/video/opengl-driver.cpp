@@ -44,8 +44,8 @@
 #include <GL/glu.h>
 #endif
 
-using std::min;
 using std::max;
+using std::min;
 using std::unique_ptr;
 
 namespace antares {
@@ -432,7 +432,10 @@ void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbuf[1]);
     GLubyte colors[] = {
-            color.red, color.green, color.blue, color.alpha,
+            color.red,
+            color.green,
+            color.blue,
+            color.alpha,
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
     glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
