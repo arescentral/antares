@@ -283,7 +283,7 @@ void Starfield::draw() const {
 
     Points points;
     for (const scrollStarType* star : range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
-        if ((star->speed != kNoStar) && (star->age > 0)) {
+        if ((star->speed != kNoStar) && (star->age > 0) && (viewport().contains(star->location))) {
             const RgbColor color =
                     GetRGBTranslateColorShade(star->hue, (star->age >> kSparkAgeToShadeShift) + 1);
             points.draw(star->location, color);
