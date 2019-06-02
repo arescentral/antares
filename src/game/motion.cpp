@@ -704,10 +704,7 @@ static void calc_bounds() {
     for (auto o_handle = g.root; (o = o_handle.get()); o_handle = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame = o->sprite->table->at(o->sprite->whichShape);
-            o->absoluteBounds =
-                    Rect(Point(o->location.h - scale_by(frame.center().h, o->naturalScale),
-                               o->location.v - scale_by(frame.center().v, o->naturalScale)),
-                         scale_by(frame.size(), o->naturalScale));
+            o->absoluteBounds = scale_sprite_rect(frame, o->location, o->naturalScale);
         }
     }
 }

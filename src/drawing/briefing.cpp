@@ -53,8 +53,6 @@ static void GetRealObjectSpriteData(
         const SpaceObject::PixID& sprite, int32_t maxSize, const Rect& bounds, const Point& corner,
         Scale scale, Scale* thisScale, const NatePixTable::Frame** frame, Point* where);
 
-static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, Scale scale);
-
 static bool BriefingSprite_IsLocationLegal(
         const NatePixTable::Frame& frame, Scale scale, Point where, bool* grid, int32_t gridWidth,
         int32_t gridHeight, const Rect& bounds);
@@ -126,7 +124,7 @@ static bool BriefingSprite_IsLocationLegal(
     Rect    spriteBounds;
     int32_t i, j;
 
-    spriteBounds = SpriteBounds_Get(frame, where, scale);
+    spriteBounds = scale_sprite_rect(frame, where, scale);
     spriteBounds.offset(-bounds.left, -bounds.top);
     spriteBounds.left /= kBriefing_Grid_Size;
     spriteBounds.right /= kBriefing_Grid_Size;
@@ -156,7 +154,7 @@ static void BriefingSprite_UseLocation(
     Rect    spriteBounds;
     int32_t i, j;
 
-    spriteBounds = SpriteBounds_Get(frame, where, scale);
+    spriteBounds = scale_sprite_rect(frame, where, scale);
     spriteBounds.offset(-bounds.left, -bounds.top);
     spriteBounds.left /= kBriefing_Grid_Size;
     spriteBounds.right /= kBriefing_Grid_Size;
@@ -260,16 +258,6 @@ static void GetRealObjectSpriteData(
 
     *where = Point{scale_by(coord.h - corner.h, scale) + bounds.left,
                    scale_by(coord.v - corner.v, scale) + bounds.top};
-}
-
-static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, Scale scale) {
-    return Rect{
-            Point{
-                    where.h - scale_by(frame.center().h, scale),
-                    where.v - scale_by(frame.center().v, scale),
-            },
-            scale_by(frame.size(), scale),
-    };
 }
 
 std::vector<sfz::optional<BriefingSprite>> render_briefing(

@@ -175,11 +175,7 @@ void draw_sprites() {
                     Scale trueScale                  = scale_by(aSprite->scale, gAbsoluteScale);
                     const NatePixTable::Frame& frame = aSprite->table->at(aSprite->whichShape);
 
-                    Rect draw_rect{
-                            Point{aSprite->where.h - scale_by(frame.center().h, trueScale),
-                                  aSprite->where.v - scale_by(frame.center().v, trueScale)},
-                            scale_by(frame.size(), trueScale),
-                    };
+                    Rect draw_rect = scale_sprite_rect(frame, aSprite->where, trueScale);
 
                     switch (aSprite->style) {
                         case spriteNormal: frame.texture().draw(draw_rect); break;
