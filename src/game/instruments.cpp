@@ -279,9 +279,7 @@ void UpdateRadar(ticks unitsDone) {
                 squared_distance = y_distance * y_distance + x_distance * x_distance;
             }
             int32_t distance = wsqrt(squared_distance);
-            if (distance == 0)
-                distance = 1;
-            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / distance;
+            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / std::max(1, distance);
             if (bestScale < SCALE_SCALE)
                 bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
             bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
@@ -301,9 +299,7 @@ void UpdateRadar(ticks unitsDone) {
             auto    anObject         = g.farthest;
             int64_t squared_distance = anObject->distanceFromPlayer;
             int32_t distance         = wsqrt(squared_distance);
-            if (distance == 0)
-                distance = 1;
-            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / distance;
+            bestScale = ((play_screen().height() / 2) * SCALE_SCALE) / std::max(1, distance);
             if (bestScale < SCALE_SCALE)
                 bestScale.factor = (bestScale.factor >> 2L) + (bestScale.factor >> 1L);
             bestScale = clamp(bestScale, kMinimumAutoScale, SCALE_SCALE);
