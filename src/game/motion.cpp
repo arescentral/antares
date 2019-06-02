@@ -447,14 +447,14 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         }
         auto& sprite = *o->sprite;
 
-        int32_t h = evil_scale_by(o->location.h - scaled_screen.bounds.left, scaled_screen.scale);
+        int32_t h = scale_by(o->location.h - scaled_screen.bounds.left, scaled_screen.scale);
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
             sprite.where.h = h + viewport.left;
         } else {
             sprite.where.h = -kSpriteMaxSize;
         }
 
-        int32_t v = evil_scale_by(o->location.v - scaled_screen.bounds.top, scaled_screen.scale);
+        int32_t v = scale_by(o->location.v - scaled_screen.bounds.top, scaled_screen.scale);
         if ((v > -kSpriteMaxSize) && (v < kSpriteMaxSize)) {
             sprite.where.v = v;
         } else {
@@ -713,10 +713,10 @@ static void calc_bounds() {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame = o->sprite->table->at(o->sprite->whichShape);
             o->absoluteBounds =
-                    Rect(Point(o->location.h - evil_scale_by(frame.center().h, o->naturalScale),
-                               o->location.v - evil_scale_by(frame.center().v, o->naturalScale)),
-                         Size(evil_scale_by(frame.width(), o->naturalScale),
-                              evil_scale_by(frame.height(), o->naturalScale)));
+                    Rect(Point(o->location.h - scale_by(frame.center().h, o->naturalScale),
+                               o->location.v - scale_by(frame.center().v, o->naturalScale)),
+                         Size(scale_by(frame.width(), o->naturalScale),
+                              scale_by(frame.height(), o->naturalScale)));
         }
     }
 }

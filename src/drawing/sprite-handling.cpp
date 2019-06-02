@@ -158,11 +158,10 @@ void RemoveSprite(Handle<Sprite> sprite) {
 }
 
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, Scale scale) {
-    Rect draw_rect =
-            Rect(0, 0, evil_scale_by(frame.width(), scale), evil_scale_by(frame.height(), scale));
+    Rect draw_rect = Rect(0, 0, scale_by(frame.width(), scale), scale_by(frame.height(), scale));
     draw_rect.offset(
-            where.h - evil_scale_by(frame.center().h, scale),
-            where.v - evil_scale_by(frame.center().v, scale));
+            where.h - scale_by(frame.center().h, scale),
+            where.v - scale_by(frame.center().v, scale));
     return draw_rect;
 }
 
@@ -173,13 +172,13 @@ void draw_sprites() {
             for (auto aSprite : Sprite::all()) {
                 if ((aSprite->table != NULL) && !aSprite->killMe &&
                     (aSprite->whichLayer == layer)) {
-                    Scale trueScale{evil_scale_by(aSprite->scale.factor, gAbsoluteScale)};
+                    Scale trueScale{scale_by(aSprite->scale.factor, gAbsoluteScale)};
                     const NatePixTable::Frame& frame = aSprite->table->at(aSprite->whichShape);
 
-                    const int32_t map_width  = evil_scale_by(frame.width(), trueScale);
-                    const int32_t map_height = evil_scale_by(frame.height(), trueScale);
-                    const int32_t scaled_h   = evil_scale_by(frame.center().h, trueScale);
-                    const int32_t scaled_v   = evil_scale_by(frame.center().v, trueScale);
+                    const int32_t map_width  = scale_by(frame.width(), trueScale);
+                    const int32_t map_height = scale_by(frame.height(), trueScale);
+                    const int32_t scaled_h   = scale_by(frame.center().h, trueScale);
+                    const int32_t scaled_v   = scale_by(frame.center().v, trueScale);
                     const Point   scaled_center(scaled_h, scaled_v);
 
                     Rect draw_rect(0, 0, map_width, map_height);

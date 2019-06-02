@@ -20,10 +20,12 @@
 
 namespace antares {
 
-Fixed scale_by(Fixed value, Scale scale) { return (value * scale.factor) / SCALE_SCALE.factor; }
+Fixed star_scale_by(Fixed value, Scale scale) {
+    return (value * scale.factor) / SCALE_SCALE.factor;
+}
 
-Fixed evil_scale_by(Fixed value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
+Fixed scale_by(Fixed value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
 
-int32_t evil_scale_by(int32_t value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
+int32_t scale_by(int32_t value, Scale scale) { return (value * scale.factor) >> SHIFT_SCALE; }
 
 }  // namespace antares

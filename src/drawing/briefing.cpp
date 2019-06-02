@@ -258,10 +258,10 @@ static void GetRealObjectSpriteData(
     if (tlong.factor < thisScale->factor)
         *thisScale = tlong;
 
-    coord.h = evil_scale_by(coord.h - corner.h, scale);
+    coord.h = scale_by(coord.h - corner.h, scale);
     coord.h += bounds.left;
 
-    coord.v = evil_scale_by(coord.v - corner.v, scale);
+    coord.v = scale_by(coord.v - corner.v, scale);
     coord.v += bounds.top;
 
     where->h = coord.h;
@@ -272,19 +272,19 @@ static Rect SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, Scal
     Rect    bounds;
     int32_t tlong;
 
-    tlong       = evil_scale_by(frame.center().h, scale);
+    tlong       = scale_by(frame.center().h, scale);
     tlong       = where.h - tlong;
     bounds.left = tlong;
 
-    tlong        = evil_scale_by(frame.width(), scale);
+    tlong        = scale_by(frame.width(), scale);
     tlong        = bounds.left + tlong;
     bounds.right = tlong;
 
-    tlong      = evil_scale_by(frame.center().v, scale);
+    tlong      = scale_by(frame.center().v, scale);
     tlong      = where.v - tlong;
     bounds.top = tlong;
 
-    tlong         = evil_scale_by(frame.height(), scale);
+    tlong         = scale_by(frame.height(), scale);
     tlong         = bounds.top + tlong;
     bounds.bottom = tlong;
 
@@ -325,8 +325,7 @@ std::vector<sfz::optional<BriefingSprite>> render_briefing(
                     anObject->location, *anObject->base, anObject->owner, *anObject->pix_id,
                     maxSize, bounds, corner, scale, &thisScale, &frame, &where);
             if (frame != NULL) {
-                thisScale.factor =
-                        evil_scale_by(kOneQuarterScale.factor, sprite_scale(*baseObject));
+                thisScale.factor = scale_by(kOneQuarterScale.factor, sprite_scale(*baseObject));
 
                 where = BriefingSprite_GetBestLocation(
                         *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);
@@ -343,8 +342,7 @@ std::vector<sfz::optional<BriefingSprite>> render_briefing(
                     anObject->location, *anObject->base, anObject->owner, *anObject->pix_id,
                     maxSize / 2, bounds, corner, scale, &thisScale, &frame, &where);
             if (frame != NULL) {
-                thisScale.factor =
-                        evil_scale_by(kOneQuarterScale.factor, sprite_scale(*baseObject));
+                thisScale.factor = scale_by(kOneQuarterScale.factor, sprite_scale(*baseObject));
 
                 where = BriefingSprite_GetBestLocation(
                         *frame, thisScale, where, gridCells.get(), gridWidth, gridHeight, bounds);

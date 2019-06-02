@@ -94,9 +94,9 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Ray& r) {
             vector->hue                  = r.hue;
 
             const int32_t x =
-                    evil_scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale);
+                    scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale);
             const int32_t y =
-                    evil_scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale);
+                    scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale);
             vector->thisLocation =
                     Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
 
@@ -132,9 +132,9 @@ Handle<Vector> Vectors::add(Point* location, const BaseObject::Bolt& b) {
             vector->color                = b.color;
 
             const int32_t x =
-                    evil_scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale);
+                    scale_by(location->h - scaled_screen.bounds.left, scaled_screen.scale);
             const int32_t y =
-                    evil_scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale);
+                    scale_by(location->v - scaled_screen.bounds.top, scaled_screen.scale);
             vector->thisLocation =
                     Rect{Point{x + viewport().left, y + viewport().top}, Size{0, 0}};
 
@@ -207,16 +207,16 @@ void Vectors::update() {
         if (vector->active) {
             if (vector->lastApparentLocation != vector->objectLocation) {
                 vector->thisLocation =
-                        Rect(evil_scale_by(
+                        Rect(scale_by(
                                      vector->objectLocation.h - scaled_screen.bounds.left,
                                      scaled_screen.scale),
-                             evil_scale_by(
+                             scale_by(
                                      vector->objectLocation.v - scaled_screen.bounds.top,
                                      scaled_screen.scale),
-                             evil_scale_by(
+                             scale_by(
                                      vector->lastApparentLocation.h - scaled_screen.bounds.left,
                                      scaled_screen.scale),
-                             evil_scale_by(
+                             scale_by(
                                      vector->lastApparentLocation.v - scaled_screen.bounds.top,
                                      scaled_screen.scale));
                 vector->thisLocation.offset(viewport().left, viewport().top);

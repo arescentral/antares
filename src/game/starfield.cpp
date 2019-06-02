@@ -71,7 +71,7 @@ void Starfield::reset() {
 
 void Starfield::make_sparks(
         int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, Hue hue, Point* location) {
-    maxVelocity = evil_scale_by(maxVelocity, gAbsoluteScale);
+    maxVelocity = scale_by(maxVelocity, gAbsoluteScale);
     if (sparkNum <= 0) {
         return;
     }
@@ -113,18 +113,24 @@ void Starfield::move(ticks by_units) {
     const Rect play_screen = antares::play_screen();
 
     const fixedPointType slowVelocity = {
-            scale_by(g.ship->velocity.h * kSlowStarFraction * by_units.count(), gAbsoluteScale),
-            scale_by(g.ship->velocity.v * kSlowStarFraction * by_units.count(), gAbsoluteScale),
+            star_scale_by(
+                    g.ship->velocity.h * kSlowStarFraction * by_units.count(), gAbsoluteScale),
+            star_scale_by(
+                    g.ship->velocity.v * kSlowStarFraction * by_units.count(), gAbsoluteScale),
     };
 
     const fixedPointType mediumVelocity = {
-            scale_by(g.ship->velocity.h * kMediumStarFraction * by_units.count(), gAbsoluteScale),
-            scale_by(g.ship->velocity.v * kMediumStarFraction * by_units.count(), gAbsoluteScale),
+            star_scale_by(
+                    g.ship->velocity.h * kMediumStarFraction * by_units.count(), gAbsoluteScale),
+            star_scale_by(
+                    g.ship->velocity.v * kMediumStarFraction * by_units.count(), gAbsoluteScale),
     };
 
     const fixedPointType fastVelocity = {
-            scale_by(g.ship->velocity.h * kFastStarFraction * by_units.count(), gAbsoluteScale),
-            scale_by(g.ship->velocity.v * kFastStarFraction * by_units.count(), gAbsoluteScale),
+            star_scale_by(
+                    g.ship->velocity.h * kFastStarFraction * by_units.count(), gAbsoluteScale),
+            star_scale_by(
+                    g.ship->velocity.v * kFastStarFraction * by_units.count(), gAbsoluteScale),
     };
 
     for (scrollStarType* star : range(_stars, _stars + kScrollStarNum)) {

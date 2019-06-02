@@ -31,12 +31,13 @@ struct Scale {
 
 // Scale `value` by `scale`.
 //
-// The regular variant calculates the final scale as ``(value * scale) / 4096``.  The evil variant
-// calculates the final scale as ``(value * scale) >> 12``, which results in off-by-one errors when
-// `value` is negative.
+// The normal variant calculates the final scale as ``(value * scale) >>
+// 12``. The star variant calculates the final scale as ``(value *
+// scale) / 4096``, which is potentially more appropriate when negative
+// values are likely.
+Fixed   star_scale_by(Fixed value, Scale scale);
 Fixed   scale_by(Fixed value, Scale scale);
-Fixed   evil_scale_by(Fixed value, Scale scale);
-int32_t evil_scale_by(int32_t value, Scale scale);
+int32_t scale_by(int32_t value, Scale scale);
 
 const int32_t SHIFT_SCALE = 12;
 const Scale   SCALE_SCALE{1 << SHIFT_SCALE};
