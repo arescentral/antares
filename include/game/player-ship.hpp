@@ -19,12 +19,34 @@
 #ifndef ANTARES_GAME_PLAYER_SHIP_HPP_
 #define ANTARES_GAME_PLAYER_SHIP_HPP_
 
+#include <set>
+
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
 #include "game/cursor.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
+
+struct PlayerEvent {
+    enum Type {
+        KEY_DOWN,
+        KEY_UP,
+    } type;
+    union {
+        KeyNum key;
+    };
+
+    static PlayerEvent key_down(KeyNum k) { return PlayerEvent{KEY_DOWN, {k}}; }
+    static PlayerEvent key_up(KeyNum k) { return PlayerEvent{KEY_UP, {k}}; }
+
+    bool operator==(PlayerEvent other) const;
+    bool operator!=(PlayerEvent other) const { return !(*this == other); }
+    bool operator<(PlayerEvent other) const;
+    bool operator<=(PlayerEvent other) const { return !(other < *this); }
+    bool operator>(PlayerEvent other) const { return (other < *this); }
+    bool operator>=(PlayerEvent other) const { return !(*this < other); }
+};
 
 class GameCursor;
 class InputSource;
@@ -56,11 +78,10 @@ class PlayerShip : public EventReceiver {
   private:
     bool active() const;
 
-    uint32_t gTheseKeys;
-    uint32_t _gamepad_keys;
-    uint32_t _key_presses;
-    uint32_t _key_releases;
-    KeyMap   _keys;
+    uint32_t              gTheseKeys;
+    uint32_t              _gamepad_keys;
+    std::set<PlayerEvent> _player_events;
+    KeyMap                _keys;
 
     enum GamepadState {
         NO_BUMPER              = 0,

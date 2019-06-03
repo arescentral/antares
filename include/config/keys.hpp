@@ -201,7 +201,7 @@ bool    GetKeyNameNum(pn::string_view name, Key& out);
 bool    AnyKeyButThisOne(const KeyMap& key_map, Key key_num);
 int32_t GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
 
-enum {
+enum KeyNum {
     kUpKeyNum    = 0,  // thrust
     kDownKeyNum  = 1,  // stop
     kLeftKeyNum  = 2,  // counter-clock
@@ -248,6 +248,8 @@ enum {
     kFirstHotKeyNum = 34,
 
     KEY_COUNT = 44,
+
+    kAutoPilotKeyNum = 19,
 };
 
 enum {

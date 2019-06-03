@@ -110,6 +110,26 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
 
 }  // namespace
 
+bool PlayerEvent::operator==(PlayerEvent other) const {
+    if (type != other.type) {
+        return false;
+    }
+    switch (type) {
+        case KEY_DOWN:
+        case KEY_UP: return key == other.key;
+    }
+}
+
+bool PlayerEvent::operator<(PlayerEvent other) const {
+    if (type != other.type) {
+        return type < other.type;
+    }
+    switch (type) {
+        case KEY_DOWN:
+        case KEY_UP: return key < other.key;
+    }
+}
+
 void ResetPlayerShip() {
     g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, Hue::YELLOW);
     g.target_label  = Label::add(0, 0, 0, -20, SpaceObject::none(), true, Hue::SKY_BLUE);
@@ -131,19 +151,17 @@ void ResetPlayerShip() {
 PlayerShip::PlayerShip()
         : gTheseKeys(0),
           _gamepad_keys(0),
-          _key_presses(0),
-          _key_releases(0),
           _gamepad_state(NO_BUMPER),
           _control_active(false),
           _control_direction(0) {}
 
-static int key_num(Key key) {
+static sfz::optional<KeyNum> key_num(Key key) {
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         if (key == sys.prefs->key(i)) {
-            return i;
+            return sfz::make_optional(static_cast<KeyNum>(i));
         }
     }
-    return -1;
+    return sfz::nullopt;
 }
 
 static void zoom_to(Zoom zoom) {
@@ -269,8 +287,11 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         return;
     }
 
-    int key = key_num(event.key());
-    switch (key) {
+    sfz::optional<KeyNum> key = key_num(event.key());
+    if (!key.has_value()) {
+        return;
+    }
+    switch (*key) {
         case kZoomOutKeyNum: zoom_out(); break;
         case kZoomInKeyNum: zoom_in(); break;
         case kScale121KeyNum: zoom_shortcut(Zoom::ACTUAL); break;
@@ -283,9 +304,9 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         case kTransferKeyNum: transfer_control(g.admiral, 0); break;
         case kMessageNextKeyNum: Messages::advance(); break;
         default:
-            if (key < kKeyControlNum) {
-                _key_presses |= ((1 << key) & ~g.key_mask);
-                _key_releases &= ~((1 << key) & ~g.key_mask);
+            if (*key < kKeyControlNum) {
+                _player_events.insert(PlayerEvent::key_down(*key));
+                _player_events.erase(PlayerEvent::key_up(*key));
             }
             break;
     }
@@ -298,12 +319,15 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
         return;
     }
 
-    int key = key_num(event.key());
-    switch (key) {
+    sfz::optional<KeyNum> key = key_num(event.key());
+    if (!key.has_value()) {
+        return;
+    }
+    switch (*key) {
         default:
-            if (key < kKeyControlNum) {
-                _key_releases |= ((1 << key) & ~g.key_mask);
-                _key_presses &= ~((1 << key) & ~g.key_mask);
+            if (*key < kKeyControlNum) {
+                _player_events.erase(PlayerEvent::key_down(*key));
+                _player_events.insert(PlayerEvent::key_up(*key));
             }
             break;
     }
@@ -396,11 +420,11 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 return;
             case Gamepad::Button::Y:
                 if (_gamepad_state & SELECT_BUMPER) {
-                    _key_presses |= kOrderKey;
-                    _key_releases &= ~kOrderKey;
+                    _player_events.insert(PlayerEvent::key_down(kOrderKeyNum));
+                    _player_events.erase(PlayerEvent::key_up(kOrderKeyNum));
                 } else {
-                    _key_presses |= kAutoPilotKey;
-                    _key_releases &= ~kAutoPilotKey;
+                    _player_events.insert(PlayerEvent::key_down(kAutoPilotKeyNum));
+                    _player_events.erase(PlayerEvent::key_up(kAutoPilotKeyNum));
                 }
                 return;
             case Gamepad::Button::LSB:
@@ -429,10 +453,18 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 _gamepad_keys |= kWarpKey;
             }
             break;
-        case Gamepad::Button::UP: minicomputer_handle_keys(kCompUpKey, 0); break;
-        case Gamepad::Button::DOWN: minicomputer_handle_keys(kCompDownKey, 0); break;
-        case Gamepad::Button::RIGHT: minicomputer_handle_keys(kCompAcceptKey, 0); break;
-        case Gamepad::Button::LEFT: minicomputer_handle_keys(kCompCancelKey, 0); break;
+        case Gamepad::Button::UP:
+            minicomputer_handle_keys({PlayerEvent::key_down(kCompUpKeyNum)});
+            break;
+        case Gamepad::Button::DOWN:
+            minicomputer_handle_keys({PlayerEvent::key_down(kCompDownKeyNum)});
+            break;
+        case Gamepad::Button::RIGHT:
+            minicomputer_handle_keys({PlayerEvent::key_down(kCompAcceptKeyNum)});
+            break;
+        case Gamepad::Button::LEFT:
+            minicomputer_handle_keys({PlayerEvent::key_down(kCompCancelKeyNum)});
+            break;
         default: break;
     }
 }
@@ -440,8 +472,8 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
 void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
     switch (event.button) {
         case Gamepad::Button::LB:
-            _key_presses &= ~kOrderKey;
-            _key_releases |= kOrderKey;
+            _player_events.erase(PlayerEvent::key_down(kOrderKeyNum));
+            _player_events.insert(PlayerEvent::key_up(kOrderKeyNum));
             if (_gamepad_state & OVERRIDE) {
                 _gamepad_state = SELECT_BUMPER;
             } else {
@@ -449,8 +481,8 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             }
             return;
         case Gamepad::Button::RB:
-            _key_presses &= ~kAutoPilotKey;
-            _key_releases |= kAutoPilotKey;
+            _player_events.erase(PlayerEvent::key_down(kAutoPilotKeyNum));
+            _player_events.insert(PlayerEvent::key_up(kAutoPilotKeyNum));
             if (_gamepad_state & OVERRIDE) {
                 _gamepad_state = TARGET_BUMPER;
             } else {
@@ -471,8 +503,10 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             case Gamepad::Button::X:
             case Gamepad::Button::LSB: return;
             case Gamepad::Button::Y:
-                _key_presses &= ~(kOrderKey | kAutoPilotKey);
-                _key_releases |= (kOrderKey | kAutoPilotKey);
+                _player_events.erase(PlayerEvent::key_down(kOrderKeyNum));
+                _player_events.erase(PlayerEvent::key_down(kAutoPilotKeyNum));
+                _player_events.insert(PlayerEvent::key_up(kOrderKeyNum));
+                _player_events.insert(PlayerEvent::key_up(kAutoPilotKeyNum));
                 return;
             default: break;
         }
@@ -489,8 +523,12 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
                 _gamepad_keys &= !kWarpKey;
             }
             break;
-        case Gamepad::Button::RIGHT: minicomputer_handle_keys(0, kCompAcceptKey); break;
-        case Gamepad::Button::LEFT: minicomputer_handle_keys(0, kCompCancelKey); break;
+        case Gamepad::Button::RIGHT:
+            minicomputer_handle_keys({PlayerEvent::key_up(kCompAcceptKeyNum)});
+            break;
+        case Gamepad::Button::LEFT:
+            minicomputer_handle_keys({PlayerEvent::key_up(kCompCancelKeyNum)});
+            break;
         default: break;
     }
 }
@@ -525,11 +563,20 @@ void PlayerShip::update(bool enter_message) {
     }
 
     if (enter_message) {
-        _key_presses  = 0;
-        _key_releases = gTheseKeys;
+        _player_events.clear();
+        for (KeyNum k = kUpKeyNum; k < KEY_COUNT; k = static_cast<KeyNum>(k + 1)) {
+            if (gTheseKeys & (1 << k)) {
+                _player_events.insert(PlayerEvent::key_up(k));
+            }
+        }
     }
-    gTheseKeys |= _key_presses;
-    gTheseKeys &= ~_key_releases;
+
+    for (auto e : _player_events) {
+        switch (e.type) {
+            case PlayerEvent::KEY_DOWN: gTheseKeys |= ((1 << e.key) & ~g.key_mask); break;
+            case PlayerEvent::KEY_UP: gTheseKeys &= ~((1 << e.key) & ~g.key_mask); break;
+        }
+    }
 
     /*
     while ((globals()->gKeyMapBufferBottom != globals()->gKeyMapBufferTop)) {
@@ -627,7 +674,7 @@ void PlayerShip::update(bool enter_message) {
         return;
     }
 
-    minicomputer_handle_keys(_key_presses, _key_releases);
+    minicomputer_handle_keys(_player_events);
 
     if (gTheseKeys & kDestinationKey) {
         if (gDestKeyState == DEST_KEY_UP) {
@@ -694,18 +741,24 @@ void PlayerShip::update(bool enter_message) {
     // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    uint32_t select_keys = _key_presses & (kSelectFriendKey | kSelectFoeKey | kSelectBaseKey);
-    if (select_keys && !_cursor.active()) {
-        gDestKeyState = DEST_KEY_BLOCKED;
-        if (_key_presses & kSelectFriendKey) {
+    if (!_cursor.active()) {
+        if (_player_events.find(PlayerEvent::key_down(kSelectFriendKeyNum)) !=
+            _player_events.end()) {
+            gDestKeyState = DEST_KEY_BLOCKED;
             if (!(gTheseKeys & kDestinationKey)) {
                 select_friendly(theShip, theShip->direction);
             } else {
                 target_friendly(theShip, theShip->direction);
             }
-        } else if (_key_presses & kSelectFoeKey) {
+        } else if (
+                _player_events.find(PlayerEvent::key_down(kSelectFoeKeyNum)) !=
+                _player_events.end()) {
+            gDestKeyState = DEST_KEY_BLOCKED;
             target_hostile(theShip, theShip->direction);
-        } else {
+        } else if (
+                _player_events.find(PlayerEvent::key_down(kSelectBaseKeyNum)) !=
+                _player_events.end()) {
+            gDestKeyState = DEST_KEY_BLOCKED;
             if (!(gTheseKeys & kDestinationKey)) {
                 select_base(theShip, theShip->direction);
             } else {
@@ -732,20 +785,19 @@ void PlayerShip::update(bool enter_message) {
         }
     }
 
-    if (_key_presses & kOrderKey) {
+    if (_player_events.find(PlayerEvent::key_down(kOrderKeyNum)) != _player_events.end()) {
         theShip->keysDown |= kGiveCommandKey;
     }
 
     if ((gTheseKeys & kWarpKey) && (gTheseKeys & kDestinationKey)) {
         gDestKeyState = DEST_KEY_BLOCKED;
-        if (_key_presses & kWarpKey) {
+        if (_player_events.find(PlayerEvent::key_down(kWarpKeyNum)) != _player_events.end()) {
             engage_autopilot();
         }
         theShip->keysDown &= ~kWarpKey;
     }
 
-    _key_presses  = 0;
-    _key_releases = 0;
+    _player_events.clear();
 }
 
 bool PlayerShip::show_select() const {

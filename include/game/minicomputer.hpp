@@ -19,8 +19,11 @@
 #ifndef ANTARES_GAME_MINICOMPUTER_HPP_
 #define ANTARES_GAME_MINICOMPUTER_HPP_
 
+#include <set>
+
 #include "data/base-object.hpp"
 #include "data/level.hpp"
+#include "game/player-ship.hpp"
 
 namespace antares {
 
@@ -55,7 +58,7 @@ void MiniScreenCleanup(void);
 void DisposeMiniScreenStatusStrList(void);
 void ClearMiniScreenLines(void);
 void draw_mini_screen();
-void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases);
+void minicomputer_handle_keys(std::set<PlayerEvent> player_events);
 void minicomputer_cancel();
 Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);

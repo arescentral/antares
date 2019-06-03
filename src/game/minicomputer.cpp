@@ -507,22 +507,30 @@ static void minicomputer_handle_move(int direction) {
     } while (line->kind == MINI_NONE);
 }
 
-void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases) {
-    if ((key_presses | key_releases) & kCompAcceptKey) {
+void minicomputer_handle_keys(std::set<PlayerEvent> player_events) {
+    if ((player_events.find(PlayerEvent::key_down(kCompAcceptKeyNum)) != player_events.end()) ||
+        (player_events.find(PlayerEvent::key_up(kCompAcceptKeyNum)) != player_events.end())) {
         minicomputer_handle_action(
-                kInLineButton, key_presses & kCompAcceptKey, MiniComputerDoAccept);
+                kInLineButton,
+                player_events.find(PlayerEvent::key_down(kCompAcceptKeyNum)) !=
+                        player_events.end(),
+                MiniComputerDoAccept);
     }
 
-    if ((key_presses | key_releases) & kCompCancelKey) {
+    if ((player_events.find(PlayerEvent::key_down(kCompCancelKeyNum)) != player_events.end()) ||
+        (player_events.find(PlayerEvent::key_up(kCompCancelKeyNum)) != player_events.end())) {
         minicomputer_handle_action(
-                kOutLineButton, key_presses & kCompCancelKey, MiniComputerDoCancel);
+                kOutLineButton,
+                player_events.find(PlayerEvent::key_down(kCompCancelKeyNum)) !=
+                        player_events.end(),
+                MiniComputerDoCancel);
     }
 
-    if (key_presses & kCompUpKey) {
+    if (player_events.find(PlayerEvent::key_down(kCompUpKeyNum)) != player_events.end()) {
         minicomputer_handle_move(-1);
     }
 
-    if (key_presses & kCompDownKey) {
+    if (player_events.find(PlayerEvent::key_down(kCompDownKeyNum)) != player_events.end()) {
         minicomputer_handle_move(+1);
     }
 }
