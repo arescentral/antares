@@ -301,7 +301,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         case kScaleHostileKeyNum: zoom_shortcut(Zoom::FOE); break;
         case kScaleObjectKeyNum: zoom_shortcut(Zoom::OBJECT); break;
         case kScaleAllKeyNum: zoom_shortcut(Zoom::ALL); break;
-        case kTransferKeyNum: transfer_control(g.admiral, 0); break;
+        case kTransferKeyNum: transfer_control(g.admiral); break;
         case kMessageNextKeyNum: Messages::advance(); break;
         default:
             if (*key < kKeyControlNum) {
@@ -431,7 +431,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 if (_gamepad_state & TARGET_BUMPER) {
                     target_self();
                 } else {
-                    transfer_control(g.admiral, 0);
+                    transfer_control(g.admiral);
                 }
                 return;
             default: break;

@@ -19,6 +19,7 @@
 #ifndef ANTARES_GAME_MINICOMPUTER_HPP_
 #define ANTARES_GAME_MINICOMPUTER_HPP_
 
+#include <functional>
 #include <set>
 
 #include "data/base-object.hpp"
@@ -36,21 +37,21 @@ enum MiniScreenLineKind {
 };
 
 struct miniScreenLineType {
-    MiniScreenLineKind      kind = MINI_NONE;
-    pn::string              string;
-    pn::string              statusFalse;
-    pn::string              statusTrue;
-    pn::string              statusString;
-    pn::string              postString;
-    int32_t                 whichButton = -1;
-    bool                    underline   = false;
-    int32_t                 value;  // for keeping track of changing values
-    int32_t                 statusType;
-    Handle<const Condition> condition;
-    Counter                 counter;
-    int32_t                 negativeValue;
-    const BaseObject*       sourceData;
-    void (*callback)(Handle<Admiral> adm, int32_t line) = nullptr;
+    MiniScreenLineKind                   kind = MINI_NONE;
+    pn::string                           string;
+    pn::string                           statusFalse;
+    pn::string                           statusTrue;
+    pn::string                           statusString;
+    pn::string                           postString;
+    int32_t                              whichButton = -1;
+    bool                                 underline   = false;
+    int32_t                              value;  // for keeping track of changing values
+    int32_t                              statusType;
+    Handle<const Condition>              condition;
+    Counter                              counter;
+    int32_t                              negativeValue;
+    const BaseObject*                    sourceData;
+    std::function<void(Handle<Admiral>)> callback;
 };
 
 void MiniScreenInit(void);
@@ -64,7 +65,7 @@ Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 void MiniComputerDoAccept(void);
-void transfer_control(Handle<Admiral> adm, int line);
+void transfer_control(Handle<Admiral> adm);
 void MiniComputerDoCancel(void);
 void MiniComputerSetBuildStrings(void);
 void MiniComputerHandleClick(Point);
