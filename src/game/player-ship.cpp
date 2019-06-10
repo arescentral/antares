@@ -524,6 +524,141 @@ bool PlayerShip::active() const {
     return player.get() && player->active && (player->attributes & kIsPlayerShip);
 }
 
+static void handle_destination_key(int32_t these_keys) {
+    if (these_keys & kDestinationKey) {
+        if (gDestKeyState == DEST_KEY_UP) {
+            gDestKeyState = DEST_KEY_DOWN;
+            gDestKeyTime  = now();
+        }
+    } else {
+        if ((gDestKeyState == DEST_KEY_DOWN) && (now() >= (gDestKeyTime + kDestKeyHoldDuration)) &&
+            (g.ship->attributes & kCanBeDestination)) {
+            target_self();
+        }
+        gDestKeyState = DEST_KEY_UP;
+    }
+}
+
+static void handle_hotkeys(const KeyMap& keys, int32_t these_keys) {
+    int hot_key = -1;
+    for (int i = 0; i < kHotKeyNum; i++) {
+        if (mCheckKeyMap(keys, kFirstHotKeyNum + i)) {
+            hot_key = i;
+        }
+    }
+
+    if (hot_key >= 0) {
+        if (gHotKeyState == HOT_KEY_UP) {
+            gHotKeyTime = now();
+            gHotKeyNum  = hot_key;
+            if (these_keys & kDestinationKey) {
+                gHotKeyState = HOT_KEY_TARGET;
+            } else {
+                gHotKeyState = HOT_KEY_SELECT;
+            }
+        }
+    } else if (gHotKeyState != HOT_KEY_UP) {
+        hot_key      = gHotKeyNum;
+        bool target  = gHotKeyState == HOT_KEY_TARGET;
+        gHotKeyState = HOT_KEY_UP;
+
+        if (now() >= gHotKeyTime + kHotKeyHoldDuration) {
+            if (globals()->lastSelectedObject.get()) {
+                auto selectShip = globals()->lastSelectedObject;
+
+                if (selectShip->active) {
+                    globals()->hotKey[hot_key].object   = globals()->lastSelectedObject;
+                    globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
+                    Update_LabelStrings_ForHotKeyChange();
+                    sys.sound.select();
+                }
+            }
+        } else {
+            gDestKeyState = DEST_KEY_BLOCKED;
+            if (globals()->hotKey[hot_key].object.get()) {
+                auto selectShip = globals()->hotKey[hot_key].object;
+                if ((selectShip->active) &&
+                    (selectShip->id == globals()->hotKey[hot_key].objectID)) {
+                    bool is_target = (these_keys & kDestinationKey) ||
+                                     (selectShip->owner != g.admiral) || target;
+                    SetPlayerSelectShip(globals()->hotKey[hot_key].object, is_target, g.admiral);
+                } else {
+                    globals()->hotKey[hot_key].object = SpaceObject::none();
+                }
+            }
+        }
+    }
+}
+
+static void handle_target_keys(
+        const GameCursor& cursor, const std::vector<PlayerEvent>& player_events,
+        int32_t these_keys) {
+    if (cursor.active()) {
+        return;
+    }
+    // for this we check lastKeys against theseKeys & relevent keys now being pressed
+    const auto begin = player_events.begin(), end = player_events.end();
+    if (std::find(begin, end, PlayerEvent::key_down(kSelectFriendKeyNum)) != end) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+        if (!(these_keys & kDestinationKey)) {
+            select_friendly(g.ship, g.ship->direction);
+        } else {
+            target_friendly(g.ship, g.ship->direction);
+        }
+    } else if (find(begin, end, PlayerEvent::key_down(kSelectFoeKeyNum)) != end) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+        target_hostile(g.ship, g.ship->direction);
+    } else if (find(begin, end, PlayerEvent::key_down(kSelectBaseKeyNum)) != end) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+        if (!(these_keys & kDestinationKey)) {
+            select_base(g.ship, g.ship->direction);
+        } else {
+            target_base(g.ship, g.ship->direction);
+        }
+    }
+}
+
+static void handle_pilot_keys(
+        Handle<SpaceObject> flagship, int32_t these_keys, int32_t gamepad_keys,
+        bool gamepad_control, int32_t gamepad_control_direction) {
+    if (flagship->attributes & kOnAutoPilot) {
+        if ((these_keys | gamepad_keys) & (kUpKey | kDownKey | kLeftKey | kRightKey)) {
+            flagship->keysDown = these_keys | kAutoPilotKey;
+        }
+    } else {
+        flagship->keysDown = these_keys | gamepad_keys;
+        if (gamepad_control) {
+            int difference = mAngleDifference(gamepad_control_direction, flagship->direction);
+            if (abs(difference) < 15) {
+                // pass
+            } else if (difference < 0) {
+                flagship->keysDown |= kRightKey;
+            } else {
+                flagship->keysDown |= kLeftKey;
+            }
+        }
+    }
+}
+
+static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
+    auto begin = player_events.begin(), end = player_events.end();
+    if (std::find(begin, end, PlayerEvent::key_down(kOrderKeyNum)) != end) {
+        g.ship->keysDown |= kGiveCommandKey;
+    }
+}
+
+static void handle_autopilot_keys(
+        const std::vector<PlayerEvent>& player_events, int32_t these_keys) {
+    if ((these_keys & kWarpKey) && (these_keys & kDestinationKey)) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+        auto begin = player_events.begin(), end = player_events.end();
+        if (std::find(begin, end, PlayerEvent::key_down(kWarpKeyNum)) != end) {
+            engage_autopilot();
+        }
+        g.ship->keysDown &= ~kWarpKey;
+    }
+}
+
 void PlayerShip::update(bool enter_message) {
     if (!g.ship.get()) {
         return;
@@ -640,13 +775,11 @@ void PlayerShip::update(bool enter_message) {
     }
     */
 
-    auto theShip = g.ship;
-
-    if (!theShip->active) {
+    if (!g.ship->active) {
         return;
     }
 
-    if (theShip->health() < (theShip->base->health >> 2L)) {
+    if (g.ship->health() < (g.ship->base->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
             if (globals()->next_klaxon == game_ticks()) {
                 sys.sound.loud_klaxon();
@@ -660,132 +793,20 @@ void PlayerShip::update(bool enter_message) {
         globals()->next_klaxon = game_ticks();
     }
 
-    if (!(theShip->attributes & kIsPlayerShip)) {
+    if (!(g.ship->attributes & kIsPlayerShip)) {
         return;
     }
 
+    Handle<SpaceObject> flagship = g.ship;  // Pilot same ship even after minicomputer transfer.
     minicomputer_handle_keys(_player_events);
-
-    if (gTheseKeys & kDestinationKey) {
-        if (gDestKeyState == DEST_KEY_UP) {
-            gDestKeyState = DEST_KEY_DOWN;
-            gDestKeyTime  = now();
-        }
-    } else {
-        if ((gDestKeyState == DEST_KEY_DOWN) && (now() >= (gDestKeyTime + kDestKeyHoldDuration)) &&
-            (theShip->attributes & kCanBeDestination)) {
-            target_self();
-        }
-        gDestKeyState = DEST_KEY_UP;
-    }
-
-    // NEW -- do hot key selection
-    int hot_key = -1;
-    for (int i = 0; i < kHotKeyNum; i++) {
-        if (mCheckKeyMap(_keys, kFirstHotKeyNum + i)) {
-            hot_key = i;
-        }
-    }
-
-    if (hot_key >= 0) {
-        if (gHotKeyState == HOT_KEY_UP) {
-            gHotKeyTime = now();
-            gHotKeyNum  = hot_key;
-            if (gTheseKeys & kDestinationKey) {
-                gHotKeyState = HOT_KEY_TARGET;
-            } else {
-                gHotKeyState = HOT_KEY_SELECT;
-            }
-        }
-    } else if (gHotKeyState != HOT_KEY_UP) {
-        hot_key      = gHotKeyNum;
-        bool target  = gHotKeyState == HOT_KEY_TARGET;
-        gHotKeyState = HOT_KEY_UP;
-
-        if (now() >= gHotKeyTime + kHotKeyHoldDuration) {
-            if (globals()->lastSelectedObject.get()) {
-                auto selectShip = globals()->lastSelectedObject;
-
-                if (selectShip->active) {
-                    globals()->hotKey[hot_key].object   = globals()->lastSelectedObject;
-                    globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
-                    Update_LabelStrings_ForHotKeyChange();
-                    sys.sound.select();
-                }
-            }
-        } else {
-            gDestKeyState = DEST_KEY_BLOCKED;
-            if (globals()->hotKey[hot_key].object.get()) {
-                auto selectShip = globals()->hotKey[hot_key].object;
-                if ((selectShip->active) &&
-                    (selectShip->id == globals()->hotKey[hot_key].objectID)) {
-                    bool is_target = (gTheseKeys & kDestinationKey) ||
-                                     (selectShip->owner != g.admiral) || target;
-                    SetPlayerSelectShip(globals()->hotKey[hot_key].object, is_target, g.admiral);
-                } else {
-                    globals()->hotKey[hot_key].object = SpaceObject::none();
-                }
-            }
-        }
-    }
-    // end new hotkey selection
-
-    // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    if (!_cursor.active()) {
-        const auto begin = _player_events.begin(), end = _player_events.end();
-        if (std::find(begin, end, PlayerEvent::key_down(kSelectFriendKeyNum)) != end) {
-            gDestKeyState = DEST_KEY_BLOCKED;
-            if (!(gTheseKeys & kDestinationKey)) {
-                select_friendly(theShip, theShip->direction);
-            } else {
-                target_friendly(theShip, theShip->direction);
-            }
-        } else if (find(begin, end, PlayerEvent::key_down(kSelectFoeKeyNum)) != end) {
-            gDestKeyState = DEST_KEY_BLOCKED;
-            target_hostile(theShip, theShip->direction);
-        } else if (find(begin, end, PlayerEvent::key_down(kSelectBaseKeyNum)) != end) {
-            gDestKeyState = DEST_KEY_BLOCKED;
-            if (!(gTheseKeys & kDestinationKey)) {
-                select_base(theShip, theShip->direction);
-            } else {
-                target_base(theShip, theShip->direction);
-            }
-        }
-    }
-
-    if (theShip->attributes & kOnAutoPilot) {
-        if ((gTheseKeys | _gamepad_keys) & (kUpKey | kDownKey | kLeftKey | kRightKey)) {
-            theShip->keysDown = gTheseKeys | kAutoPilotKey;
-        }
-    } else {
-        theShip->keysDown = gTheseKeys | _gamepad_keys;
-        if ((_gamepad_state == NO_BUMPER) && _control_active) {
-            int difference = mAngleDifference(_control_direction, theShip->direction);
-            if (abs(difference) < 15) {
-                // pass
-            } else if (difference < 0) {
-                theShip->keysDown |= kRightKey;
-            } else {
-                theShip->keysDown |= kLeftKey;
-            }
-        }
-    }
-
-    if (std::find(
-                _player_events.begin(), _player_events.end(),
-                PlayerEvent::key_down(kOrderKeyNum)) != _player_events.end()) {
-        theShip->keysDown |= kGiveCommandKey;
-    }
-
-    if ((gTheseKeys & kWarpKey) && (gTheseKeys & kDestinationKey)) {
-        gDestKeyState = DEST_KEY_BLOCKED;
-        if (std::find(
-                    _player_events.begin(), _player_events.end(),
-                    PlayerEvent::key_down(kWarpKeyNum)) != _player_events.end()) {
-            engage_autopilot();
-        }
-        theShip->keysDown &= ~kWarpKey;
-    }
+    handle_destination_key(gTheseKeys);
+    handle_hotkeys(_keys, gTheseKeys);
+    handle_target_keys(_cursor, _player_events, gTheseKeys);
+    handle_pilot_keys(
+            flagship, gTheseKeys, _gamepad_keys, (_gamepad_state == NO_BUMPER) && _control_active,
+            _control_direction);
+    handle_order_key(_player_events);
+    handle_autopilot_keys(_player_events, gTheseKeys);
 
     _player_events.clear();
 }
