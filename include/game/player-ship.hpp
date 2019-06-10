@@ -19,7 +19,7 @@
 #ifndef ANTARES_GAME_PLAYER_SHIP_HPP_
 #define ANTARES_GAME_PLAYER_SHIP_HPP_
 
-#include <set>
+#include <vector>
 
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
@@ -78,10 +78,10 @@ class PlayerShip : public EventReceiver {
   private:
     bool active() const;
 
-    uint32_t              gTheseKeys;
-    uint32_t              _gamepad_keys;
-    std::set<PlayerEvent> _player_events;
-    KeyMap                _keys;
+    uint32_t                 gTheseKeys;
+    uint32_t                 _gamepad_keys;
+    std::vector<PlayerEvent> _player_events;
+    KeyMap                   _keys;
 
     enum GamepadState {
         NO_BUMPER              = 0,

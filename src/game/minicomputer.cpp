@@ -505,31 +505,44 @@ static void minicomputer_handle_move(int direction) {
     } while (line->kind == MINI_NONE);
 }
 
-void minicomputer_handle_keys(std::set<PlayerEvent> player_events) {
-    if ((player_events.find(PlayerEvent::key_down(kCompAcceptKeyNum)) != player_events.end()) ||
-        (player_events.find(PlayerEvent::key_up(kCompAcceptKeyNum)) != player_events.end())) {
-        minicomputer_handle_action(
-                kInLineButton,
-                player_events.find(PlayerEvent::key_down(kCompAcceptKeyNum)) !=
-                        player_events.end(),
-                MiniComputerDoAccept);
-    }
+void minicomputer_handle_event(PlayerEvent e) {
+    switch (e.type) {
+        case PlayerEvent::KEY_DOWN:
+            switch (e.key) {
+                case kCompAcceptKeyNum:
+                    minicomputer_handle_action(kInLineButton, true, MiniComputerDoAccept);
+                    break;
 
-    if ((player_events.find(PlayerEvent::key_down(kCompCancelKeyNum)) != player_events.end()) ||
-        (player_events.find(PlayerEvent::key_up(kCompCancelKeyNum)) != player_events.end())) {
-        minicomputer_handle_action(
-                kOutLineButton,
-                player_events.find(PlayerEvent::key_down(kCompCancelKeyNum)) !=
-                        player_events.end(),
-                MiniComputerDoCancel);
-    }
+                case kCompCancelKeyNum:
+                    minicomputer_handle_action(kOutLineButton, true, MiniComputerDoCancel);
+                    break;
 
-    if (player_events.find(PlayerEvent::key_down(kCompUpKeyNum)) != player_events.end()) {
-        minicomputer_handle_move(-1);
-    }
+                case kCompUpKeyNum: minicomputer_handle_move(-1); break;
+                case kCompDownKeyNum: minicomputer_handle_move(+1); break;
 
-    if (player_events.find(PlayerEvent::key_down(kCompDownKeyNum)) != player_events.end()) {
-        minicomputer_handle_move(+1);
+                default: break;
+            }
+            break;
+
+        case PlayerEvent::KEY_UP:
+            switch (e.key) {
+                case kCompAcceptKeyNum:
+                    minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);
+                    break;
+
+                case kCompCancelKeyNum:
+                    minicomputer_handle_action(kOutLineButton, false, MiniComputerDoCancel);
+                    break;
+
+                default: break;
+            }
+            break;
+    }
+}
+
+void minicomputer_handle_keys(std::vector<PlayerEvent> player_events) {
+    for (const auto& e : player_events) {
+        minicomputer_handle_event(e);
     }
 }
 

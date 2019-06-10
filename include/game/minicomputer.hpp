@@ -20,7 +20,7 @@
 #define ANTARES_GAME_MINICOMPUTER_HPP_
 
 #include <functional>
-#include <set>
+#include <vector>
 
 #include "data/base-object.hpp"
 #include "data/level.hpp"
@@ -59,7 +59,7 @@ void MiniScreenCleanup(void);
 void DisposeMiniScreenStatusStrList(void);
 void ClearMiniScreenLines(void);
 void draw_mini_screen();
-void minicomputer_handle_keys(std::set<PlayerEvent> player_events);
+void minicomputer_handle_keys(std::vector<PlayerEvent> player_events);
 void minicomputer_cancel();
 Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);
