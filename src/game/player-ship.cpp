@@ -463,16 +463,16 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             }
             break;
         case Gamepad::Button::UP:
-            minicomputer_handle_keys({PlayerEvent::key_down(kCompUpKeyNum)});
+            _player_events.push_back(PlayerEvent::key_down(kCompUpKeyNum));
             break;
         case Gamepad::Button::DOWN:
-            minicomputer_handle_keys({PlayerEvent::key_down(kCompDownKeyNum)});
+            _player_events.push_back(PlayerEvent::key_down(kCompDownKeyNum));
             break;
         case Gamepad::Button::RIGHT:
-            minicomputer_handle_keys({PlayerEvent::key_down(kCompAcceptKeyNum)});
+            _player_events.push_back(PlayerEvent::key_down(kCompAcceptKeyNum));
             break;
         case Gamepad::Button::LEFT:
-            minicomputer_handle_keys({PlayerEvent::key_down(kCompCancelKeyNum)});
+            _player_events.push_back(PlayerEvent::key_down(kCompCancelKeyNum));
             break;
         default: break;
     }
@@ -529,10 +529,10 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             }
             break;
         case Gamepad::Button::RIGHT:
-            minicomputer_handle_keys({PlayerEvent::key_up(kCompAcceptKeyNum)});
+            _player_events.push_back(PlayerEvent::key_up(kCompAcceptKeyNum));
             break;
         case Gamepad::Button::LEFT:
-            minicomputer_handle_keys({PlayerEvent::key_up(kCompCancelKeyNum)});
+            _player_events.push_back(PlayerEvent::key_up(kCompCancelKeyNum));
             break;
         default: break;
     }
