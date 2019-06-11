@@ -247,6 +247,17 @@ enum KeyNum {
 
     kFirstHotKeyNum = 34,
 
+    kHotKey1Num  = kFirstHotKeyNum + 0,
+    kHotKey2Num  = kFirstHotKeyNum + 1,
+    kHotKey3Num  = kFirstHotKeyNum + 2,
+    kHotKey4Num  = kFirstHotKeyNum + 3,
+    kHotKey5Num  = kFirstHotKeyNum + 4,
+    kHotKey6Num  = kFirstHotKeyNum + 5,
+    kHotKey7Num  = kFirstHotKeyNum + 6,
+    kHotKey8Num  = kFirstHotKeyNum + 7,
+    kHotKey9Num  = kFirstHotKeyNum + 8,
+    kHotKey10Num = kFirstHotKeyNum + 9,
+
     KEY_COUNT = 44,
 
     kAutoPilotKeyNum = 19,

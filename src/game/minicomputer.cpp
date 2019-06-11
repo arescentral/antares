@@ -525,6 +525,7 @@ void minicomputer_handle_event(PlayerEvent e) {
             break;
 
         case PlayerEvent::KEY_UP:
+        case PlayerEvent::LONG_KEY_UP:
             switch (e.key) {
                 case kCompAcceptKeyNum:
                     minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);

@@ -86,9 +86,8 @@ enum HotKeyState {
 static ANTARES_GLOBAL DestKeyState gDestKeyState = DEST_KEY_UP;
 static ANTARES_GLOBAL wall_time gDestKeyTime;
 
-static ANTARES_GLOBAL HotKeyState gHotKeyState = HOT_KEY_UP;
-static ANTARES_GLOBAL wall_time gHotKeyTime;
-static ANTARES_GLOBAL int       gHotKeyNum;
+static ANTARES_GLOBAL HotKeyState gHotKeyState[10];
+static ANTARES_GLOBAL wall_time gHotKeyTime[10];
 
 static ANTARES_GLOBAL Zoom gPreviousZoomMode;
 
@@ -116,7 +115,8 @@ bool PlayerEvent::operator==(PlayerEvent other) const {
     }
     switch (type) {
         case KEY_DOWN:
-        case KEY_UP: return key == other.key;
+        case KEY_UP:
+        case LONG_KEY_UP: return key == other.key;
     }
 }
 
@@ -126,7 +126,8 @@ bool PlayerEvent::operator<(PlayerEvent other) const {
     }
     switch (type) {
         case KEY_DOWN:
-        case KEY_UP: return key < other.key;
+        case KEY_UP:
+        case LONG_KEY_UP: return key < other.key;
     }
 }
 
@@ -144,7 +145,9 @@ void ResetPlayerShip() {
         globals()->hotKey[h].object   = SpaceObject::none();
         globals()->hotKey[h].objectID = -1;
     }
-    gHotKeyState  = HOT_KEY_UP;
+    for (auto& k : gHotKeyState) {
+        k = HOT_KEY_UP;
+    }
     gDestKeyState = DEST_KEY_UP;
 }
 
@@ -289,6 +292,20 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
+        switch (*key) {
+            case kHotKey1Num: gHotKeyTime[0] = now(); break;
+            case kHotKey2Num: gHotKeyTime[1] = now(); break;
+            case kHotKey3Num: gHotKeyTime[2] = now(); break;
+            case kHotKey4Num: gHotKeyTime[3] = now(); break;
+            case kHotKey5Num: gHotKeyTime[4] = now(); break;
+            case kHotKey6Num: gHotKeyTime[5] = now(); break;
+            case kHotKey7Num: gHotKeyTime[6] = now(); break;
+            case kHotKey8Num: gHotKeyTime[7] = now(); break;
+            case kHotKey9Num: gHotKeyTime[8] = now(); break;
+            case kHotKey10Num: gHotKeyTime[9] = now(); break;
+            case kDestinationKeyNum: gDestKeyTime = now(); break;
+            default: break;
+        }
         _player_events.push_back(PlayerEvent::key_down(*key));
     }
 }
@@ -302,7 +319,28 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
-        _player_events.push_back(PlayerEvent::key_up(*key));
+        bool long_hold = false;
+        switch (*key) {
+            case kHotKey1Num: long_hold = (now() >= gHotKeyTime[0] + kHotKeyHoldDuration); break;
+            case kHotKey2Num: long_hold = (now() >= gHotKeyTime[1] + kHotKeyHoldDuration); break;
+            case kHotKey3Num: long_hold = (now() >= gHotKeyTime[2] + kHotKeyHoldDuration); break;
+            case kHotKey4Num: long_hold = (now() >= gHotKeyTime[3] + kHotKeyHoldDuration); break;
+            case kHotKey5Num: long_hold = (now() >= gHotKeyTime[4] + kHotKeyHoldDuration); break;
+            case kHotKey6Num: long_hold = (now() >= gHotKeyTime[5] + kHotKeyHoldDuration); break;
+            case kHotKey7Num: long_hold = (now() >= gHotKeyTime[6] + kHotKeyHoldDuration); break;
+            case kHotKey8Num: long_hold = (now() >= gHotKeyTime[7] + kHotKeyHoldDuration); break;
+            case kHotKey9Num: long_hold = (now() >= gHotKeyTime[8] + kHotKeyHoldDuration); break;
+            case kHotKey10Num: long_hold = (now() >= gHotKeyTime[9] + kHotKeyHoldDuration); break;
+            case kDestinationKeyNum:
+                long_hold = (now() >= (gDestKeyTime + kDestKeyHoldDuration));
+                break;
+            default: break;
+        }
+        if (long_hold) {
+            _player_events.push_back(PlayerEvent::long_key_up(*key));
+        } else {
+            _player_events.push_back(PlayerEvent::key_up(*key));
+        }
     }
 }
 
@@ -524,68 +562,92 @@ bool PlayerShip::active() const {
     return player.get() && player->active && (player->attributes & kIsPlayerShip);
 }
 
-static void handle_destination_key(int32_t these_keys) {
-    if (these_keys & kDestinationKey) {
-        if (gDestKeyState == DEST_KEY_UP) {
-            gDestKeyState = DEST_KEY_DOWN;
-            gDestKeyTime  = now();
+static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
+    for (const auto& e : player_events) {
+        switch (e.type) {
+            case PlayerEvent::KEY_DOWN:
+                if (e.key == kDestinationKeyNum) {
+                    gDestKeyState = DEST_KEY_DOWN;
+                }
+                break;
+
+            case PlayerEvent::KEY_UP:
+                if (e.key == kDestinationKeyNum) {
+                    gDestKeyState = DEST_KEY_UP;
+                }
+                break;
+
+            case PlayerEvent::LONG_KEY_UP:
+                if (e.key == kDestinationKeyNum) {
+                    if ((gDestKeyState == DEST_KEY_DOWN) &&
+                        (g.ship->attributes & kCanBeDestination)) {
+                        target_self();
+                    }
+                    gDestKeyState = DEST_KEY_UP;
+                }
+                break;
         }
-    } else {
-        if ((gDestKeyState == DEST_KEY_DOWN) && (now() >= (gDestKeyTime + kDestKeyHoldDuration)) &&
-            (g.ship->attributes & kCanBeDestination)) {
-            target_self();
-        }
-        gDestKeyState = DEST_KEY_UP;
     }
 }
 
-static void handle_hotkeys(const KeyMap& keys, int32_t these_keys) {
-    int hot_key = -1;
-    for (int i = 0; i < kHotKeyNum; i++) {
-        if (mCheckKeyMap(keys, kFirstHotKeyNum + i)) {
-            hot_key = i;
-        }
+static int hot_key_index(const PlayerEvent& e) {
+    switch (e.type) {
+        case PlayerEvent::KEY_DOWN:
+        case PlayerEvent::KEY_UP:
+        case PlayerEvent::LONG_KEY_UP:
+            if ((kHotKey1Num <= e.key) && (e.key <= kHotKey10Num)) {
+                return e.key - kFirstHotKeyNum;
+            }
+            break;
     }
+    return -1;
+}
 
-    if (hot_key >= 0) {
-        if (gHotKeyState == HOT_KEY_UP) {
-            gHotKeyTime = now();
-            gHotKeyNum  = hot_key;
-            if (these_keys & kDestinationKey) {
-                gHotKeyState = HOT_KEY_TARGET;
-            } else {
-                gHotKeyState = HOT_KEY_SELECT;
-            }
+static void handle_hotkeys(const std::vector<PlayerEvent>& player_events, int32_t these_keys) {
+    for (const auto& e : player_events) {
+        int i = hot_key_index(e);
+        if (i < 0) {
+            continue;
         }
-    } else if (gHotKeyState != HOT_KEY_UP) {
-        hot_key      = gHotKeyNum;
-        bool target  = gHotKeyState == HOT_KEY_TARGET;
-        gHotKeyState = HOT_KEY_UP;
 
-        if (now() >= gHotKeyTime + kHotKeyHoldDuration) {
-            if (globals()->lastSelectedObject.get()) {
-                auto selectShip = globals()->lastSelectedObject;
-
-                if (selectShip->active) {
-                    globals()->hotKey[hot_key].object   = globals()->lastSelectedObject;
-                    globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
-                    Update_LabelStrings_ForHotKeyChange();
-                    sys.sound.select();
-                }
-            }
-        } else {
-            gDestKeyState = DEST_KEY_BLOCKED;
-            if (globals()->hotKey[hot_key].object.get()) {
-                auto selectShip = globals()->hotKey[hot_key].object;
-                if ((selectShip->active) &&
-                    (selectShip->id == globals()->hotKey[hot_key].objectID)) {
-                    bool is_target = (these_keys & kDestinationKey) ||
-                                     (selectShip->owner != g.admiral) || target;
-                    SetPlayerSelectShip(globals()->hotKey[hot_key].object, is_target, g.admiral);
+        switch (e.type) {
+            case PlayerEvent::KEY_DOWN:
+                if (these_keys & kDestinationKey) {
+                    gHotKeyState[i] = HOT_KEY_TARGET;
                 } else {
-                    globals()->hotKey[hot_key].object = SpaceObject::none();
+                    gHotKeyState[i] = HOT_KEY_SELECT;
                 }
-            }
+                break;
+
+            case PlayerEvent::KEY_UP:
+                gHotKeyState[i] = HOT_KEY_UP;
+                if (globals()->hotKey[i].object.get()) {
+                    bool target     = (gHotKeyState[i] == HOT_KEY_TARGET);
+                    gDestKeyState   = DEST_KEY_BLOCKED;
+                    auto selectShip = globals()->hotKey[i].object;
+                    if ((selectShip->active) &&
+                        (selectShip->id == globals()->hotKey[i].objectID)) {
+                        bool is_target = (these_keys & kDestinationKey) ||
+                                         (selectShip->owner != g.admiral) || target;
+                        SetPlayerSelectShip(globals()->hotKey[i].object, is_target, g.admiral);
+                    } else {
+                        globals()->hotKey[i].object = SpaceObject::none();
+                    }
+                }
+                break;
+
+            case PlayerEvent::LONG_KEY_UP:
+                gHotKeyState[i] = HOT_KEY_UP;
+                if (globals()->lastSelectedObject.get()) {
+                    auto selectShip = globals()->lastSelectedObject;
+                    if (selectShip->active) {
+                        globals()->hotKey[i].object   = globals()->lastSelectedObject;
+                        globals()->hotKey[i].objectID = globals()->lastSelectedObjectID;
+                        Update_LabelStrings_ForHotKeyChange();
+                        sys.sound.select();
+                    }
+                }
+                break;
         }
     }
 }
@@ -696,6 +758,7 @@ void PlayerShip::update(bool enter_message) {
                 break;
 
             case PlayerEvent::KEY_UP:
+            case PlayerEvent::LONG_KEY_UP:
                 if (e.key < kKeyControlNum) {
                     gTheseKeys &= ~((1 << e.key) & ~g.key_mask);
                 }
@@ -799,8 +862,8 @@ void PlayerShip::update(bool enter_message) {
 
     Handle<SpaceObject> flagship = g.ship;  // Pilot same ship even after minicomputer transfer.
     minicomputer_handle_keys(_player_events);
-    handle_destination_key(gTheseKeys);
-    handle_hotkeys(_keys, gTheseKeys);
+    handle_destination_key(_player_events);
+    handle_hotkeys(_player_events, gTheseKeys);
     handle_target_keys(_cursor, _player_events, gTheseKeys);
     handle_pilot_keys(
             flagship, gTheseKeys, _gamepad_keys, (_gamepad_state == NO_BUMPER) && _control_active,

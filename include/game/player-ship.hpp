@@ -32,6 +32,7 @@ struct PlayerEvent {
     enum Type {
         KEY_DOWN,
         KEY_UP,
+        LONG_KEY_UP,
     } type;
     union {
         KeyNum key;
@@ -39,6 +40,7 @@ struct PlayerEvent {
 
     static PlayerEvent key_down(KeyNum k) { return PlayerEvent{KEY_DOWN, {k}}; }
     static PlayerEvent key_up(KeyNum k) { return PlayerEvent{KEY_UP, {k}}; }
+    static PlayerEvent long_key_up(KeyNum k) { return PlayerEvent{LONG_KEY_UP, {k}}; }
 
     bool operator==(PlayerEvent other) const;
     bool operator!=(PlayerEvent other) const { return !(*this == other); }
