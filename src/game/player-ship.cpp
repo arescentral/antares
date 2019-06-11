@@ -562,6 +562,12 @@ bool PlayerShip::active() const {
     return player.get() && player->active && (player->attributes & kIsPlayerShip);
 }
 
+static void block_dest_key() {
+    if (gDestKeyState == DEST_KEY_DOWN) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+    }
+}
+
 static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
         switch (e.type) {
@@ -632,10 +638,8 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
                     } else {
                         globals()->hotKey[i].object = SpaceObject::none();
                     }
-                    if (gDestKeyState == DEST_KEY_DOWN) {
-                        gDestKeyState = DEST_KEY_BLOCKED;
-                    }
                 }
+                block_dest_key();
                 break;
 
             case PlayerEvent::LONG_KEY_UP:
@@ -681,9 +685,7 @@ static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
 
             default: continue;
         }
-        if (gDestKeyState == DEST_KEY_DOWN) {
-            gDestKeyState = DEST_KEY_BLOCKED;
-        }
+        block_dest_key();
     }
 }
 
@@ -723,7 +725,7 @@ static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events)
             (gDestKeyState != DEST_KEY_UP)) {
             engage_autopilot();
             g.ship->keysDown &= ~kWarpKey;
-            gDestKeyState = DEST_KEY_BLOCKED;
+            block_dest_key();
         }
     }
 }
@@ -925,9 +927,7 @@ void PlayerShipHandleClick(Point where, int button) {
             }
         }
     }
-    if (gDestKeyState == DEST_KEY_DOWN) {
-        gDestKeyState = DEST_KEY_BLOCKED;
-    }
+    block_dest_key();
 }
 
 void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
@@ -937,9 +937,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
     if (adm == g.admiral) {
         globals()->lastSelectedObject   = ship;
         globals()->lastSelectedObjectID = ship->id;
-        if (gDestKeyState == DEST_KEY_DOWN) {
-            gDestKeyState = DEST_KEY_BLOCKED;
-        }
+        block_dest_key();
     }
     if (target) {
         adm->set_target(ship);
