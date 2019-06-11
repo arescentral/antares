@@ -562,10 +562,11 @@ bool PlayerShip::active() const {
     return player.get() && player->active && (player->attributes & kIsPlayerShip);
 }
 
-static void block_dest_key() {
+static bool use_target_key() {
     if (gDestKeyState == DEST_KEY_DOWN) {
         gDestKeyState = DEST_KEY_BLOCKED;
     }
+    return gDestKeyState == DEST_KEY_BLOCKED;
 }
 
 static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
@@ -625,22 +626,21 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
                 }
                 break;
 
-            case PlayerEvent::KEY_UP:
+            case PlayerEvent::KEY_UP: {
                 gHotKeyState[i] = HOT_KEY_UP;
+                bool target     = use_target_key();
                 if (globals()->hotKey[i].object.get()) {
-                    bool target     = (gHotKeyState[i] == HOT_KEY_TARGET);
+                    target          = target || (gHotKeyState[i] == HOT_KEY_TARGET);
                     auto selectShip = globals()->hotKey[i].object;
                     if ((selectShip->active) &&
                         (selectShip->id == globals()->hotKey[i].objectID)) {
-                        bool is_target = (gDestKeyState != DEST_KEY_UP) ||
-                                         (selectShip->owner != g.admiral) || target;
-                        SetPlayerSelectShip(globals()->hotKey[i].object, is_target, g.admiral);
+                        target = target || (selectShip->owner != g.admiral);
+                        SetPlayerSelectShip(globals()->hotKey[i].object, target, g.admiral);
                     } else {
                         globals()->hotKey[i].object = SpaceObject::none();
                     }
                 }
-                block_dest_key();
-                break;
+            } break;
 
             case PlayerEvent::LONG_KEY_UP:
                 gHotKeyState[i] = HOT_KEY_UP;
@@ -666,26 +666,28 @@ static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
         }
         switch (e.key) {
             case kSelectFriendKeyNum:
-                if (gDestKeyState == DEST_KEY_UP) {
-                    select_friendly(g.ship, g.ship->direction);
-                } else {
+                if (use_target_key()) {
                     target_friendly(g.ship, g.ship->direction);
+                } else {
+                    select_friendly(g.ship, g.ship->direction);
                 }
                 break;
 
-            case kSelectFoeKeyNum: target_hostile(g.ship, g.ship->direction); break;
+            case kSelectFoeKeyNum:
+                use_target_key();
+                target_hostile(g.ship, g.ship->direction);
+                break;
 
             case kSelectBaseKeyNum:
-                if (gDestKeyState == DEST_KEY_UP) {
-                    select_base(g.ship, g.ship->direction);
-                } else {
+                if (use_target_key()) {
                     target_base(g.ship, g.ship->direction);
+                } else {
+                    select_base(g.ship, g.ship->direction);
                 }
                 break;
 
             default: continue;
         }
-        block_dest_key();
     }
 }
 
@@ -721,11 +723,9 @@ static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
 
 static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kWarpKeyNum) &&
-            (gDestKeyState != DEST_KEY_UP)) {
+        if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kWarpKeyNum) && use_target_key()) {
             engage_autopilot();
             g.ship->keysDown &= ~kWarpKey;
-            block_dest_key();
         }
     }
 }
@@ -900,6 +900,7 @@ void PlayerShipHandleClick(Point where, int button) {
         return;
     }
 
+    bool target = use_target_key() || (button == 1);
     if (g.ship.get()) {
         if ((g.ship->active) && (g.ship->attributes & kIsPlayerShip)) {
             Rect bounds = {
@@ -909,7 +910,7 @@ void PlayerShipHandleClick(Point where, int button) {
                     where.v + kCursorBoundsSize,
             };
 
-            if ((gDestKeyState != DEST_KEY_UP) || (button == 1)) {
+            if (target) {
                 auto target        = g.admiral->target();
                 auto selectShipNum = GetSpritePointSelectObject(
                         &bounds, g.ship, kCanBeDestination | kIsDestination, target,
@@ -927,7 +928,6 @@ void PlayerShipHandleClick(Point where, int button) {
             }
         }
     }
-    block_dest_key();
 }
 
 void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
@@ -937,7 +937,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
     if (adm == g.admiral) {
         globals()->lastSelectedObject   = ship;
         globals()->lastSelectedObjectID = ship->id;
-        block_dest_key();
+        use_target_key();
     }
     if (target) {
         adm->set_target(ship);
