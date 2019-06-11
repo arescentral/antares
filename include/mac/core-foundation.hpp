@@ -83,7 +83,7 @@ class Object : public UnownedObject<T> {
 template <typename To, typename From>
 To cast(From from) {
     if (CFGetTypeID(from.c_obj()) == To::type_id()) {
-        return To(reinterpret_cast<typename To::type>(from.release()));
+        return To{reinterpret_cast<typename To::type>(from.release())};
     }
     return nullptr;
 }
