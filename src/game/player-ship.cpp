@@ -712,15 +712,14 @@ static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
     }
 }
 
-static void handle_autopilot_keys(
-        const std::vector<PlayerEvent>& player_events, int32_t these_keys) {
-    if ((these_keys & kWarpKey) && (gDestKeyState != DEST_KEY_UP)) {
-        auto begin = player_events.begin(), end = player_events.end();
-        if (std::find(begin, end, PlayerEvent::key_down(kWarpKeyNum)) != end) {
+static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events) {
+    for (const auto& e : player_events) {
+        if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kWarpKeyNum) &&
+            (gDestKeyState != DEST_KEY_UP)) {
             engage_autopilot();
+            g.ship->keysDown &= ~kWarpKey;
+            gDestKeyState = DEST_KEY_BLOCKED;
         }
-        g.ship->keysDown &= ~kWarpKey;
-        gDestKeyState = DEST_KEY_BLOCKED;
     }
 }
 
@@ -872,7 +871,7 @@ void PlayerShip::update(bool enter_message) {
             flagship, gTheseKeys, _gamepad_keys, (_gamepad_state == NO_BUMPER) && _control_active,
             _control_direction);
     handle_order_key(_player_events);
-    handle_autopilot_keys(_player_events, gTheseKeys);
+    handle_autopilot_keys(_player_events);
 
     _player_events.clear();
 }
