@@ -656,26 +656,34 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
 
 static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    const auto begin = player_events.begin(), end = player_events.end();
-    if (std::find(begin, end, PlayerEvent::key_down(kSelectFriendKeyNum)) != end) {
-        if (gDestKeyState == DEST_KEY_UP) {
-            select_friendly(g.ship, g.ship->direction);
-        } else {
-            target_friendly(g.ship, g.ship->direction);
+    for (const auto& e : player_events) {
+        if (e.type != PlayerEvent::KEY_DOWN) {
+            continue;
         }
-    } else if (find(begin, end, PlayerEvent::key_down(kSelectFoeKeyNum)) != end) {
-        target_hostile(g.ship, g.ship->direction);
-    } else if (find(begin, end, PlayerEvent::key_down(kSelectBaseKeyNum)) != end) {
-        if (gDestKeyState == DEST_KEY_UP) {
-            select_base(g.ship, g.ship->direction);
-        } else {
-            target_base(g.ship, g.ship->direction);
+        switch (e.key) {
+            case kSelectFriendKeyNum:
+                if (gDestKeyState == DEST_KEY_UP) {
+                    select_friendly(g.ship, g.ship->direction);
+                } else {
+                    target_friendly(g.ship, g.ship->direction);
+                }
+                break;
+
+            case kSelectFoeKeyNum: target_hostile(g.ship, g.ship->direction); break;
+
+            case kSelectBaseKeyNum:
+                if (gDestKeyState == DEST_KEY_UP) {
+                    select_base(g.ship, g.ship->direction);
+                } else {
+                    target_base(g.ship, g.ship->direction);
+                }
+                break;
+
+            default: continue;
         }
-    } else {
-        return;
-    }
-    if (gDestKeyState == DEST_KEY_DOWN) {
-        gDestKeyState = DEST_KEY_BLOCKED;
+        if (gDestKeyState == DEST_KEY_DOWN) {
+            gDestKeyState = DEST_KEY_BLOCKED;
+        }
     }
 }
 
@@ -702,9 +710,10 @@ static void handle_pilot_keys(
 }
 
 static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
-    auto begin = player_events.begin(), end = player_events.end();
-    if (std::find(begin, end, PlayerEvent::key_down(kOrderKeyNum)) != end) {
-        g.ship->keysDown |= kGiveCommandKey;
+    for (const auto& e : player_events) {
+        if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kOrderKeyNum)) {
+            g.ship->keysDown |= kGiveCommandKey;
+        }
     }
 }
 
