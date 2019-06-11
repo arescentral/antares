@@ -654,11 +654,7 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
     }
 }
 
-static void handle_target_keys(
-        const GameCursor& cursor, const std::vector<PlayerEvent>& player_events) {
-    if (cursor.active()) {
-        return;
-    }
+static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     const auto begin = player_events.begin(), end = player_events.end();
     if (std::find(begin, end, PlayerEvent::key_down(kSelectFriendKeyNum)) != end) {
@@ -866,7 +862,9 @@ void PlayerShip::update(bool enter_message) {
     minicomputer_handle_keys(_player_events);
     handle_destination_key(_player_events);
     handle_hotkeys(_player_events);
-    handle_target_keys(_cursor, _player_events);
+    if (!_cursor.active()) {
+        handle_target_keys(_player_events);
+    }
     handle_pilot_keys(
             flagship, gTheseKeys, _gamepad_keys, (_gamepad_state == NO_BUMPER) && _control_active,
             _control_direction);
