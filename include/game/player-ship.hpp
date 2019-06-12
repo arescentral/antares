@@ -102,8 +102,6 @@ class PlayerShip : public EventReceiver {
 
 void ResetPlayerShip();
 void PlayerShipHandleClick(Point where, int button);
-void SetPlayerSelectShip(
-        Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);
 void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip);
 void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);

@@ -214,8 +214,38 @@ static void engage_autopilot() {
     player->keysDown |= kAdoptTargetKey;
 }
 
+static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
+    Handle<SpaceObject> flagship = adm->flagship();
+    Handle<Label>       label;
+
+    if (adm == g.admiral) {
+        globals()->lastSelectedObject   = ship;
+        globals()->lastSelectedObjectID = ship->id;
+    }
+    if (target) {
+        adm->set_target(ship);
+        label = g.target_label;
+
+        if (!(flagship->attributes & kOnAutoPilot)) {
+            SetObjectDestination(flagship);
+        }
+    } else {
+        adm->set_control(ship);
+        label = g.control_label;
+    }
+
+    if (adm == g.admiral) {
+        sys.sound.select();
+        label->set_object(ship);
+        if (ship == g.ship) {
+            label->set_age(Label::kVisibleTime);
+        }
+        label->set_string(name_with_hot_key_suffix(ship));
+    }
+}
+
 static void pick_object(
-        Handle<SpaceObject> origin_ship, int32_t direction, bool destination, int32_t attributes,
+        Handle<SpaceObject> origin_ship, int32_t direction, bool target, int32_t attributes,
         int32_t nonattributes, Handle<SpaceObject> select_ship, Allegiance allegiance) {
     uint64_t huge_distance;
     if (select_ship.get()) {
@@ -245,11 +275,7 @@ static void pick_object(
             allegiance);
 
     if (select_ship.get()) {
-        if (destination) {
-            SetPlayerSelectShip(select_ship, true, g.admiral);
-        } else {
-            SetPlayerSelectShip(select_ship, false, g.admiral);
-        }
+        select_object(select_ship, target, g.admiral);
     }
 }
 
@@ -281,7 +307,7 @@ static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
             FRIENDLY_OR_HOSTILE);
 }
 
-static void target_self() { SetPlayerSelectShip(g.ship, true, g.admiral); }
+static void target_self() { select_object(g.ship, true, g.admiral); }
 
 static bool use_target_key() {
     if (gDestKeyState == DEST_KEY_DOWN) {
@@ -636,7 +662,7 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
                     if ((selectShip->active) &&
                         (selectShip->id == globals()->hotKey[i].objectID)) {
                         target = target || (selectShip->owner != g.admiral);
-                        SetPlayerSelectShip(globals()->hotKey[i].object, target, g.admiral);
+                        select_object(globals()->hotKey[i].object, target, g.admiral);
                     } else {
                         globals()->hotKey[i].object = SpaceObject::none();
                     }
@@ -916,48 +942,17 @@ void PlayerShipHandleClick(Point where, int button) {
                         &bounds, g.ship, kCanBeDestination | kIsDestination, target,
                         FRIENDLY_OR_HOSTILE);
                 if (selectShipNum.get()) {
-                    SetPlayerSelectShip(selectShipNum, true, g.admiral);
+                    select_object(selectShipNum, true, g.admiral);
                 }
             } else {
                 auto control       = g.admiral->control();
                 auto selectShipNum = GetSpritePointSelectObject(
                         &bounds, g.ship, kCanBeDestination | kIsDestination, control, FRIENDLY);
                 if (selectShipNum.get()) {
-                    SetPlayerSelectShip(selectShipNum, false, g.admiral);
+                    select_object(selectShipNum, false, g.admiral);
                 }
             }
         }
-    }
-}
-
-void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
-    Handle<SpaceObject> flagship = adm->flagship();
-    Handle<Label>       label;
-
-    if (adm == g.admiral) {
-        globals()->lastSelectedObject   = ship;
-        globals()->lastSelectedObjectID = ship->id;
-        use_target_key();
-    }
-    if (target) {
-        adm->set_target(ship);
-        label = g.target_label;
-
-        if (!(flagship->attributes & kOnAutoPilot)) {
-            SetObjectDestination(flagship);
-        }
-    } else {
-        adm->set_control(ship);
-        label = g.control_label;
-    }
-
-    if (adm == g.admiral) {
-        sys.sound.select();
-        label->set_object(ship);
-        if (ship == g.ship) {
-            label->set_age(Label::kVisibleTime);
-        }
-        label->set_string(name_with_hot_key_suffix(ship));
     }
 }
 
