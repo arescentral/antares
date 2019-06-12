@@ -283,6 +283,13 @@ static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
 
 static void target_self() { SetPlayerSelectShip(g.ship, true, g.admiral); }
 
+static bool use_target_key() {
+    if (gDestKeyState == DEST_KEY_DOWN) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+    }
+    return gDestKeyState == DEST_KEY_BLOCKED;
+}
+
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
 
@@ -304,6 +311,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kHotKey9Num: gHotKeyTime[8] = now(); break;
             case kHotKey10Num: gHotKeyTime[9] = now(); break;
             case kDestinationKeyNum: gDestKeyTime = now(); break;
+            case kWarpKeyNum: *key = use_target_key() ? kAutoPilot2KeyNum : kWarpKeyNum; break;
             default: break;
         }
         _player_events.push_back(PlayerEvent::key_down(*key));
@@ -562,13 +570,6 @@ bool PlayerShip::active() const {
     return player.get() && player->active && (player->attributes & kIsPlayerShip);
 }
 
-static bool use_target_key() {
-    if (gDestKeyState == DEST_KEY_DOWN) {
-        gDestKeyState = DEST_KEY_BLOCKED;
-    }
-    return gDestKeyState == DEST_KEY_BLOCKED;
-}
-
 static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
         switch (e.type) {
@@ -723,10 +724,7 @@ static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
 
 static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kWarpKeyNum) && use_target_key()) {
-            engage_autopilot();
-            g.ship->keysDown &= ~kWarpKey;
-        } else if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kAutoPilot2KeyNum)) {
+        if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kAutoPilot2KeyNum)) {
             engage_autopilot();
         }
     }
