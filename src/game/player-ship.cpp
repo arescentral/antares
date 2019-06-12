@@ -338,6 +338,13 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kHotKey10Num: gHotKeyTime[9] = now(); break;
             case kDestinationKeyNum: gDestKeyTime = now(); break;
             case kWarpKeyNum: *key = use_target_key() ? kAutoPilot2KeyNum : kWarpKeyNum; break;
+            case kSelectFriendKeyNum:
+                *key = use_target_key() ? kTargetFriendKeyNum : kSelectFriendKeyNum;
+                break;
+            case kSelectFoeKeyNum: use_target_key(); break;
+            case kSelectBaseKeyNum:
+                *key = use_target_key() ? kTargetBaseKeyNum : kSelectBaseKeyNum;
+                break;
             default: break;
         }
         _player_events.push_back(PlayerEvent::key_down(*key));
@@ -692,27 +699,11 @@ static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
             continue;
         }
         switch (e.key) {
-            case kSelectFriendKeyNum:
-                if (use_target_key()) {
-                    target_friendly(g.ship, g.ship->direction);
-                } else {
-                    select_friendly(g.ship, g.ship->direction);
-                }
-                break;
-
-            case kSelectFoeKeyNum:
-                use_target_key();
-                target_hostile(g.ship, g.ship->direction);
-                break;
-
-            case kSelectBaseKeyNum:
-                if (use_target_key()) {
-                    target_base(g.ship, g.ship->direction);
-                } else {
-                    select_base(g.ship, g.ship->direction);
-                }
-                break;
-
+            case kSelectFriendKeyNum: select_friendly(g.ship, g.ship->direction); break;
+            case kTargetFriendKeyNum: target_friendly(g.ship, g.ship->direction); break;
+            case kSelectFoeKeyNum: target_hostile(g.ship, g.ship->direction); break;
+            case kSelectBaseKeyNum: select_base(g.ship, g.ship->direction); break;
+            case kTargetBaseKeyNum: target_base(g.ship, g.ship->direction); break;
             default: continue;
         }
     }
