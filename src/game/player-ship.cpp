@@ -433,7 +433,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 if (_gamepad_state & SELECT_BUMPER) {
                     _player_events.push_back(PlayerEvent::key_down(kOrderKeyNum));
                 } else {
-                    _player_events.push_back(PlayerEvent::key_down(kAutoPilotKeyNum));
+                    _player_events.push_back(PlayerEvent::key_down(kAutoPilot2KeyNum));
                 }
                 return;
             case Gamepad::Button::LSB:
@@ -489,7 +489,7 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             }
             return;
         case Gamepad::Button::RB:
-            _player_events.push_back(PlayerEvent::key_up(kAutoPilotKeyNum));
+            _player_events.push_back(PlayerEvent::key_up(kAutoPilot2KeyNum));
             if (_gamepad_state & OVERRIDE) {
                 _gamepad_state = TARGET_BUMPER;
             } else {
@@ -511,7 +511,7 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             case Gamepad::Button::LSB: return;
             case Gamepad::Button::Y:
                 _player_events.push_back(PlayerEvent::key_up(kOrderKeyNum));
-                _player_events.push_back(PlayerEvent::key_up(kAutoPilotKeyNum));
+                _player_events.push_back(PlayerEvent::key_up(kAutoPilot2KeyNum));
                 return;
             default: break;
         }
@@ -726,6 +726,8 @@ static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events)
         if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kWarpKeyNum) && use_target_key()) {
             engage_autopilot();
             g.ship->keysDown &= ~kWarpKey;
+        } else if ((e.type == PlayerEvent::KEY_DOWN) && (e.key == kAutoPilot2KeyNum)) {
+            engage_autopilot();
         }
     }
 }

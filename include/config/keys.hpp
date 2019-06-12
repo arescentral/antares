@@ -260,7 +260,8 @@ enum KeyNum {
 
     KEY_COUNT = 44,
 
-    kAutoPilotKeyNum = 19,
+    kAutoPilotKeyNum  = 19,  // For autopilot key flag (conflicts with zoom)
+    kAutoPilot2KeyNum = 44,  // For autopilot key event
 };
 
 enum {
