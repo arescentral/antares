@@ -258,10 +258,11 @@ enum KeyNum {
     kHotKey9Num  = kFirstHotKeyNum + 8,
     kHotKey10Num = kFirstHotKeyNum + 9,
 
-    KEY_COUNT = 44,
+    KEY_COUNT = 44,  // Number of real keys that can be set in prefs
 
-    kAutoPilotKeyNum    = 19,  // For autopilot key flag (conflicts with zoom)
-    kAutoPilot2KeyNum   = 44,  // For autopilot key event
+    // Virtual keys used in PlayerEvents follow
+
+    kAutoPilot2KeyNum   = 44,
     kTargetFriendKeyNum = 45,
     kTargetBaseKeyNum   = 46,
 
