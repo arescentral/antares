@@ -1169,86 +1169,49 @@ int32_t MiniComputerGetStatusValue(int32_t whichLine) {
 }
 
 void MiniComputerHandleClick(Point where) {
-    Rect                mRect;
-    int32_t             lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
-    miniScreenLineType* line;
-
-    line  = g.mini.lineData.get();
-    scrap = 0;
-    while (scrap < kMiniScreenTrueLineNum) {
-        if (line->whichButton == kInLineButton) {
-            inLineButtonLine = scrap;
-        } else if (line->whichButton == kOutLineButton) {
-            outLineButtonLine = scrap;
-        }
-        scrap++;
-        line++;
-    }
-
-    mRect =
-            Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
-                 kButBoxBottom + instrument_top());
-
     // if click is in button screen
-    if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
-                  kMiniScreenCharHeight;
-        g.mini.clickLine = lineNum;
-        line             = g.mini.lineData.get() + lineNum;
+    if (Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
+             kButBoxBottom + instrument_top())
+                .contains(where)) {
+        int lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
+                      kMiniScreenCharHeight;
+        g.mini.clickLine         = lineNum;
+        miniScreenLineType* line = g.mini.lineData.get() + lineNum;
         if (line->whichButton == kInLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 sys.sound.click();
             }
-            if (outLineButtonLine >= 0) {
-                line = g.mini.lineData.get() + outLineButtonLine;
-                if (line->kind != MINI_BUTTON_OFF) {
-                    line->kind = MINI_BUTTON_OFF;
-                }
+            if (g.mini.lineData[11].whichButton == kOutLineButton) {
+                g.mini.lineData[11].kind = MINI_BUTTON_OFF;
             }
         } else if (line->whichButton == kOutLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 sys.sound.click();
             }
-            if (inLineButtonLine >= 0) {
-                line = g.mini.lineData.get() + inLineButtonLine;
-                if (line->kind != MINI_BUTTON_OFF) {
-                    line->kind = MINI_BUTTON_OFF;
-                }
+            if (g.mini.lineData[10].whichButton == kOutLineButton) {
+                g.mini.lineData[10].kind = MINI_BUTTON_OFF;
             }
         }
     } else {
         // make sure both buttons are off
-        if (inLineButtonLine >= 0) {
-            line = g.mini.lineData.get() + inLineButtonLine;
-            if (line->kind != MINI_BUTTON_OFF) {
-                line->kind = MINI_BUTTON_OFF;
-            }
+        if (g.mini.lineData[10].whichButton == kOutLineButton) {
+            g.mini.lineData[10].kind = MINI_BUTTON_OFF;
         }
-        if (outLineButtonLine >= 0) {
-            line = g.mini.lineData.get() + outLineButtonLine;
-            if (line->kind != MINI_BUTTON_OFF) {
-                line->kind = MINI_BUTTON_OFF;
-            }
+        if (g.mini.lineData[11].whichButton == kOutLineButton) {
+            g.mini.lineData[11].kind = MINI_BUTTON_OFF;
         }
-
-        mRect =
-                Rect(kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
-                     kMiniScreenBottom + instrument_top());
 
         // if click is in main menu screen
-        if (mRect.contains(where)) {
-            if (g.mini.selectLine != kMiniScreenNoLineSelected) {
-                line = g.mini.lineData.get() + g.mini.selectLine;
-            }
-
-            lineNum          = mGetLineNumFromV(where.v);
-            g.mini.clickLine = lineNum;
-            line             = g.mini.lineData.get() + lineNum;
+        if (Rect(kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
+                 kMiniScreenBottom + instrument_top())
+                    .contains(where)) {
+            int lineNum              = mGetLineNumFromV(where.v);
+            g.mini.clickLine         = lineNum;
+            miniScreenLineType* line = g.mini.lineData.get() + lineNum;
             if ((line->kind == MINI_SELECTABLE) || (line->kind == MINI_DIM)) {
                 g.mini.selectLine = lineNum;
-                line              = g.mini.lineData.get() + g.mini.selectLine;
             }
         } else {
             g.mini.clickLine = kMiniScreenNoLineSelected;
@@ -1257,86 +1220,50 @@ void MiniComputerHandleClick(Point where) {
 }
 
 void MiniComputerHandleDoubleClick(Point where) {
-    Rect                mRect;
-    int32_t             lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
-    miniScreenLineType* line;
-
-    line  = g.mini.lineData.get();
-    scrap = 0;
-    while (scrap < kMiniScreenTrueLineNum) {
-        if (line->whichButton == kInLineButton) {
-            inLineButtonLine = scrap;
-        } else if (line->whichButton == kOutLineButton) {
-            outLineButtonLine = scrap;
-        }
-        scrap++;
-        line++;
-    }
-
-    mRect =
-            Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
-                 kButBoxBottom + instrument_top());
-
     // if click is in button screen
-    if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
-                  kMiniScreenCharHeight;
-        line = g.mini.lineData.get() + lineNum;
+    if (Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
+             kButBoxBottom + instrument_top())
+                .contains(where)) {
+        int lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
+                      kMiniScreenCharHeight;
+        miniScreenLineType* line = g.mini.lineData.get() + lineNum;
         if (line->whichButton == kInLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 sys.sound.click();
             }
-            if (outLineButtonLine >= 0) {
-                line = g.mini.lineData.get() + outLineButtonLine;
-                if (line->kind != MINI_BUTTON_OFF) {
-                    line->kind = MINI_BUTTON_OFF;
-                }
+            if (g.mini.lineData[11].whichButton == kOutLineButton) {
+                g.mini.lineData[11].kind = MINI_BUTTON_OFF;
             }
         } else if (line->whichButton == kOutLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 sys.sound.click();
             }
-            if (inLineButtonLine >= 0) {
-                line = g.mini.lineData.get() + inLineButtonLine;
-                if (line->kind != MINI_BUTTON_OFF) {
-                    line->kind = MINI_BUTTON_OFF;
-                }
+            if (g.mini.lineData[10].whichButton == kOutLineButton) {
+                g.mini.lineData[10].kind = MINI_BUTTON_OFF;
             }
         }
     } else {
         // make sure both buttons are off
-        if (inLineButtonLine >= 0) {
-            line = g.mini.lineData.get() + inLineButtonLine;
-            if (line->kind != MINI_BUTTON_OFF) {
-                line->kind = MINI_BUTTON_OFF;
-            }
+        if (g.mini.lineData[10].whichButton == kOutLineButton) {
+            g.mini.lineData[10].kind = MINI_BUTTON_OFF;
         }
-        if (outLineButtonLine >= 0) {
-            line = g.mini.lineData.get() + outLineButtonLine;
-            if (line->kind != MINI_BUTTON_OFF) {
-                line->kind = MINI_BUTTON_OFF;
-            }
+        if (g.mini.lineData[11].whichButton == kOutLineButton) {
+            g.mini.lineData[11].kind = MINI_BUTTON_OFF;
         }
-
-        mRect =
-                Rect(kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
-                     kMiniScreenBottom + instrument_top());
 
         // if click is in main menu screen
-        if (mRect.contains(where)) {
-            lineNum = mGetLineNumFromV(where.v);
+        if (Rect(kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
+                 kMiniScreenBottom + instrument_top())
+                    .contains(where)) {
+            int lineNum = mGetLineNumFromV(where.v);
             if (lineNum == g.mini.selectLine) {
                 sys.sound.click();
                 MiniComputerDoAccept();
             } else {
-                if (g.mini.selectLine != kMiniScreenNoLineSelected) {
-                    line = g.mini.lineData.get() + g.mini.selectLine;
-                }
-
-                lineNum = mGetLineNumFromV(where.v);
-                line    = g.mini.lineData.get() + lineNum;
+                lineNum                  = mGetLineNumFromV(where.v);
+                miniScreenLineType* line = g.mini.lineData.get() + lineNum;
                 if ((line->kind == MINI_SELECTABLE) || (line->kind == MINI_DIM)) {
                     g.mini.selectLine = lineNum;
 
@@ -1348,19 +1275,14 @@ void MiniComputerHandleDoubleClick(Point where) {
 }
 
 void MiniComputerHandleMouseUp(Point where) {
-    Rect                mRect;
-    int32_t             lineNum;
-    miniScreenLineType* line;
-
-    mRect =
-            Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
-                 kButBoxBottom + instrument_top());
-
     // if click is in button screen
-    if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
-                  kMiniScreenCharHeight;
-        line = g.mini.lineData.get() + lineNum;
+    if (Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
+             kButBoxBottom + instrument_top())
+                .contains(where)) {
+        int32_t lineNum =
+                ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
+                kMiniScreenCharHeight;
+        miniScreenLineType* line = g.mini.lineData.get() + lineNum;
         if (line->whichButton == kInLineButton) {
             if (line->kind == MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_OFF;
@@ -1376,55 +1298,31 @@ void MiniComputerHandleMouseUp(Point where) {
 }
 
 void MiniComputerHandleMouseStillDown(Point where) {
-    Rect                mRect;
-    int32_t             lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
-    miniScreenLineType* line;
-
-    line  = g.mini.lineData.get();
-    scrap = 0;
-    while (scrap < kMiniScreenTrueLineNum) {
-        if (line->whichButton == kInLineButton) {
-            inLineButtonLine = scrap;
-        } else if (line->whichButton == kOutLineButton) {
-            outLineButtonLine = scrap;
-        }
-        scrap++;
-        line++;
-    }
-
-    mRect =
-            Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
-                 kButBoxBottom + instrument_top());
-
     // if click is in button screen
-    if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
-                  kMiniScreenCharHeight;
-        line = g.mini.lineData.get() + lineNum;
+    if (Rect(kButBoxLeft, kButBoxTop + instrument_top(), kButBoxRight,
+             kButBoxBottom + instrument_top())
+                .contains(where)) {
+        int lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
+                      kMiniScreenCharHeight;
+        miniScreenLineType* line = g.mini.lineData.get() + lineNum;
         if ((line->whichButton == kInLineButton) && (lineNum == g.mini.clickLine)) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
             }
+            return;
         } else if ((line->whichButton == kOutLineButton) && (lineNum == g.mini.clickLine)) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
             }
-        } else {
-            lineNum = -1;
+            return;
         }
-    } else {
-        lineNum = -1;
     }
 
-    if (lineNum == -1) {
-        line = g.mini.lineData.get() + inLineButtonLine;
-        if (line->kind == MINI_BUTTON_ON) {
-            line->kind = MINI_BUTTON_OFF;
-        }
-        line = g.mini.lineData.get() + outLineButtonLine;
-        if (line->kind == MINI_BUTTON_ON) {
-            line->kind = MINI_BUTTON_OFF;
-        }
+    if (g.mini.lineData[10].whichButton == kInLineButton) {
+        g.mini.lineData[10].kind = MINI_BUTTON_OFF;
+    }
+    if (g.mini.lineData[11].whichButton == kOutLineButton) {
+        g.mini.lineData[11].kind = MINI_BUTTON_OFF;
     }
 }
 
