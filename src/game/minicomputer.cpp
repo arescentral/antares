@@ -62,9 +62,7 @@ const int32_t kMiniScreenWidth  = kMiniScreenRight - kMiniScreenLeft;
 
 const int32_t kMiniScreenLeftBuffer = 3;
 
-const int32_t kMiniScreenCharHeight  = 10;  // height of the screen in characters
-const int32_t kMiniScreenButtonNum   = 2;
-const int32_t kMiniScreenTrueLineNum = kMiniScreenCharHeight + kMiniScreenButtonNum;
+const int32_t kMiniScreenCharHeight = 10;  // height of the screen in characters
 
 const int32_t kButBoxLeft   = 16;
 const int32_t kButBoxTop    = 450;
@@ -204,7 +202,7 @@ void MiniScreenInit() {
     g.mini.currentScreen = Screen::MAIN;
     g.mini.clickLine     = kMiniScreenNoLineSelected;
 
-    g.mini.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
+    g.mini.lineData.reset(new miniScreenLineType[kMiniScreenCharHeight + 2]);
 
     ClearMiniScreenLines();
 }
@@ -216,17 +214,21 @@ void MiniScreenCleanup() {
 
 #pragma mark -
 
+static void clear_line(miniScreenLineType* line) {
+    line->string.clear();
+    line->whichButton = kNoLineButton;
+    line->kind        = MINI_NONE;
+    line->underline   = false;
+    line->sourceData  = nullptr;
+    line->callback    = nullptr;
+}
+
 void ClearMiniScreenLines() {
-    miniScreenLineType* c = g.mini.lineData.get();
-    for (int32_t b = 0; b < kMiniScreenTrueLineNum; b++) {
-        c->string.clear();
-        c->whichButton = kNoLineButton;
-        c->kind        = MINI_NONE;
-        c->underline   = false;
-        c->sourceData  = nullptr;
-        c->callback    = nullptr;
-        c++;
+    for (int32_t i = 0; i < kMiniScreenCharHeight; i++) {
+        clear_line(&g.mini.lineData[i]);
     }
+    clear_line(&g.mini.lineData[10]);
+    clear_line(&g.mini.lineData[11]);
 }
 
 static void underline(const Rects& rects, int line) {
@@ -265,47 +267,49 @@ static void item_text(const Quads& quads, int line, pn::string_view string, bool
     sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
-static void button_on(const Rects& rects, int line) {
+static void button_on(const Rects& rects, const miniScreenLineType& button) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left   = rect.left + kMiniScreenLeftBuffer - 2;
-    hilite_rect.top    = rect.top + (line * sys.fonts.computer.height);
+    hilite_rect.top    = rect.top + (button.whichButton * sys.fonts.computer.height);
     hilite_rect.right  = rect.right;
     hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, LIGHT, LIGHTEST, MEDIUM);
 }
 
-static void button_off(const Rects& rects, int line) {
+static void button_off(const Rects& rects, const miniScreenLineType& button) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left = rect.left + kMiniScreenLeftBuffer - 2;
-    hilite_rect.top  = rect.top + (line * sys.fonts.computer.height);
+    hilite_rect.top  = rect.top + (button.whichButton * sys.fonts.computer.height);
     hilite_rect.right =
             rect.left + kMiniScreenLeftBuffer + sys.fonts.computer.logicalWidth * 4 + 1;
     hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, MEDIUM, LIGHT, DARK);
 }
 
-static void button_on_text(const Quads& quads, int line, pn::string_view string) {
+static void button_on_text(const Quads& quads, const miniScreenLineType& button) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
+            kMiniScreenLeftBuffer,
+            (button.whichButton * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = RgbColor::black();
-    sys.fonts.computer.draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, button.string, textcolor);
 }
 
-static void button_off_text(const Quads& quads, int line, pn::string_view string) {
+static void button_off_text(const Quads& quads, const miniScreenLineType& button) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
+            kMiniScreenLeftBuffer,
+            (button.whichButton * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniButColor, LIGHTEST);
-    sys.fonts.computer.draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, button.string, textcolor);
 }
 
 static void draw_minicomputer_lines() {
@@ -328,14 +332,14 @@ static void draw_minicomputer_lines() {
         underline(rects, 9);
 
         rects.fill(but_box_rect, GetRGBTranslateColorShade(kMiniButColor, DARKEST));
-        switch (g.mini.lineData[kMiniScreenCharHeight].kind) {
-            case MINI_BUTTON_OFF: button_off(rects, 0); break;
-            case MINI_BUTTON_ON: button_on(rects, 0); break;
+        switch (g.mini.lineData[10].kind) {
+            case MINI_BUTTON_OFF: button_off(rects, g.mini.lineData[10]); break;
+            case MINI_BUTTON_ON: button_on(rects, g.mini.lineData[10]); break;
             default: break;
         }
-        switch (g.mini.lineData[kMiniScreenCharHeight + 1].kind) {
-            case MINI_BUTTON_OFF: button_off(rects, 1); break;
-            case MINI_BUTTON_ON: button_on(rects, 1); break;
+        switch (g.mini.lineData[11].kind) {
+            case MINI_BUTTON_OFF: button_off(rects, g.mini.lineData[11]); break;
+            case MINI_BUTTON_ON: button_on(rects, g.mini.lineData[11]); break;
             default: break;
         }
     }
@@ -354,18 +358,15 @@ static void draw_minicomputer_lines() {
             item_text(quads, count, strings[count], dim[count]);
         }
 
-        for (int32_t count = 0; count < kMiniScreenButtonNum; count++) {
-            switch (g.mini.lineData[count + kMiniScreenCharHeight].kind) {
-                case MINI_BUTTON_ON:
-                    button_on_text(
-                            quads, count, g.mini.lineData[count + kMiniScreenCharHeight].string);
-                    break;
-                case MINI_BUTTON_OFF:
-                    button_off_text(
-                            quads, count, g.mini.lineData[count + kMiniScreenCharHeight].string);
-                    break;
-                default: break;
-            }
+        switch (g.mini.lineData[10].kind) {
+            case MINI_BUTTON_ON: button_on_text(quads, g.mini.lineData[10]); break;
+            case MINI_BUTTON_OFF: button_off_text(quads, g.mini.lineData[10]); break;
+            default: break;
+        }
+        switch (g.mini.lineData[11].kind) {
+            case MINI_BUTTON_ON: button_on_text(quads, g.mini.lineData[11]); break;
+            case MINI_BUTTON_OFF: button_off_text(quads, g.mini.lineData[11]); break;
+            default: break;
         }
     }
 }
