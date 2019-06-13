@@ -579,28 +579,6 @@ void draw_sector_lines() {
             scaled_screen.bounds.origin(), scaled_screen.scale, kMinGraphicSectorSize, viewport());
 }
 
-void InstrumentsHandleClick(const GameCursor& cursor) {
-    const Point where = cursor.clamped_location();
-    PlayerShipHandleClick(where, 0);
-    MiniComputerHandleClick(where);
-}
-
-void InstrumentsHandleDoubleClick(const GameCursor& cursor) {
-    const Point where = cursor.clamped_location();
-    PlayerShipHandleClick(where, 0);
-    MiniComputerHandleDoubleClick(where);
-}
-
-void InstrumentsHandleMouseUp(const GameCursor& cursor) {
-    const Point where = cursor.clamped_location();
-    MiniComputerHandleMouseUp(where);
-}
-
-void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
-    const Point where = cursor.clamped_location();
-    MiniComputerHandleMouseStillDown(where);
-}
-
 void draw_arbitrary_sector_lines(
         const Point& corner, Scale scale, int32_t minSectorSize, const Rect& bounds) {
     Rects rects;

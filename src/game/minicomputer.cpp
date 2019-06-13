@@ -194,7 +194,6 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstr
 
 static void draw_mini_ship_data(
         Handle<SpaceObject> obj, Hue header_hue, int16_t screen_top, pn::string_view label);
-static void MiniComputerExecute(Screen whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 
 void    MiniComputerSetStatusStrings(void);
 int32_t MiniComputerGetStatusValue(int32_t);
@@ -393,8 +392,7 @@ static miniScreenLineType text(pn::string_view name, bool underlined) {
     return line;
 }
 
-static miniScreenLineType selectable(
-        pn::string_view name, void (*callback)(Handle<Admiral> adm, int32_t line)) {
+static miniScreenLineType selectable(pn::string_view name, void (*callback)(Handle<Admiral> adm)) {
     miniScreenLineType line;
     line.kind     = MINI_SELECTABLE;
     line.string   = name.copy();
@@ -507,23 +505,34 @@ static void minicomputer_handle_move(int direction) {
     } while (line->kind == MINI_NONE);
 }
 
-void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases) {
-    if ((key_presses | key_releases) & kCompAcceptKey) {
-        minicomputer_handle_action(
-                kInLineButton, key_presses & kCompAcceptKey, MiniComputerDoAccept);
-    }
+void minicomputer_handle_event(PlayerEvent e) {
+    switch (e.key) {
+        case PlayerEventType::COMP_ACCEPT_ON:
+            minicomputer_handle_action(kInLineButton, true, MiniComputerDoAccept);
+            break;
 
-    if ((key_presses | key_releases) & kCompCancelKey) {
-        minicomputer_handle_action(
-                kOutLineButton, key_presses & kCompCancelKey, MiniComputerDoCancel);
-    }
+        case PlayerEventType::COMP_CANCEL_ON:
+            minicomputer_handle_action(kOutLineButton, true, MiniComputerDoCancel);
+            break;
 
-    if (key_presses & kCompUpKey) {
-        minicomputer_handle_move(-1);
-    }
+        case PlayerEventType::COMP_UP_ON: minicomputer_handle_move(-1); break;
+        case PlayerEventType::COMP_DOWN_ON: minicomputer_handle_move(+1); break;
 
-    if (key_presses & kCompDownKey) {
-        minicomputer_handle_move(+1);
+        case PlayerEventType::COMP_ACCEPT_OFF:
+            minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);
+            break;
+
+        case PlayerEventType::COMP_CANCEL_OFF:
+            minicomputer_handle_action(kOutLineButton, false, MiniComputerDoCancel);
+            break;
+
+        default: break;
+    }
+}
+
+void minicomputer_handle_keys(std::vector<PlayerEvent> player_events) {
+    for (const auto& e : player_events) {
+        minicomputer_handle_event(e);
     }
 }
 
@@ -770,10 +779,16 @@ static void draw_mini_ship_data(
 }
 
 void MiniComputerDoAccept() {
-    MiniComputerExecute(g.mini.currentScreen, g.mini.selectLine, g.admiral);
+    if (g.mini.selectLine != kMiniScreenNoLineSelected) {
+        // TODO(sfiera): has to work for remote players, which means
+        const miniScreenLineType* line = &g.mini.lineData[g.mini.selectLine];
+        if (line->callback) {
+            line->callback(g.admiral);
+        }
+    }
 }
 
-void transfer_control(Handle<Admiral> adm, int32_t line) {
+void transfer_control(Handle<Admiral> adm) {
     auto control  = adm->control();
     auto flagship = adm->flagship();
     if (flagship.get() && control.get()) {
@@ -787,12 +802,12 @@ void transfer_control(Handle<Admiral> adm, int32_t line) {
     }
 }
 
-static void build_ship(Handle<Admiral> adm, int32_t line) {
+static void build_ship(Handle<Admiral> adm, int32_t index) {
     if (g.key_mask & kComputerBuildMenu) {
         return;
     }
     if (CountObjectsOfBaseType(nullptr, Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
-        if (adm->build(line - kBuildScreenFirstTypeLine) == false) {
+        if (adm->build(index) == false) {
             if (adm == g.admiral) {
                 sys.sound.warning();
             }
@@ -816,11 +831,11 @@ static void fire(Handle<Admiral> adm, int key) {
     }
 }
 
-static void fire_pulse(Handle<Admiral> adm, int32_t line) { fire(adm, kPulseKey); }
-static void fire_beam(Handle<Admiral> adm, int32_t line) { fire(adm, kBeamKey); }
-static void fire_special(Handle<Admiral> adm, int32_t line) { fire(adm, kSpecialKey); }
+static void fire_pulse(Handle<Admiral> adm) { fire(adm, kPulseKey); }
+static void fire_beam(Handle<Admiral> adm) { fire(adm, kBeamKey); }
+static void fire_special(Handle<Admiral> adm) { fire(adm, kSpecialKey); }
 
-static void hold_position(Handle<Admiral> adm, int32_t line) {
+static void hold_position(Handle<Admiral> adm) {
     if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
@@ -830,7 +845,7 @@ static void hold_position(Handle<Admiral> adm, int32_t line) {
     }
 }
 
-static void come_to_me(Handle<Admiral> adm, int32_t line) {
+static void come_to_me(Handle<Admiral> adm) {
     if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
@@ -841,40 +856,40 @@ static void come_to_me(Handle<Admiral> adm, int32_t line) {
     }
 }
 
-static void next_message(Handle<Admiral> adm, int32_t line) {
+static void next_message(Handle<Admiral> adm) {
     if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::advance();
 }
 
-static void last_message(Handle<Admiral> adm, int32_t line) {
+static void last_message(Handle<Admiral> adm) {
     if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::replay();
 }
 
-static void prev_message(Handle<Admiral> adm, int32_t line) {
+static void prev_message(Handle<Admiral> adm) {
     if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::previous();
 }
 
-static void show_build_screen(Handle<Admiral> adm, int32_t line) {
+static void show_build_screen(Handle<Admiral> adm) {
     if (adm != g.admiral) {
         return;
     }
     const miniScreenLineType lines[] = {
             text("BUILD SHIPS", false),
             text("", true),
-            selectable("", build_ship),
-            selectable("", build_ship),
-            selectable("", build_ship),
-            selectable("", build_ship),
-            selectable("", build_ship),
-            selectable("", build_ship),
+            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 0); }),
+            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 1); }),
+            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 2); }),
+            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 3); }),
+            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 4); }),
+            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 5); }),
             accept("Build"),
             cancel("Main Menu"),
     };
@@ -882,7 +897,7 @@ static void show_build_screen(Handle<Admiral> adm, int32_t line) {
     MiniComputerSetBuildStrings();
 }
 
-static void show_special_screen(Handle<Admiral> adm, int32_t line) {
+static void show_special_screen(Handle<Admiral> adm) {
     if (adm != g.admiral) {
         return;
     }
@@ -900,7 +915,7 @@ static void show_special_screen(Handle<Admiral> adm, int32_t line) {
     make_mini_screen(Screen::SPECIAL, lines);
 }
 
-static void show_message_screen(Handle<Admiral> adm, int32_t line) {
+static void show_message_screen(Handle<Admiral> adm) {
     if (adm != g.admiral) {
         return;
     }
@@ -915,7 +930,7 @@ static void show_message_screen(Handle<Admiral> adm, int32_t line) {
     make_mini_screen(Screen::MESSAGE, lines);
 }
 
-static void show_status_screen(Handle<Admiral> adm, int32_t line) {
+static void show_status_screen(Handle<Admiral> adm) {
     if (adm != g.admiral) {
         return;
     }
@@ -927,7 +942,7 @@ static void show_status_screen(Handle<Admiral> adm, int32_t line) {
     MiniComputerSetStatusStrings();
 }
 
-static void show_main_screen(Handle<Admiral> adm, int32_t line) {
+static void show_main_screen(Handle<Admiral> adm) {
     if (adm != g.admiral) {
         return;
     }
@@ -942,18 +957,7 @@ static void show_main_screen(Handle<Admiral> adm, int32_t line) {
     make_mini_screen(Screen::MAIN, lines);
 }
 
-static void MiniComputerExecute(
-        Screen whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
-    if (whichLine != kMiniScreenNoLineSelected) {
-        // TODO(sfiera): has to work for remote players, which means
-        const miniScreenLineType* line = &g.mini.lineData[whichLine];
-        if (line->callback) {
-            line->callback(whichAdmiral, whichLine);
-        }
-    }
-}
-
-void MiniComputerDoCancel() { show_main_screen(g.admiral, 0); }
+void MiniComputerDoCancel() { show_main_screen(g.admiral); }
 
 void MiniComputerSetBuildStrings() {
     // sets the ship type strings for the build screen
@@ -1439,11 +1443,11 @@ void MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine) {
     Point w;
 
     switch (whichScreen) {
-        case Screen::BUILD: show_build_screen(g.admiral, 0); break;
-        case Screen::SPECIAL: show_special_screen(g.admiral, 0); break;
-        case Screen::MESSAGE: show_message_screen(g.admiral, 0); break;
-        case Screen::STATUS: show_status_screen(g.admiral, 0); break;
-        default: show_main_screen(g.admiral, 0); break;
+        case Screen::BUILD: show_build_screen(g.admiral); break;
+        case Screen::SPECIAL: show_special_screen(g.admiral); break;
+        case Screen::MESSAGE: show_message_screen(g.admiral); break;
+        case Screen::STATUS: show_status_screen(g.admiral); break;
+        default: show_main_screen(g.admiral); break;
     }
 
     w.v = (whichLine * sys.fonts.computer.height) + (kMiniScreenTop + instrument_top());

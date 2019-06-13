@@ -25,7 +25,6 @@
 
 namespace antares {
 
-class GameCursor;
 class PlayerShip;
 
 const int32_t kMiniBuildTimeHeight = 25;
@@ -42,10 +41,6 @@ bool    update_site();
 void    draw_site(const PlayerShip& player);
 bool    update_sector_lines();
 void    draw_sector_lines();
-void    InstrumentsHandleClick(const GameCursor& cursor);
-void    InstrumentsHandleDoubleClick(const GameCursor& cursor);
-void    InstrumentsHandleMouseUp(const GameCursor& cursor);
-void    InstrumentsHandleMouseStillDown(const GameCursor& cursor);
 void    draw_arbitrary_sector_lines(
            const Point& corner, Scale scale, int32_t minSectorSize, const Rect& bounds);
 

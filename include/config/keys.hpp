@@ -23,7 +23,7 @@
 
 namespace antares {
 
-const size_t kKeyControlNum         = 19;
+const size_t kKeyControlNum         = 8;
 const size_t kKeyExtendedControlNum = 44;
 const size_t kKeyMapBufferNum       = 256;
 const size_t kHotKeyNum             = 10;
@@ -201,7 +201,7 @@ bool    GetKeyNameNum(pn::string_view name, Key& out);
 bool    AnyKeyButThisOne(const KeyMap& key_map, Key key_num);
 int32_t GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
 
-enum {
+enum KeyNum {
     kUpKeyNum    = 0,  // thrust
     kDownKeyNum  = 1,  // stop
     kLeftKeyNum  = 2,  // counter-clock
@@ -247,7 +247,18 @@ enum {
 
     kFirstHotKeyNum = 34,
 
-    KEY_COUNT = 44,
+    kHotKey1Num  = kFirstHotKeyNum + 0,
+    kHotKey2Num  = kFirstHotKeyNum + 1,
+    kHotKey3Num  = kFirstHotKeyNum + 2,
+    kHotKey4Num  = kFirstHotKeyNum + 3,
+    kHotKey5Num  = kFirstHotKeyNum + 4,
+    kHotKey6Num  = kFirstHotKeyNum + 5,
+    kHotKey7Num  = kFirstHotKeyNum + 6,
+    kHotKey8Num  = kFirstHotKeyNum + 7,
+    kHotKey9Num  = kFirstHotKeyNum + 8,
+    kHotKey10Num = kFirstHotKeyNum + 9,
+
+    KEY_COUNT = 44,  // Number of real keys that can be set in prefs
 };
 
 enum {

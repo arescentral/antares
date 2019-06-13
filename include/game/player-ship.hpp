@@ -19,12 +19,105 @@
 #ifndef ANTARES_GAME_PLAYER_SHIP_HPP_
 #define ANTARES_GAME_PLAYER_SHIP_HPP_
 
+#include <vector>
+
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
 #include "game/cursor.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
+
+enum class PlayerEventType {
+    ACCEL_ON   = 0x000,
+    ACCEL_OFF  = 0x100,
+    DECEL_ON   = 0x001,
+    DECEL_OFF  = 0x101,
+    CCW_ON     = 0x002,
+    CCW_OFF    = 0x102,
+    CW_ON      = 0x003,
+    CW_OFF     = 0x103,
+    FIRE_1_ON  = 0x004,
+    FIRE_1_OFF = 0x104,
+    FIRE_2_ON  = 0x005,
+    FIRE_2_OFF = 0x105,
+    FIRE_S_ON  = 0x006,
+    FIRE_S_OFF = 0x106,
+    WARP_ON    = 0x007,
+    WARP_OFF   = 0x107,
+
+    COMP_UP_ON      = 0x010,
+    COMP_UP_OFF     = 0x110,
+    COMP_DOWN_ON    = 0x011,
+    COMP_DOWN_OFF   = 0x111,
+    COMP_ACCEPT_ON  = 0x012,
+    COMP_ACCEPT_OFF = 0x112,
+    COMP_CANCEL_ON  = 0x013,
+    COMP_CANCEL_OFF = 0x113,
+    MESSAGE_NEXT    = 0x014,
+    AUTOPILOT       = 0x015,
+    ORDER           = 0x016,
+    TRANSFER        = 0x017,
+
+    ZOOM_IN  = 0x020,
+    ZOOM_OUT = 0x021,
+    ZOOM_1X  = 0x022,
+    ZOOM_2X  = 0x023,
+    ZOOM_4X  = 0x024,
+    ZOOM_16X = 0x025,
+    ZOOM_FOE = 0x026,
+    ZOOM_OBJ = 0x027,
+    ZOOM_ALL = 0x028,
+
+    SELECT_FRIEND = 0x030,
+    TARGET_FRIEND = 0x031,
+    TARGET_FOE    = 0x032,
+    SELECT_BASE   = 0x033,
+    TARGET_BASE   = 0x034,
+    TARGET_SELF   = 0x035,
+
+    SET_HOTKEY_1  = 0x040,
+    SET_HOTKEY_3  = 0x042,
+    SET_HOTKEY_4  = 0x043,
+    SET_HOTKEY_5  = 0x044,
+    SET_HOTKEY_6  = 0x045,
+    SET_HOTKEY_7  = 0x046,
+    SET_HOTKEY_8  = 0x047,
+    SET_HOTKEY_9  = 0x048,
+    SET_HOTKEY_10 = 0x049,
+
+    SELECT_HOTKEY_1  = 0x050,
+    SELECT_HOTKEY_3  = 0x052,
+    SELECT_HOTKEY_4  = 0x053,
+    SELECT_HOTKEY_5  = 0x054,
+    SELECT_HOTKEY_6  = 0x055,
+    SELECT_HOTKEY_7  = 0x056,
+    SELECT_HOTKEY_8  = 0x057,
+    SELECT_HOTKEY_9  = 0x058,
+    SELECT_HOTKEY_10 = 0x059,
+
+    TARGET_HOTKEY_1  = 0x060,
+    TARGET_HOTKEY_2  = 0x061,
+    TARGET_HOTKEY_3  = 0x062,
+    TARGET_HOTKEY_4  = 0x063,
+    TARGET_HOTKEY_5  = 0x064,
+    TARGET_HOTKEY_6  = 0x065,
+    TARGET_HOTKEY_7  = 0x066,
+    TARGET_HOTKEY_8  = 0x067,
+    TARGET_HOTKEY_9  = 0x068,
+    TARGET_HOTKEY_10 = 0x069,
+};
+
+struct PlayerEvent {
+    PlayerEventType key;
+
+    bool operator==(PlayerEvent other) const;
+    bool operator!=(PlayerEvent other) const { return !(*this == other); }
+    bool operator<(PlayerEvent other) const;
+    bool operator<=(PlayerEvent other) const { return !(other < *this); }
+    bool operator>(PlayerEvent other) const { return (other < *this); }
+    bool operator>=(PlayerEvent other) const { return !(*this < other); }
+};
 
 class GameCursor;
 class InputSource;
@@ -56,11 +149,10 @@ class PlayerShip : public EventReceiver {
   private:
     bool active() const;
 
-    uint32_t gTheseKeys;
-    uint32_t _gamepad_keys;
-    uint32_t _key_presses;
-    uint32_t _key_releases;
-    KeyMap   _keys;
+    uint32_t                 gTheseKeys;
+    uint32_t                 _gamepad_keys;
+    std::vector<PlayerEvent> _player_events;
+    KeyMap                   _keys;
 
     enum GamepadState {
         NO_BUMPER              = 0,
@@ -79,8 +171,6 @@ class PlayerShip : public EventReceiver {
 
 void ResetPlayerShip();
 void PlayerShipHandleClick(Point where, int button);
-void SetPlayerSelectShip(
-        Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);
 void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip);
 void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
