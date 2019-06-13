@@ -347,8 +347,63 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
-        PlayerKeyNum k = static_cast<PlayerKeyNum>(*key);
+        PlayerKeyNum k;
         switch (*key) {
+            case kUpKeyNum: k = PlayerKeyNum::ACCEL; break;
+            case kDownKeyNum: k = PlayerKeyNum::DECEL; break;
+            case kLeftKeyNum: k = PlayerKeyNum::CCW; break;
+            case kRightKeyNum: k = PlayerKeyNum::CW; break;
+            case kOneKeyNum: k = PlayerKeyNum::FIRE_1; break;
+            case kTwoKeyNum: k = PlayerKeyNum::FIRE_2; break;
+            case kEnterKeyNum: k = PlayerKeyNum::FIRE_S; break;
+
+            case kWarpKeyNum:
+                k = use_target_key() ? PlayerKeyNum::AUTOPILOT : PlayerKeyNum::WARP;
+                break;
+
+            case kDestinationKeyNum:
+                gDestKeyState = DEST_KEY_DOWN;
+                gDestKeyTime  = now();
+                k             = PlayerKeyNum::TARGET;
+                break;
+
+            case kSelectFriendKeyNum:
+                k = use_target_key() ? PlayerKeyNum::TARGET_FRIEND : PlayerKeyNum::SELECT_FRIEND;
+                break;
+            case kSelectFoeKeyNum:
+                use_target_key();
+                k = PlayerKeyNum::SELECT_FOE;
+                break;
+            case kSelectBaseKeyNum:
+                k = use_target_key() ? PlayerKeyNum::TARGET_BASE : PlayerKeyNum::SELECT_BASE;
+                break;
+
+            case kOrderKeyNum: k = PlayerKeyNum::ORDER; break;
+            case kTransferKeyNum: k = PlayerKeyNum::TRANSFER; break;
+
+            case kCompUpKeyNum: k = PlayerKeyNum::COMP_UP; break;
+            case kCompDownKeyNum: k = PlayerKeyNum::COMP_DOWN; break;
+            case kCompAcceptKeyNum: k = PlayerKeyNum::COMP_ACCEPT; break;
+            case kCompCancelKeyNum: k = PlayerKeyNum::COMP_CANCEL; break;
+
+            case kZoomInKeyNum: k = PlayerKeyNum::ZOOM_IN; break;
+            case kZoomOutKeyNum: k = PlayerKeyNum::ZOOM_OUT; break;
+            case kScale121KeyNum: k = PlayerKeyNum::ZOOM_1X; break;
+            case kScale122KeyNum: k = PlayerKeyNum::ZOOM_2X; break;
+            case kScale124KeyNum: k = PlayerKeyNum::ZOOM_4X; break;
+            case kScale1216KeyNum: k = PlayerKeyNum::ZOOM_16X; break;
+            case kScaleHostileKeyNum: k = PlayerKeyNum::ZOOM_FOE; break;
+            case kScaleObjectKeyNum: k = PlayerKeyNum::ZOOM_OBJ; break;
+            case kScaleAllKeyNum: k = PlayerKeyNum::ZOOM_ALL; break;
+            case kMessageNextKeyNum: k = PlayerKeyNum::MESSAGE_NEXT; break;
+
+            case kHelpKeyNum: k = PlayerKeyNum::HELP; break;
+            case kVolumeDownKeyNum: k = PlayerKeyNum::VOL_DOWN; break;
+            case kVolumeUpKeyNum: k = PlayerKeyNum::VOL_UP; break;
+            case kActionMusicKeyNum: k = PlayerKeyNum::MUSIC; break;
+            case kNetSettingsKeyNum: k = PlayerKeyNum::NET_SETTINGS; break;
+            case kFastMotionKeyNum: k = PlayerKeyNum::FAST_MOTION; break;
+
             case kHotKey1Num: hot_key_down(0); return;
             case kHotKey2Num: hot_key_down(1); return;
             case kHotKey3Num: hot_key_down(2); return;
@@ -360,22 +415,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kHotKey9Num: hot_key_down(8); return;
             case kHotKey10Num: hot_key_down(9); return;
 
-            case kDestinationKeyNum:
-                gDestKeyState = DEST_KEY_DOWN;
-                gDestKeyTime  = now();
-                break;
-
-            case kWarpKeyNum:
-                k = use_target_key() ? PlayerKeyNum::AUTOPILOT : PlayerKeyNum::WARP;
-                break;
-            case kSelectFriendKeyNum:
-                k = use_target_key() ? PlayerKeyNum::TARGET_FRIEND : PlayerKeyNum::SELECT_FRIEND;
-                break;
-            case kSelectFoeKeyNum: use_target_key(); break;
-            case kSelectBaseKeyNum:
-                k = use_target_key() ? PlayerKeyNum::TARGET_BASE : PlayerKeyNum::SELECT_BASE;
-                break;
-            default: break;
+            case KEY_COUNT: return;
         }
         _player_events.push_back(PlayerEvent::key_down(k));
     }
@@ -390,8 +430,56 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
-        PlayerKeyNum k = static_cast<PlayerKeyNum>(*key);
+        PlayerKeyNum k;
         switch (*key) {
+            case kUpKeyNum: k = PlayerKeyNum::ACCEL; break;
+            case kDownKeyNum: k = PlayerKeyNum::DECEL; break;
+            case kLeftKeyNum: k = PlayerKeyNum::CCW; break;
+            case kRightKeyNum: k = PlayerKeyNum::CW; break;
+            case kOneKeyNum: k = PlayerKeyNum::FIRE_1; break;
+            case kTwoKeyNum: k = PlayerKeyNum::FIRE_2; break;
+            case kEnterKeyNum: k = PlayerKeyNum::FIRE_S; break;
+            case kWarpKeyNum: k = PlayerKeyNum::WARP; break;
+
+            case kDestinationKeyNum:
+                if ((now() >= (gDestKeyTime + kDestKeyHoldDuration) &&
+                     (gDestKeyState == DEST_KEY_DOWN))) {
+                    k = PlayerKeyNum::TARGET_SELF;
+                } else {
+                    k = PlayerKeyNum::TARGET;
+                }
+                gDestKeyState = DEST_KEY_UP;
+                break;
+
+            case kSelectFriendKeyNum: k = PlayerKeyNum::SELECT_FRIEND; break;
+            case kSelectFoeKeyNum: k = PlayerKeyNum::SELECT_FOE; break;
+            case kSelectBaseKeyNum: k = PlayerKeyNum::SELECT_BASE; break;
+            case kOrderKeyNum: k = PlayerKeyNum::ORDER; break;
+            case kTransferKeyNum: k = PlayerKeyNum::TRANSFER; break;
+
+            case kCompUpKeyNum: k = PlayerKeyNum::COMP_UP; break;
+            case kCompDownKeyNum: k = PlayerKeyNum::COMP_DOWN; break;
+            case kCompAcceptKeyNum: k = PlayerKeyNum::COMP_ACCEPT; break;
+            case kCompCancelKeyNum: k = PlayerKeyNum::COMP_CANCEL; break;
+
+            case kZoomInKeyNum: k = PlayerKeyNum::ZOOM_IN; break;
+            case kZoomOutKeyNum: k = PlayerKeyNum::ZOOM_OUT; break;
+            case kScale121KeyNum: k = PlayerKeyNum::ZOOM_1X; break;
+            case kScale122KeyNum: k = PlayerKeyNum::ZOOM_2X; break;
+            case kScale124KeyNum: k = PlayerKeyNum::ZOOM_4X; break;
+            case kScale1216KeyNum: k = PlayerKeyNum::ZOOM_16X; break;
+            case kScaleHostileKeyNum: k = PlayerKeyNum::ZOOM_FOE; break;
+            case kScaleObjectKeyNum: k = PlayerKeyNum::ZOOM_OBJ; break;
+            case kScaleAllKeyNum: k = PlayerKeyNum::ZOOM_ALL; break;
+            case kMessageNextKeyNum: k = PlayerKeyNum::MESSAGE_NEXT; break;
+
+            case kHelpKeyNum: k = PlayerKeyNum::HELP; break;
+            case kVolumeDownKeyNum: k = PlayerKeyNum::VOL_DOWN; break;
+            case kVolumeUpKeyNum: k = PlayerKeyNum::VOL_UP; break;
+            case kActionMusicKeyNum: k = PlayerKeyNum::MUSIC; break;
+            case kNetSettingsKeyNum: k = PlayerKeyNum::NET_SETTINGS; break;
+            case kFastMotionKeyNum: k = PlayerKeyNum::FAST_MOTION; break;
+
             case kHotKey1Num: _player_events.push_back(hot_key_up(0)); return;
             case kHotKey2Num: _player_events.push_back(hot_key_up(1)); return;
             case kHotKey3Num: _player_events.push_back(hot_key_up(2)); return;
@@ -403,15 +491,7 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
             case kHotKey9Num: _player_events.push_back(hot_key_up(8)); return;
             case kHotKey10Num: _player_events.push_back(hot_key_up(9)); return;
 
-            case kDestinationKeyNum:
-                if ((now() >= (gDestKeyTime + kDestKeyHoldDuration) &&
-                     (gDestKeyState == DEST_KEY_DOWN))) {
-                    k = PlayerKeyNum::TARGET_SELF;
-                }
-                gDestKeyState = DEST_KEY_UP;
-                break;
-
-            default: break;
+            case KEY_COUNT: return;
         }
         _player_events.push_back(PlayerEvent::key_up(k));
     }
