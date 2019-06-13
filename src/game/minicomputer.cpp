@@ -77,8 +77,8 @@ const Hue kMiniScreenColor = Hue::GREEN;
 const Hue kMiniButColor    = Hue::AQUA;
 
 const int32_t kNoLineButton  = -1;
-const int32_t kInLineButton  = kCompAcceptKeyNum;
-const int32_t kOutLineButton = kCompCancelKeyNum;
+const int32_t kInLineButton  = 0;
+const int32_t kOutLineButton = 1;
 
 enum {
     kMainMiniBuild   = 1,
@@ -463,26 +463,20 @@ static void make_mini_screen(Screen screen, const miniScreenLineType (&lines)[si
     }
 }
 
-static void minicomputer_handle_action(int32_t button, bool key_down, void (*action)()) {
-    // find out which line, if any, contains this button
-    for (size_t i : range(kMiniScreenTrueLineNum)) {
-        miniScreenLineType& line = g.mini.lineData[i];
-        if (line.whichButton != button) {
-            continue;
-        }
-        // hilite/unhilite this button
-        if (key_down) {
-            if (line.kind != MINI_BUTTON_ON) {
-                line.kind = MINI_BUTTON_ON;
-                sys.sound.click();
-            }
-        } else {
-            if (line.kind != MINI_BUTTON_OFF) {
-                line.kind = MINI_BUTTON_OFF;
-                if (action) {
-                    action();
-                }
-            }
+static void minicomputer_down(int32_t button) {
+    miniScreenLineType& line = g.mini.lineData[kMiniScreenCharHeight + button];
+    if ((line.whichButton == button) && (line.kind != MINI_BUTTON_ON)) {
+        line.kind = MINI_BUTTON_ON;
+        sys.sound.click();
+    }
+}
+
+static void minicomputer_up(int32_t button, void (*action)()) {
+    miniScreenLineType& line = g.mini.lineData[kMiniScreenCharHeight + button];
+    if ((line.whichButton == button) && (line.kind != MINI_BUTTON_OFF)) {
+        line.kind = MINI_BUTTON_OFF;
+        if (action) {
+            action();
         }
     }
 }
@@ -507,23 +501,19 @@ static void minicomputer_handle_move(int direction) {
 
 void minicomputer_handle_event(PlayerEvent e) {
     switch (e.key) {
-        case PlayerEventType::COMP_ACCEPT_ON:
-            minicomputer_handle_action(kInLineButton, true, MiniComputerDoAccept);
-            break;
+        case PlayerEventType::COMP_ACCEPT_ON: minicomputer_down(kInLineButton); break;
 
-        case PlayerEventType::COMP_CANCEL_ON:
-            minicomputer_handle_action(kOutLineButton, true, MiniComputerDoCancel);
-            break;
+        case PlayerEventType::COMP_CANCEL_ON: minicomputer_down(kOutLineButton); break;
 
         case PlayerEventType::COMP_UP_ON: minicomputer_handle_move(-1); break;
         case PlayerEventType::COMP_DOWN_ON: minicomputer_handle_move(+1); break;
 
         case PlayerEventType::COMP_ACCEPT_OFF:
-            minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);
+            minicomputer_up(kInLineButton, MiniComputerDoAccept);
             break;
 
         case PlayerEventType::COMP_CANCEL_OFF:
-            minicomputer_handle_action(kOutLineButton, false, MiniComputerDoCancel);
+            minicomputer_up(kOutLineButton, MiniComputerDoCancel);
             break;
 
         default: break;
@@ -537,8 +527,8 @@ void minicomputer_handle_keys(std::vector<PlayerEvent> player_events) {
 }
 
 void minicomputer_cancel() {
-    minicomputer_handle_action(kInLineButton, false, NULL);
-    minicomputer_handle_action(kOutLineButton, false, NULL);
+    minicomputer_up(kInLineButton, NULL);
+    minicomputer_up(kOutLineButton, NULL);
 }
 
 static void update_build_screen_lines() {
