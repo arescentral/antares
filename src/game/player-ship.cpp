@@ -115,8 +115,7 @@ bool PlayerEvent::operator==(PlayerEvent other) const {
     }
     switch (type) {
         case KEY_DOWN:
-        case KEY_UP:
-        case LONG_KEY_UP: return key == other.key;
+        case KEY_UP: return key == other.key;
     }
 }
 
@@ -126,8 +125,7 @@ bool PlayerEvent::operator<(PlayerEvent other) const {
     }
     switch (type) {
         case KEY_DOWN:
-        case KEY_UP:
-        case LONG_KEY_UP: return key < other.key;
+        case KEY_UP: return key < other.key;
     }
 }
 
@@ -358,7 +356,11 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kHotKey9Num: hot_key_down(8); return;
             case kHotKey10Num: hot_key_down(9); return;
 
-            case kDestinationKeyNum: gDestKeyTime = now(); break;
+            case kDestinationKeyNum:
+                gDestKeyState = DEST_KEY_DOWN;
+                gDestKeyTime  = now();
+                break;
+
             case kWarpKeyNum: *key = use_target_key() ? kAutoPilot2KeyNum : kWarpKeyNum; break;
             case kSelectFriendKeyNum:
                 *key = use_target_key() ? kTargetFriendKeyNum : kSelectFriendKeyNum;
@@ -382,7 +384,6 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
-        bool long_hold = false;
         switch (*key) {
             case kHotKey1Num: _player_events.push_back(hot_key_up(0)); return;
             case kHotKey2Num: _player_events.push_back(hot_key_up(1)); return;
@@ -394,16 +395,18 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
             case kHotKey8Num: _player_events.push_back(hot_key_up(7)); return;
             case kHotKey9Num: _player_events.push_back(hot_key_up(8)); return;
             case kHotKey10Num: _player_events.push_back(hot_key_up(9)); return;
+
             case kDestinationKeyNum:
-                long_hold = (now() >= (gDestKeyTime + kDestKeyHoldDuration));
+                if ((now() >= (gDestKeyTime + kDestKeyHoldDuration) &&
+                     (gDestKeyState == DEST_KEY_DOWN))) {
+                    *key = kTargetSelfKeyNum;
+                }
+                gDestKeyState = DEST_KEY_UP;
                 break;
+
             default: break;
         }
-        if (long_hold) {
-            _player_events.push_back(PlayerEvent::long_key_up(*key));
-        } else {
-            _player_events.push_back(PlayerEvent::key_up(*key));
-        }
+        _player_events.push_back(PlayerEvent::key_up(*key));
     }
 }
 
@@ -627,28 +630,9 @@ bool PlayerShip::active() const {
 
 static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        switch (e.type) {
-            case PlayerEvent::KEY_DOWN:
-                if (e.key == kDestinationKeyNum) {
-                    gDestKeyState = DEST_KEY_DOWN;
-                }
-                break;
-
-            case PlayerEvent::KEY_UP:
-                if (e.key == kDestinationKeyNum) {
-                    gDestKeyState = DEST_KEY_UP;
-                }
-                break;
-
-            case PlayerEvent::LONG_KEY_UP:
-                if (e.key == kDestinationKeyNum) {
-                    if ((gDestKeyState == DEST_KEY_DOWN) &&
-                        (g.ship->attributes & kCanBeDestination)) {
-                        target_self();
-                    }
-                    gDestKeyState = DEST_KEY_UP;
-                }
-                break;
+        if ((e.type == PlayerEvent::KEY_UP) && (e.key == kTargetSelfKeyNum) &&
+            (g.ship->attributes & kCanBeDestination)) {
+            target_self();
         }
     }
 }
@@ -657,7 +641,6 @@ static int hot_key_index(const PlayerEvent& e) {
     switch (e.type) {
         case PlayerEvent::KEY_DOWN:
         case PlayerEvent::KEY_UP:
-        case PlayerEvent::LONG_KEY_UP:
             if ((kHotKey1Num <= e.key) && (e.key <= kHotKey10Num)) {
                 return e.key - kFirstHotKeyNum;
             } else if ((kSetHotKey1Num <= e.key) && (e.key <= kSetHotKey10Num)) {
@@ -796,7 +779,6 @@ void PlayerShip::update(bool enter_message) {
                 break;
 
             case PlayerEvent::KEY_UP:
-            case PlayerEvent::LONG_KEY_UP:
                 if (e.key < kKeyControlNum) {
                     gTheseKeys &= ~((1 << e.key) & ~g.key_mask);
                 }
