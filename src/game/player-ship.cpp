@@ -316,6 +316,27 @@ static bool use_target_key() {
     return gDestKeyState == DEST_KEY_BLOCKED;
 }
 
+static void hot_key_down(int i) {
+    gHotKeyTime[i] = now();
+    if (gDestKeyState == DEST_KEY_UP) {
+        gHotKeyState[i] = HOT_KEY_SELECT;
+    } else {
+        gHotKeyState[i] = HOT_KEY_TARGET;
+    }
+}
+
+static PlayerEvent hot_key_up(int i) {
+    bool target     = (gHotKeyState[i] == HOT_KEY_TARGET);
+    gHotKeyState[i] = HOT_KEY_UP;
+    if (now() >= gHotKeyTime[i] + kHotKeyHoldDuration) {
+        return PlayerEvent::key_up(static_cast<KeyNum>(kSetHotKey1Num + i));
+    } else if (use_target_key() || target) {
+        return PlayerEvent::key_up(static_cast<KeyNum>(kTargetHotKey1Num + i));
+    } else {
+        return PlayerEvent::key_up(static_cast<KeyNum>(kSelectHotKey1Num + i));
+    }
+}
+
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
 
@@ -326,16 +347,17 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
         switch (*key) {
-            case kHotKey1Num: gHotKeyTime[0] = now(); break;
-            case kHotKey2Num: gHotKeyTime[1] = now(); break;
-            case kHotKey3Num: gHotKeyTime[2] = now(); break;
-            case kHotKey4Num: gHotKeyTime[3] = now(); break;
-            case kHotKey5Num: gHotKeyTime[4] = now(); break;
-            case kHotKey6Num: gHotKeyTime[5] = now(); break;
-            case kHotKey7Num: gHotKeyTime[6] = now(); break;
-            case kHotKey8Num: gHotKeyTime[7] = now(); break;
-            case kHotKey9Num: gHotKeyTime[8] = now(); break;
-            case kHotKey10Num: gHotKeyTime[9] = now(); break;
+            case kHotKey1Num: hot_key_down(0); return;
+            case kHotKey2Num: hot_key_down(1); return;
+            case kHotKey3Num: hot_key_down(2); return;
+            case kHotKey4Num: hot_key_down(3); return;
+            case kHotKey5Num: hot_key_down(4); return;
+            case kHotKey6Num: hot_key_down(5); return;
+            case kHotKey7Num: hot_key_down(6); return;
+            case kHotKey8Num: hot_key_down(7); return;
+            case kHotKey9Num: hot_key_down(8); return;
+            case kHotKey10Num: hot_key_down(9); return;
+
             case kDestinationKeyNum: gDestKeyTime = now(); break;
             case kWarpKeyNum: *key = use_target_key() ? kAutoPilot2KeyNum : kWarpKeyNum; break;
             case kSelectFriendKeyNum:
@@ -362,16 +384,16 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
     if (key.has_value()) {
         bool long_hold = false;
         switch (*key) {
-            case kHotKey1Num: long_hold = (now() >= gHotKeyTime[0] + kHotKeyHoldDuration); break;
-            case kHotKey2Num: long_hold = (now() >= gHotKeyTime[1] + kHotKeyHoldDuration); break;
-            case kHotKey3Num: long_hold = (now() >= gHotKeyTime[2] + kHotKeyHoldDuration); break;
-            case kHotKey4Num: long_hold = (now() >= gHotKeyTime[3] + kHotKeyHoldDuration); break;
-            case kHotKey5Num: long_hold = (now() >= gHotKeyTime[4] + kHotKeyHoldDuration); break;
-            case kHotKey6Num: long_hold = (now() >= gHotKeyTime[5] + kHotKeyHoldDuration); break;
-            case kHotKey7Num: long_hold = (now() >= gHotKeyTime[6] + kHotKeyHoldDuration); break;
-            case kHotKey8Num: long_hold = (now() >= gHotKeyTime[7] + kHotKeyHoldDuration); break;
-            case kHotKey9Num: long_hold = (now() >= gHotKeyTime[8] + kHotKeyHoldDuration); break;
-            case kHotKey10Num: long_hold = (now() >= gHotKeyTime[9] + kHotKeyHoldDuration); break;
+            case kHotKey1Num: _player_events.push_back(hot_key_up(0)); return;
+            case kHotKey2Num: _player_events.push_back(hot_key_up(1)); return;
+            case kHotKey3Num: _player_events.push_back(hot_key_up(2)); return;
+            case kHotKey4Num: _player_events.push_back(hot_key_up(3)); return;
+            case kHotKey5Num: _player_events.push_back(hot_key_up(4)); return;
+            case kHotKey6Num: _player_events.push_back(hot_key_up(5)); return;
+            case kHotKey7Num: _player_events.push_back(hot_key_up(6)); return;
+            case kHotKey8Num: _player_events.push_back(hot_key_up(7)); return;
+            case kHotKey9Num: _player_events.push_back(hot_key_up(8)); return;
+            case kHotKey10Num: _player_events.push_back(hot_key_up(9)); return;
             case kDestinationKeyNum:
                 long_hold = (now() >= (gDestKeyTime + kDestKeyHoldDuration));
                 break;
@@ -638,6 +660,12 @@ static int hot_key_index(const PlayerEvent& e) {
         case PlayerEvent::LONG_KEY_UP:
             if ((kHotKey1Num <= e.key) && (e.key <= kHotKey10Num)) {
                 return e.key - kFirstHotKeyNum;
+            } else if ((kSetHotKey1Num <= e.key) && (e.key <= kSetHotKey10Num)) {
+                return e.key - kSetHotKey1Num;
+            } else if ((kSelectHotKey1Num <= e.key) && (e.key <= kSelectHotKey10Num)) {
+                return e.key - kSelectHotKey1Num;
+            } else if ((kTargetHotKey1Num <= e.key) && (e.key <= kTargetHotKey10Num)) {
+                return e.key - kTargetHotKey1Num;
             }
             break;
     }
@@ -651,43 +679,27 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
             continue;
         }
 
-        switch (e.type) {
-            case PlayerEvent::KEY_DOWN:
-                if (gDestKeyState == DEST_KEY_UP) {
-                    gHotKeyState[i] = HOT_KEY_SELECT;
+        if ((kSetHotKey1Num <= e.key) && (e.key <= kSetHotKey10Num)) {
+            if (globals()->lastSelectedObject.get()) {
+                auto o = globals()->lastSelectedObject;
+                if (o->active && (o->id == globals()->lastSelectedObjectID)) {
+                    globals()->hotKey[i].object   = globals()->lastSelectedObject;
+                    globals()->hotKey[i].objectID = globals()->lastSelectedObjectID;
+                    Update_LabelStrings_ForHotKeyChange();
+                    sys.sound.select();
+                }
+            }
+        } else {
+            bool target = (kTargetHotKey1Num <= e.key) && (e.key <= kTargetHotKey10Num);
+            if (globals()->hotKey[i].object.get()) {
+                auto o = globals()->hotKey[i].object;
+                if (o->active && (o->id == globals()->hotKey[i].objectID)) {
+                    target = target || (o->owner != g.admiral);
+                    select_object(o, target, g.admiral);
                 } else {
-                    gHotKeyState[i] = HOT_KEY_TARGET;
+                    globals()->hotKey[i].object = SpaceObject::none();
                 }
-                break;
-
-            case PlayerEvent::KEY_UP: {
-                gHotKeyState[i] = HOT_KEY_UP;
-                bool target     = use_target_key();
-                if (globals()->hotKey[i].object.get()) {
-                    target          = target || (gHotKeyState[i] == HOT_KEY_TARGET);
-                    auto selectShip = globals()->hotKey[i].object;
-                    if ((selectShip->active) &&
-                        (selectShip->id == globals()->hotKey[i].objectID)) {
-                        target = target || (selectShip->owner != g.admiral);
-                        select_object(globals()->hotKey[i].object, target, g.admiral);
-                    } else {
-                        globals()->hotKey[i].object = SpaceObject::none();
-                    }
-                }
-            } break;
-
-            case PlayerEvent::LONG_KEY_UP:
-                gHotKeyState[i] = HOT_KEY_UP;
-                if (globals()->lastSelectedObject.get()) {
-                    auto selectShip = globals()->lastSelectedObject;
-                    if (selectShip->active) {
-                        globals()->hotKey[i].object   = globals()->lastSelectedObject;
-                        globals()->hotKey[i].objectID = globals()->lastSelectedObjectID;
-                        Update_LabelStrings_ForHotKeyChange();
-                        sys.sound.select();
-                    }
-                }
-                break;
+            }
         }
     }
 }

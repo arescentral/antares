@@ -264,6 +264,39 @@ enum KeyNum {
     kAutoPilot2KeyNum   = 44,  // For autopilot key event
     kTargetFriendKeyNum = 45,
     kTargetBaseKeyNum   = 46,
+
+    kSetHotKey1Num  = 47,
+    kSetHotKey2Num  = 48,
+    kSetHotKey3Num  = 49,
+    kSetHotKey4Num  = 50,
+    kSetHotKey5Num  = 51,
+    kSetHotKey6Num  = 52,
+    kSetHotKey7Num  = 53,
+    kSetHotKey8Num  = 54,
+    kSetHotKey9Num  = 55,
+    kSetHotKey10Num = 56,
+
+    kSelectHotKey1Num  = 57,
+    kSelectHotKey2Num  = 58,
+    kSelectHotKey3Num  = 59,
+    kSelectHotKey4Num  = 60,
+    kSelectHotKey5Num  = 61,
+    kSelectHotKey6Num  = 62,
+    kSelectHotKey7Num  = 63,
+    kSelectHotKey8Num  = 64,
+    kSelectHotKey9Num  = 65,
+    kSelectHotKey10Num = 66,
+
+    kTargetHotKey1Num  = 67,
+    kTargetHotKey2Num  = 68,
+    kTargetHotKey3Num  = 69,
+    kTargetHotKey4Num  = 70,
+    kTargetHotKey5Num  = 71,
+    kTargetHotKey6Num  = 72,
+    kTargetHotKey7Num  = 73,
+    kTargetHotKey8Num  = 74,
+    kTargetHotKey9Num  = 75,
+    kTargetHotKey10Num = 76,
 };
 
 enum {
