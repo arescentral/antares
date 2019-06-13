@@ -311,13 +311,13 @@ static PlayerEvent hot_key_up(int i) {
     gHotKeyState[i] = HOT_KEY_UP;
     if (now() >= gHotKeyTime[i] + kHotKeyHoldDuration) {
         return PlayerEvent{
-                static_cast<PlayerKeyNum>(static_cast<int>(PlayerKeyNum::SET_HOTKEY_1) + i)};
+                static_cast<PlayerEventType>(static_cast<int>(PlayerEventType::SET_HOTKEY_1) + i)};
     } else if (use_target_key() || target) {
-        return PlayerEvent{
-                static_cast<PlayerKeyNum>(static_cast<int>(PlayerKeyNum::TARGET_HOTKEY_1) + i)};
+        return PlayerEvent{static_cast<PlayerEventType>(
+                static_cast<int>(PlayerEventType::TARGET_HOTKEY_1) + i)};
     } else {
-        return PlayerEvent{
-                static_cast<PlayerKeyNum>(static_cast<int>(PlayerKeyNum::SELECT_HOTKEY_1) + i)};
+        return PlayerEvent{static_cast<PlayerEventType>(
+                static_cast<int>(PlayerEventType::SELECT_HOTKEY_1) + i)};
     }
 }
 
@@ -330,18 +330,18 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
-        PlayerKeyNum k;
+        PlayerEventType k;
         switch (*key) {
-            case kUpKeyNum: k = PlayerKeyNum::ACCEL_ON; break;
-            case kDownKeyNum: k = PlayerKeyNum::DECEL_ON; break;
-            case kLeftKeyNum: k = PlayerKeyNum::CCW_ON; break;
-            case kRightKeyNum: k = PlayerKeyNum::CW_ON; break;
-            case kOneKeyNum: k = PlayerKeyNum::FIRE_1_ON; break;
-            case kTwoKeyNum: k = PlayerKeyNum::FIRE_2_ON; break;
-            case kEnterKeyNum: k = PlayerKeyNum::FIRE_S_ON; break;
+            case kUpKeyNum: k = PlayerEventType::ACCEL_ON; break;
+            case kDownKeyNum: k = PlayerEventType::DECEL_ON; break;
+            case kLeftKeyNum: k = PlayerEventType::CCW_ON; break;
+            case kRightKeyNum: k = PlayerEventType::CW_ON; break;
+            case kOneKeyNum: k = PlayerEventType::FIRE_1_ON; break;
+            case kTwoKeyNum: k = PlayerEventType::FIRE_2_ON; break;
+            case kEnterKeyNum: k = PlayerEventType::FIRE_S_ON; break;
 
             case kWarpKeyNum:
-                k = use_target_key() ? PlayerKeyNum::AUTOPILOT : PlayerKeyNum::WARP_ON;
+                k = use_target_key() ? PlayerEventType::AUTOPILOT : PlayerEventType::WARP_ON;
                 break;
 
             case kDestinationKeyNum:
@@ -350,34 +350,35 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
                 return;
 
             case kSelectFriendKeyNum:
-                k = use_target_key() ? PlayerKeyNum::TARGET_FRIEND : PlayerKeyNum::SELECT_FRIEND;
+                k = use_target_key() ? PlayerEventType::TARGET_FRIEND
+                                     : PlayerEventType::SELECT_FRIEND;
                 break;
             case kSelectFoeKeyNum:
                 use_target_key();
-                k = PlayerKeyNum::TARGET_FOE;
+                k = PlayerEventType::TARGET_FOE;
                 break;
             case kSelectBaseKeyNum:
-                k = use_target_key() ? PlayerKeyNum::TARGET_BASE : PlayerKeyNum::SELECT_BASE;
+                k = use_target_key() ? PlayerEventType::TARGET_BASE : PlayerEventType::SELECT_BASE;
                 break;
 
-            case kOrderKeyNum: k = PlayerKeyNum::ORDER; break;
-            case kTransferKeyNum: k = PlayerKeyNum::TRANSFER; break;
+            case kOrderKeyNum: k = PlayerEventType::ORDER; break;
+            case kTransferKeyNum: k = PlayerEventType::TRANSFER; break;
 
-            case kCompUpKeyNum: k = PlayerKeyNum::COMP_UP_ON; break;
-            case kCompDownKeyNum: k = PlayerKeyNum::COMP_DOWN_ON; break;
-            case kCompAcceptKeyNum: k = PlayerKeyNum::COMP_ACCEPT_ON; break;
-            case kCompCancelKeyNum: k = PlayerKeyNum::COMP_CANCEL_ON; break;
+            case kCompUpKeyNum: k = PlayerEventType::COMP_UP_ON; break;
+            case kCompDownKeyNum: k = PlayerEventType::COMP_DOWN_ON; break;
+            case kCompAcceptKeyNum: k = PlayerEventType::COMP_ACCEPT_ON; break;
+            case kCompCancelKeyNum: k = PlayerEventType::COMP_CANCEL_ON; break;
 
-            case kZoomInKeyNum: k = PlayerKeyNum::ZOOM_IN; break;
-            case kZoomOutKeyNum: k = PlayerKeyNum::ZOOM_OUT; break;
-            case kScale121KeyNum: k = PlayerKeyNum::ZOOM_1X; break;
-            case kScale122KeyNum: k = PlayerKeyNum::ZOOM_2X; break;
-            case kScale124KeyNum: k = PlayerKeyNum::ZOOM_4X; break;
-            case kScale1216KeyNum: k = PlayerKeyNum::ZOOM_16X; break;
-            case kScaleHostileKeyNum: k = PlayerKeyNum::ZOOM_FOE; break;
-            case kScaleObjectKeyNum: k = PlayerKeyNum::ZOOM_OBJ; break;
-            case kScaleAllKeyNum: k = PlayerKeyNum::ZOOM_ALL; break;
-            case kMessageNextKeyNum: k = PlayerKeyNum::MESSAGE_NEXT; break;
+            case kZoomInKeyNum: k = PlayerEventType::ZOOM_IN; break;
+            case kZoomOutKeyNum: k = PlayerEventType::ZOOM_OUT; break;
+            case kScale121KeyNum: k = PlayerEventType::ZOOM_1X; break;
+            case kScale122KeyNum: k = PlayerEventType::ZOOM_2X; break;
+            case kScale124KeyNum: k = PlayerEventType::ZOOM_4X; break;
+            case kScale1216KeyNum: k = PlayerEventType::ZOOM_16X; break;
+            case kScaleHostileKeyNum: k = PlayerEventType::ZOOM_FOE; break;
+            case kScaleObjectKeyNum: k = PlayerEventType::ZOOM_OBJ; break;
+            case kScaleAllKeyNum: k = PlayerEventType::ZOOM_ALL; break;
+            case kMessageNextKeyNum: k = PlayerEventType::MESSAGE_NEXT; break;
 
             case kHelpKeyNum: return;
             case kVolumeDownKeyNum: return;
@@ -412,22 +413,22 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
-        PlayerKeyNum k;
+        PlayerEventType k;
         switch (*key) {
-            case kUpKeyNum: k = PlayerKeyNum::ACCEL_OFF; break;
-            case kDownKeyNum: k = PlayerKeyNum::DECEL_OFF; break;
-            case kLeftKeyNum: k = PlayerKeyNum::CCW_OFF; break;
-            case kRightKeyNum: k = PlayerKeyNum::CW_OFF; break;
-            case kOneKeyNum: k = PlayerKeyNum::FIRE_1_OFF; break;
-            case kTwoKeyNum: k = PlayerKeyNum::FIRE_2_OFF; break;
-            case kEnterKeyNum: k = PlayerKeyNum::FIRE_S_OFF; break;
-            case kWarpKeyNum: k = PlayerKeyNum::WARP_OFF; break;
+            case kUpKeyNum: k = PlayerEventType::ACCEL_OFF; break;
+            case kDownKeyNum: k = PlayerEventType::DECEL_OFF; break;
+            case kLeftKeyNum: k = PlayerEventType::CCW_OFF; break;
+            case kRightKeyNum: k = PlayerEventType::CW_OFF; break;
+            case kOneKeyNum: k = PlayerEventType::FIRE_1_OFF; break;
+            case kTwoKeyNum: k = PlayerEventType::FIRE_2_OFF; break;
+            case kEnterKeyNum: k = PlayerEventType::FIRE_S_OFF; break;
+            case kWarpKeyNum: k = PlayerEventType::WARP_OFF; break;
 
             case kDestinationKeyNum:
                 if ((now() >= (gDestKeyTime + kDestKeyHoldDuration) &&
                      (gDestKeyState == DEST_KEY_DOWN))) {
                     gDestKeyState = DEST_KEY_UP;
-                    k             = PlayerKeyNum::TARGET_SELF;
+                    k             = PlayerEventType::TARGET_SELF;
                 } else {
                     gDestKeyState = DEST_KEY_UP;
                     return;
@@ -440,10 +441,10 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
             case kOrderKeyNum:
             case kTransferKeyNum: return;
 
-            case kCompUpKeyNum: k = PlayerKeyNum::COMP_UP_OFF; break;
-            case kCompDownKeyNum: k = PlayerKeyNum::COMP_DOWN_OFF; break;
-            case kCompAcceptKeyNum: k = PlayerKeyNum::COMP_ACCEPT_OFF; break;
-            case kCompCancelKeyNum: k = PlayerKeyNum::COMP_CANCEL_OFF; break;
+            case kCompUpKeyNum: k = PlayerEventType::COMP_UP_OFF; break;
+            case kCompDownKeyNum: k = PlayerEventType::COMP_DOWN_OFF; break;
+            case kCompAcceptKeyNum: k = PlayerEventType::COMP_ACCEPT_OFF; break;
+            case kCompCancelKeyNum: k = PlayerEventType::COMP_CANCEL_OFF; break;
 
             case kZoomInKeyNum:
             case kZoomOutKeyNum:
@@ -567,9 +568,9 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 return;
             case Gamepad::Button::Y:
                 if (_gamepad_state & SELECT_BUMPER) {
-                    _player_events.push_back(PlayerEvent{PlayerKeyNum::ORDER});
+                    _player_events.push_back(PlayerEvent{PlayerEventType::ORDER});
                 } else {
-                    _player_events.push_back(PlayerEvent{PlayerKeyNum::AUTOPILOT});
+                    _player_events.push_back(PlayerEvent{PlayerEventType::AUTOPILOT});
                 }
                 return;
             case Gamepad::Button::LSB:
@@ -599,16 +600,16 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             }
             break;
         case Gamepad::Button::UP:
-            _player_events.push_back(PlayerEvent{PlayerKeyNum::COMP_UP_ON});
+            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_UP_ON});
             break;
         case Gamepad::Button::DOWN:
-            _player_events.push_back(PlayerEvent{PlayerKeyNum::COMP_DOWN_ON});
+            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_DOWN_ON});
             break;
         case Gamepad::Button::RIGHT:
-            _player_events.push_back(PlayerEvent{PlayerKeyNum::COMP_ACCEPT_ON});
+            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_ACCEPT_ON});
             break;
         case Gamepad::Button::LEFT:
-            _player_events.push_back(PlayerEvent{PlayerKeyNum::COMP_CANCEL_ON});
+            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_CANCEL_ON});
             break;
         default: break;
     }
@@ -660,10 +661,10 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             }
             break;
         case Gamepad::Button::RIGHT:
-            _player_events.push_back(PlayerEvent{PlayerKeyNum::COMP_ACCEPT_OFF});
+            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_ACCEPT_OFF});
             break;
         case Gamepad::Button::LEFT:
-            _player_events.push_back(PlayerEvent{PlayerKeyNum::COMP_CANCEL_OFF});
+            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_CANCEL_OFF});
             break;
         default: break;
     }
@@ -695,14 +696,14 @@ bool PlayerShip::active() const {
 
 static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerKeyNum::TARGET_SELF && (g.ship->attributes & kCanBeDestination)) {
+        if (e.key == PlayerEventType::TARGET_SELF && (g.ship->attributes & kCanBeDestination)) {
             target_self();
         }
     }
 }
 
 static int hot_key_index(const PlayerEvent& e) {
-    if ((PlayerKeyNum::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerKeyNum::TARGET_HOTKEY_10)) {
+    if ((PlayerEventType::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerEventType::TARGET_HOTKEY_10)) {
         return static_cast<int>(e.key) & 0xf;
     }
     return -1;
@@ -715,7 +716,8 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
             continue;
         }
 
-        if ((PlayerKeyNum::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerKeyNum::SET_HOTKEY_10)) {
+        if ((PlayerEventType::SET_HOTKEY_1 <= e.key) &&
+            (e.key <= PlayerEventType::SET_HOTKEY_10)) {
             if (globals()->lastSelectedObject.get()) {
                 auto o = globals()->lastSelectedObject;
                 if (o->active && (o->id == globals()->lastSelectedObjectID)) {
@@ -726,8 +728,8 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
                 }
             }
         } else {
-            bool target = (PlayerKeyNum::TARGET_HOTKEY_1 <= e.key) &&
-                          (e.key <= PlayerKeyNum::TARGET_HOTKEY_10);
+            bool target = (PlayerEventType::TARGET_HOTKEY_1 <= e.key) &&
+                          (e.key <= PlayerEventType::TARGET_HOTKEY_10);
             if (globals()->hotKey[i].object.get()) {
                 auto o = globals()->hotKey[i].object;
                 if (o->active && (o->id == globals()->hotKey[i].objectID)) {
@@ -745,11 +747,11 @@ static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     for (const auto& e : player_events) {
         switch (e.key) {
-            case PlayerKeyNum::SELECT_FRIEND: select_friendly(g.ship, g.ship->direction); break;
-            case PlayerKeyNum::TARGET_FRIEND: target_friendly(g.ship, g.ship->direction); break;
-            case PlayerKeyNum::TARGET_FOE: target_hostile(g.ship, g.ship->direction); break;
-            case PlayerKeyNum::SELECT_BASE: select_base(g.ship, g.ship->direction); break;
-            case PlayerKeyNum::TARGET_BASE: target_base(g.ship, g.ship->direction); break;
+            case PlayerEventType::SELECT_FRIEND: select_friendly(g.ship, g.ship->direction); break;
+            case PlayerEventType::TARGET_FRIEND: target_friendly(g.ship, g.ship->direction); break;
+            case PlayerEventType::TARGET_FOE: target_hostile(g.ship, g.ship->direction); break;
+            case PlayerEventType::SELECT_BASE: select_base(g.ship, g.ship->direction); break;
+            case PlayerEventType::TARGET_BASE: target_base(g.ship, g.ship->direction); break;
             default: continue;
         }
     }
@@ -779,7 +781,7 @@ static void handle_pilot_keys(
 
 static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerKeyNum::ORDER) {
+        if (e.key == PlayerEventType::ORDER) {
             g.ship->keysDown |= kGiveCommandKey;
         }
     }
@@ -787,7 +789,7 @@ static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
 
 static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerKeyNum::AUTOPILOT) {
+        if (e.key == PlayerEventType::AUTOPILOT) {
             engage_autopilot();
         }
     }
@@ -805,35 +807,35 @@ void PlayerShip::update(bool enter_message) {
 
     for (auto e : _player_events) {
         switch (e.key) {
-            case PlayerKeyNum::ACCEL_ON: gTheseKeys |= (kUpKey & ~g.key_mask); break;
-            case PlayerKeyNum::DECEL_ON: gTheseKeys |= (kDownKey & ~g.key_mask); break;
-            case PlayerKeyNum::CCW_ON: gTheseKeys |= (kLeftKey & ~g.key_mask); break;
-            case PlayerKeyNum::CW_ON: gTheseKeys |= (kRightKey & ~g.key_mask); break;
-            case PlayerKeyNum::FIRE_1_ON: gTheseKeys |= (kPulseKey & ~g.key_mask); break;
-            case PlayerKeyNum::FIRE_2_ON: gTheseKeys |= (kBeamKey & ~g.key_mask); break;
-            case PlayerKeyNum::FIRE_S_ON: gTheseKeys |= (kSpecialKey & ~g.key_mask); break;
-            case PlayerKeyNum::WARP_ON: gTheseKeys |= (kWarpKey & ~g.key_mask); break;
+            case PlayerEventType::ACCEL_ON: gTheseKeys |= (kUpKey & ~g.key_mask); break;
+            case PlayerEventType::DECEL_ON: gTheseKeys |= (kDownKey & ~g.key_mask); break;
+            case PlayerEventType::CCW_ON: gTheseKeys |= (kLeftKey & ~g.key_mask); break;
+            case PlayerEventType::CW_ON: gTheseKeys |= (kRightKey & ~g.key_mask); break;
+            case PlayerEventType::FIRE_1_ON: gTheseKeys |= (kPulseKey & ~g.key_mask); break;
+            case PlayerEventType::FIRE_2_ON: gTheseKeys |= (kBeamKey & ~g.key_mask); break;
+            case PlayerEventType::FIRE_S_ON: gTheseKeys |= (kSpecialKey & ~g.key_mask); break;
+            case PlayerEventType::WARP_ON: gTheseKeys |= (kWarpKey & ~g.key_mask); break;
 
-            case PlayerKeyNum::ACCEL_OFF: gTheseKeys &= ~(kUpKey & ~g.key_mask); break;
-            case PlayerKeyNum::DECEL_OFF: gTheseKeys &= ~(kDownKey & ~g.key_mask); break;
-            case PlayerKeyNum::CCW_OFF: gTheseKeys &= ~(kLeftKey & ~g.key_mask); break;
-            case PlayerKeyNum::CW_OFF: gTheseKeys &= ~(kRightKey & ~g.key_mask); break;
-            case PlayerKeyNum::FIRE_1_OFF: gTheseKeys &= ~(kPulseKey & ~g.key_mask); break;
-            case PlayerKeyNum::FIRE_2_OFF: gTheseKeys &= ~(kBeamKey & ~g.key_mask); break;
-            case PlayerKeyNum::FIRE_S_OFF: gTheseKeys &= ~(kSpecialKey & ~g.key_mask); break;
-            case PlayerKeyNum::WARP_OFF: gTheseKeys &= ~(kWarpKey & ~g.key_mask); break;
+            case PlayerEventType::ACCEL_OFF: gTheseKeys &= ~(kUpKey & ~g.key_mask); break;
+            case PlayerEventType::DECEL_OFF: gTheseKeys &= ~(kDownKey & ~g.key_mask); break;
+            case PlayerEventType::CCW_OFF: gTheseKeys &= ~(kLeftKey & ~g.key_mask); break;
+            case PlayerEventType::CW_OFF: gTheseKeys &= ~(kRightKey & ~g.key_mask); break;
+            case PlayerEventType::FIRE_1_OFF: gTheseKeys &= ~(kPulseKey & ~g.key_mask); break;
+            case PlayerEventType::FIRE_2_OFF: gTheseKeys &= ~(kBeamKey & ~g.key_mask); break;
+            case PlayerEventType::FIRE_S_OFF: gTheseKeys &= ~(kSpecialKey & ~g.key_mask); break;
+            case PlayerEventType::WARP_OFF: gTheseKeys &= ~(kWarpKey & ~g.key_mask); break;
 
-            case PlayerKeyNum::ZOOM_OUT: zoom_out(); break;
-            case PlayerKeyNum::ZOOM_IN: zoom_in(); break;
-            case PlayerKeyNum::ZOOM_1X: zoom_shortcut(Zoom::ACTUAL); break;
-            case PlayerKeyNum::ZOOM_2X: zoom_shortcut(Zoom::DOUBLE); break;
-            case PlayerKeyNum::ZOOM_4X: zoom_shortcut(Zoom::QUARTER); break;
-            case PlayerKeyNum::ZOOM_16X: zoom_shortcut(Zoom::SIXTEENTH); break;
-            case PlayerKeyNum::ZOOM_FOE: zoom_shortcut(Zoom::FOE); break;
-            case PlayerKeyNum::ZOOM_OBJ: zoom_shortcut(Zoom::OBJECT); break;
-            case PlayerKeyNum::ZOOM_ALL: zoom_shortcut(Zoom::ALL); break;
-            case PlayerKeyNum::TRANSFER: transfer_control(g.admiral); break;
-            case PlayerKeyNum::MESSAGE_NEXT: Messages::advance(); break;
+            case PlayerEventType::ZOOM_OUT: zoom_out(); break;
+            case PlayerEventType::ZOOM_IN: zoom_in(); break;
+            case PlayerEventType::ZOOM_1X: zoom_shortcut(Zoom::ACTUAL); break;
+            case PlayerEventType::ZOOM_2X: zoom_shortcut(Zoom::DOUBLE); break;
+            case PlayerEventType::ZOOM_4X: zoom_shortcut(Zoom::QUARTER); break;
+            case PlayerEventType::ZOOM_16X: zoom_shortcut(Zoom::SIXTEENTH); break;
+            case PlayerEventType::ZOOM_FOE: zoom_shortcut(Zoom::FOE); break;
+            case PlayerEventType::ZOOM_OBJ: zoom_shortcut(Zoom::OBJECT); break;
+            case PlayerEventType::ZOOM_ALL: zoom_shortcut(Zoom::ALL); break;
+            case PlayerEventType::TRANSFER: transfer_control(g.admiral); break;
+            case PlayerEventType::MESSAGE_NEXT: Messages::advance(); break;
 
             default: break;
         }

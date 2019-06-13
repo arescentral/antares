@@ -28,7 +28,7 @@
 
 namespace antares {
 
-enum class PlayerKeyNum {
+enum class PlayerEventType {
     ACCEL_ON   = 0x000,
     ACCEL_OFF  = 0x100,
     DECEL_ON   = 0x001,
@@ -109,7 +109,7 @@ enum class PlayerKeyNum {
 };
 
 struct PlayerEvent {
-    PlayerKeyNum key;
+    PlayerEventType key;
 
     bool operator==(PlayerEvent other) const;
     bool operator!=(PlayerEvent other) const { return !(*this == other); }

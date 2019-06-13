@@ -507,22 +507,22 @@ static void minicomputer_handle_move(int direction) {
 
 void minicomputer_handle_event(PlayerEvent e) {
     switch (e.key) {
-        case PlayerKeyNum::COMP_ACCEPT_ON:
+        case PlayerEventType::COMP_ACCEPT_ON:
             minicomputer_handle_action(kInLineButton, true, MiniComputerDoAccept);
             break;
 
-        case PlayerKeyNum::COMP_CANCEL_ON:
+        case PlayerEventType::COMP_CANCEL_ON:
             minicomputer_handle_action(kOutLineButton, true, MiniComputerDoCancel);
             break;
 
-        case PlayerKeyNum::COMP_UP_ON: minicomputer_handle_move(-1); break;
-        case PlayerKeyNum::COMP_DOWN_ON: minicomputer_handle_move(+1); break;
+        case PlayerEventType::COMP_UP_ON: minicomputer_handle_move(-1); break;
+        case PlayerEventType::COMP_DOWN_ON: minicomputer_handle_move(+1); break;
 
-        case PlayerKeyNum::COMP_ACCEPT_OFF:
+        case PlayerEventType::COMP_ACCEPT_OFF:
             minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);
             break;
 
-        case PlayerKeyNum::COMP_CANCEL_OFF:
+        case PlayerEventType::COMP_CANCEL_OFF:
             minicomputer_handle_action(kOutLineButton, false, MiniComputerDoCancel);
             break;
 
