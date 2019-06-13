@@ -506,37 +506,27 @@ static void minicomputer_handle_move(int direction) {
 }
 
 void minicomputer_handle_event(PlayerEvent e) {
-    switch (e.type) {
-        case PlayerEvent::KEY_DOWN:
-            switch (e.key) {
-                case PlayerKeyNum::COMP_ACCEPT:
-                    minicomputer_handle_action(kInLineButton, true, MiniComputerDoAccept);
-                    break;
-
-                case PlayerKeyNum::COMP_CANCEL:
-                    minicomputer_handle_action(kOutLineButton, true, MiniComputerDoCancel);
-                    break;
-
-                case PlayerKeyNum::COMP_UP: minicomputer_handle_move(-1); break;
-                case PlayerKeyNum::COMP_DOWN: minicomputer_handle_move(+1); break;
-
-                default: break;
-            }
+    switch (e.key) {
+        case PlayerKeyNum::COMP_ACCEPT_ON:
+            minicomputer_handle_action(kInLineButton, true, MiniComputerDoAccept);
             break;
 
-        case PlayerEvent::KEY_UP:
-            switch (e.key) {
-                case PlayerKeyNum::COMP_ACCEPT:
-                    minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);
-                    break;
-
-                case PlayerKeyNum::COMP_CANCEL:
-                    minicomputer_handle_action(kOutLineButton, false, MiniComputerDoCancel);
-                    break;
-
-                default: break;
-            }
+        case PlayerKeyNum::COMP_CANCEL_ON:
+            minicomputer_handle_action(kOutLineButton, true, MiniComputerDoCancel);
             break;
+
+        case PlayerKeyNum::COMP_UP_ON: minicomputer_handle_move(-1); break;
+        case PlayerKeyNum::COMP_DOWN_ON: minicomputer_handle_move(+1); break;
+
+        case PlayerKeyNum::COMP_ACCEPT_OFF:
+            minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);
+            break;
+
+        case PlayerKeyNum::COMP_CANCEL_OFF:
+            minicomputer_handle_action(kOutLineButton, false, MiniComputerDoCancel);
+            break;
+
+        default: break;
     }
 }
 
