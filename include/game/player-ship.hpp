@@ -28,17 +28,110 @@
 
 namespace antares {
 
+enum class PlayerKeyNum {
+    ACCEL  = kUpKeyNum,
+    DECEL  = kDownKeyNum,
+    CCW    = kLeftKeyNum,
+    CW     = kRightKeyNum,
+    FIRE_1 = kOneKeyNum,
+    FIRE_2 = kTwoKeyNum,
+    FIRE_S = kEnterKeyNum,
+    WARP   = kWarpKeyNum,
+
+    SELECT_FRIEND = kSelectFriendKeyNum,
+
+    SELECT_FOE = kSelectFoeKeyNum,
+
+    SELECT_BASE = kSelectBaseKeyNum,
+
+    TARGET = kDestinationKeyNum,
+    ORDER  = kOrderKeyNum,
+
+    ZOOM_IN  = kZoomInKeyNum,
+    ZOOM_OUT = kZoomOutKeyNum,
+
+    COMP_UP     = kCompUpKeyNum,
+    COMP_DOWN   = kCompDownKeyNum,
+    COMP_ACCEPT = kCompAcceptKeyNum,
+    COMP_CANCEL = kCompCancelKeyNum,
+
+    TRANSFER     = kTransferKeyNum,
+    ZOOM_1X      = kScale121KeyNum,
+    ZOOM_2X      = kScale122KeyNum,
+    ZOOM_4X      = kScale124KeyNum,
+    ZOOM_16X     = kScale1216KeyNum,
+    ZOOM_FOE     = kScaleHostileKeyNum,
+    ZOOM_OBJ     = kScaleObjectKeyNum,
+    ZOOM_ALL     = kScaleAllKeyNum,
+    MESSAGE_NEXT = kMessageNextKeyNum,
+    HELP         = kHelpKeyNum,
+    VOL_DOWN     = kVolumeDownKeyNum,
+    VOL_UP       = kVolumeUpKeyNum,
+    MUSIC        = kActionMusicKeyNum,
+    NET_SETTINGS = kNetSettingsKeyNum,
+    FAST_MOTION  = kFastMotionKeyNum,
+
+    HOTKEY_1  = kHotKey1Num,
+    HOTKEY_2  = kHotKey2Num,
+    HOTKEY_3  = kHotKey3Num,
+    HOTKEY_4  = kHotKey4Num,
+    HOTKEY_5  = kHotKey5Num,
+    HOTKEY_6  = kHotKey6Num,
+    HOTKEY_7  = kHotKey7Num,
+    HOTKEY_8  = kHotKey8Num,
+    HOTKEY_9  = kHotKey9Num,
+    HOTKEY_10 = kHotKey10Num,
+
+    AUTOPILOT     = kAutoPilot2KeyNum,
+    TARGET_FRIEND = kTargetFriendKeyNum,
+    TARGET_BASE   = kTargetBaseKeyNum,
+    TARGET_SELF   = kTargetSelfKeyNum,
+
+    SET_HOTKEY_1  = kSetHotKey1Num,
+    SET_HOTKEY_2  = kSetHotKey2Num,
+    SET_HOTKEY_3  = kSetHotKey3Num,
+    SET_HOTKEY_4  = kSetHotKey4Num,
+    SET_HOTKEY_5  = kSetHotKey5Num,
+    SET_HOTKEY_6  = kSetHotKey6Num,
+    SET_HOTKEY_7  = kSetHotKey7Num,
+    SET_HOTKEY_8  = kSetHotKey8Num,
+    SET_HOTKEY_9  = kSetHotKey9Num,
+    SET_HOTKEY_10 = kSetHotKey10Num,
+
+    SELECT_HOTKEY_1  = kSelectHotKey1Num,
+    SELECT_HOTKEY_2  = kSelectHotKey2Num,
+    SELECT_HOTKEY_3  = kSelectHotKey3Num,
+    SELECT_HOTKEY_4  = kSelectHotKey4Num,
+    SELECT_HOTKEY_5  = kSelectHotKey5Num,
+    SELECT_HOTKEY_6  = kSelectHotKey6Num,
+    SELECT_HOTKEY_7  = kSelectHotKey7Num,
+    SELECT_HOTKEY_8  = kSelectHotKey8Num,
+    SELECT_HOTKEY_9  = kSelectHotKey9Num,
+    SELECT_HOTKEY_10 = kSelectHotKey10Num,
+
+    TARGET_HOTKEY_1  = kTargetHotKey1Num,
+    TARGET_HOTKEY_2  = kTargetHotKey2Num,
+    TARGET_HOTKEY_3  = kTargetHotKey3Num,
+    TARGET_HOTKEY_4  = kTargetHotKey4Num,
+    TARGET_HOTKEY_5  = kTargetHotKey5Num,
+    TARGET_HOTKEY_6  = kTargetHotKey6Num,
+    TARGET_HOTKEY_7  = kTargetHotKey7Num,
+    TARGET_HOTKEY_8  = kTargetHotKey8Num,
+    TARGET_HOTKEY_9  = kTargetHotKey9Num,
+    TARGET_HOTKEY_10 = kTargetHotKey10Num,
+};
+
 struct PlayerEvent {
     enum Type {
         KEY_DOWN,
         KEY_UP,
     } type;
     union {
-        KeyNum key;
+        PlayerKeyNum key;
     };
 
-    static PlayerEvent key_down(KeyNum k) { return PlayerEvent{KEY_DOWN, {k}}; }
-    static PlayerEvent key_up(KeyNum k) { return PlayerEvent{KEY_UP, {k}}; }
+    static PlayerEvent key_down(PlayerKeyNum k) { return PlayerEvent{KEY_DOWN, {k}}; }
+    static PlayerEvent key_up(PlayerKeyNum k) { return PlayerEvent{KEY_UP, {k}}; }
 
     bool operator==(PlayerEvent other) const;
     bool operator!=(PlayerEvent other) const { return !(*this == other); }

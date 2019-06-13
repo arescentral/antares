@@ -509,16 +509,16 @@ void minicomputer_handle_event(PlayerEvent e) {
     switch (e.type) {
         case PlayerEvent::KEY_DOWN:
             switch (e.key) {
-                case kCompAcceptKeyNum:
+                case PlayerKeyNum::COMP_ACCEPT:
                     minicomputer_handle_action(kInLineButton, true, MiniComputerDoAccept);
                     break;
 
-                case kCompCancelKeyNum:
+                case PlayerKeyNum::COMP_CANCEL:
                     minicomputer_handle_action(kOutLineButton, true, MiniComputerDoCancel);
                     break;
 
-                case kCompUpKeyNum: minicomputer_handle_move(-1); break;
-                case kCompDownKeyNum: minicomputer_handle_move(+1); break;
+                case PlayerKeyNum::COMP_UP: minicomputer_handle_move(-1); break;
+                case PlayerKeyNum::COMP_DOWN: minicomputer_handle_move(+1); break;
 
                 default: break;
             }
@@ -526,11 +526,11 @@ void minicomputer_handle_event(PlayerEvent e) {
 
         case PlayerEvent::KEY_UP:
             switch (e.key) {
-                case kCompAcceptKeyNum:
+                case PlayerKeyNum::COMP_ACCEPT:
                     minicomputer_handle_action(kInLineButton, false, MiniComputerDoAccept);
                     break;
 
-                case kCompCancelKeyNum:
+                case PlayerKeyNum::COMP_CANCEL:
                     minicomputer_handle_action(kOutLineButton, false, MiniComputerDoCancel);
                     break;
 

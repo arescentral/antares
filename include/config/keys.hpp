@@ -23,7 +23,7 @@
 
 namespace antares {
 
-const size_t kKeyControlNum         = 19;
+const size_t kKeyControlNum         = 13;
 const size_t kKeyExtendedControlNum = 44;
 const size_t kKeyMapBufferNum       = 256;
 const size_t kHotKeyNum             = 10;
