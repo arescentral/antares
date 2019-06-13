@@ -259,46 +259,6 @@ enum KeyNum {
     kHotKey10Num = kFirstHotKeyNum + 9,
 
     KEY_COUNT = 44,  // Number of real keys that can be set in prefs
-
-    // Virtual keys used in PlayerEvents follow
-
-    kAutoPilot2KeyNum   = 44,
-    kTargetFriendKeyNum = 45,
-    kTargetBaseKeyNum   = 46,
-    kTargetSelfKeyNum   = 47,
-
-    kSetHotKey1Num  = 48,
-    kSetHotKey2Num  = 49,
-    kSetHotKey3Num  = 50,
-    kSetHotKey4Num  = 51,
-    kSetHotKey5Num  = 52,
-    kSetHotKey6Num  = 53,
-    kSetHotKey7Num  = 54,
-    kSetHotKey8Num  = 55,
-    kSetHotKey9Num  = 56,
-    kSetHotKey10Num = 57,
-
-    kSelectHotKey1Num  = 58,
-    kSelectHotKey2Num  = 59,
-    kSelectHotKey3Num  = 60,
-    kSelectHotKey4Num  = 61,
-    kSelectHotKey5Num  = 62,
-    kSelectHotKey6Num  = 63,
-    kSelectHotKey7Num  = 64,
-    kSelectHotKey8Num  = 65,
-    kSelectHotKey9Num  = 66,
-    kSelectHotKey10Num = 67,
-
-    kTargetHotKey1Num  = 68,
-    kTargetHotKey2Num  = 69,
-    kTargetHotKey3Num  = 70,
-    kTargetHotKey4Num  = 71,
-    kTargetHotKey5Num  = 72,
-    kTargetHotKey6Num  = 73,
-    kTargetHotKey7Num  = 74,
-    kTargetHotKey8Num  = 75,
-    kTargetHotKey9Num  = 76,
-    kTargetHotKey10Num = 77,
 };
 
 enum {

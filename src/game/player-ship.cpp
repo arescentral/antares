@@ -347,6 +347,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
+        PlayerKeyNum k = static_cast<PlayerKeyNum>(*key);
         switch (*key) {
             case kHotKey1Num: hot_key_down(0); return;
             case kHotKey2Num: hot_key_down(1); return;
@@ -364,17 +365,19 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
                 gDestKeyTime  = now();
                 break;
 
-            case kWarpKeyNum: *key = use_target_key() ? kAutoPilot2KeyNum : kWarpKeyNum; break;
+            case kWarpKeyNum:
+                k = use_target_key() ? PlayerKeyNum::AUTOPILOT : PlayerKeyNum::WARP;
+                break;
             case kSelectFriendKeyNum:
-                *key = use_target_key() ? kTargetFriendKeyNum : kSelectFriendKeyNum;
+                k = use_target_key() ? PlayerKeyNum::TARGET_FRIEND : PlayerKeyNum::SELECT_FRIEND;
                 break;
             case kSelectFoeKeyNum: use_target_key(); break;
             case kSelectBaseKeyNum:
-                *key = use_target_key() ? kTargetBaseKeyNum : kSelectBaseKeyNum;
+                k = use_target_key() ? PlayerKeyNum::TARGET_BASE : PlayerKeyNum::SELECT_BASE;
                 break;
             default: break;
         }
-        _player_events.push_back(PlayerEvent::key_down(static_cast<PlayerKeyNum>(*key)));
+        _player_events.push_back(PlayerEvent::key_down(k));
     }
 }
 
@@ -387,6 +390,7 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 
     sfz::optional<KeyNum> key = key_num(event.key());
     if (key.has_value()) {
+        PlayerKeyNum k = static_cast<PlayerKeyNum>(*key);
         switch (*key) {
             case kHotKey1Num: _player_events.push_back(hot_key_up(0)); return;
             case kHotKey2Num: _player_events.push_back(hot_key_up(1)); return;
@@ -402,14 +406,14 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
             case kDestinationKeyNum:
                 if ((now() >= (gDestKeyTime + kDestKeyHoldDuration) &&
                      (gDestKeyState == DEST_KEY_DOWN))) {
-                    *key = kTargetSelfKeyNum;
+                    k = PlayerKeyNum::TARGET_SELF;
                 }
                 gDestKeyState = DEST_KEY_UP;
                 break;
 
             default: break;
         }
-        _player_events.push_back(PlayerEvent::key_up(static_cast<PlayerKeyNum>(*key)));
+        _player_events.push_back(PlayerEvent::key_up(k));
     }
 }
 
