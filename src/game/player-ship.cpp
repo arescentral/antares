@@ -708,16 +708,8 @@ static void handle_destination_key(const std::vector<PlayerEvent>& player_events
 }
 
 static int hot_key_index(const PlayerEvent& e) {
-    if ((PlayerKeyNum::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerKeyNum::SET_HOTKEY_10)) {
-        return static_cast<int>(e.key) - static_cast<int>(PlayerKeyNum::SET_HOTKEY_1);
-    } else if (
-            (PlayerKeyNum::SELECT_HOTKEY_1 <= e.key) &&
-            (e.key <= PlayerKeyNum::SELECT_HOTKEY_10)) {
-        return static_cast<int>(e.key) - static_cast<int>(PlayerKeyNum::SELECT_HOTKEY_1);
-    } else if (
-            (PlayerKeyNum::TARGET_HOTKEY_1 <= e.key) &&
-            (e.key <= PlayerKeyNum::TARGET_HOTKEY_10)) {
-        return static_cast<int>(e.key) - static_cast<int>(PlayerKeyNum::TARGET_HOTKEY_1);
+    if ((PlayerKeyNum::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerKeyNum::TARGET_HOTKEY_10)) {
+        return static_cast<int>(e.key) & 0xf;
     }
     return -1;
 }
