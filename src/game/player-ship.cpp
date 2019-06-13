@@ -371,7 +371,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
                 break;
             case kSelectFoeKeyNum:
                 use_target_key();
-                k = PlayerKeyNum::SELECT_FOE;
+                k = PlayerKeyNum::TARGET_FOE;
                 break;
             case kSelectBaseKeyNum:
                 k = use_target_key() ? PlayerKeyNum::TARGET_BASE : PlayerKeyNum::SELECT_BASE;
@@ -452,7 +452,7 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
                 break;
 
             case kSelectFriendKeyNum: k = PlayerKeyNum::SELECT_FRIEND; break;
-            case kSelectFoeKeyNum: k = PlayerKeyNum::SELECT_FOE; break;
+            case kSelectFoeKeyNum: k = PlayerKeyNum::TARGET_FOE; break;
             case kSelectBaseKeyNum: k = PlayerKeyNum::SELECT_BASE; break;
             case kOrderKeyNum: k = PlayerKeyNum::ORDER; break;
             case kTransferKeyNum: k = PlayerKeyNum::TRANSFER; break;
@@ -786,7 +786,7 @@ static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
         switch (e.key) {
             case PlayerKeyNum::SELECT_FRIEND: select_friendly(g.ship, g.ship->direction); break;
             case PlayerKeyNum::TARGET_FRIEND: target_friendly(g.ship, g.ship->direction); break;
-            case PlayerKeyNum::SELECT_FOE: target_hostile(g.ship, g.ship->direction); break;
+            case PlayerKeyNum::TARGET_FOE: target_hostile(g.ship, g.ship->direction); break;
             case PlayerKeyNum::SELECT_BASE: select_base(g.ship, g.ship->direction); break;
             case PlayerKeyNum::TARGET_BASE: target_base(g.ship, g.ship->direction); break;
             default: continue;
