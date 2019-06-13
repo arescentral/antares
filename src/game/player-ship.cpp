@@ -364,8 +364,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kDestinationKeyNum:
                 gDestKeyState = DEST_KEY_DOWN;
                 gDestKeyTime  = now();
-                k             = PlayerKeyNum::TARGET;
-                break;
+                return;
 
             case kSelectFriendKeyNum:
                 k = use_target_key() ? PlayerKeyNum::TARGET_FRIEND : PlayerKeyNum::SELECT_FRIEND;
@@ -397,12 +396,12 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kScaleAllKeyNum: k = PlayerKeyNum::ZOOM_ALL; break;
             case kMessageNextKeyNum: k = PlayerKeyNum::MESSAGE_NEXT; break;
 
-            case kHelpKeyNum: k = PlayerKeyNum::HELP; break;
-            case kVolumeDownKeyNum: k = PlayerKeyNum::VOL_DOWN; break;
-            case kVolumeUpKeyNum: k = PlayerKeyNum::VOL_UP; break;
-            case kActionMusicKeyNum: k = PlayerKeyNum::MUSIC; break;
-            case kNetSettingsKeyNum: k = PlayerKeyNum::NET_SETTINGS; break;
-            case kFastMotionKeyNum: k = PlayerKeyNum::FAST_MOTION; break;
+            case kHelpKeyNum: return;
+            case kVolumeDownKeyNum: return;
+            case kVolumeUpKeyNum: return;
+            case kActionMusicKeyNum: return;
+            case kNetSettingsKeyNum: return;
+            case kFastMotionKeyNum: return;
 
             case kHotKey1Num: hot_key_down(0); return;
             case kHotKey2Num: hot_key_down(1); return;
@@ -444,11 +443,12 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
             case kDestinationKeyNum:
                 if ((now() >= (gDestKeyTime + kDestKeyHoldDuration) &&
                      (gDestKeyState == DEST_KEY_DOWN))) {
-                    k = PlayerKeyNum::TARGET_SELF;
+                    gDestKeyState = DEST_KEY_UP;
+                    k             = PlayerKeyNum::TARGET_SELF;
                 } else {
-                    k = PlayerKeyNum::TARGET;
+                    gDestKeyState = DEST_KEY_UP;
+                    return;
                 }
-                gDestKeyState = DEST_KEY_UP;
                 break;
 
             case kSelectFriendKeyNum: k = PlayerKeyNum::SELECT_FRIEND; break;
@@ -473,12 +473,12 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
             case kScaleAllKeyNum: k = PlayerKeyNum::ZOOM_ALL; break;
             case kMessageNextKeyNum: k = PlayerKeyNum::MESSAGE_NEXT; break;
 
-            case kHelpKeyNum: k = PlayerKeyNum::HELP; break;
-            case kVolumeDownKeyNum: k = PlayerKeyNum::VOL_DOWN; break;
-            case kVolumeUpKeyNum: k = PlayerKeyNum::VOL_UP; break;
-            case kActionMusicKeyNum: k = PlayerKeyNum::MUSIC; break;
-            case kNetSettingsKeyNum: k = PlayerKeyNum::NET_SETTINGS; break;
-            case kFastMotionKeyNum: k = PlayerKeyNum::FAST_MOTION; break;
+            case kHelpKeyNum: return;
+            case kVolumeDownKeyNum: return;
+            case kVolumeUpKeyNum: return;
+            case kActionMusicKeyNum: return;
+            case kNetSettingsKeyNum: return;
+            case kFastMotionKeyNum: return;
 
             case kHotKey1Num: _player_events.push_back(hot_key_up(0)); return;
             case kHotKey2Num: _player_events.push_back(hot_key_up(1)); return;
@@ -728,11 +728,7 @@ static int hot_key_index(const PlayerEvent& e) {
     switch (e.type) {
         case PlayerEvent::KEY_DOWN:
         case PlayerEvent::KEY_UP:
-            if ((PlayerKeyNum::HOTKEY_1 <= e.key) && (e.key <= PlayerKeyNum::HOTKEY_10)) {
-                return static_cast<int>(e.key) - static_cast<int>(PlayerKeyNum::HOTKEY_1);
-            } else if (
-                    (PlayerKeyNum::SET_HOTKEY_1 <= e.key) &&
-                    (e.key <= PlayerKeyNum::SET_HOTKEY_10)) {
+            if ((PlayerKeyNum::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerKeyNum::SET_HOTKEY_10)) {
                 return static_cast<int>(e.key) - static_cast<int>(PlayerKeyNum::SET_HOTKEY_1);
             } else if (
                     (PlayerKeyNum::SELECT_HOTKEY_1 <= e.key) &&

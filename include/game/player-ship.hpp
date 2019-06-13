@@ -39,13 +39,10 @@ enum class PlayerKeyNum {
     WARP   = kWarpKeyNum,
 
     SELECT_FRIEND = kSelectFriendKeyNum,
+    SELECT_FOE    = kSelectFoeKeyNum,
+    SELECT_BASE   = kSelectBaseKeyNum,
 
-    SELECT_FOE = kSelectFoeKeyNum,
-
-    SELECT_BASE = kSelectBaseKeyNum,
-
-    TARGET = kDestinationKeyNum,
-    ORDER  = kOrderKeyNum,
+    ORDER = kOrderKeyNum,
 
     ZOOM_IN  = kZoomInKeyNum,
     ZOOM_OUT = kZoomOutKeyNum,
@@ -64,23 +61,6 @@ enum class PlayerKeyNum {
     ZOOM_OBJ     = kScaleObjectKeyNum,
     ZOOM_ALL     = kScaleAllKeyNum,
     MESSAGE_NEXT = kMessageNextKeyNum,
-    HELP         = kHelpKeyNum,
-    VOL_DOWN     = kVolumeDownKeyNum,
-    VOL_UP       = kVolumeUpKeyNum,
-    MUSIC        = kActionMusicKeyNum,
-    NET_SETTINGS = kNetSettingsKeyNum,
-    FAST_MOTION  = kFastMotionKeyNum,
-
-    HOTKEY_1  = kHotKey1Num,
-    HOTKEY_2  = kHotKey2Num,
-    HOTKEY_3  = kHotKey3Num,
-    HOTKEY_4  = kHotKey4Num,
-    HOTKEY_5  = kHotKey5Num,
-    HOTKEY_6  = kHotKey6Num,
-    HOTKEY_7  = kHotKey7Num,
-    HOTKEY_8  = kHotKey8Num,
-    HOTKEY_9  = kHotKey9Num,
-    HOTKEY_10 = kHotKey10Num,
 
     AUTOPILOT     = 0x0100,
     TARGET_FRIEND = 0x0101,
