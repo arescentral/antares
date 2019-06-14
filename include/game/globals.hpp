@@ -44,7 +44,9 @@ const int32_t kRadarSize        = 110;
 
 struct miniScreenLineType;
 struct miniComputerDataType {
-    std::unique_ptr<miniScreenLineType[]> lineData;
+    std::unique_ptr<miniScreenLineType[]> lines;
+    std::unique_ptr<miniScreenLineType>   accept;
+    std::unique_ptr<miniScreenLineType>   cancel;
     int32_t                               selectLine;
     Screen                                currentScreen;
     int32_t                               clickLine;
