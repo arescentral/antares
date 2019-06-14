@@ -468,13 +468,13 @@ static void make_mini_screen(
         dst->callback  = src.callback;
     }
 
-    if (accept.whichButton == kInLineButton) {
+    if (accept.kind != MINI_BUTTON_NONE) {
         g.mini.accept->kind        = accept.kind;
         g.mini.accept->string      = accept.string.copy();
         g.mini.accept->whichButton = accept.whichButton;
     }
 
-    if (cancel.whichButton == kOutLineButton) {
+    if (cancel.kind != MINI_BUTTON_NONE) {
         g.mini.cancel->kind        = cancel.kind;
         g.mini.cancel->string      = cancel.string.copy();
         g.mini.cancel->whichButton = cancel.whichButton;
@@ -482,14 +482,14 @@ static void make_mini_screen(
 }
 
 static void minicomputer_down(MiniButton* line) {
-    if ((line->whichButton != kNoLineButton) && (line->kind != MINI_BUTTON_ON)) {
+    if (line->kind == MINI_BUTTON_OFF) {
         line->kind = MINI_BUTTON_ON;
         sys.sound.click();
     }
 }
 
 static void minicomputer_up(MiniButton* line, void (*action)()) {
-    if ((line->whichButton != kNoLineButton) && (line->kind != MINI_BUTTON_OFF)) {
+    if (line->kind == MINI_BUTTON_ON) {
         line->kind = MINI_BUTTON_OFF;
         if (action) {
             action();
@@ -1182,31 +1182,24 @@ void MiniComputerHandleClick(Point where) {
              kButBoxBottom + instrument_top())
                 .contains(where)) {
         int lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height);
-        g.mini.clickLine   = lineNum + kMiniScreenCharHeight;
-        MiniButton* button = (lineNum == 0) ? g.mini.accept.get() : g.mini.cancel.get();
-        if (button->whichButton == kInLineButton) {
+        g.mini.clickLine       = lineNum + kMiniScreenCharHeight;
+        MiniButton* button     = (lineNum == 0) ? g.mini.accept.get() : g.mini.cancel.get();
+        MiniButton* off_button = (lineNum == 0) ? g.mini.cancel.get() : g.mini.accept.get();
+        if (button->kind) {
             if (button->kind != MINI_BUTTON_ON) {
                 button->kind = MINI_BUTTON_ON;
                 sys.sound.click();
             }
-            if (g.mini.cancel->whichButton == kOutLineButton) {
-                g.mini.cancel->kind = MINI_BUTTON_OFF;
-            }
-        } else if (button->whichButton == kOutLineButton) {
-            if (button->kind != MINI_BUTTON_ON) {
-                button->kind = MINI_BUTTON_ON;
-                sys.sound.click();
-            }
-            if (g.mini.accept->whichButton == kOutLineButton) {
-                g.mini.accept->kind = MINI_BUTTON_OFF;
+            if (off_button->kind) {
+                off_button->kind = MINI_BUTTON_OFF;
             }
         }
     } else {
         // make sure both buttons are off
-        if (g.mini.accept->whichButton == kOutLineButton) {
+        if (g.mini.accept->kind) {
             g.mini.accept->kind = MINI_BUTTON_OFF;
         }
-        if (g.mini.cancel->whichButton == kOutLineButton) {
+        if (g.mini.cancel->kind) {
             g.mini.cancel->kind = MINI_BUTTON_OFF;
         }
 
@@ -1232,30 +1225,23 @@ void MiniComputerHandleDoubleClick(Point where) {
              kButBoxBottom + instrument_top())
                 .contains(where)) {
         int lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height);
-        MiniButton* button = (lineNum == 0) ? g.mini.accept.get() : g.mini.cancel.get();
-        if (button->whichButton == kInLineButton) {
+        MiniButton* button     = (lineNum == 0) ? g.mini.accept.get() : g.mini.cancel.get();
+        MiniButton* off_button = (lineNum == 0) ? g.mini.cancel.get() : g.mini.accept.get();
+        if (button->kind) {
             if (button->kind != MINI_BUTTON_ON) {
                 button->kind = MINI_BUTTON_ON;
                 sys.sound.click();
             }
-            if (g.mini.cancel->whichButton == kOutLineButton) {
-                g.mini.cancel->kind = MINI_BUTTON_OFF;
-            }
-        } else if (button->whichButton == kOutLineButton) {
-            if (button->kind != MINI_BUTTON_ON) {
-                button->kind = MINI_BUTTON_ON;
-                sys.sound.click();
-            }
-            if (g.mini.accept->whichButton == kOutLineButton) {
-                g.mini.accept->kind = MINI_BUTTON_OFF;
+            if (off_button->kind) {
+                off_button->kind = MINI_BUTTON_OFF;
             }
         }
     } else {
         // make sure both buttons are off
-        if (g.mini.accept->whichButton == kOutLineButton) {
+        if (g.mini.accept->kind) {
             g.mini.accept->kind = MINI_BUTTON_OFF;
         }
-        if (g.mini.cancel->whichButton == kOutLineButton) {
+        if (g.mini.cancel->kind) {
             g.mini.cancel->kind = MINI_BUTTON_OFF;
         }
 
@@ -1288,15 +1274,14 @@ void MiniComputerHandleMouseUp(Point where) {
         int32_t lineNum =
                 ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height);
         MiniButton* button = (lineNum == 0) ? g.mini.accept.get() : g.mini.cancel.get();
-        if (button->whichButton == kInLineButton) {
+        if (button->kind) {
             if (button->kind == MINI_BUTTON_ON) {
                 button->kind = MINI_BUTTON_OFF;
-                MiniComputerDoAccept();
-            }
-        } else if (button->whichButton == kOutLineButton) {
-            if (button->kind == MINI_BUTTON_ON) {
-                button->kind = MINI_BUTTON_OFF;
-                MiniComputerDoCancel();
+                if (lineNum == 0) {
+                    MiniComputerDoAccept();
+                } else {
+                    MiniComputerDoCancel();
+                }
             }
         }
     }
@@ -1309,22 +1294,16 @@ void MiniComputerHandleMouseStillDown(Point where) {
                 .contains(where)) {
         int lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height);
         MiniButton* button = (lineNum == 0) ? g.mini.accept.get() : g.mini.cancel.get();
-        if ((button->whichButton == kInLineButton) &&
-            ((lineNum + kMiniScreenCharHeight) == g.mini.clickLine)) {
-            button->kind = MINI_BUTTON_ON;
-            return;
-        } else if (
-                (button->whichButton == kOutLineButton) &&
-                ((lineNum + kMiniScreenCharHeight) == g.mini.clickLine)) {
+        if (button->kind && ((lineNum + kMiniScreenCharHeight) == g.mini.clickLine)) {
             button->kind = MINI_BUTTON_ON;
             return;
         }
     }
 
-    if (g.mini.accept->whichButton == kInLineButton) {
+    if (g.mini.accept->kind) {
         g.mini.accept->kind = MINI_BUTTON_OFF;
     }
-    if (g.mini.cancel->whichButton == kOutLineButton) {
+    if (g.mini.cancel->kind) {
         g.mini.cancel->kind = MINI_BUTTON_OFF;
     }
 }
