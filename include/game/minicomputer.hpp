@@ -36,7 +36,25 @@ enum MiniScreenLineKind {
     MINI_BUTTON_OFF = 4,
 };
 
-struct miniScreenLineType {
+struct MiniLine {
+    MiniScreenLineKind                   kind = MINI_NONE;
+    pn::string                           string;
+    pn::string                           statusFalse;
+    pn::string                           statusTrue;
+    pn::string                           statusString;
+    pn::string                           postString;
+    int32_t                              whichButton = -1;
+    bool                                 underline   = false;
+    int32_t                              value;  // for keeping track of changing values
+    int32_t                              statusType;
+    Handle<const Condition>              condition;
+    Counter                              counter;
+    int32_t                              negativeValue;
+    const BaseObject*                    sourceData;
+    std::function<void(Handle<Admiral>)> callback;
+};
+
+struct MiniButton {
     MiniScreenLineKind                   kind = MINI_NONE;
     pn::string                           string;
     pn::string                           statusFalse;

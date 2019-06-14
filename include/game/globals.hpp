@@ -42,14 +42,15 @@ const int32_t kRightPanelWidth  = 32;
 const int32_t kSmallScreenWidth = 640;
 const int32_t kRadarSize        = 110;
 
-struct miniScreenLineType;
+struct MiniLine;
+struct MiniButton;
 struct miniComputerDataType {
-    std::unique_ptr<miniScreenLineType[]> lines;
-    std::unique_ptr<miniScreenLineType>   accept;
-    std::unique_ptr<miniScreenLineType>   cancel;
-    int32_t                               selectLine;
-    Screen                                currentScreen;
-    int32_t                               clickLine;
+    std::unique_ptr<MiniLine[]> lines;
+    std::unique_ptr<MiniButton> accept;
+    std::unique_ptr<MiniButton> cancel;
+    int32_t                     selectLine;
+    Screen                      currentScreen;
+    int32_t                     clickLine;
 };
 
 struct hotKeyType {
