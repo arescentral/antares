@@ -219,20 +219,16 @@ void MiniScreenCleanup() {
 
 static void clear_line(MiniLine* line) {
     line->string.clear();
-    line->whichButton = kNoLineButton;
-    line->kind        = MINI_NONE;
-    line->underline   = false;
-    line->sourceData  = nullptr;
-    line->callback    = nullptr;
+    line->kind       = MINI_NONE;
+    line->underline  = false;
+    line->sourceData = nullptr;
+    line->callback   = nullptr;
 }
 
 static void clear_button(MiniButton* line) {
     line->string.clear();
     line->whichButton = kNoLineButton;
-    line->kind        = MINI_NONE;
-    line->underline   = false;
-    line->sourceData  = nullptr;
-    line->callback    = nullptr;
+    line->kind        = MINI_BUTTON_NONE;
 }
 
 void ClearMiniScreenLines() {
@@ -465,30 +461,22 @@ static void make_mini_screen(
                 // fall through
 
             case MINI_NONE: dst = item++; break;
-
-            case MINI_BUTTON_ON:
-            case MINI_BUTTON_OFF: continue;
         }
-        dst->kind        = src.kind;
-        dst->string      = src.string.copy();
-        dst->underline   = src.underline;
-        dst->callback    = src.callback;
-        dst->whichButton = src.whichButton;
+        dst->kind      = src.kind;
+        dst->string    = src.string.copy();
+        dst->underline = src.underline;
+        dst->callback  = src.callback;
     }
 
     if (accept.whichButton == kInLineButton) {
         g.mini.accept->kind        = accept.kind;
         g.mini.accept->string      = accept.string.copy();
-        g.mini.accept->underline   = accept.underline;
-        g.mini.accept->callback    = accept.callback;
         g.mini.accept->whichButton = accept.whichButton;
     }
 
     if (cancel.whichButton == kOutLineButton) {
         g.mini.cancel->kind        = cancel.kind;
         g.mini.cancel->string      = cancel.string.copy();
-        g.mini.cancel->underline   = cancel.underline;
-        g.mini.cancel->callback    = cancel.callback;
         g.mini.cancel->whichButton = cancel.whichButton;
     }
 }
