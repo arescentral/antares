@@ -838,6 +838,23 @@ void PlayerShip::update(bool enter_message) {
             case PlayerEventType::TRANSFER: transfer_control(g.admiral); break;
             case PlayerEventType::MESSAGE_NEXT: Messages::advance(); break;
 
+            case PlayerEventType::MINI_BUILD_1: build_ship(g.admiral, 0); break;
+            case PlayerEventType::MINI_BUILD_2: build_ship(g.admiral, 1); break;
+            case PlayerEventType::MINI_BUILD_3: build_ship(g.admiral, 2); break;
+            case PlayerEventType::MINI_BUILD_4: build_ship(g.admiral, 3); break;
+            case PlayerEventType::MINI_BUILD_5: build_ship(g.admiral, 4); break;
+            case PlayerEventType::MINI_BUILD_6: build_ship(g.admiral, 5); break;
+
+            case PlayerEventType::MINI_HOLD: hold_position(g.admiral); break;
+            case PlayerEventType::MINI_COME: come_to_me(g.admiral); break;
+            case PlayerEventType::MINI_FIRE_1: fire_weapon(g.admiral, kPulseKey); break;
+            case PlayerEventType::MINI_FIRE_2: fire_weapon(g.admiral, kBeamKey); break;
+            case PlayerEventType::MINI_FIRE_S: fire_weapon(g.admiral, kSpecialKey); break;
+
+            case PlayerEventType::MINI_NEXT_PAGE: next_message(g.admiral); break;
+            case PlayerEventType::MINI_PREV_PAGE: prev_message(g.admiral); break;
+            case PlayerEventType::MINI_LAST_MESSAGE: last_message(g.admiral); break;
+
             default: break;
         }
     }
@@ -937,7 +954,12 @@ void PlayerShip::update(bool enter_message) {
     }
 
     Handle<SpaceObject> flagship = g.ship;  // Pilot same ship even after minicomputer transfer.
-    minicomputer_handle_keys(_player_events);
+    for (auto e : _player_events) {
+        switch (e.key) {
+            case PlayerEventType::MINI_TRANSFER: transfer_control(g.admiral); break;
+            default: break;
+        }
+    }
     handle_destination_key(_player_events);
     handle_hotkeys(_player_events);
     if (!_cursor.active()) {

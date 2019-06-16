@@ -812,7 +812,7 @@ void transfer_control(Handle<Admiral> adm) {
     }
 }
 
-static void build_ship(Handle<Admiral> adm, int32_t index) {
+void build_ship(Handle<Admiral> adm, int32_t index) {
     if (g.key_mask & kComputerBuildMenu) {
         return;
     }
@@ -829,7 +829,7 @@ static void build_ship(Handle<Admiral> adm, int32_t index) {
     }
 }
 
-static void fire(Handle<Admiral> adm, int key) {
+void fire_weapon(Handle<Admiral> adm, int key) {
     if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
@@ -841,11 +841,7 @@ static void fire(Handle<Admiral> adm, int key) {
     }
 }
 
-static void fire_pulse(Handle<Admiral> adm) { fire(adm, kPulseKey); }
-static void fire_beam(Handle<Admiral> adm) { fire(adm, kBeamKey); }
-static void fire_special(Handle<Admiral> adm) { fire(adm, kSpecialKey); }
-
-static void hold_position(Handle<Admiral> adm) {
+void hold_position(Handle<Admiral> adm) {
     if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
@@ -855,7 +851,7 @@ static void hold_position(Handle<Admiral> adm) {
     }
 }
 
-static void come_to_me(Handle<Admiral> adm) {
+void come_to_me(Handle<Admiral> adm) {
     if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
@@ -866,55 +862,25 @@ static void come_to_me(Handle<Admiral> adm) {
     }
 }
 
-static void next_message(Handle<Admiral> adm) {
+void next_message(Handle<Admiral> adm) {
     if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::advance();
 }
 
-static void last_message(Handle<Admiral> adm) {
+void last_message(Handle<Admiral> adm) {
     if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::replay();
 }
 
-static void prev_message(Handle<Admiral> adm) {
+void prev_message(Handle<Admiral> adm) {
     if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::previous();
-}
-
-void minicomputer_handle_event(PlayerEvent e) {
-    switch (e.key) {
-        case PlayerEventType::MINI_BUILD_1: build_ship(g.admiral, 0); break;
-        case PlayerEventType::MINI_BUILD_2: build_ship(g.admiral, 1); break;
-        case PlayerEventType::MINI_BUILD_3: build_ship(g.admiral, 2); break;
-        case PlayerEventType::MINI_BUILD_4: build_ship(g.admiral, 3); break;
-        case PlayerEventType::MINI_BUILD_5: build_ship(g.admiral, 4); break;
-        case PlayerEventType::MINI_BUILD_6: build_ship(g.admiral, 5); break;
-
-        case PlayerEventType::MINI_TRANSFER: transfer_control(g.admiral); break;
-        case PlayerEventType::MINI_HOLD: hold_position(g.admiral); break;
-        case PlayerEventType::MINI_COME: come_to_me(g.admiral); break;
-        case PlayerEventType::MINI_FIRE_1: fire_pulse(g.admiral); break;
-        case PlayerEventType::MINI_FIRE_2: fire_beam(g.admiral); break;
-        case PlayerEventType::MINI_FIRE_S: fire_special(g.admiral); break;
-
-        case PlayerEventType::MINI_NEXT_PAGE: next_message(g.admiral); break;
-        case PlayerEventType::MINI_PREV_PAGE: prev_message(g.admiral); break;
-        case PlayerEventType::MINI_LAST_MESSAGE: last_message(g.admiral); break;
-
-        default: break;
-    }
-}
-
-void minicomputer_handle_keys(const std::vector<PlayerEvent>& player_events) {
-    for (const auto& e : player_events) {
-        minicomputer_handle_event(e);
-    }
 }
 
 static void show_build_screen(Handle<Admiral> adm) {

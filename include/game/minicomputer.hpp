@@ -71,14 +71,21 @@ void ClearMiniScreenLines(void);
 void draw_mini_screen();
 void minicomputer_interpret_key_down(KeyNum k, std::vector<PlayerEvent>* player_events);
 void minicomputer_interpret_key_up(KeyNum k, std::vector<PlayerEvent>* player_events);
-void minicomputer_handle_keys(const std::vector<PlayerEvent>& player_events);
 void minicomputer_cancel();
 Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 sfz::optional<PlayerEvent> MiniComputerDoAccept();
 
+void build_ship(Handle<Admiral> adm, int32_t index);
 void transfer_control(Handle<Admiral> adm);
+void hold_position(Handle<Admiral> adm);
+void come_to_me(Handle<Admiral> adm);
+void fire_weapon(Handle<Admiral> adm, int key);
+void next_message(Handle<Admiral> adm);
+void last_message(Handle<Admiral> adm);
+void prev_message(Handle<Admiral> adm);
+
 void MiniComputerDoCancel(void);
 void MiniComputerSetBuildStrings(void);
 void MiniComputerHandleClick(Point);
