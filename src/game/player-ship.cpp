@@ -936,6 +936,7 @@ void PlayerShip::update(bool enter_message) {
     }
 
     Handle<SpaceObject> flagship = g.ship;  // Pilot same ship even after minicomputer transfer.
+    minicomputer_interpret_keys(&_player_events);
     minicomputer_handle_keys(_player_events);
     handle_destination_key(_player_events);
     handle_hotkeys(_player_events);

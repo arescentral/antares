@@ -106,6 +106,24 @@ enum class PlayerEventType {
     TARGET_HOTKEY_8  = 0x067,
     TARGET_HOTKEY_9  = 0x068,
     TARGET_HOTKEY_10 = 0x069,
+
+    MINI_BUILD_1 = 0x070,
+    MINI_BUILD_2 = 0x071,
+    MINI_BUILD_3 = 0x072,
+    MINI_BUILD_4 = 0x073,
+    MINI_BUILD_5 = 0x074,
+    MINI_BUILD_6 = 0x075,
+
+    MINI_TRANSFER = 0x080,
+    MINI_HOLD     = 0x081,
+    MINI_COME     = 0x082,
+    MINI_FIRE_1   = 0x083,
+    MINI_FIRE_2   = 0x084,
+    MINI_FIRE_S   = 0x085,
+
+    MINI_NEXT_PAGE    = 0x090,
+    MINI_PREV_PAGE    = 0x091,
+    MINI_LAST_MESSAGE = 0x092,
 };
 
 struct PlayerEvent {

@@ -222,6 +222,7 @@ static void clear_line(MiniLine* line) {
     line->underline  = false;
     line->sourceData = nullptr;
     line->callback   = nullptr;
+    line->event      = sfz::nullopt;
 }
 
 static void clear_button(MiniButton* line) {
@@ -396,6 +397,16 @@ static MiniLine selectable(pn::string_view name, void (*callback)(Handle<Admiral
     line.kind     = MINI_SELECTABLE;
     line.string   = name.copy();
     line.callback = callback;
+    line.event    = sfz::nullopt;
+    return line;
+}
+
+static MiniLine selectable(pn::string_view name, PlayerEvent e) {
+    MiniLine line;
+    line.kind     = MINI_SELECTABLE;
+    line.string   = name.copy();
+    line.callback = nullptr;
+    line.event    = sfz::make_optional(std::move(e));
     return line;
 }
 
@@ -456,6 +467,7 @@ static void make_mini_screen(
         dst->string    = src.string.copy();
         dst->underline = src.underline;
         dst->callback  = src.callback;
+        dst->event     = src.event;
     }
 
     if (accept.kind != MINI_BUTTON_NONE) {
@@ -478,7 +490,7 @@ static void minicomputer_down(MiniButton* line) {
     }
 }
 
-static void minicomputer_up(MiniButton* line, void (*action)()) {
+static void minicomputer_up(MiniButton* line, std::function<void()> action) {
     if (line->kind == MINI_BUTTON_ON) {
         line->kind = MINI_BUTTON_OFF;
         if (action) {
@@ -505,31 +517,40 @@ static void minicomputer_handle_move(int direction) {
     } while (line->kind == MINI_NONE);
 }
 
-void minicomputer_handle_event(PlayerEvent e) {
+bool minicomputer_interpret_event(PlayerEvent e, std::vector<PlayerEvent>* player_events) {
     switch (e.key) {
-        case PlayerEventType::COMP_ACCEPT_ON: minicomputer_down(g.mini.accept.get()); break;
+        case PlayerEventType::COMP_ACCEPT_ON: minicomputer_down(g.mini.accept.get()); return true;
 
-        case PlayerEventType::COMP_CANCEL_ON: minicomputer_down(g.mini.cancel.get()); break;
+        case PlayerEventType::COMP_CANCEL_ON: minicomputer_down(g.mini.cancel.get()); return true;
 
-        case PlayerEventType::COMP_UP_ON: minicomputer_handle_move(-1); break;
-        case PlayerEventType::COMP_DOWN_ON: minicomputer_handle_move(+1); break;
+        case PlayerEventType::COMP_UP_ON: minicomputer_handle_move(-1); return true;
+        case PlayerEventType::COMP_DOWN_ON: minicomputer_handle_move(+1); return true;
 
         case PlayerEventType::COMP_ACCEPT_OFF:
-            minicomputer_up(g.mini.accept.get(), MiniComputerDoAccept);
-            break;
+            minicomputer_up(g.mini.accept.get(), [=]() {
+                auto e = MiniComputerDoAccept();
+                if (e.has_value()) {
+                    player_events->push_back(*e);
+                }
+            });
+            return true;
 
         case PlayerEventType::COMP_CANCEL_OFF:
             minicomputer_up(g.mini.cancel.get(), MiniComputerDoCancel);
-            break;
+            return true;
 
-        default: break;
+        default: return false;
     }
 }
 
-void minicomputer_handle_keys(std::vector<PlayerEvent> player_events) {
-    for (const auto& e : player_events) {
-        minicomputer_handle_event(e);
+void minicomputer_interpret_keys(std::vector<PlayerEvent>* player_events) {
+    std::vector<PlayerEvent> out;
+    for (const auto& e : *player_events) {
+        if (!minicomputer_interpret_event(e, &out)) {
+            out.push_back(e);
+        }
     }
+    *player_events = out;
 }
 
 void minicomputer_cancel() {
@@ -774,14 +795,16 @@ static void draw_mini_ship_data(
     }
 }
 
-void MiniComputerDoAccept() {
+sfz::optional<PlayerEvent> MiniComputerDoAccept() {
     if (g.mini.selectLine != kMiniScreenNoLineSelected) {
-        // TODO(sfiera): has to work for remote players, which means
         const MiniLine* line = &g.mini.lines[g.mini.selectLine];
+        auto            e    = line->event;
         if (line->callback) {
             line->callback(g.admiral);
         }
+        return e;
     }
+    return sfz::nullopt;
 }
 
 void transfer_control(Handle<Admiral> adm) {
@@ -873,6 +896,36 @@ static void prev_message(Handle<Admiral> adm) {
     Messages::previous();
 }
 
+void minicomputer_handle_event(PlayerEvent e) {
+    switch (e.key) {
+        case PlayerEventType::MINI_BUILD_1: build_ship(g.admiral, 0); break;
+        case PlayerEventType::MINI_BUILD_2: build_ship(g.admiral, 1); break;
+        case PlayerEventType::MINI_BUILD_3: build_ship(g.admiral, 2); break;
+        case PlayerEventType::MINI_BUILD_4: build_ship(g.admiral, 3); break;
+        case PlayerEventType::MINI_BUILD_5: build_ship(g.admiral, 4); break;
+        case PlayerEventType::MINI_BUILD_6: build_ship(g.admiral, 5); break;
+
+        case PlayerEventType::MINI_TRANSFER: transfer_control(g.admiral); break;
+        case PlayerEventType::MINI_HOLD: hold_position(g.admiral); break;
+        case PlayerEventType::MINI_COME: come_to_me(g.admiral); break;
+        case PlayerEventType::MINI_FIRE_1: fire_pulse(g.admiral); break;
+        case PlayerEventType::MINI_FIRE_2: fire_beam(g.admiral); break;
+        case PlayerEventType::MINI_FIRE_S: fire_special(g.admiral); break;
+
+        case PlayerEventType::MINI_NEXT_PAGE: next_message(g.admiral); break;
+        case PlayerEventType::MINI_PREV_PAGE: prev_message(g.admiral); break;
+        case PlayerEventType::MINI_LAST_MESSAGE: last_message(g.admiral); break;
+
+        default: break;
+    }
+}
+
+void minicomputer_handle_keys(const std::vector<PlayerEvent>& player_events) {
+    for (const auto& e : player_events) {
+        minicomputer_handle_event(e);
+    }
+}
+
 static void show_build_screen(Handle<Admiral> adm) {
     if (adm != g.admiral) {
         return;
@@ -880,12 +933,12 @@ static void show_build_screen(Handle<Admiral> adm) {
     const MiniLine lines[] = {
             text("BUILD SHIPS", false),
             text("", true),
-            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 0); }),
-            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 1); }),
-            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 2); }),
-            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 3); }),
-            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 4); }),
-            selectable("", [](Handle<Admiral> adm) { build_ship(adm, 5); }),
+            selectable("", {PlayerEventType::MINI_BUILD_1}),
+            selectable("", {PlayerEventType::MINI_BUILD_2}),
+            selectable("", {PlayerEventType::MINI_BUILD_3}),
+            selectable("", {PlayerEventType::MINI_BUILD_4}),
+            selectable("", {PlayerEventType::MINI_BUILD_5}),
+            selectable("", {PlayerEventType::MINI_BUILD_6}),
     };
     make_mini_screen(Screen::BUILD, lines, accept("Build"), cancel("Main Menu"));
     MiniComputerSetBuildStrings();
@@ -897,12 +950,12 @@ static void show_special_screen(Handle<Admiral> adm) {
     }
     const MiniLine lines[] = {
             text("SPECIAL ORDERS", true),
-            selectable("Transfer Control", transfer_control),
-            selectable("Hold Position", hold_position),
-            selectable("Go To My Position", come_to_me),
-            selectable("Fire Weapon 1", fire_pulse),
-            selectable("Fire Weapon 2", fire_beam),
-            selectable("Fire Special", fire_special),
+            selectable("Transfer Control", {PlayerEventType::MINI_TRANSFER}),
+            selectable("Hold Position", {PlayerEventType::MINI_HOLD}),
+            selectable("Go To My Position", {PlayerEventType::MINI_COME}),
+            selectable("Fire Weapon 1", {PlayerEventType::MINI_FIRE_1}),
+            selectable("Fire Weapon 2", {PlayerEventType::MINI_FIRE_2}),
+            selectable("Fire Special", {PlayerEventType::MINI_FIRE_S}),
     };
     make_mini_screen(Screen::SPECIAL, lines, accept("Execute"), cancel("Main Menu"));
 }
@@ -913,9 +966,9 @@ static void show_message_screen(Handle<Admiral> adm) {
     }
     const MiniLine lines[] = {
             text("MESSAGES", true),
-            selectable("Next Page/Clear", next_message),
-            selectable("Previous Page", prev_message),
-            selectable("Last Message", last_message),
+            selectable("Next Page/Clear", {PlayerEventType::MINI_NEXT_PAGE}),
+            selectable("Previous Page", {PlayerEventType::MINI_PREV_PAGE}),
+            selectable("Last Message", {PlayerEventType::MINI_LAST_MESSAGE}),
     };
     make_mini_screen(Screen::MESSAGE, lines, accept("Execute"), cancel("Main Menu"));
 }
@@ -1240,7 +1293,10 @@ void MiniComputerHandleDoubleClick(Point where) {
             int lineNum = mGetLineNumFromV(where.v);
             if (lineNum == g.mini.selectLine) {
                 sys.sound.click();
-                MiniComputerDoAccept();
+                auto e = MiniComputerDoAccept();
+                if (e.has_value()) {
+                    minicomputer_handle_event(*e);
+                }
             } else {
                 lineNum        = mGetLineNumFromV(where.v);
                 MiniLine* line = g.mini.lines.get() + lineNum;
@@ -1265,7 +1321,10 @@ void MiniComputerHandleMouseUp(Point where) {
             if (button->kind == MINI_BUTTON_ON) {
                 button->kind = MINI_BUTTON_OFF;
                 if (lineNum == 0) {
-                    MiniComputerDoAccept();
+                    auto e = MiniComputerDoAccept();
+                    if (e.has_value()) {
+                        minicomputer_handle_event(*e);
+                    }
                 } else {
                     MiniComputerDoCancel();
                 }

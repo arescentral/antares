@@ -49,6 +49,7 @@ struct MiniLine {
     int32_t                              negativeValue;
     const BaseObject*                    sourceData;
     std::function<void(Handle<Admiral>)> callback;
+    sfz::optional<PlayerEvent>           event;
 };
 
 enum MiniScreenButtonKind {
@@ -68,19 +69,20 @@ void MiniScreenCleanup(void);
 void DisposeMiniScreenStatusStrList(void);
 void ClearMiniScreenLines(void);
 void draw_mini_screen();
-void minicomputer_handle_keys(std::vector<PlayerEvent> player_events);
+void minicomputer_interpret_keys(std::vector<PlayerEvent>* player_events);
+void minicomputer_handle_keys(const std::vector<PlayerEvent>& player_events);
 void minicomputer_cancel();
 Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
-void MiniComputerDoAccept(void);
-void transfer_control(Handle<Admiral> adm);
-void MiniComputerDoCancel(void);
-void MiniComputerSetBuildStrings(void);
-void MiniComputerHandleClick(Point);
-void MiniComputerHandleDoubleClick(Point);
-void MiniComputerHandleMouseUp(Point);
-void MiniComputerHandleMouseStillDown(Point);
+sfz::optional<PlayerEvent> MiniComputerDoAccept();
+void                       transfer_control(Handle<Admiral> adm);
+void                       MiniComputerDoCancel(void);
+void                       MiniComputerSetBuildStrings(void);
+void                       MiniComputerHandleClick(Point);
+void                       MiniComputerHandleDoubleClick(Point);
+void                       MiniComputerHandleMouseUp(Point);
+void                       MiniComputerHandleMouseStillDown(Point);
 void MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine);
 
 }  // namespace antares
