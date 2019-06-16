@@ -489,7 +489,7 @@ void PlayerShip::mouse_down(const MouseDownEvent& event) {
         case 0:
             if (event.count() == 2) {
                 PlayerShipHandleClick(where, 0);
-                MiniComputerHandleDoubleClick(where);
+                MiniComputerHandleDoubleClick(where, &_player_events);
             } else if (event.count() == 1) {
                 PlayerShipHandleClick(where, 0);
                 MiniComputerHandleClick(where);
@@ -509,7 +509,7 @@ void PlayerShip::mouse_up(const MouseUpEvent& event) {
     Point where = event.where();
     if (event.button() == 0) {
         MiniComputerHandleMouseStillDown(where);
-        MiniComputerHandleMouseUp(where);
+        MiniComputerHandleMouseUp(where, &_player_events);
     }
 }
 

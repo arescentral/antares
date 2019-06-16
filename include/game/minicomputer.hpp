@@ -77,13 +77,14 @@ Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 sfz::optional<PlayerEvent> MiniComputerDoAccept();
-void                       transfer_control(Handle<Admiral> adm);
-void                       MiniComputerDoCancel(void);
-void                       MiniComputerSetBuildStrings(void);
-void                       MiniComputerHandleClick(Point);
-void                       MiniComputerHandleDoubleClick(Point);
-void                       MiniComputerHandleMouseUp(Point);
-void                       MiniComputerHandleMouseStillDown(Point);
+
+void transfer_control(Handle<Admiral> adm);
+void MiniComputerDoCancel(void);
+void MiniComputerSetBuildStrings(void);
+void MiniComputerHandleClick(Point);
+void MiniComputerHandleDoubleClick(Point, std::vector<PlayerEvent>* player_events);
+void MiniComputerHandleMouseUp(Point, std::vector<PlayerEvent>* player_events);
+void MiniComputerHandleMouseStillDown(Point);
 void MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine);
 
 }  // namespace antares

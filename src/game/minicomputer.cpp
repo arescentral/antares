@@ -1252,7 +1252,7 @@ void MiniComputerHandleClick(Point where) {
     }
 }
 
-void MiniComputerHandleDoubleClick(Point where) {
+void MiniComputerHandleDoubleClick(Point where, std::vector<PlayerEvent>* player_events) {
     // if click is in button screen
     if (Rect{Point{kButBoxLeft, kButBoxTop + instrument_top()}, Size{kButBoxWidth, kButBoxHeight}}
                 .contains(where)) {
@@ -1286,7 +1286,7 @@ void MiniComputerHandleDoubleClick(Point where) {
                 sys.sound.click();
                 auto e = MiniComputerDoAccept();
                 if (e.has_value()) {
-                    minicomputer_handle_event(*e);
+                    player_events->push_back(*e);
                 }
             } else {
                 lineNum        = mGetLineNumFromV(where.v);
@@ -1301,7 +1301,7 @@ void MiniComputerHandleDoubleClick(Point where) {
     }
 }
 
-void MiniComputerHandleMouseUp(Point where) {
+void MiniComputerHandleMouseUp(Point where, std::vector<PlayerEvent>* player_events) {
     // if click is in button screen
     if (Rect{Point{kButBoxLeft, kButBoxTop + instrument_top()}, Size{kButBoxWidth, kButBoxHeight}}
                 .contains(where)) {
@@ -1314,7 +1314,7 @@ void MiniComputerHandleMouseUp(Point where) {
                 if (lineNum == 0) {
                     auto e = MiniComputerDoAccept();
                     if (e.has_value()) {
-                        minicomputer_handle_event(*e);
+                        player_events->push_back(*e);
                     }
                 } else {
                     MiniComputerDoCancel();
