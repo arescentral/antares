@@ -378,7 +378,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kScaleHostileKeyNum: k = PlayerEventType::ZOOM_FOE; break;
             case kScaleObjectKeyNum: k = PlayerEventType::ZOOM_OBJ; break;
             case kScaleAllKeyNum: k = PlayerEventType::ZOOM_ALL; break;
-            case kMessageNextKeyNum: k = PlayerEventType::MESSAGE_NEXT; break;
+            case kMessageNextKeyNum: k = PlayerEventType::NEXT_PAGE; break;
 
             case kHelpKeyNum: return;
             case kVolumeDownKeyNum: return;
@@ -836,7 +836,6 @@ void PlayerShip::update(bool enter_message) {
             case PlayerEventType::ZOOM_OBJ: zoom_shortcut(Zoom::OBJECT); break;
             case PlayerEventType::ZOOM_ALL: zoom_shortcut(Zoom::ALL); break;
             case PlayerEventType::TRANSFER: transfer_control(g.admiral); break;
-            case PlayerEventType::MESSAGE_NEXT: next_message(g.admiral); break;
 
             case PlayerEventType::MINI_BUILD_1: build_ship(g.admiral, 0); break;
             case PlayerEventType::MINI_BUILD_2: build_ship(g.admiral, 1); break;
@@ -851,6 +850,7 @@ void PlayerShip::update(bool enter_message) {
             case PlayerEventType::MINI_FIRE_2: fire_weapon(g.admiral, kBeamKey); break;
             case PlayerEventType::MINI_FIRE_S: fire_weapon(g.admiral, kSpecialKey); break;
 
+            case PlayerEventType::NEXT_PAGE: next_message(g.admiral); break;
             case PlayerEventType::MINI_NEXT_PAGE: next_message(g.admiral); break;
             case PlayerEventType::MINI_PREV_PAGE: prev_message(g.admiral); break;
             case PlayerEventType::MINI_LAST_MESSAGE: last_message(g.admiral); break;
