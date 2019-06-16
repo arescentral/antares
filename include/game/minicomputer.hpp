@@ -35,21 +35,21 @@ enum MiniScreenLineKind {
 };
 
 struct MiniLine {
-    MiniScreenLineKind                   kind = MINI_NONE;
-    pn::string                           string;
-    pn::string                           statusFalse;
-    pn::string                           statusTrue;
-    pn::string                           statusString;
-    pn::string                           postString;
-    bool                                 underline = false;
-    int32_t                              value;  // for keeping track of changing values
-    int32_t                              statusType;
-    Handle<const Condition>              condition;
-    Counter                              counter;
-    int32_t                              negativeValue;
-    const BaseObject*                    sourceData;
-    std::function<void(Handle<Admiral>)> callback;
-    sfz::optional<PlayerEvent>           event;
+    MiniScreenLineKind      kind = MINI_NONE;
+    pn::string              string;
+    pn::string              statusFalse;
+    pn::string              statusTrue;
+    pn::string              statusString;
+    pn::string              postString;
+    bool                    underline = false;
+    int32_t                 value;  // for keeping track of changing values
+    int32_t                 statusType;
+    Handle<const Condition> condition;
+    Counter                 counter;
+    int32_t                 negativeValue;
+    const BaseObject*       sourceData;
+
+    std::function<void(Handle<Admiral>, std::vector<PlayerEvent>*)> callback;
 };
 
 enum MiniScreenButtonKind {
@@ -75,7 +75,7 @@ void minicomputer_cancel();
 Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
-sfz::optional<PlayerEvent> MiniComputerDoAccept();
+void MiniComputerDoAccept(std::vector<PlayerEvent>* player_events);
 
 void build_ship(Handle<Admiral> adm, int32_t index);
 void transfer_control(Handle<Admiral> adm);

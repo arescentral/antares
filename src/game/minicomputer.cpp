@@ -222,7 +222,6 @@ static void clear_line(MiniLine* line) {
     line->underline  = false;
     line->sourceData = nullptr;
     line->callback   = nullptr;
-    line->event      = sfz::nullopt;
 }
 
 static void clear_button(MiniButton* line) {
@@ -392,21 +391,13 @@ static MiniLine text(pn::string_view name, bool underlined) {
     return line;
 }
 
-static MiniLine selectable(pn::string_view name, void (*callback)(Handle<Admiral> adm)) {
+static MiniLine selectable(
+        pn::string_view                                                 name,
+        std::function<void(Handle<Admiral>, std::vector<PlayerEvent>*)> callback) {
     MiniLine line;
     line.kind     = MINI_SELECTABLE;
     line.string   = name.copy();
     line.callback = callback;
-    line.event    = sfz::nullopt;
-    return line;
-}
-
-static MiniLine selectable(pn::string_view name, PlayerEvent e) {
-    MiniLine line;
-    line.kind     = MINI_SELECTABLE;
-    line.string   = name.copy();
-    line.callback = nullptr;
-    line.event    = sfz::make_optional(std::move(e));
     return line;
 }
 
@@ -467,7 +458,6 @@ static void make_mini_screen(
         dst->string    = src.string.copy();
         dst->underline = src.underline;
         dst->callback  = src.callback;
-        dst->event     = src.event;
     }
 
     if (accept.kind != MINI_BUTTON_NONE) {
@@ -530,12 +520,7 @@ void minicomputer_interpret_key_down(KeyNum k, std::vector<PlayerEvent>* player_
 void minicomputer_interpret_key_up(KeyNum k, std::vector<PlayerEvent>* player_events) {
     switch (k) {
         case kCompAcceptKeyNum:
-            minicomputer_up(g.mini.accept.get(), [=]() {
-                auto e = MiniComputerDoAccept();
-                if (e.has_value()) {
-                    player_events->push_back(*e);
-                }
-            });
+            minicomputer_up(g.mini.accept.get(), [=]() { MiniComputerDoAccept(player_events); });
             break;
 
         case kCompCancelKeyNum: minicomputer_up(g.mini.cancel.get(), MiniComputerDoCancel); break;
@@ -786,16 +771,13 @@ static void draw_mini_ship_data(
     }
 }
 
-sfz::optional<PlayerEvent> MiniComputerDoAccept() {
+void MiniComputerDoAccept(std::vector<PlayerEvent>* player_events) {
     if (g.mini.selectLine != kMiniScreenNoLineSelected) {
         const MiniLine* line = &g.mini.lines[g.mini.selectLine];
-        auto            e    = line->event;
         if (line->callback) {
-            line->callback(g.admiral);
+            line->callback(g.admiral, player_events);
         }
-        return e;
     }
-    return sfz::nullopt;
 }
 
 void transfer_control(Handle<Admiral> adm) {
@@ -883,54 +865,60 @@ void prev_message(Handle<Admiral> adm) {
     Messages::previous();
 }
 
-static void show_build_screen(Handle<Admiral> adm) {
+static std::function<void(Handle<Admiral>, std::vector<PlayerEvent>*)> push_event(PlayerEvent e) {
+    return [e](Handle<Admiral> adm, std::vector<PlayerEvent>* player_events) {
+        player_events->push_back(e);
+    };
+}
+
+static void show_build_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
     if (adm != g.admiral) {
         return;
     }
     const MiniLine lines[] = {
             text("BUILD SHIPS", false),
             text("", true),
-            selectable("", {PlayerEventType::MINI_BUILD_1}),
-            selectable("", {PlayerEventType::MINI_BUILD_2}),
-            selectable("", {PlayerEventType::MINI_BUILD_3}),
-            selectable("", {PlayerEventType::MINI_BUILD_4}),
-            selectable("", {PlayerEventType::MINI_BUILD_5}),
-            selectable("", {PlayerEventType::MINI_BUILD_6}),
+            selectable("", push_event({PlayerEventType::MINI_BUILD_1})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD_2})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD_3})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD_4})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD_5})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD_6})),
     };
     make_mini_screen(Screen::BUILD, lines, accept("Build"), cancel("Main Menu"));
     MiniComputerSetBuildStrings();
 }
 
-static void show_special_screen(Handle<Admiral> adm) {
+static void show_special_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
     if (adm != g.admiral) {
         return;
     }
     const MiniLine lines[] = {
             text("SPECIAL ORDERS", true),
-            selectable("Transfer Control", {PlayerEventType::MINI_TRANSFER}),
-            selectable("Hold Position", {PlayerEventType::MINI_HOLD}),
-            selectable("Go To My Position", {PlayerEventType::MINI_COME}),
-            selectable("Fire Weapon 1", {PlayerEventType::MINI_FIRE_1}),
-            selectable("Fire Weapon 2", {PlayerEventType::MINI_FIRE_2}),
-            selectable("Fire Special", {PlayerEventType::MINI_FIRE_S}),
+            selectable("Transfer Control", push_event({PlayerEventType::MINI_TRANSFER})),
+            selectable("Hold Position", push_event({PlayerEventType::MINI_HOLD})),
+            selectable("Go To My Position", push_event({PlayerEventType::MINI_COME})),
+            selectable("Fire Weapon 1", push_event({PlayerEventType::MINI_FIRE_1})),
+            selectable("Fire Weapon 2", push_event({PlayerEventType::MINI_FIRE_2})),
+            selectable("Fire Special", push_event({PlayerEventType::MINI_FIRE_S})),
     };
     make_mini_screen(Screen::SPECIAL, lines, accept("Execute"), cancel("Main Menu"));
 }
 
-static void show_message_screen(Handle<Admiral> adm) {
+static void show_message_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
     if (adm != g.admiral) {
         return;
     }
     const MiniLine lines[] = {
             text("MESSAGES", true),
-            selectable("Next Page/Clear", {PlayerEventType::MINI_NEXT_PAGE}),
-            selectable("Previous Page", {PlayerEventType::MINI_PREV_PAGE}),
-            selectable("Last Message", {PlayerEventType::MINI_LAST_MESSAGE}),
+            selectable("Next Page/Clear", push_event({PlayerEventType::MINI_NEXT_PAGE})),
+            selectable("Previous Page", push_event({PlayerEventType::MINI_PREV_PAGE})),
+            selectable("Last Message", push_event({PlayerEventType::MINI_LAST_MESSAGE})),
     };
     make_mini_screen(Screen::MESSAGE, lines, accept("Execute"), cancel("Main Menu"));
 }
 
-static void show_status_screen(Handle<Admiral> adm) {
+static void show_status_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
     if (adm != g.admiral) {
         return;
     }
@@ -1250,10 +1238,7 @@ void MiniComputerHandleDoubleClick(Point where, std::vector<PlayerEvent>* player
             int lineNum = mGetLineNumFromV(where.v);
             if (lineNum == g.mini.selectLine) {
                 sys.sound.click();
-                auto e = MiniComputerDoAccept();
-                if (e.has_value()) {
-                    player_events->push_back(*e);
-                }
+                MiniComputerDoAccept(player_events);
             } else {
                 lineNum        = mGetLineNumFromV(where.v);
                 MiniLine* line = g.mini.lines.get() + lineNum;
@@ -1278,10 +1263,7 @@ void MiniComputerHandleMouseUp(Point where, std::vector<PlayerEvent>* player_eve
             if (button->kind == MINI_BUTTON_ON) {
                 button->kind = MINI_BUTTON_OFF;
                 if (lineNum == 0) {
-                    auto e = MiniComputerDoAccept();
-                    if (e.has_value()) {
-                        player_events->push_back(*e);
-                    }
+                    MiniComputerDoAccept(player_events);
                 } else {
                     MiniComputerDoCancel();
                 }
@@ -1315,10 +1297,10 @@ void MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine) {
     Point w;
 
     switch (whichScreen) {
-        case Screen::BUILD: show_build_screen(g.admiral); break;
-        case Screen::SPECIAL: show_special_screen(g.admiral); break;
-        case Screen::MESSAGE: show_message_screen(g.admiral); break;
-        case Screen::STATUS: show_status_screen(g.admiral); break;
+        case Screen::BUILD: show_build_screen(g.admiral, nullptr); break;
+        case Screen::SPECIAL: show_special_screen(g.admiral, nullptr); break;
+        case Screen::MESSAGE: show_message_screen(g.admiral, nullptr); break;
+        case Screen::STATUS: show_status_screen(g.admiral, nullptr); break;
         default: show_main_screen(g.admiral); break;
     }
 
