@@ -32,26 +32,36 @@ enum MiniScreenLineKind {
     MINI_NONE       = 0,
     MINI_DIM        = 1,
     MINI_SELECTABLE = 2,
-    MINI_BUTTON_ON  = 3,
-    MINI_BUTTON_OFF = 4,
 };
 
-struct miniScreenLineType {
-    MiniScreenLineKind                   kind = MINI_NONE;
-    pn::string                           string;
-    pn::string                           statusFalse;
-    pn::string                           statusTrue;
-    pn::string                           statusString;
-    pn::string                           postString;
-    int32_t                              whichButton = -1;
-    bool                                 underline   = false;
-    int32_t                              value;  // for keeping track of changing values
-    int32_t                              statusType;
-    Handle<const Condition>              condition;
-    Counter                              counter;
-    int32_t                              negativeValue;
-    const BaseObject*                    sourceData;
-    std::function<void(Handle<Admiral>)> callback;
+struct MiniLine {
+    MiniScreenLineKind      kind = MINI_NONE;
+    pn::string              string;
+    pn::string              statusFalse;
+    pn::string              statusTrue;
+    pn::string              statusString;
+    pn::string              postString;
+    bool                    underline = false;
+    int32_t                 value;  // for keeping track of changing values
+    int32_t                 statusType;
+    Handle<const Condition> condition;
+    Counter                 counter;
+    int32_t                 negativeValue;
+    const BaseObject*       sourceData;
+
+    std::function<void(Handle<Admiral>, std::vector<PlayerEvent>*)> callback;
+};
+
+enum MiniScreenButtonKind {
+    MINI_BUTTON_NONE = 0,
+    MINI_BUTTON_ON   = 1,
+    MINI_BUTTON_OFF  = 2,
+};
+
+struct MiniButton {
+    MiniScreenButtonKind kind = MINI_BUTTON_NONE;
+    pn::string           string;
+    int32_t              whichButton = -1;
 };
 
 void MiniScreenInit(void);
@@ -59,18 +69,28 @@ void MiniScreenCleanup(void);
 void DisposeMiniScreenStatusStrList(void);
 void ClearMiniScreenLines(void);
 void draw_mini_screen();
-void minicomputer_handle_keys(std::vector<PlayerEvent> player_events);
+void minicomputer_interpret_key_down(KeyNum k, std::vector<PlayerEvent>* player_events);
+void minicomputer_interpret_key_up(KeyNum k, std::vector<PlayerEvent>* player_events);
 void minicomputer_cancel();
 Cash MiniComputerGetPriceOfCurrentSelection(void);
 void UpdateMiniScreenLines(void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
-void MiniComputerDoAccept(void);
+void MiniComputerDoAccept(std::vector<PlayerEvent>* player_events);
+
+void build_ship(Handle<Admiral> adm, int32_t index);
 void transfer_control(Handle<Admiral> adm);
+void hold_position(Handle<Admiral> adm);
+void come_to_me(Handle<Admiral> adm);
+void fire_weapon(Handle<Admiral> adm, int key);
+void next_message(Handle<Admiral> adm);
+void last_message(Handle<Admiral> adm);
+void prev_message(Handle<Admiral> adm);
+
 void MiniComputerDoCancel(void);
 void MiniComputerSetBuildStrings(void);
 void MiniComputerHandleClick(Point);
-void MiniComputerHandleDoubleClick(Point);
-void MiniComputerHandleMouseUp(Point);
+void MiniComputerHandleDoubleClick(Point, std::vector<PlayerEvent>* player_events);
+void MiniComputerHandleMouseUp(Point, std::vector<PlayerEvent>* player_events);
 void MiniComputerHandleMouseStillDown(Point);
 void MiniComputer_SetScreenAndLineHack(Screen whichScreen, int32_t whichLine);
 
