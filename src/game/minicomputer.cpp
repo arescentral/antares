@@ -517,40 +517,31 @@ static void minicomputer_handle_move(int direction) {
     } while (line->kind == MINI_NONE);
 }
 
-bool minicomputer_interpret_event(PlayerEvent e, std::vector<PlayerEvent>* player_events) {
-    switch (e.key) {
-        case PlayerEventType::COMP_ACCEPT_ON: minicomputer_down(g.mini.accept.get()); return true;
+void minicomputer_interpret_key_down(KeyNum k, std::vector<PlayerEvent>* player_events) {
+    switch (k) {
+        case kCompAcceptKeyNum: minicomputer_down(g.mini.accept.get()); break;
+        case kCompCancelKeyNum: minicomputer_down(g.mini.cancel.get()); break;
+        case kCompUpKeyNum: minicomputer_handle_move(-1); break;
+        case kCompDownKeyNum: minicomputer_handle_move(+1); break;
+        default: break;
+    }
+}
 
-        case PlayerEventType::COMP_CANCEL_ON: minicomputer_down(g.mini.cancel.get()); return true;
-
-        case PlayerEventType::COMP_UP_ON: minicomputer_handle_move(-1); return true;
-        case PlayerEventType::COMP_DOWN_ON: minicomputer_handle_move(+1); return true;
-
-        case PlayerEventType::COMP_ACCEPT_OFF:
+void minicomputer_interpret_key_up(KeyNum k, std::vector<PlayerEvent>* player_events) {
+    switch (k) {
+        case kCompAcceptKeyNum:
             minicomputer_up(g.mini.accept.get(), [=]() {
                 auto e = MiniComputerDoAccept();
                 if (e.has_value()) {
                     player_events->push_back(*e);
                 }
             });
-            return true;
+            break;
 
-        case PlayerEventType::COMP_CANCEL_OFF:
-            minicomputer_up(g.mini.cancel.get(), MiniComputerDoCancel);
-            return true;
+        case kCompCancelKeyNum: minicomputer_up(g.mini.cancel.get(), MiniComputerDoCancel); break;
 
-        default: return false;
+        default: break;
     }
-}
-
-void minicomputer_interpret_keys(std::vector<PlayerEvent>* player_events) {
-    std::vector<PlayerEvent> out;
-    for (const auto& e : *player_events) {
-        if (!minicomputer_interpret_event(e, &out)) {
-            out.push_back(e);
-        }
-    }
-    *player_events = out;
 }
 
 void minicomputer_cancel() {

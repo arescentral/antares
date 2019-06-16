@@ -364,10 +364,10 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
             case kOrderKeyNum: k = PlayerEventType::ORDER; break;
             case kTransferKeyNum: k = PlayerEventType::TRANSFER; break;
 
-            case kCompUpKeyNum: k = PlayerEventType::COMP_UP_ON; break;
-            case kCompDownKeyNum: k = PlayerEventType::COMP_DOWN_ON; break;
-            case kCompAcceptKeyNum: k = PlayerEventType::COMP_ACCEPT_ON; break;
-            case kCompCancelKeyNum: k = PlayerEventType::COMP_CANCEL_ON; break;
+            case kCompUpKeyNum:
+            case kCompDownKeyNum:
+            case kCompAcceptKeyNum:
+            case kCompCancelKeyNum: minicomputer_interpret_key_down(*key, &_player_events); return;
 
             case kZoomInKeyNum: k = PlayerEventType::ZOOM_IN; break;
             case kZoomOutKeyNum: k = PlayerEventType::ZOOM_OUT; break;
@@ -441,10 +441,10 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
             case kOrderKeyNum:
             case kTransferKeyNum: return;
 
-            case kCompUpKeyNum: k = PlayerEventType::COMP_UP_OFF; break;
-            case kCompDownKeyNum: k = PlayerEventType::COMP_DOWN_OFF; break;
-            case kCompAcceptKeyNum: k = PlayerEventType::COMP_ACCEPT_OFF; break;
-            case kCompCancelKeyNum: k = PlayerEventType::COMP_CANCEL_OFF; break;
+            case kCompUpKeyNum:
+            case kCompDownKeyNum:
+            case kCompAcceptKeyNum:
+            case kCompCancelKeyNum: minicomputer_interpret_key_up(*key, &_player_events); return;
 
             case kZoomInKeyNum:
             case kZoomOutKeyNum:
@@ -600,17 +600,18 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             }
             break;
         case Gamepad::Button::UP:
-            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_UP_ON});
+            minicomputer_interpret_key_down(kCompUpKeyNum, &_player_events);
             break;
         case Gamepad::Button::DOWN:
-            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_DOWN_ON});
+            minicomputer_interpret_key_down(kCompDownKeyNum, &_player_events);
             break;
         case Gamepad::Button::RIGHT:
-            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_ACCEPT_ON});
+            minicomputer_interpret_key_down(kCompAcceptKeyNum, &_player_events);
             break;
         case Gamepad::Button::LEFT:
-            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_CANCEL_ON});
+            minicomputer_interpret_key_down(kCompCancelKeyNum, &_player_events);
             break;
+
         default: break;
     }
 }
@@ -661,10 +662,10 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             }
             break;
         case Gamepad::Button::RIGHT:
-            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_ACCEPT_OFF});
+            minicomputer_interpret_key_up(kCompAcceptKeyNum, &_player_events);
             break;
         case Gamepad::Button::LEFT:
-            _player_events.push_back(PlayerEvent{PlayerEventType::COMP_CANCEL_OFF});
+            minicomputer_interpret_key_up(kCompCancelKeyNum, &_player_events);
             break;
         default: break;
     }
@@ -936,7 +937,6 @@ void PlayerShip::update(bool enter_message) {
     }
 
     Handle<SpaceObject> flagship = g.ship;  // Pilot same ship even after minicomputer transfer.
-    minicomputer_interpret_keys(&_player_events);
     minicomputer_handle_keys(_player_events);
     handle_destination_key(_player_events);
     handle_hotkeys(_player_events);
