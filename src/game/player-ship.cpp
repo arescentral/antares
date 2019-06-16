@@ -836,7 +836,7 @@ void PlayerShip::update(bool enter_message) {
             case PlayerEventType::ZOOM_OBJ: zoom_shortcut(Zoom::OBJECT); break;
             case PlayerEventType::ZOOM_ALL: zoom_shortcut(Zoom::ALL); break;
             case PlayerEventType::TRANSFER: transfer_control(g.admiral); break;
-            case PlayerEventType::MESSAGE_NEXT: Messages::advance(); break;
+            case PlayerEventType::MESSAGE_NEXT: next_message(g.admiral); break;
 
             case PlayerEventType::MINI_BUILD_1: build_ship(g.admiral, 0); break;
             case PlayerEventType::MINI_BUILD_2: build_ship(g.admiral, 1); break;
