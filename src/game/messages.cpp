@@ -98,7 +98,7 @@ struct Messages::longMessageType {
     bool                           lastLabelMessage   = false;
     Handle<Label>                  labelMessageID     = Label::none();
 
-    bool have_pages() const { return !pages->empty(); }
+    bool have_pages() const { return pages && !pages->empty(); }
     bool have_current() const { return current_page_index >= 0; }
     bool had_current() const { return last_page_index >= 0; }
     bool have_next() const { return (current_page_index + 1) < pages->size(); }
