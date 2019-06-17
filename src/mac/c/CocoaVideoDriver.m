@@ -62,30 +62,52 @@ struct AntaresWindow {
     NSOpenGLContext*     context;
     NSOpenGLView*        view;
     NSWindow*            window;
+
+    void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
+    void* mouse_down_userdata;
+
+    void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
+    void* mouse_up_userdata;
+
+    void (*mouse_move_callback)(int32_t x, int32_t y, void* userdata);
+    void* mouse_move_userdata;
+
+    void (*caps_lock_callback)(void* userdata);
+    void* caps_lock_userdata;
+
+    void (*caps_unlock_callback)(void* userdata);
+    void* caps_unlock_userdata;
+
+    int32_t last_flags;
 };
 
+static void* memdup(void* data, size_t size) {
+    void* copy = malloc(size);
+    memcpy(copy, data, size);
+    return copy;
+}
+
 AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextObj context) {
-    AntaresWindow* window = malloc(sizeof(AntaresWindow));
-    window->pixel_format  = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
-    window->context       = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
+    AntaresWindow window = {};
+    window.pixel_format  = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
+    window.context       = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
 
     NSRect window_rect = NSMakeRect(0, 0, 640, 480);
     int    style_mask  = NSTitledWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
 
-    window->view =
-            [[NSOpenGLView alloc] initWithFrame:window_rect pixelFormat:window->pixel_format];
-    [window->view setWantsBestResolutionOpenGLSurface:YES];
-    [window->view setOpenGLContext:window->context];
+    window.view = [[NSOpenGLView alloc] initWithFrame:window_rect pixelFormat:window.pixel_format];
+    [window.view setWantsBestResolutionOpenGLSurface:YES];
+    [window.view setOpenGLContext:window.context];
 
-    window->window = [[NSWindow alloc] initWithContentRect:window_rect
-                                                 styleMask:style_mask
-                                                   backing:NSBackingStoreBuffered
-                                                     defer:NO];
-    [window->window setAcceptsMouseMovedEvents:YES];
-    [window->window setContentView:window->view];
-    [window->window makeKeyAndOrderFront:NSApp];
-    [window->window center];
-    return window;
+    window.window = [[NSWindow alloc] initWithContentRect:window_rect
+                                                styleMask:style_mask
+                                                  backing:NSBackingStoreBuffered
+                                                    defer:NO];
+    [window.window setAcceptsMouseMovedEvents:YES];
+    [window.window setContentView:window.view];
+    [window.window makeKeyAndOrderFront:NSApp];
+    [window.window center];
+    return memdup(&window, sizeof(AntaresWindow));
 }
 
 void antares_window_destroy(AntaresWindow* window) {
@@ -113,24 +135,7 @@ int32_t antares_window_viewport_height(const AntaresWindow* window) {
 }
 
 struct AntaresEventTranslator {
-    void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
-    void* mouse_down_userdata;
-
-    void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
-    void* mouse_up_userdata;
-
-    void (*mouse_move_callback)(int32_t x, int32_t y, void* userdata);
-    void* mouse_move_userdata;
-
-    void (*caps_lock_callback)(void* userdata);
-    void* caps_lock_userdata;
-
-    void (*caps_unlock_callback)(void* userdata);
-    void* caps_unlock_userdata;
-
     AntaresWindow* window;
-
-    int32_t last_flags;
 };
 
 static bool translate_coords(AntaresEventTranslator* translator, NSEvent* event, NSPoint* p) {
@@ -145,11 +150,9 @@ static bool translate_coords(AntaresEventTranslator* translator, NSEvent* event,
 }
 
 AntaresEventTranslator* antares_event_translator_create() {
-    AntaresEventTranslator* translator = malloc(sizeof(AntaresEventTranslator));
-    memset(translator, 0, sizeof(AntaresEventTranslator));
-    translator->window     = nil;
-    translator->last_flags = 0;
-    return translator;
+    AntaresEventTranslator translator = {};
+    translator.window                 = nil;
+    return memdup(&translator, sizeof(AntaresEventTranslator));
 }
 
 void antares_event_translator_destroy(AntaresEventTranslator* translator) { free(translator); }
@@ -174,34 +177,34 @@ void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
         void* userdata) {
-    translator->mouse_down_callback = callback;
-    translator->mouse_down_userdata = userdata;
+    translator->window->mouse_down_callback = callback;
+    translator->window->mouse_down_userdata = userdata;
 }
 
 void antares_event_translator_set_mouse_up_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata) {
-    translator->mouse_up_callback = callback;
-    translator->mouse_up_userdata = userdata;
+    translator->window->mouse_up_callback = callback;
+    translator->window->mouse_up_userdata = userdata;
 }
 
 void antares_event_translator_set_mouse_move_callback(
         AntaresEventTranslator* translator, void (*callback)(int32_t x, int32_t y, void* userdata),
         void*                   userdata) {
-    translator->mouse_move_callback = callback;
-    translator->mouse_move_userdata = userdata;
+    translator->window->mouse_move_callback = callback;
+    translator->window->mouse_move_userdata = userdata;
 }
 
 void antares_event_translator_set_caps_lock_callback(
         AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata) {
-    translator->caps_lock_callback = callback;
-    translator->caps_lock_userdata = userdata;
+    translator->window->caps_lock_callback = callback;
+    translator->window->caps_lock_userdata = userdata;
 }
 
 void antares_event_translator_set_caps_unlock_callback(
         AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata) {
-    translator->caps_unlock_callback = callback;
-    translator->caps_unlock_userdata = userdata;
+    translator->window->caps_unlock_callback = callback;
+    translator->window->caps_unlock_userdata = userdata;
 }
 
 static void hide_unhide(AntaresWindow* window, NSPoint location) {
@@ -240,8 +243,9 @@ static void mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
     }
     hide_unhide(translator->window, where);
     int button = button_for(event);
-    translator->mouse_down_callback(
-            button, where.x, where.y, [event clickCount], translator -> mouse_down_userdata);
+    translator->window->mouse_down_callback(
+            button, where.x, where.y, [event clickCount],
+            translator -> window -> mouse_down_userdata);
 }
 
 static void mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
@@ -251,7 +255,8 @@ static void mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
     }
     hide_unhide(translator->window, where);
     int button = button_for(event);
-    translator->mouse_up_callback(button, where.x, where.y, translator->mouse_up_userdata);
+    translator->window->mouse_up_callback(
+            button, where.x, where.y, translator->window->mouse_up_userdata);
 }
 
 static void mouse_move(AntaresEventTranslator* translator, NSEvent* event) {
@@ -260,7 +265,8 @@ static void mouse_move(AntaresEventTranslator* translator, NSEvent* event) {
         return;
     }
     hide_unhide(translator->window, where);
-    translator->mouse_move_callback(where.x, where.y, translator->mouse_move_userdata);
+    translator->window->mouse_move_callback(
+            where.x, where.y, translator->window->mouse_move_userdata);
 }
 
 bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until) {
@@ -314,9 +320,10 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
 
             case NSFlagsChanged:
                 if ([event modifierFlags] & NSAlphaShiftKeyMask) {
-                    translator->caps_lock_callback(translator->caps_lock_userdata);
+                    translator->window->caps_lock_callback(translator->window->caps_lock_userdata);
                 } else {
-                    translator->caps_unlock_callback(translator->caps_unlock_userdata);
+                    translator->window->caps_unlock_callback(
+                            translator->window->caps_unlock_userdata);
                 }
                 break;
 

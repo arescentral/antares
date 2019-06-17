@@ -62,7 +62,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
       private:
         AntaresEventTranslator* _c_obj;
     };
-    EventTranslator _translator;
+    AntaresEventTranslator* _translator;
 
     InputMode      _input_mode = KEYBOARD_MOUSE;
     AntaresWindow* _window     = nullptr;
