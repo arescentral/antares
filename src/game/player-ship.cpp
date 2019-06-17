@@ -798,7 +798,7 @@ void PlayerShip::update(bool enter_message) {
 
     if (enter_message) {
         _player_events.clear();
-        // TODO(sfiera): cancel any in-flight events
+        gTheseKeys = 0;
     }
 
     for (auto e : _player_events) {
