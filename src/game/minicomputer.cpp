@@ -878,12 +878,12 @@ static void show_build_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
     const MiniLine lines[] = {
             text("BUILD SHIPS", false),
             text("", true),
-            selectable("", push_event({PlayerEventType::MINI_BUILD_1})),
-            selectable("", push_event({PlayerEventType::MINI_BUILD_2})),
-            selectable("", push_event({PlayerEventType::MINI_BUILD_3})),
-            selectable("", push_event({PlayerEventType::MINI_BUILD_4})),
-            selectable("", push_event({PlayerEventType::MINI_BUILD_5})),
-            selectable("", push_event({PlayerEventType::MINI_BUILD_6})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD, 0})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD, 1})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD, 2})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD, 3})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD, 4})),
+            selectable("", push_event({PlayerEventType::MINI_BUILD, 5})),
     };
     make_mini_screen(Screen::BUILD, lines, accept("Build"), cancel("Main Menu"));
     MiniComputerSetBuildStrings();

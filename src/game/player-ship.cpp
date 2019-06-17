@@ -109,8 +109,13 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
 
 }  // namespace
 
-bool PlayerEvent::operator==(PlayerEvent other) const { return key == other.key; }
-bool PlayerEvent::operator<(PlayerEvent other) const { return key < other.key; }
+bool PlayerEvent::operator==(PlayerEvent other) const {
+    return (type == other.type) && (data == other.data);
+}
+
+bool PlayerEvent::operator<(PlayerEvent other) const {
+    return (type != other.type) ? (type < other.type) : (data < other.data);
+}
 
 void ResetPlayerShip() {
     g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, Hue::YELLOW);
@@ -310,14 +315,11 @@ static PlayerEvent hot_key_up(int i) {
     bool target     = (gHotKeyState[i] == HOT_KEY_TARGET);
     gHotKeyState[i] = HOT_KEY_UP;
     if (now() >= gHotKeyTime[i] + kHotKeyHoldDuration) {
-        return PlayerEvent{
-                static_cast<PlayerEventType>(static_cast<int>(PlayerEventType::SET_HOTKEY_1) + i)};
+        return PlayerEvent{PlayerEventType::HOTKEY_SET, i};
     } else if (use_target_key() || target) {
-        return PlayerEvent{static_cast<PlayerEventType>(
-                static_cast<int>(PlayerEventType::TARGET_HOTKEY_1) + i)};
+        return PlayerEvent{PlayerEventType::HOTKEY_TARGET, i};
     } else {
-        return PlayerEvent{static_cast<PlayerEventType>(
-                static_cast<int>(PlayerEventType::SELECT_HOTKEY_1) + i)};
+        return PlayerEvent{PlayerEventType::HOTKEY_SELECT, i};
     }
 }
 
@@ -697,49 +699,42 @@ bool PlayerShip::active() const {
 
 static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerEventType::TARGET_SELF && (g.ship->attributes & kCanBeDestination)) {
+        if (e.type == PlayerEventType::TARGET_SELF && (g.ship->attributes & kCanBeDestination)) {
             target_self();
         }
     }
 }
 
-static int hot_key_index(const PlayerEvent& e) {
-    if ((PlayerEventType::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerEventType::TARGET_HOTKEY_10)) {
-        return static_cast<int>(e.key) & 0xf;
-    }
-    return -1;
-}
-
 static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        int i = hot_key_index(e);
-        if (i < 0) {
-            continue;
-        }
+        switch (e.type) {
+            case PlayerEventType::HOTKEY_SET:
+                if (globals()->lastSelectedObject.get()) {
+                    auto o = globals()->lastSelectedObject;
+                    if (o->active && (o->id == globals()->lastSelectedObjectID)) {
+                        globals()->hotKey[e.data].object   = globals()->lastSelectedObject;
+                        globals()->hotKey[e.data].objectID = globals()->lastSelectedObjectID;
+                        Update_LabelStrings_ForHotKeyChange();
+                        sys.sound.select();
+                    }
+                }
+                break;
 
-        if ((PlayerEventType::SET_HOTKEY_1 <= e.key) &&
-            (e.key <= PlayerEventType::SET_HOTKEY_10)) {
-            if (globals()->lastSelectedObject.get()) {
-                auto o = globals()->lastSelectedObject;
-                if (o->active && (o->id == globals()->lastSelectedObjectID)) {
-                    globals()->hotKey[i].object   = globals()->lastSelectedObject;
-                    globals()->hotKey[i].objectID = globals()->lastSelectedObjectID;
-                    Update_LabelStrings_ForHotKeyChange();
-                    sys.sound.select();
+            case PlayerEventType::HOTKEY_SELECT:
+            case PlayerEventType::HOTKEY_TARGET:
+                if (globals()->hotKey[e.data].object.get()) {
+                    auto o = globals()->hotKey[e.data].object;
+                    if (o->active && (o->id == globals()->hotKey[e.data].objectID)) {
+                        bool target = (e.type == PlayerEventType::HOTKEY_TARGET) ||
+                                      (o->owner != g.admiral);
+                        select_object(o, target, g.admiral);
+                    } else {
+                        globals()->hotKey[e.data].object = SpaceObject::none();
+                    }
                 }
-            }
-        } else {
-            bool target = (PlayerEventType::TARGET_HOTKEY_1 <= e.key) &&
-                          (e.key <= PlayerEventType::TARGET_HOTKEY_10);
-            if (globals()->hotKey[i].object.get()) {
-                auto o = globals()->hotKey[i].object;
-                if (o->active && (o->id == globals()->hotKey[i].objectID)) {
-                    target = target || (o->owner != g.admiral);
-                    select_object(o, target, g.admiral);
-                } else {
-                    globals()->hotKey[i].object = SpaceObject::none();
-                }
-            }
+                break;
+
+            default: break;
         }
     }
 }
@@ -747,7 +742,7 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
 static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     for (const auto& e : player_events) {
-        switch (e.key) {
+        switch (e.type) {
             case PlayerEventType::SELECT_FRIEND: select_friendly(g.ship, g.ship->direction); break;
             case PlayerEventType::TARGET_FRIEND: target_friendly(g.ship, g.ship->direction); break;
             case PlayerEventType::TARGET_FOE: target_hostile(g.ship, g.ship->direction); break;
@@ -782,7 +777,7 @@ static void handle_pilot_keys(
 
 static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerEventType::ORDER) {
+        if (e.type == PlayerEventType::ORDER) {
             g.ship->keysDown |= kGiveCommandKey;
         }
     }
@@ -790,7 +785,7 @@ static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
 
 static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerEventType::AUTOPILOT) {
+        if (e.type == PlayerEventType::AUTOPILOT) {
             engage_autopilot();
         }
     }
@@ -807,7 +802,7 @@ void PlayerShip::update(bool enter_message) {
     }
 
     for (auto e : _player_events) {
-        switch (e.key) {
+        switch (e.type) {
             case PlayerEventType::ACCEL_ON: gTheseKeys |= (kUpKey & ~g.key_mask); break;
             case PlayerEventType::DECEL_ON: gTheseKeys |= (kDownKey & ~g.key_mask); break;
             case PlayerEventType::CCW_ON: gTheseKeys |= (kLeftKey & ~g.key_mask); break;
@@ -837,12 +832,7 @@ void PlayerShip::update(bool enter_message) {
             case PlayerEventType::ZOOM_ALL: zoom_shortcut(Zoom::ALL); break;
             case PlayerEventType::TRANSFER: transfer_control(g.admiral); break;
 
-            case PlayerEventType::MINI_BUILD_1: build_ship(g.admiral, 0); break;
-            case PlayerEventType::MINI_BUILD_2: build_ship(g.admiral, 1); break;
-            case PlayerEventType::MINI_BUILD_3: build_ship(g.admiral, 2); break;
-            case PlayerEventType::MINI_BUILD_4: build_ship(g.admiral, 3); break;
-            case PlayerEventType::MINI_BUILD_5: build_ship(g.admiral, 4); break;
-            case PlayerEventType::MINI_BUILD_6: build_ship(g.admiral, 5); break;
+            case PlayerEventType::MINI_BUILD: build_ship(g.admiral, e.data); break;
 
             case PlayerEventType::MINI_HOLD: hold_position(g.admiral); break;
             case PlayerEventType::MINI_COME: come_to_me(g.admiral); break;
@@ -955,7 +945,7 @@ void PlayerShip::update(bool enter_message) {
 
     Handle<SpaceObject> flagship = g.ship;  // Pilot same ship even after minicomputer transfer.
     for (auto e : _player_events) {
-        switch (e.key) {
+        switch (e.type) {
             case PlayerEventType::MINI_TRANSFER: transfer_control(g.admiral); break;
             default: break;
         }
