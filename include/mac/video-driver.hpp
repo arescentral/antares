@@ -51,19 +51,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
 
     struct EventBridge;
 
-    class EventTranslator {
-      public:
-        EventTranslator() : _c_obj(antares_event_translator_create()) {}
-        EventTranslator(const EventTranslator&) = delete;
-        EventTranslator& operator=(const EventTranslator&) = delete;
-        ~EventTranslator() { antares_event_translator_destroy(_c_obj); }
-        AntaresEventTranslator* c_obj() const { return _c_obj; }
-
-      private:
-        AntaresEventTranslator* _c_obj;
-    };
-    AntaresEventTranslator* _translator;
-
     InputMode      _input_mode = KEYBOARD_MOUSE;
     AntaresWindow* _window     = nullptr;
 };

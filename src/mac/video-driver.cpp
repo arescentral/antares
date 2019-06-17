@@ -102,7 +102,7 @@ Size CocoaVideoDriver::screen_size() const {
 
 Point CocoaVideoDriver::get_mouse() {
     Point p;
-    antares_get_mouse_location(_translator, &p.h, &p.v);
+    antares_get_mouse_location(_window, &p.h, &p.v);
     return p;
 }
 
@@ -111,11 +111,11 @@ InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 wall_time CocoaVideoDriver::now() const { return _now(); }
 
 struct CocoaVideoDriver::EventBridge {
-    InputMode&              input_mode;
-    MainLoop&               main_loop;
-    cgl::Context&           context;
-    AntaresEventTranslator* translator;
-    std::queue<Event*>      event_queue;
+    InputMode&         input_mode;
+    MainLoop&          main_loop;
+    cgl::Context&      context;
+    AntaresWindow&     window;
+    std::queue<Event*> event_queue;
 
     double gamepad[6];
     bool   switch_dpad[4];
@@ -420,7 +420,7 @@ struct CocoaVideoDriver::EventBridge {
 
     void enqueue(Event* event) {
         event_queue.emplace(event);
-        antares_event_translator_cancel(translator);
+        antares_window_cancel_event(window.c_obj());
     }
 
     void send_all() {
@@ -455,10 +455,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context     context(pixel_format.c_obj(), NULL);
     AntaresWindow    window(pixel_format, context);
-    _window = window.c_obj();
-    EventTranslator translator;
-    _translator = translator.c_obj();
-    antares_event_translator_set_window(_translator, window.c_obj());
+    _window             = window.c_obj();
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
     CGLSetCurrentContext(context.c_obj());
@@ -466,16 +463,13 @@ void CocoaVideoDriver::loop(Card* initial) {
     MainLoop main_loop(*this, initial);
     main_loop.draw();
     CGLFlushDrawable(context.c_obj());
-    EventBridge bridge = {_input_mode, main_loop, context, _translator};
+    EventBridge bridge = {_input_mode, main_loop, context, window};
 
-    antares_event_translator_set_mouse_down_callback(
-            _translator, EventBridge::mouse_down, &bridge);
-    antares_event_translator_set_mouse_up_callback(_translator, EventBridge::mouse_up, &bridge);
-    antares_event_translator_set_mouse_move_callback(
-            _translator, EventBridge::mouse_move, &bridge);
-    antares_event_translator_set_caps_lock_callback(_translator, EventBridge::caps_lock, &bridge);
-    antares_event_translator_set_caps_unlock_callback(
-            _translator, EventBridge::caps_unlock, &bridge);
+    antares_window_set_mouse_down_callback(_window, EventBridge::mouse_down, &bridge);
+    antares_window_set_mouse_up_callback(_window, EventBridge::mouse_up, &bridge);
+    antares_window_set_mouse_move_callback(_window, EventBridge::mouse_move, &bridge);
+    antares_window_set_caps_lock_callback(_window, EventBridge::caps_lock, &bridge);
+    antares_window_set_caps_unlock_callback(_window, EventBridge::caps_unlock, &bridge);
 
     cf::MutableDictionary keyboard(CFDictionaryCreateMutable(
             NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
@@ -501,7 +495,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     while (!main_loop.done()) {
         wall_time at;
         if (main_loop.top()->next_timer(at)) {
-            if (antares_event_translator_next(_translator, at.time_since_epoch().count())) {
+            if (antares_window_next_event(_window, at.time_since_epoch().count())) {
                 bridge.send_all();
             } else {
                 main_loop.top()->fire_timer();
@@ -510,7 +504,7 @@ void CocoaVideoDriver::loop(Card* initial) {
             }
         } else {
             at = wall_time::max();
-            antares_event_translator_next(_translator, at.time_since_epoch().count());
+            antares_window_next_event(_window, at.time_since_epoch().count());
             bridge.send_all();
         }
     }

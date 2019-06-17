@@ -42,31 +42,25 @@ int32_t        antares_window_screen_height(const AntaresWindow* window);
 int32_t        antares_window_viewport_width(const AntaresWindow* window);
 int32_t        antares_window_viewport_height(const AntaresWindow* window);
 
-typedef struct AntaresEventTranslator AntaresEventTranslator;
-AntaresEventTranslator*               antares_event_translator_create();
-void antares_event_translator_destroy(AntaresEventTranslator* translator);
+void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y);
 
-void antares_event_translator_set_window(
-        AntaresEventTranslator* translator, AntaresWindow* window);
-void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y);
-
-void antares_event_translator_set_mouse_down_callback(
-        AntaresEventTranslator* translator,
+void antares_window_set_mouse_down_callback(
+        AntaresWindow* window,
         void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
         void* userdata);
-void antares_event_translator_set_mouse_up_callback(
-        AntaresEventTranslator* translator,
-        void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata);
-void antares_event_translator_set_mouse_move_callback(
-        AntaresEventTranslator* translator, void (*callback)(int32_t x, int32_t y, void* userdata),
-        void*                   userdata);
-void antares_event_translator_set_caps_lock_callback(
-        AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata);
-void antares_event_translator_set_caps_unlock_callback(
-        AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata);
+void antares_window_set_mouse_up_callback(
+        AntaresWindow* window, void (*callback)(int button, int32_t x, int32_t y, void* userdata),
+        void*          userdata);
+void antares_window_set_mouse_move_callback(
+        AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata),
+        void*          userdata);
+void antares_window_set_caps_lock_callback(
+        AntaresWindow* window, void (*callback)(void* userdata), void* userdata);
+void antares_window_set_caps_unlock_callback(
+        AntaresWindow* window, void (*callback)(void* userdata), void* userdata);
 
-bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until);
-void antares_event_translator_cancel(AntaresEventTranslator* translator);
+bool antares_window_next_event(AntaresWindow* window, int64_t until);
+void antares_window_cancel_event(AntaresWindow* window);
 
 #ifdef __cplusplus
 }  // extern "C"
