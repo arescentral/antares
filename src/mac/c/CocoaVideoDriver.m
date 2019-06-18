@@ -37,6 +37,30 @@ static bool mouse_visible = true;
 }
 @end
 
+@interface AntaresView : NSOpenGLView {
+  @public
+    void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
+    void* mouse_down_userdata;
+
+    void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
+    void* mouse_up_userdata;
+
+    void (*mouse_move_callback)(int32_t x, int32_t y, void* userdata);
+    void* mouse_move_userdata;
+
+    void (*caps_lock_callback)(void* userdata);
+    void* caps_lock_userdata;
+
+    void (*caps_unlock_callback)(void* userdata);
+    void* caps_unlock_userdata;
+
+    int32_t last_flags;
+}
+@end
+
+@implementation AntaresView
+@end
+
 bool antares_is_active() { return [NSApp isActive]; }
 
 void antares_menu_bar_hide() { [NSMenu setMenuBarVisible:NO]; }
@@ -60,25 +84,8 @@ void antares_mouse_show() {
 struct AntaresWindow {
     NSOpenGLPixelFormat* pixel_format;
     NSOpenGLContext*     context;
-    NSOpenGLView*        view;
+    AntaresView*         view;
     NSWindow*            window;
-
-    void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
-    void* mouse_down_userdata;
-
-    void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
-    void* mouse_up_userdata;
-
-    void (*mouse_move_callback)(int32_t x, int32_t y, void* userdata);
-    void* mouse_move_userdata;
-
-    void (*caps_lock_callback)(void* userdata);
-    void* caps_lock_userdata;
-
-    void (*caps_unlock_callback)(void* userdata);
-    void* caps_unlock_userdata;
-
-    int32_t last_flags;
 };
 
 static void* memdup(void* data, size_t size) {
@@ -95,7 +102,7 @@ AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextO
     NSRect window_rect = NSMakeRect(0, 0, 640, 480);
     int    style_mask  = NSTitledWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
 
-    window.view = [[NSOpenGLView alloc] initWithFrame:window_rect pixelFormat:window.pixel_format];
+    window.view = [[AntaresView alloc] initWithFrame:window_rect pixelFormat:window.pixel_format];
     [window.view setWantsBestResolutionOpenGLSurface:YES];
     [window.view setOpenGLContext:window.context];
 
@@ -160,34 +167,34 @@ void antares_window_set_mouse_down_callback(
         AntaresWindow* window,
         void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
         void* userdata) {
-    window->mouse_down_callback = callback;
-    window->mouse_down_userdata = userdata;
+    window->view->mouse_down_callback = callback;
+    window->view->mouse_down_userdata = userdata;
 }
 
 void antares_window_set_mouse_up_callback(
         AntaresWindow* window, void (*callback)(int button, int32_t x, int32_t y, void* userdata),
         void*          userdata) {
-    window->mouse_up_callback = callback;
-    window->mouse_up_userdata = userdata;
+    window->view->mouse_up_callback = callback;
+    window->view->mouse_up_userdata = userdata;
 }
 
 void antares_window_set_mouse_move_callback(
         AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata),
         void*          userdata) {
-    window->mouse_move_callback = callback;
-    window->mouse_move_userdata = userdata;
+    window->view->mouse_move_callback = callback;
+    window->view->mouse_move_userdata = userdata;
 }
 
 void antares_window_set_caps_lock_callback(
         AntaresWindow* window, void (*callback)(void* userdata), void* userdata) {
-    window->caps_lock_callback = callback;
-    window->caps_lock_userdata = userdata;
+    window->view->caps_lock_callback = callback;
+    window->view->caps_lock_userdata = userdata;
 }
 
 void antares_window_set_caps_unlock_callback(
         AntaresWindow* window, void (*callback)(void* userdata), void* userdata) {
-    window->caps_unlock_callback = callback;
-    window->caps_unlock_userdata = userdata;
+    window->view->caps_unlock_callback = callback;
+    window->view->caps_unlock_userdata = userdata;
 }
 
 static void hide_unhide(AntaresWindow* window, NSPoint location) {
@@ -226,8 +233,8 @@ static void mouse_down(AntaresWindow* window, NSEvent* event) {
     }
     hide_unhide(window, where);
     int button = button_for(event);
-    window->mouse_down_callback(
-            button, where.x, where.y, [event clickCount], window -> mouse_down_userdata);
+    window->view->mouse_down_callback(
+            button, where.x, where.y, [event clickCount], window -> view -> mouse_down_userdata);
 }
 
 static void mouse_up(AntaresWindow* window, NSEvent* event) {
@@ -237,7 +244,7 @@ static void mouse_up(AntaresWindow* window, NSEvent* event) {
     }
     hide_unhide(window, where);
     int button = button_for(event);
-    window->mouse_up_callback(button, where.x, where.y, window->mouse_up_userdata);
+    window->view->mouse_up_callback(button, where.x, where.y, window->view->mouse_up_userdata);
 }
 
 static void mouse_move(AntaresWindow* window, NSEvent* event) {
@@ -246,7 +253,7 @@ static void mouse_move(AntaresWindow* window, NSEvent* event) {
         return;
     }
     hide_unhide(window, where);
-    window->mouse_move_callback(where.x, where.y, window->mouse_move_userdata);
+    window->view->mouse_move_callback(where.x, where.y, window->view->mouse_move_userdata);
 }
 
 bool antares_window_next_event(AntaresWindow* window, int64_t until) {
@@ -300,9 +307,9 @@ bool antares_window_next_event(AntaresWindow* window, int64_t until) {
 
             case NSFlagsChanged:
                 if ([event modifierFlags] & NSAlphaShiftKeyMask) {
-                    window->caps_lock_callback(window->caps_lock_userdata);
+                    window->view->caps_lock_callback(window->view->caps_lock_userdata);
                 } else {
-                    window->caps_unlock_callback(window->caps_unlock_userdata);
+                    window->view->caps_unlock_callback(window->view->caps_unlock_userdata);
                 }
                 break;
 
