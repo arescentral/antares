@@ -22,6 +22,7 @@
 #include <Cocoa/Cocoa.h>
 #include <mach/clock.h>
 #include <mach/mach.h>
+#include <sys/time.h>
 
 static bool mouse_visible = true;
 
@@ -56,9 +57,6 @@ static bool mouse_visible = true;
 
     int32_t last_flags;
 }
-@end
-
-@implementation AntaresView
 @end
 
 bool antares_is_active() { return [NSApp isActive]; }
@@ -113,6 +111,7 @@ AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextO
     [window.window setAcceptsMouseMovedEvents:YES];
     [window.window setContentView:window.view];
     [window.window makeKeyAndOrderFront:NSApp];
+    [window.window makeFirstResponder:window.view];
     [window.window center];
     return memdup(&window, sizeof(AntaresWindow));
 }
@@ -141,13 +140,13 @@ int32_t antares_window_viewport_height(const AntaresWindow* window) {
     return [window->view convertRectToBacking:[window->view bounds]].size.height;
 }
 
-static bool translate_coords(AntaresWindow* window, NSEvent* event, NSPoint* p) {
-    if ([event window] != window->window) {
+static bool translate_coords(AntaresView* view, NSEvent* event, NSPoint* p) {
+    if ([event window] != [view window]) {
         return false;
     }
     NSPoint input    = [event locationInWindow];
-    input            = [window->view convertPoint:input fromView:nil];
-    NSSize view_size = [window->view bounds].size;
+    input            = [view convertPoint:input fromView:nil];
+    NSSize view_size = [view bounds].size;
     *p               = NSMakePoint(input.x, view_size.height - input.y);
     return true;
 }
@@ -197,11 +196,11 @@ void antares_window_set_caps_unlock_callback(
     window->view->caps_unlock_userdata = userdata;
 }
 
-static void hide_unhide(AntaresWindow* window, NSPoint location) {
-    if (!window) {
+static void hide_unhide(AntaresView* view, NSPoint location) {
+    if (!view) {
         return;
     }
-    NSSize size      = [window->view bounds].size;
+    NSSize size      = [view bounds].size;
     bool   in_window = location.x >= 0 && location.y >= 0 && location.x < size.width &&
                      location.y < size.height;
     if (in_window) {
@@ -226,111 +225,117 @@ static int button_for(NSEvent* event) {
     }
 }
 
-static void mouse_down(AntaresWindow* window, NSEvent* event) {
+static void mouse_down(AntaresView* view, NSEvent* event) {
     NSPoint where;
-    if (!translate_coords(window, event, &where)) {
+    if (!translate_coords(view, event, &where)) {
         return;
     }
-    hide_unhide(window, where);
+    hide_unhide(view, where);
     int button = button_for(event);
-    window->view->mouse_down_callback(
-            button, where.x, where.y, [event clickCount], window -> view -> mouse_down_userdata);
+    view->mouse_down_callback(
+            button, where.x, where.y, [event clickCount], view -> mouse_down_userdata);
 }
 
-static void mouse_up(AntaresWindow* window, NSEvent* event) {
+static void mouse_up(AntaresView* view, NSEvent* event) {
     NSPoint where;
-    if (!translate_coords(window, event, &where)) {
+    if (!translate_coords(view, event, &where)) {
         return;
     }
-    hide_unhide(window, where);
+    hide_unhide(view, where);
     int button = button_for(event);
-    window->view->mouse_up_callback(button, where.x, where.y, window->view->mouse_up_userdata);
+    view->mouse_up_callback(button, where.x, where.y, view->mouse_up_userdata);
 }
 
-static void mouse_move(AntaresWindow* window, NSEvent* event) {
+static void mouse_move(AntaresView* view, NSEvent* event) {
     NSPoint where;
-    if (!translate_coords(window, event, &where)) {
+    if (!translate_coords(view, event, &where)) {
         return;
     }
-    hide_unhide(window, where);
-    window->view->mouse_move_callback(where.x, where.y, window->view->mouse_move_userdata);
+    hide_unhide(view, where);
+    view->mouse_move_callback(where.x, where.y, view->mouse_move_userdata);
+}
+
+static void flags_changed(AntaresView* view, NSEvent* event) {
+    if ([event modifierFlags] & NSAlphaShiftKeyMask) {
+        view->caps_lock_callback(view->caps_lock_userdata);
+    } else {
+        view->caps_unlock_callback(view->caps_unlock_userdata);
+    }
 }
 
 bool antares_window_next_event(AntaresWindow* window, int64_t until) {
-    NSAutoreleasePool* pool    = [[NSAutoreleasePool alloc] init];
-    NSDate*            date    = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
-    bool               waiting = true;
-    while (waiting) {
+    @autoreleasepool {
+        NSDate*  date  = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
         NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask
                                             untilDate:date
                                                inMode:NSDefaultRunLoopMode
                                               dequeue:YES];
         if (!event) {
-            break;
+            return false;
         }
-        // Put events after `until` back in the queue.
+
+        // Don’t handle events after wait time; put them back in the queue
+        // so they can be handled after the timer fires.
         if ([event timestamp] > [date timeIntervalSinceSystemStart]) {
             [NSApp postEvent:event atStart:true];
-            break;
+            return false;
         }
 
-        // Send non-key events.
-        switch ([event type]) {
-            case NSKeyDown:
-            case NSKeyUp: break;
-
-            default: [NSApp sendEvent:event]; break;
-        };
-
-        // Handle events.
-        switch ([event type]) {
-            case NSLeftMouseDown:
-            case NSRightMouseDown:
-                mouse_down(window, event);
-                waiting = false;
-                break;
-
-            case NSLeftMouseUp:
-            case NSRightMouseUp:
-                mouse_up(window, event);
-                waiting = false;
-                break;
-
-            case NSMouseMoved:
-            case NSLeftMouseDragged:
-            case NSRightMouseDragged:
-                mouse_move(window, event);
-                waiting = false;
-                break;
-
-            case NSApplicationDefined: waiting = false; break;
-
-            case NSFlagsChanged:
-                if ([event modifierFlags] & NSAlphaShiftKeyMask) {
-                    window->view->caps_lock_callback(window->view->caps_lock_userdata);
-                } else {
-                    window->view->caps_unlock_callback(window->view->caps_unlock_userdata);
-                }
-                break;
-
-            default: break;
-        }
+        // Forward to the view so it can fire a callback.
+        [NSApp sendEvent:event];
+        return true;
     }
-    [pool drain];
-    return !waiting;
 }
 
 void antares_window_cancel_event(AntaresWindow* window) {
-    NSAutoreleasePool* pool  = [[NSAutoreleasePool alloc] init];
-    NSEvent*           event = [NSEvent otherEventWithType:NSApplicationDefined
-                                        location:NSMakePoint(0, 0)
-                                   modifierFlags:0
-                                       timestamp:[[NSDate date] timeIntervalSinceSystemStart]
-                                    windowNumber:0
-                                         context:nil
-                                         subtype:0
-                                           data1:0
-                                           data2:0];
-    [NSApp postEvent:event atStart:true];
-    [pool drain];
+    @autoreleasepool {
+        NSEvent* event = [NSEvent otherEventWithType:NSApplicationDefined
+                                            location:NSMakePoint(0, 0)
+                                       modifierFlags:0
+                                           timestamp:[[NSDate date] timeIntervalSinceSystemStart]
+                                        windowNumber:0
+                                             context:nil
+                                             subtype:0
+                                               data1:0
+                                               data2:0];
+        [NSApp postEvent:event atStart:true];
+    }
 }
+
+@implementation AntaresView
+
+- (BOOL)acceptsFirstResponder {
+    return YES;
+}
+
+- (BOOL)acceptsMouseMovedEvents {
+    return YES;
+}
+
+- (void)keyDown:(NSEvent*)event {
+}
+
+- (void)keyUp:(NSEvent*)event {
+}
+
+- (void)mouseDown:(NSEvent*)event {
+    mouse_down(self, event);
+}
+
+- (void)mouseUp:(NSEvent*)event {
+    mouse_up(self, event);
+}
+
+- (void)mouseDragged:(NSEvent*)event {
+    mouse_move(self, event);
+}
+
+- (void)mouseMoved:(NSEvent*)event {
+    mouse_move(self, event);
+}
+
+- (void)flagsChanged:(NSEvent*)event {
+    flags_changed(self, event);
+}
+
+@end
