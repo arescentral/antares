@@ -40,6 +40,12 @@ static bool mouse_visible = true;
 
 @interface AntaresView : NSOpenGLView {
   @public
+    void (*key_down_callback)(int key, void* userdata);
+    void* key_down_userdata;
+
+    void (*key_up_callback)(int key, void* userdata);
+    void* key_up_userdata;
+
     void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
     void* mouse_down_userdata;
 
@@ -55,7 +61,7 @@ static bool mouse_visible = true;
     void (*caps_unlock_callback)(void* userdata);
     void* caps_unlock_userdata;
 
-    int32_t last_flags;
+    int32_t modifier_flags;
 }
 @end
 
@@ -162,6 +168,18 @@ void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y) {
     *y               = view_size.height - *y;
 }
 
+void antares_window_set_key_down_callback(
+        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata) {
+    window->view->key_down_callback = callback;
+    window->view->key_down_userdata = userdata;
+}
+
+void antares_window_set_key_up_callback(
+        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata) {
+    window->view->key_up_callback = callback;
+    window->view->key_up_userdata = userdata;
+}
+
 void antares_window_set_mouse_down_callback(
         AntaresWindow* window,
         void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
@@ -194,6 +212,22 @@ void antares_window_set_caps_unlock_callback(
         AntaresWindow* window, void (*callback)(void* userdata), void* userdata) {
     window->view->caps_unlock_callback = callback;
     window->view->caps_unlock_userdata = userdata;
+}
+
+static void key_down(AntaresView* view, NSEvent* event) {
+    NSPoint where;
+    if (!translate_coords(view, event, &where)) {
+        return;
+    }
+    view->key_down_callback([event keyCode], view -> key_down_userdata);
+}
+
+static void key_up(AntaresView* view, NSEvent* event) {
+    NSPoint where;
+    if (!translate_coords(view, event, &where)) {
+        return;
+    }
+    view->key_up_callback([event keyCode], view -> key_up_userdata);
 }
 
 static void hide_unhide(AntaresView* view, NSPoint location) {
@@ -256,10 +290,20 @@ static void mouse_move(AntaresView* view, NSEvent* event) {
 }
 
 static void flags_changed(AntaresView* view, NSEvent* event) {
-    if ([event modifierFlags] & NSAlphaShiftKeyMask) {
-        view->caps_lock_callback(view->caps_lock_userdata);
+    int32_t old_flags = view->modifier_flags;
+    int32_t new_flags = view->modifier_flags = [event modifierFlags];
+    if ([event keyCode] == 0x39) {  // Caps Lock
+        if ((new_flags | old_flags) == new_flags) {
+            view->caps_lock_callback(view->caps_lock_userdata);
+        } else {
+            view->caps_unlock_callback(view->caps_unlock_userdata);
+        }
+        return;
+    }
+    if ((new_flags | old_flags) == new_flags) {
+        view->key_down_callback([event keyCode], view -> key_down_userdata);
     } else {
-        view->caps_unlock_callback(view->caps_unlock_userdata);
+        view->key_up_callback([event keyCode], view -> key_up_userdata);
     }
 }
 
@@ -282,7 +326,12 @@ bool antares_window_next_event(AntaresWindow* window, int64_t until) {
         }
 
         // Forward to the view so it can fire a callback.
-        [NSApp sendEvent:event];
+        switch ([event type]) {
+            case NSEventTypeKeyDown: [window->view keyDown:event]; break;
+            case NSEventTypeKeyUp: [window->view keyUp:event]; break;
+            case NSEventTypeFlagsChanged: [window->view flagsChanged:event]; break;
+            default: [NSApp sendEvent:event];
+        }
         return true;
     }
 }
@@ -313,9 +362,17 @@ void antares_window_cancel_event(AntaresWindow* window) {
 }
 
 - (void)keyDown:(NSEvent*)event {
+    if (![event isARepeat]) {
+        key_down(self, event);
+    }
 }
 
 - (void)keyUp:(NSEvent*)event {
+    key_up(self, event);
+}
+
+- (void)flagsChanged:(NSEvent*)event {
+    flags_changed(self, event);
 }
 
 - (void)mouseDown:(NSEvent*)event {
@@ -332,10 +389,6 @@ void antares_window_cancel_event(AntaresWindow* window) {
 
 - (void)mouseMoved:(NSEvent*)event {
     mouse_move(self, event);
-}
-
-- (void)flagsChanged:(NSEvent*)event {
-    flags_changed(self, event);
 }
 
 @end

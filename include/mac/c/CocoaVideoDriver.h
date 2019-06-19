@@ -44,6 +44,10 @@ int32_t        antares_window_viewport_height(const AntaresWindow* window);
 
 void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y);
 
+void antares_window_set_key_down_callback(
+        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata);
+void antares_window_set_key_up_callback(
+        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata);
 void antares_window_set_mouse_down_callback(
         AntaresWindow* window,
         void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),

@@ -110,6 +110,49 @@ InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
 wall_time CocoaVideoDriver::now() const { return _now(); }
 
+static const int key_code_count            = 0x80;
+static const Key key_codes[key_code_count] = {
+        Key::A,         Key::S,          Key::D,           Key::F,          Key::H,
+        Key::G,         Key::Z,          Key::X,           Key::C,          Key::V,
+        Key::NONE,      Key::B,          Key::Q,           Key::W,          Key::E,
+        Key::R,
+
+        Key::Y,         Key::T,          Key::K1,          Key::K2,         Key::K3,
+        Key::K4,        Key::K6,         Key::K5,          Key::EQUALS,     Key::K9,
+        Key::K7,        Key::MINUS,      Key::K8,          Key::K0,         Key::R_BRACKET,
+        Key::O,
+
+        Key::U,         Key::L_BRACKET,  Key::I,           Key::P,          Key::RETURN,
+        Key::L,         Key::J,          Key::QUOTE,       Key::K,          Key::SEMICOLON,
+        Key::BACKSLASH, Key::COMMA,      Key::SLASH,       Key::N,          Key::M,
+        Key::PERIOD,
+
+        Key::TAB,       Key::SPACE,      Key::BACKTICK,    Key::BACKSPACE,  Key::NONE,
+        Key::ESCAPE,    Key::R_COMMAND,  Key::COMMAND,     Key::SHIFT,      Key::CAPS_LOCK,
+        Key::OPTION,    Key::CONTROL,    Key::R_SHIFT,     Key::R_OPTION,   Key::R_CONTROL,
+        Key::NONE,
+
+        Key::F17,       Key::N_PERIOD,   Key::NONE,        Key::N_TIMES,    Key::NONE,
+        Key::N_PLUS,    Key::NONE,       Key::N_CLEAR,     Key::VOL_UP,     Key::VOL_DOWN,
+        Key::MUTE,      Key::N_DIVIDE,   Key::N_ENTER,     Key::NONE,       Key::N_MINUS,
+        Key::F18,
+
+        Key::F19,       Key::N_EQUALS,   Key::K0,          Key::K1,         Key::K2,
+        Key::K3,        Key::K4,         Key::K5,          Key::K6,         Key::K7,
+        Key::F20,       Key::K8,         Key::K9,          Key::J_YEN,      Key::J_UNDERSCORE,
+        Key::K_COMMA,
+
+        Key::F5,        Key::F6,         Key::F7,          Key::F3,         Key::F8,
+        Key::F9,        Key::NONE,       Key::F11,         Key::J_KANA,     Key::F13,
+        Key::F16,       Key::F14,        Key::NONE,        Key::F10,        Key::NONE,
+        Key::F12,
+
+        Key::NONE,      Key::F15,        Key::HELP,        Key::HOME,       Key::PAGE_UP,
+        Key::DELETE,    Key::F4,         Key::END,         Key::F2,         Key::PAGE_DOWN,
+        Key::F1,        Key::LEFT_ARROW, Key::RIGHT_ARROW, Key::DOWN_ARROW, Key::UP_ARROW,
+        Key::NONE,
+};
+
 struct CocoaVideoDriver::EventBridge {
     InputMode&         input_mode;
     MainLoop&          main_loop;
@@ -119,6 +162,16 @@ struct CocoaVideoDriver::EventBridge {
 
     double gamepad[6];
     bool   switch_dpad[4];
+
+    static void key_down(int key, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
+        self->enqueue(new KeyDownEvent(_now(), key_codes[key]));
+    }
+
+    static void key_up(int key, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
+        self->enqueue(new KeyUpEvent(_now(), key_codes[key]));
+    }
 
     static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
@@ -150,7 +203,6 @@ struct CocoaVideoDriver::EventBridge {
         IOHIDElementRef element    = IOHIDValueGetElement(value);
         uint32_t        usage_page = IOHIDElementGetUsagePage(element);
         switch (usage_page) {
-            case kHIDPage_KeyboardOrKeypad: self->key_event(result, element, value); break;
             case kHIDPage_GenericDesktop: self->analog_event(result, element, value); break;
             case kHIDPage_Button: self->button_event(result, element, value); break;
         }
@@ -465,22 +517,19 @@ void CocoaVideoDriver::loop(Card* initial) {
     CGLFlushDrawable(context.c_obj());
     EventBridge bridge = {_input_mode, main_loop, context, window};
 
+    antares_window_set_key_down_callback(_window, EventBridge::key_down, &bridge);
+    antares_window_set_key_up_callback(_window, EventBridge::key_up, &bridge);
     antares_window_set_mouse_down_callback(_window, EventBridge::mouse_down, &bridge);
     antares_window_set_mouse_up_callback(_window, EventBridge::mouse_up, &bridge);
     antares_window_set_mouse_move_callback(_window, EventBridge::mouse_move, &bridge);
     antares_window_set_caps_lock_callback(_window, EventBridge::caps_lock, &bridge);
     antares_window_set_caps_unlock_callback(_window, EventBridge::caps_unlock, &bridge);
 
-    cf::MutableDictionary keyboard(CFDictionaryCreateMutable(
-            NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-    keyboard.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
-    keyboard.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
     cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
             NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
     gamepad.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     gamepad.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_GamePad).c_obj());
     cf::MutableArray criteria(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
-    criteria.append(keyboard.c_obj());
     criteria.append(gamepad.c_obj());
 
     auto hid_manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);

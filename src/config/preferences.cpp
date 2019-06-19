@@ -45,16 +45,16 @@ Preferences::Preferences() {
     keys[kDownKeyNum]  = Key::N5;
     keys[kLeftKeyNum]  = Key::N4;
     keys[kRightKeyNum] = Key::N6;
-    keys[kOneKeyNum]   = Key::L_OPTION;
-    keys[kTwoKeyNum]   = Key::L_COMMAND;
+    keys[kOneKeyNum]   = Key::OPTION;
+    keys[kTwoKeyNum]   = Key::COMMAND;
     keys[kEnterKeyNum] = Key::SPACE;
     keys[kWarpKeyNum]  = Key::TAB;
 
     keys[kSelectFriendKeyNum] = Key::N_CLEAR;
     keys[kSelectFoeKeyNum]    = Key::N_EQUALS;
     keys[kSelectBaseKeyNum]   = Key::N_DIVIDE;
-    keys[kDestinationKeyNum]  = Key::L_SHIFT;
-    keys[kOrderKeyNum]        = Key::L_CONTROL;
+    keys[kDestinationKeyNum]  = Key::SHIFT;
+    keys[kOrderKeyNum]        = Key::CONTROL;
 
     keys[kZoomInKeyNum]  = Key::N_PLUS;
     keys[kZoomOutKeyNum] = Key::N_MINUS;

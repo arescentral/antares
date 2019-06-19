@@ -154,7 +154,7 @@ void fast_motion(EventScheduler& scheduler) {
     // Skip the intro.  Start the first tutorial and skip the prologue.
     scheduler.schedule_key(Key::Q, 1756, 1757);
     scheduler.schedule_key(Key::S, 1816, 1817);
-    scheduler.schedule_key(Key::L_SHIFT, 1860, 1863);
+    scheduler.schedule_key(Key::SHIFT, 1860, 1863);
     scheduler.schedule_key(Key::K8, 1861, 1862);
     scheduler.schedule_key(Key::K0, 1864, 1865);
     scheduler.schedule_key(Key::K6, 1866, 1867);

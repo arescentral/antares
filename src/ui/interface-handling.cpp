@@ -123,7 +123,7 @@ bool BothCommandAndQ() {
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
         Key key = sys.prefs->key(i);
         q |= (key == Key::Q);
-        command |= (key == Key::L_COMMAND);
+        command |= (key == Key::COMMAND);
     }
 
     return command && q;

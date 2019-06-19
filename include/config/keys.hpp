@@ -92,10 +92,10 @@ enum class Key {
 
     // Modifier keys.
     CAPS_LOCK = 0x39,
-    L_CONTROL = 0xe0,
-    L_SHIFT   = 0xe1,
-    L_OPTION  = 0xe2,
-    L_COMMAND = 0xe3,
+    CONTROL   = 0xe0,
+    SHIFT     = 0xe1,
+    OPTION    = 0xe2,
+    COMMAND   = 0xe3,
     R_CONTROL = 0xe4,
     R_SHIFT   = 0xe5,
     R_OPTION  = 0xe6,
@@ -153,9 +153,39 @@ enum class Key {
     F13 = 0x68,
     F14 = 0x69,
     F15 = 0x6a,
+    F16 = 0x6b,
+    F17 = 0x6c,
+    F18 = 0x6d,
+    F19 = 0x6e,
+    F20 = 0x6f,
+    F21 = 0x70,
+    F22 = 0x71,
+    F23 = 0x72,
+    F24 = 0x73,
+
+    // Media keys
+    OPEN     = 0x74,
+    PROPS    = 0x76,
+    FRONT    = 0x77,
+    STOP     = 0x78,
+    AGAIN    = 0x79,
+    UNDO     = 0x7a,
+    CUT      = 0x7b,
+    COPY     = 0x7c,
+    PASTE    = 0x7d,
+    FIND     = 0x7e,
+    MUTE     = 0x7f,
+    VOL_UP   = 0x80,
+    VOL_DOWN = 0x81,
 
     // Miscellaneous.
     POWER = 0x66,
+
+    // Japanese
+    J_UNDERSCORE = 0x87,
+    J_YEN        = 0x89,
+    K_COMMA      = 0x85,
+    J_KANA       = 0x88,
 };
 
 class KeyMap {
@@ -193,7 +223,7 @@ inline bool mCapsLockKey(const KeyMap& km) { return km.get(Key::CAPS_LOCK); }
 inline bool mReturnKey(const KeyMap& km) { return km.get(Key::RETURN); }
 inline bool mEscKey(const KeyMap& km) { return km.get(Key::ESCAPE); }
 inline bool mQKey(const KeyMap& km) { return km.get(Key::Q); }
-inline bool mCommandKey(const KeyMap& km) { return km.get(Key::L_COMMAND); }
+inline bool mCommandKey(const KeyMap& km) { return km.get(Key::COMMAND); }
 inline bool mLeftArrowKey(const KeyMap& km) { return km.get(Key::LEFT_ARROW); }
 
 void    GetKeyNumName(Key key_num, pn::string& out);
