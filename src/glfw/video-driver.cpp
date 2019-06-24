@@ -165,6 +165,10 @@ Point GLFWVideoDriver::get_mouse() {
 
 InputMode GLFWVideoDriver::input_mode() const { return KEYBOARD_MOUSE; }
 
+bool GLFWVideoDriver::start_editing(TextReceiver* text) { return false; }
+
+void GLFWVideoDriver::stop_editing(TextReceiver* text) {}
+
 wall_time GLFWVideoDriver::now() const { return wall_time(usecs(int64_t(glfwGetTime() * 1e6))); }
 
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {

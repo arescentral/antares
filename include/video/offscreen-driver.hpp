@@ -40,6 +40,9 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual Point     get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return _scheduler->input_mode(); }
 
+    virtual bool start_editing(TextReceiver* text);
+    virtual void stop_editing(TextReceiver* text);
+
     virtual wall_time now() const { return _scheduler->now(); }
 
     void loop(Card* initial, EventScheduler& scheduler);

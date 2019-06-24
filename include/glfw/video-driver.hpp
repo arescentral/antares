@@ -44,6 +44,9 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
+    virtual bool start_editing(TextReceiver* text);
+    virtual void stop_editing(TextReceiver* text);
+
     virtual wall_time now() const;
 
     void loop(Card* initial);

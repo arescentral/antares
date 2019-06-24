@@ -171,6 +171,10 @@ TextVideoDriver::TextVideoDriver(Size screen_size, const sfz::optional<pn::strin
 
 int TextVideoDriver::scale() const { return 1; }
 
+bool TextVideoDriver::start_editing(TextReceiver* text) { return false; }
+
+void TextVideoDriver::stop_editing(TextReceiver* text) {}
+
 Texture TextVideoDriver::texture(pn::string_view name, const PixMap& content, int scale) {
     static_cast<void>(scale);  // TODO(sfiera): test HiDPI?
     return std::unique_ptr<Texture::Impl>(new TextureImpl(name, *this, content.size()));

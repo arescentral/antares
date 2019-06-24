@@ -44,6 +44,30 @@ int32_t        antares_window_viewport_height(const AntaresWindow* window);
 
 void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y);
 
+typedef enum {
+    ANTARES_WINDOW_TEXT_CALLBACK_REPLACE,
+    ANTARES_WINDOW_TEXT_CALLBACK_SELECT,
+    ANTARES_WINDOW_TEXT_CALLBACK_MARK,
+    ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE,
+    ANTARES_WINDOW_TEXT_CALLBACK_TAB,
+    ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE,
+
+    ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET,
+    ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE,
+    ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION,
+    ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK,
+} antares_window_text_callback_type;
+
+typedef struct {
+    int begin, end;
+} antares_window_text_callback_range;
+
+void antares_window_set_text_callback(
+        AntaresWindow* window,
+        antares_window_text_callback_range (*callback)(
+                antares_window_text_callback_type type, int int_start, int int_end,
+                const char* char_start, const char* char_end, void* userdata),
+        void* userdata);
 void antares_window_set_key_down_callback(
         AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata);
 void antares_window_set_key_up_callback(

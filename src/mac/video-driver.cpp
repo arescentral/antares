@@ -108,6 +108,51 @@ Point CocoaVideoDriver::get_mouse() {
 
 InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
+antares_window_text_callback_range CocoaVideoDriver::text_callback(
+        antares_window_text_callback_type type, int int_start, int int_end, const char* char_start,
+        const char* char_end, void* userdata) {
+    Text*                    text = reinterpret_cast<Text*>(userdata);
+    TextReceiver::range<int> out  = {-1, -1};
+
+    switch (type) {
+        case ANTARES_WINDOW_TEXT_CALLBACK_REPLACE:
+            text->receiver->replace(
+                    {int_start, int_end}, pn::string_view(char_start, char_end - char_start));
+            break;
+
+        case ANTARES_WINDOW_TEXT_CALLBACK_SELECT:
+            text->receiver->select({int_start, int_end});
+            break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_MARK: text->receiver->mark({int_start, int_end}); break;
+
+        case ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE: text->receiver->newline(); break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_TAB: text->receiver->tab(); break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE: text->receiver->escape(); break;
+
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET:
+            out = {0, text->receiver->offset(int_start, int_start - int_end)};
+            break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE: out = {0, text->receiver->size()}; break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION: out = text->receiver->selection(); break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK: out = text->receiver->mark(); break;
+    }
+
+    return {out.begin, out.end};
+}
+
+bool CocoaVideoDriver::start_editing(TextReceiver* text) {
+    _text.receiver = text;
+    antares_window_set_text_callback(_window, text_callback, &_text);
+    return true;
+}
+
+void CocoaVideoDriver::stop_editing(TextReceiver* text) {
+    if (_text.receiver == text) {
+        antares_window_set_text_callback(_window, nullptr, nullptr);
+        _text.receiver = nullptr;
+    }
+}
+
 wall_time CocoaVideoDriver::now() const { return _now(); }
 
 static const int key_code_count            = 0x80;

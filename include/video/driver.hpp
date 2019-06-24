@@ -34,6 +34,7 @@ class Card;
 class KeyMap;
 class PixMap;
 class Texture;
+class TextReceiver;
 
 enum GameState {
     UNKNOWN,
@@ -58,6 +59,9 @@ class VideoDriver {
     virtual InputMode input_mode() const  = 0;
     virtual int       scale() const       = 0;
     virtual Size      screen_size() const = 0;
+
+    virtual bool start_editing(TextReceiver* text) = 0;
+    virtual void stop_editing(TextReceiver* text)  = 0;
 
     virtual wall_time now() const = 0;
 
@@ -165,6 +169,29 @@ class Texture {
     }
 
     std::unique_ptr<Impl> _impl;
+};
+
+class TextReceiver {
+  public:
+    template <typename T>
+    struct range {
+        T begin, end;
+    };
+
+    virtual ~TextReceiver();
+
+    virtual void replace(
+            range<int> replace, pn::string_view text) = 0;  // clears mark, selects end
+    virtual void select(range<int> select)            = 0;  // clears mark
+    virtual void mark(range<int> mark)                = 0;
+    virtual void newline()                            = 0;  // may replace with \n
+    virtual void tab()                                = 0;  // may replace with \t
+    virtual void escape()                             = 0;
+
+    virtual int        offset(int origin, int by) const = 0;
+    virtual int        size() const                     = 0;
+    virtual range<int> selection() const                = 0;
+    virtual range<int> mark() const                     = 0;
 };
 
 class Points {

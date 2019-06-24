@@ -37,6 +37,9 @@ class TextVideoDriver : public VideoDriver {
     virtual int       scale() const;
     virtual Size      screen_size() const { return _size; }
 
+    virtual bool start_editing(TextReceiver* text);
+    virtual void stop_editing(TextReceiver* text);
+
     virtual wall_time now() const { return _scheduler->now(); }
 
     virtual Texture texture(pn::string_view name, const PixMap& content, int scale);

@@ -38,8 +38,33 @@ static bool mouse_visible = true;
 }
 @end
 
-@interface AntaresView : NSOpenGLView {
+@implementation NSString (AntaresAdditions)
+- (NSData*)utf8Data {
+    return [self dataUsingEncoding:NSUTF8StringEncoding];
+}
+
+- (NSUInteger)utf8Length {
+    return [self utf8Data].length;
+}
+
+- (NSUInteger)utf8IndexOf:(NSUInteger)runeIndex {
+    return [self substringToIndex:runeIndex].utf8Length;
+}
+@end
+
+typedef enum {
+    SelectionDirectionNeither,
+    SelectionDirectionRight,
+    SelectionDirectionLeft,
+} SelectionDirection;
+
+@interface AntaresView : NSOpenGLView <NSTextInputClient> {
   @public
+    antares_window_text_callback_range (*text_callback)(
+            antares_window_text_callback_type type, int int_start, int int_end,
+            const char* char_start, const char* char_end, void* userdata);
+    void* text_userdata;
+
     void (*key_down_callback)(int key, void* userdata);
     void* key_down_userdata;
 
@@ -61,7 +86,8 @@ static bool mouse_visible = true;
     void (*caps_unlock_callback)(void* userdata);
     void* caps_unlock_userdata;
 
-    int32_t modifier_flags;
+    SelectionDirection selectionDir;
+    int32_t            modifier_flags;
 }
 @end
 
@@ -166,6 +192,16 @@ void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y) {
     *x               = round(location.x);
     *y               = round(location.y);
     *y               = view_size.height - *y;
+}
+
+void antares_window_set_text_callback(
+        AntaresWindow* window,
+        antares_window_text_callback_range (*callback)(
+                antares_window_text_callback_type type, int int_start, int int_end,
+                const char* char_start, const char* char_end, void* userdata),
+        void* userdata) {
+    window->view->text_callback = callback;
+    window->view->text_userdata = userdata;
 }
 
 void antares_window_set_key_down_callback(
@@ -325,13 +361,18 @@ bool antares_window_next_event(AntaresWindow* window, int64_t until) {
             return false;
         }
 
-        // Forward to the view so it can fire a callback.
-        switch ([event type]) {
-            case NSEventTypeKeyDown: [window->view keyDown:event]; break;
-            case NSEventTypeKeyUp: [window->view keyUp:event]; break;
-            case NSEventTypeFlagsChanged: [window->view flagsChanged:event]; break;
-            default: [NSApp sendEvent:event];
+        // Unless in text mode, keypresses should be handled directly
+        // by the view; Cmd+A should trigger the keypresses for Cmd and
+        // A, not the Select All menu item.
+        if (!window->view->text_callback) {
+            switch ([event type]) {
+                case NSEventTypeKeyDown: [window->view keyDown:event]; return true;
+                case NSEventTypeKeyUp: [window->view keyUp:event]; return true;
+                case NSEventTypeFlagsChanged: [window->view flagsChanged:event]; return true;
+                default: break;
+            }
         }
+        [NSApp sendEvent:event];
         return true;
     }
 }
@@ -351,7 +392,12 @@ void antares_window_cancel_event(AntaresWindow* window) {
     }
 }
 
+static const NSRange kNoRange = {NSNotFound, 0};
+static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoRange); }
+
 @implementation AntaresView
+
+// NSResponder
 
 - (BOOL)acceptsFirstResponder {
     return YES;
@@ -362,8 +408,12 @@ void antares_window_cancel_event(AntaresWindow* window) {
 }
 
 - (void)keyDown:(NSEvent*)event {
-    if (![event isARepeat]) {
-        key_down(self, event);
+    if (text_callback) {
+        [self interpretKeyEvents:[NSArray arrayWithObject:event]];
+    } else {
+        if (![event isARepeat]) {
+            key_down(self, event);
+        }
     }
 }
 
@@ -389,6 +439,339 @@ void antares_window_cancel_event(AntaresWindow* window) {
 
 - (void)mouseMoved:(NSEvent*)event {
     mouse_move(self, event);
+}
+
+// NSResponder
+
+- (void)doCommandBySelector:(SEL)selector {
+    [super doCommandBySelector:selector];
+}
+
+- (void)moveRight:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selection.length > 0) {
+        [self selectAt:NSMaxRange(selection)];
+    } else {
+        [self selectAt:[self offset:selection.location by:1]];
+    }
+}
+
+- (void)moveToEndOfDocument:(id)sender {
+    [self selectAt:self.textLength];
+}
+
+- (void)moveLeft:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selection.length > 0) {
+        [self selectAt:selection.location];
+    } else {
+        [self selectAt:[self offset:selection.location by:-1]];
+    }
+}
+
+- (void)moveToBeginningOfDocument:(id)sender {
+    [self selectAt:0];
+}
+
+- (void)moveRightAndModifySelection:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selectionDir == SelectionDirectionNeither) {
+        selectionDir = SelectionDirectionRight;
+    }
+    if (selectionDir == SelectionDirectionLeft) {
+        [self selectFrom:[self offset:selection.location by:1]
+                      to:NSMaxRange(selection)
+                      in:SelectionDirectionLeft];
+    } else {
+        [self selectFrom:selection.location
+                      to:[self offset:NSMaxRange(selection) by:1]
+                      in:SelectionDirectionRight];
+    }
+}
+
+- (void)moveToEndOfDocumentAndModifySelection:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selectionDir == SelectionDirectionNeither) {
+        selectionDir = SelectionDirectionRight;
+    }
+    [self selectFrom:selection.location to:self.textLength in:selectionDir];
+}
+
+- (void)moveLeftAndModifySelection:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selectionDir == SelectionDirectionNeither) {
+        selectionDir = SelectionDirectionLeft;
+    }
+    if (selectionDir == SelectionDirectionRight) {
+        [self selectFrom:selection.location
+                      to:[self offset:NSMaxRange(selection) by:-1]
+                      in:SelectionDirectionRight];
+    } else {
+        [self selectFrom:[self offset:selection.location by:-1]
+                      to:NSMaxRange(selection)
+                      in:SelectionDirectionLeft];
+    }
+}
+
+- (void)moveToBeginningOfDocumentAndModifySelection:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selectionDir == SelectionDirectionNeither) {
+        selectionDir = SelectionDirectionLeft;
+    }
+    [self selectFrom:0 to:NSMaxRange(selection) in:selectionDir];
+}
+
+- (void)insertTab:(id)sender {
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_TAB, 0, 0, nil, nil, text_userdata);
+}
+
+- (void)insertTabIgnoringFieldEditor:(id)sender {
+    [self insertTab:sender];
+}
+
+- (void)insertBacktab:(id)sender {
+    [self insertTab:sender];
+}
+
+- (void)insertNewline:(id)sender {
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, 0, 0, nil, nil, text_userdata);
+}
+
+- (void)insertNewlineIgnoringFieldEditor:(id)sender {
+    [self insertNewline:sender];
+}
+
+- (void)insertSingleQuoteIgnoringSubstitution:(id)sender {
+    [self replaceRange:self.selectedRange with:@"'"];
+}
+
+- (void)insertDoubleQuoteIgnoringSubstitution:(id)sender {
+    [self replaceRange:self.selectedRange with:@"\""];
+}
+
+- (void)selectAll:(id)sender {
+    [self selectFrom:0 to:self.textLength in:SelectionDirectionNeither];
+}
+
+- (void)deleteBackward:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selection.length > 0) {
+        [self replaceRange:selection with:@""];
+    } else {
+        [self replaceFrom:[self offset:selection.location by:-1] to:selection.location with:@""];
+    }
+}
+
+- (void)deleteForward:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selection.length > 0) {
+        [self replaceRange:selection with:@""];
+    } else {
+        [self replaceFrom:selection.location to:[self offset:selection.location by:1] with:@""];
+    }
+}
+
+- (void)deleteToBeginningOfLine:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selection.length > 0) {
+        [self replaceRange:selection with:@""];
+    } else {
+        [self replaceFrom:0 to:selection.location with:@""];
+    }
+}
+
+- (void)deleteToEndOfLine:(id)sender {
+    NSRange selection = self.selectedRange;
+    if (selection.length > 0) {
+        [self replaceRange:selection with:@""];
+    } else {
+        [self replaceFrom:selection.location to:self.textLength with:@""];
+    }
+}
+
+- (void)cancelOperation:(id)sender {
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE, 0, 0, nil, nil, text_userdata);
+}
+
+// clang-format off
+- (void)moveForward:(id)s { [self moveRight:s]; }
+- (void)moveWordRight:(id)s { [self moveRight:s]; }
+- (void)moveForwardAndModifySelection:(id)s { [self moveRightAndModifySelection:s]; }
+- (void)moveWordRightAndModifySelection:(id)s { [self moveRightAndModifySelection:s]; }
+
+- (void)moveBackward:(id)s { [self moveLeft:s]; }
+- (void)moveWordLeft:(id)s { [self moveLeft:s]; }
+- (void)moveBackwardAndModifySelection:(id)s { [self moveLeftAndModifySelection:s]; }
+- (void)moveWordLeftAndModifySelection:(id)s { [self moveLeftAndModifySelection:s]; }
+
+- (void)moveDown:(id)s { [self moveToEndOfDocument:s]; }
+- (void)moveToRightEndOfLine:(id)s { [self moveToEndOfDocument:s]; }
+- (void)moveParagraphForward:(id)s { [self moveToEndOfDocument:s]; }
+- (void)moveToEndOfParagraph:(id)s { [self moveToEndOfDocument:s]; }
+- (void)pageDown:(id)s { [self moveToEndOfDocument:s]; }
+- (void)moveDownAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
+- (void)moveToRightEndOfLineAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
+- (void)moveParagraphForwardAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
+- (void)moveToEndOfParagraphAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
+- (void)pageDownAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
+
+- (void)moveUp:(id)s { [self moveToBeginningOfDocument:s]; }
+- (void)moveToLeftEndOfLine:(id)s { [self moveToBeginningOfDocument:s]; }
+- (void)moveParagraphBackward:(id)s { [self moveToBeginningOfDocument:s]; }
+- (void)moveToBeginningOfParagraph:(id)s { [self moveToBeginningOfDocument:s]; }
+- (void)pageUp:(id)s { [self moveToBeginningOfDocument:s]; }
+- (void)moveUpAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
+- (void)moveToLeftEndOfLineAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
+- (void)moveParagraphBackwardAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
+- (void)moveToBeginningOfParagraphAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
+- (void)pageUpAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
+
+- (void)deleteWordBackward:(id)s { [self deleteBackward:s]; }
+- (void)deleteBackwardByDecomposingPreviousCharacter:(id)s { [self deleteBackward:s]; }
+- (void)deleteWordForward:(id)s { [self deleteForward:s]; }
+// clang-format on
+
+// NSTextInputClient
+
+- (void)insertString:(NSString*)string replacementRange:(NSRange)replacementRange {
+    const NSRange baseRange = self.hasMarkedText ? self.markedRange : self.selectedRange;
+    if (isNoRange(replacementRange)) {
+        replacementRange = baseRange;
+    } else {
+        replacementRange.location += baseRange.location;
+        if (NSMaxRange(replacementRange) > NSMaxRange(baseRange)) {
+            replacementRange.length = NSMaxRange(baseRange) - replacementRange.location;
+        }
+    }
+
+    [self replaceRange:replacementRange with:string];
+}
+
+- (void)insertText:(id)string replacementRange:(NSRange)replacementRange {
+    if ([string isKindOfClass:[NSString class]]) {
+        [self insertString:string replacementRange:replacementRange];
+    } else if ([string isKindOfClass:[NSAttributedString class]]) {
+        [self insertString:[string string] replacementRange:replacementRange];
+    }
+}
+
+- (void)setMarkedString:(NSString*)string
+           selectedRange:(NSRange)selectedRange
+        replacementRange:(NSRange)replacementRange {
+    const NSRange baseRange = self.hasMarkedText ? self.markedRange : self.selectedRange;
+    if (isNoRange(replacementRange)) {
+        replacementRange = baseRange;
+    } else {
+        replacementRange.location += baseRange.location;
+        if (NSMaxRange(replacementRange) > NSMaxRange(baseRange)) {
+            replacementRange.length = NSMaxRange(baseRange) - replacementRange.location;
+        }
+    }
+    NSUInteger selectedStart =
+            replacementRange.location + [string utf8IndexOf:selectedRange.location];
+    NSUInteger selectedEnd =
+            replacementRange.location + [string utf8IndexOf:NSMaxRange(selectedRange)];
+
+    [self replaceRange:replacementRange with:string];
+    [self selectFrom:selectedStart to:selectedEnd in:SelectionDirectionNeither];
+    [self markText:NSMakeRange(replacementRange.location, string.utf8Length)];
+}
+
+- (void)setMarkedText:(id)string
+           selectedRange:(NSRange)selectedRange
+        replacementRange:(NSRange)replacementRange {
+    if ([string isKindOfClass:[NSString class]]) {
+        [self setMarkedString:string
+                   selectedRange:selectedRange
+                replacementRange:replacementRange];
+    } else if ([string isKindOfClass:[NSAttributedString class]]) {
+        [self setMarkedString:[string string]
+                   selectedRange:selectedRange
+                replacementRange:replacementRange];
+    }
+}
+
+- (void)unmarkText {
+    [self markText:kNoRange];
+}
+
+- (NSRange)selectedRange {
+    antares_window_text_callback_range selection = text_callback(
+            ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, 0, 0, nil, nil, text_userdata);
+    return NSMakeRange(selection.begin, selection.end - selection.begin);
+}
+
+- (NSRange)markedRange {
+    antares_window_text_callback_range mark =
+            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, 0, 0, nil, nil, text_userdata);
+    if (mark.begin == mark.end) {
+        return kNoRange;
+    }
+    return NSMakeRange(mark.begin, mark.end - mark.begin);
+}
+
+- (BOOL)hasMarkedText {
+    return !isNoRange(self.markedRange);
+}
+
+- (NSUInteger)offset:(NSUInteger)origin by:(NSInteger)by {
+    antares_window_text_callback_range offset = text_callback(
+            ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, origin, origin + by, nil, nil, text_userdata);
+    return offset.end - offset.begin;
+}
+
+- (NSAttributedString*)attributedSubstringForProposedRange:(NSRange)range
+                                               actualRange:(NSRangePointer)actualRange {
+    return nil;
+}
+
+- (NSArray*)validAttributesForMarkedText {
+    return [NSArray array];
+}
+
+- (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actualRange {
+    return NSMakeRect(0, 0, 0, 0);
+}
+
+- (NSUInteger)characterIndexForPoint:(NSPoint)point {
+    return 0;
+}
+
+// Helpers
+
+- (NSUInteger)textLength {
+    antares_window_text_callback_range text =
+            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, 0, 0, nil, nil, text_userdata);
+    return text.end - text.begin;
+}
+
+- (void)replaceFrom:(NSUInteger)from to:(NSUInteger)to with:(NSString*)string {
+    [self replaceRange:NSMakeRange(from, to - from) with:string];
+}
+
+- (void)replaceRange:(NSRange)range with:(NSString*)string {
+    NSData*     utf8       = [string utf8Data];
+    const char* utf8_start = [utf8 bytes];
+    const char* utf8_end   = utf8_start + [utf8 length];
+    text_callback(
+            ANTARES_WINDOW_TEXT_CALLBACK_REPLACE, range.location, NSMaxRange(range), utf8_start,
+            utf8_end, text_userdata);
+    selectionDir = SelectionDirectionNeither;
+}
+
+- (void)selectAt:(NSUInteger)at {
+    [self selectFrom:at to:at in:SelectionDirectionNeither];
+}
+
+- (void)selectFrom:(NSUInteger)from to:(NSUInteger)to in:(SelectionDirection)direction {
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_SELECT, from, to, nil, nil, text_userdata);
+    selectionDir = (from < to) ? direction : SelectionDirectionNeither;
+}
+
+- (void)markText:(NSRange)range {
+    text_callback(
+            ANTARES_WINDOW_TEXT_CALLBACK_MARK, range.location, NSMaxRange(range), nil, nil,
+            text_userdata);
 }
 
 @end

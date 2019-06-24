@@ -42,17 +42,28 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
+    virtual bool start_editing(TextReceiver* text);
+    virtual void stop_editing(TextReceiver* text);
+
     virtual wall_time now() const;
 
     void loop(Card* initial);
 
   private:
-    static wall_time _now();
+    static wall_time                          _now();
+    static antares_window_text_callback_range text_callback(
+            antares_window_text_callback_type type, int int_start, int int_end,
+            const char* char_start, const char* char_end, void* userdata);
 
     struct EventBridge;
 
+    struct Text {
+        TextReceiver* receiver = nullptr;
+    };
+
     InputMode      _input_mode = KEYBOARD_MOUSE;
     AntaresWindow* _window     = nullptr;
+    Text           _text;
 };
 
 }  // namespace antares
