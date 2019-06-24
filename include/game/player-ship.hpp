@@ -114,7 +114,7 @@ class PlayerShip : public EventReceiver {
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
     virtual void gamepad_stick(const GamepadStickEvent& event);
 
-    void update(bool enter_message);
+    void update();
 
     bool    show_select() const;
     bool    show_target() const;
@@ -122,6 +122,8 @@ class PlayerShip : public EventReceiver {
 
     GameCursor&       cursor() { return _cursor; }
     const GameCursor& cursor() const { return _cursor; }
+
+    bool entering_message() const { return _message.editing(); }
 
   private:
     bool active() const;
@@ -144,6 +146,36 @@ class PlayerShip : public EventReceiver {
     bool         _control_active;
     int32_t      _control_direction;
     GameCursor   _cursor;
+
+    class MessageTextReceiver : public TextReceiver {
+      public:
+        using TextReceiver::range;
+
+        MessageTextReceiver();
+
+        void start_editing();
+        void stop_editing();
+        bool editing() const { return _editing; }
+
+        virtual void replace(range<int> replace, pn::string_view text);
+        virtual void select(range<int> select);
+        virtual void mark(range<int> mark);
+        virtual void newline();
+        virtual void tab();
+        virtual void escape();
+
+        virtual int        offset(int origin, int by) const;
+        virtual int        size() const;
+        virtual range<int> selection() const;
+        virtual range<int> mark() const;
+
+      private:
+        bool       _editing = false;
+        pn::string _text;
+        range<int> _selection;
+        range<int> _mark;
+    };
+    MessageTextReceiver _message;
 };
 
 void ResetPlayerShip();

@@ -126,7 +126,6 @@ class GamePlay : public Card {
     const Rect            _play_area;
     const bool            _command_and_q;
     bool                  _fast_motion;
-    bool                  _entering_message;
     bool                  _player_paused;
     PlayAgainScreen::Item _play_again;
     PlayerShip            _player_ship;
@@ -231,7 +230,6 @@ GamePlay::GamePlay(bool replay, InputSource* input, GameResult* game_result)
           _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
           _command_and_q(BothCommandAndQ()),
           _fast_motion(false),
-          _entering_message(false),
           _player_paused(false),
           _real_time(now()),
           _input_source(input) {}
@@ -429,7 +427,7 @@ void GamePlay::fire_timer() {
         _real_time += kMinorTick;
     }
 
-    if (_fast_motion && !_entering_message) {
+    if (_fast_motion && !_player_ship.entering_message()) {
         unitsPassed *= 12;
         _real_time = now();
     }
@@ -472,7 +470,7 @@ void GamePlay::fire_timer() {
                 g.game_over    = true;
                 g.game_over_at = g.time;
             }
-            _player_ship.update(_entering_message);
+            _player_ship.update();
 
             CollideSpaceObjects();
             if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {

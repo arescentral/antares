@@ -326,6 +326,11 @@ static PlayerEvent hot_key_up(int i) {
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
 
+    if (event.key() == Key::RETURN) {
+        _message.start_editing();
+        return;
+    }
+
     if (!active()) {
         return;
     }
@@ -791,12 +796,12 @@ static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events)
     }
 }
 
-void PlayerShip::update(bool enter_message) {
+void PlayerShip::update() {
     if (!g.ship.get()) {
         return;
     }
 
-    if (enter_message) {
+    if (_message.editing()) {
         _player_events.clear();
         gTheseKeys = 0;
     }
@@ -973,6 +978,84 @@ bool PlayerShip::show_target() const {
 }
 
 int32_t PlayerShip::control_direction() const { return _control_direction; }
+
+PlayerShip::MessageTextReceiver::MessageTextReceiver()
+        : _text{}, _selection{0, 0}, _mark{-1, -1} {}
+
+void PlayerShip::MessageTextReceiver::start_editing() {
+    _editing = true;
+    sys.video->start_editing(this);
+    replace({0, _text.size()}, "");
+}
+
+void PlayerShip::MessageTextReceiver::stop_editing() {
+    _editing = false;
+    sys.video->stop_editing(this);
+    g.send_label->set_string("");
+}
+
+void PlayerShip::MessageTextReceiver::replace(range<int> replace, pn::string_view text) {
+    _text.replace(replace.begin, replace.end - replace.begin, text);
+    _selection = {replace.begin + text.size(), replace.begin + text.size()};
+    _mark      = {-1, -1};
+
+    int width  = sys.fonts.tactical.string_width(_text);
+    int strlen = viewport().left + ((viewport().width() / 2) - (width / 2));
+    if ((strlen + width) > (viewport().right)) {
+        strlen -= (strlen + width) - (viewport().right);
+    }
+    g.send_label->set_string(pn::format("<{}>", _text));
+    g.send_label->set_position(strlen, viewport().top + ((play_screen().height() / 2)));
+}
+
+void PlayerShip::MessageTextReceiver::select(range<int> select) {
+    _selection = select;
+    _mark      = {-1, -1};
+}
+
+void PlayerShip::MessageTextReceiver::mark(range<int> mark) { _mark = mark; }
+
+void PlayerShip::MessageTextReceiver::newline() {
+    stop_editing();
+
+    int cheat = GetCheatNumFromString(_text);
+    if (cheat > 0) {
+        ExecuteCheat(cheat, g.admiral);
+    } else if (!_text.empty()) {
+        if (g.admiral->cheats() & kNameObjectBit) {
+            SetAdmiralBuildAtName(g.admiral, _text);
+            g.admiral->cheats() &= ~kNameObjectBit;
+        }
+    }
+}
+
+void PlayerShip::MessageTextReceiver::tab() { replace(_selection, "\t"); }
+
+void PlayerShip::MessageTextReceiver::escape() {
+    stop_editing();
+    g.admiral->cheats() &= ~kNameObjectBit;
+}
+
+int PlayerShip::MessageTextReceiver::offset(int origin, int by) const {
+    int at = origin;
+    for (; (by < 0) && (at < _text.size()); ++by) {
+        at = pn_rune_next(_text.data(), _text.size(), at);
+    }
+    for (; (by > 0) && (at > 0); --by) {
+        at = pn_rune_prev(_text.data(), _text.size(), at);
+    }
+    return at;
+}
+
+int PlayerShip::MessageTextReceiver::size() const { return _text.size(); }
+
+PlayerShip::MessageTextReceiver::range<int> PlayerShip::MessageTextReceiver::selection() const {
+    return _selection;
+}
+
+PlayerShip::MessageTextReceiver::range<int> PlayerShip::MessageTextReceiver::mark() const {
+    return _mark;
+}
 
 void PlayerShipHandleClick(Point where, int button) {
     if (g.key_mask & kMouseMask) {
