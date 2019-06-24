@@ -68,7 +68,7 @@ Font::~Font() {}
 Rect Font::glyph_rect(pn::rune rune) const {
     auto it = _glyphs.find(rune);
     if (it == _glyphs.end()) {
-        return Rect();
+        return glyph_rect(pn::rune{'?'});
     }
     return it->second;
 }
