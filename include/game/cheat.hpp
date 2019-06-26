@@ -23,43 +23,30 @@
 
 namespace antares {
 
-enum {
-    kCheatActiveBit  = 0x00000001,
-    kAutoPlayBit     = 0x00000002,
-    kNameObjectBit   = 0x00000004,
-    kObserverBit     = 0x00000008,
-    kBuildFastBit    = 0x00000010,
-    kRaisePayRateBit = 0x00000020,
-    kLowerPayRateBit = 0x00000040,
-    kCheatBit8       = 0x00000080,
-    kCheatBit9       = 0x00000100,
-    kCheatBit10      = 0x00000200,
-    kCheatBit11      = 0x00000400,
-    kCheatBit12      = 0x00000800,
-    kCheatBit13      = 0x00001000,
-    kCheatBit14      = 0x00002000,
-    kCheatBit15      = 0x00004000,
-    kCheatBit16      = 0x00008000,
-    kCheatBit17      = 0x00010000,
-    kCheatBit18      = 0x00020000,
-    kCheatBit19      = 0x00040000,
-    kCheatBit20      = 0x00080000,
-    kCheatBit21      = 0x00100000,
-    kCheatBit22      = 0x00200000,
-    kCheatBit23      = 0x00400000,
-    kCheatBit24      = 0x00800000,
-    kCheatBit25      = 0x01000000,
-    kCheatBit26      = 0x02000000,
-    kCheatBit27      = 0x04000000,
-    kCheatBit28      = 0x08000000,
-    kCheatBit29      = 0x10000000,
-    kCheatBit30      = 0x20000000,
-    kCheatBit31      = 0x40000000,
-    kCheatBit32      = 0x80000000,
+enum class Cheat {
+    NONE           = 0,
+    ACTIVATE_CHEAT = 1,
+    AUTO_PLAY      = 2,
+    PAY_MONEY      = 3,
+    NAME_OBJECT    = 4,
+    OBSERVER       = 5,  // makes your ship appear to not be engageable
+    BUILD_FAST     = 6,
+    RAISE_PAY_RATE = 7,  // determines your payscale
+    LOWER_PAY_RATE = 8,
 };
 
-int16_t GetCheatNumFromString(pn::string_view string);
-void    ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
+enum {
+    kCheatActiveBit  = 1 << (static_cast<int>(Cheat::ACTIVATE_CHEAT) - 1),
+    kAutoPlayBit     = 1 << (static_cast<int>(Cheat::AUTO_PLAY) - 1),
+    kNameObjectBit   = 1 << (static_cast<int>(Cheat::NAME_OBJECT) - 1),
+    kObserverBit     = 1 << (static_cast<int>(Cheat::OBSERVER) - 1),
+    kBuildFastBit    = 1 << (static_cast<int>(Cheat::BUILD_FAST) - 1),
+    kRaisePayRateBit = 1 << (static_cast<int>(Cheat::RAISE_PAY_RATE) - 1),
+    kLowerPayRateBit = 1 << (static_cast<int>(Cheat::LOWER_PAY_RATE) - 1),
+};
+
+Cheat GetCheatFromString(pn::string_view string);
+void  ExecuteCheat(Cheat c, Handle<Admiral> a);
 
 }  // namespace antares
 

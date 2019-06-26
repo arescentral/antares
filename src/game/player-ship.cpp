@@ -1030,8 +1030,8 @@ void PlayerShip::MessageTextReceiver::update() {
 void PlayerShip::MessageTextReceiver::newline() {
     stop_editing();
 
-    int cheat = GetCheatNumFromString(_text);
-    if (cheat > 0) {
+    Cheat cheat = GetCheatFromString(_text);
+    if (cheat != Cheat::NONE) {
         ExecuteCheat(cheat, g.admiral);
     } else if (!_text.empty()) {
         if (g.admiral->cheats() & kNameObjectBit) {
