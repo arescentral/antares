@@ -184,7 +184,8 @@ class TextReceiver {
             range<int> replace, pn::string_view text) = 0;  // clears mark, selects end
     virtual void select(range<int> select)            = 0;  // clears mark
     virtual void mark(range<int> mark)                = 0;
-    virtual void newline()                            = 0;  // may replace with \n
+    virtual void accept()                             = 0;  // might replace with \n
+    virtual void newline()                            = 0;  // should replace with \n
     virtual void tab()                                = 0;  // may replace with \t
     virtual void escape()                             = 0;
 

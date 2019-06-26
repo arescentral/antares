@@ -125,6 +125,7 @@ antares_window_text_callback_range CocoaVideoDriver::text_callback(
             break;
         case ANTARES_WINDOW_TEXT_CALLBACK_MARK: text->receiver->mark({int_start, int_end}); break;
 
+        case ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT: text->receiver->accept(); break;
         case ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE: text->receiver->newline(); break;
         case ANTARES_WINDOW_TEXT_CALLBACK_TAB: text->receiver->tab(); break;
         case ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE: text->receiver->escape(); break;

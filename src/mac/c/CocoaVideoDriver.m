@@ -534,11 +534,11 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)insertNewline:(id)sender {
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, 0, 0, nil, nil, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT, 0, 0, nil, nil, text_userdata);
 }
 
 - (void)insertNewlineIgnoringFieldEditor:(id)sender {
-    [self insertNewline:sender];
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, 0, 0, nil, nil, text_userdata);
 }
 
 - (void)insertSingleQuoteIgnoringSubstitution:(id)sender {

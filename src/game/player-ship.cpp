@@ -1011,12 +1011,13 @@ void PlayerShip::MessageTextReceiver::select(range<int> select) {
 void PlayerShip::MessageTextReceiver::mark(range<int> mark) { _mark = mark; }
 
 void PlayerShip::MessageTextReceiver::update() {
-    int width  = sys.fonts.tactical.string_width(_text);
+    g.send_label->set_string(pn::format("<{}>", _text));
+
+    int width  = g.send_label->get_width();
     int strlen = viewport().left + ((viewport().width() / 2) - (width / 2));
     if ((strlen + width) > (viewport().right)) {
         strlen -= (strlen + width) - (viewport().right);
     }
-    g.send_label->set_string(pn::format("<{}>", _text));
     g.send_label->set_position(strlen, viewport().top + ((play_screen().height() / 2)));
 
     pn::string_view pre_selected = _text.substr(0, _selection.begin);
@@ -1027,7 +1028,7 @@ void PlayerShip::MessageTextReceiver::update() {
     g.send_label->select(1 + pre_selected_runes, 1 + pre_selected_runes + in_selected_runes);
 }
 
-void PlayerShip::MessageTextReceiver::newline() {
+void PlayerShip::MessageTextReceiver::accept() {
     stop_editing();
 
     Cheat cheat = GetCheatFromString(_text);
@@ -1040,6 +1041,8 @@ void PlayerShip::MessageTextReceiver::newline() {
         }
     }
 }
+
+void PlayerShip::MessageTextReceiver::newline() { replace(_selection, "\n"); }
 
 void PlayerShip::MessageTextReceiver::tab() { replace(_selection, "\t"); }
 

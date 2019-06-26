@@ -376,7 +376,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             const int      i = _select_begin;
             Rect           r;
             const RgbColor color = _chars[i].fore_color;
-            if ((i == 0) || (_chars[i].special == LINE_BREAK)) {
+            if ((i == 0) || (_chars[i - 1].special == LINE_BREAK)) {
                 r = _chars[i].bounds;
             } else {
                 r      = _chars[i - 1].bounds;

@@ -160,6 +160,7 @@ class PlayerShip : public EventReceiver {
         virtual void replace(range<int> replace, pn::string_view text);
         virtual void select(range<int> select);
         virtual void mark(range<int> mark);
+        virtual void accept();
         virtual void newline();
         virtual void tab();
         virtual void escape();
