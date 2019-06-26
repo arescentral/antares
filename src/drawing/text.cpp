@@ -81,7 +81,9 @@ void Font::draw(const Quads& quads, Point cursor, pn::string_view string, RgbCol
     cursor.offset(0, -ascent);
     for (pn::rune rune : string) {
         auto glyph = glyph_rect(rune);
-        quads.draw(Rect(cursor, glyph.size()), glyph, color);
+        if (rune.value() > ' ') {
+            quads.draw(Rect(cursor, glyph.size()), glyph, color);
+        }
         cursor.offset(glyph.width(), 0);
     }
 }
