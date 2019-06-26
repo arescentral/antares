@@ -45,17 +45,22 @@ class StyledText {
     StyledText();
     StyledText(const Font& font);
     StyledText(const StyledText&) = delete;
+    StyledText(StyledText&&)      = default;
     StyledText& operator=(const StyledText&) = delete;
+    StyledText& operator=(StyledText&&) = default;
     ~StyledText();
 
     void set_font(const Font& font);
     void set_fore_color(RgbColor fore_color);
     void set_back_color(RgbColor back_color);
     void set_tab_width(int tab_width);
+    void set_plain_text(pn::string_view text);
     void set_retro_text(pn::string_view text);
     void set_interface_text(pn::string_view text);
     void wrap_to(int width, int side_margin, int line_spacing);
+    void clear();
 
+    bool                               empty() const;
     int                                size() const;
     int                                tab_width() const;
     int                                width() const;
@@ -75,6 +80,7 @@ class StyledText {
         TAB,
         WORD_BREAK,
         LINE_BREAK,
+        NO_BREAK,
         PICTURE,
         DELAY,
     };

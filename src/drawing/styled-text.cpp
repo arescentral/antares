@@ -66,7 +66,34 @@ void StyledText::set_back_color(RgbColor back_color) { _back_color = back_color;
 
 void StyledText::set_tab_width(int tab_width) { _tab_width = tab_width; }
 
+void StyledText::set_plain_text(pn::string_view text) {
+    _chars.clear();
+
+    for (auto r : text) {
+        switch (r.value()) {
+            case '\n':
+                _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+                break;
+            case ' ':
+                _chars.push_back(StyledChar(' ', WORD_BREAK, _fore_color, _back_color));
+                break;
+            case 0xA0:
+                _chars.push_back(StyledChar(0xA0, NO_BREAK, _fore_color, _back_color));
+                break;
+            default:
+                _chars.push_back(StyledChar(r.value(), NONE, _fore_color, _back_color));
+                break;
+        }
+    }
+    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
+        _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+    }
+    wrap_to(std::numeric_limits<int>::max(), 0, 0);
+}
+
 void StyledText::set_retro_text(pn::string_view text) {
+    _chars.clear();
+
     const RgbColor original_fore_color = _fore_color;
     const RgbColor original_back_color = _back_color;
     RgbColor       fore_color          = _fore_color;
@@ -85,7 +112,7 @@ void StyledText::set_retro_text(pn::string_view text) {
 
                     case '_':
                         // TODO(sfiera): replace use of "_" with e.g. "\_".
-                        _chars.push_back(StyledChar(' ', NONE, fore_color, back_color));
+                        _chars.push_back(StyledChar(0xA0, NO_BREAK, fore_color, back_color));
                         break;
 
                     case ' ':
@@ -164,6 +191,8 @@ void StyledText::set_retro_text(pn::string_view text) {
 }
 
 void StyledText::set_interface_text(pn::string_view text) {
+    _chars.clear();
+
     const auto f = _fore_color;
     const auto b = _back_color;
     pn::string id;
@@ -235,6 +264,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
         _chars[i].v = v;
         switch (_chars[i].special) {
             case NONE:
+            case NO_BREAK:
                 h += _font->char_width(_chars[i].character);
                 if (h >= wrap_distance) {
                     v += _font->height + _line_spacing;
@@ -274,6 +304,12 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _height = v;
 }
 
+void StyledText::clear() { _chars.clear(); }
+
+bool StyledText::empty() const {
+    return _chars.size() <= 1;  // Always have \n at the end.
+}
+
 int StyledText::size() const { return _chars.size(); }
 
 int StyledText::tab_width() const {
@@ -295,8 +331,9 @@ const std::vector<inlinePictType>& StyledText::inline_picts() const { return _in
 void StyledText::draw(const Rect& bounds) const { draw_range(bounds, 0, _chars.size()); }
 
 void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
-    const int line_height = _font->height + _line_spacing;
-    const int char_adjust = _font->ascent + _line_spacing;
+    const int   line_height = _font->height + _line_spacing;
+    const Point char_adjust = {bounds.left, bounds.top + _font->ascent + _line_spacing};
+
     {
         Rects rects;
         for (size_t i = begin; i < end; ++i) {
@@ -305,6 +342,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
 
             switch (ch.special) {
                 case NONE:
+                case NO_BREAK:
                 case WORD_BREAK:
                     corner.offset(ch.h, ch.v);
                     if (ch.back_color != RgbColor::black()) {
@@ -332,19 +370,21 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
                     }
                     break;
 
-                default: break;
+                case PICTURE:
+                case DELAY: break;
             }
         }
     }
 
     {
         Quads quads(_font->texture);
+
         for (size_t i = begin; i < end; ++i) {
             const StyledChar& ch = _chars[i];
             if (ch.special == NONE) {
                 _font->draw(
-                        quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
-                        ch.character, ch.fore_color);
+                        quads, Point{ch.h + char_adjust.h, ch.v + char_adjust.v}, ch.character,
+                        ch.fore_color);
             }
         }
     }
@@ -403,6 +443,7 @@ int StyledText::move_word_down(int index, int v) {
                 return h;
             }
 
+            case NO_BREAK:
             case NONE: break;
         }
     }

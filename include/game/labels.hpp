@@ -22,6 +22,7 @@
 #include <pn/string>
 
 #include "data/base-object.hpp"
+#include "drawing/styled-text.hpp"
 
 namespace antares {
 
@@ -60,7 +61,6 @@ class Label {
 
   private:
     static Handle<Label> next_free_label();
-    void                 recalc_size();
 
     Point               where;
     Point               offset;
@@ -68,7 +68,7 @@ class Label {
     int32_t             width;
     int32_t             height;
     ticks               age = ticks(0);
-    pn::string          text;
+    StyledText          text;
     Hue                 hue;
     bool                active  = false;
     bool                killMe  = false;

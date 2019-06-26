@@ -41,16 +41,14 @@ namespace {
 
 const int32_t kLabelBuffer          = 4;
 const int32_t kLabelInnerSpace      = 3;
-const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
+const int32_t kLabelTotalInnerSpace = kLabelInnerSpace * 2;
 
 }  // namespace
 
 const ticks Label::kVisibleTime = secs(1);
 
 // local function prototypes
-static int32_t         String_Count_Lines(pn::string_view s);
-static pn::string_view String_Get_Nth_Line(pn::string_view source, int32_t nth);
-static void            Auto_Animate_Line(Point* source, Point* dest);
+static void Auto_Animate_Line(Point* source, Point* dest);
 
 Label* Label::get(int number) {
     if ((0 <= number) && (number < kMaxLabelNum)) {
@@ -119,29 +117,20 @@ void Label::draw() {
         // label->where is changed between update_all_label_contents() and draw time, but the rect
         // remains unchanged.  Since that function used to do this drawing, the rect's corner is
         // the original location we drew at.
-        Point at(label->thisRect.left, label->thisRect.top);
+        Rect rect = label->thisRect;
 
-        if (!label->active || label->killMe || (label->text.empty()) || !label->visible ||
+        if (!label->active || label->killMe || label->text.empty() || !label->visible ||
             (label->thisRect.width() <= 0) || (label->thisRect.height() <= 0)) {
             continue;
         }
-        pn::string_view text = label->text;
-        if ((0 <= label->retroCount) && (label->retroCount < text.size())) {
-            text = text.substr(0, label->retroCount);
-        }
-        const RgbColor light = GetRGBTranslateColorShade(label->hue, LIGHTEST);
-        const RgbColor dark  = GetRGBTranslateColorShade(label->hue, VERY_DARK);
+        const RgbColor dark = GetRGBTranslateColorShade(label->hue, VERY_DARK);
         sys.video->dither_rect(label->thisRect, dark);
-        at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical.ascent);
+        rect.offset(kLabelInnerSpace, kLabelInnerSpace);
 
-        if (label->lineNum > 1) {
-            for (int j = 1; j <= label->lineNum; j++) {
-                pn::string_view line = String_Get_Nth_Line(text, j);
-                sys.fonts.tactical.draw(at, line, light);
-                at.offset(0, label->lineHeight);
-            }
+        if ((0 <= label->retroCount) && (label->retroCount < label->text.size())) {
+            label->text.draw_range(rect, 0, label->retroCount);
         } else {
-            sys.fonts.tactical.draw(at, text, light);
+            label->text.draw_range(rect, 0, label->text.size());
         }
     }
 }
@@ -149,7 +138,7 @@ void Label::draw() {
 void Label::update_contents(ticks units_done) {
     Rect clip = viewport();
     for (auto label : all()) {
-        if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
+        if (!label->active || label->killMe || label->text.empty() || !label->visible) {
             label->thisRect.left = label->thisRect.right = 0;
             continue;
         }
@@ -166,12 +155,9 @@ void Label::update_contents(ticks units_done) {
             // printing was tied to the frame rate before: 3 per frame.  Here, we've switched to 1
             // per tick, so this would be equivalent to the old code at 20 FPS.  The question is,
             // does it feel equivalent?  It only comes up in the tutorial.
-            pn::string_view::iterator it{label->text.data(), label->text.size(),
-                                         label->retroCount};
             for (size_t i = 0; i < units_done.count(); ++i) {
-                ++it;  // Increment rune, not byte.
+                ++label->retroCount;
             }
-            label->retroCount = it.offset();
             if (static_cast<size_t>(label->retroCount) >= label->text.size()) {
                 label->retroCount = -1;
             } else {
@@ -316,8 +302,12 @@ void Label::set_age(ticks age) {
 }
 
 void Label::set_string(pn::string_view string) {
-    text = string.copy();
-    recalc_size();
+    text.set_font(sys.fonts.tactical);
+    text.set_fore_color(GetRGBTranslateColorShade(hue, LIGHTEST));
+    text.set_plain_text(string);
+    width      = text.auto_width() + kLabelTotalInnerSpace;
+    height     = text.height() + kLabelTotalInnerSpace;
+    lineHeight = sys.fonts.tactical.height;
 }
 
 void Label::clear_string() {
@@ -344,67 +334,6 @@ void Label::set_attached_hint_line(bool attachedHintLine, Point toWhere) {
 void Label::set_offset(int32_t hoff, int32_t voff) {
     offset.h = hoff;
     offset.v = voff;
-}
-
-// do this if you mess with its string
-void Label::recalc_size() {
-    int lineNum = String_Count_Lines(text);
-
-    if (lineNum > 1) {
-        this->lineNum = lineNum;
-        int maxWidth  = 0;
-        for (int i = 1; i <= lineNum; i++) {
-            pn::string_view text  = String_Get_Nth_Line(this->text, i);
-            int32_t         width = sys.fonts.tactical.string_width(text);
-            if (width > maxWidth) {
-                maxWidth = width;
-            }
-        }
-        width      = maxWidth + kLabelTotalInnerSpace;
-        height     = (sys.fonts.tactical.height * lineNum) + kLabelTotalInnerSpace;
-        lineHeight = sys.fonts.tactical.height;
-    } else {
-        width      = sys.fonts.tactical.string_width(text) + kLabelTotalInnerSpace;
-        height     = sys.fonts.tactical.height + kLabelTotalInnerSpace;
-        lineHeight = sys.fonts.tactical.height;
-    }
-}
-
-static int32_t String_Count_Lines(pn::string_view s) {
-    bool trailing_nl = false;
-    int  count       = 0;
-    for (pn::rune r : s) {
-        if (r == pn::rune{'\n'}) {
-            ++count;
-            trailing_nl = true;
-        } else {
-            trailing_nl = false;
-        }
-    }
-    if (trailing_nl) {
-        return count;
-    } else {
-        return count + 1;
-    }
-}
-
-static pn::string_view String_Get_Nth_Line(pn::string_view source, int32_t nth) {
-    if (nth < 1) {
-        return pn::string_view{};
-    }
-    pn::string_view::size_type carriage_return = source.find(pn::rune{'\n'});
-    if (carriage_return == pn::string_view::npos) {
-        if (nth == 1) {
-            return source;
-        } else {
-            return pn::string_view{};
-        }
-    }
-    if (nth == 1) {
-        return source.substr(0, carriage_return);
-    } else {
-        return String_Get_Nth_Line(source.substr(carriage_return + 1), nth - 1);
-    }
 }
 
 static void Auto_Animate_Line(Point* source, Point* dest) {
