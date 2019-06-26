@@ -94,8 +94,7 @@ class StyledText {
         SpecialChar special;
         RgbColor    fore_color;
         RgbColor    back_color;
-        int         h;
-        int         v;
+        Rect        bounds;
     };
 
     void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;

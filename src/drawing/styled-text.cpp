@@ -257,11 +257,11 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     int h         = _side_margin;
     int v         = 0;
 
-    int wrap_distance = width - side_margin;
+    const int line_height   = _font->height + _line_spacing;
+    const int wrap_distance = width - side_margin;
 
     for (size_t i = 0; i < _chars.size(); ++i) {
-        _chars[i].h = h;
-        _chars[i].v = v;
+        _chars[i].bounds = Rect{h, v, h, v + line_height};
         switch (_chars[i].special) {
             case NONE:
             case NO_BREAK:
@@ -300,6 +300,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
 
             case DELAY: break;
         }
+        _chars[i].bounds.right = h;
     }
     _height = v;
 }
@@ -331,41 +332,30 @@ const std::vector<inlinePictType>& StyledText::inline_picts() const { return _in
 void StyledText::draw(const Rect& bounds) const { draw_range(bounds, 0, _chars.size()); }
 
 void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
-    const int   line_height = _font->height + _line_spacing;
     const Point char_adjust = {bounds.left, bounds.top + _font->ascent + _line_spacing};
 
     {
         Rects rects;
         for (size_t i = begin; i < end; ++i) {
-            const StyledChar& ch     = _chars[i];
-            Point             corner = bounds.origin();
+            const StyledChar& ch = _chars[i];
 
             switch (ch.special) {
                 case NONE:
                 case NO_BREAK:
                 case WORD_BREAK:
-                    corner.offset(ch.h, ch.v);
+                case TAB:
                     if (ch.back_color != RgbColor::black()) {
-                        Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
-                        char_rect.offset(corner.h, corner.v);
+                        Rect char_rect = ch.bounds;
+                        char_rect.offset(bounds.left, bounds.top);
                         rects.fill(char_rect, ch.back_color);
                     }
                     break;
 
-                case TAB:
-                    corner.offset(ch.h, ch.v);
-                    if (ch.back_color != RgbColor::black()) {
-                        Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
-                        tab_rect.offset(corner.h, corner.v);
-                        rects.fill(tab_rect, ch.back_color);
-                    }
-                    break;
-
                 case LINE_BREAK:
-                    corner.offset(ch.h, ch.v);
                     if (ch.back_color != RgbColor::black()) {
-                        Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
-                        line_rect.offset(corner.h, corner.v);
+                        Rect line_rect = ch.bounds;
+                        line_rect.offset(bounds.left, bounds.top);
+                        line_rect.right = bounds.right;
                         rects.fill(line_rect, ch.back_color);
                     }
                     break;
@@ -383,8 +373,9 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             const StyledChar& ch = _chars[i];
             if (ch.special == NONE) {
                 _font->draw(
-                        quads, Point{ch.h + char_adjust.h, ch.v + char_adjust.v}, ch.character,
-                        ch.fore_color);
+                        quads,
+                        Point{ch.bounds.left + char_adjust.h, ch.bounds.top + char_adjust.v},
+                        ch.character, ch.fore_color);
             }
         }
     }
@@ -412,9 +403,8 @@ void StyledText::draw_cursor(const Rect& bounds, int index) const {
 void StyledText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
     const int         line_height = _font->height + _line_spacing;
     const StyledChar& ch          = _chars[index];
-    Point             corner(bounds.left + ch.h, bounds.top + ch.v);
     Rect              char_rect(0, 0, _font->logicalWidth, line_height);
-    char_rect.offset(corner.h, corner.v);
+    char_rect.offset(bounds.left + ch.bounds.left, bounds.top + ch.bounds.top);
     char_rect.clip_to(bounds);
     if ((char_rect.width() > 0) && (char_rect.height() > 0)) {
         Rects().fill(char_rect, color);
@@ -430,14 +420,13 @@ int StyledText::move_word_down(int index, int v) {
             case WORD_BREAK:
             case TAB:
             case DELAY: {
-                if (_chars[i + 1].h <= _side_margin) {
+                if (_chars[i + 1].bounds.left <= _side_margin) {
                     return _side_margin;
                 }
 
                 int h = _side_margin;
                 for (int j = i + 1; j <= index; ++j) {
-                    _chars[j].h = h;
-                    _chars[j].v = v;
+                    _chars[j].bounds = Rect{Point{h, v}, _chars[j].bounds.size()};
                     h += _font->char_width(_chars[j].character);
                 }
                 return h;
@@ -457,7 +446,6 @@ StyledText::StyledChar::StyledChar(
           special(special),
           fore_color(fore_color),
           back_color(back_color),
-          h(0),
-          v(0) {}
+          bounds{0, 0, 0, 0} {}
 
 }  // namespace antares
