@@ -42,11 +42,13 @@ struct inlinePictType {
 
 class StyledText {
   public:
+    StyledText();
     StyledText(const Font& font);
     StyledText(const StyledText&) = delete;
     StyledText& operator=(const StyledText&) = delete;
     ~StyledText();
 
+    void set_font(const Font& font);
     void set_fore_color(RgbColor fore_color);
     void set_back_color(RgbColor back_color);
     void set_tab_width(int tab_width);
@@ -104,7 +106,7 @@ class StyledText {
     int                         _auto_width;
     int                         _side_margin;
     int                         _line_spacing;
-    const Font&                 _font;
+    const Font*                 _font;
 };
 
 }  // namespace antares
