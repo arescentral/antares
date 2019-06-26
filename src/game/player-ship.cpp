@@ -18,6 +18,7 @@
 
 #include "game/player-ship.hpp"
 
+#include <algorithm>
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
@@ -998,7 +999,18 @@ void PlayerShip::MessageTextReceiver::replace(range<int> replace, pn::string_vie
     _text.replace(replace.begin, replace.end - replace.begin, text);
     _selection = {replace.begin + text.size(), replace.begin + text.size()};
     _mark      = {-1, -1};
+    update();
+}
 
+void PlayerShip::MessageTextReceiver::select(range<int> select) {
+    _selection = select;
+    _mark      = {-1, -1};
+    update();
+}
+
+void PlayerShip::MessageTextReceiver::mark(range<int> mark) { _mark = mark; }
+
+void PlayerShip::MessageTextReceiver::update() {
     int width  = sys.fonts.tactical.string_width(_text);
     int strlen = viewport().left + ((viewport().width() / 2) - (width / 2));
     if ((strlen + width) > (viewport().right)) {
@@ -1006,14 +1018,14 @@ void PlayerShip::MessageTextReceiver::replace(range<int> replace, pn::string_vie
     }
     g.send_label->set_string(pn::format("<{}>", _text));
     g.send_label->set_position(strlen, viewport().top + ((play_screen().height() / 2)));
-}
 
-void PlayerShip::MessageTextReceiver::select(range<int> select) {
-    _selection = select;
-    _mark      = {-1, -1};
+    pn::string_view pre_selected = _text.substr(0, _selection.begin);
+    pn::string_view in_selected =
+            _text.substr(_selection.begin, _selection.end - _selection.begin);
+    int pre_selected_runes = std::distance(pre_selected.begin(), pre_selected.end());
+    int in_selected_runes  = std::distance(in_selected.begin(), in_selected.end());
+    g.send_label->select(1 + pre_selected_runes, 1 + pre_selected_runes + in_selected_runes);
 }
-
-void PlayerShip::MessageTextReceiver::mark(range<int> mark) { _mark = mark; }
 
 void PlayerShip::MessageTextReceiver::newline() {
     stop_editing();

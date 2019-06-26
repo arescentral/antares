@@ -170,6 +170,8 @@ class PlayerShip : public EventReceiver {
         virtual range<int> mark() const;
 
       private:
+        void update();
+
         bool       _editing = false;
         pn::string _text;
         range<int> _selection;

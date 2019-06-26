@@ -310,6 +310,8 @@ void Label::set_string(pn::string_view string) {
     lineHeight = sys.fonts.tactical.height;
 }
 
+void Label::select(int from, int to) { text.select(from, to); }
+
 void Label::clear_string() {
     text.clear();
     width = height = 0;

@@ -57,6 +57,7 @@ class StyledText {
     void set_plain_text(pn::string_view text);
     void set_retro_text(pn::string_view text);
     void set_interface_text(pn::string_view text);
+    void select(int from, int to);
     void wrap_to(int width, int side_margin, int line_spacing);
     void clear();
 
@@ -99,6 +100,7 @@ class StyledText {
 
     void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
     int  move_word_down(int index, int v);
+    bool is_selected(int index) const;
 
     RgbColor                    _fore_color;
     RgbColor                    _back_color;
@@ -111,6 +113,8 @@ class StyledText {
     int                         _auto_width;
     int                         _side_margin;
     int                         _line_spacing;
+    int                         _select_begin = -1;
+    int                         _select_end   = -1;
     const Font*                 _font;
 };
 

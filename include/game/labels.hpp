@@ -52,6 +52,7 @@ class Label {
     void    set_object(Handle<SpaceObject> object);
     void    set_age(ticks age);
     void    set_string(pn::string_view string);
+    void    select(int from, int to);
     void    clear_string();
     void    set_hue(Hue hue);
     void    set_offset(int32_t hoff, int32_t voff);
