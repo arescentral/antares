@@ -1053,10 +1053,10 @@ void PlayerShip::MessageTextReceiver::escape() {
 
 int PlayerShip::MessageTextReceiver::offset(int origin, int by) const {
     int at = origin;
-    for (; (by < 0) && (at < _text.size()); ++by) {
+    for (; (by > 0) && (at < _text.size()); --by) {
         at = pn_rune_next(_text.data(), _text.size(), at);
     }
-    for (; (by > 0) && (at > 0); --by) {
+    for (; (by < 0) && (at > 0); ++by) {
         at = pn_rune_prev(_text.data(), _text.size(), at);
     }
     return at;

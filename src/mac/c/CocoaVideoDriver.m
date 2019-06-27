@@ -61,8 +61,8 @@ typedef enum {
 @interface AntaresView : NSOpenGLView <NSTextInputClient> {
   @public
     antares_window_text_callback_range (*text_callback)(
-            antares_window_text_callback_type type, int int_start, int int_end,
-            const char* char_start, const char* char_end, void* userdata);
+            antares_window_text_callback_type type, antares_window_text_callback_data data,
+            void* userdata);
     void* text_userdata;
 
     void (*key_down_callback)(int key, void* userdata);
@@ -197,8 +197,8 @@ void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y) {
 void antares_window_set_text_callback(
         AntaresWindow* window,
         antares_window_text_callback_range (*callback)(
-                antares_window_text_callback_type type, int int_start, int int_end,
-                const char* char_start, const char* char_end, void* userdata),
+                antares_window_text_callback_type type, antares_window_text_callback_data data,
+                void* userdata),
         void* userdata) {
     window->view->text_callback = callback;
     window->view->text_userdata = userdata;
@@ -522,7 +522,8 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)insertTab:(id)sender {
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_TAB, 0, 0, nil, nil, text_userdata);
+    antares_window_text_callback_data data = {};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_TAB, data, text_userdata);
 }
 
 - (void)insertTabIgnoringFieldEditor:(id)sender {
@@ -534,11 +535,13 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)insertNewline:(id)sender {
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT, 0, 0, nil, nil, text_userdata);
+    antares_window_text_callback_data data = {};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT, data, text_userdata);
 }
 
 - (void)insertNewlineIgnoringFieldEditor:(id)sender {
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, 0, 0, nil, nil, text_userdata);
+    antares_window_text_callback_data data = {};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, data, text_userdata);
 }
 
 - (void)insertSingleQuoteIgnoringSubstitution:(id)sender {
@@ -590,7 +593,8 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)cancelOperation:(id)sender {
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE, 0, 0, nil, nil, text_userdata);
+    antares_window_text_callback_data data = {};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE, data, text_userdata);
 }
 
 // clang-format off
@@ -696,14 +700,16 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (NSRange)selectedRange {
-    antares_window_text_callback_range selection = text_callback(
-            ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, 0, 0, nil, nil, text_userdata);
+    antares_window_text_callback_data  data = {};
+    antares_window_text_callback_range selection =
+            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, data, text_userdata);
     return NSMakeRange(selection.begin, selection.end - selection.begin);
 }
 
 - (NSRange)markedRange {
+    antares_window_text_callback_data  data = {};
     antares_window_text_callback_range mark =
-            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, 0, 0, nil, nil, text_userdata);
+            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, data, text_userdata);
     if (mark.begin == mark.end) {
         return kNoRange;
     }
@@ -715,8 +721,9 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (NSUInteger)offset:(NSUInteger)origin by:(NSInteger)by {
-    antares_window_text_callback_range offset = text_callback(
-            ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, origin, origin + by, nil, nil, text_userdata);
+    antares_window_text_callback_data  data = {.offset = {origin, by}};
+    antares_window_text_callback_range offset =
+            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, data, text_userdata);
     return offset.end - offset.begin;
 }
 
@@ -740,8 +747,9 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 // Helpers
 
 - (NSUInteger)textLength {
+    antares_window_text_callback_data  data = {};
     antares_window_text_callback_range text =
-            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, 0, 0, nil, nil, text_userdata);
+            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, data, text_userdata);
     return text.end - text.begin;
 }
 
@@ -750,12 +758,13 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)replaceRange:(NSRange)range with:(NSString*)string {
-    NSData*     utf8       = [string utf8Data];
-    const char* utf8_start = [utf8 bytes];
-    const char* utf8_end   = utf8_start + [utf8 length];
-    text_callback(
-            ANTARES_WINDOW_TEXT_CALLBACK_REPLACE, range.location, NSMaxRange(range), utf8_start,
-            utf8_end, text_userdata);
+    NSData*                           utf8 = [string utf8Data];
+    antares_window_text_callback_data data = {.replace = {
+                                                      .range = {range.location, NSMaxRange(range)},
+                                                      .data  = [utf8 bytes],
+                                                      .size  = [utf8 length],
+                                              }};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_REPLACE, data, text_userdata);
     selectionDir = SelectionDirectionNeither;
 }
 
@@ -764,14 +773,14 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)selectFrom:(NSUInteger)from to:(NSUInteger)to in:(SelectionDirection)direction {
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_SELECT, from, to, nil, nil, text_userdata);
+    antares_window_text_callback_data data = {.select = {from, to}};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_SELECT, data, text_userdata);
     selectionDir = (from < to) ? direction : SelectionDirectionNeither;
 }
 
 - (void)markText:(NSRange)range {
-    text_callback(
-            ANTARES_WINDOW_TEXT_CALLBACK_MARK, range.location, NSMaxRange(range), nil, nil,
-            text_userdata);
+    antares_window_text_callback_data data = {.mark = {range.location, NSMaxRange(range)}};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_MARK, data, text_userdata);
 }
 
 @end

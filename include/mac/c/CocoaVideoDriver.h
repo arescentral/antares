@@ -63,11 +63,27 @@ typedef struct {
     int begin, end;
 } antares_window_text_callback_range;
 
+typedef union {
+    struct {
+        antares_window_text_callback_range range;
+        const char*                        data;
+        int                                size;
+    } replace;
+
+    antares_window_text_callback_range select;
+
+    antares_window_text_callback_range mark;
+
+    struct {
+        int origin, by;
+    } offset;
+} antares_window_text_callback_data;
+
 void antares_window_set_text_callback(
         AntaresWindow* window,
         antares_window_text_callback_range (*callback)(
-                antares_window_text_callback_type type, int int_start, int int_end,
-                const char* char_start, const char* char_end, void* userdata),
+                antares_window_text_callback_type type, antares_window_text_callback_data data,
+                void* userdata),
         void* userdata);
 void antares_window_set_key_down_callback(
         AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata);

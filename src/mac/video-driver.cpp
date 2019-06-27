@@ -109,21 +109,24 @@ Point CocoaVideoDriver::get_mouse() {
 InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
 antares_window_text_callback_range CocoaVideoDriver::text_callback(
-        antares_window_text_callback_type type, int int_start, int int_end, const char* char_start,
-        const char* char_end, void* userdata) {
+        antares_window_text_callback_type type, antares_window_text_callback_data data,
+        void* userdata) {
     Text*                    text = reinterpret_cast<Text*>(userdata);
     TextReceiver::range<int> out  = {-1, -1};
 
     switch (type) {
         case ANTARES_WINDOW_TEXT_CALLBACK_REPLACE:
             text->receiver->replace(
-                    {int_start, int_end}, pn::string_view(char_start, char_end - char_start));
+                    {data.replace.range.begin, data.replace.range.end},
+                    pn::string_view(data.replace.data, data.replace.size));
             break;
 
         case ANTARES_WINDOW_TEXT_CALLBACK_SELECT:
-            text->receiver->select({int_start, int_end});
+            text->receiver->select({data.select.begin, data.select.end});
             break;
-        case ANTARES_WINDOW_TEXT_CALLBACK_MARK: text->receiver->mark({int_start, int_end}); break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_MARK:
+            text->receiver->mark({data.mark.begin, data.mark.end});
+            break;
 
         case ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT: text->receiver->accept(); break;
         case ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE: text->receiver->newline(); break;
@@ -131,7 +134,7 @@ antares_window_text_callback_range CocoaVideoDriver::text_callback(
         case ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE: text->receiver->escape(); break;
 
         case ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET:
-            out = {0, text->receiver->offset(int_start, int_start - int_end)};
+            out = {0, text->receiver->offset(data.offset.origin, data.offset.by)};
             break;
         case ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE: out = {0, text->receiver->size()}; break;
         case ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION: out = text->receiver->selection(); break;
