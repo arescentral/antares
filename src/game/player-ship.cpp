@@ -1051,15 +1051,78 @@ void PlayerShip::MessageTextReceiver::escape() {
     g.admiral->cheats() &= ~kNameObjectBit;
 }
 
-int PlayerShip::MessageTextReceiver::offset(int origin, int by) const {
-    int at = origin;
-    for (; (by > 0) && (at < _text.size()); --by) {
-        at = pn_rune_next(_text.data(), _text.size(), at);
+template <typename Iterator>
+static bool is_word(Iterator begin, Iterator end, Iterator it) {
+    if ((*it).isalnum()) {
+        return true;
+    } else if ((it == begin) || (it == end)) {
+        return false;
     }
-    for (; (by < 0) && (at > 0); ++by) {
-        at = pn_rune_prev(_text.data(), _text.size(), at);
+
+    // A single ' or . is part of a word if surrounded by alphanumeric characters on both sides.
+    switch ((*it).value()) {
+        default: return false;
+        case '.':
+        case '\'':
+            auto jt = it++;
+            --jt;
+            return (*it).isalnum() && (*jt).isalnum();
     }
-    return at;
+}
+
+template <typename Iterator>
+static Iterator advance(Iterator begin, Iterator end, Iterator it, TextReceiver::OffsetUnit unit) {
+    if (it == end) {
+        return it;
+    }
+
+    switch (unit) {
+        case TextReceiver::GLYPHS:
+        case TextReceiver::LINE_GLYPHS:
+        case TextReceiver::PARAGRAPH_GLYPHS:
+            while ((++it != end) && ((*it).width() == 0)) {
+            }
+            return it;
+
+        case TextReceiver::WORDS:
+            while (!is_word(begin, end, it)) {
+                if (++it == end) {
+                    return end;
+                }
+            }
+            for (; (it != end) && is_word(begin, end, it); ++it) {
+            }
+            return it;
+
+        case TextReceiver::LINES: return end;
+
+        case TextReceiver::PARAGRAPHS: return end;
+    }
+}
+
+template <typename Iterator>
+static Iterator advance_by(
+        Iterator begin, Iterator end, Iterator it, int by, TextReceiver::OffsetUnit unit) {
+    for (; by > 0; --by) {
+        if (it == end) {
+            return end;
+        }
+        it = advance(begin, end, it, unit);
+    }
+    return it;
+}
+
+int PlayerShip::MessageTextReceiver::offset(int origin, int by, OffsetUnit unit) const {
+    if (by > 0) {
+        pn::string::iterator it{_text.data(), _text.size(), origin};
+        return advance_by(_text.begin(), _text.end(), it, by, unit).offset();
+    } else if (by < 0) {
+        by = (by == INT_MIN) ? INT_MAX : -by;
+        pn::string::reverse_iterator it{_text.data(), _text.size(), origin};
+        return advance_by(_text.rbegin(), _text.rend(), it, by, unit).offset();
+    } else {
+        return origin;
+    }
 }
 
 int PlayerShip::MessageTextReceiver::size() const { return _text.size(); }

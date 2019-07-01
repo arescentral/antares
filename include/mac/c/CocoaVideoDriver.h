@@ -63,6 +63,15 @@ typedef struct {
     int begin, end;
 } antares_window_text_callback_range;
 
+typedef enum {
+    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS           = 0,
+    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS            = 1,
+    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES            = 2,
+    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS      = 3,
+    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS       = 4,
+    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS = 5,
+} antares_window_text_callback_unit;
+
 typedef union {
     struct {
         antares_window_text_callback_range range;
@@ -75,7 +84,8 @@ typedef union {
     antares_window_text_callback_range mark;
 
     struct {
-        int origin, by;
+        int                               origin, by;
+        antares_window_text_callback_unit unit;
     } offset;
 } antares_window_text_callback_data;
 

@@ -165,7 +165,7 @@ class PlayerShip : public EventReceiver {
         virtual void tab();
         virtual void escape();
 
-        virtual int        offset(int origin, int by) const;
+        virtual int        offset(int origin, int by, OffsetUnit unit) const;
         virtual int        size() const;
         virtual range<int> selection() const;
         virtual range<int> mark() const;

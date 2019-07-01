@@ -134,7 +134,9 @@ antares_window_text_callback_range CocoaVideoDriver::text_callback(
         case ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE: text->receiver->escape(); break;
 
         case ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET:
-            out = {0, text->receiver->offset(data.offset.origin, data.offset.by)};
+            out = {0, text->receiver->offset(
+                              data.offset.origin, data.offset.by,
+                              (TextReceiver::OffsetUnit)data.offset.unit)};
             break;
         case ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE: out = {0, text->receiver->size()}; break;
         case ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION: out = text->receiver->selection(); break;

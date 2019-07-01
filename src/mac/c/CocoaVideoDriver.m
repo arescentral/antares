@@ -447,46 +447,139 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [super doCommandBySelector:selector];
 }
 
-- (void)moveRight:(id)sender {
+- (void)moveBy:(int)by unit:(antares_window_text_callback_unit)unit {
     NSRange selection = self.selectedRange;
     if (selection.length > 0) {
-        [self selectAt:NSMaxRange(selection)];
+        [self selectAt:(by > 0) ? NSMaxRange(selection) : selection.location];
     } else {
-        [self selectAt:[self offset:selection.location by:1]];
+        [self selectAt:[self offset:selection.location by:by unit:unit]];
     }
+}
+
+- (void)moveRight:(id)sender {
+    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+}
+
+- (void)moveLeft:(id)sender {
+    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+}
+
+- (void)moveWordRight:(id)sender {
+    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+}
+
+- (void)moveWordLeft:(id)sender {
+    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+}
+
+- (void)moveDown:(id)sender {
+    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+}
+
+- (void)moveUp:(id)s {
+    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+}
+
+- (void)moveToRightEndOfLine:(id)sender {
+    [self moveBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+}
+
+- (void)moveToLeftEndOfLine:(id)s {
+    [self moveBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+}
+
+- (void)moveParagraphForward:(id)sender {
+    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+}
+
+- (void)moveParagraphBackward:(id)s {
+    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+}
+
+- (void)moveToEndOfParagraph:(id)sender {
+    [self moveBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+}
+
+- (void)moveToBeginningOfParagraph:(id)s {
+    [self moveBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
 }
 
 - (void)moveToEndOfDocument:(id)sender {
     [self selectAt:self.textLength];
 }
 
-- (void)moveLeft:(id)sender {
-    NSRange selection = self.selectedRange;
-    if (selection.length > 0) {
-        [self selectAt:selection.location];
-    } else {
-        [self selectAt:[self offset:selection.location by:-1]];
-    }
-}
-
 - (void)moveToBeginningOfDocument:(id)sender {
     [self selectAt:0];
 }
 
-- (void)moveRightAndModifySelection:(id)sender {
+- (void)moveAndModifySelectionBy:(int)by unit:(antares_window_text_callback_unit)unit {
     NSRange selection = self.selectedRange;
+    int     from      = selection.location;
+    int     to        = NSMaxRange(selection);
+
+    SelectionDirection forwards = (by > 0) ? SelectionDirectionRight : SelectionDirectionLeft;
     if (selectionDir == SelectionDirectionNeither) {
-        selectionDir = SelectionDirectionRight;
+        selectionDir = forwards;
     }
-    if (selectionDir == SelectionDirectionLeft) {
-        [self selectFrom:[self offset:selection.location by:1]
-                      to:NSMaxRange(selection)
-                      in:SelectionDirectionLeft];
-    } else {
-        [self selectFrom:selection.location
-                      to:[self offset:NSMaxRange(selection) by:1]
-                      in:SelectionDirectionRight];
+
+    int* cursor = (selectionDir == SelectionDirectionRight) ? &to : &from;
+    int  anchor = (selectionDir == SelectionDirectionRight) ? from : to;
+    *cursor     = [self offset:*cursor by:by unit:unit];
+    if (from > to) {
+        *cursor = anchor;
     }
+
+    [self selectFrom:from to:to in:selectionDir];
+}
+
+- (void)moveRightAndModifySelection:(id)sender {
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+}
+
+- (void)moveLeftAndModifySelection:(id)sender {
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+}
+
+- (void)moveWordRightAndModifySelection:(id)sender {
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+}
+
+- (void)moveWordLeftAndModifySelection:(id)sender {
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+}
+
+- (void)moveDownAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+}
+
+- (void)moveUpAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+}
+
+- (void)moveToRightEndOfLineAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+}
+
+- (void)moveToLeftEndOfLineAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+}
+
+- (void)moveParagraphForwardAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+}
+
+- (void)moveParagraphBackwardAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+}
+
+- (void)moveToEndOfParagraphAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:INT_MAX
+                              unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+}
+
+- (void)moveToBeginningOfParagraphAndModifySelection:(id)s {
+    [self moveAndModifySelectionBy:INT_MIN
+                              unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
 }
 
 - (void)moveToEndOfDocumentAndModifySelection:(id)sender {
@@ -495,22 +588,6 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
         selectionDir = SelectionDirectionRight;
     }
     [self selectFrom:selection.location to:self.textLength in:selectionDir];
-}
-
-- (void)moveLeftAndModifySelection:(id)sender {
-    NSRange selection = self.selectedRange;
-    if (selectionDir == SelectionDirectionNeither) {
-        selectionDir = SelectionDirectionLeft;
-    }
-    if (selectionDir == SelectionDirectionRight) {
-        [self selectFrom:selection.location
-                      to:[self offset:NSMaxRange(selection) by:-1]
-                      in:SelectionDirectionRight];
-    } else {
-        [self selectFrom:[self offset:selection.location by:-1]
-                      to:NSMaxRange(selection)
-                      in:SelectionDirectionLeft];
-    }
 }
 
 - (void)moveToBeginningOfDocumentAndModifySelection:(id)sender {
@@ -556,40 +633,39 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [self selectFrom:0 to:self.textLength in:SelectionDirectionNeither];
 }
 
-- (void)deleteBackward:(id)sender {
+- (void)deleteBy:(int)by unit:(antares_window_text_callback_unit)unit {
     NSRange selection = self.selectedRange;
     if (selection.length > 0) {
         [self replaceRange:selection with:@""];
     } else {
-        [self replaceFrom:[self offset:selection.location by:-1] to:selection.location with:@""];
+        [self replaceFrom:[self offset:selection.location by:by unit:unit]
+                       to:selection.location
+                     with:@""];
     }
+}
+
+- (void)deleteBackward:(id)sender {
+    [self deleteBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)deleteForward:(id)sender {
-    NSRange selection = self.selectedRange;
-    if (selection.length > 0) {
-        [self replaceRange:selection with:@""];
-    } else {
-        [self replaceFrom:selection.location to:[self offset:selection.location by:1] with:@""];
-    }
+    [self deleteBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+}
+
+- (void)deleteWordBackward:(id)s {
+    [self deleteBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+}
+
+- (void)deleteWordForward:(id)s {
+    [self deleteBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
 }
 
 - (void)deleteToBeginningOfLine:(id)sender {
-    NSRange selection = self.selectedRange;
-    if (selection.length > 0) {
-        [self replaceRange:selection with:@""];
-    } else {
-        [self replaceFrom:0 to:selection.location with:@""];
-    }
+    [self deleteBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)deleteToEndOfLine:(id)sender {
-    NSRange selection = self.selectedRange;
-    if (selection.length > 0) {
-        [self replaceRange:selection with:@""];
-    } else {
-        [self replaceFrom:selection.location to:self.textLength with:@""];
-    }
+    [self deleteBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)cancelOperation:(id)sender {
@@ -599,40 +675,16 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 
 // clang-format off
 - (void)moveForward:(id)s { [self moveRight:s]; }
-- (void)moveWordRight:(id)s { [self moveRight:s]; }
 - (void)moveForwardAndModifySelection:(id)s { [self moveRightAndModifySelection:s]; }
-- (void)moveWordRightAndModifySelection:(id)s { [self moveRightAndModifySelection:s]; }
-
 - (void)moveBackward:(id)s { [self moveLeft:s]; }
-- (void)moveWordLeft:(id)s { [self moveLeft:s]; }
 - (void)moveBackwardAndModifySelection:(id)s { [self moveLeftAndModifySelection:s]; }
-- (void)moveWordLeftAndModifySelection:(id)s { [self moveLeftAndModifySelection:s]; }
 
-- (void)moveDown:(id)s { [self moveToEndOfDocument:s]; }
-- (void)moveToRightEndOfLine:(id)s { [self moveToEndOfDocument:s]; }
-- (void)moveParagraphForward:(id)s { [self moveToEndOfDocument:s]; }
-- (void)moveToEndOfParagraph:(id)s { [self moveToEndOfDocument:s]; }
 - (void)pageDown:(id)s { [self moveToEndOfDocument:s]; }
-- (void)moveDownAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
-- (void)moveToRightEndOfLineAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
-- (void)moveParagraphForwardAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
-- (void)moveToEndOfParagraphAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
 - (void)pageDownAndModifySelection:(id)s { [self moveToEndOfDocumentAndModifySelection:s]; }
-
-- (void)moveUp:(id)s { [self moveToBeginningOfDocument:s]; }
-- (void)moveToLeftEndOfLine:(id)s { [self moveToBeginningOfDocument:s]; }
-- (void)moveParagraphBackward:(id)s { [self moveToBeginningOfDocument:s]; }
-- (void)moveToBeginningOfParagraph:(id)s { [self moveToBeginningOfDocument:s]; }
 - (void)pageUp:(id)s { [self moveToBeginningOfDocument:s]; }
-- (void)moveUpAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
-- (void)moveToLeftEndOfLineAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
-- (void)moveParagraphBackwardAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
-- (void)moveToBeginningOfParagraphAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
 - (void)pageUpAndModifySelection:(id)s { [self moveToBeginningOfDocumentAndModifySelection:s]; }
 
-- (void)deleteWordBackward:(id)s { [self deleteBackward:s]; }
 - (void)deleteBackwardByDecomposingPreviousCharacter:(id)s { [self deleteBackward:s]; }
-- (void)deleteWordForward:(id)s { [self deleteForward:s]; }
 // clang-format on
 
 // NSTextInputClient
@@ -720,8 +772,10 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     return !isNoRange(self.markedRange);
 }
 
-- (NSUInteger)offset:(NSUInteger)origin by:(NSInteger)by {
-    antares_window_text_callback_data  data = {.offset = {origin, by}};
+- (NSUInteger)offset:(NSUInteger)origin
+                  by:(NSInteger)by
+                unit:(antares_window_text_callback_unit)unit {
+    antares_window_text_callback_data  data = {.offset = {origin, by, unit}};
     antares_window_text_callback_range offset =
             text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, data, text_userdata);
     return offset.end - offset.begin;
