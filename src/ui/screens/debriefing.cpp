@@ -109,15 +109,18 @@ DebriefingScreen::DebriefingScreen(pn::string_view message)
 DebriefingScreen::DebriefingScreen(
         pn::string_view message, game_ticks your_time, game_ticks par_time, int your_loss,
         int par_loss, int your_kill, int par_kill)
-        : _state(TYPING), _typed_chars(0), _data_item(initialize(message, true)) {
+        : _state(TYPING),
+          _typed_chars(0),
+          _data_item(initialize(message, true)),
+          _score{StyledText::retro(
+                         build_score_text(
+                                 your_time, par_time, your_loss, par_loss, your_kill, par_kill),
+                         GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
+                         GetRGBTranslateColorShade(Hue::GOLD, DARKEST))
+                         .wrap_to(sys.fonts.button, _message_bounds.width(), 0, 2, 60)} {
     Rect score_area = _message_bounds;
     score_area.top  = score_area.bottom - kScoreTableHeight;
 
-    _score.set_retro_text(
-            build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill),
-            GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
-            GetRGBTranslateColorShade(Hue::GOLD, DARKEST));
-    _score.wrap_to(sys.fonts.button, _message_bounds.width(), 0, 2, 60);
     _score_bounds = Rect(0, 0, _score.auto_width(), _score.height());
     _score_bounds.center_in(score_area);
 

@@ -39,7 +39,7 @@ class HelpScreen : public InterfaceScreen {
         BOX = 1,
     };
 
-    StyledText _text;
+    const StyledText _text;
 };
 
 }  // namespace antares

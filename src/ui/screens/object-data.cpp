@@ -60,13 +60,15 @@ Rect object_data_bounds(Point origin, Size size) {
 ObjectDataScreen::ObjectDataScreen(
         Point origin, const BaseObject& object, Trigger trigger, int mouse, Key key,
         Gamepad::Button gamepad)
-        : _trigger(trigger), _mouse(mouse), _key(key), _gamepad(gamepad), _state(TYPING) {
-    pn::string text;
-    CreateObjectDataText(text, object);
-    _text.set_retro_text(text, kObjectDataForeColor, kObjectDataBackColor);
-    _text.wrap_to(sys.fonts.button, kShipDataWidth, 0, 0);
-    _bounds = object_data_bounds(origin, Size(_text.auto_width(), _text.height()));
-}
+        : _trigger(trigger),
+          _mouse(mouse),
+          _key(key),
+          _gamepad(gamepad),
+          _state(TYPING),
+          _text{StyledText::retro(
+                        CreateObjectDataText(object), kObjectDataForeColor, kObjectDataBackColor)
+                        .wrap_to(sys.fonts.button, kShipDataWidth, 0, 0)},
+          _bounds{object_data_bounds(origin, Size(_text.auto_width(), _text.height()))} {}
 
 ObjectDataScreen::~ObjectDataScreen() {}
 

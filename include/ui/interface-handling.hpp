@@ -34,8 +34,8 @@ enum PlayAgainResult {
     PLAY_AGAIN_SKIP,
 };
 
-bool BothCommandAndQ(void);
-void CreateObjectDataText(pn::string& text, const BaseObject& object);
+bool       BothCommandAndQ(void);
+pn::string CreateObjectDataText(const BaseObject& object);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo);
 
 }  // namespace antares

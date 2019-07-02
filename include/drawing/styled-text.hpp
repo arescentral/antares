@@ -49,18 +49,19 @@ class StyledText {
     StyledText& operator=(StyledText&&) = default;
     ~StyledText();
 
-    void set_plain_text(
+    static StyledText plain(
             pn::string_view text, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
-    void set_retro_text(
+    static StyledText retro(
             pn::string_view text, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
-    void set_interface_text(
+    static StyledText interface(
             pn::string_view text, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
-    void select(int from, int to);
-    void wrap_to(
-            const Font& font, int width, int side_margin, int line_spacing, int tab_width = 0);
+
+    void       select(int from, int to);
+    StyledText wrap_to(
+            const Font& font, int width, int side_margin, int line_spacing, int tab_width = 0) &&;
     void clear();
 
     bool                               empty() const;

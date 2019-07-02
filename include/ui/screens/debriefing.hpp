@@ -60,7 +60,6 @@ class DebriefingScreen : public Card {
     State              _state;
 
     pn::string _message;
-    StyledText _score;
     Rect       _pix_bounds;
     Rect       _message_bounds;
     Rect       _score_bounds;
@@ -68,7 +67,8 @@ class DebriefingScreen : public Card {
     wall_time _next_update;
     int       _typed_chars;
 
-    BoxRect _data_item;
+    BoxRect          _data_item;
+    const StyledText _score;
 };
 
 const char* stringify(DebriefingScreen::State state);

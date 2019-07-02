@@ -189,11 +189,12 @@ void Messages::clip() {
         m->labelMessage = false;
     }
 
-    m->retro_text = StyledText{};
-    m->retro_text.set_retro_text(text, kMessagesForeColor, kMessagesBackColor);
-    m->retro_text.wrap_to(
-            sys.fonts.tactical,
-            viewport().width() - kHBuffer - sys.fonts.tactical.logicalWidth + 1, 0, 0, 60);
+    m->retro_text =
+            StyledText::retro(text, kMessagesForeColor, kMessagesBackColor)
+                    .wrap_to(
+                            sys.fonts.tactical,
+                            viewport().width() - kHBuffer - sys.fonts.tactical.logicalWidth + 1, 0,
+                            0, 60);
     m->retro_origin =
             Point(viewport().left + kHBuffer,
                   viewport().bottom + sys.fonts.tactical.ascent + kLongMessageVPad);

@@ -52,27 +52,33 @@ StyledText::StyledText() = default;
 
 StyledText::~StyledText() {}
 
-void StyledText::set_plain_text(pn::string_view text, RgbColor fore_color, RgbColor back_color) {
-    _chars.clear();
+StyledText StyledText::plain(pn::string_view text, RgbColor fore_color, RgbColor back_color) {
+    StyledText t;
 
     for (auto r : text) {
         switch (r.value()) {
             case '\n':
-                _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+                t._chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
                 break;
-            case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color)); break;
-            case 0xA0: _chars.push_back(StyledChar(0xA0, NO_BREAK, fore_color, back_color)); break;
-            default: _chars.push_back(StyledChar(r.value(), NONE, fore_color, back_color)); break;
+            case ' ':
+                t._chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
+                break;
+            case 0xA0:
+                t._chars.push_back(StyledChar(0xA0, NO_BREAK, fore_color, back_color));
+                break;
+            default:
+                t._chars.push_back(StyledChar(r.value(), NONE, fore_color, back_color));
+                break;
         }
     }
-    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
-        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+    if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
+        t._chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
     }
-    wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
+    return std::move(t).wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
 }
 
-void StyledText::set_retro_text(pn::string_view text, RgbColor fore_color, RgbColor back_color) {
-    _chars.clear();
+StyledText StyledText::retro(pn::string_view text, RgbColor fore_color, RgbColor back_color) {
+    StyledText t;
 
     const RgbColor original_fore_color = fore_color;
     const RgbColor original_back_color = back_color;
@@ -85,22 +91,22 @@ void StyledText::set_retro_text(pn::string_view text, RgbColor fore_color, RgbCo
             case START:
                 switch (r.value()) {
                     case '\n':
-                        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+                        t._chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
                         break;
 
                     case '_':
                         // TODO(sfiera): replace use of "_" with e.g. "\_".
-                        _chars.push_back(StyledChar(0xA0, NO_BREAK, fore_color, back_color));
+                        t._chars.push_back(StyledChar(0xA0, NO_BREAK, fore_color, back_color));
                         break;
 
                     case ' ':
-                        _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
+                        t._chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
                         break;
 
                     case '\\': state = SLASH; break;
 
                     default:
-                        _chars.push_back(StyledChar(r.value(), NONE, fore_color, back_color));
+                        t._chars.push_back(StyledChar(r.value(), NONE, fore_color, back_color));
                         break;
                 }
                 break;
@@ -109,26 +115,26 @@ void StyledText::set_retro_text(pn::string_view text, RgbColor fore_color, RgbCo
                 switch (r.value()) {
                     case 'i':
                         std::swap(fore_color, back_color);
-                        _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
-                        _chars.push_back(StyledChar('i', DELAY, fore_color, back_color));
+                        t._chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
+                        t._chars.push_back(StyledChar('i', DELAY, fore_color, back_color));
                         state = START;
                         break;
 
                     case 'r':
                         fore_color = original_fore_color;
                         back_color = original_back_color;
-                        _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
-                        _chars.push_back(StyledChar('r', DELAY, fore_color, back_color));
+                        t._chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
+                        t._chars.push_back(StyledChar('r', DELAY, fore_color, back_color));
                         state = START;
                         break;
 
                     case 't':
-                        _chars.push_back(StyledChar('\\', TAB, fore_color, back_color));
+                        t._chars.push_back(StyledChar('\\', TAB, fore_color, back_color));
                         state = START;
                         break;
 
                     case '\\':
-                        _chars.push_back(StyledChar('\\', NONE, fore_color, back_color));
+                        t._chars.push_back(StyledChar('\\', NONE, fore_color, back_color));
                         state = START;
                         break;
 
@@ -161,16 +167,15 @@ void StyledText::set_retro_text(pn::string_view text, RgbColor fore_color, RgbCo
         throw std::runtime_error(pn::format("not enough input for special code.").c_str());
     }
 
-    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
-        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+    if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
+        t._chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
     }
 
-    wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
+    return std::move(t).wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
 }
 
-void StyledText::set_interface_text(
-        pn::string_view text, RgbColor fore_color, RgbColor back_color) {
-    _chars.clear();
+StyledText StyledText::interface(pn::string_view text, RgbColor fore_color, RgbColor back_color) {
+    StyledText t;
 
     const auto f = fore_color;
     const auto b = back_color;
@@ -181,9 +186,9 @@ void StyledText::set_interface_text(
         switch (state) {
             case START:
                 switch (r.value()) {
-                    case '\n': _chars.push_back(StyledChar('\n', LINE_BREAK, f, b)); break;
-                    case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, f, b)); break;
-                    default: _chars.push_back(StyledChar(r.value(), NONE, f, b)); break;
+                    case '\n': t._chars.push_back(StyledChar('\n', LINE_BREAK, f, b)); break;
+                    case ' ': t._chars.push_back(StyledChar(' ', WORD_BREAK, f, b)); break;
+                    default: t._chars.push_back(StyledChar(r.value(), NONE, f, b)); break;
                     case '^': state = CODE; break;
                 }
                 break;
@@ -211,21 +216,21 @@ void StyledText::set_interface_text(
                     inline_pict.picture = std::move(id);
                 }
 
-                _textures.push_back(Resource::texture(inline_pict.picture));
-                inline_pict.bounds = _textures.back().size().as_rect();
-                _inline_picts.emplace_back(std::move(inline_pict));
-                _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
+                t._textures.push_back(Resource::texture(inline_pict.picture));
+                inline_pict.bounds = t._textures.back().size().as_rect();
+                t._inline_picts.emplace_back(std::move(inline_pict));
+                t._chars.push_back(StyledChar(t._inline_picts.size() - 1, PICTURE, f, b));
                 id.clear();
                 state = START;
                 break;
         }
     }
 
-    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
-        _chars.push_back(StyledChar('\n', LINE_BREAK, f, b));
+    if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
+        t._chars.push_back(StyledChar('\n', LINE_BREAK, f, b));
     }
 
-    wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
+    return std::move(t).wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
 }
 
 void StyledText::select(int from, int to) {
@@ -233,8 +238,8 @@ void StyledText::select(int from, int to) {
     _select_end   = to;
 }
 
-void StyledText::wrap_to(
-        const Font& font, int width, int side_margin, int line_spacing, int tab_width) {
+StyledText StyledText::wrap_to(
+        const Font& font, int width, int side_margin, int line_spacing, int tab_width) && {
     _font         = &font;
     _width        = width;
     _side_margin  = side_margin;
@@ -292,6 +297,7 @@ void StyledText::wrap_to(
         _chars[i].bounds.right = h;
     }
     _height = v;
+    return std::move(*this);
 }
 
 void StyledText::clear() { _chars.clear(); }

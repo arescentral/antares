@@ -51,8 +51,7 @@ class ObjectDataBuilder {
     ObjectDataBuilder& operator=(const ObjectDataBuilder&) = delete;
 
     void save(const BaseObject& object, pn::string_view portrait) {
-        pn::string data;
-        CreateObjectDataText(data, object);
+        pn::string data = CreateObjectDataText(object);
         if (_output_dir.has_value()) {
             pn::string      path = pn::format("{0}/{1}.txt", *_output_dir, portrait);
             pn::string_view dir  = sfz::path::dirname(path);
