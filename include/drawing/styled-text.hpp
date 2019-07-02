@@ -102,11 +102,12 @@ class StyledText {
 
     struct StyledChar {
         StyledChar(
-                uint32_t character, SpecialChar special, const RgbColor& fore_color,
+                pn::rune r, SpecialChar special, int pict_index, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
-        pn::rune    character;
+        pn::rune    rune;
         SpecialChar special;
+        int         pict_index;
         RgbColor    fore_color;
         RgbColor    back_color;
         Rect        bounds;
