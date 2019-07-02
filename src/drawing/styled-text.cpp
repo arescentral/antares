@@ -51,10 +51,7 @@ int hex_digit(pn::rune r) {
 StyledText::StyledText() : StyledText{sys.fonts.tactical} {}
 
 StyledText::StyledText(const Font& font)
-        : _fore_color(RgbColor::white()),
-          _back_color(RgbColor::black()),
-          _tab_width(0),
-          _font(&font) {}
+        : _fore_color(RgbColor::white()), _back_color(RgbColor::black()), _font(&font) {}
 
 StyledText::~StyledText() {}
 
@@ -63,8 +60,6 @@ void StyledText::set_font(const Font& font) { _font = &font; }
 void StyledText::set_fore_color(RgbColor fore_color) { _fore_color = fore_color; }
 
 void StyledText::set_back_color(RgbColor back_color) { _back_color = back_color; }
-
-void StyledText::set_tab_width(int tab_width) { _tab_width = tab_width; }
 
 void StyledText::set_plain_text(pn::string_view text) {
     _chars.clear();
@@ -254,7 +249,7 @@ void StyledText::select(int from, int to) {
     _select_end   = to;
 }
 
-void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
+void StyledText::wrap_to(int width, int side_margin, int line_spacing, int tab_width) {
     _width        = width;
     _side_margin  = side_margin;
     _line_spacing = line_spacing;
@@ -262,6 +257,9 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     int h         = _side_margin;
     int v         = 0;
 
+    if (tab_width <= 0) {
+        tab_width = width / 2;
+    }
     const int line_height   = _font->height + _line_spacing;
     const int wrap_distance = width - side_margin;
 
@@ -279,7 +277,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
                 break;
 
             case TAB:
-                h += tab_width() - (h % tab_width());
+                h += tab_width - (h % tab_width);
                 _auto_width = std::max(_auto_width, h);
                 break;
 
@@ -317,14 +315,6 @@ bool StyledText::empty() const {
 }
 
 int StyledText::size() const { return _chars.size(); }
-
-int StyledText::tab_width() const {
-    if (_tab_width > 0) {
-        return _tab_width;
-    } else {
-        return _width / 2;
-    }
-}
 
 int StyledText::width() const { return _width; }
 

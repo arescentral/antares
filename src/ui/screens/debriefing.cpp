@@ -123,8 +123,7 @@ DebriefingScreen::DebriefingScreen(
 
     _score = style_score_text(
             build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill));
-    _score->set_tab_width(60);
-    _score->wrap_to(_message_bounds.width(), 0, 2);
+    _score->wrap_to(_message_bounds.width(), 0, 2, 60);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
     _score_bounds.center_in(score_area);
 

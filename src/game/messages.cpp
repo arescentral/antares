@@ -193,9 +193,8 @@ void Messages::clip() {
     m->retro_text->set_fore_color(kMessagesForeColor);
     m->retro_text->set_back_color(kMessagesBackColor);
     m->retro_text->set_retro_text(text);
-    m->retro_text->set_tab_width(60);
     m->retro_text->wrap_to(
-            viewport().width() - kHBuffer - sys.fonts.tactical.logicalWidth + 1, 0, 0);
+            viewport().width() - kHBuffer - sys.fonts.tactical.logicalWidth + 1, 0, 0, 60);
     m->retro_origin =
             Point(viewport().left + kHBuffer,
                   viewport().bottom + sys.fonts.tactical.ascent + kLongMessageVPad);

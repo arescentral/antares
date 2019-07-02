@@ -53,17 +53,15 @@ class StyledText {
     void set_font(const Font& font);
     void set_fore_color(RgbColor fore_color);
     void set_back_color(RgbColor back_color);
-    void set_tab_width(int tab_width);
     void set_plain_text(pn::string_view text);
     void set_retro_text(pn::string_view text);
     void set_interface_text(pn::string_view text);
     void select(int from, int to);
-    void wrap_to(int width, int side_margin, int line_spacing);
+    void wrap_to(int width, int side_margin, int line_spacing, int tab_width = 0);
     void clear();
 
     bool                               empty() const;
     int                                size() const;
-    int                                tab_width() const;
     int                                width() const;
     int                                height() const;
     int                                auto_width() const;
@@ -106,7 +104,6 @@ class StyledText {
     std::vector<StyledChar>     _chars;
     std::vector<inlinePictType> _inline_picts;
     std::vector<Texture>        _textures;
-    int                         _tab_width;
     int                         _width;
     int                         _height;
     int                         _auto_width;

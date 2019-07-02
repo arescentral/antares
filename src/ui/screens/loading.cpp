@@ -45,8 +45,7 @@ LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
     _name_text.reset(new StyledText(sys.fonts.title));
     _name_text->set_fore_color(kLoadingForeColor);
     _name_text->set_retro_text(level.base.name);
-    _name_text->set_tab_width(220);
-    _name_text->wrap_to(640, 0, 2);
+    _name_text->wrap_to(640, 0, 2, 220);
 }
 
 LoadingScreen::~LoadingScreen() {}
