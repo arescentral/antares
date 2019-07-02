@@ -40,8 +40,8 @@ LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
           _state(TYPING),
           _level(level),
           _cancelled(cancelled),
-          _name_text{StyledText::retro(level.base.name, kLoadingForeColor)
-                             .wrap_to({sys.fonts.title, 640, 0, 2, 220})},
+          _name_text{StyledText::retro(
+                  level.base.name, {sys.fonts.title, 640, 0, 2, 220}, kLoadingForeColor)},
           _next_update(now() + kTypingDelay),
           _chars_typed(0) {}
 

@@ -68,16 +68,14 @@ class StyledText {
     ~StyledText();
 
     static StyledText plain(
-            pn::string_view text, RgbColor fore_color = RgbColor::white(),
+            pn::string_view text, WrapMetrics metrics, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
     static StyledText retro(
-            pn::string_view text, RgbColor fore_color = RgbColor::white(),
+            pn::string_view text, WrapMetrics metrics, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
     static StyledText interface(
-            pn::string_view text, RgbColor fore_color = RgbColor::white(),
+            pn::string_view text, WrapMetrics metrics, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
-
-    StyledText wrap_to(WrapMetrics metrics) &&;
 
     bool                               empty() const;
     int                                size() const;
@@ -114,6 +112,7 @@ class StyledText {
         Rect        bounds;
     };
 
+    void rewrap();
     int  move_word_down(int index, int v);
     bool is_selected(int index) const;
 

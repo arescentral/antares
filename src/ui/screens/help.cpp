@@ -44,9 +44,9 @@ static pn::string help_text() {
 HelpScreen::HelpScreen()
         : InterfaceScreen("help", {128, 0, 608, 480}),
           _text{StyledText::retro(
-                        help_text(), GetRGBTranslateColorShade(Hue::RED, LIGHTEST),
-                        GetRGBTranslateColorShade(Hue::RED, VERY_DARK))
-                        .wrap_to({sys.fonts.computer, widget(BOX)->inner_bounds().width()})} {
+                  help_text(), {sys.fonts.computer, widget(BOX)->inner_bounds().width()},
+                  GetRGBTranslateColorShade(Hue::RED, LIGHTEST),
+                  GetRGBTranslateColorShade(Hue::RED, VERY_DARK))} {
     button(DONE)->bind({[this] { stack()->pop(this); }});
 }
 

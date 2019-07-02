@@ -302,8 +302,7 @@ void Label::set_age(ticks age) {
 }
 
 void Label::set_string(pn::string_view string) {
-    text = StyledText::plain(string, GetRGBTranslateColorShade(hue, LIGHTEST))
-                   .wrap_to(sys.fonts.tactical);
+    text = StyledText::plain(string, sys.fonts.tactical, GetRGBTranslateColorShade(hue, LIGHTEST));
     width      = text.auto_width() + kLabelTotalInnerSpace;
     height     = text.height() + kLabelTotalInnerSpace;
     lineHeight = sys.fonts.tactical.height;

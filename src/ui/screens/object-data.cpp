@@ -66,8 +66,8 @@ ObjectDataScreen::ObjectDataScreen(
           _gamepad(gamepad),
           _state(TYPING),
           _text{StyledText::retro(
-                        CreateObjectDataText(object), kObjectDataForeColor, kObjectDataBackColor)
-                        .wrap_to({sys.fonts.button, kShipDataWidth})},
+                  CreateObjectDataText(object), {sys.fonts.button, kShipDataWidth},
+                  kObjectDataForeColor, kObjectDataBackColor)},
           _bounds{object_data_bounds(origin, Size(_text.auto_width(), _text.height()))} {}
 
 ObjectDataScreen::~ObjectDataScreen() {}

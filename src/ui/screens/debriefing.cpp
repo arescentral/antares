@@ -113,11 +113,10 @@ DebriefingScreen::DebriefingScreen(
           _typed_chars(0),
           _data_item(initialize(message, true)),
           _score{StyledText::retro(
-                         build_score_text(
-                                 your_time, par_time, your_loss, par_loss, your_kill, par_kill),
-                         GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
-                         GetRGBTranslateColorShade(Hue::GOLD, DARKEST))
-                         .wrap_to({sys.fonts.button, _message_bounds.width(), 0, 2, 60})} {
+                  build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill),
+                  {sys.fonts.button, _message_bounds.width(), 0, 2, 60},
+                  GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
+                  GetRGBTranslateColorShade(Hue::GOLD, DARKEST))} {
     Rect score_area = _message_bounds;
     score_area.top  = score_area.bottom - kScoreTableHeight;
 
