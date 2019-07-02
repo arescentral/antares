@@ -117,7 +117,7 @@ DebriefingScreen::DebriefingScreen(
                                  your_time, par_time, your_loss, par_loss, your_kill, par_kill),
                          GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
                          GetRGBTranslateColorShade(Hue::GOLD, DARKEST))
-                         .wrap_to(sys.fonts.button, _message_bounds.width(), 0, 2, 60)} {
+                         .wrap_to({sys.fonts.button, _message_bounds.width(), 0, 2, 60})} {
     Rect score_area = _message_bounds;
     score_area.top  = score_area.bottom - kScoreTableHeight;
 

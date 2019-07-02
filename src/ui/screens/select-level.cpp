@@ -156,7 +156,7 @@ void SelectLevelScreen::draw_level_name() const {
 
     const StyledText retro =
             StyledText::retro(chapter_name, GetRGBTranslateColorShade(Hue::AQUA, LIGHTEST))
-                    .wrap_to(sys.fonts.title, 440, 0, 2);
+                    .wrap_to({sys.fonts.title, 440, 0, 2});
 
     Rect  bounds = i.inner_bounds();
     Point off    = offset();

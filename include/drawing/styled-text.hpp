@@ -20,6 +20,7 @@
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
 #include <pn/string>
+#include <utility>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -38,6 +39,23 @@ struct inlinePictType {
     Rect              bounds;
     pn::string        picture;
     const BaseObject* object;  // May be null.
+};
+
+struct WrapMetrics {
+    const Font* font;
+    int         width;
+    int         side_margin;
+    int         line_spacing;
+    int         tab_width;
+
+    WrapMetrics(
+            const Font& font, int width = std::numeric_limits<int>::max(), int side_margin = 0,
+            int line_spacing = 0, int tab_width = 0)
+            : font{&font},
+              width{width},
+              side_margin{side_margin},
+              line_spacing{line_spacing},
+              tab_width{tab_width} {}
 };
 
 class StyledText {
@@ -59,8 +77,7 @@ class StyledText {
             pn::string_view text, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
 
-    StyledText wrap_to(
-            const Font& font, int width, int side_margin, int line_spacing, int tab_width = 0) &&;
+    StyledText wrap_to(WrapMetrics metrics) &&;
 
     bool                               empty() const;
     int                                size() const;
@@ -103,14 +120,9 @@ class StyledText {
     std::vector<StyledChar>     _chars;
     std::vector<inlinePictType> _inline_picts;
     std::vector<Texture>        _textures;
-    int                         _width;
-    int                         _height;
-    int                         _auto_width;
-    int                         _side_margin;
-    int                         _line_spacing;
-    int                         _select_begin = -1;
-    int                         _select_end   = -1;
-    const Font*                 _font;
+    WrapMetrics                 _wrap_metrics;
+    Size                        _auto_size;
+    std::pair<int, int>         _selected = {-1, -1};
 };
 
 }  // namespace antares

@@ -67,7 +67,7 @@ ObjectDataScreen::ObjectDataScreen(
           _state(TYPING),
           _text{StyledText::retro(
                         CreateObjectDataText(object), kObjectDataForeColor, kObjectDataBackColor)
-                        .wrap_to(sys.fonts.button, kShipDataWidth, 0, 0)},
+                        .wrap_to({sys.fonts.button, kShipDataWidth})},
           _bounds{object_data_bounds(origin, Size(_text.auto_width(), _text.height()))} {}
 
 ObjectDataScreen::~ObjectDataScreen() {}

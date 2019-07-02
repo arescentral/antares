@@ -67,7 +67,7 @@ static const int32_t kMissionLineHJog         = 10;
 static vector<inlinePictType> populate_inline_picts(
         Rect rect, pn::string_view text, InterfaceStyle style) {
     StyledText interface_text = StyledText::interface(text).wrap_to(
-            interface_font(style), rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
+            {interface_font(style), rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer});
     std::vector<inlinePictType> result;
     for (const inlinePictType& pict : interface_text.inline_picts()) {
         result.emplace_back();

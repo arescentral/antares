@@ -135,7 +135,7 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
             }
             _lines.push_back(Line{Line::TEXT, nullptr,
                                   StyledText::retro(content, red)
-                                          .wrap_to(sys.fonts.title, _size.width - 11, 0, 2)});
+                                          .wrap_to({sys.fonts.title, _size.width - 11, 0, 2})});
         }
     }
 

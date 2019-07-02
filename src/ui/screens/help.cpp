@@ -46,7 +46,7 @@ HelpScreen::HelpScreen()
           _text{StyledText::retro(
                         help_text(), GetRGBTranslateColorShade(Hue::RED, LIGHTEST),
                         GetRGBTranslateColorShade(Hue::RED, VERY_DARK))
-                        .wrap_to(sys.fonts.computer, widget(BOX)->inner_bounds().width(), 0, 0)} {
+                        .wrap_to({sys.fonts.computer, widget(BOX)->inner_bounds().width()})} {
     button(DONE)->bind({[this] { stack()->pop(this); }});
 }
 

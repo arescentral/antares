@@ -303,7 +303,7 @@ void Label::set_age(ticks age) {
 
 void Label::set_string(pn::string_view string) {
     text = StyledText::plain(string, GetRGBTranslateColorShade(hue, LIGHTEST))
-                   .wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
+                   .wrap_to(sys.fonts.tactical);
     width      = text.auto_width() + kLabelTotalInnerSpace;
     height     = text.height() + kLabelTotalInnerSpace;
     lineHeight = sys.fonts.tactical.height;
