@@ -94,12 +94,12 @@ struct Messages::longMessageType {
     int16_t                        last_page_index    = -1;
     uint8_t                        backColor          = 0;
     pn::string                     text               = "";
-    std::unique_ptr<StyledText>    retro_text         = nullptr;
-    Point                          retro_origin       = {0, 0};
-    int32_t                        at_char            = 0;
-    bool                           labelMessage       = false;
-    bool                           lastLabelMessage   = false;
-    Handle<Label>                  labelMessageID     = Label::none();
+    StyledText                     retro_text;
+    Point                          retro_origin     = {0, 0};
+    int32_t                        at_char          = 0;
+    bool                           labelMessage     = false;
+    bool                           lastLabelMessage = false;
+    Handle<Label>                  labelMessageID   = Label::none();
 
     bool have_pages() const { return pages && !pages->empty(); }
     bool have_current() const { return current_page_index >= 0; }
@@ -159,7 +159,7 @@ void Messages::add(pn::string_view message) { message_data.emplace(message.copy(
 void Messages::start(sfz::optional<int64_t> start_id, const std::vector<pn::string>* pages) {
     longMessageType* m = long_message_data;
     if (!m->have_current()) {
-        m->retro_text.reset();
+        m->retro_text     = StyledText{};
         m->charDelayCount = ticks(0);
     }
     m->start_id           = start_id;
@@ -189,9 +189,9 @@ void Messages::clip() {
         m->labelMessage = false;
     }
 
-    m->retro_text.reset(new StyledText);
-    m->retro_text->set_retro_text(text, kMessagesForeColor, kMessagesBackColor);
-    m->retro_text->wrap_to(
+    m->retro_text = StyledText{};
+    m->retro_text.set_retro_text(text, kMessagesForeColor, kMessagesBackColor);
+    m->retro_text.wrap_to(
             sys.fonts.tactical,
             viewport().width() - kHBuffer - sys.fonts.tactical.logicalWidth + 1, 0, 0, 60);
     m->retro_origin =
@@ -201,7 +201,7 @@ void Messages::clip() {
     m->at_char = 0;
 
     if (!m->labelMessage) {
-        g.bottom_border = m->retro_text->height() + kLongMessageVPadDouble;
+        g.bottom_border = m->retro_text.height() + kLongMessageVPadDouble;
     }
     m->stage = kShowStage;
 }
@@ -227,13 +227,10 @@ void Messages::draw_long_message(ticks time_pass) {
 
         // draw in offscreen world
         if (m->have_current() && (m->stage == kShowStage)) {
-            if (m->retro_text.get() != NULL) {
+            if (!m->retro_text.empty()) {
                 if (m->labelMessage) {
                     m->labelMessageID->set_age(ticks(0));
-
-                    if (m->retro_text.get() != NULL) {
-                        MessageLabel_Set_Special(m->labelMessageID, m->text);
-                    }
+                    MessageLabel_Set_Special(m->labelMessageID, m->text);
                 }
             }
         }
@@ -242,9 +239,9 @@ void Messages::draw_long_message(ticks time_pass) {
             m->lastLabelMessage = m->labelMessage;
         }
     } else if (
-            m->have_current() && (m->retro_text.get() != NULL) &&
-            (m->at_char < m->retro_text->size()) && (m->stage == kShowStage) && !m->labelMessage) {
-        time_pass = std::min(time_pass, ticks(m->retro_text->size() - m->at_char));
+            m->have_current() && !m->retro_text.empty() && (m->at_char < m->retro_text.size()) &&
+            (m->stage == kShowStage) && !m->labelMessage) {
+        time_pass = std::min(time_pass, ticks(m->retro_text.size() - m->at_char));
         // Play teletype sound at least once every 3 ticks.
         m->charDelayCount += time_pass;
         if (m->charDelayCount > ticks(0)) {
@@ -261,7 +258,7 @@ void Messages::end() {
     longMessageType* m    = long_message_data;
     m->current_page_index = -1;
     m->stage              = kStartStage;
-    m->retro_text.reset();
+    m->retro_text         = StyledText{};
 }
 
 void Messages::advance() {
@@ -456,11 +453,11 @@ void Messages::draw_message() {
     Rect bounds(viewport().left, viewport().bottom, viewport().right, play_screen().bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
-    long_message_data->retro_text->draw_range(bounds, 0, long_message_data->at_char);
+    long_message_data->retro_text.draw_range(bounds, 0, long_message_data->at_char);
     // The final char is a newline; don't display a cursor rect for it.
     if ((0 < long_message_data->at_char) &&
-        (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {
-        long_message_data->retro_text->draw_cursor(
+        (long_message_data->at_char < (long_message_data->retro_text.size() - 1))) {
+        long_message_data->retro_text.draw_cursor(
                 bounds, long_message_data->at_char, kMessagesForeColor);
     }
 }

@@ -63,10 +63,9 @@ ObjectDataScreen::ObjectDataScreen(
         : _trigger(trigger), _mouse(mouse), _key(key), _gamepad(gamepad), _state(TYPING) {
     pn::string text;
     CreateObjectDataText(text, object);
-    _text.reset(new StyledText);
-    _text->set_retro_text(text, kObjectDataForeColor, kObjectDataBackColor);
-    _text->wrap_to(sys.fonts.button, kShipDataWidth, 0, 0);
-    _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
+    _text.set_retro_text(text, kObjectDataForeColor, kObjectDataBackColor);
+    _text.wrap_to(sys.fonts.button, kShipDataWidth, 0, 0);
+    _bounds = object_data_bounds(origin, Size(_text.auto_width(), _text.height()));
 }
 
 ObjectDataScreen::~ObjectDataScreen() {}
@@ -96,7 +95,7 @@ void ObjectDataScreen::fire_timer() {
         }
     }
     while (_next_update <= now) {
-        if (_typed_chars < _text->size()) {
+        if (_typed_chars < _text.size()) {
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {
@@ -132,9 +131,9 @@ void ObjectDataScreen::draw() const {
     Rects().fill(outside, kObjectDataForeColor);
     outside.inset(1, 1);
     Rects().fill(outside, RgbColor::black());
-    _text->draw_range(_bounds, 0, _typed_chars);
-    if (_typed_chars < _text->size()) {
-        _text->draw_cursor(_bounds, _typed_chars, kObjectDataForeColor);
+    _text.draw_range(_bounds, 0, _typed_chars);
+    if (_typed_chars < _text.size()) {
+        _text.draw_cursor(_bounds, _typed_chars, kObjectDataForeColor);
     }
 }
 

@@ -101,14 +101,6 @@ int score(
     return score;
 }
 
-unique_ptr<StyledText> style_score_text(pn::string text) {
-    unique_ptr<StyledText> result(new StyledText);
-    result->set_retro_text(
-            text, GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
-            GetRGBTranslateColorShade(Hue::GOLD, DARKEST));
-    return result;
-}
-
 }  // namespace
 
 DebriefingScreen::DebriefingScreen(pn::string_view message)
@@ -121,10 +113,12 @@ DebriefingScreen::DebriefingScreen(
     Rect score_area = _message_bounds;
     score_area.top  = score_area.bottom - kScoreTableHeight;
 
-    _score = style_score_text(
-            build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill));
-    _score->wrap_to(sys.fonts.button, _message_bounds.width(), 0, 2, 60);
-    _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
+    _score.set_retro_text(
+            build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill),
+            GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
+            GetRGBTranslateColorShade(Hue::GOLD, DARKEST));
+    _score.wrap_to(sys.fonts.button, _message_bounds.width(), 0, 2, 60);
+    _score_bounds = Rect(0, 0, _score.auto_width(), _score.height());
     _score_bounds.center_in(score_area);
 
     _score_bounds.offset(_pix_bounds.left, _pix_bounds.top);
@@ -144,8 +138,8 @@ void DebriefingScreen::resign_front() {}
 void DebriefingScreen::draw() const {
     next()->draw();
     Rects().fill(_pix_bounds, RgbColor::black());
-    if (_score) {
-        _score->draw_range(_score_bounds, 0, _typed_chars);
+    if (!_score.empty()) {
+        _score.draw_range(_score_bounds, 0, _typed_chars);
     }
     Rect interface_bounds = _message_bounds;
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
@@ -198,7 +192,7 @@ void DebriefingScreen::fire_timer() {
     sys.sound.teletype();
     wall_time now = antares::now();
     while (_next_update <= now) {
-        if (_typed_chars < _score->size()) {
+        if (_typed_chars < _score.size()) {
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {

@@ -60,8 +60,8 @@ class ObjectDataScreen : public Card {
     wall_time _next_sound;
     int       _typed_chars;
 
-    Rect                        _bounds;
-    std::unique_ptr<StyledText> _text;
+    Rect       _bounds;
+    StyledText _text;
 };
 
 }  // namespace antares
