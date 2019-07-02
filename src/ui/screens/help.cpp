@@ -35,16 +35,14 @@
 
 namespace antares {
 
-HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}), _text(sys.fonts.computer) {
+HelpScreen::HelpScreen() : InterfaceScreen("help", {128, 0, 608, 480}) {
     pn::string text = Resource::text(6002);
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
-    RgbColor fore = GetRGBTranslateColorShade(Hue::RED, LIGHTEST);
-    RgbColor back = GetRGBTranslateColorShade(Hue::RED, VERY_DARK);
-    _text.set_fore_color(fore);
-    _text.set_back_color(back);
-    _text.set_retro_text(text);
-    _text.wrap_to(widget(BOX)->inner_bounds().width(), 0, 0);
+    _text.set_retro_text(
+            text, GetRGBTranslateColorShade(Hue::RED, LIGHTEST),
+            GetRGBTranslateColorShade(Hue::RED, VERY_DARK));
+    _text.wrap_to(sys.fonts.computer, widget(BOX)->inner_bounds().width(), 0, 0);
 
     button(DONE)->bind({[this] { stack()->pop(this); }});
 }

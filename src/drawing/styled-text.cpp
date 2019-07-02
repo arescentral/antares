@@ -48,51 +48,34 @@ int hex_digit(pn::rune r) {
 
 }  // namespace
 
-StyledText::StyledText() : StyledText{sys.fonts.tactical} {}
-
-StyledText::StyledText(const Font& font)
-        : _fore_color(RgbColor::white()), _back_color(RgbColor::black()), _font(&font) {}
+StyledText::StyledText() = default;
 
 StyledText::~StyledText() {}
 
-void StyledText::set_font(const Font& font) { _font = &font; }
-
-void StyledText::set_fore_color(RgbColor fore_color) { _fore_color = fore_color; }
-
-void StyledText::set_back_color(RgbColor back_color) { _back_color = back_color; }
-
-void StyledText::set_plain_text(pn::string_view text) {
+void StyledText::set_plain_text(pn::string_view text, RgbColor fore_color, RgbColor back_color) {
     _chars.clear();
 
     for (auto r : text) {
         switch (r.value()) {
             case '\n':
-                _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+                _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
                 break;
-            case ' ':
-                _chars.push_back(StyledChar(' ', WORD_BREAK, _fore_color, _back_color));
-                break;
-            case 0xA0:
-                _chars.push_back(StyledChar(0xA0, NO_BREAK, _fore_color, _back_color));
-                break;
-            default:
-                _chars.push_back(StyledChar(r.value(), NONE, _fore_color, _back_color));
-                break;
+            case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color)); break;
+            case 0xA0: _chars.push_back(StyledChar(0xA0, NO_BREAK, fore_color, back_color)); break;
+            default: _chars.push_back(StyledChar(r.value(), NONE, fore_color, back_color)); break;
         }
     }
     if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
-        _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
     }
-    wrap_to(std::numeric_limits<int>::max(), 0, 0);
+    wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
 }
 
-void StyledText::set_retro_text(pn::string_view text) {
+void StyledText::set_retro_text(pn::string_view text, RgbColor fore_color, RgbColor back_color) {
     _chars.clear();
 
-    const RgbColor original_fore_color = _fore_color;
-    const RgbColor original_back_color = _back_color;
-    RgbColor       fore_color          = _fore_color;
-    RgbColor       back_color          = _back_color;
+    const RgbColor original_fore_color = fore_color;
+    const RgbColor original_back_color = back_color;
     pn::rune       r1;
 
     enum { START, SLASH, FG1, FG2, BG1, BG2 } state = START;
@@ -182,14 +165,15 @@ void StyledText::set_retro_text(pn::string_view text) {
         _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
     }
 
-    wrap_to(std::numeric_limits<int>::max(), 0, 0);
+    wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
 }
 
-void StyledText::set_interface_text(pn::string_view text) {
+void StyledText::set_interface_text(
+        pn::string_view text, RgbColor fore_color, RgbColor back_color) {
     _chars.clear();
 
-    const auto f = _fore_color;
-    const auto b = _back_color;
+    const auto f = fore_color;
+    const auto b = back_color;
     pn::string id;
     enum { START, CODE, ID } state = START;
 
@@ -241,7 +225,7 @@ void StyledText::set_interface_text(pn::string_view text) {
         _chars.push_back(StyledChar('\n', LINE_BREAK, f, b));
     }
 
-    wrap_to(std::numeric_limits<int>::max(), 0, 0);
+    wrap_to(sys.fonts.tactical, std::numeric_limits<int>::max(), 0, 0);
 }
 
 void StyledText::select(int from, int to) {
@@ -249,7 +233,9 @@ void StyledText::select(int from, int to) {
     _select_end   = to;
 }
 
-void StyledText::wrap_to(int width, int side_margin, int line_spacing, int tab_width) {
+void StyledText::wrap_to(
+        const Font& font, int width, int side_margin, int line_spacing, int tab_width) {
+    _font         = &font;
     _width        = width;
     _side_margin  = side_margin;
     _line_spacing = line_spacing;

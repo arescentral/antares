@@ -43,21 +43,24 @@ struct inlinePictType {
 class StyledText {
   public:
     StyledText();
-    StyledText(const Font& font);
     StyledText(const StyledText&) = delete;
     StyledText(StyledText&&)      = default;
     StyledText& operator=(const StyledText&) = delete;
     StyledText& operator=(StyledText&&) = default;
     ~StyledText();
 
-    void set_font(const Font& font);
-    void set_fore_color(RgbColor fore_color);
-    void set_back_color(RgbColor back_color);
-    void set_plain_text(pn::string_view text);
-    void set_retro_text(pn::string_view text);
-    void set_interface_text(pn::string_view text);
+    void set_plain_text(
+            pn::string_view text, RgbColor fore_color = RgbColor::white(),
+            RgbColor back_color = RgbColor::black());
+    void set_retro_text(
+            pn::string_view text, RgbColor fore_color = RgbColor::white(),
+            RgbColor back_color = RgbColor::black());
+    void set_interface_text(
+            pn::string_view text, RgbColor fore_color = RgbColor::white(),
+            RgbColor back_color = RgbColor::black());
     void select(int from, int to);
-    void wrap_to(int width, int side_margin, int line_spacing, int tab_width = 0);
+    void wrap_to(
+            const Font& font, int width, int side_margin, int line_spacing, int tab_width = 0);
     void clear();
 
     bool                               empty() const;
@@ -99,8 +102,6 @@ class StyledText {
     int  move_word_down(int index, int v);
     bool is_selected(int index) const;
 
-    RgbColor                    _fore_color;
-    RgbColor                    _back_color;
     std::vector<StyledChar>     _chars;
     std::vector<inlinePictType> _inline_picts;
     std::vector<Texture>        _textures;

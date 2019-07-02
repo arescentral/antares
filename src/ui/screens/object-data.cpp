@@ -63,11 +63,9 @@ ObjectDataScreen::ObjectDataScreen(
         : _trigger(trigger), _mouse(mouse), _key(key), _gamepad(gamepad), _state(TYPING) {
     pn::string text;
     CreateObjectDataText(text, object);
-    _text.reset(new StyledText(sys.fonts.button));
-    _text->set_fore_color(kObjectDataForeColor);
-    _text->set_back_color(kObjectDataBackColor);
-    _text->set_retro_text(text);
-    _text->wrap_to(kShipDataWidth, 0, 0);
+    _text.reset(new StyledText);
+    _text->set_retro_text(text, kObjectDataForeColor, kObjectDataBackColor);
+    _text->wrap_to(sys.fonts.button, kShipDataWidth, 0, 0);
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
 }
 

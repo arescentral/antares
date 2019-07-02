@@ -154,11 +154,9 @@ void SelectLevelScreen::draw_level_name() const {
 
     const Widget& i = *widget(NAME);
 
-    RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, LIGHTEST);
-    StyledText retro(sys.fonts.title);
-    retro.set_fore_color(color);
-    retro.set_retro_text(chapter_name);
-    retro.wrap_to(440, 0, 2);
+    StyledText retro;
+    retro.set_retro_text(chapter_name, GetRGBTranslateColorShade(Hue::AQUA, LIGHTEST));
+    retro.wrap_to(sys.fonts.title, 440, 0, 2);
 
     Rect  bounds = i.inner_bounds();
     Point off    = offset();

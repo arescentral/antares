@@ -126,15 +126,14 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
                 }
             }
         } else {
-            unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
+            unique_ptr<StyledText> styled(new StyledText);
             auto                   red = GetRGBTranslateColorShade(Hue::RED, LIGHTEST);
-            styled->set_fore_color(red);
             if (line.data() == raw_lines.back().data()) {
-                styled->set_retro_text(line);
+                styled->set_retro_text(line, red);
             } else {
-                styled->set_retro_text(pn::format("{0}\n", line));
+                styled->set_retro_text(pn::format("{0}\n", line), red);
             }
-            styled->wrap_to(_size.width - 11, 0, 2);
+            styled->wrap_to(sys.fonts.title, _size.width - 11, 0, 2);
             _lines.push_back(Line{Line::TEXT, nullptr, std::move(styled)});
         }
     }

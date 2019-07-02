@@ -42,10 +42,9 @@ LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
           _cancelled(cancelled),
           _next_update(now() + kTypingDelay),
           _chars_typed(0) {
-    _name_text.reset(new StyledText(sys.fonts.title));
-    _name_text->set_fore_color(kLoadingForeColor);
-    _name_text->set_retro_text(level.base.name);
-    _name_text->wrap_to(640, 0, 2, 220);
+    _name_text.reset(new StyledText);
+    _name_text->set_retro_text(level.base.name, kLoadingForeColor);
+    _name_text->wrap_to(sys.fonts.title, 640, 0, 2, 220);
 }
 
 LoadingScreen::~LoadingScreen() {}
