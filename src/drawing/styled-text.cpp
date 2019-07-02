@@ -417,11 +417,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
     draw_range(bounds, index, index + 1);
 }
 
-void StyledText::draw_cursor(const Rect& bounds, int index) const {
-    color_cursor(bounds, index, _fore_color);
-}
-
-void StyledText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
+void StyledText::draw_cursor(const Rect& bounds, int index, const RgbColor& color) const {
     const int         line_height = _font->height + _line_spacing;
     const StyledChar& ch          = _chars[index];
     Rect              char_rect(0, 0, _font->logicalWidth, line_height);

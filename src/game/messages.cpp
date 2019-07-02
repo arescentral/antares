@@ -63,6 +63,9 @@ static const int16_t kAutoPilotOffString = 9;
 static const Hue     kStatusLabelColor   = Hue::AQUA;
 static const Hue     kStatusWarnColor    = Hue::PINK;
 
+static const RgbColor& kMessagesForeColor = GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHTEST);
+static const RgbColor& kMessagesBackColor = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKEST);
+
 namespace {
 
 template <typename T>
@@ -186,11 +189,9 @@ void Messages::clip() {
         m->labelMessage = false;
     }
 
-    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHTEST);
-    const RgbColor& dark_blue  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKEST);
     m->retro_text.reset(new StyledText(sys.fonts.tactical));
-    m->retro_text->set_fore_color(light_blue);
-    m->retro_text->set_back_color(dark_blue);
+    m->retro_text->set_fore_color(kMessagesForeColor);
+    m->retro_text->set_back_color(kMessagesBackColor);
     m->retro_text->set_retro_text(text);
     m->retro_text->set_tab_width(60);
     m->retro_text->wrap_to(
@@ -445,15 +446,13 @@ void Messages::draw_message() {
         return;
     }
 
-    const RgbColor& dark_blue  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKEST);
-    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHTEST);
-    Rect            message_bounds(
+    Rect message_bounds(
             play_screen().left, viewport().bottom, play_screen().right, play_screen().bottom);
     {
         Rects rects;
-        rects.fill(message_bounds, light_blue);
+        rects.fill(message_bounds, kMessagesForeColor);
         message_bounds.inset(0, 1);
-        rects.fill(message_bounds, dark_blue);
+        rects.fill(message_bounds, kMessagesBackColor);
     }
 
     Rect bounds(viewport().left, viewport().bottom, viewport().right, play_screen().bottom);
@@ -463,7 +462,8 @@ void Messages::draw_message() {
     // The final char is a newline; don't display a cursor rect for it.
     if ((0 < long_message_data->at_char) &&
         (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {
-        long_message_data->retro_text->draw_cursor(bounds, long_message_data->at_char);
+        long_message_data->retro_text->draw_cursor(
+                bounds, long_message_data->at_char, kMessagesForeColor);
     }
 }
 

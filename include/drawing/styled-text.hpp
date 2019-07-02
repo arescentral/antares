@@ -73,7 +73,7 @@ class StyledText {
     void draw_range(const Rect& bounds, int begin, int end) const;
     void draw_char(const Rect& bounds, int index) const;
 
-    void draw_cursor(const Rect& bounds, int index) const;
+    void draw_cursor(const Rect& bounds, int index, const RgbColor& color) const;
 
   private:
     enum SpecialChar {
@@ -98,7 +98,6 @@ class StyledText {
         Rect        bounds;
     };
 
-    void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
     int  move_word_down(int index, int v);
     bool is_selected(int index) const;
 

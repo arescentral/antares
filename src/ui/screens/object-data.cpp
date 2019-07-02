@@ -30,8 +30,10 @@ namespace antares {
 
 namespace {
 
-const int32_t kShipDataWidth = 240;
-const usecs   kTypingDelay   = kMinorTick;
+const int32_t  kShipDataWidth       = 240;
+const usecs    kTypingDelay         = kMinorTick;
+const RgbColor kObjectDataForeColor = GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST);
+const RgbColor kObjectDataBackColor = GetRGBTranslateColorShade(Hue::GREEN, DARKEST);
 
 Rect object_data_bounds(Point origin, Size size) {
     Rect bounds(Point(0, 0), size);
@@ -62,8 +64,8 @@ ObjectDataScreen::ObjectDataScreen(
     pn::string text;
     CreateObjectDataText(text, object);
     _text.reset(new StyledText(sys.fonts.button));
-    _text->set_fore_color(GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
-    _text->set_back_color(GetRGBTranslateColorShade(Hue::GREEN, DARKEST));
+    _text->set_fore_color(kObjectDataForeColor);
+    _text->set_back_color(kObjectDataBackColor);
     _text->set_retro_text(text);
     _text->wrap_to(kShipDataWidth, 0, 0);
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
@@ -129,13 +131,12 @@ void ObjectDataScreen::draw() const {
     next()->draw();
     Rect outside = _bounds;
     outside.inset(-8, -4);
-    const RgbColor light_green = GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST);
-    Rects().fill(outside, light_green);
+    Rects().fill(outside, kObjectDataForeColor);
     outside.inset(1, 1);
     Rects().fill(outside, RgbColor::black());
     _text->draw_range(_bounds, 0, _typed_chars);
     if (_typed_chars < _text->size()) {
-        _text->draw_cursor(_bounds, _typed_chars);
+        _text->draw_cursor(_bounds, _typed_chars, kObjectDataForeColor);
     }
 }
 
