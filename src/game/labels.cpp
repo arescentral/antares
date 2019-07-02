@@ -96,7 +96,7 @@ Handle<Label> Label::add(
     } else {
         label->visible = true;
     }
-    label->text.clear();
+    label->text    = StyledText{};
     label->lineNum = label->lineHeight = label->width = label->height = 0;
 
     return label;
@@ -104,10 +104,10 @@ Handle<Label> Label::add(
 
 void Label::remove() {
     thisRect = Rect(0, 0, -1, -1);
-    text.clear();
-    active = false;
-    killMe = false;
-    object = SpaceObject::none();
+    text     = StyledText{};
+    active   = false;
+    killMe   = false;
+    object   = SpaceObject::none();
     width = height = lineNum = lineHeight = 0;
 }
 
@@ -274,7 +274,7 @@ void Label::update_positions(ticks units_done) {
                     label->visible = false;
                     label->age     = ticks(0);
                     label->object  = SpaceObject::none();
-                    label->text.clear();
+                    label->text    = StyledText{};
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
@@ -312,7 +312,7 @@ void Label::set_string(pn::string_view string) {
 void Label::select(int from, int to) { text.select(from, to); }
 
 void Label::clear_string() {
-    text.clear();
+    text  = StyledText{};
     width = height = 0;
 }
 

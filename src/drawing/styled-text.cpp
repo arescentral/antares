@@ -300,15 +300,11 @@ StyledText StyledText::wrap_to(
     return std::move(*this);
 }
 
-void StyledText::clear() { _chars.clear(); }
-
 bool StyledText::empty() const {
     return _chars.size() <= 1;  // Always have \n at the end.
 }
 
 int StyledText::size() const { return _chars.size(); }
-
-int StyledText::width() const { return _width; }
 
 int StyledText::height() const { return _height; }
 
@@ -393,10 +389,6 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             texture.draw(corner.h, corner.v);
         }
     }
-}
-
-void StyledText::draw_char(const Rect& bounds, int index) const {
-    draw_range(bounds, index, index + 1);
 }
 
 void StyledText::draw_cursor(const Rect& bounds, int index, const RgbColor& color) const {

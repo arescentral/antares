@@ -59,21 +59,18 @@ class StyledText {
             pn::string_view text, RgbColor fore_color = RgbColor::white(),
             RgbColor back_color = RgbColor::black());
 
-    void       select(int from, int to);
     StyledText wrap_to(
             const Font& font, int width, int side_margin, int line_spacing, int tab_width = 0) &&;
-    void clear();
 
     bool                               empty() const;
     int                                size() const;
-    int                                width() const;
     int                                height() const;
     int                                auto_width() const;
     const std::vector<inlinePictType>& inline_picts() const;
 
+    void select(int from, int to);
     void draw(const Rect& bounds) const;
     void draw_range(const Rect& bounds, int begin, int end) const;
-    void draw_char(const Rect& bounds, int index) const;
 
     void draw_cursor(const Rect& bounds, int index, const RgbColor& color) const;
 
