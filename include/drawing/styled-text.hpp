@@ -102,21 +102,22 @@ class StyledText {
 
     struct StyledChar {
         StyledChar(
-                pn::rune r, SpecialChar special, int pict_index, const RgbColor& fore_color,
-                const RgbColor& back_color);
+                pn::string::iterator it, SpecialChar special, int pict_index,
+                const RgbColor& fore_color, const RgbColor& back_color);
 
-        pn::rune    rune;
-        SpecialChar special;
-        int         pict_index;
-        RgbColor    fore_color;
-        RgbColor    back_color;
-        Rect        bounds;
+        pn::string::iterator it;
+        SpecialChar          special;
+        int                  pict_index;
+        RgbColor             fore_color;
+        RgbColor             back_color;
+        Rect                 bounds;
     };
 
     void rewrap();
     int  move_word_down(int index, int v);
     bool is_selected(int index) const;
 
+    pn::string                  _text;
     std::vector<StyledChar>     _chars;
     std::vector<inlinePictType> _inline_picts;
     std::vector<Texture>        _textures;

@@ -34,9 +34,6 @@ namespace antares {
 
 namespace {
 
-constexpr pn::rune nl{'\n'};
-constexpr pn::rune bs{'\\'};
-
 int hex_digit(pn::rune r) {
     int32_t c = r.value();
     if ('0' <= c && c <= '9') {
@@ -58,24 +55,26 @@ StyledText::~StyledText() {}
 StyledText StyledText::plain(
         pn::string_view text, WrapMetrics metrics, RgbColor fore_color, RgbColor back_color) {
     StyledText t;
+    t._text         = text.copy();
     t._wrap_metrics = metrics;
 
-    for (auto r : text) {
+    for (auto it = t._text.begin(), end = t._text.end(); it != end; ++it) {
+        const auto r = *it;
         switch (r.value()) {
             case '\n':
-                t._chars.push_back(StyledChar(r, LINE_BREAK, 0, fore_color, back_color));
+                t._chars.push_back(StyledChar(it, LINE_BREAK, 0, fore_color, back_color));
                 break;
             case ' ':
-                t._chars.push_back(StyledChar(r, WORD_BREAK, 0, fore_color, back_color));
+                t._chars.push_back(StyledChar(it, WORD_BREAK, 0, fore_color, back_color));
                 break;
             case 0xA0:
-                t._chars.push_back(StyledChar(r, NO_BREAK, 0, fore_color, back_color));
+                t._chars.push_back(StyledChar(it, NO_BREAK, 0, fore_color, back_color));
                 break;
-            default: t._chars.push_back(StyledChar(r, NONE, 0, fore_color, back_color)); break;
+            default: t._chars.push_back(StyledChar(it, NONE, 0, fore_color, back_color)); break;
         }
     }
     if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
-        t._chars.push_back(StyledChar(nl, LINE_BREAK, 0, fore_color, back_color));
+        t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
 
     t.rewrap();
@@ -85,6 +84,7 @@ StyledText StyledText::plain(
 StyledText StyledText::retro(
         pn::string_view text, WrapMetrics metrics, RgbColor fore_color, RgbColor back_color) {
     StyledText t;
+    t._text         = text.copy();
     t._wrap_metrics = metrics;
 
     const RgbColor original_fore_color = fore_color;
@@ -93,27 +93,28 @@ StyledText StyledText::retro(
 
     enum { START, SLASH, FG1, FG2, BG1, BG2 } state = START;
 
-    for (pn::rune r : text) {
+    for (auto it = t._text.begin(), end = t._text.end(); it != end; ++it) {
+        const auto r = *it;
         switch (state) {
             case START:
                 switch (r.value()) {
                     case '\n':
-                        t._chars.push_back(StyledChar(r, LINE_BREAK, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, LINE_BREAK, 0, fore_color, back_color));
                         break;
 
                     case '_':
                         // TODO(sfiera): replace use of "_" with e.g. "\_".
-                        t._chars.push_back(StyledChar(r, NO_BREAK, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, NO_BREAK, 0, fore_color, back_color));
                         break;
 
                     case ' ':
-                        t._chars.push_back(StyledChar(r, WORD_BREAK, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, WORD_BREAK, 0, fore_color, back_color));
                         break;
 
                     case '\\': state = SLASH; break;
 
                     default:
-                        t._chars.push_back(StyledChar(r, NONE, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, NONE, 0, fore_color, back_color));
                         break;
                 }
                 break;
@@ -122,26 +123,26 @@ StyledText StyledText::retro(
                 switch (r.value()) {
                     case 'i':
                         std::swap(fore_color, back_color);
-                        t._chars.push_back(StyledChar(bs, DELAY, 0, fore_color, back_color));
-                        t._chars.push_back(StyledChar(r, DELAY, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case 'r':
                         fore_color = original_fore_color;
                         back_color = original_back_color;
-                        t._chars.push_back(StyledChar(bs, DELAY, 0, fore_color, back_color));
-                        t._chars.push_back(StyledChar(r, DELAY, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case 't':
-                        t._chars.push_back(StyledChar(bs, TAB, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, TAB, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case '\\':
-                        t._chars.push_back(StyledChar(r, NONE, 0, fore_color, back_color));
+                        t._chars.push_back(StyledChar(it, NONE, 0, fore_color, back_color));
                         state = START;
                         break;
 
@@ -175,7 +176,7 @@ StyledText StyledText::retro(
     }
 
     if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
-        t._chars.push_back(StyledChar(nl, LINE_BREAK, 0, fore_color, back_color));
+        t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
 
     t.rewrap();
@@ -185,6 +186,7 @@ StyledText StyledText::retro(
 StyledText StyledText::interface(
         pn::string_view text, WrapMetrics metrics, RgbColor fore_color, RgbColor back_color) {
     StyledText t;
+    t._text         = text.copy();
     t._wrap_metrics = metrics;
 
     const auto f = fore_color;
@@ -192,13 +194,14 @@ StyledText StyledText::interface(
     pn::string id;
     enum { START, CODE, ID } state = START;
 
-    for (auto r : text) {
+    for (auto it = t._text.begin(), end = t._text.end(); it != end; ++it) {
+        const auto r = *it;
         switch (state) {
             case START:
                 switch (r.value()) {
-                    case '\n': t._chars.push_back(StyledChar(r, LINE_BREAK, 0, f, b)); break;
-                    case ' ': t._chars.push_back(StyledChar(r, WORD_BREAK, 0, f, b)); break;
-                    default: t._chars.push_back(StyledChar(r, NONE, 0, f, b)); break;
+                    case '\n': t._chars.push_back(StyledChar(it, LINE_BREAK, 0, f, b)); break;
+                    case ' ': t._chars.push_back(StyledChar(it, WORD_BREAK, 0, f, b)); break;
+                    default: t._chars.push_back(StyledChar(it, NONE, 0, f, b)); break;
                     case '^': state = CODE; break;
                 }
                 break;
@@ -229,8 +232,7 @@ StyledText StyledText::interface(
                 t._textures.push_back(Resource::texture(inline_pict.picture));
                 inline_pict.bounds = t._textures.back().size().as_rect();
                 t._inline_picts.emplace_back(std::move(inline_pict));
-                t._chars.push_back(
-                        StyledChar(pn::rune{}, PICTURE, t._inline_picts.size() - 1, f, b));
+                t._chars.push_back(StyledChar(it, PICTURE, t._inline_picts.size() - 1, f, b));
                 id.clear();
                 state = START;
                 break;
@@ -238,7 +240,7 @@ StyledText StyledText::interface(
     }
 
     if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
-        t._chars.push_back(StyledChar(nl, LINE_BREAK, 0, f, b));
+        t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, f, b));
     }
 
     t.rewrap();
@@ -264,7 +266,7 @@ void StyledText::rewrap() {
         switch (_chars[i].special) {
             case NONE:
             case NO_BREAK:
-                h += _wrap_metrics.font->char_width(_chars[i].rune);
+                h += _wrap_metrics.font->char_width(*_chars[i].it);
                 if (h >= wrap_distance) {
                     v += _wrap_metrics.font->height + _wrap_metrics.line_spacing;
                     h = move_word_down(i, v);
@@ -282,7 +284,7 @@ void StyledText::rewrap() {
                 v += _wrap_metrics.font->height + _wrap_metrics.line_spacing;
                 break;
 
-            case WORD_BREAK: h += _wrap_metrics.font->char_width(_chars[i].rune); break;
+            case WORD_BREAK: h += _wrap_metrics.font->char_width(*_chars[i].it); break;
 
             case PICTURE: {
                 inlinePictType* pict = &_inline_picts[_chars[i].pict_index];
@@ -379,7 +381,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             if (ch.special == NONE) {
                 RgbColor color = is_selected(i) ? ch.back_color : ch.fore_color;
                 Point    p = Point{ch.bounds.left + char_adjust.h, ch.bounds.top + char_adjust.v};
-                _wrap_metrics.font->draw(quads, p, ch.rune, color);
+                _wrap_metrics.font->draw(quads, p, *ch.it, color);
             }
         }
     }
@@ -424,7 +426,7 @@ int StyledText::move_word_down(int index, int v) {
                 int h = _wrap_metrics.side_margin;
                 for (int j = i + 1; j <= index; ++j) {
                     _chars[j].bounds = Rect{Point{h, v}, _chars[j].bounds.size()};
-                    h += _wrap_metrics.font->char_width(_chars[j].rune);
+                    h += _wrap_metrics.font->char_width(*_chars[j].it);
                 }
                 return h;
             }
@@ -441,9 +443,9 @@ bool StyledText::is_selected(int index) const {
 }
 
 StyledText::StyledChar::StyledChar(
-        pn::rune r, SpecialChar special, int pict_index, const RgbColor& fore_color,
+        pn::string::iterator it, SpecialChar special, int pict_index, const RgbColor& fore_color,
         const RgbColor& back_color)
-        : rune{r},
+        : it{it},
           special{special},
           pict_index{pict_index},
           fore_color{fore_color},
