@@ -1020,12 +1020,7 @@ void PlayerShip::MessageTextReceiver::update() {
     }
     g.send_label->set_position(strlen, viewport().top + ((play_screen().height() / 2)));
 
-    pn::string_view pre_selected = _text.substr(0, _selection.begin);
-    pn::string_view in_selected =
-            _text.substr(_selection.begin, _selection.end - _selection.begin);
-    int pre_selected_runes = std::distance(pre_selected.begin(), pre_selected.end());
-    int in_selected_runes  = std::distance(in_selected.begin(), in_selected.end());
-    g.send_label->select(1 + pre_selected_runes, 1 + pre_selected_runes + in_selected_runes);
+    g.send_label->select(1 + _selection.begin, 1 + _selection.end);
 }
 
 void PlayerShip::MessageTextReceiver::accept() {

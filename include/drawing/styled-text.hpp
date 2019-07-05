@@ -115,7 +115,7 @@ class StyledText {
 
     void rewrap();
     int  move_word_down(int index, int v);
-    bool is_selected(int index) const;
+    bool is_selected(const StyledChar& ch) const;
 
     pn::string                  _text;
     std::vector<StyledChar>     _chars;

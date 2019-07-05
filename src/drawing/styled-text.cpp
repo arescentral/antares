@@ -326,11 +326,31 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
 
     {
         Rects rects;
+        bool should_draw_caret = (0 <= _selected.first) && (_selected.first == _selected.second) &&
+                                 (_selected.second < _chars.size());
+        Rect prev_bounds;
+
         for (size_t i = begin; i < end; ++i) {
             const StyledChar& ch = _chars[i];
             Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
-            const RgbColor color = is_selected(i) ? ch.fore_color : ch.back_color;
+            const RgbColor color = is_selected(ch) ? ch.fore_color : ch.back_color;
+
+            if (should_draw_caret) {
+                if (ch.it.offset() >= _selected.first) {
+                    Rect bounds;
+                    if (ch.special == LINE_BREAK) {
+                        bounds = Rect{prev_bounds.right, prev_bounds.top, prev_bounds.right + 1,
+                                      prev_bounds.bottom};
+                    } else {
+                        bounds = Rect{r.left, r.top, r.left + 1, r.bottom};
+                    }
+                    rects.fill(bounds, ch.fore_color);
+                    should_draw_caret = false;
+                } else {
+                    prev_bounds = r;
+                }
+            }
 
             switch (ch.special) {
                 case NONE:
@@ -356,20 +376,11 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             rects.fill(r, color);
         }
 
-        if ((0 <= _selected.first) && (_selected.first == _selected.second) &&
-            (_selected.second < _chars.size())) {
-            const int      i = _selected.first;
-            Rect           r;
-            const RgbColor color = _chars[i].fore_color;
-            if ((i == 0) || (_chars[i - 1].special == LINE_BREAK)) {
-                r = _chars[i].bounds;
-            } else {
-                r      = _chars[i - 1].bounds;
-                r.left = r.right;
-            }
-            r.right = r.left + 1;
+        if (should_draw_caret) {
+            const StyledChar& ch = _chars.back();
+            Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
-            rects.fill(r, color);
+            rects.fill(Rect{r.right, r.top, r.right + 1, r.bottom}, ch.fore_color);
         }
     }
 
@@ -379,7 +390,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         for (size_t i = begin; i < end; ++i) {
             const StyledChar& ch = _chars[i];
             if (ch.special == NONE) {
-                RgbColor color = is_selected(i) ? ch.back_color : ch.fore_color;
+                RgbColor color = is_selected(ch) ? ch.back_color : ch.fore_color;
                 Point    p = Point{ch.bounds.left + char_adjust.h, ch.bounds.top + char_adjust.v};
                 _wrap_metrics.font->draw(quads, p, *ch.it, color);
             }
@@ -438,8 +449,8 @@ int StyledText::move_word_down(int index, int v) {
     return _wrap_metrics.side_margin;
 }
 
-bool StyledText::is_selected(int index) const {
-    return (_selected.first <= index) && (index < _selected.second);
+bool StyledText::is_selected(const StyledChar& ch) const {
+    return (_selected.first <= ch.it.offset()) && (ch.it.offset() < _selected.second);
 }
 
 StyledText::StyledChar::StyledChar(
