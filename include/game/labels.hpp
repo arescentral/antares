@@ -48,28 +48,30 @@ class Label {
 
     void remove();
 
-    void    set_position(int16_t h, int16_t v);
-    void    set_object(Handle<SpaceObject> object);
-    void    set_age(ticks age);
-    void    set_string(pn::string_view string);
-    void    select(int from, int to);
-    void    clear_string();
-    void    set_hue(Hue hue);
-    void    set_offset(int32_t hoff, int32_t voff);
-    int32_t get_width() { return width; }
-    void    set_keep_on_screen_anyway(bool keepOnScreenAnyWay);
-    void    set_attached_hint_line(bool attachedHintLine, Point toWhere);
+    StyledText&       text() { return _text; };
+    const StyledText& text() const { return _text; }
+
+    void set_position(int16_t h, int16_t v);
+    void set_object(Handle<SpaceObject> object);
+    void set_age(ticks age);
+    void set_hue(Hue hue);
+    void set_offset(int32_t hoff, int32_t voff);
+    void set_keep_on_screen_anyway(bool keepOnScreenAnyWay);
+    void set_attached_hint_line(bool attachedHintLine, Point toWhere);
+
+    int32_t width() const;
 
   private:
     static Handle<Label> next_free_label();
 
+    int32_t height() const;
+    int32_t line_height() const;
+
     Point               where;
     Point               offset;
     Rect                thisRect = Rect(0, 0, -1, -1);
-    int32_t             width;
-    int32_t             height;
-    ticks               age = ticks(0);
-    StyledText          text;
+    ticks               age      = ticks(0);
+    StyledText          _text;
     Hue                 hue;
     bool                active  = false;
     bool                killMe  = false;
@@ -77,7 +79,6 @@ class Label {
     Handle<SpaceObject> object;
     bool                objectLink = true;  // true if label requires an object to be seen
     int32_t             lineNum    = 1;
-    int32_t             lineHeight;
     bool    keepOnScreenAnyway = false;  // if not attached to object, keep on screen if it's off
     bool    attachedHintLine   = false;
     Point   attachedToWhere;

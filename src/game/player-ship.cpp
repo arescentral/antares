@@ -204,6 +204,7 @@ static void engage_autopilot() {
 static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
     Handle<SpaceObject> flagship = adm->flagship();
     Handle<Label>       label;
+    Hue                 hue;
 
     if (adm == g.admiral) {
         globals()->lastSelectedObject   = ship;
@@ -212,6 +213,7 @@ static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral>
     if (target) {
         adm->set_target(ship);
         label = g.target_label;
+        hue   = Hue::SKY_BLUE;
 
         if (!(flagship->attributes & kOnAutoPilot)) {
             SetObjectDestination(flagship);
@@ -219,6 +221,7 @@ static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral>
     } else {
         adm->set_control(ship);
         label = g.control_label;
+        hue   = Hue::YELLOW;
     }
 
     if (adm == g.admiral) {
@@ -227,7 +230,9 @@ static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral>
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
         }
-        label->set_string(name_with_hot_key_suffix(ship));
+        label->text() = StyledText::plain(
+                name_with_hot_key_suffix(ship), sys.fonts.tactical,
+                GetRGBTranslateColorShade(hue, LIGHTEST));
     }
 }
 
@@ -992,7 +997,7 @@ void PlayerShip::MessageTextReceiver::start_editing() {
 void PlayerShip::MessageTextReceiver::stop_editing() {
     _editing = false;
     sys.video->stop_editing(this);
-    g.send_label->set_string("");
+    g.send_label->text() = StyledText{};
 }
 
 void PlayerShip::MessageTextReceiver::replace(range<int> replace, pn::string_view text) {
@@ -1011,16 +1016,18 @@ void PlayerShip::MessageTextReceiver::select(range<int> select) {
 void PlayerShip::MessageTextReceiver::mark(range<int> mark) { _mark = mark; }
 
 void PlayerShip::MessageTextReceiver::update() {
-    g.send_label->set_string(pn::format("<{}>", _text));
+    g.send_label->text() = StyledText::plain(
+            pn::format("<{}>", _text), sys.fonts.tactical,
+            GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
 
-    int width  = g.send_label->get_width();
+    int width  = g.send_label->width();
     int strlen = viewport().left + ((viewport().width() / 2) - (width / 2));
     if ((strlen + width) > (viewport().right)) {
         strlen -= (strlen + width) - (viewport().right);
     }
     g.send_label->set_position(strlen, viewport().top + ((play_screen().height() / 2)));
 
-    g.send_label->select(1 + _selection.begin, 1 + _selection.end);
+    g.send_label->text().select(1 + _selection.begin, 1 + _selection.end);
 }
 
 void PlayerShip::MessageTextReceiver::accept() {
@@ -1303,7 +1310,9 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         if (target == g.ship) {
             g.target_label->set_age(Label::kVisibleTime);
         }
-        g.target_label->set_string(name_with_hot_key_suffix(target));
+        g.target_label->text() = StyledText::plain(
+                name_with_hot_key_suffix(target), sys.fonts.tactical,
+                GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHTEST));
     }
 
     auto control = g.admiral->control();
@@ -1313,7 +1322,9 @@ void Update_LabelStrings_ForHotKeyChange(void) {
             g.control_label->set_age(Label::kVisibleTime);
         }
         sys.sound.select();
-        g.control_label->set_string(name_with_hot_key_suffix(control));
+        g.control_label->text() = StyledText::plain(
+                name_with_hot_key_suffix(control), sys.fonts.tactical,
+                GetRGBTranslateColorShade(Hue::YELLOW, LIGHTEST));
     }
 }
 

@@ -96,19 +96,19 @@ Handle<Label> Label::add(
     } else {
         label->visible = true;
     }
-    label->text    = StyledText{};
-    label->lineNum = label->lineHeight = label->width = label->height = 0;
+    label->_text   = StyledText{};
+    label->lineNum = 0;
 
     return label;
 }
 
 void Label::remove() {
     thisRect = Rect(0, 0, -1, -1);
-    text     = StyledText{};
+    _text    = StyledText{};
     active   = false;
     killMe   = false;
     object   = SpaceObject::none();
-    width = height = lineNum = lineHeight = 0;
+    lineNum  = 0;
 }
 
 void Label::draw() {
@@ -119,7 +119,7 @@ void Label::draw() {
         // the original location we drew at.
         Rect rect = label->thisRect;
 
-        if (!label->active || label->killMe || label->text.empty() || !label->visible ||
+        if (!label->active || label->killMe || label->_text.empty() || !label->visible ||
             (label->thisRect.width() <= 0) || (label->thisRect.height() <= 0)) {
             continue;
         }
@@ -127,10 +127,10 @@ void Label::draw() {
         sys.video->dither_rect(label->thisRect, dark);
         rect.offset(kLabelInnerSpace, kLabelInnerSpace);
 
-        if ((0 <= label->retroCount) && (label->retroCount < label->text.size())) {
-            label->text.draw_range(rect, 0, label->retroCount);
+        if ((0 <= label->retroCount) && (label->retroCount < label->_text.size())) {
+            label->_text.draw_range(rect, 0, label->retroCount);
         } else {
-            label->text.draw_range(rect, 0, label->text.size());
+            label->_text.draw_range(rect, 0, label->_text.size());
         }
     }
 }
@@ -138,12 +138,12 @@ void Label::draw() {
 void Label::update_contents(ticks units_done) {
     Rect clip = viewport();
     for (auto label : all()) {
-        if (!label->active || label->killMe || label->text.empty() || !label->visible) {
+        if (!label->active || label->killMe || label->_text.empty() || !label->visible) {
             label->thisRect.left = label->thisRect.right = 0;
             continue;
         }
 
-        label->thisRect = Rect(0, 0, label->width, label->height);
+        label->thisRect = Rect(0, 0, label->width(), label->height());
         label->thisRect.offset(label->where.h, label->where.v);
         label->thisRect.clip_to(clip);
         if ((label->thisRect.width() <= 0) || (label->thisRect.height() <= 0)) {
@@ -158,7 +158,7 @@ void Label::update_contents(ticks units_done) {
             for (size_t i = 0; i < units_done.count(); ++i) {
                 ++label->retroCount;
             }
-            if (static_cast<size_t>(label->retroCount) >= label->text.size()) {
+            if (static_cast<size_t>(label->retroCount) >= label->_text.size()) {
                 label->retroCount = -1;
             } else {
                 sys.sound.teletype();
@@ -199,9 +199,9 @@ void Label::update_positions(ticks units_done) {
                         label->where.h = label_limits.left;
                     }
 
-                    if (label->where.h > (label_limits.right - label->width)) {
+                    if (label->where.h > (label_limits.right - label->width())) {
                         isOffScreen    = true;
-                        label->where.h = label_limits.right - label->width;
+                        label->where.h = label_limits.right - label->width();
                     }
 
                     label->where.v = label->object->sprite->where.v + label->offset.v;
@@ -211,9 +211,9 @@ void Label::update_positions(ticks units_done) {
                         label->where.v = label_limits.top;
                     }
 
-                    if (label->where.v > (label_limits.bottom - label->height)) {
+                    if (label->where.v > (label_limits.bottom - label->height())) {
                         isOffScreen    = true;
-                        label->where.v = label_limits.bottom - label->height;
+                        label->where.v = label_limits.bottom - label->height();
                     }
 
                     if (!(label->object->seenByPlayerFlags & (1 << g.admiral.number()))) {
@@ -230,39 +230,40 @@ void Label::update_positions(ticks units_done) {
                             label->visible = true;
                         }
                     }
-                    if (label->attachedHintLine && !(label->text.empty())) {
+                    if (label->attachedHintLine && !(label->_text.empty())) {
                         Point dest = label->attachedToWhere = label->object->sprite->where;
                         Point source;
-                        source.h = label->where.h + (label->width / 4);
+                        source.h = label->where.h + (label->width() / 4);
 
                         if (label->attachedToWhere.v < label->where.v) {
                             source.v = label->where.v - 2;
                         } else {
-                            source.v = label->where.v + label->height + 2;
+                            source.v = label->where.v + label->height() + 2;
                         }
                         Auto_Animate_Line(&source, &dest);
                         HintLine::show(source, dest, label->hue, DARK);
                     }
                 } else {
-                    label->set_string("");
+                    label->_text = StyledText{};
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
                 }
             } else if (label->keepOnScreenAnyway) {
                 label->where.h = max(label->where.h, label_limits.left);
-                label->where.h = min<int32_t>(label->where.h, label_limits.right - label->width);
+                label->where.h = min<int32_t>(label->where.h, label_limits.right - label->width());
                 label->where.v = max(label->where.v, label_limits.top);
-                label->where.v = min<int32_t>(label->where.v, label_limits.bottom - label->height);
+                label->where.v =
+                        min<int32_t>(label->where.v, label_limits.bottom - label->height());
 
-                if ((label->attachedHintLine) && !(label->text.empty())) {
+                if ((label->attachedHintLine) && !(label->_text.empty())) {
                     Point dest = label->attachedToWhere;
                     Point source;
-                    source.v = label->where.v + (label->height / 2);
+                    source.v = label->where.v + (label->height() / 2);
                     if (label->attachedToWhere.h < label->where.h) {
                         source.h = label->where.h - 2;
                     } else {
-                        source.h = label->where.h + label->width + 2;
+                        source.h = label->where.h + label->width() + 2;
                     }
                     Auto_Animate_Line(&source, &dest);
                     HintLine::show(source, dest, label->hue, LIGHTEST);
@@ -274,7 +275,7 @@ void Label::update_positions(ticks units_done) {
                     label->visible = false;
                     label->age     = ticks(0);
                     label->object  = SpaceObject::none();
-                    label->text    = StyledText{};
+                    label->_text   = StyledText{};
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
@@ -301,20 +302,6 @@ void Label::set_age(ticks age) {
     visible   = true;
 }
 
-void Label::set_string(pn::string_view string) {
-    text = StyledText::plain(string, sys.fonts.tactical, GetRGBTranslateColorShade(hue, LIGHTEST));
-    width      = text.auto_width() + kLabelTotalInnerSpace;
-    height     = text.height() + kLabelTotalInnerSpace;
-    lineHeight = sys.fonts.tactical.height;
-}
-
-void Label::select(int from, int to) { text.select(from, to); }
-
-void Label::clear_string() {
-    text  = StyledText{};
-    width = height = 0;
-}
-
 void Label::set_hue(Hue hue) { this->hue = hue; }
 
 void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
@@ -335,6 +322,12 @@ void Label::set_offset(int32_t hoff, int32_t voff) {
     offset.h = hoff;
     offset.v = voff;
 }
+
+int32_t Label::width() const { return _text.auto_width() + kLabelTotalInnerSpace; }
+
+int32_t Label::height() const { return _text.height() + kLabelTotalInnerSpace; }
+
+int32_t Label::line_height() const { return sys.fonts.tactical.height; }
 
 static void Auto_Animate_Line(Point* source, Point* dest) {
     switch ((std::chrono::time_point_cast<ticks>(g.time).time_since_epoch().count() >> 3) & 0x03) {

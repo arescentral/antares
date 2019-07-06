@@ -315,16 +315,18 @@ void Messages::draw_message_screen(ticks by_units) {
                     viewport().bottom - (kMessageDisplayTime - time_count).count());
         }
 
-        g.message_label->set_string(message);
+        g.message_label->text() = StyledText::plain(
+                message, sys.fonts.tactical, GetRGBTranslateColorShade(kMessageColor, LIGHTEST));
     } else {
-        g.message_label->clear_string();
-        time_count = ticks(0);
+        g.message_label->text() = StyledText{};
+        time_count              = ticks(0);
     }
 }
 
 void Messages::set_status(pn::string_view status, Hue hue) {
     g.status_label->set_hue(hue);
-    g.status_label->set_string(status);
+    g.status_label->text() = StyledText::plain(
+            status, sys.fonts.tactical, GetRGBTranslateColorShade(hue, LIGHTEST));
     g.status_label->set_age(kStatusLabelAge);
 }
 
@@ -409,14 +411,14 @@ void MessageLabel_Set_Special(Handle<Label> label, pn::string_view text) {
         ++it;
     }
 
-    label->set_string(message);
+    label->text() = StyledText::plain(message, sys.fonts.tactical, kMessagesForeColor);
     label->set_keep_on_screen_anyway(true);
 
     switch (whichType.value()) {
         case 'R':
             label->set_offset(0, 0);
             label->set_position(
-                    play_screen().right - (label->get_width() + 10), instrument_top() + value);
+                    play_screen().right - label->width() - 10, instrument_top() + value);
             break;
 
         case 'L':
@@ -426,7 +428,7 @@ void MessageLabel_Set_Special(Handle<Label> label, pn::string_view text) {
 
         case 'O': {
             auto o = GetObjectFromInitialNumber(Handle<const Initial>(value));
-            label->set_offset(-(label->get_width() / 2), 64);
+            label->set_offset(-label->width() / 2, 64);
             label->set_object(o);
 
             hintLine = true;
