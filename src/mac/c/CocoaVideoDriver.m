@@ -709,8 +709,11 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)item {
-    if ((item.action == @selector(delete:)) || (item.action == @selector(cut:)) ||
-        (item.action == @selector(copy:))) {
+    if (!text_callback) {
+        return false;
+    } else if (
+            (item.action == @selector(delete:)) || (item.action == @selector(cut:)) ||
+            (item.action == @selector(copy:))) {
         return self.selectedRange.length > 0;
     } else if (item.action == @selector(paste:)) {
         return [[NSPasteboard generalPasteboard]
