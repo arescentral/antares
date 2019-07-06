@@ -1017,16 +1017,11 @@ void PlayerShip::MessageTextReceiver::mark(range<int> mark) { _mark = mark; }
 
 void PlayerShip::MessageTextReceiver::update() {
     g.send_label->text() = StyledText::plain(
-            pn::format("<{}>", _text), sys.fonts.tactical,
+            pn::format("<{}>", _text), {sys.fonts.tactical, viewport().width() / 2},
             GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
-
-    int width  = g.send_label->width();
-    int strlen = viewport().left + ((viewport().width() / 2) - (width / 2));
-    if ((strlen + width) > (viewport().right)) {
-        strlen -= (strlen + width) - (viewport().right);
-    }
-    g.send_label->set_position(strlen, viewport().top + ((play_screen().height() / 2)));
-
+    g.send_label->set_position(
+            viewport().left + ((viewport().width() / 2) - (g.send_label->width() / 2)),
+            viewport().top + ((play_screen().height() / 2)));
     g.send_label->text().select(1 + _selection.begin, 1 + _selection.end);
 }
 
