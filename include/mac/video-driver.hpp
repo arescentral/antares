@@ -51,19 +51,12 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
 
   private:
     static wall_time _now();
-    static void      text_callback(
-                 antares_window_text_callback_type type, antares_window_text_callback_data data,
-                 void* userdata);
 
     struct EventBridge;
-
-    struct Text {
-        TextReceiver* receiver = nullptr;
-    };
+    EventBridge* _bridge = nullptr;
 
     InputMode      _input_mode = KEYBOARD_MOUSE;
     AntaresWindow* _window     = nullptr;
-    Text           _text;
 };
 
 }  // namespace antares

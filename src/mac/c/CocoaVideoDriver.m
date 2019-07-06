@@ -63,28 +63,15 @@ typedef enum {
     void (*text_callback)(
             antares_window_text_callback_type type, antares_window_text_callback_data data,
             void* userdata);
-    void* text_userdata;
-
     void (*key_down_callback)(int key, void* userdata);
-    void* key_down_userdata;
-
     void (*key_up_callback)(int key, void* userdata);
-    void* key_up_userdata;
-
     void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
-    void* mouse_down_userdata;
-
     void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
-    void* mouse_up_userdata;
-
     void (*mouse_move_callback)(int32_t x, int32_t y, void* userdata);
-    void* mouse_move_userdata;
-
     void (*caps_lock_callback)(void* userdata);
-    void* caps_lock_userdata;
-
     void (*caps_unlock_callback)(void* userdata);
-    void* caps_unlock_userdata;
+
+    void* userdata;
 
     SelectionDirection selectionDir;
     int32_t            modifier_flags;
@@ -194,60 +181,52 @@ void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y) {
     *y               = view_size.height - *y;
 }
 
+void antares_window_set_userdata(AntaresWindow* window, void* userdata) {
+    window->view->userdata = userdata;
+}
+
 void antares_window_set_text_callback(
-        AntaresWindow* window,
-        void (*callback)(
-                antares_window_text_callback_type type, antares_window_text_callback_data data,
-                void* userdata),
-        void* userdata) {
+        AntaresWindow* window, void (*callback)(
+                                       antares_window_text_callback_type type,
+                                       antares_window_text_callback_data data, void* userdata)) {
     window->view->text_callback = callback;
-    window->view->text_userdata = userdata;
 }
 
 void antares_window_set_key_down_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata) {
+        AntaresWindow* window, void (*callback)(int key, void* userdata)) {
     window->view->key_down_callback = callback;
-    window->view->key_down_userdata = userdata;
 }
 
 void antares_window_set_key_up_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata) {
+        AntaresWindow* window, void (*callback)(int key, void* userdata)) {
     window->view->key_up_callback = callback;
-    window->view->key_up_userdata = userdata;
 }
 
 void antares_window_set_mouse_down_callback(
         AntaresWindow* window,
-        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
-        void* userdata) {
+        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata)) {
     window->view->mouse_down_callback = callback;
-    window->view->mouse_down_userdata = userdata;
 }
 
 void antares_window_set_mouse_up_callback(
-        AntaresWindow* window, void (*callback)(int button, int32_t x, int32_t y, void* userdata),
-        void*          userdata) {
+        AntaresWindow* window,
+        void (*callback)(int button, int32_t x, int32_t y, void* userdata)) {
     window->view->mouse_up_callback = callback;
-    window->view->mouse_up_userdata = userdata;
 }
 
 void antares_window_set_mouse_move_callback(
-        AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata),
-        void*          userdata) {
+        AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata)) {
     window->view->mouse_move_callback = callback;
-    window->view->mouse_move_userdata = userdata;
 }
 
 void antares_window_set_caps_lock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata), void* userdata) {
+        AntaresWindow* window, void (*callback)(void* userdata)) {
     window->view->caps_lock_callback = callback;
-    window->view->caps_lock_userdata = userdata;
 }
 
 void antares_window_set_caps_unlock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata), void* userdata) {
+        AntaresWindow* window, void (*callback)(void* userdata)) {
     window->view->caps_unlock_callback = callback;
-    window->view->caps_unlock_userdata = userdata;
 }
 
 static void key_down(AntaresView* view, NSEvent* event) {
@@ -255,7 +234,7 @@ static void key_down(AntaresView* view, NSEvent* event) {
     if (!translate_coords(view, event, &where)) {
         return;
     }
-    view->key_down_callback([event keyCode], view -> key_down_userdata);
+    view->key_down_callback([event keyCode], view -> userdata);
 }
 
 static void key_up(AntaresView* view, NSEvent* event) {
@@ -263,7 +242,7 @@ static void key_up(AntaresView* view, NSEvent* event) {
     if (!translate_coords(view, event, &where)) {
         return;
     }
-    view->key_up_callback([event keyCode], view -> key_up_userdata);
+    view->key_up_callback([event keyCode], view -> userdata);
 }
 
 static void hide_unhide(AntaresView* view, NSPoint location) {
@@ -302,8 +281,7 @@ static void mouse_down(AntaresView* view, NSEvent* event) {
     }
     hide_unhide(view, where);
     int button = button_for(event);
-    view->mouse_down_callback(
-            button, where.x, where.y, [event clickCount], view -> mouse_down_userdata);
+    view->mouse_down_callback(button, where.x, where.y, [event clickCount], view -> userdata);
 }
 
 static void mouse_up(AntaresView* view, NSEvent* event) {
@@ -313,7 +291,7 @@ static void mouse_up(AntaresView* view, NSEvent* event) {
     }
     hide_unhide(view, where);
     int button = button_for(event);
-    view->mouse_up_callback(button, where.x, where.y, view->mouse_up_userdata);
+    view->mouse_up_callback(button, where.x, where.y, view->userdata);
 }
 
 static void mouse_move(AntaresView* view, NSEvent* event) {
@@ -322,7 +300,7 @@ static void mouse_move(AntaresView* view, NSEvent* event) {
         return;
     }
     hide_unhide(view, where);
-    view->mouse_move_callback(where.x, where.y, view->mouse_move_userdata);
+    view->mouse_move_callback(where.x, where.y, view->userdata);
 }
 
 static void flags_changed(AntaresView* view, NSEvent* event) {
@@ -330,16 +308,16 @@ static void flags_changed(AntaresView* view, NSEvent* event) {
     int32_t new_flags = view->modifier_flags = [event modifierFlags];
     if ([event keyCode] == 0x39) {  // Caps Lock
         if ((new_flags | old_flags) == new_flags) {
-            view->caps_lock_callback(view->caps_lock_userdata);
+            view->caps_lock_callback(view->userdata);
         } else {
-            view->caps_unlock_callback(view->caps_unlock_userdata);
+            view->caps_unlock_callback(view->userdata);
         }
         return;
     }
     if ((new_flags | old_flags) == new_flags) {
-        view->key_down_callback([event keyCode], view -> key_down_userdata);
+        view->key_down_callback([event keyCode], view -> userdata);
     } else {
-        view->key_up_callback([event keyCode], view -> key_up_userdata);
+        view->key_up_callback([event keyCode], view -> userdata);
     }
 }
 
@@ -600,7 +578,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 
 - (void)insertTab:(id)sender {
     antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_TAB, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_TAB, data, userdata);
 }
 
 - (void)insertTabIgnoringFieldEditor:(id)sender {
@@ -613,12 +591,12 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 
 - (void)insertNewline:(id)sender {
     antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT, data, userdata);
 }
 
 - (void)insertNewlineIgnoringFieldEditor:(id)sender {
     antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, data, userdata);
 }
 
 - (void)insertSingleQuoteIgnoringSubstitution:(id)sender {
@@ -674,7 +652,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 
 - (void)cancelOperation:(id)sender {
     antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE, data, userdata);
 }
 
 // clang-format off
@@ -791,14 +769,14 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 - (NSRange)selectedRange {
     antares_window_text_callback_range selection;
     antares_window_text_callback_data  data = {.get_selection = &selection};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, data, userdata);
     return NSMakeRange(selection.begin, selection.end - selection.begin);
 }
 
 - (NSRange)markedRange {
     antares_window_text_callback_range mark;
     antares_window_text_callback_data  data = {.get_mark = &mark};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, data, userdata);
     if (mark.begin == mark.end) {
         return kNoRange;
     }
@@ -814,7 +792,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
                 unit:(antares_window_text_callback_unit)unit {
     int                               offset;
     antares_window_text_callback_data data = {.get_offset = {origin, by, unit, &offset}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, data, userdata);
     return offset;
 }
 
@@ -840,7 +818,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 - (NSUInteger)textLength {
     int                               size;
     antares_window_text_callback_data data = {.get_size = &size};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, data, userdata);
     return size;
 }
 
@@ -855,7 +833,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
                                                       .data  = [utf8 bytes],
                                                       .size  = [utf8 length],
                                               }};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_REPLACE, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_REPLACE, data, userdata);
     selectionDir = SelectionDirectionNeither;
 }
 
@@ -865,13 +843,13 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 
 - (void)selectFrom:(NSUInteger)from to:(NSUInteger)to in:(SelectionDirection)direction {
     antares_window_text_callback_data data = {.select = {from, to}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_SELECT, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_SELECT, data, userdata);
     selectionDir = (from < to) ? direction : SelectionDirectionNeither;
 }
 
 - (void)markText:(NSRange)range {
     antares_window_text_callback_data data = {.mark = {range.location, NSMaxRange(range)}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_MARK, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_MARK, data, userdata);
 }
 
 - (NSString*)textInRange:(NSRange)range {
@@ -879,7 +857,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     int                               length;
     antares_window_text_callback_data data = {
             .get_text = {{range.location, NSMaxRange(range)}, &bytes, &length}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT, data, text_userdata);
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT, data, userdata);
     return [[[NSString alloc] initWithBytes:bytes length:length
                                    encoding:NSUTF8StringEncoding] autorelease];
 }

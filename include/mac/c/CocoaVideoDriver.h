@@ -101,30 +101,26 @@ typedef union {
     } get_text;
 } antares_window_text_callback_data;
 
+void antares_window_set_userdata(AntaresWindow* window, void* userdata);
 void antares_window_set_text_callback(
-        AntaresWindow* window,
-        void (*callback)(
-                antares_window_text_callback_type type, antares_window_text_callback_data data,
-                void* userdata),
-        void* userdata);
+        AntaresWindow* window, void (*callback)(
+                                       antares_window_text_callback_type type,
+                                       antares_window_text_callback_data data, void* userdata));
 void antares_window_set_key_down_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata);
+        AntaresWindow* window, void (*callback)(int key, void* userdata));
 void antares_window_set_key_up_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata), void* userdata);
+        AntaresWindow* window, void (*callback)(int key, void* userdata));
 void antares_window_set_mouse_down_callback(
         AntaresWindow* window,
-        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
-        void* userdata);
+        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata));
 void antares_window_set_mouse_up_callback(
-        AntaresWindow* window, void (*callback)(int button, int32_t x, int32_t y, void* userdata),
-        void*          userdata);
+        AntaresWindow* window, void (*callback)(int button, int32_t x, int32_t y, void* userdata));
 void antares_window_set_mouse_move_callback(
-        AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata),
-        void*          userdata);
+        AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata));
 void antares_window_set_caps_lock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata), void* userdata);
+        AntaresWindow* window, void (*callback)(void* userdata));
 void antares_window_set_caps_unlock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata), void* userdata);
+        AntaresWindow* window, void (*callback)(void* userdata));
 
 bool antares_window_next_event(AntaresWindow* window, int64_t until);
 void antares_window_cancel_event(AntaresWindow* window);
