@@ -197,10 +197,11 @@ class TextReceiver {
         PARAGRAPHS       = 4,  // Non-newline sequences
         PARAGRAPH_GLYPHS = 5,  // Glyphs within a paragraph
     };
-    virtual int        offset(int origin, int by, OffsetUnit unit) const = 0;
-    virtual int        size() const                                      = 0;
-    virtual range<int> selection() const                                 = 0;
-    virtual range<int> mark() const                                      = 0;
+    virtual int             offset(int origin, int by, OffsetUnit unit) const = 0;
+    virtual int             size() const                                      = 0;
+    virtual range<int>      selection() const                                 = 0;
+    virtual range<int>      mark() const                                      = 0;
+    virtual pn::string_view text(range<int> range) const                      = 0;
 };
 
 class Points {

@@ -1132,6 +1132,10 @@ PlayerShip::MessageTextReceiver::range<int> PlayerShip::MessageTextReceiver::mar
     return _mark;
 }
 
+pn::string_view PlayerShip::MessageTextReceiver::text(range<int> range) const {
+    return _text.substr(range.begin, range.end - range.begin);
+}
+
 void PlayerShipHandleClick(Point where, int button) {
     if (g.key_mask & kMouseMask) {
         return;

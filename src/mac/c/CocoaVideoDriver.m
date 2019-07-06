@@ -60,7 +60,7 @@ typedef enum {
 
 @interface AntaresView : NSOpenGLView <NSTextInputClient> {
   @public
-    antares_window_text_callback_range (*text_callback)(
+    void (*text_callback)(
             antares_window_text_callback_type type, antares_window_text_callback_data data,
             void* userdata);
     void* text_userdata;
@@ -196,7 +196,7 @@ void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y) {
 
 void antares_window_set_text_callback(
         AntaresWindow* window,
-        antares_window_text_callback_range (*callback)(
+        void (*callback)(
                 antares_window_text_callback_type type, antares_window_text_callback_data data,
                 void* userdata),
         void* userdata) {
@@ -633,6 +633,10 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [self selectFrom:0 to:self.textLength in:SelectionDirectionNeither];
 }
 
+- (void)delete:(id)sender {
+    [self replaceRange:self.selectedRange with:@""];
+}
+
 - (void)deleteBy:(int)by unit:(antares_window_text_callback_unit)unit {
     NSRange selection = self.selectedRange;
     if (selection.length > 0) {
@@ -686,6 +690,36 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 
 - (void)deleteBackwardByDecomposingPreviousCharacter:(id)s { [self deleteBackward:s]; }
 // clang-format on
+
+- (void)cut:(id)sender {
+    [self copy:sender];
+    [self delete:sender];
+}
+
+- (void)copy:(id)sender {
+    [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSPasteboardTypeString]
+                                             owner:nil];
+    [[NSPasteboard generalPasteboard] setString:[self textInRange:self.selectedRange]
+                                        forType:NSPasteboardTypeString];
+}
+
+- (void)paste:(id)sender {
+    [self replaceRange:self.selectedRange
+                  with:[[NSPasteboard generalPasteboard] stringForType:NSPasteboardTypeString]];
+}
+
+- (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)item {
+    if ((item.action == @selector(delete:)) || (item.action == @selector(cut:)) ||
+        (item.action == @selector(copy:))) {
+        return self.selectedRange.length > 0;
+    } else if (item.action == @selector(paste:)) {
+        return [[NSPasteboard generalPasteboard]
+                       availableTypeFromArray:@[ NSPasteboardTypeString ]] != nil;
+    } else if (item.action == @selector(selectAll:)) {
+        return true;
+    }
+    return false;
+}
 
 // NSTextInputClient
 
@@ -752,16 +786,16 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (NSRange)selectedRange {
-    antares_window_text_callback_data  data = {};
-    antares_window_text_callback_range selection =
-            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, data, text_userdata);
+    antares_window_text_callback_range selection;
+    antares_window_text_callback_data  data = {.get_selection = &selection};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, data, text_userdata);
     return NSMakeRange(selection.begin, selection.end - selection.begin);
 }
 
 - (NSRange)markedRange {
-    antares_window_text_callback_data  data = {};
-    antares_window_text_callback_range mark =
-            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, data, text_userdata);
+    antares_window_text_callback_range mark;
+    antares_window_text_callback_data  data = {.get_mark = &mark};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, data, text_userdata);
     if (mark.begin == mark.end) {
         return kNoRange;
     }
@@ -775,10 +809,10 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 - (NSUInteger)offset:(NSUInteger)origin
                   by:(NSInteger)by
                 unit:(antares_window_text_callback_unit)unit {
-    antares_window_text_callback_data  data = {.offset = {origin, by, unit}};
-    antares_window_text_callback_range offset =
-            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, data, text_userdata);
-    return offset.end - offset.begin;
+    int                               offset;
+    antares_window_text_callback_data data = {.get_offset = {origin, by, unit, &offset}};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, data, text_userdata);
+    return offset;
 }
 
 - (NSAttributedString*)attributedSubstringForProposedRange:(NSRange)range
@@ -801,10 +835,10 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 // Helpers
 
 - (NSUInteger)textLength {
-    antares_window_text_callback_data  data = {};
-    antares_window_text_callback_range text =
-            text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, data, text_userdata);
-    return text.end - text.begin;
+    int                               size;
+    antares_window_text_callback_data data = {.get_size = &size};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, data, text_userdata);
+    return size;
 }
 
 - (void)replaceFrom:(NSUInteger)from to:(NSUInteger)to with:(NSString*)string {
@@ -835,6 +869,16 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 - (void)markText:(NSRange)range {
     antares_window_text_callback_data data = {.mark = {range.location, NSMaxRange(range)}};
     text_callback(ANTARES_WINDOW_TEXT_CALLBACK_MARK, data, text_userdata);
+}
+
+- (NSString*)textInRange:(NSRange)range {
+    const char*                       bytes;
+    int                               length;
+    antares_window_text_callback_data data = {
+            .get_text = {{range.location, NSMaxRange(range)}, &bytes, &length}};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT, data, text_userdata);
+    return [[[NSString alloc] initWithBytes:bytes length:length
+                                   encoding:NSUTF8StringEncoding] autorelease];
 }
 
 @end

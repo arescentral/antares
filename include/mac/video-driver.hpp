@@ -50,10 +50,10 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    static wall_time                          _now();
-    static antares_window_text_callback_range text_callback(
-            antares_window_text_callback_type type, antares_window_text_callback_data data,
-            void* userdata);
+    static wall_time _now();
+    static void      text_callback(
+                 antares_window_text_callback_type type, antares_window_text_callback_data data,
+                 void* userdata);
 
     struct EventBridge;
 

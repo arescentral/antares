@@ -108,11 +108,14 @@ Point CocoaVideoDriver::get_mouse() {
 
 InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
-antares_window_text_callback_range CocoaVideoDriver::text_callback(
+static antares_window_text_callback_range c_range(TextReceiver::range<int> range) {
+    return {range.begin, range.end};
+}
+
+void CocoaVideoDriver::text_callback(
         antares_window_text_callback_type type, antares_window_text_callback_data data,
         void* userdata) {
-    Text*                    text = reinterpret_cast<Text*>(userdata);
-    TextReceiver::range<int> out  = {-1, -1};
+    Text* text = reinterpret_cast<Text*>(userdata);
 
     switch (type) {
         case ANTARES_WINDOW_TEXT_CALLBACK_REPLACE:
@@ -134,16 +137,24 @@ antares_window_text_callback_range CocoaVideoDriver::text_callback(
         case ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE: text->receiver->escape(); break;
 
         case ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET:
-            out = {0, text->receiver->offset(
-                              data.offset.origin, data.offset.by,
-                              (TextReceiver::OffsetUnit)data.offset.unit)};
+            *data.get_offset.offset = text->receiver->offset(
+                    data.get_offset.origin, data.get_offset.by,
+                    (TextReceiver::OffsetUnit)data.get_offset.unit);
             break;
-        case ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE: out = {0, text->receiver->size()}; break;
-        case ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION: out = text->receiver->selection(); break;
-        case ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK: out = text->receiver->mark(); break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE: *data.get_size = text->receiver->size(); break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION:
+            *data.get_selection = c_range(text->receiver->selection());
+            break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK:
+            *data.get_mark = c_range(text->receiver->mark());
+            break;
+        case ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT: {
+            pn::string_view s =
+                    text->receiver->text({data.get_text.range.begin, data.get_text.range.end});
+            *data.get_text.data = s.data();
+            *data.get_text.size = s.size();
+        } break;
     }
-
-    return {out.begin, out.end};
 }
 
 bool CocoaVideoDriver::start_editing(TextReceiver* text) {

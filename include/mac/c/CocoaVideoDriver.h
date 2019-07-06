@@ -57,6 +57,7 @@ typedef enum {
     ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE,
     ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION,
     ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK,
+    ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT,
 } antares_window_text_callback_type;
 
 typedef struct {
@@ -86,12 +87,23 @@ typedef union {
     struct {
         int                               origin, by;
         antares_window_text_callback_unit unit;
-    } offset;
+        int*                              offset;
+    } get_offset;
+
+    int*                                get_size;
+    antares_window_text_callback_range* get_selection;
+    antares_window_text_callback_range* get_mark;
+
+    struct {
+        antares_window_text_callback_range range;
+        const char**                       data;
+        int*                               size;
+    } get_text;
 } antares_window_text_callback_data;
 
 void antares_window_set_text_callback(
         AntaresWindow* window,
-        antares_window_text_callback_range (*callback)(
+        void (*callback)(
                 antares_window_text_callback_type type, antares_window_text_callback_data data,
                 void* userdata),
         void* userdata);
