@@ -1067,46 +1067,53 @@ static bool is_word(Iterator begin, Iterator end, Iterator it) {
     }
 }
 
+// Returns {new iterator, can go further?}
 template <typename Iterator>
-static Iterator advance(Iterator begin, Iterator end, Iterator it, TextReceiver::OffsetUnit unit) {
+static std::pair<Iterator, bool> advance(
+        Iterator begin, Iterator end, Iterator it, TextReceiver::OffsetUnit unit) {
     if (it == end) {
-        return it;
+        return {it, false};
     }
 
     switch (unit) {
-        case TextReceiver::GLYPHS:
         case TextReceiver::LINE_GLYPHS:
         case TextReceiver::PARAGRAPH_GLYPHS:
+            if (*it == pn::rune{'\n'}) {
+                return {it, false};
+            }
             while ((++it != end) && ((*it).width() == 0)) {
             }
-            return it;
+            return {it, true};
+
+        case TextReceiver::GLYPHS:
+            while ((++it != end) && ((*it).width() == 0)) {
+            }
+            return {it, true};
 
         case TextReceiver::WORDS:
             while (!is_word(begin, end, it)) {
                 if (++it == end) {
-                    return end;
+                    return {end, false};
                 }
             }
             for (; (it != end) && is_word(begin, end, it); ++it) {
             }
-            return it;
+            return {it, true};
 
-        case TextReceiver::LINES: return end;
+        case TextReceiver::LINES: return {end, false};
 
-        case TextReceiver::PARAGRAPHS: return end;
+        case TextReceiver::PARAGRAPHS: return {end, false};
     }
 }
 
 template <typename Iterator>
 static Iterator advance_by(
         Iterator begin, Iterator end, Iterator it, int by, TextReceiver::OffsetUnit unit) {
-    for (; by > 0; --by) {
-        if (it == end) {
-            return end;
-        }
-        it = advance(begin, end, it, unit);
+    std::pair<Iterator, bool> it_loop = {it, true};
+    for (; (by > 0) && it_loop.second; --by) {
+        it_loop = advance(begin, end, it_loop.first, unit);
     }
-    return it;
+    return it_loop.first;
 }
 
 int PlayerShip::MessageTextReceiver::offset(int origin, int by, OffsetUnit unit) const {
