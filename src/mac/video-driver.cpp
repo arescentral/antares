@@ -108,7 +108,7 @@ Point CocoaVideoDriver::get_mouse() {
 
 InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
-static antares_window_text_callback_range c_range(TextReceiver::range<int> range) {
+static antares_window_callback_range c_range(TextReceiver::range<int> range) {
     return {range.begin, range.end};
 }
 
@@ -168,87 +168,124 @@ struct CocoaVideoDriver::EventBridge {
     double gamepad[6];
     bool   switch_dpad[4];
 
-    static void key_down(int key, void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(_now(), key_codes[key]));
-    }
-
-    static void key_up(int key, void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(_now(), key_codes[key]));
-    }
-
-    static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseDownEvent(_now(), button, count, Point(x, y)));
-    }
-
-    static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseUpEvent(_now(), button, Point(x, y)));
-    }
-
-    static void mouse_move(int32_t x, int32_t y, void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseMoveEvent(_now(), Point(x, y)));
-    }
-
-    static void caps_lock(void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(_now(), Key::CAPS_LOCK));
-    }
-
-    static void caps_unlock(void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(_now(), Key::CAPS_LOCK));
-    }
-
     static void text(
-            antares_window_text_callback_type type, antares_window_text_callback_data data,
-            void* userdata) {
-        EventBridge*  self = reinterpret_cast<EventBridge*>(userdata);
-        TextReceiver* r    = self->text_receiver;
-        if (!r) {
-            return;
-        }
+            antares_window_callback_type type, antares_window_callback_data data, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
 
         switch (type) {
-            case ANTARES_WINDOW_TEXT_CALLBACK_REPLACE:
-                r->replace(
-                        {data.replace.range.begin, data.replace.range.end},
-                        pn::string_view(data.replace.data, data.replace.size));
+            case ANTARES_WINDOW_CALLBACK_KEY_DOWN:
+                self->enqueue(new KeyDownEvent(_now(), key_codes[data.key_down]));
                 break;
 
-            case ANTARES_WINDOW_TEXT_CALLBACK_SELECT:
-                r->select({data.select.begin, data.select.end});
-                break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_MARK:
-                r->mark({data.mark.begin, data.mark.end});
+            case ANTARES_WINDOW_CALLBACK_KEY_UP:
+                self->enqueue(new KeyUpEvent(_now(), key_codes[data.key_up]));
                 break;
 
-            case ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT: r->accept(); break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE: r->newline(); break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_TAB: r->tab(); break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE: r->escape(); break;
+            case ANTARES_WINDOW_CALLBACK_CAPS_LOCK:
+                self->enqueue(new KeyDownEvent(_now(), Key::CAPS_LOCK));
+                break;
 
-            case ANTARES_WINDOW_TEXT_CALLBACK_GET_EDITING:
+            case ANTARES_WINDOW_CALLBACK_CAPS_UNLOCK:
+                self->enqueue(new KeyUpEvent(_now(), Key::CAPS_LOCK));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_MOUSE_DOWN:
+                self->enqueue(new MouseDownEvent(
+                        _now(), data.mouse_down.button, data.mouse_down.count,
+                        Point(data.mouse_down.x, data.mouse_down.y)));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_MOUSE_UP:
+                self->enqueue(new MouseUpEvent(
+                        _now(), data.mouse_up.button, Point(data.mouse_up.x, data.mouse_up.y)));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_MOUSE_MOVE:
+                self->enqueue(
+                        new MouseMoveEvent(_now(), Point(data.mouse_move.x, data.mouse_move.y)));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_REPLACE:
+                if (self->text_receiver) {
+                    self->text_receiver->replace(
+                            {data.replace.range.begin, data.replace.range.end},
+                            pn::string_view(data.replace.data, data.replace.size));
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_SELECT:
+                if (self->text_receiver) {
+                    self->text_receiver->select({data.select.begin, data.select.end});
+                }
+                break;
+            case ANTARES_WINDOW_CALLBACK_MARK:
+                if (self->text_receiver) {
+                    self->text_receiver->mark({data.mark.begin, data.mark.end});
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_ACCEPT:
+                if (self->text_receiver) {
+                    self->text_receiver->accept();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_NEWLINE:
+                if (self->text_receiver) {
+                    self->text_receiver->newline();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_TAB:
+                if (self->text_receiver) {
+                    self->text_receiver->tab();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_ESCAPE:
+                if (self->text_receiver) {
+                    self->text_receiver->escape();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_EDITING:
                 *data.get_editing = (self->text_receiver != nullptr);
                 break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET:
-                *data.get_offset.offset = r->offset(
-                        data.get_offset.origin, data.get_offset.by,
-                        (TextReceiver::OffsetUnit)data.get_offset.unit);
+
+            case ANTARES_WINDOW_CALLBACK_GET_OFFSET:
+                if (self->text_receiver) {
+                    *data.get_offset.offset = self->text_receiver->offset(
+                            data.get_offset.origin, data.get_offset.by,
+                            (TextReceiver::OffsetUnit)data.get_offset.unit);
+                }
                 break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE: *data.get_size = r->size(); break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION:
-                *data.get_selection = c_range(r->selection());
+
+            case ANTARES_WINDOW_CALLBACK_GET_SIZE:
+                if (self->text_receiver) {
+                    *data.get_size = self->text_receiver->size();
+                }
                 break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK: *data.get_mark = c_range(r->mark()); break;
-            case ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT: {
-                pn::string_view s = r->text({data.get_text.range.begin, data.get_text.range.end});
-                *data.get_text.data = s.data();
-                *data.get_text.size = s.size();
-            } break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_SELECTION:
+                if (self->text_receiver) {
+                    *data.get_selection = c_range(self->text_receiver->selection());
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_MARK:
+                if (self->text_receiver) {
+                    *data.get_mark = c_range(self->text_receiver->mark());
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_TEXT:
+                if (self->text_receiver) {
+                    pn::string_view s = self->text_receiver->text(
+                            {data.get_text.range.begin, data.get_text.range.end});
+                    *data.get_text.data = s.data();
+                    *data.get_text.size = s.size();
+                }
+                break;
         }
     }
 
@@ -583,15 +620,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     EventBridge bridge = {_input_mode, main_loop, context, window};
     _bridge            = &bridge;
 
-    antares_window_set_userdata(_window, &bridge);
-    antares_window_set_key_down_callback(_window, EventBridge::key_down);
-    antares_window_set_key_up_callback(_window, EventBridge::key_up);
-    antares_window_set_mouse_down_callback(_window, EventBridge::mouse_down);
-    antares_window_set_mouse_up_callback(_window, EventBridge::mouse_up);
-    antares_window_set_mouse_move_callback(_window, EventBridge::mouse_move);
-    antares_window_set_caps_lock_callback(_window, EventBridge::caps_lock);
-    antares_window_set_caps_unlock_callback(_window, EventBridge::caps_unlock);
-    antares_window_set_text_callback(_window, EventBridge::text);
+    antares_window_set_callback(_window, EventBridge::text, &bridge);
 
     cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
             NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));

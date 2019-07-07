@@ -45,85 +45,98 @@ int32_t        antares_window_viewport_height(const AntaresWindow* window);
 void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y);
 
 typedef enum {
-    ANTARES_WINDOW_TEXT_CALLBACK_REPLACE,
-    ANTARES_WINDOW_TEXT_CALLBACK_SELECT,
-    ANTARES_WINDOW_TEXT_CALLBACK_MARK,
-    ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT,
-    ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE,
-    ANTARES_WINDOW_TEXT_CALLBACK_TAB,
-    ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE,
+    ANTARES_WINDOW_CALLBACK_KEY_DOWN,
+    ANTARES_WINDOW_CALLBACK_KEY_UP,
+    ANTARES_WINDOW_CALLBACK_CAPS_LOCK,
+    ANTARES_WINDOW_CALLBACK_CAPS_UNLOCK,
 
-    ANTARES_WINDOW_TEXT_CALLBACK_GET_EDITING,
-    ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET,
-    ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE,
-    ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION,
-    ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK,
-    ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT,
-} antares_window_text_callback_type;
+    ANTARES_WINDOW_CALLBACK_MOUSE_DOWN,
+    ANTARES_WINDOW_CALLBACK_MOUSE_UP,
+    ANTARES_WINDOW_CALLBACK_MOUSE_MOVE,
+
+    ANTARES_WINDOW_CALLBACK_REPLACE,
+    ANTARES_WINDOW_CALLBACK_SELECT,
+    ANTARES_WINDOW_CALLBACK_MARK,
+    ANTARES_WINDOW_CALLBACK_ACCEPT,
+    ANTARES_WINDOW_CALLBACK_NEWLINE,
+    ANTARES_WINDOW_CALLBACK_TAB,
+    ANTARES_WINDOW_CALLBACK_ESCAPE,
+
+    ANTARES_WINDOW_CALLBACK_GET_EDITING,
+    ANTARES_WINDOW_CALLBACK_GET_OFFSET,
+    ANTARES_WINDOW_CALLBACK_GET_SIZE,
+    ANTARES_WINDOW_CALLBACK_GET_SELECTION,
+    ANTARES_WINDOW_CALLBACK_GET_MARK,
+    ANTARES_WINDOW_CALLBACK_GET_TEXT,
+} antares_window_callback_type;
 
 typedef struct {
     int begin, end;
-} antares_window_text_callback_range;
+} antares_window_callback_range;
 
 typedef enum {
-    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS           = 0,
-    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS            = 1,
-    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES            = 2,
-    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS      = 3,
-    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS       = 4,
-    ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS = 5,
-} antares_window_text_callback_unit;
+    ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS           = 0,
+    ANTARES_WINDOW_CALLBACK_UNIT_WORDS            = 1,
+    ANTARES_WINDOW_CALLBACK_UNIT_LINES            = 2,
+    ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS      = 3,
+    ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS       = 4,
+    ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS = 5,
+} antares_window_callback_unit;
 
 typedef union {
+    int key_down;
+    int key_up;
+
     struct {
-        antares_window_text_callback_range range;
-        const char*                        data;
-        int                                size;
+        int     button;
+        int32_t x, y;
+        int     count;
+    } mouse_down;
+
+    struct {
+        int     button;
+        int32_t x, y;
+    } mouse_up;
+
+    struct {
+        int32_t x, y;
+    } mouse_move;
+
+    struct {
+        antares_window_callback_range range;
+        const char*                   data;
+        int                           size;
     } replace;
 
-    antares_window_text_callback_range select;
+    antares_window_callback_range select;
 
-    antares_window_text_callback_range mark;
+    antares_window_callback_range mark;
 
     bool* get_editing;
 
     struct {
-        int                               origin, by;
-        antares_window_text_callback_unit unit;
-        int*                              offset;
+        int                          origin, by;
+        antares_window_callback_unit unit;
+        int*                         offset;
     } get_offset;
 
-    int*                                get_size;
-    antares_window_text_callback_range* get_selection;
-    antares_window_text_callback_range* get_mark;
+    int*                           get_size;
+    antares_window_callback_range* get_selection;
+    antares_window_callback_range* get_mark;
 
     struct {
-        antares_window_text_callback_range range;
-        const char**                       data;
-        int*                               size;
+        antares_window_callback_range range;
+        const char**                  data;
+        int*                          size;
     } get_text;
-} antares_window_text_callback_data;
+} antares_window_callback_data;
 
-void antares_window_set_userdata(AntaresWindow* window, void* userdata);
-void antares_window_set_text_callback(
-        AntaresWindow* window, void (*callback)(
-                                       antares_window_text_callback_type type,
-                                       antares_window_text_callback_data data, void* userdata));
-void antares_window_set_key_down_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata));
-void antares_window_set_key_up_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata));
-void antares_window_set_mouse_down_callback(
+void antares_window_set_callback(
         AntaresWindow* window,
-        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata));
-void antares_window_set_mouse_up_callback(
-        AntaresWindow* window, void (*callback)(int button, int32_t x, int32_t y, void* userdata));
-void antares_window_set_mouse_move_callback(
-        AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata));
-void antares_window_set_caps_lock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata));
-void antares_window_set_caps_unlock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata));
+        void (*callback)(
+                antares_window_callback_type type, antares_window_callback_data data,
+                void* userdata),
+        void* userdata);
 
 bool antares_window_next_event(AntaresWindow* window, int64_t until);
 void antares_window_cancel_event(AntaresWindow* window);

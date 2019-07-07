@@ -60,16 +60,8 @@ typedef enum {
 
 @interface AntaresView : NSOpenGLView <NSTextInputClient> {
   @public
-    void (*text_callback)(
-            antares_window_text_callback_type type, antares_window_text_callback_data data,
-            void* userdata);
-    void (*key_down_callback)(int key, void* userdata);
-    void (*key_up_callback)(int key, void* userdata);
-    void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
-    void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
-    void (*mouse_move_callback)(int32_t x, int32_t y, void* userdata);
-    void (*caps_lock_callback)(void* userdata);
-    void (*caps_unlock_callback)(void* userdata);
+    void (*callback)(
+            antares_window_callback_type type, antares_window_callback_data data, void* userdata);
 
     void* userdata;
 
@@ -182,52 +174,14 @@ void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y) {
     *y               = view_size.height - *y;
 }
 
-void antares_window_set_userdata(AntaresWindow* window, void* userdata) {
+void antares_window_set_callback(
+        AntaresWindow* window,
+        void (*callback)(
+                antares_window_callback_type type, antares_window_callback_data data,
+                void* userdata),
+        void* userdata) {
+    window->view->callback = callback;
     window->view->userdata = userdata;
-}
-
-void antares_window_set_text_callback(
-        AntaresWindow* window, void (*callback)(
-                                       antares_window_text_callback_type type,
-                                       antares_window_text_callback_data data, void* userdata)) {
-    window->view->text_callback = callback;
-}
-
-void antares_window_set_key_down_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata)) {
-    window->view->key_down_callback = callback;
-}
-
-void antares_window_set_key_up_callback(
-        AntaresWindow* window, void (*callback)(int key, void* userdata)) {
-    window->view->key_up_callback = callback;
-}
-
-void antares_window_set_mouse_down_callback(
-        AntaresWindow* window,
-        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata)) {
-    window->view->mouse_down_callback = callback;
-}
-
-void antares_window_set_mouse_up_callback(
-        AntaresWindow* window,
-        void (*callback)(int button, int32_t x, int32_t y, void* userdata)) {
-    window->view->mouse_up_callback = callback;
-}
-
-void antares_window_set_mouse_move_callback(
-        AntaresWindow* window, void (*callback)(int32_t x, int32_t y, void* userdata)) {
-    window->view->mouse_move_callback = callback;
-}
-
-void antares_window_set_caps_lock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata)) {
-    window->view->caps_lock_callback = callback;
-}
-
-void antares_window_set_caps_unlock_callback(
-        AntaresWindow* window, void (*callback)(void* userdata)) {
-    window->view->caps_unlock_callback = callback;
 }
 
 static void key_down(AntaresView* view, NSEvent* event) {
@@ -235,7 +189,8 @@ static void key_down(AntaresView* view, NSEvent* event) {
     if (!translate_coords(view, event, &where)) {
         return;
     }
-    view->key_down_callback([event keyCode], view -> userdata);
+    antares_window_callback_data data = {.key_down = [event keyCode]};
+    view->callback(ANTARES_WINDOW_CALLBACK_KEY_DOWN, data, view->userdata);
 }
 
 static void key_up(AntaresView* view, NSEvent* event) {
@@ -243,7 +198,8 @@ static void key_up(AntaresView* view, NSEvent* event) {
     if (!translate_coords(view, event, &where)) {
         return;
     }
-    view->key_up_callback([event keyCode], view -> userdata);
+    antares_window_callback_data data = {.key_up = [event keyCode]};
+    view->callback(ANTARES_WINDOW_CALLBACK_KEY_UP, data, view->userdata);
 }
 
 static void hide_unhide(AntaresView* view, NSPoint location) {
@@ -281,8 +237,10 @@ static void mouse_down(AntaresView* view, NSEvent* event) {
         return;
     }
     hide_unhide(view, where);
-    int button = button_for(event);
-    view->mouse_down_callback(button, where.x, where.y, [event clickCount], view -> userdata);
+    int                          button = button_for(event);
+    antares_window_callback_data data   = {
+            .mouse_down = {button, where.x, where.y, [event clickCount]}};
+    view->callback(ANTARES_WINDOW_CALLBACK_MOUSE_DOWN, data, view->userdata);
 }
 
 static void mouse_up(AntaresView* view, NSEvent* event) {
@@ -291,8 +249,9 @@ static void mouse_up(AntaresView* view, NSEvent* event) {
         return;
     }
     hide_unhide(view, where);
-    int button = button_for(event);
-    view->mouse_up_callback(button, where.x, where.y, view->userdata);
+    int                          button = button_for(event);
+    antares_window_callback_data data   = {.mouse_up = {button, where.x, where.y}};
+    view->callback(ANTARES_WINDOW_CALLBACK_MOUSE_UP, data, view->userdata);
 }
 
 static void mouse_move(AntaresView* view, NSEvent* event) {
@@ -301,24 +260,28 @@ static void mouse_move(AntaresView* view, NSEvent* event) {
         return;
     }
     hide_unhide(view, where);
-    view->mouse_move_callback(where.x, where.y, view->userdata);
+    antares_window_callback_data data = {.mouse_move = {where.x, where.y}};
+    view->callback(ANTARES_WINDOW_CALLBACK_MOUSE_MOVE, data, view->userdata);
 }
 
 static void flags_changed(AntaresView* view, NSEvent* event) {
     int32_t old_flags = view->modifier_flags;
     int32_t new_flags = view->modifier_flags = [event modifierFlags];
     if ([event keyCode] == 0x39) {  // Caps Lock
+        antares_window_callback_data data = {};
         if ((new_flags | old_flags) == new_flags) {
-            view->caps_lock_callback(view->userdata);
+            view->callback(ANTARES_WINDOW_CALLBACK_CAPS_LOCK, data, view->userdata);
         } else {
-            view->caps_unlock_callback(view->userdata);
+            view->callback(ANTARES_WINDOW_CALLBACK_CAPS_UNLOCK, data, view->userdata);
         }
         return;
     }
     if ((new_flags | old_flags) == new_flags) {
-        view->key_down_callback([event keyCode], view -> userdata);
+        antares_window_callback_data data = {.key_down = [event keyCode]};
+        view->callback(ANTARES_WINDOW_CALLBACK_KEY_DOWN, data, view->userdata);
     } else {
-        view->key_up_callback([event keyCode], view -> userdata);
+        antares_window_callback_data data = {.key_up = [event keyCode]};
+        view->callback(ANTARES_WINDOW_CALLBACK_KEY_UP, data, view->userdata);
     }
 }
 
@@ -426,7 +389,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [super doCommandBySelector:selector];
 }
 
-- (void)moveBy:(int)by unit:(antares_window_text_callback_unit)unit {
+- (void)moveBy:(int)by unit:(antares_window_callback_unit)unit {
     NSRange selection = self.selectedRange;
     if (selection.length > 0) {
         [self selectAt:(by > 0) ? NSMaxRange(selection) : selection.location];
@@ -436,51 +399,51 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)moveRight:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveLeft:(id)sender {
-    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveWordRight:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveWordLeft:(id)sender {
-    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveDown:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveUp:(id)s {
-    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveToRightEndOfLine:(id)sender {
-    [self moveBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)moveToLeftEndOfLine:(id)s {
-    [self moveBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)moveParagraphForward:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveParagraphBackward:(id)s {
-    [self moveBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToEndOfParagraph:(id)sender {
-    [self moveBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
 }
 
 - (void)moveToBeginningOfParagraph:(id)s {
-    [self moveBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
 }
 
 - (void)moveToEndOfDocument:(id)sender {
@@ -491,7 +454,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [self selectAt:0];
 }
 
-- (void)moveAndModifySelectionBy:(int)by unit:(antares_window_text_callback_unit)unit {
+- (void)moveAndModifySelectionBy:(int)by unit:(antares_window_callback_unit)unit {
     NSRange selection = self.selectedRange;
     int     from      = selection.location;
     int     to        = NSMaxRange(selection);
@@ -512,53 +475,51 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)moveRightAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveLeftAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveWordRightAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveWordLeftAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveDownAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveUpAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINES];
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveToRightEndOfLineAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)moveToLeftEndOfLineAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)moveParagraphForwardAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveParagraphBackwardAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToEndOfParagraphAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MAX
-                              unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
 }
 
 - (void)moveToBeginningOfParagraphAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MIN
-                              unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
 }
 
 - (void)moveToEndOfDocumentAndModifySelection:(id)sender {
@@ -578,8 +539,8 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)insertTab:(id)sender {
-    antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_TAB, data, userdata);
+    antares_window_callback_data data = {};
+    callback(ANTARES_WINDOW_CALLBACK_TAB, data, userdata);
 }
 
 - (void)insertTabIgnoringFieldEditor:(id)sender {
@@ -591,13 +552,13 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)insertNewline:(id)sender {
-    antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ACCEPT, data, userdata);
+    antares_window_callback_data data = {};
+    callback(ANTARES_WINDOW_CALLBACK_ACCEPT, data, userdata);
 }
 
 - (void)insertNewlineIgnoringFieldEditor:(id)sender {
-    antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_NEWLINE, data, userdata);
+    antares_window_callback_data data = {};
+    callback(ANTARES_WINDOW_CALLBACK_NEWLINE, data, userdata);
 }
 
 - (void)insertSingleQuoteIgnoringSubstitution:(id)sender {
@@ -616,7 +577,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [self replaceRange:self.selectedRange with:@""];
 }
 
-- (void)deleteBy:(int)by unit:(antares_window_text_callback_unit)unit {
+- (void)deleteBy:(int)by unit:(antares_window_callback_unit)unit {
     NSRange selection = self.selectedRange;
     if (selection.length > 0) {
         [self replaceRange:selection with:@""];
@@ -628,32 +589,32 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)deleteBackward:(id)sender {
-    [self deleteBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+    [self deleteBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)deleteForward:(id)sender {
-    [self deleteBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_GLYPHS];
+    [self deleteBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)deleteWordBackward:(id)s {
-    [self deleteBy:-1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+    [self deleteBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)deleteWordForward:(id)s {
-    [self deleteBy:+1 unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_WORDS];
+    [self deleteBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)deleteToBeginningOfLine:(id)sender {
-    [self deleteBy:INT_MIN unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+    [self deleteBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)deleteToEndOfLine:(id)sender {
-    [self deleteBy:INT_MAX unit:ANTARES_WINDOW_TEXT_CALLBACK_UNIT_LINE_GLYPHS];
+    [self deleteBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
 }
 
 - (void)cancelOperation:(id)sender {
-    antares_window_text_callback_data data = {};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE, data, userdata);
+    antares_window_callback_data data = {};
+    callback(ANTARES_WINDOW_CALLBACK_ESCAPE, data, userdata);
 }
 
 // clang-format off
@@ -768,16 +729,16 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (NSRange)selectedRange {
-    antares_window_text_callback_range selection;
-    antares_window_text_callback_data  data = {.get_selection = &selection};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION, data, userdata);
+    antares_window_callback_range selection;
+    antares_window_callback_data  data = {.get_selection = &selection};
+    callback(ANTARES_WINDOW_CALLBACK_GET_SELECTION, data, userdata);
     return NSMakeRange(selection.begin, selection.end - selection.begin);
 }
 
 - (NSRange)markedRange {
-    antares_window_text_callback_range mark;
-    antares_window_text_callback_data  data = {.get_mark = &mark};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_MARK, data, userdata);
+    antares_window_callback_range mark;
+    antares_window_callback_data  data = {.get_mark = &mark};
+    callback(ANTARES_WINDOW_CALLBACK_GET_MARK, data, userdata);
     if (mark.begin == mark.end) {
         return kNoRange;
     }
@@ -788,12 +749,10 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     return !isNoRange(self.markedRange);
 }
 
-- (NSUInteger)offset:(NSUInteger)origin
-                  by:(NSInteger)by
-                unit:(antares_window_text_callback_unit)unit {
-    int                               offset;
-    antares_window_text_callback_data data = {.get_offset = {origin, by, unit, &offset}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET, data, userdata);
+- (NSUInteger)offset:(NSUInteger)origin by:(NSInteger)by unit:(antares_window_callback_unit)unit {
+    int                          offset;
+    antares_window_callback_data data = {.get_offset = {origin, by, unit, &offset}};
+    callback(ANTARES_WINDOW_CALLBACK_GET_OFFSET, data, userdata);
     return offset;
 }
 
@@ -817,16 +776,16 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 // Helpers
 
 - (BOOL)isEditing {
-    bool                              editing;
-    antares_window_text_callback_data data = {.get_editing = &editing};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_EDITING, data, userdata);
+    bool                         editing;
+    antares_window_callback_data data = {.get_editing = &editing};
+    callback(ANTARES_WINDOW_CALLBACK_GET_EDITING, data, userdata);
     return editing;
 }
 
 - (NSUInteger)textLength {
-    int                               size;
-    antares_window_text_callback_data data = {.get_size = &size};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE, data, userdata);
+    int                          size;
+    antares_window_callback_data data = {.get_size = &size};
+    callback(ANTARES_WINDOW_CALLBACK_GET_SIZE, data, userdata);
     return size;
 }
 
@@ -835,13 +794,13 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)replaceRange:(NSRange)range with:(NSString*)string {
-    NSData*                           utf8 = [string utf8Data];
-    antares_window_text_callback_data data = {.replace = {
-                                                      .range = {range.location, NSMaxRange(range)},
-                                                      .data  = [utf8 bytes],
-                                                      .size  = [utf8 length],
-                                              }};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_REPLACE, data, userdata);
+    NSData*                      utf8 = [string utf8Data];
+    antares_window_callback_data data = {.replace = {
+                                                 .range = {range.location, NSMaxRange(range)},
+                                                 .data  = [utf8 bytes],
+                                                 .size  = [utf8 length],
+                                         }};
+    callback(ANTARES_WINDOW_CALLBACK_REPLACE, data, userdata);
     selectionDir = SelectionDirectionNeither;
 }
 
@@ -850,22 +809,22 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)selectFrom:(NSUInteger)from to:(NSUInteger)to in:(SelectionDirection)direction {
-    antares_window_text_callback_data data = {.select = {from, to}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_SELECT, data, userdata);
+    antares_window_callback_data data = {.select = {from, to}};
+    callback(ANTARES_WINDOW_CALLBACK_SELECT, data, userdata);
     selectionDir = (from < to) ? direction : SelectionDirectionNeither;
 }
 
 - (void)markText:(NSRange)range {
-    antares_window_text_callback_data data = {.mark = {range.location, NSMaxRange(range)}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_MARK, data, userdata);
+    antares_window_callback_data data = {.mark = {range.location, NSMaxRange(range)}};
+    callback(ANTARES_WINDOW_CALLBACK_MARK, data, userdata);
 }
 
 - (NSString*)textInRange:(NSRange)range {
-    const char*                       bytes;
-    int                               length;
-    antares_window_text_callback_data data = {
+    const char*                  bytes;
+    int                          length;
+    antares_window_callback_data data = {
             .get_text = {{range.location, NSMaxRange(range)}, &bytes, &length}};
-    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_TEXT, data, userdata);
+    callback(ANTARES_WINDOW_CALLBACK_GET_TEXT, data, userdata);
     return [[[NSString alloc] initWithBytes:bytes length:length
                                    encoding:NSUTF8StringEncoding] autorelease];
 }
