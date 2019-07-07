@@ -76,6 +76,7 @@ typedef enum {
     SelectionDirection selectionDir;
     int32_t            modifier_flags;
 }
+- (BOOL)isEditing;
 @end
 
 bool antares_is_active() { return [NSApp isActive]; }
@@ -342,7 +343,7 @@ bool antares_window_next_event(AntaresWindow* window, int64_t until) {
         // Unless in text mode, keypresses should be handled directly
         // by the view; Cmd+A should trigger the keypresses for Cmd and
         // A, not the Select All menu item.
-        if (!window->view->text_callback) {
+        if (!window->view.isEditing) {
             switch ([event type]) {
                 case NSEventTypeKeyDown: [window->view keyDown:event]; return true;
                 case NSEventTypeKeyUp: [window->view keyUp:event]; return true;
@@ -386,7 +387,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)keyDown:(NSEvent*)event {
-    if (text_callback) {
+    if (self.isEditing) {
         [self interpretKeyEvents:[NSArray arrayWithObject:event]];
     } else {
         if (![event isARepeat]) {
@@ -687,7 +688,7 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)item {
-    if (!text_callback) {
+    if (!self.isEditing) {
         return false;
     } else if (
             (item.action == @selector(delete:)) || (item.action == @selector(cut:)) ||
@@ -814,6 +815,13 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 // Helpers
+
+- (BOOL)isEditing {
+    bool                              editing;
+    antares_window_text_callback_data data = {.get_editing = &editing};
+    text_callback(ANTARES_WINDOW_TEXT_CALLBACK_GET_EDITING, data, userdata);
+    return editing;
+}
 
 - (NSUInteger)textLength {
     int                               size;

@@ -231,6 +231,9 @@ struct CocoaVideoDriver::EventBridge {
             case ANTARES_WINDOW_TEXT_CALLBACK_TAB: r->tab(); break;
             case ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE: r->escape(); break;
 
+            case ANTARES_WINDOW_TEXT_CALLBACK_GET_EDITING:
+                *data.get_editing = (self->text_receiver != nullptr);
+                break;
             case ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET:
                 *data.get_offset.offset = r->offset(
                         data.get_offset.origin, data.get_offset.by,
@@ -543,13 +546,11 @@ struct CocoaVideoDriver::EventBridge {
 
 bool CocoaVideoDriver::start_editing(TextReceiver* text) {
     _bridge->text_receiver = text;
-    antares_window_set_text_callback(_window, EventBridge::text);
     return true;
 }
 
 void CocoaVideoDriver::stop_editing(TextReceiver* text) {
     if (_bridge->text_receiver == text) {
-        antares_window_set_text_callback(_window, nullptr);
         _bridge->text_receiver = nullptr;
     }
 }
@@ -590,6 +591,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     antares_window_set_mouse_move_callback(_window, EventBridge::mouse_move);
     antares_window_set_caps_lock_callback(_window, EventBridge::caps_lock);
     antares_window_set_caps_unlock_callback(_window, EventBridge::caps_unlock);
+    antares_window_set_text_callback(_window, EventBridge::text);
 
     cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
             NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));

@@ -53,6 +53,7 @@ typedef enum {
     ANTARES_WINDOW_TEXT_CALLBACK_TAB,
     ANTARES_WINDOW_TEXT_CALLBACK_ESCAPE,
 
+    ANTARES_WINDOW_TEXT_CALLBACK_GET_EDITING,
     ANTARES_WINDOW_TEXT_CALLBACK_GET_OFFSET,
     ANTARES_WINDOW_TEXT_CALLBACK_GET_SIZE,
     ANTARES_WINDOW_TEXT_CALLBACK_GET_SELECTION,
@@ -83,6 +84,8 @@ typedef union {
     antares_window_text_callback_range select;
 
     antares_window_text_callback_range mark;
+
+    bool* get_editing;
 
     struct {
         int                               origin, by;
