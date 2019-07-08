@@ -431,19 +431,19 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)moveParagraphForward:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_ENDS];
 }
 
 - (void)moveParagraphBackward:(id)s {
-    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_BEGINNINGS];
 }
 
 - (void)moveToEndOfParagraph:(id)sender {
-    [self moveBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
 }
 
 - (void)moveToBeginningOfParagraph:(id)s {
-    [self moveBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
 }
 
 - (void)moveToEndOfDocument:(id)sender {
@@ -507,19 +507,19 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)moveParagraphForwardAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_BEGINNINGS];
 }
 
 - (void)moveParagraphBackwardAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
+    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_BEGINNINGS];
 }
 
 - (void)moveToEndOfParagraphAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
 }
 
 - (void)moveToBeginningOfParagraphAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPH_GLYPHS];
+    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
 }
 
 - (void)moveToEndOfDocumentAndModifySelection:(id)sender {

@@ -190,12 +190,13 @@ class TextReceiver {
     virtual void escape()                             = 0;
 
     enum OffsetUnit {
-        GLYPHS           = 0,  // Composited characters + modifiers
-        WORDS            = 1,  // Alphanumeric sequences
-        LINES            = 2,  // Visual lines
-        LINE_GLYPHS      = 3,  // Glyphs within a visual line
-        PARAGRAPHS       = 4,  // Non-newline sequences
-        PARAGRAPH_GLYPHS = 5,  // Glyphs within a paragraph
+        GLYPHS          = 0,  // Composited characters + modifiers
+        WORDS           = 1,  // Alphanumeric sequences
+        LINES           = 2,  // Visual lines
+        LINE_GLYPHS     = 3,  // Glyphs within a visual line
+        PARA_BEGINNINGS = 4,  // Beginnings of paragraphs
+        PARA_ENDS       = 5,  // Ends of paragraphs
+        PARA_GLYPHS     = 6,  // Glyphs within a paragraph
     };
     virtual int             offset(int origin, int by, OffsetUnit unit) const = 0;
     virtual int             size() const                                      = 0;

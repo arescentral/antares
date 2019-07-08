@@ -1067,6 +1067,45 @@ static bool is_word(Iterator begin, Iterator end, Iterator it) {
     }
 }
 
+static pn::string::iterator next_para_beginning(
+        pn::string::iterator it, pn::string::iterator end) {
+    for (; it != end; ++it) {
+        if (*it == pn::rune{'\n'}) {
+            return ++it;
+        }
+    }
+    return it;
+}
+
+static pn::string::iterator next_para_end(pn::string::iterator it, pn::string::iterator end) {
+    for (++it; it != end; ++it) {
+        if (*it == pn::rune{'\n'}) {
+            break;
+        }
+    }
+    return it;
+}
+
+static pn::string::reverse_iterator next_para_beginning(
+        pn::string::reverse_iterator it, pn::string::reverse_iterator end) {
+    for (++it; it != end; ++it) {
+        if (*it == pn::rune{'\n'}) {
+            break;
+        }
+    }
+    return it;
+}
+
+static pn::string::reverse_iterator next_para_end(
+        pn::string::reverse_iterator it, pn::string::reverse_iterator end) {
+    for (; it != end; ++it) {
+        if (*it == pn::rune{'\n'}) {
+            return ++it;
+        }
+    }
+    return it;
+}
+
 // Returns {new iterator, can go further?}
 template <typename Iterator>
 static std::pair<Iterator, bool> advance(
@@ -1077,7 +1116,7 @@ static std::pair<Iterator, bool> advance(
 
     switch (unit) {
         case TextReceiver::LINE_GLYPHS:
-        case TextReceiver::PARAGRAPH_GLYPHS:
+        case TextReceiver::PARA_GLYPHS:
             if (*it == pn::rune{'\n'}) {
                 return {it, false};
             }
@@ -1102,7 +1141,9 @@ static std::pair<Iterator, bool> advance(
 
         case TextReceiver::LINES: return {end, false};
 
-        case TextReceiver::PARAGRAPHS: return {end, false};
+        case TextReceiver::PARA_BEGINNINGS: return {next_para_beginning(it, end), true};
+
+        case TextReceiver::PARA_ENDS: return {next_para_end(it, end), true};
     }
 }
 
