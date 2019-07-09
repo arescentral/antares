@@ -75,13 +75,21 @@ typedef struct {
 } antares_window_callback_range;
 
 typedef enum {
-    ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS          = 0,
-    ANTARES_WINDOW_CALLBACK_UNIT_WORDS           = 1,
-    ANTARES_WINDOW_CALLBACK_UNIT_LINES           = 2,
-    ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS     = 3,
-    ANTARES_WINDOW_CALLBACK_UNIT_PARA_BEGINNINGS = 4,
-    ANTARES_WINDOW_CALLBACK_UNIT_PARA_ENDS       = 5,
-    ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS     = 6,
+    ANTARES_WINDOW_CALLBACK_OFFSET_PREV_SAME  = -4,
+    ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START = -3,
+    ANTARES_WINDOW_CALLBACK_OFFSET_PREV_END   = -2,
+    ANTARES_WINDOW_CALLBACK_OFFSET_THIS_START = -1,
+    ANTARES_WINDOW_CALLBACK_OFFSET_THIS_END   = +1,
+    ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_START = +2,
+    ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_END   = +3,
+    ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_SAME  = +4,
+} antares_window_callback_offset;
+
+typedef enum {
+    ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS     = 0,
+    ANTARES_WINDOW_CALLBACK_UNIT_WORDS      = 1,
+    ANTARES_WINDOW_CALLBACK_UNIT_LINES      = 2,
+    ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS = 3,
 } antares_window_callback_unit;
 
 typedef union {
@@ -116,9 +124,10 @@ typedef union {
     bool* get_editing;
 
     struct {
-        int                          origin, by;
-        antares_window_callback_unit unit;
-        int*                         offset;
+        int                            origin;
+        antares_window_callback_offset to;
+        antares_window_callback_unit   unit;
+        int*                           offset;
     } get_offset;
 
     int*                           get_size;

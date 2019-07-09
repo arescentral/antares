@@ -255,7 +255,7 @@ struct CocoaVideoDriver::EventBridge {
             case ANTARES_WINDOW_CALLBACK_GET_OFFSET:
                 if (self->text_receiver) {
                     *data.get_offset.offset = self->text_receiver->offset(
-                            data.get_offset.origin, data.get_offset.by,
+                            data.get_offset.origin, (TextReceiver::Offset)data.get_offset.to,
                             (TextReceiver::OffsetUnit)data.get_offset.unit);
                 }
                 break;

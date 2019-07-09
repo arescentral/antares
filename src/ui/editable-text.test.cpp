@@ -75,63 +75,63 @@ TEST_F(EditableTextTest, OffsetGlyphs) {
             "b\xcc\x86"            // b̆
             "\xc3\xa7\xcc\xa7"     // ç̧
             "?\xcc\x84\xcc\xb1");  // ?̱̄
-    EXPECT_THAT(text.offset(0, -1, TextReceiver::GLYPHS), Eq(0));
-    EXPECT_THAT(text.offset(0, +1, TextReceiver::GLYPHS), Eq(2));
-    EXPECT_THAT(text.offset(2, -1, TextReceiver::GLYPHS), Eq(0));
-    EXPECT_THAT(text.offset(2, +1, TextReceiver::GLYPHS), Eq(5));
-    EXPECT_THAT(text.offset(5, -1, TextReceiver::GLYPHS), Eq(2));
-    EXPECT_THAT(text.offset(5, +1, TextReceiver::GLYPHS), Eq(9));
-    EXPECT_THAT(text.offset(9, -1, TextReceiver::GLYPHS), Eq(5));
-    EXPECT_THAT(text.offset(9, +1, TextReceiver::GLYPHS), Eq(14));
-    EXPECT_THAT(text.offset(14, -1, TextReceiver::GLYPHS), Eq(9));
-    EXPECT_THAT(text.offset(14, +1, TextReceiver::GLYPHS), Eq(14));
+    EXPECT_THAT(text.offset(0, TextReceiver::PREV_START, TextReceiver::GLYPHS), Eq(0));
+    EXPECT_THAT(text.offset(0, TextReceiver::NEXT_START, TextReceiver::GLYPHS), Eq(2));
+    EXPECT_THAT(text.offset(2, TextReceiver::PREV_START, TextReceiver::GLYPHS), Eq(0));
+    EXPECT_THAT(text.offset(2, TextReceiver::NEXT_START, TextReceiver::GLYPHS), Eq(5));
+    EXPECT_THAT(text.offset(5, TextReceiver::PREV_START, TextReceiver::GLYPHS), Eq(2));
+    EXPECT_THAT(text.offset(5, TextReceiver::NEXT_START, TextReceiver::GLYPHS), Eq(9));
+    EXPECT_THAT(text.offset(9, TextReceiver::PREV_START, TextReceiver::GLYPHS), Eq(5));
+    EXPECT_THAT(text.offset(9, TextReceiver::NEXT_START, TextReceiver::GLYPHS), Eq(14));
+    EXPECT_THAT(text.offset(14, TextReceiver::PREV_START, TextReceiver::GLYPHS), Eq(9));
+    EXPECT_THAT(text.offset(14, TextReceiver::NEXT_START, TextReceiver::GLYPHS), Eq(14));
 }
 
 TEST_F(EditableTextTest, OffsetWords) {
     DummyEditableText text;
     text.replace({0, 0}, "1 + 1.5 isn't two");
-    EXPECT_THAT(text.offset(0, -1, TextReceiver::WORDS), Eq(0));
-    EXPECT_THAT(text.offset(0, +1, TextReceiver::WORDS), Eq(1));
+    EXPECT_THAT(text.offset(0, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(0));
+    EXPECT_THAT(text.offset(0, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(1));
 
-    EXPECT_THAT(text.offset(1, -1, TextReceiver::WORDS), Eq(0));
-    EXPECT_THAT(text.offset(2, -1, TextReceiver::WORDS), Eq(0));
-    EXPECT_THAT(text.offset(3, -1, TextReceiver::WORDS), Eq(0));
-    EXPECT_THAT(text.offset(4, -1, TextReceiver::WORDS), Eq(0));
-    EXPECT_THAT(text.offset(1, +1, TextReceiver::WORDS), Eq(7));
-    EXPECT_THAT(text.offset(2, +1, TextReceiver::WORDS), Eq(7));
-    EXPECT_THAT(text.offset(3, +1, TextReceiver::WORDS), Eq(7));
-    EXPECT_THAT(text.offset(4, +1, TextReceiver::WORDS), Eq(7));
+    EXPECT_THAT(text.offset(1, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(0));
+    EXPECT_THAT(text.offset(2, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(0));
+    EXPECT_THAT(text.offset(3, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(0));
+    EXPECT_THAT(text.offset(4, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(0));
+    EXPECT_THAT(text.offset(1, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(7));
+    EXPECT_THAT(text.offset(2, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(7));
+    EXPECT_THAT(text.offset(3, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(7));
+    EXPECT_THAT(text.offset(4, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(7));
 
-    EXPECT_THAT(text.offset(5, -1, TextReceiver::WORDS), Eq(4));
-    EXPECT_THAT(text.offset(6, -1, TextReceiver::WORDS), Eq(4));
-    EXPECT_THAT(text.offset(5, +1, TextReceiver::WORDS), Eq(7));
-    EXPECT_THAT(text.offset(6, +1, TextReceiver::WORDS), Eq(7));
+    EXPECT_THAT(text.offset(5, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(4));
+    EXPECT_THAT(text.offset(6, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(4));
+    EXPECT_THAT(text.offset(5, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(7));
+    EXPECT_THAT(text.offset(6, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(7));
 
-    EXPECT_THAT(text.offset(7, -1, TextReceiver::WORDS), Eq(4));
-    EXPECT_THAT(text.offset(8, -1, TextReceiver::WORDS), Eq(4));
-    EXPECT_THAT(text.offset(7, +1, TextReceiver::WORDS), Eq(13));
-    EXPECT_THAT(text.offset(8, +1, TextReceiver::WORDS), Eq(13));
+    EXPECT_THAT(text.offset(7, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(4));
+    EXPECT_THAT(text.offset(8, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(4));
+    EXPECT_THAT(text.offset(7, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(13));
+    EXPECT_THAT(text.offset(8, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(13));
 
-    EXPECT_THAT(text.offset(9, -1, TextReceiver::WORDS), Eq(8));
-    EXPECT_THAT(text.offset(10, -1, TextReceiver::WORDS), Eq(8));
-    EXPECT_THAT(text.offset(11, -1, TextReceiver::WORDS), Eq(8));
-    EXPECT_THAT(text.offset(12, -1, TextReceiver::WORDS), Eq(8));
-    EXPECT_THAT(text.offset(9, +1, TextReceiver::WORDS), Eq(13));
-    EXPECT_THAT(text.offset(10, +1, TextReceiver::WORDS), Eq(13));
-    EXPECT_THAT(text.offset(11, +1, TextReceiver::WORDS), Eq(13));
-    EXPECT_THAT(text.offset(12, +1, TextReceiver::WORDS), Eq(13));
+    EXPECT_THAT(text.offset(9, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(8));
+    EXPECT_THAT(text.offset(10, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(8));
+    EXPECT_THAT(text.offset(11, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(8));
+    EXPECT_THAT(text.offset(12, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(8));
+    EXPECT_THAT(text.offset(9, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(13));
+    EXPECT_THAT(text.offset(10, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(13));
+    EXPECT_THAT(text.offset(11, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(13));
+    EXPECT_THAT(text.offset(12, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(13));
 
-    EXPECT_THAT(text.offset(13, -1, TextReceiver::WORDS), Eq(8));
-    EXPECT_THAT(text.offset(14, -1, TextReceiver::WORDS), Eq(8));
-    EXPECT_THAT(text.offset(13, +1, TextReceiver::WORDS), Eq(17));
-    EXPECT_THAT(text.offset(14, +1, TextReceiver::WORDS), Eq(17));
+    EXPECT_THAT(text.offset(13, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(8));
+    EXPECT_THAT(text.offset(14, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(8));
+    EXPECT_THAT(text.offset(13, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(17));
+    EXPECT_THAT(text.offset(14, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(17));
 
-    EXPECT_THAT(text.offset(15, -1, TextReceiver::WORDS), Eq(14));
-    EXPECT_THAT(text.offset(16, -1, TextReceiver::WORDS), Eq(14));
-    EXPECT_THAT(text.offset(17, -1, TextReceiver::WORDS), Eq(14));
-    EXPECT_THAT(text.offset(15, +1, TextReceiver::WORDS), Eq(17));
-    EXPECT_THAT(text.offset(16, +1, TextReceiver::WORDS), Eq(17));
-    EXPECT_THAT(text.offset(17, +1, TextReceiver::WORDS), Eq(17));
+    EXPECT_THAT(text.offset(15, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(14));
+    EXPECT_THAT(text.offset(16, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(14));
+    EXPECT_THAT(text.offset(17, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(14));
+    EXPECT_THAT(text.offset(15, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(17));
+    EXPECT_THAT(text.offset(16, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(17));
+    EXPECT_THAT(text.offset(17, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(17));
 }
 
 TEST_F(EditableTextTest, OffsetParagraphs) {
@@ -143,20 +143,26 @@ TEST_F(EditableTextTest, OffsetParagraphs) {
             "\n"
             "123456789");
 
-    EXPECT_THAT(text.offset(0, -1, TextReceiver::PARA_ENDS), Eq(0));
-    EXPECT_THAT(text.offset(0, -1, TextReceiver::PARA_BEGINNINGS), Eq(0));
-    EXPECT_THAT(text.offset(0, +1, TextReceiver::PARA_ENDS), Eq(9));
-    EXPECT_THAT(text.offset(0, +1, TextReceiver::PARA_BEGINNINGS), Eq(10));
+    EXPECT_THAT(text.offset(0, TextReceiver::PREV_END, TextReceiver::PARAGRAPHS), Eq(0));
+    EXPECT_THAT(text.offset(0, TextReceiver::PREV_START, TextReceiver::PARAGRAPHS), Eq(0));
+    EXPECT_THAT(text.offset(0, TextReceiver::THIS_START, TextReceiver::PARAGRAPHS), Eq(0));
+    EXPECT_THAT(text.offset(0, TextReceiver::THIS_END, TextReceiver::PARAGRAPHS), Eq(9));
+    EXPECT_THAT(text.offset(0, TextReceiver::NEXT_END, TextReceiver::PARAGRAPHS), Eq(9));
+    EXPECT_THAT(text.offset(0, TextReceiver::NEXT_START, TextReceiver::PARAGRAPHS), Eq(10));
 
-    EXPECT_THAT(text.offset(15, -1, TextReceiver::PARA_ENDS), Eq(9));
-    EXPECT_THAT(text.offset(15, -1, TextReceiver::PARA_BEGINNINGS), Eq(10));
-    EXPECT_THAT(text.offset(15, +1, TextReceiver::PARA_ENDS), Eq(19));
-    EXPECT_THAT(text.offset(15, +1, TextReceiver::PARA_BEGINNINGS), Eq(20));
+    EXPECT_THAT(text.offset(15, TextReceiver::PREV_END, TextReceiver::PARAGRAPHS), Eq(9));
+    EXPECT_THAT(text.offset(15, TextReceiver::PREV_START, TextReceiver::PARAGRAPHS), Eq(10));
+    EXPECT_THAT(text.offset(15, TextReceiver::THIS_START, TextReceiver::PARAGRAPHS), Eq(10));
+    EXPECT_THAT(text.offset(15, TextReceiver::THIS_END, TextReceiver::PARAGRAPHS), Eq(19));
+    EXPECT_THAT(text.offset(15, TextReceiver::NEXT_END, TextReceiver::PARAGRAPHS), Eq(19));
+    EXPECT_THAT(text.offset(15, TextReceiver::NEXT_START, TextReceiver::PARAGRAPHS), Eq(20));
 
-    EXPECT_THAT(text.offset(21, -1, TextReceiver::PARA_ENDS), Eq(20));
-    EXPECT_THAT(text.offset(21, -1, TextReceiver::PARA_BEGINNINGS), Eq(20));
-    EXPECT_THAT(text.offset(21, +1, TextReceiver::PARA_ENDS), Eq(30));
-    EXPECT_THAT(text.offset(21, +1, TextReceiver::PARA_BEGINNINGS), Eq(30));
+    EXPECT_THAT(text.offset(21, TextReceiver::PREV_END, TextReceiver::PARAGRAPHS), Eq(20));
+    EXPECT_THAT(text.offset(21, TextReceiver::PREV_START, TextReceiver::PARAGRAPHS), Eq(20));
+    EXPECT_THAT(text.offset(21, TextReceiver::THIS_START, TextReceiver::PARAGRAPHS), Eq(21));
+    EXPECT_THAT(text.offset(21, TextReceiver::THIS_END, TextReceiver::PARAGRAPHS), Eq(30));
+    EXPECT_THAT(text.offset(21, TextReceiver::NEXT_END, TextReceiver::PARAGRAPHS), Eq(30));
+    EXPECT_THAT(text.offset(21, TextReceiver::NEXT_START, TextReceiver::PARAGRAPHS), Eq(30));
 }
 
 }  // namespace

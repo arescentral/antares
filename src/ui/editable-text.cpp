@@ -48,8 +48,8 @@ void EditableText::tab() { replace(_selection, "\t"); }
 
 void EditableText::escape() {}
 
-template <typename Iterator>
-static bool is_word(Iterator begin, Iterator end, Iterator it) {
+static bool is_word(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
     if ((*it).isalnum()) {
         return true;
     } else if ((it == begin) || (it == end)) {
@@ -63,110 +63,116 @@ static bool is_word(Iterator begin, Iterator end, Iterator it) {
         case '\'':
             auto jt = it++;
             --jt;
-            return (*it).isalnum() && (*jt).isalnum();
+            return (it != end) && (*it).isalnum() && (*jt).isalnum();
     }
 }
 
-static pn::string::iterator next_para_beginning(
-        pn::string::iterator it, pn::string::iterator end) {
-    for (; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            return ++it;
-        }
-    }
-    return it;
+bool is_glyph_boundary(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return (it == end) || ((*it).width() != 0);
 }
 
-static pn::string::iterator next_para_end(pn::string::iterator it, pn::string::iterator end) {
-    for (++it; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            break;
-        }
-    }
-    return it;
+bool is_word_start(pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return is_word(begin, end, it) && ((it == begin) || !is_word(begin, end, --it));
 }
 
-static pn::string::reverse_iterator next_para_beginning(
-        pn::string::reverse_iterator it, pn::string::reverse_iterator end) {
-    for (++it; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            break;
-        }
-    }
-    return it;
+bool is_word_end(pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return !is_word(begin, end, it) && ((it == begin) || is_word(begin, end, --it));
 }
 
-static pn::string::reverse_iterator next_para_end(
-        pn::string::reverse_iterator it, pn::string::reverse_iterator end) {
-    for (; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            return ++it;
-        }
-    }
-    return it;
+bool is_paragraph_start(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return (it == begin) || (*--it == pn::rune{'\n'});
 }
 
-// Returns {new iterator, can go further?}
-template <typename Iterator>
-static std::pair<Iterator, bool> advance(
-        Iterator begin, Iterator end, Iterator it, TextReceiver::OffsetUnit unit) {
-    if (it == end) {
-        return {it, false};
-    }
+bool is_paragraph_end(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return (it == end) || (*it == pn::rune{'\n'});
+}
 
+bool is_start(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+        TextReceiver::OffsetUnit unit) {
     switch (unit) {
-        case TextReceiver::LINE_GLYPHS:
-        case TextReceiver::PARA_GLYPHS:
-            if (*it == pn::rune{'\n'}) {
-                return {it, false};
-            }
-            while ((++it != end) && ((*it).width() == 0)) {
-            }
-            return {it, true};
+        case TextReceiver::GLYPHS: return is_glyph_boundary(begin, end, it);
+        case TextReceiver::WORDS: return is_word_start(begin, end, it);
+        case TextReceiver::LINES:
+        case TextReceiver::PARAGRAPHS: return is_paragraph_start(begin, end, it);
+    }
+}
 
-        case TextReceiver::GLYPHS:
-            while ((++it != end) && ((*it).width() == 0)) {
-            }
-            return {it, true};
+bool is_end(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+        TextReceiver::OffsetUnit unit) {
+    switch (unit) {
+        case TextReceiver::GLYPHS: return is_glyph_boundary(begin, end, it);
+        case TextReceiver::WORDS: return is_word_end(begin, end, it);
+        case TextReceiver::LINES:
+        case TextReceiver::PARAGRAPHS: return is_paragraph_end(begin, end, it);
+    }
+}
 
-        case TextReceiver::WORDS:
-            while (!is_word(begin, end, it)) {
-                if (++it == end) {
-                    return {end, false};
+int EditableText::offset(int origin, Offset offset, OffsetUnit unit) const {
+    pn::string::iterator       it{_text.data(), _text.size(), origin};
+    const pn::string::iterator begin = _text.begin(), end = _text.end();
+
+    if ((offset < 0) && (it == begin)) {
+        return 0;
+    } else if ((offset > 0) && (it == end)) {
+        return _text.size();
+    }
+
+    switch (offset) {
+        case PREV_SAME: return this->offset(origin, PREV_START, PARAGRAPHS);
+        case NEXT_SAME: return this->offset(origin, NEXT_END, PARAGRAPHS);
+
+        case PREV_START:
+            while (--it != begin) {
+                if (is_start(begin, end, it, unit)) {
+                    break;
                 }
             }
-            for (; (it != end) && is_word(begin, end, it); ++it) {
+            return it.offset();
+
+        case PREV_END:
+            while (--it != begin) {
+                if (is_end(begin, end, it, unit)) {
+                    break;
+                }
             }
-            return {it, true};
+            return it.offset();
 
-        case TextReceiver::LINES: return {end, false};
+        case THIS_START:
+            do {
+                if (is_start(begin, end, it, unit)) {
+                    break;
+                }
+            } while (--it != begin);
+            return it.offset();
 
-        case TextReceiver::PARA_BEGINNINGS: return {next_para_beginning(it, end), true};
+        case THIS_END:
+            do {
+                if (is_end(begin, end, it, unit)) {
+                    break;
+                }
+            } while (++it != end);
+            return it.offset();
 
-        case TextReceiver::PARA_ENDS: return {next_para_end(it, end), true};
-    }
-}
+        case NEXT_START:
+            while (++it != end) {
+                if (is_start(begin, end, it, unit)) {
+                    break;
+                }
+            }
+            return it.offset();
 
-template <typename Iterator>
-static Iterator advance_by(
-        Iterator begin, Iterator end, Iterator it, int by, TextReceiver::OffsetUnit unit) {
-    std::pair<Iterator, bool> it_loop = {it, true};
-    for (; (by > 0) && it_loop.second; --by) {
-        it_loop = advance(begin, end, it_loop.first, unit);
-    }
-    return it_loop.first;
-}
-
-int EditableText::offset(int origin, int by, OffsetUnit unit) const {
-    if (by > 0) {
-        pn::string::iterator it{_text.data(), _text.size(), origin};
-        return advance_by(_text.begin(), _text.end(), it, by, unit).offset();
-    } else if (by < 0) {
-        by = (by == INT_MIN) ? INT_MAX : -by;
-        pn::string::reverse_iterator it{_text.data(), _text.size(), origin};
-        return advance_by(_text.rbegin(), _text.rend(), it, by, unit).offset();
-    } else {
-        return origin;
+        case NEXT_END:
+            while (++it != end) {
+                if (is_end(begin, end, it, unit)) {
+                    break;
+                }
+            }
+            return it.offset();
     }
 }
 

@@ -30,9 +30,9 @@
 namespace antares {
 
 class EditableText : public TextReceiver {
-  public:
     using TextReceiver::range;
 
+  public:
     EditableText();
 
     virtual void replace(range<int> replace, pn::string_view text);
@@ -43,7 +43,7 @@ class EditableText : public TextReceiver {
     virtual void tab();
     virtual void escape();
 
-    virtual int             offset(int origin, int by, OffsetUnit unit) const;
+    virtual int             offset(int origin, Offset offset, OffsetUnit unit) const;
     virtual int             size() const;
     virtual range<int>      selection() const;
     virtual range<int>      mark() const;

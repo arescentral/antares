@@ -189,20 +189,27 @@ class TextReceiver {
     virtual void tab()                                = 0;  // may replace with \t
     virtual void escape()                             = 0;
 
-    enum OffsetUnit {
-        GLYPHS          = 0,  // Composited characters + modifiers
-        WORDS           = 1,  // Alphanumeric sequences
-        LINES           = 2,  // Visual lines
-        LINE_GLYPHS     = 3,  // Glyphs within a visual line
-        PARA_BEGINNINGS = 4,  // Beginnings of paragraphs
-        PARA_ENDS       = 5,  // Ends of paragraphs
-        PARA_GLYPHS     = 6,  // Glyphs within a paragraph
+    enum Offset {
+        PREV_SAME  = -4,  // Previous equivalent position (line only)
+        PREV_START = -3,  // Previous start of (glyph, word, line, paragraph)
+        PREV_END   = -2,  // Previous end of (glyph, word, line, paragraph)
+        THIS_START = -1,  // PREV_START, unless already at a start
+        THIS_END   = +1,  // NEXT_END, unless already at a start
+        NEXT_START = +2,  // Next start of (glyph, word, line, paragraph)
+        NEXT_END   = +3,  // Next end of (glyph, word, line, paragraph)
+        NEXT_SAME  = +4,  // Next equivalent position (line only)
     };
-    virtual int             offset(int origin, int by, OffsetUnit unit) const = 0;
-    virtual int             size() const                                      = 0;
-    virtual range<int>      selection() const                                 = 0;
-    virtual range<int>      mark() const                                      = 0;
-    virtual pn::string_view text(range<int> range) const                      = 0;
+    enum OffsetUnit {
+        GLYPHS     = 0,  // Composited character + modifiers.
+        WORDS      = 1,  // Alphanumeric sequence, including internal [‘'’.]
+        LINES      = 2,  // Visual line, including spaces at end.
+        PARAGRAPHS = 3,  // Paragraph, excluding newline at end.
+    };
+    virtual int             offset(int origin, Offset offset, OffsetUnit unit) const = 0;
+    virtual int             size() const                                             = 0;
+    virtual range<int>      selection() const                                        = 0;
+    virtual range<int>      mark() const                                             = 0;
+    virtual pn::string_view text(range<int> range) const                             = 0;
 };
 
 class Points {

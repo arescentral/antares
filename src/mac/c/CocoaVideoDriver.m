@@ -389,61 +389,69 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [super doCommandBySelector:selector];
 }
 
-- (void)moveBy:(int)by unit:(antares_window_callback_unit)unit {
+- (void)moveTo:(antares_window_callback_offset)to unit:(antares_window_callback_unit)unit {
     NSRange selection = self.selectedRange;
     if (selection.length > 0) {
-        [self selectAt:(by > 0) ? NSMaxRange(selection) : selection.location];
+        [self selectAt:(to > 0) ? NSMaxRange(selection) : selection.location];
     } else {
-        [self selectAt:[self offset:selection.location by:by unit:unit]];
+        [self selectAt:[self offset:selection.location to:to unit:unit]];
     }
 }
 
 - (void)moveRight:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_START
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveLeft:(id)sender {
-    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveWordRight:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_END unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveWordLeft:(id)sender {
-    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveDown:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_SAME unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveUp:(id)s {
-    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_SAME unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveToRightEndOfLine:(id)sender {
-    [self moveBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_END unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveToLeftEndOfLine:(id)s {
-    [self moveBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_START
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveParagraphForward:(id)sender {
-    [self moveBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_ENDS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_END
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveParagraphBackward:(id)s {
-    [self moveBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_BEGINNINGS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToEndOfParagraph:(id)sender {
-    [self moveBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_END
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToBeginningOfParagraph:(id)s {
-    [self moveBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
+    [self moveTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_START
+            unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToEndOfDocument:(id)sender {
@@ -454,72 +462,85 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [self selectAt:0];
 }
 
-- (void)moveAndModifySelectionBy:(int)by unit:(antares_window_callback_unit)unit {
+- (void)moveAndModifySelectionTo:(antares_window_callback_offset)to
+                            unit:(antares_window_callback_unit)unit {
     NSRange selection = self.selectedRange;
-    int     from      = selection.location;
-    int     to        = NSMaxRange(selection);
+    int     begin     = selection.location;
+    int     end       = NSMaxRange(selection);
 
-    SelectionDirection forwards = (by > 0) ? SelectionDirectionRight : SelectionDirectionLeft;
+    SelectionDirection forwards = (to > 0) ? SelectionDirectionRight : SelectionDirectionLeft;
     if (selectionDir == SelectionDirectionNeither) {
         selectionDir = forwards;
     }
 
-    int* cursor = (selectionDir == SelectionDirectionRight) ? &to : &from;
-    int  anchor = (selectionDir == SelectionDirectionRight) ? from : to;
-    *cursor     = [self offset:*cursor by:by unit:unit];
-    if (from > to) {
+    int* cursor = (selectionDir == SelectionDirectionRight) ? &end : &begin;
+    int  anchor = (selectionDir == SelectionDirectionRight) ? begin : end;
+    *cursor     = [self offset:*cursor to:to unit:unit];
+    if (begin > end) {
         *cursor = anchor;
     }
 
-    [self selectFrom:from to:to in:selectionDir];
+    [self selectFrom:begin to:end in:selectionDir];
 }
 
 - (void)moveRightAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_START
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveLeftAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)moveWordRightAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_END
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveWordLeftAndModifySelection:(id)sender {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)moveDownAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_SAME
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveUpAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_SAME
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveToRightEndOfLineAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_END
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveToLeftEndOfLineAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_END
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)moveParagraphForwardAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_BEGINNINGS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_START
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveParagraphBackwardAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_BEGINNINGS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToEndOfParagraphAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_END
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToBeginningOfParagraphAndModifySelection:(id)s {
-    [self moveAndModifySelectionBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_PARA_GLYPHS];
+    [self moveAndModifySelectionTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_START
+                              unit:ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS];
 }
 
 - (void)moveToEndOfDocumentAndModifySelection:(id)sender {
@@ -577,39 +598,45 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     [self replaceRange:self.selectedRange with:@""];
 }
 
-- (void)deleteBy:(int)by unit:(antares_window_callback_unit)unit {
+- (void)deleteTo:(antares_window_callback_offset)to unit:(antares_window_callback_unit)unit {
     NSRange selection = self.selectedRange;
     if (selection.length > 0) {
         [self replaceRange:selection with:@""];
     } else {
-        [self replaceFrom:[self offset:selection.location by:by unit:unit]
+        [self replaceFrom:[self offset:selection.location to:to unit:unit]
                        to:selection.location
                      with:@""];
     }
 }
 
 - (void)deleteBackward:(id)sender {
-    [self deleteBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
+    [self deleteTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+              unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)deleteForward:(id)sender {
-    [self deleteBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
+    [self deleteTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_START
+              unit:ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS];
 }
 
 - (void)deleteWordBackward:(id)s {
-    [self deleteBy:-1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
+    [self deleteTo:ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START
+              unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)deleteWordForward:(id)s {
-    [self deleteBy:+1 unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
+    [self deleteTo:ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_END
+              unit:ANTARES_WINDOW_CALLBACK_UNIT_WORDS];
 }
 
 - (void)deleteToBeginningOfLine:(id)sender {
-    [self deleteBy:INT_MIN unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
+    [self deleteTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_START
+              unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)deleteToEndOfLine:(id)sender {
-    [self deleteBy:INT_MAX unit:ANTARES_WINDOW_CALLBACK_UNIT_LINE_GLYPHS];
+    [self deleteTo:ANTARES_WINDOW_CALLBACK_OFFSET_THIS_END
+              unit:ANTARES_WINDOW_CALLBACK_UNIT_LINES];
 }
 
 - (void)cancelOperation:(id)sender {
@@ -749,9 +776,11 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
     return !isNoRange(self.markedRange);
 }
 
-- (NSUInteger)offset:(NSUInteger)origin by:(NSInteger)by unit:(antares_window_callback_unit)unit {
+- (NSUInteger)offset:(NSUInteger)origin
+                  to:(antares_window_callback_offset)to
+                unit:(antares_window_callback_unit)unit {
     int                          offset;
-    antares_window_callback_data data = {.get_offset = {origin, by, unit, &offset}};
+    antares_window_callback_data data = {.get_offset = {origin, to, unit, &offset}};
     callback(ANTARES_WINDOW_CALLBACK_GET_OFFSET, data, userdata);
     return offset;
 }
