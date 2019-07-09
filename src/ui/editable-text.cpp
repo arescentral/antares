@@ -23,10 +23,15 @@
 
 namespace antares {
 
-EditableText::EditableText() : _text{}, _selection{0, 0}, _mark{-1, -1} {}
+EditableText::EditableText(pn::string_view prefix, pn::string_view suffix)
+        : _prefix{prefix.copy()},
+          _suffix{suffix.copy()},
+          _text{pn::format("{}{}", _prefix, _suffix)},
+          _selection{0, 0},
+          _mark{-1, -1} {}
 
 void EditableText::replace(range<int> replace, pn::string_view text) {
-    _text.replace(replace.begin, replace.end - replace.begin, text);
+    _text.replace(replace.begin + _prefix.size(), replace.end - replace.begin, text);
     _selection = {replace.begin + text.size(), replace.begin + text.size()};
     _mark      = {-1, -1};
     update();
@@ -113,13 +118,13 @@ bool is_end(
 }
 
 int EditableText::offset(int origin, Offset offset, OffsetUnit unit) const {
-    pn::string::iterator       it{_text.data(), _text.size(), origin};
-    const pn::string::iterator begin = _text.begin(), end = _text.end();
+    pn::string::iterator       it{text().data(), text().size(), origin};
+    const pn::string::iterator begin = text().begin(), end = text().end();
 
     if ((offset < 0) && (it == begin)) {
         return 0;
     } else if ((offset > 0) && (it == end)) {
-        return _text.size();
+        return text().size();
     }
 
     switch (offset) {
@@ -176,14 +181,20 @@ int EditableText::offset(int origin, Offset offset, OffsetUnit unit) const {
     }
 }
 
-int EditableText::size() const { return _text.size(); }
+int EditableText::size() const { return _text.size() - _prefix.size() - _suffix.size(); }
 
 EditableText::range<int> EditableText::selection() const { return _selection; }
 
 EditableText::range<int> EditableText::mark() const { return _mark; }
 
 pn::string_view EditableText::text(range<int> range) const {
-    return _text.substr(range.begin, range.end - range.begin);
+    return _text.substr(range.begin + _prefix.size(), range.end - range.begin);
+}
+
+pn::string_view EditableText::text() const { return _text.substr(_prefix.size(), size()); }
+
+EditableText::range<int> EditableText::to_full(range<int> r) const {
+    return {r.begin + _prefix.size(), r.end + _prefix.size()};
 }
 
 }  // namespace antares

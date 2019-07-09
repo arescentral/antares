@@ -33,7 +33,7 @@ class EditableText : public TextReceiver {
     using TextReceiver::range;
 
   public:
-    EditableText();
+    EditableText(pn::string_view prefix, pn::string_view suffix);
 
     virtual void replace(range<int> replace, pn::string_view text);
     virtual void select(range<int> select);
@@ -48,15 +48,23 @@ class EditableText : public TextReceiver {
     virtual range<int>      selection() const;
     virtual range<int>      mark() const;
     virtual pn::string_view text(range<int> range) const;
-    pn::string_view         text() const { return _text; }
+    pn::string_view         text() const;
 
   protected:
     virtual void update() = 0;
 
+    pn::string_view full_text() const { return _text; }
+    range<int>      full_selection() const { return to_full(_selection); }
+    range<int>      full_mark() const { return to_full(_mark); }
+
   private:
-    pn::string _text;
-    range<int> _selection;
-    range<int> _mark;
+    range<int> to_full(range<int> r) const;
+
+    const pn::string _prefix;
+    const pn::string _suffix;
+    pn::string       _text;
+    range<int>       _selection;
+    range<int>       _mark;
 };
 
 }  // namespace antares

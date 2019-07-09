@@ -42,11 +42,13 @@ class EditableTextTest : public testing::Test {
 
 class DummyEditableText : public EditableText {
   public:
+    DummyEditableText(pn::string_view prefix, pn::string_view suffix)
+            : EditableText{prefix, suffix} {}
     virtual void update() {}
 };
 
 TEST_F(EditableTextTest, Replace) {
-    DummyEditableText text;
+    DummyEditableText text{"", ""};
     EXPECT_THAT(text.text(), Eq(""));
     EXPECT_THAT(text.selection(), Eq(range{0, 0}));
     EXPECT_THAT(text.mark(), Eq(range{-1, -1}));
@@ -68,7 +70,7 @@ TEST_F(EditableTextTest, Replace) {
 }
 
 TEST_F(EditableTextTest, OffsetGlyphs) {
-    DummyEditableText text;
+    DummyEditableText text{"", ""};
     text.replace(
             {0, 0},
             "\xc3\xa0"             // à
@@ -88,7 +90,7 @@ TEST_F(EditableTextTest, OffsetGlyphs) {
 }
 
 TEST_F(EditableTextTest, OffsetWords) {
-    DummyEditableText text;
+    DummyEditableText text{"", ""};
     text.replace({0, 0}, "1 + 1.5 isn't two");
     EXPECT_THAT(text.offset(0, TextReceiver::PREV_START, TextReceiver::WORDS), Eq(0));
     EXPECT_THAT(text.offset(0, TextReceiver::NEXT_END, TextReceiver::WORDS), Eq(1));
@@ -135,7 +137,7 @@ TEST_F(EditableTextTest, OffsetWords) {
 }
 
 TEST_F(EditableTextTest, OffsetParagraphs) {
-    DummyEditableText text;
+    DummyEditableText text{"", ""};
     text.replace(
             {0, 0},
             "012345678\n"

@@ -985,7 +985,7 @@ bool PlayerShip::show_target() const {
 
 int32_t PlayerShip::control_direction() const { return _control_direction; }
 
-PlayerShip::MessageText::MessageText() = default;
+PlayerShip::MessageText::MessageText() : EditableText{"<", ">"} {}
 
 void PlayerShip::MessageText::start_editing() {
     _editing = true;
@@ -1001,12 +1001,12 @@ void PlayerShip::MessageText::stop_editing() {
 
 void PlayerShip::MessageText::update() {
     g.send_label->text() = StyledText::plain(
-            pn::format("<{}>", text()), {sys.fonts.tactical, viewport().width() / 2},
+            full_text(), {sys.fonts.tactical, viewport().width() / 2},
             GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
     g.send_label->set_position(
             viewport().left + ((viewport().width() / 2) - (g.send_label->width() / 2)),
             viewport().top + ((play_screen().height() / 2)));
-    g.send_label->text().select(1 + selection().begin, 1 + selection().end);
+    g.send_label->text().select(full_selection().begin, full_selection().end);
 }
 
 void PlayerShip::MessageText::accept() {

@@ -161,9 +161,10 @@ class PlayerShip : public EventReceiver {
         virtual void accept();
         virtual void escape();
 
-      private:
+      protected:
         virtual void update();
 
+      private:
         bool _editing = false;
     };
     MessageText _message;
