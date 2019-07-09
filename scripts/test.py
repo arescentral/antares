@@ -82,7 +82,8 @@ def call(args):
 
     queue.put((
         name,
-        START, ))
+        START,
+    ))
     try:
         start = time.time()
         result = fn(opts, queue, name, *args)
@@ -122,6 +123,7 @@ def main():
     pool = multiprocessing.pool.ThreadPool()
     tests = [
         (unit_test, opts, queue, "color-test"),
+        (unit_test, opts, queue, "editable-text-test"),
         (unit_test, opts, queue, "fixed-test"),
         (data_test, opts, queue, "build-pix", [], ["--text"]),
         (data_test, opts, queue, "object-data"),

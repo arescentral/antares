@@ -24,6 +24,7 @@
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
 #include "game/cursor.hpp"
+#include "ui/editable-text.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -147,39 +148,25 @@ class PlayerShip : public EventReceiver {
     int32_t      _control_direction;
     GameCursor   _cursor;
 
-    class MessageTextReceiver : public TextReceiver {
+    class MessageText : public EditableText {
       public:
         using TextReceiver::range;
 
-        MessageTextReceiver();
+        MessageText();
 
         void start_editing();
         void stop_editing();
         bool editing() const { return _editing; }
 
-        virtual void replace(range<int> replace, pn::string_view text);
-        virtual void select(range<int> select);
-        virtual void mark(range<int> mark);
         virtual void accept();
-        virtual void newline();
-        virtual void tab();
         virtual void escape();
 
-        virtual int             offset(int origin, int by, OffsetUnit unit) const;
-        virtual int             size() const;
-        virtual range<int>      selection() const;
-        virtual range<int>      mark() const;
-        virtual pn::string_view text(range<int> range) const;
-
       private:
-        void update();
+        virtual void update();
 
-        bool       _editing = false;
-        pn::string _text;
-        range<int> _selection;
-        range<int> _mark;
+        bool _editing = false;
     };
-    MessageTextReceiver _message;
+    MessageText _message;
 };
 
 void ResetPlayerShip();

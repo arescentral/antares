@@ -985,203 +985,47 @@ bool PlayerShip::show_target() const {
 
 int32_t PlayerShip::control_direction() const { return _control_direction; }
 
-PlayerShip::MessageTextReceiver::MessageTextReceiver()
-        : _text{}, _selection{0, 0}, _mark{-1, -1} {}
+PlayerShip::MessageText::MessageText() = default;
 
-void PlayerShip::MessageTextReceiver::start_editing() {
+void PlayerShip::MessageText::start_editing() {
     _editing = true;
     sys.video->start_editing(this);
-    replace({0, _text.size()}, "");
+    replace({0, size()}, "");
 }
 
-void PlayerShip::MessageTextReceiver::stop_editing() {
+void PlayerShip::MessageText::stop_editing() {
     _editing = false;
     sys.video->stop_editing(this);
     g.send_label->text() = StyledText{};
 }
 
-void PlayerShip::MessageTextReceiver::replace(range<int> replace, pn::string_view text) {
-    _text.replace(replace.begin, replace.end - replace.begin, text);
-    _selection = {replace.begin + text.size(), replace.begin + text.size()};
-    _mark      = {-1, -1};
-    update();
-}
-
-void PlayerShip::MessageTextReceiver::select(range<int> select) {
-    _selection = select;
-    _mark      = {-1, -1};
-    update();
-}
-
-void PlayerShip::MessageTextReceiver::mark(range<int> mark) { _mark = mark; }
-
-void PlayerShip::MessageTextReceiver::update() {
+void PlayerShip::MessageText::update() {
     g.send_label->text() = StyledText::plain(
-            pn::format("<{}>", _text), {sys.fonts.tactical, viewport().width() / 2},
+            pn::format("<{}>", text()), {sys.fonts.tactical, viewport().width() / 2},
             GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
     g.send_label->set_position(
             viewport().left + ((viewport().width() / 2) - (g.send_label->width() / 2)),
             viewport().top + ((play_screen().height() / 2)));
-    g.send_label->text().select(1 + _selection.begin, 1 + _selection.end);
+    g.send_label->text().select(1 + selection().begin, 1 + selection().end);
 }
 
-void PlayerShip::MessageTextReceiver::accept() {
+void PlayerShip::MessageText::accept() {
     stop_editing();
 
-    Cheat cheat = GetCheatFromString(_text);
+    Cheat cheat = GetCheatFromString(text());
     if (cheat != Cheat::NONE) {
         ExecuteCheat(cheat, g.admiral);
-    } else if (!_text.empty()) {
+    } else if (!text().empty()) {
         if (g.admiral->cheats() & kNameObjectBit) {
-            SetAdmiralBuildAtName(g.admiral, _text);
+            SetAdmiralBuildAtName(g.admiral, text());
             g.admiral->cheats() &= ~kNameObjectBit;
         }
     }
 }
 
-void PlayerShip::MessageTextReceiver::newline() { replace(_selection, "\n"); }
-
-void PlayerShip::MessageTextReceiver::tab() { replace(_selection, "\t"); }
-
-void PlayerShip::MessageTextReceiver::escape() {
+void PlayerShip::MessageText::escape() {
     stop_editing();
     g.admiral->cheats() &= ~kNameObjectBit;
-}
-
-template <typename Iterator>
-static bool is_word(Iterator begin, Iterator end, Iterator it) {
-    if ((*it).isalnum()) {
-        return true;
-    } else if ((it == begin) || (it == end)) {
-        return false;
-    }
-
-    // A single ' or . is part of a word if surrounded by alphanumeric characters on both sides.
-    switch ((*it).value()) {
-        default: return false;
-        case '.':
-        case '\'':
-            auto jt = it++;
-            --jt;
-            return (*it).isalnum() && (*jt).isalnum();
-    }
-}
-
-static pn::string::iterator next_para_beginning(
-        pn::string::iterator it, pn::string::iterator end) {
-    for (; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            return ++it;
-        }
-    }
-    return it;
-}
-
-static pn::string::iterator next_para_end(pn::string::iterator it, pn::string::iterator end) {
-    for (++it; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            break;
-        }
-    }
-    return it;
-}
-
-static pn::string::reverse_iterator next_para_beginning(
-        pn::string::reverse_iterator it, pn::string::reverse_iterator end) {
-    for (++it; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            break;
-        }
-    }
-    return it;
-}
-
-static pn::string::reverse_iterator next_para_end(
-        pn::string::reverse_iterator it, pn::string::reverse_iterator end) {
-    for (; it != end; ++it) {
-        if (*it == pn::rune{'\n'}) {
-            return ++it;
-        }
-    }
-    return it;
-}
-
-// Returns {new iterator, can go further?}
-template <typename Iterator>
-static std::pair<Iterator, bool> advance(
-        Iterator begin, Iterator end, Iterator it, TextReceiver::OffsetUnit unit) {
-    if (it == end) {
-        return {it, false};
-    }
-
-    switch (unit) {
-        case TextReceiver::LINE_GLYPHS:
-        case TextReceiver::PARA_GLYPHS:
-            if (*it == pn::rune{'\n'}) {
-                return {it, false};
-            }
-            while ((++it != end) && ((*it).width() == 0)) {
-            }
-            return {it, true};
-
-        case TextReceiver::GLYPHS:
-            while ((++it != end) && ((*it).width() == 0)) {
-            }
-            return {it, true};
-
-        case TextReceiver::WORDS:
-            while (!is_word(begin, end, it)) {
-                if (++it == end) {
-                    return {end, false};
-                }
-            }
-            for (; (it != end) && is_word(begin, end, it); ++it) {
-            }
-            return {it, true};
-
-        case TextReceiver::LINES: return {end, false};
-
-        case TextReceiver::PARA_BEGINNINGS: return {next_para_beginning(it, end), true};
-
-        case TextReceiver::PARA_ENDS: return {next_para_end(it, end), true};
-    }
-}
-
-template <typename Iterator>
-static Iterator advance_by(
-        Iterator begin, Iterator end, Iterator it, int by, TextReceiver::OffsetUnit unit) {
-    std::pair<Iterator, bool> it_loop = {it, true};
-    for (; (by > 0) && it_loop.second; --by) {
-        it_loop = advance(begin, end, it_loop.first, unit);
-    }
-    return it_loop.first;
-}
-
-int PlayerShip::MessageTextReceiver::offset(int origin, int by, OffsetUnit unit) const {
-    if (by > 0) {
-        pn::string::iterator it{_text.data(), _text.size(), origin};
-        return advance_by(_text.begin(), _text.end(), it, by, unit).offset();
-    } else if (by < 0) {
-        by = (by == INT_MIN) ? INT_MAX : -by;
-        pn::string::reverse_iterator it{_text.data(), _text.size(), origin};
-        return advance_by(_text.rbegin(), _text.rend(), it, by, unit).offset();
-    } else {
-        return origin;
-    }
-}
-
-int PlayerShip::MessageTextReceiver::size() const { return _text.size(); }
-
-PlayerShip::MessageTextReceiver::range<int> PlayerShip::MessageTextReceiver::selection() const {
-    return _selection;
-}
-
-PlayerShip::MessageTextReceiver::range<int> PlayerShip::MessageTextReceiver::mark() const {
-    return _mark;
-}
-
-pn::string_view PlayerShip::MessageTextReceiver::text(range<int> range) const {
-    return _text.substr(range.begin, range.end - range.begin);
 }
 
 void PlayerShipHandleClick(Point where, int button) {
