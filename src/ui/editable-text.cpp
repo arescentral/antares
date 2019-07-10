@@ -27,29 +27,32 @@ EditableText::EditableText(pn::string_view prefix, pn::string_view suffix)
         : _prefix{prefix.copy()},
           _suffix{suffix.copy()},
           _text{pn::format("{}{}", _prefix, _suffix)},
-          _selection{0, 0},
+          _selection{prefix.size(), prefix.size()},
           _mark{-1, -1} {}
 
 void EditableText::replace(range<int> replace, pn::string_view text) {
     _text.replace(replace.begin + _prefix.size(), replace.end - replace.begin, text);
-    _selection = {replace.begin + text.size(), replace.begin + text.size()};
+    int cursor = replace.begin + text.size() + _prefix.size();
+    _selection = {cursor, cursor};
     _mark      = {-1, -1};
     update();
 }
 
 void EditableText::select(range<int> select) {
-    _selection = select;
+    _selection = {select.begin + _prefix.size(), select.end + _prefix.size()};
     _mark      = {-1, -1};
     update();
 }
 
-void EditableText::mark(range<int> mark) { _mark = mark; }
+void EditableText::mark(range<int> mark) {
+    _mark = {mark.begin + _prefix.size(), mark.end + _prefix.size()};
+}
 
-void EditableText::accept() { replace(_selection, "\n"); }
+void EditableText::accept() { replace(selection(), "\n"); }
 
-void EditableText::newline() { replace(_selection, "\n"); }
+void EditableText::newline() { replace(selection(), "\n"); }
 
-void EditableText::tab() { replace(_selection, "\t"); }
+void EditableText::tab() { replace(selection(), "\t"); }
 
 void EditableText::escape() {}
 
@@ -183,18 +186,18 @@ int EditableText::offset(int origin, Offset offset, OffsetUnit unit) const {
 
 int EditableText::size() const { return _text.size() - _prefix.size() - _suffix.size(); }
 
-EditableText::range<int> EditableText::selection() const { return _selection; }
+EditableText::range<int> EditableText::selection() const {
+    return {_selection.begin - _prefix.size(), _selection.end - _prefix.size()};
+}
 
-EditableText::range<int> EditableText::mark() const { return _mark; }
+EditableText::range<int> EditableText::mark() const {
+    return {_mark.begin - _prefix.size(), _mark.end - _prefix.size()};
+}
 
 pn::string_view EditableText::text(range<int> range) const {
     return _text.substr(range.begin + _prefix.size(), range.end - range.begin);
 }
 
 pn::string_view EditableText::text() const { return _text.substr(_prefix.size(), size()); }
-
-EditableText::range<int> EditableText::to_full(range<int> r) const {
-    return {r.begin + _prefix.size(), r.end + _prefix.size()};
-}
 
 }  // namespace antares

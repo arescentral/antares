@@ -54,8 +54,8 @@ class EditableText : public TextReceiver {
     virtual void update() = 0;
 
     pn::string_view full_text() const { return _text; }
-    range<int>      full_selection() const { return to_full(_selection); }
-    range<int>      full_mark() const { return to_full(_mark); }
+    range<int>      full_selection() const { return _selection; }
+    range<int>      full_mark() const { return _mark; }
 
   private:
     range<int> to_full(range<int> r) const;
