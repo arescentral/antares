@@ -24,28 +24,28 @@
 namespace antares {
 
 EditableText::EditableText(pn::string_view prefix, pn::string_view suffix)
-        : _prefix{prefix.copy()},
-          _suffix{suffix.copy()},
-          _text{pn::format("{}{}", _prefix, _suffix)},
-          _selection{prefix.size(), prefix.size()},
-          _mark{-1, -1} {}
+        : _prefix{prefix.copy()}, _suffix{suffix.copy()} {}
 
 void EditableText::replace(range<int> replace, pn::string_view text) {
-    _text.replace(replace.begin + _prefix.size(), replace.end - replace.begin, text);
-    int cursor = replace.begin + text.size() + _prefix.size();
-    _selection = {cursor, cursor};
-    _mark      = {-1, -1};
-    update();
+    pn::string new_text = styled_text().text().copy();
+    new_text.replace(replace.begin + _prefix.size(), replace.end - replace.begin, text);
+    int        cursor    = replace.begin + text.size() + _prefix.size();
+    range<int> selection = {cursor, cursor};
+    range<int> mark      = {-1, -1};
+    update(new_text, selection, mark);
 }
 
 void EditableText::select(range<int> select) {
-    _selection = {select.begin + _prefix.size(), select.end + _prefix.size()};
-    _mark      = {-1, -1};
-    update();
+    range<int> selection = {select.begin + _prefix.size(), select.end + _prefix.size()};
+    range<int> mark      = {-1, -1};
+    update(styled_text().text(), selection, mark);
 }
 
 void EditableText::mark(range<int> mark) {
-    _mark = {mark.begin + _prefix.size(), mark.end + _prefix.size()};
+    range<int> selection = {styled_text().selection().first, styled_text().selection().second};
+    mark.begin += _prefix.size();
+    mark.end += _prefix.size();
+    update(styled_text().text(), selection, mark);
 }
 
 void EditableText::accept() { replace(selection(), "\n"); }
@@ -184,20 +184,26 @@ int EditableText::offset(int origin, Offset offset, OffsetUnit unit) const {
     }
 }
 
-int EditableText::size() const { return _text.size() - _prefix.size() - _suffix.size(); }
+int EditableText::size() const {
+    return styled_text().text().size() - _prefix.size() - _suffix.size();
+}
 
 EditableText::range<int> EditableText::selection() const {
-    return {_selection.begin - _prefix.size(), _selection.end - _prefix.size()};
+    return {styled_text().selection().first - _prefix.size(),
+            styled_text().selection().second - _prefix.size()};
 }
 
 EditableText::range<int> EditableText::mark() const {
-    return {_mark.begin - _prefix.size(), _mark.end - _prefix.size()};
+    return {styled_text().mark().first - _prefix.size(),
+            styled_text().mark().second - _prefix.size()};
 }
 
 pn::string_view EditableText::text(range<int> range) const {
-    return _text.substr(range.begin + _prefix.size(), range.end - range.begin);
+    return styled_text().text().substr(range.begin + _prefix.size(), range.end - range.begin);
 }
 
-pn::string_view EditableText::text() const { return _text.substr(_prefix.size(), size()); }
+pn::string_view EditableText::text() const {
+    return styled_text().text().substr(_prefix.size(), size());
+}
 
 }  // namespace antares

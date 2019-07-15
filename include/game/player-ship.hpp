@@ -162,7 +162,9 @@ class PlayerShip : public EventReceiver {
         virtual void escape();
 
       protected:
-        virtual void update();
+        virtual void        update(pn::string_view text, range<int> selection, range<int> mark);
+        virtual StyledText& styled_text();
+        virtual const StyledText& styled_text() const;
 
       private:
         bool _editing = false;

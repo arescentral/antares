@@ -29,6 +29,8 @@
 
 namespace antares {
 
+class StyledText;
+
 class EditableText : public TextReceiver {
     using TextReceiver::range;
 
@@ -51,20 +53,13 @@ class EditableText : public TextReceiver {
     pn::string_view         text() const;
 
   protected:
-    virtual void update() = 0;
-
-    pn::string_view full_text() const { return _text; }
-    range<int>      full_selection() const { return _selection; }
-    range<int>      full_mark() const { return _mark; }
+    virtual void        update(pn::string_view text, range<int> selection, range<int> mark) = 0;
+    virtual StyledText& styled_text()                                                       = 0;
+    virtual const StyledText& styled_text() const                                           = 0;
 
   private:
-    range<int> to_full(range<int> r) const;
-
     const pn::string _prefix;
     const pn::string _suffix;
-    pn::string       _text;
-    range<int>       _selection;
-    range<int>       _mark;
 };
 
 }  // namespace antares

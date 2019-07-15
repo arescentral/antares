@@ -990,7 +990,7 @@ PlayerShip::MessageText::MessageText() : EditableText{"<", ">"} {}
 void PlayerShip::MessageText::start_editing() {
     _editing = true;
     sys.video->start_editing(this);
-    replace({0, size()}, "");
+    update("<>", {1, 1}, {-1, -1});
 }
 
 void PlayerShip::MessageText::stop_editing() {
@@ -999,15 +999,20 @@ void PlayerShip::MessageText::stop_editing() {
     g.send_label->text() = StyledText{};
 }
 
-void PlayerShip::MessageText::update() {
+void PlayerShip::MessageText::update(pn::string_view text, range<int> selection, range<int> mark) {
     g.send_label->text() = StyledText::plain(
-            full_text(), {sys.fonts.tactical, viewport().width() / 2},
+            text, {sys.fonts.tactical, viewport().width() / 2},
             GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
+    g.send_label->text().select(selection.begin, selection.end);
+    g.send_label->text().mark(mark.begin, mark.end);
+
     g.send_label->set_position(
             viewport().left + ((viewport().width() / 2) - (g.send_label->width() / 2)),
             viewport().top + ((play_screen().height() / 2)));
-    g.send_label->text().select(full_selection().begin, full_selection().end);
 }
+
+StyledText&       PlayerShip::MessageText::styled_text() { return g.send_label->text(); }
+const StyledText& PlayerShip::MessageText::styled_text() const { return g.send_label->text(); }
 
 void PlayerShip::MessageText::accept() {
     stop_editing();

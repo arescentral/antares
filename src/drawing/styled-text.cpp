@@ -247,7 +247,11 @@ StyledText StyledText::interface(
     return t;
 }
 
-void StyledText::select(int from, int to) { _selected = {from, to}; }
+pn::string_view     StyledText::text() const { return _text; }
+void                StyledText::select(int from, int to) { _selection = {from, to}; }
+std::pair<int, int> StyledText::selection() const { return _selection; }
+void                StyledText::mark(int from, int to) { _mark = {from, to}; }
+std::pair<int, int> StyledText::mark() const { return _mark; }
 
 void StyledText::rewrap() {
     if (_wrap_metrics.tab_width <= 0) {
@@ -326,8 +330,9 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
 
     {
         Rects rects;
-        bool should_draw_caret = (0 <= _selected.first) && (_selected.first == _selected.second) &&
-                                 (_selected.second < _chars.size());
+        bool  should_draw_caret = (0 <= _selection.first) &&
+                                 (_selection.first == _selection.second) &&
+                                 (_selection.second < _chars.size());
         Rect prev_bounds;
 
         for (size_t i = begin; i < end; ++i) {
@@ -337,7 +342,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             const RgbColor color = is_selected(ch) ? ch.fore_color : ch.back_color;
 
             if (should_draw_caret) {
-                if (ch.it.offset() >= _selected.first) {
+                if (ch.it.offset() >= _selection.first) {
                     Rect bounds;
                     if (ch.special == LINE_BREAK) {
                         bounds = Rect{prev_bounds.right, prev_bounds.top, prev_bounds.right + 1,
@@ -450,7 +455,7 @@ int StyledText::move_word_down(int index, int v) {
 }
 
 bool StyledText::is_selected(const StyledChar& ch) const {
-    return (_selected.first <= ch.it.offset()) && (ch.it.offset() < _selected.second);
+    return (_selection.first <= ch.it.offset()) && (ch.it.offset() < _selection.second);
 }
 
 StyledText::StyledChar::StyledChar(

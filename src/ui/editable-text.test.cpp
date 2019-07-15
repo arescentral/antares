@@ -20,6 +20,10 @@
 
 #include <gmock/gmock.h>
 
+#include "config/dirs.hpp"
+#include "config/preferences.hpp"
+#include "drawing/styled-text.hpp"
+#include "game/sys.hpp"
 #include "video/text-driver.hpp"
 
 namespace antares {
@@ -36,15 +40,36 @@ using range = TextReceiver::range<int>;
 
 class EditableTextTest : public testing::Test {
   public:
-    EditableTextTest() : video({640, 480}, sfz::nullopt) {}
+    EditableTextTest() : video({640, 480}, sfz::nullopt) {
+        sys.prefs->set_scenario_identifier(kFactoryScenarioIdentifier);
+        sys_init();
+    }
     TextVideoDriver video;
+    NullPrefsDriver prefs;
 };
 
 class DummyEditableText : public EditableText {
+    using TextReceiver::range;
+
   public:
     DummyEditableText(pn::string_view prefix, pn::string_view suffix)
-            : EditableText{prefix, suffix} {}
-    virtual void update() {}
+            : EditableText{prefix, suffix} {
+        _styled_text = StyledText::plain(pn::format("{}{}", prefix, suffix), sys.fonts.tactical);
+        _styled_text.select(prefix.size(), prefix.size());
+        _styled_text.mark(-1, -1);
+    }
+
+    virtual void update(pn::string_view text, range<int> selection, range<int> mark) {
+        _styled_text = StyledText::plain(text, sys.fonts.tactical);
+        _styled_text.select(selection.begin, selection.end);
+        _styled_text.mark(mark.begin, mark.end);
+    }
+
+    virtual StyledText&       styled_text() { return _styled_text; };
+    virtual const StyledText& styled_text() const { return _styled_text; };
+
+  private:
+    StyledText _styled_text;
 };
 
 TEST_F(EditableTextTest, Replace) {

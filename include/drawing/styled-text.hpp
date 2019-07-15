@@ -83,7 +83,12 @@ class StyledText {
     int                                auto_width() const;
     const std::vector<inlinePictType>& inline_picts() const;
 
-    void select(int from, int to);
+    pn::string_view     text() const;
+    void                select(int from, int to);
+    std::pair<int, int> selection() const;
+    void                mark(int from, int to);
+    std::pair<int, int> mark() const;
+
     void draw(const Rect& bounds) const;
     void draw_range(const Rect& bounds, int begin, int end) const;
 
@@ -123,7 +128,8 @@ class StyledText {
     std::vector<Texture>        _textures;
     WrapMetrics                 _wrap_metrics;
     Size                        _auto_size;
-    std::pair<int, int>         _selected = {-1, -1};
+    std::pair<int, int>         _selection = {-1, -1};
+    std::pair<int, int>         _mark      = {-1, -1};
 };
 
 }  // namespace antares
