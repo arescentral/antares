@@ -1015,8 +1015,6 @@ StyledText&       PlayerShip::MessageText::styled_text() { return g.send_label->
 const StyledText& PlayerShip::MessageText::styled_text() const { return g.send_label->text(); }
 
 void PlayerShip::MessageText::accept() {
-    stop_editing();
-
     Cheat cheat = GetCheatFromString(text());
     if (cheat != Cheat::NONE) {
         ExecuteCheat(cheat, g.admiral);
@@ -1026,6 +1024,8 @@ void PlayerShip::MessageText::accept() {
             g.admiral->cheats() &= ~kNameObjectBit;
         }
     }
+
+    stop_editing();
 }
 
 void PlayerShip::MessageText::escape() {
