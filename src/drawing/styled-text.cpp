@@ -342,7 +342,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         Rects rects;
         bool  should_draw_caret = (0 <= _selection.first) &&
                                  (_selection.first == _selection.second) &&
-                                 (_selection.second < _chars.size());
+                                 (_selection.second < _text.size());
         Rect prev_bounds;
 
         for (size_t i = begin; i < end; ++i) {
