@@ -111,7 +111,10 @@ StyledText StyledText::retro(
                         t._chars.push_back(StyledChar(it, WORD_BREAK, 0, fore_color, back_color));
                         break;
 
-                    case '\\': state = SLASH; break;
+                    case '\\':
+                        state = SLASH;
+                        t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
+                        break;
 
                     default:
                         t._chars.push_back(StyledChar(it, NONE, 0, fore_color, back_color));
@@ -124,7 +127,6 @@ StyledText StyledText::retro(
                     case 'i':
                         std::swap(fore_color, back_color);
                         t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
-                        t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
                         state = START;
                         break;
 
@@ -132,22 +134,30 @@ StyledText StyledText::retro(
                         fore_color = original_fore_color;
                         back_color = original_back_color;
                         t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
-                        t._chars.push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case 't':
+                        t._chars.pop_back();
                         t._chars.push_back(StyledChar(it, TAB, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case '\\':
+                        t._chars.pop_back();
                         t._chars.push_back(StyledChar(it, NONE, 0, fore_color, back_color));
                         state = START;
                         break;
 
-                    case 'f': state = FG1; break;
-                    case 'b': state = BG1; break;
+                    case 'f':
+                        t._chars.pop_back();
+                        state = FG1;
+                        break;
+
+                    case 'b':
+                        t._chars.pop_back();
+                        state = BG1;
+                        break;
 
                     default:
                         throw std::runtime_error(
