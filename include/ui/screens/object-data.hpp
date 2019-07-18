@@ -58,10 +58,9 @@ class ObjectDataScreen : public Card {
     State     _state;
     wall_time _next_update;
     wall_time _next_sound;
-    int       _typed_chars;
 
-    const StyledText _text;
-    const Rect       _bounds;
+    StyledText _text;
+    const Rect _bounds;
 };
 
 }  // namespace antares

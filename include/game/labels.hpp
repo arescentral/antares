@@ -79,10 +79,9 @@ class Label {
     Handle<SpaceObject> object;
     bool                objectLink = true;  // true if label requires an object to be seen
     int32_t             lineNum    = 1;
-    bool    keepOnScreenAnyway = false;  // if not attached to object, keep on screen if it's off
-    bool    attachedHintLine   = false;
-    Point   attachedToWhere;
-    int32_t retroCount = -1;
+    bool  keepOnScreenAnyway = false;  // if not attached to object, keep on screen if it's off
+    bool  attachedHintLine   = false;
+    Point attachedToWhere;
 };
 
 }  // namespace antares

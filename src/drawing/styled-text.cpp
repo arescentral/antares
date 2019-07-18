@@ -76,6 +76,7 @@ StyledText StyledText::plain(
     if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
         t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
+    t._until = t._chars.size();
 
     t.rewrap();
     return t;
@@ -188,6 +189,7 @@ StyledText StyledText::retro(
     if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
         t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
+    t._until = t._chars.size();
 
     t.rewrap();
     return t;
@@ -252,10 +254,15 @@ StyledText StyledText::interface(
     if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
         t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, f, b));
     }
+    t._until = t._chars.size();
 
     t.rewrap();
     return t;
 }
+
+void StyledText::hide() { _until = 0; }
+void StyledText::advance() { _until = std::min<int>(_until + 1, _chars.size()); }
+bool StyledText::done() const { return _until == _chars.size(); }
 
 pn::string_view     StyledText::text() const { return _text; }
 void                StyledText::select(int from, int to) { _selection = {from, to}; }
@@ -324,17 +331,13 @@ bool StyledText::empty() const {
     return _chars.size() <= 1;  // Always have \n at the end.
 }
 
-int StyledText::size() const { return _chars.size(); }
-
 int StyledText::height() const { return _auto_size.height; }
 
 int StyledText::auto_width() const { return _auto_size.width; }
 
 const std::vector<inlinePictType>& StyledText::inline_picts() const { return _inline_picts; }
 
-void StyledText::draw(const Rect& bounds) const { draw_range(bounds, 0, _chars.size()); }
-
-void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
+void StyledText::draw(const Rect& bounds) const {
     const Point char_adjust = {
             bounds.left, bounds.top + _wrap_metrics.font->ascent + _wrap_metrics.line_spacing};
 
@@ -345,7 +348,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
                                  (_selection.second < _text.size());
         Rect prev_bounds;
 
-        for (size_t i = begin; i < end; ++i) {
+        for (size_t i = 0; i < _until; ++i) {
             const StyledChar& ch = _chars[i];
             Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
@@ -402,7 +405,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
     {
         Quads quads(_wrap_metrics.font->texture);
 
-        for (size_t i = begin; i < end; ++i) {
+        for (size_t i = 0; i < _until; ++i) {
             const StyledChar& ch = _chars[i];
             if (ch.special == NONE) {
                 RgbColor color = is_selected(ch) ? ch.back_color : ch.fore_color;
@@ -412,7 +415,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         }
     }
 
-    for (size_t i = begin; i < end; ++i) {
+    for (size_t i = 0; i < _until; ++i) {
         const StyledChar& ch     = _chars[i];
         Point             corner = bounds.origin();
         if (ch.special == PICTURE) {
@@ -425,9 +428,12 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
     }
 }
 
-void StyledText::draw_cursor(const Rect& bounds, int index, const RgbColor& color) const {
+void StyledText::draw_cursor(const Rect& bounds, const RgbColor& color, bool ends) const {
+    if (done() || (!ends && ((_until == 0) || (_until == (_chars.size() - 1))))) {
+        return;
+    }
     const int         line_height = _wrap_metrics.font->height + _wrap_metrics.line_spacing;
-    const StyledChar& ch          = _chars[index];
+    const StyledChar& ch          = _chars[_until];
     Rect              char_rect(0, 0, _wrap_metrics.font->logicalWidth, line_height);
     char_rect.offset(bounds.left + ch.bounds.left, bounds.top + ch.bounds.top);
     char_rect.clip_to(bounds);

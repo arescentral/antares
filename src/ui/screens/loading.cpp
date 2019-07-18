@@ -43,7 +43,9 @@ LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
           _name_text{StyledText::retro(
                   level.base.name, {sys.fonts.title, 640, 0, 2, 220}, kLoadingForeColor)},
           _next_update(now() + kTypingDelay),
-          _chars_typed(0) {}
+          _next_teletype(_next_update) {
+    _name_text.hide();
+}
 
 LoadingScreen::~LoadingScreen() {}
 
@@ -62,16 +64,19 @@ void LoadingScreen::fire_timer() {
     switch (_state) {
         case TYPING:
             while (_next_update < now()) {
-                if (_chars_typed >= _name_text.size()) {
+                if (_name_text.done()) {
                     _state      = LOADING;
                     _load_state = start_construct_level(_level);
                     return;
                 }
-                if ((_chars_typed % 3) == 0) {
-                    sys.sound.teletype();
-                }
                 _next_update += kTypingDelay;
-                ++_chars_typed;
+                _name_text.advance();
+            }
+            if (_next_teletype < now()) {
+                sys.sound.teletype();
+                while (_next_teletype < now()) {
+                    _next_teletype += 3 * kTypingDelay;
+                }
             }
             break;
 
@@ -98,10 +103,8 @@ void LoadingScreen::overlay() const {
     Rect bounds(0, 0, _name_text.auto_width(), _name_text.height());
     bounds.center_in(above_content);
 
-    _name_text.draw_range(bounds, 0, _chars_typed);
-    if (_chars_typed < _name_text.size()) {
-        _name_text.draw_cursor(bounds, _chars_typed, kLoadingForeColor);
-    }
+    _name_text.draw(bounds);
+    _name_text.draw_cursor(bounds, kLoadingForeColor);
 
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark  = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);

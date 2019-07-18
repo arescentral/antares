@@ -65,10 +65,9 @@ class DebriefingScreen : public Card {
     Rect       _score_bounds;
 
     wall_time _next_update;
-    int       _typed_chars;
 
-    BoxRect          _data_item;
-    const StyledText _score;
+    BoxRect    _data_item;
+    StyledText _score;
 };
 
 const char* stringify(DebriefingScreen::State state);

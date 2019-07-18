@@ -78,10 +78,13 @@ class StyledText {
             RgbColor back_color = RgbColor::black());
 
     bool                               empty() const;
-    int                                size() const;
     int                                height() const;
     int                                auto_width() const;
     const std::vector<inlinePictType>& inline_picts() const;
+
+    void hide();
+    void advance();
+    bool done() const;
 
     pn::string_view     text() const;
     void                select(int from, int to);
@@ -90,9 +93,8 @@ class StyledText {
     std::pair<int, int> mark() const;
 
     void draw(const Rect& bounds) const;
-    void draw_range(const Rect& bounds, int begin, int end) const;
 
-    void draw_cursor(const Rect& bounds, int index, const RgbColor& color) const;
+    void draw_cursor(const Rect& bounds, const RgbColor& color, bool ends = true) const;
 
   private:
     enum SpecialChar {
@@ -127,6 +129,7 @@ class StyledText {
     std::vector<inlinePictType> _inline_picts;
     std::vector<Texture>        _textures;
     WrapMetrics                 _wrap_metrics;
+    int                         _until;
     Size                        _auto_size;
     std::pair<int, int>         _selection = {-1, -1};
     std::pair<int, int>         _mark      = {-1, -1};

@@ -86,8 +86,8 @@ enum longMessageStageType {
 }  // namespace
 
 struct Messages::longMessageType {
-    longMessageStageType           stage          = kNoStage;
-    ticks                          charDelayCount = ticks(0);
+    longMessageStageType           stage         = kNoStage;
+    int                            teletype_tick = 0;
     sfz::optional<int64_t>         start_id;
     const std::vector<pn::string>* pages              = nullptr;
     int16_t                        current_page_index = -1;
@@ -96,7 +96,6 @@ struct Messages::longMessageType {
     pn::string                     text               = "";
     StyledText                     retro_text;
     Point                          retro_origin     = {0, 0};
-    int32_t                        at_char          = 0;
     bool                           labelMessage     = false;
     bool                           lastLabelMessage = false;
     Handle<Label>                  labelMessageID   = Label::none();
@@ -159,8 +158,8 @@ void Messages::add(pn::string_view message) { message_data.emplace(message.copy(
 void Messages::start(sfz::optional<int64_t> start_id, const std::vector<pn::string>* pages) {
     longMessageType* m = long_message_data;
     if (!m->have_current()) {
-        m->retro_text     = StyledText{};
-        m->charDelayCount = ticks(0);
+        m->retro_text    = StyledText{};
+        m->teletype_tick = 0;
     }
     m->start_id           = start_id;
     m->pages              = pages;
@@ -197,8 +196,8 @@ void Messages::clip() {
     m->retro_origin =
             Point(viewport().left + kHBuffer,
                   viewport().bottom + sys.fonts.tactical.ascent + kLongMessageVPad);
-    m->text    = std::move(text);
-    m->at_char = 0;
+    m->text = std::move(text);
+    m->retro_text.hide();
 
     if (!m->labelMessage) {
         g.bottom_border = m->retro_text.height() + kLongMessageVPadDouble;
@@ -239,18 +238,15 @@ void Messages::draw_long_message(ticks time_pass) {
             m->lastLabelMessage = m->labelMessage;
         }
     } else if (
-            m->have_current() && !m->retro_text.empty() && (m->at_char < m->retro_text.size()) &&
+            m->have_current() && !m->retro_text.empty() && !m->retro_text.done() &&
             (m->stage == kShowStage) && !m->labelMessage) {
-        time_pass = std::min(time_pass, ticks(m->retro_text.size() - m->at_char));
-        // Play teletype sound at least once every 3 ticks.
-        m->charDelayCount += time_pass;
-        if (m->charDelayCount > ticks(0)) {
-            sys.sound.teletype();
-            while (m->charDelayCount > ticks(0)) {
-                m->charDelayCount -= kMajorTick;
+        for (ticks i{0}; i < time_pass; ++i) {
+            m->retro_text.advance();
+            if ((m->teletype_tick++ % 3) == 0) {
+                // Play teletype sound once every 3 ticks.
+                sys.sound.teletype();
             }
         }
-        m->at_char += time_pass.count();
     }
 }
 
@@ -455,13 +451,8 @@ void Messages::draw_message() {
     Rect bounds(viewport().left, viewport().bottom, viewport().right, play_screen().bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
-    long_message_data->retro_text.draw_range(bounds, 0, long_message_data->at_char);
-    // The final char is a newline; don't display a cursor rect for it.
-    if ((0 < long_message_data->at_char) &&
-        (long_message_data->at_char < (long_message_data->retro_text.size() - 1))) {
-        long_message_data->retro_text.draw_cursor(
-                bounds, long_message_data->at_char, kMessagesForeColor);
-    }
+    long_message_data->retro_text.draw(bounds);
+    long_message_data->retro_text.draw_cursor(bounds, kMessagesForeColor, /* ends= */ false);
 }
 
 pn::string_view Messages::pause_string() { return sys.messages.at(10); }

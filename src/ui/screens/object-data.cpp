@@ -74,9 +74,9 @@ ObjectDataScreen::~ObjectDataScreen() {}
 
 void ObjectDataScreen::become_front() {
     _state       = TYPING;
-    _typed_chars = 0;
     _next_update = now() + kTypingDelay;
     _next_sound  = _next_update;
+    _text.hide();
 }
 
 bool ObjectDataScreen::next_timer(wall_time& time) {
@@ -97,9 +97,9 @@ void ObjectDataScreen::fire_timer() {
         }
     }
     while (_next_update <= now) {
-        if (_typed_chars < _text.size()) {
+        if (!_text.done()) {
             _next_update += kTypingDelay;
-            ++_typed_chars;
+            _text.advance();
         } else {
             _next_update = wall_time();
             _state       = DONE;
@@ -133,10 +133,8 @@ void ObjectDataScreen::draw() const {
     Rects().fill(outside, kObjectDataForeColor);
     outside.inset(1, 1);
     Rects().fill(outside, RgbColor::black());
-    _text.draw_range(_bounds, 0, _typed_chars);
-    if (_typed_chars < _text.size()) {
-        _text.draw_cursor(_bounds, _typed_chars, kObjectDataForeColor);
-    }
+    _text.draw(_bounds);
+    _text.draw_cursor(_bounds, kObjectDataForeColor);
 }
 
 }  // namespace antares

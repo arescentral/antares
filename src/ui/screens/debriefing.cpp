@@ -104,13 +104,12 @@ int score(
 }  // namespace
 
 DebriefingScreen::DebriefingScreen(pn::string_view message)
-        : _state(DONE), _typed_chars(0), _data_item(initialize(message, false)) {}
+        : _state(DONE), _data_item(initialize(message, false)) {}
 
 DebriefingScreen::DebriefingScreen(
         pn::string_view message, game_ticks your_time, game_ticks par_time, int your_loss,
         int par_loss, int your_kill, int par_kill)
         : _state(TYPING),
-          _typed_chars(0),
           _data_item(initialize(message, true)),
           _score{StyledText::retro(
                   build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill),
@@ -127,7 +126,7 @@ DebriefingScreen::DebriefingScreen(
 }
 
 void DebriefingScreen::become_front() {
-    _typed_chars = 0;
+    _score.hide();
     if (_state == TYPING) {
         _next_update = now() + kTypingDelay;
     } else {
@@ -141,7 +140,7 @@ void DebriefingScreen::draw() const {
     next()->draw();
     Rects().fill(_pix_bounds, RgbColor::black());
     if (!_score.empty()) {
-        _score.draw_range(_score_bounds, 0, _typed_chars);
+        _score.draw(_score_bounds);
     }
     Rect interface_bounds = _message_bounds;
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
@@ -194,9 +193,9 @@ void DebriefingScreen::fire_timer() {
     sys.sound.teletype();
     wall_time now = antares::now();
     while (_next_update <= now) {
-        if (_typed_chars < _score.size()) {
+        if (!_score.done()) {
             _next_update += kTypingDelay;
-            ++_typed_chars;
+            _score.advance();
         } else {
             _next_update = wall_time();
             _state       = DONE;

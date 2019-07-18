@@ -57,9 +57,9 @@ class LoadingScreen : public InterfaceScreen {
     const Level& _level;
     bool* const  _cancelled;
 
-    const StyledText _name_text;
-    wall_time        _next_update;
-    int32_t          _chars_typed;
+    StyledText _name_text;
+    wall_time  _next_update;
+    wall_time  _next_teletype;
 
     LoadState _load_state;
 };

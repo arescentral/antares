@@ -127,11 +127,7 @@ void Label::draw() {
         sys.video->dither_rect(label->thisRect, dark);
         rect.offset(kLabelInnerSpace, kLabelInnerSpace);
 
-        if ((0 <= label->retroCount) && (label->retroCount < label->_text.size())) {
-            label->_text.draw_range(rect, 0, label->retroCount);
-        } else {
-            label->_text.draw_range(rect, 0, label->_text.size());
-        }
+        label->_text.draw(rect);
     }
 }
 
@@ -150,17 +146,15 @@ void Label::update_contents(ticks units_done) {
             continue;
         }
 
-        if (label->retroCount >= 0) {
+        if (!label->text().done()) {
             // TODO(sfiera): get data on the original rate here.  It looks like the rate of
             // printing was tied to the frame rate before: 3 per frame.  Here, we've switched to 1
             // per tick, so this would be equivalent to the old code at 20 FPS.  The question is,
             // does it feel equivalent?  It only comes up in the tutorial.
             for (size_t i = 0; i < units_done.count(); ++i) {
-                ++label->retroCount;
+                label->text().advance();
             }
-            if (static_cast<size_t>(label->retroCount) >= label->_text.size()) {
-                label->retroCount = -1;
-            } else {
+            if (!label->text().done()) {
                 sys.sound.teletype();
             }
         }
@@ -306,7 +300,7 @@ void Label::set_hue(Hue hue) { this->hue = hue; }
 
 void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
     this->keepOnScreenAnyway = keepOnScreenAnyway;
-    retroCount               = 0;
+    text().hide();
 }
 
 void Label::set_attached_hint_line(bool attachedHintLine, Point toWhere) {
@@ -315,7 +309,6 @@ void Label::set_attached_hint_line(bool attachedHintLine, Point toWhere) {
     }
     this->attachedHintLine = attachedHintLine;
     attachedToWhere        = toWhere;
-    retroCount             = 0;
 }
 
 void Label::set_offset(int32_t hoff, int32_t voff) {
