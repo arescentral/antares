@@ -989,8 +989,9 @@ PlayerShip::MessageText::MessageText() : EditableText{"<", ">"} {}
 
 void PlayerShip::MessageText::start_editing() {
     _editing = true;
-    sys.video->start_editing(this);
-    update("<>", {1, 1}, {-1, -1});
+    if (sys.video->start_editing(this)) {
+        update("<>", {1, 1}, {-1, -1});
+    }
 }
 
 void PlayerShip::MessageText::stop_editing() {
