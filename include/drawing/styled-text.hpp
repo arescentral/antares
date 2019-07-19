@@ -121,18 +121,18 @@ class StyledText {
     };
 
     void rewrap();
-    int  move_word_down(int index, int v);
+    int  move_word_down(std::vector<StyledChar>::iterator it, int v);
     bool is_selected(const StyledChar& ch) const;
 
-    pn::string                  _text;
-    std::vector<StyledChar>     _chars;
-    std::vector<inlinePictType> _inline_picts;
-    std::vector<Texture>        _textures;
-    WrapMetrics                 _wrap_metrics;
-    int                         _until;
-    Size                        _auto_size;
-    std::pair<int, int>         _selection = {-1, -1};
-    std::pair<int, int>         _mark      = {-1, -1};
+    pn::string                              _text;
+    std::vector<StyledChar>                 _chars;
+    std::vector<inlinePictType>             _inline_picts;
+    std::vector<Texture>                    _textures;
+    WrapMetrics                             _wrap_metrics;
+    std::vector<StyledChar>::const_iterator _until;
+    Size                                    _auto_size;
+    std::pair<int, int>                     _selection = {-1, -1};
+    std::pair<int, int>                     _mark      = {-1, -1};
 };
 
 }  // namespace antares

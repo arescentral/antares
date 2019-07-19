@@ -32,9 +32,7 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
-
-int hex_digit(pn::rune r) {
+static int hex_digit(pn::rune r) {
     int32_t c = r.value();
     if ('0' <= c && c <= '9') {
         return c - '0';
@@ -46,7 +44,11 @@ int hex_digit(pn::rune r) {
     throw std::runtime_error(pn::format("{0} is not a valid hex digit", c).c_str());
 }
 
-}  // namespace
+template <typename container>
+static auto last(container& c) -> decltype(c.end()) {
+    auto it = c.end();
+    return (it == c.begin()) ? it : --it;
+}
 
 StyledText::StyledText() : _wrap_metrics{sys.fonts.tactical} {}
 
@@ -73,10 +75,10 @@ StyledText StyledText::plain(
             default: t._chars.push_back(StyledChar(it, NONE, 0, fore_color, back_color)); break;
         }
     }
-    if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
+    if (t._chars.empty() || (last(t._chars)->special != LINE_BREAK)) {
         t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
-    t._until = t._chars.size();
+    t._until = t._chars.end();
 
     t.rewrap();
     return t;
@@ -186,10 +188,10 @@ StyledText StyledText::retro(
         throw std::runtime_error(pn::format("not enough input for special code.").c_str());
     }
 
-    if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
+    if (t._chars.empty() || (last(t._chars)->special != LINE_BREAK)) {
         t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
-    t._until = t._chars.size();
+    t._until = t._chars.end();
 
     t.rewrap();
     return t;
@@ -251,18 +253,22 @@ StyledText StyledText::interface(
         }
     }
 
-    if (t._chars.empty() || (t._chars.back().special != LINE_BREAK)) {
+    if (t._chars.empty() || (last(t._chars)->special != LINE_BREAK)) {
         t._chars.push_back(StyledChar(t._text.end(), LINE_BREAK, 0, f, b));
     }
-    t._until = t._chars.size();
+    t._until = t._chars.end();
 
     t.rewrap();
     return t;
 }
 
-void StyledText::hide() { _until = 0; }
-void StyledText::advance() { _until = std::min<int>(_until + 1, _chars.size()); }
-bool StyledText::done() const { return _until == _chars.size(); }
+bool StyledText::done() const { return _until == _chars.end(); }
+void StyledText::hide() { _until = _chars.begin(); }
+void StyledText::advance() {
+    if (!done()) {
+        ++_until;
+    }
+}
 
 pn::string_view     StyledText::text() const { return _text; }
 void                StyledText::select(int from, int to) { _selection = {from, to}; }
@@ -282,15 +288,16 @@ void StyledText::rewrap() {
     const int line_height   = _wrap_metrics.font->height + _wrap_metrics.line_spacing;
     const int wrap_distance = _wrap_metrics.width - _wrap_metrics.side_margin;
 
-    for (size_t i = 0; i < _chars.size(); ++i) {
-        _chars[i].bounds = Rect{h, v, h, v + line_height};
-        switch (_chars[i].special) {
+    for (auto it = _chars.begin(), end = _chars.end(); it != end; ++it) {
+        StyledChar& ch = *it;
+        ch.bounds      = Rect{h, v, h, v + line_height};
+        switch (ch.special) {
             case NONE:
             case NO_BREAK:
-                h += _wrap_metrics.font->char_width(*_chars[i].it);
+                h += _wrap_metrics.font->char_width(*ch.it);
                 if (h >= wrap_distance) {
                     v += _wrap_metrics.font->height + _wrap_metrics.line_spacing;
-                    h = move_word_down(i, v);
+                    h = move_word_down(it, v);
                 }
                 _auto_size.width = std::max(_auto_size.width, h);
                 break;
@@ -305,24 +312,24 @@ void StyledText::rewrap() {
                 v += _wrap_metrics.font->height + _wrap_metrics.line_spacing;
                 break;
 
-            case WORD_BREAK: h += _wrap_metrics.font->char_width(*_chars[i].it); break;
+            case WORD_BREAK: h += _wrap_metrics.font->char_width(*ch.it); break;
 
             case PICTURE: {
-                inlinePictType* pict = &_inline_picts[_chars[i].pict_index];
+                inlinePictType* pict = &_inline_picts[ch.pict_index];
                 if (h != _wrap_metrics.side_margin) {
                     v += _wrap_metrics.font->height + _wrap_metrics.line_spacing;
                 }
                 h = _wrap_metrics.side_margin;
                 pict->bounds.offset(0, v - pict->bounds.top);
                 v += pict->bounds.height() + _wrap_metrics.line_spacing + 3;
-                if (_chars[i + 1].special == LINE_BREAK) {
+                if (next(it)->special == LINE_BREAK) {
                     v -= (_wrap_metrics.font->height + _wrap_metrics.line_spacing);
                 }
             } break;
 
             case DELAY: break;
         }
-        _chars[i].bounds.right = h;
+        ch.bounds.right = h;
     }
     _auto_size.height = v;
 }
@@ -348,8 +355,8 @@ void StyledText::draw(const Rect& bounds) const {
                                  (_selection.second < _text.size());
         Rect prev_bounds;
 
-        for (size_t i = 0; i < _until; ++i) {
-            const StyledChar& ch = _chars[i];
+        for (auto it = _chars.begin(); it != _until; ++it) {
+            const StyledChar& ch = *it;
             Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
             const RgbColor color = is_selected(ch) ? ch.fore_color : ch.back_color;
@@ -395,7 +402,7 @@ void StyledText::draw(const Rect& bounds) const {
         }
 
         if (should_draw_caret) {
-            const StyledChar& ch = _chars.back();
+            const StyledChar& ch = *last(_chars);
             Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
             rects.fill(Rect{r.right, r.top, r.right + 1, r.bottom}, ch.fore_color);
@@ -405,8 +412,8 @@ void StyledText::draw(const Rect& bounds) const {
     {
         Quads quads(_wrap_metrics.font->texture);
 
-        for (size_t i = 0; i < _until; ++i) {
-            const StyledChar& ch = _chars[i];
+        for (auto it = _chars.begin(); it != _until; ++it) {
+            const StyledChar& ch = *it;
             if (ch.special == NONE) {
                 RgbColor color = is_selected(ch) ? ch.back_color : ch.fore_color;
                 Point    p = Point{ch.bounds.left + char_adjust.h, ch.bounds.top + char_adjust.v};
@@ -415,8 +422,8 @@ void StyledText::draw(const Rect& bounds) const {
         }
     }
 
-    for (size_t i = 0; i < _until; ++i) {
-        const StyledChar& ch     = _chars[i];
+    for (auto it = _chars.begin(); it != _until; ++it) {
+        const StyledChar& ch     = *it;
         Point             corner = bounds.origin();
         if (ch.special == PICTURE) {
             const inlinePictType& inline_pict = _inline_picts[ch.pict_index];
@@ -429,11 +436,11 @@ void StyledText::draw(const Rect& bounds) const {
 }
 
 void StyledText::draw_cursor(const Rect& bounds, const RgbColor& color, bool ends) const {
-    if (done() || (!ends && ((_until == 0) || (_until == (_chars.size() - 1))))) {
+    if (done() || (!ends && ((_until == _chars.begin()) || (next(_until) == _chars.end())))) {
         return;
     }
     const int         line_height = _wrap_metrics.font->height + _wrap_metrics.line_spacing;
-    const StyledChar& ch          = _chars[_until];
+    const StyledChar& ch          = *_until;
     Rect              char_rect(0, 0, _wrap_metrics.font->logicalWidth, line_height);
     char_rect.offset(bounds.left + ch.bounds.left, bounds.top + ch.bounds.top);
     char_rect.clip_to(bounds);
@@ -442,23 +449,26 @@ void StyledText::draw_cursor(const Rect& bounds, const RgbColor& color, bool end
     }
 }
 
-int StyledText::move_word_down(int index, int v) {
-    for (int i = index; i >= 0; --i) {
-        switch (_chars[i].special) {
+int StyledText::move_word_down(std::vector<StyledChar>::iterator it, int v) {
+    const auto end = next(it);
+    while (true) {
+        StyledChar& ch = *it;
+        switch (ch.special) {
             case LINE_BREAK:
             case PICTURE: return _wrap_metrics.side_margin;
 
             case WORD_BREAK:
             case TAB:
             case DELAY: {
-                if (_chars[i + 1].bounds.left <= _wrap_metrics.side_margin) {
+                ++it;
+                if (it->bounds.left <= _wrap_metrics.side_margin) {
                     return _wrap_metrics.side_margin;
                 }
 
                 int h = _wrap_metrics.side_margin;
-                for (int j = i + 1; j <= index; ++j) {
-                    _chars[j].bounds = Rect{Point{h, v}, _chars[j].bounds.size()};
-                    h += _wrap_metrics.font->char_width(*_chars[j].it);
+                for (; it != end; ++it) {
+                    it->bounds = Rect{Point{h, v}, it->bounds.size()};
+                    h += _wrap_metrics.font->char_width(*it->it);
                 }
                 return h;
             }
@@ -466,6 +476,11 @@ int StyledText::move_word_down(int index, int v) {
             case NO_BREAK:
             case NONE: break;
         }
+
+        if (it == _chars.begin()) {
+            break;
+        }
+        --it;
     }
     return _wrap_metrics.side_margin;
 }
