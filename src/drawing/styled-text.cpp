@@ -353,32 +353,11 @@ void StyledText::draw(const Rect& bounds) const {
 
     {
         Rects rects;
-        bool  should_draw_caret = (0 <= _selection.first) &&
-                                 (_selection.first == _selection.second) &&
-                                 (_selection.second < _text.size());
-        Rect prev_bounds;
-
         for (auto it = _chars->begin(); it != _until; ++it) {
             const StyledChar& ch = it->second;
             Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
             const RgbColor color = is_selected(it) ? ch.fore_color : ch.back_color;
-
-            if (should_draw_caret) {
-                if (it->first.offset() >= _selection.first) {
-                    Rect bounds;
-                    if (ch.special == LINE_BREAK) {
-                        bounds = Rect{prev_bounds.right, prev_bounds.top, prev_bounds.right + 1,
-                                      prev_bounds.bottom};
-                    } else {
-                        bounds = Rect{r.left, r.top, r.left + 1, r.bottom};
-                    }
-                    rects.fill(bounds, ch.fore_color);
-                    should_draw_caret = false;
-                } else {
-                    prev_bounds = r;
-                }
-            }
 
             switch (ch.special) {
                 case NONE:
@@ -404,11 +383,20 @@ void StyledText::draw(const Rect& bounds) const {
             rects.fill(r, color);
         }
 
-        if (should_draw_caret) {
-            const StyledChar& ch = last(*_chars)->second;
-            Rect              r  = ch.bounds;
-            r.offset(bounds.left, bounds.top);
-            rects.fill(Rect{r.right, r.top, r.right + 1, r.bottom}, ch.fore_color);
+        if ((0 <= _selection.first) && (_selection.first == _selection.second) &&
+            (_selection.second < _text.size())) {
+            auto it = _chars->lower_bound(
+                    pn::string::iterator{_text.data(), _text.size(), _selection.first});
+            const StyledChar& ch = it->second;
+            if ((it == _chars->begin()) || (ch.special != LINE_BREAK)) {
+                Rect r = ch.bounds;
+                r.offset(bounds.left, bounds.top);
+                rects.fill(Rect{r.left, r.top, r.left + 1, r.bottom}, ch.fore_color);
+            } else {
+                Rect r = (--it)->second.bounds;
+                r.offset(bounds.left, bounds.top);
+                rects.fill(Rect{r.right, r.top, r.right + 1, r.bottom}, ch.fore_color);
+            }
         }
     }
 
