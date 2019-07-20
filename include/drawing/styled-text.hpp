@@ -19,7 +19,7 @@
 #ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
-#include <list>
+#include <map>
 #include <pn/string>
 #include <utility>
 #include <vector>
@@ -122,18 +122,18 @@ class StyledText {
     };
 
     void rewrap();
-    int  move_word_down(std::list<StyledChar>::iterator it, int v);
+    int  move_word_down(std::map<int, StyledChar>::iterator it, int v);
     bool is_selected(const StyledChar& ch) const;
 
-    pn::string                             _text;
-    std::unique_ptr<std::list<StyledChar>> _chars;
-    std::vector<inlinePictType>            _inline_picts;
-    std::vector<Texture>                   _textures;
-    WrapMetrics                            _wrap_metrics;
-    std::list<StyledChar>::const_iterator  _until;
-    Size                                   _auto_size;
-    std::pair<int, int>                    _selection = {-1, -1};
-    std::pair<int, int>                    _mark      = {-1, -1};
+    pn::string                                 _text;
+    std::unique_ptr<std::map<int, StyledChar>> _chars;
+    std::vector<inlinePictType>                _inline_picts;
+    std::vector<Texture>                       _textures;
+    WrapMetrics                                _wrap_metrics;
+    std::map<int, StyledChar>::const_iterator  _until;
+    Size                                       _auto_size;
+    std::pair<int, int>                        _selection = {-1, -1};
+    std::pair<int, int>                        _mark      = {-1, -1};
 };
 
 }  // namespace antares

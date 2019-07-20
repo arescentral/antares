@@ -57,7 +57,7 @@ StyledText::~StyledText() {}
 StyledText StyledText::plain(
         pn::string_view text, WrapMetrics metrics, RgbColor fore_color, RgbColor back_color) {
     StyledText t;
-    t._chars.reset(new std::list<StyledChar>);
+    t._chars.reset(new std::map<int, StyledChar>);
     t._text         = text.copy();
     t._wrap_metrics = metrics;
 
@@ -65,19 +65,25 @@ StyledText StyledText::plain(
         const auto r = *it;
         switch (r.value()) {
             case '\n':
-                t._chars->push_back(StyledChar(it, LINE_BREAK, 0, fore_color, back_color));
+                t._chars->emplace(
+                        it.offset(), StyledChar(it, LINE_BREAK, 0, fore_color, back_color));
                 break;
             case ' ':
-                t._chars->push_back(StyledChar(it, WORD_BREAK, 0, fore_color, back_color));
+                t._chars->emplace(
+                        it.offset(), StyledChar(it, WORD_BREAK, 0, fore_color, back_color));
                 break;
             case 0xA0:
-                t._chars->push_back(StyledChar(it, NO_BREAK, 0, fore_color, back_color));
+                t._chars->emplace(
+                        it.offset(), StyledChar(it, NO_BREAK, 0, fore_color, back_color));
                 break;
-            default: t._chars->push_back(StyledChar(it, NONE, 0, fore_color, back_color)); break;
+            default:
+                t._chars->emplace(it.offset(), StyledChar(it, NONE, 0, fore_color, back_color));
+                break;
         }
     }
-    if (t._chars->empty() || (last(*t._chars)->special != LINE_BREAK)) {
-        t._chars->push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
+    if (t._chars->empty() || (last(*t._chars)->second.special != LINE_BREAK)) {
+        t._chars->emplace(
+                t._text.size(), StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
     t._until = t._chars->end();
 
@@ -88,7 +94,7 @@ StyledText StyledText::plain(
 StyledText StyledText::retro(
         pn::string_view text, WrapMetrics metrics, RgbColor fore_color, RgbColor back_color) {
     StyledText t;
-    t._chars.reset(new std::list<StyledChar>);
+    t._chars.reset(new std::map<int, StyledChar>);
     t._text         = text.copy();
     t._wrap_metrics = metrics;
 
@@ -104,25 +110,32 @@ StyledText StyledText::retro(
             case START:
                 switch (r.value()) {
                     case '\n':
-                        t._chars->push_back(StyledChar(it, LINE_BREAK, 0, fore_color, back_color));
+                        t._chars->emplace(
+                                it.offset(),
+                                StyledChar(it, LINE_BREAK, 0, fore_color, back_color));
                         break;
 
                     case '_':
                         // TODO(sfiera): replace use of "_" with e.g. "\_".
-                        t._chars->push_back(StyledChar(it, NO_BREAK, 0, fore_color, back_color));
+                        t._chars->emplace(
+                                it.offset(), StyledChar(it, NO_BREAK, 0, fore_color, back_color));
                         break;
 
                     case ' ':
-                        t._chars->push_back(StyledChar(it, WORD_BREAK, 0, fore_color, back_color));
+                        t._chars->emplace(
+                                it.offset(),
+                                StyledChar(it, WORD_BREAK, 0, fore_color, back_color));
                         break;
 
                     case '\\':
                         state = SLASH;
-                        t._chars->push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
+                        t._chars->emplace(
+                                it.offset(), StyledChar(it, DELAY, 0, fore_color, back_color));
                         break;
 
                     default:
-                        t._chars->push_back(StyledChar(it, NONE, 0, fore_color, back_color));
+                        t._chars->emplace(
+                                it.offset(), StyledChar(it, NONE, 0, fore_color, back_color));
                         break;
                 }
                 break;
@@ -131,36 +144,40 @@ StyledText StyledText::retro(
                 switch (r.value()) {
                     case 'i':
                         std::swap(fore_color, back_color);
-                        t._chars->push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
+                        t._chars->emplace(
+                                it.offset(), StyledChar(it, DELAY, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case 'r':
                         fore_color = original_fore_color;
                         back_color = original_back_color;
-                        t._chars->push_back(StyledChar(it, DELAY, 0, fore_color, back_color));
+                        t._chars->emplace(
+                                it.offset(), StyledChar(it, DELAY, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case 't':
-                        t._chars->pop_back();
-                        t._chars->push_back(StyledChar(it, TAB, 0, fore_color, back_color));
+                        t._chars->erase(last(*t._chars));
+                        t._chars->emplace(
+                                it.offset(), StyledChar(it, TAB, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case '\\':
-                        t._chars->pop_back();
-                        t._chars->push_back(StyledChar(it, NONE, 0, fore_color, back_color));
+                        t._chars->erase(last(*t._chars));
+                        t._chars->emplace(
+                                it.offset(), StyledChar(it, NONE, 0, fore_color, back_color));
                         state = START;
                         break;
 
                     case 'f':
-                        t._chars->pop_back();
+                        t._chars->erase(last(*t._chars));
                         state = FG1;
                         break;
 
                     case 'b':
-                        t._chars->pop_back();
+                        t._chars->erase(last(*t._chars));
                         state = BG1;
                         break;
 
@@ -190,8 +207,9 @@ StyledText StyledText::retro(
         throw std::runtime_error(pn::format("not enough input for special code.").c_str());
     }
 
-    if (t._chars->empty() || (last(*t._chars)->special != LINE_BREAK)) {
-        t._chars->push_back(StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
+    if (t._chars->empty() || (last(*t._chars)->second.special != LINE_BREAK)) {
+        t._chars->emplace(
+                t._text.size(), StyledChar(t._text.end(), LINE_BREAK, 0, fore_color, back_color));
     }
     t._until = t._chars->end();
 
@@ -202,7 +220,7 @@ StyledText StyledText::retro(
 StyledText StyledText::interface(
         pn::string_view text, WrapMetrics metrics, RgbColor fore_color, RgbColor back_color) {
     StyledText t;
-    t._chars.reset(new std::list<StyledChar>);
+    t._chars.reset(new std::map<int, StyledChar>);
     t._text         = text.copy();
     t._wrap_metrics = metrics;
 
@@ -216,9 +234,13 @@ StyledText StyledText::interface(
         switch (state) {
             case START:
                 switch (r.value()) {
-                    case '\n': t._chars->push_back(StyledChar(it, LINE_BREAK, 0, f, b)); break;
-                    case ' ': t._chars->push_back(StyledChar(it, WORD_BREAK, 0, f, b)); break;
-                    default: t._chars->push_back(StyledChar(it, NONE, 0, f, b)); break;
+                    case '\n':
+                        t._chars->emplace(it.offset(), StyledChar(it, LINE_BREAK, 0, f, b));
+                        break;
+                    case ' ':
+                        t._chars->emplace(it.offset(), StyledChar(it, WORD_BREAK, 0, f, b));
+                        break;
+                    default: t._chars->emplace(it.offset(), StyledChar(it, NONE, 0, f, b)); break;
                     case '^': state = CODE; break;
                 }
                 break;
@@ -249,15 +271,16 @@ StyledText StyledText::interface(
                 t._textures.push_back(Resource::texture(inline_pict.picture));
                 inline_pict.bounds = t._textures.back().size().as_rect();
                 t._inline_picts.emplace_back(std::move(inline_pict));
-                t._chars->push_back(StyledChar(it, PICTURE, t._inline_picts.size() - 1, f, b));
+                t._chars->emplace(
+                        it.offset(), StyledChar(it, PICTURE, t._inline_picts.size() - 1, f, b));
                 id.clear();
                 state = START;
                 break;
         }
     }
 
-    if (t._chars->empty() || (last(*t._chars)->special != LINE_BREAK)) {
-        t._chars->push_back(StyledChar(t._text.end(), LINE_BREAK, 0, f, b));
+    if (t._chars->empty() || (last(*t._chars)->second.special != LINE_BREAK)) {
+        t._chars->emplace(t._text.size(), StyledChar(t._text.end(), LINE_BREAK, 0, f, b));
     }
     t._until = t._chars->end();
 
@@ -292,7 +315,7 @@ void StyledText::rewrap() {
     const int wrap_distance = _wrap_metrics.width - _wrap_metrics.side_margin;
 
     for (auto it = _chars->begin(), end = _chars->end(); it != end; ++it) {
-        StyledChar& ch = *it;
+        StyledChar& ch = it->second;
         ch.bounds      = Rect{h, v, h, v + line_height};
         switch (ch.special) {
             case NONE:
@@ -325,7 +348,7 @@ void StyledText::rewrap() {
                 h = _wrap_metrics.side_margin;
                 pict->bounds.offset(0, v - pict->bounds.top);
                 v += pict->bounds.height() + _wrap_metrics.line_spacing + 3;
-                if (next(it)->special == LINE_BREAK) {
+                if (next(it)->second.special == LINE_BREAK) {
                     v -= (_wrap_metrics.font->height + _wrap_metrics.line_spacing);
                 }
             } break;
@@ -359,7 +382,7 @@ void StyledText::draw(const Rect& bounds) const {
         Rect prev_bounds;
 
         for (auto it = _chars->begin(); it != _until; ++it) {
-            const StyledChar& ch = *it;
+            const StyledChar& ch = it->second;
             Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
             const RgbColor color = is_selected(ch) ? ch.fore_color : ch.back_color;
@@ -405,7 +428,7 @@ void StyledText::draw(const Rect& bounds) const {
         }
 
         if (should_draw_caret) {
-            const StyledChar& ch = *last(*_chars);
+            const StyledChar& ch = last(*_chars)->second;
             Rect              r  = ch.bounds;
             r.offset(bounds.left, bounds.top);
             rects.fill(Rect{r.right, r.top, r.right + 1, r.bottom}, ch.fore_color);
@@ -416,7 +439,7 @@ void StyledText::draw(const Rect& bounds) const {
         Quads quads(_wrap_metrics.font->texture);
 
         for (auto it = _chars->begin(); it != _until; ++it) {
-            const StyledChar& ch = *it;
+            const StyledChar& ch = it->second;
             if (ch.special == NONE) {
                 RgbColor color = is_selected(ch) ? ch.back_color : ch.fore_color;
                 Point    p = Point{ch.bounds.left + char_adjust.h, ch.bounds.top + char_adjust.v};
@@ -426,7 +449,7 @@ void StyledText::draw(const Rect& bounds) const {
     }
 
     for (auto it = _chars->begin(); it != _until; ++it) {
-        const StyledChar& ch     = *it;
+        const StyledChar& ch     = it->second;
         Point             corner = bounds.origin();
         if (ch.special == PICTURE) {
             const inlinePictType& inline_pict = _inline_picts[ch.pict_index];
@@ -443,7 +466,7 @@ void StyledText::draw_cursor(const Rect& bounds, const RgbColor& color, bool end
         return;
     }
     const int         line_height = _wrap_metrics.font->height + _wrap_metrics.line_spacing;
-    const StyledChar& ch          = *_until;
+    const StyledChar& ch          = _until->second;
     Rect              char_rect(0, 0, _wrap_metrics.font->logicalWidth, line_height);
     char_rect.offset(bounds.left + ch.bounds.left, bounds.top + ch.bounds.top);
     char_rect.clip_to(bounds);
@@ -452,10 +475,10 @@ void StyledText::draw_cursor(const Rect& bounds, const RgbColor& color, bool end
     }
 }
 
-int StyledText::move_word_down(std::list<StyledChar>::iterator it, int v) {
+int StyledText::move_word_down(std::map<int, StyledChar>::iterator it, int v) {
     const auto end = next(it);
     while (true) {
-        StyledChar& ch = *it;
+        StyledChar& ch = it->second;
         switch (ch.special) {
             case LINE_BREAK:
             case PICTURE: return _wrap_metrics.side_margin;
@@ -464,14 +487,14 @@ int StyledText::move_word_down(std::list<StyledChar>::iterator it, int v) {
             case TAB:
             case DELAY: {
                 ++it;
-                if (it->bounds.left <= _wrap_metrics.side_margin) {
+                if (it->second.bounds.left <= _wrap_metrics.side_margin) {
                     return _wrap_metrics.side_margin;
                 }
 
                 int h = _wrap_metrics.side_margin;
                 for (; it != end; ++it) {
-                    it->bounds = Rect{Point{h, v}, it->bounds.size()};
-                    h += _wrap_metrics.font->char_width(*it->it);
+                    it->second.bounds = Rect{Point{h, v}, it->second.bounds.size()};
+                    h += _wrap_metrics.font->char_width(*it->second.it);
                 }
                 return h;
             }
