@@ -110,30 +110,29 @@ class StyledText {
 
     struct StyledChar {
         StyledChar(
-                pn::string::iterator it, SpecialChar special, int pict_index,
-                const RgbColor& fore_color, const RgbColor& back_color);
+                SpecialChar special, int pict_index, const RgbColor& fore_color,
+                const RgbColor& back_color);
 
-        pn::string::iterator it;
-        SpecialChar          special;
-        int                  pict_index;
-        RgbColor             fore_color;
-        RgbColor             back_color;
-        Rect                 bounds;
+        SpecialChar special;
+        int         pict_index;
+        RgbColor    fore_color;
+        RgbColor    back_color;
+        Rect        bounds;
     };
 
     void rewrap();
-    int  move_word_down(std::map<int, StyledChar>::iterator it, int v);
-    bool is_selected(const StyledChar& ch) const;
+    int  move_word_down(std::map<pn::string::iterator, StyledChar>::iterator it, int v);
+    bool is_selected(std::map<pn::string::iterator, StyledChar>::const_iterator it) const;
 
-    pn::string                                 _text;
-    std::unique_ptr<std::map<int, StyledChar>> _chars;
-    std::vector<inlinePictType>                _inline_picts;
-    std::vector<Texture>                       _textures;
-    WrapMetrics                                _wrap_metrics;
-    std::map<int, StyledChar>::const_iterator  _until;
-    Size                                       _auto_size;
-    std::pair<int, int>                        _selection = {-1, -1};
-    std::pair<int, int>                        _mark      = {-1, -1};
+    pn::string                                                  _text;
+    std::unique_ptr<std::map<pn::string::iterator, StyledChar>> _chars;
+    std::vector<inlinePictType>                                 _inline_picts;
+    std::vector<Texture>                                        _textures;
+    WrapMetrics                                                 _wrap_metrics;
+    std::map<pn::string::iterator, StyledChar>::const_iterator  _until;
+    Size                                                        _auto_size;
+    std::pair<int, int>                                         _selection = {-1, -1};
+    std::pair<int, int>                                         _mark      = {-1, -1};
 };
 
 }  // namespace antares
