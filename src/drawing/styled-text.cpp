@@ -478,24 +478,46 @@ static bool is_paragraph_end(
     return (it == end) || (*it == pn::rune{'\n'});
 }
 
-static bool is_start(
+bool StyledText::is_line_start(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) const {
+    auto curr = _chars->lower_bound(it);
+    if (curr == _chars->begin()) {
+        return true;
+    }
+    auto prev =
+            _chars->lower_bound(pn::string::iterator{_text.data(), _text.size(), it.offset() - 1});
+    return (curr->second.bounds.top > prev->second.bounds.top);
+}
+
+bool StyledText::is_line_end(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) const {
+    auto curr = _chars->lower_bound(it);
+    if (curr == _chars->end()) {
+        return true;
+    }
+    auto next =
+            _chars->lower_bound(pn::string::iterator{_text.data(), _text.size(), it.offset() + 1});
+    return (curr->second.bounds.top < next->second.bounds.top);
+}
+
+bool StyledText::is_start(
         pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
-        TextReceiver::OffsetUnit unit) {
+        TextReceiver::OffsetUnit unit) const {
     switch (unit) {
         case TextReceiver::GLYPHS: return is_glyph_boundary(begin, end, it);
         case TextReceiver::WORDS: return is_word_start(begin, end, it);
-        case TextReceiver::LINES:
+        case TextReceiver::LINES: return is_line_start(begin, end, it);
         case TextReceiver::PARAGRAPHS: return is_paragraph_start(begin, end, it);
     }
 }
 
-static bool is_end(
+bool StyledText::is_end(
         pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
-        TextReceiver::OffsetUnit unit) {
+        TextReceiver::OffsetUnit unit) const {
     switch (unit) {
         case TextReceiver::GLYPHS: return is_glyph_boundary(begin, end, it);
         case TextReceiver::WORDS: return is_word_end(begin, end, it);
-        case TextReceiver::LINES:
+        case TextReceiver::LINES: return is_line_end(begin, end, it);
         case TextReceiver::PARAGRAPHS: return is_paragraph_end(begin, end, it);
     }
 }

@@ -126,6 +126,17 @@ class StyledText {
     int  move_word_down(std::map<pn::string::iterator, StyledChar>::iterator it, int v);
     bool is_selected(std::map<pn::string::iterator, StyledChar>::const_iterator it) const;
 
+    bool is_line_start(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) const;
+    bool is_line_end(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) const;
+    bool is_start(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+            TextReceiver::OffsetUnit unit) const;
+    bool is_end(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+            TextReceiver::OffsetUnit unit) const;
+
     pn::string                                                  _text;
     std::unique_ptr<std::map<pn::string::iterator, StyledChar>> _chars;
     std::vector<inlinePictType>                                 _inline_picts;
