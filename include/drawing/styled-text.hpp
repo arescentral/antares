@@ -136,6 +136,8 @@ class StyledText {
     bool is_end(
             pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
             TextReceiver::OffsetUnit unit) const;
+    pn::string::iterator line_up(pn::string::iterator it) const;
+    pn::string::iterator line_down(pn::string::iterator it) const;
 
     pn::string                                                  _text;
     std::unique_ptr<std::map<pn::string::iterator, StyledChar>> _chars;

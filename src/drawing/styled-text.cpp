@@ -522,6 +522,60 @@ bool StyledText::is_end(
     }
 }
 
+pn::string::iterator StyledText::line_up(pn::string::iterator it) const {
+    auto          curr = _chars->lower_bound(it);
+    const int32_t h    = curr->second.bounds.left;
+    const int32_t v    = curr->second.bounds.top;
+    while ((curr != _chars->begin()) && (curr->second.bounds.top == v)) {
+        --curr;
+    }
+    if (curr == _chars->begin()) {
+        return curr->first;
+    }
+
+    const int32_t v2      = curr->second.bounds.top;
+    auto          closest = curr;
+    int32_t       diff    = std::abs(h - curr->second.bounds.left);
+    while ((curr != _chars->begin()) && (curr->second.bounds.top == v2)) {
+        int32_t diff2 = std::abs(h - curr->second.bounds.left);
+        if (diff2 <= diff) {
+            closest = curr;
+            diff    = diff2;
+        } else {
+            break;
+        }
+        --curr;
+    }
+    return closest->first;
+}
+
+pn::string::iterator StyledText::line_down(pn::string::iterator it) const {
+    auto          curr = _chars->lower_bound(it);
+    const int32_t h    = curr->second.bounds.left;
+    const int32_t v    = curr->second.bounds.top;
+    while ((curr != _chars->end()) && (curr->second.bounds.top == v)) {
+        ++curr;
+    }
+    if (curr == _chars->end()) {
+        return curr->first;
+    }
+
+    const int32_t v2      = curr->second.bounds.top;
+    auto          closest = curr;
+    int32_t       diff    = std::abs(h - curr->second.bounds.left);
+    while ((curr != _chars->end()) && (curr->second.bounds.top == v2)) {
+        int32_t diff2 = std::abs(h - curr->second.bounds.left);
+        if (diff2 <= diff) {
+            closest = curr;
+            diff    = diff2;
+        } else {
+            break;
+        }
+        ++curr;
+    }
+    return closest->first;
+}
+
 int StyledText::offset(
         int origin, TextReceiver::Offset offset, TextReceiver::OffsetUnit unit) const {
     pn::string::iterator       it{_text.data(), _text.size(), origin};
@@ -534,10 +588,8 @@ int StyledText::offset(
     }
 
     switch (offset) {
-        case TextReceiver::PREV_SAME:
-            return this->offset(origin, TextReceiver::PREV_START, TextReceiver::PARAGRAPHS);
-        case TextReceiver::NEXT_SAME:
-            return this->offset(origin, TextReceiver::NEXT_END, TextReceiver::PARAGRAPHS);
+        case TextReceiver::PREV_SAME: return line_up(it).offset();
+        case TextReceiver::NEXT_SAME: return line_down(it).offset();
 
         case TextReceiver::PREV_START:
             while (--it != begin) {
