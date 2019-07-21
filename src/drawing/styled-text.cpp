@@ -388,15 +388,9 @@ void StyledText::draw(const Rect& bounds) const {
             auto it = _chars->lower_bound(
                     pn::string::iterator{_text.data(), _text.size(), _selection.first});
             const StyledChar& ch = it->second;
-            if ((it == _chars->begin()) || (ch.special != LINE_BREAK)) {
-                Rect r = ch.bounds;
-                r.offset(bounds.left, bounds.top);
-                rects.fill(Rect{r.left, r.top, r.left + 1, r.bottom}, ch.fore_color);
-            } else {
-                Rect r = (--it)->second.bounds;
-                r.offset(bounds.left, bounds.top);
-                rects.fill(Rect{r.right, r.top, r.right + 1, r.bottom}, ch.fore_color);
-            }
+            Rect              r  = ch.bounds;
+            r.offset(bounds.left, bounds.top);
+            rects.fill(Rect{r.left, r.top, r.left + 1, r.bottom}, ch.fore_color);
         }
     }
 
