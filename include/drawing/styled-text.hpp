@@ -97,6 +97,8 @@ class StyledText {
 
     void draw_cursor(const Rect& bounds, const RgbColor& color, bool ends = true) const;
 
+    int offset(int origin, TextReceiver::Offset offset, TextReceiver::OffsetUnit unit) const;
+
   private:
     enum SpecialChar {
         NONE,

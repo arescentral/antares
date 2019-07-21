@@ -434,6 +434,139 @@ void StyledText::draw_cursor(const Rect& bounds, const RgbColor& color, bool end
     }
 }
 
+static bool is_word(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    if ((*it).isalnum()) {
+        return true;
+    } else if ((it == begin) || (it == end)) {
+        return false;
+    }
+
+    // A single ' or . is part of a word if surrounded by alphanumeric characters on both sides.
+    switch ((*it).value()) {
+        default: return false;
+        case '.':
+        case '\'':
+            auto jt = it++;
+            --jt;
+            return (it != end) && (*it).isalnum() && (*jt).isalnum();
+    }
+}
+
+static bool is_glyph_boundary(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return (it == end) || ((*it).width() != 0);
+}
+
+static bool is_word_start(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return is_word(begin, end, it) && ((it == begin) || !is_word(begin, end, --it));
+}
+
+static bool is_word_end(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return !is_word(begin, end, it) && ((it == begin) || is_word(begin, end, --it));
+}
+
+static bool is_paragraph_start(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return (it == begin) || (*--it == pn::rune{'\n'});
+}
+
+static bool is_paragraph_end(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) {
+    return (it == end) || (*it == pn::rune{'\n'});
+}
+
+static bool is_start(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+        TextReceiver::OffsetUnit unit) {
+    switch (unit) {
+        case TextReceiver::GLYPHS: return is_glyph_boundary(begin, end, it);
+        case TextReceiver::WORDS: return is_word_start(begin, end, it);
+        case TextReceiver::LINES:
+        case TextReceiver::PARAGRAPHS: return is_paragraph_start(begin, end, it);
+    }
+}
+
+static bool is_end(
+        pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+        TextReceiver::OffsetUnit unit) {
+    switch (unit) {
+        case TextReceiver::GLYPHS: return is_glyph_boundary(begin, end, it);
+        case TextReceiver::WORDS: return is_word_end(begin, end, it);
+        case TextReceiver::LINES:
+        case TextReceiver::PARAGRAPHS: return is_paragraph_end(begin, end, it);
+    }
+}
+
+int StyledText::offset(
+        int origin, TextReceiver::Offset offset, TextReceiver::OffsetUnit unit) const {
+    pn::string::iterator       it{_text.data(), _text.size(), origin};
+    const pn::string::iterator begin = _text.begin(), end = _text.end();
+
+    if ((offset < 0) && (it == begin)) {
+        return 0;
+    } else if ((offset > 0) && (it == end)) {
+        return _text.size();
+    }
+
+    switch (offset) {
+        case TextReceiver::PREV_SAME:
+            return this->offset(origin, TextReceiver::PREV_START, TextReceiver::PARAGRAPHS);
+        case TextReceiver::NEXT_SAME:
+            return this->offset(origin, TextReceiver::NEXT_END, TextReceiver::PARAGRAPHS);
+
+        case TextReceiver::PREV_START:
+            while (--it != begin) {
+                if (is_start(begin, end, it, unit)) {
+                    break;
+                }
+            }
+            return it.offset();
+
+        case TextReceiver::PREV_END:
+            while (--it != begin) {
+                if (is_end(begin, end, it, unit)) {
+                    break;
+                }
+            }
+            return it.offset();
+
+        case TextReceiver::THIS_START:
+            do {
+                if (is_start(begin, end, it, unit)) {
+                    break;
+                }
+            } while (--it != begin);
+            return it.offset();
+
+        case TextReceiver::THIS_END:
+            do {
+                if (is_end(begin, end, it, unit)) {
+                    break;
+                }
+            } while (++it != end);
+            return it.offset();
+
+        case TextReceiver::NEXT_START:
+            while (++it != end) {
+                if (is_start(begin, end, it, unit)) {
+                    break;
+                }
+            }
+            return it.offset();
+
+        case TextReceiver::NEXT_END:
+            while (++it != end) {
+                if (is_end(begin, end, it, unit)) {
+                    break;
+                }
+            }
+            return it.offset();
+    }
+}
+
 int StyledText::move_word_down(std::map<pn::string::iterator, StyledChar>::iterator it, int v) {
     const auto end = next(it);
     while (true) {
