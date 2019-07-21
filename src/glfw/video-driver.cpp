@@ -207,6 +207,94 @@ void GLFWVideoDriver::char_(unsigned int code_point) {
     _text->replace(_text->selection(), pn::rune{code_point});
 }
 
+static void backspace(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if (s.begin != s.end) {
+        // delete selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.begin = text->offset(s.begin, TextReceiver::THIS_START, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::WORDS);
+    } else {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::GLYPHS);
+    }
+    text->replace(s, "");
+}
+
+static void fwd_delete(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if (s.begin != s.end) {
+        // delete selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.end = text->offset(s.end, TextReceiver::THIS_END, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::WORDS);
+    } else {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::GLYPHS);
+    }
+    text->replace(s, "");
+}
+
+static void left(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.begin = text->offset(s.begin, TextReceiver::THIS_START, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::WORDS);
+    } else {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::GLYPHS);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.end = s.begin;
+    }
+    text->select(s);
+}
+
+static void right(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.end = text->offset(s.end, TextReceiver::THIS_END, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::WORDS);
+    } else {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::GLYPHS);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.begin = s.end;
+    }
+    text->select(s);
+}
+
+static void up(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_SAME, TextReceiver::LINES);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.end = s.begin;
+    }
+    text->select(s);
+}
+
+static void down(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else {
+        s.end = text->offset(s.end, TextReceiver::NEXT_SAME, TextReceiver::LINES);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.begin = s.end;
+    }
+    text->select(s);
+}
+
 void GLFWVideoDriver::edit(int key, int action, int mods) {
     if (action == GLFW_RELEASE) {
         return;
@@ -229,47 +317,13 @@ void GLFWVideoDriver::edit(int key, int action, int mods) {
             }
             break;
 
-        case GLFW_KEY_BACKSPACE: {
-            const int at = _text->offset(
-                    _text->selection().begin, TextReceiver::PREV_START, TextReceiver::GLYPHS);
-            _text->replace({at, _text->selection().end}, "");
-            break;
-        }
+        case GLFW_KEY_BACKSPACE: backspace(_text, mods); break;
+        case GLFW_KEY_DELETE: fwd_delete(_text, mods); break;
 
-        case GLFW_KEY_DELETE: {
-            const int at = _text->offset(
-                    _text->selection().begin, TextReceiver::NEXT_START, TextReceiver::GLYPHS);
-            _text->replace({_text->selection().begin, at}, "");
-            break;
-        }
-
-        case GLFW_KEY_LEFT: {
-            const int at = _text->offset(
-                    _text->selection().begin, TextReceiver::PREV_START, TextReceiver::GLYPHS);
-            _text->select({at, at});
-            break;
-        }
-
-        case GLFW_KEY_RIGHT: {
-            const int at = _text->offset(
-                    _text->selection().begin, TextReceiver::NEXT_START, TextReceiver::GLYPHS);
-            _text->select({at, at});
-            break;
-        }
-
-        case GLFW_KEY_UP: {
-            const int at = _text->offset(
-                    _text->selection().begin, TextReceiver::PREV_SAME, TextReceiver::LINES);
-            _text->select({at, at});
-            break;
-        }
-
-        case GLFW_KEY_DOWN: {
-            const int at = _text->offset(
-                    _text->selection().begin, TextReceiver::NEXT_SAME, TextReceiver::LINES);
-            _text->select({at, at});
-            break;
-        }
+        case GLFW_KEY_LEFT: left(_text, mods); break;
+        case GLFW_KEY_RIGHT: right(_text, mods); break;
+        case GLFW_KEY_UP: up(_text, mods); break;
+        case GLFW_KEY_DOWN: down(_text, mods); break;
     }
 }
 
