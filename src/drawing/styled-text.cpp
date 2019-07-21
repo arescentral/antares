@@ -557,6 +557,7 @@ pn::string::iterator StyledText::line_down(pn::string::iterator it) const {
         ++curr;
     }
     if (curr == _chars->end()) {
+        --curr;
         return curr->first;
     }
 
