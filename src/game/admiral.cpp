@@ -346,7 +346,10 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
 }
 
 void SetAdmiralBuildAtName(Handle<Admiral> a, pn::string_view name) {
-    auto   destObject = a->buildAtObject();
+    auto destObject = a->buildAtObject();
+    if (!destObject.get()) {
+        return;
+    }
     size_t rune_count = 0;
     for (pn::string_view::iterator it = name.begin(); it != name.end(); ++it) {
         if (rune_count++ == kDestinationNameLen) {

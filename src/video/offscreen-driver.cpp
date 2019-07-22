@@ -185,6 +185,10 @@ OffscreenVideoDriver::OffscreenVideoDriver(
     }
 }
 
+bool OffscreenVideoDriver::start_editing(TextReceiver* text) { return false; }
+
+void OffscreenVideoDriver::stop_editing(TextReceiver* text) {}
+
 void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
     _scheduler = &scheduler;
     MainLoop loop(*this, _output_dir, initial);

@@ -66,9 +66,9 @@ static const int32_t kMissionLineHJog         = 10;
 
 static vector<inlinePictType> populate_inline_picts(
         Rect rect, pn::string_view text, InterfaceStyle style) {
-    StyledText interface_text(interface_font(style));
-    interface_text.set_interface_text(text);
-    interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
+    StyledText interface_text = StyledText::interface(
+            text,
+            {interface_font(style), rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer});
     std::vector<inlinePictType> result;
     for (const inlinePictType& pict : interface_text.inline_picts()) {
         result.emplace_back();
@@ -291,7 +291,9 @@ void BriefingScreen::key_down(const KeyDownEvent& event) {
         case Key::K8: return show_object_data(7, event);
         case Key::K9: return show_object_data(8, event);
         case Key::K0: return show_object_data(9, event);
-        default: { return InterfaceScreen::key_down(event); }
+        default: {
+            return InterfaceScreen::key_down(event);
+        }
     }
 }
 
@@ -304,7 +306,9 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
             return;
         case Gamepad::Button::UP: return show_object_data(0, event);
         case Gamepad::Button::DOWN: return show_object_data(1, event);
-        default: { return InterfaceScreen::gamepad_button_down(event); }
+        default: {
+            return InterfaceScreen::gamepad_button_down(event);
+        }
     }
 }
 

@@ -27,6 +27,8 @@
     NSURL* _download_url;
     NSURL* _author_url;
 
+    NSApplicationTerminateReply _application_should_terminate;
+
     IBOutlet NSWindow* _window;
     IBOutlet NSButton* _no_show_again_checkbox;
 

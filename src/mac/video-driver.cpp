@@ -102,47 +102,191 @@ Size CocoaVideoDriver::screen_size() const {
 
 Point CocoaVideoDriver::get_mouse() {
     Point p;
-    antares_get_mouse_location(_translator.c_obj(), &p.h, &p.v);
+    antares_get_mouse_location(_window, &p.h, &p.v);
     return p;
 }
 
 InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
+static antares_window_callback_range c_range(TextReceiver::range<int> range) {
+    return {range.begin, range.end};
+}
+
 wall_time CocoaVideoDriver::now() const { return _now(); }
+
+static const int key_code_count            = 0x80;
+static const Key key_codes[key_code_count] = {
+        Key::A,         Key::S,          Key::D,           Key::F,          Key::H,
+        Key::G,         Key::Z,          Key::X,           Key::C,          Key::V,
+        Key::NONE,      Key::B,          Key::Q,           Key::W,          Key::E,
+        Key::R,
+
+        Key::Y,         Key::T,          Key::K1,          Key::K2,         Key::K3,
+        Key::K4,        Key::K6,         Key::K5,          Key::EQUALS,     Key::K9,
+        Key::K7,        Key::MINUS,      Key::K8,          Key::K0,         Key::R_BRACKET,
+        Key::O,
+
+        Key::U,         Key::L_BRACKET,  Key::I,           Key::P,          Key::RETURN,
+        Key::L,         Key::J,          Key::QUOTE,       Key::K,          Key::SEMICOLON,
+        Key::BACKSLASH, Key::COMMA,      Key::SLASH,       Key::N,          Key::M,
+        Key::PERIOD,
+
+        Key::TAB,       Key::SPACE,      Key::BACKTICK,    Key::BACKSPACE,  Key::NONE,
+        Key::ESCAPE,    Key::R_COMMAND,  Key::COMMAND,     Key::SHIFT,      Key::CAPS_LOCK,
+        Key::OPTION,    Key::CONTROL,    Key::R_SHIFT,     Key::R_OPTION,   Key::R_CONTROL,
+        Key::NONE,
+
+        Key::F17,       Key::N_PERIOD,   Key::NONE,        Key::N_TIMES,    Key::NONE,
+        Key::N_PLUS,    Key::NONE,       Key::N_CLEAR,     Key::VOL_UP,     Key::VOL_DOWN,
+        Key::MUTE,      Key::N_DIVIDE,   Key::N_ENTER,     Key::NONE,       Key::N_MINUS,
+        Key::F18,
+
+        Key::F19,       Key::N_EQUALS,   Key::K0,          Key::K1,         Key::K2,
+        Key::K3,        Key::K4,         Key::K5,          Key::K6,         Key::K7,
+        Key::F20,       Key::K8,         Key::K9,          Key::J_YEN,      Key::J_UNDERSCORE,
+        Key::K_COMMA,
+
+        Key::F5,        Key::F6,         Key::F7,          Key::F3,         Key::F8,
+        Key::F9,        Key::NONE,       Key::F11,         Key::J_KANA,     Key::F13,
+        Key::F16,       Key::F14,        Key::NONE,        Key::F10,        Key::NONE,
+        Key::F12,
+
+        Key::NONE,      Key::F15,        Key::HELP,        Key::HOME,       Key::PAGE_UP,
+        Key::DELETE,    Key::F4,         Key::END,         Key::F2,         Key::PAGE_DOWN,
+        Key::F1,        Key::LEFT_ARROW, Key::RIGHT_ARROW, Key::DOWN_ARROW, Key::UP_ARROW,
+        Key::NONE,
+};
 
 struct CocoaVideoDriver::EventBridge {
     InputMode&         input_mode;
     MainLoop&          main_loop;
     cgl::Context&      context;
-    EventTranslator&   translator;
+    AntaresWindow&     window;
     std::queue<Event*> event_queue;
+    TextReceiver*      text_receiver;
 
     double gamepad[6];
     bool   switch_dpad[4];
 
-    static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
+    static void text(
+            antares_window_callback_type type, antares_window_callback_data data, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseDownEvent(_now(), button, count, Point(x, y)));
-    }
 
-    static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseUpEvent(_now(), button, Point(x, y)));
-    }
+        switch (type) {
+            case ANTARES_WINDOW_CALLBACK_KEY_DOWN:
+                self->enqueue(new KeyDownEvent(_now(), key_codes[data.key_down]));
+                break;
 
-    static void mouse_move(int32_t x, int32_t y, void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseMoveEvent(_now(), Point(x, y)));
-    }
+            case ANTARES_WINDOW_CALLBACK_KEY_UP:
+                self->enqueue(new KeyUpEvent(_now(), key_codes[data.key_up]));
+                break;
 
-    static void caps_lock(void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(_now(), Key::CAPS_LOCK));
-    }
+            case ANTARES_WINDOW_CALLBACK_CAPS_LOCK:
+                self->enqueue(new KeyDownEvent(_now(), Key::CAPS_LOCK));
+                break;
 
-    static void caps_unlock(void* userdata) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(_now(), Key::CAPS_LOCK));
+            case ANTARES_WINDOW_CALLBACK_CAPS_UNLOCK:
+                self->enqueue(new KeyUpEvent(_now(), Key::CAPS_LOCK));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_MOUSE_DOWN:
+                self->enqueue(new MouseDownEvent(
+                        _now(), data.mouse_down.button, data.mouse_down.count,
+                        Point(data.mouse_down.x, data.mouse_down.y)));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_MOUSE_UP:
+                self->enqueue(new MouseUpEvent(
+                        _now(), data.mouse_up.button, Point(data.mouse_up.x, data.mouse_up.y)));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_MOUSE_MOVE:
+                self->enqueue(
+                        new MouseMoveEvent(_now(), Point(data.mouse_move.x, data.mouse_move.y)));
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_REPLACE:
+                if (self->text_receiver) {
+                    self->text_receiver->replace(
+                            {data.replace.range.begin, data.replace.range.end},
+                            pn::string_view(data.replace.data, data.replace.size));
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_SELECT:
+                if (self->text_receiver) {
+                    self->text_receiver->select({data.select.begin, data.select.end});
+                }
+                break;
+            case ANTARES_WINDOW_CALLBACK_MARK:
+                if (self->text_receiver) {
+                    self->text_receiver->mark({data.mark.begin, data.mark.end});
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_ACCEPT:
+                if (self->text_receiver) {
+                    self->text_receiver->accept();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_NEWLINE:
+                if (self->text_receiver) {
+                    self->text_receiver->newline();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_TAB:
+                if (self->text_receiver) {
+                    self->text_receiver->tab();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_ESCAPE:
+                if (self->text_receiver) {
+                    self->text_receiver->escape();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_EDITING:
+                *data.get_editing = (self->text_receiver != nullptr);
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_OFFSET:
+                if (self->text_receiver) {
+                    *data.get_offset.offset = self->text_receiver->offset(
+                            data.get_offset.origin, (TextReceiver::Offset)data.get_offset.to,
+                            (TextReceiver::OffsetUnit)data.get_offset.unit);
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_SIZE:
+                if (self->text_receiver) {
+                    *data.get_size = self->text_receiver->size();
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_SELECTION:
+                if (self->text_receiver) {
+                    *data.get_selection = c_range(self->text_receiver->selection());
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_MARK:
+                if (self->text_receiver) {
+                    *data.get_mark = c_range(self->text_receiver->mark());
+                }
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_GET_TEXT:
+                if (self->text_receiver) {
+                    pn::string_view s = self->text_receiver->text(
+                            {data.get_text.range.begin, data.get_text.range.end});
+                    *data.get_text.data = s.data();
+                    *data.get_text.size = s.size();
+                }
+                break;
+        }
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -150,7 +294,6 @@ struct CocoaVideoDriver::EventBridge {
         IOHIDElementRef element    = IOHIDValueGetElement(value);
         uint32_t        usage_page = IOHIDElementGetUsagePage(element);
         switch (usage_page) {
-            case kHIDPage_KeyboardOrKeypad: self->key_event(result, element, value); break;
             case kHIDPage_GenericDesktop: self->analog_event(result, element, value); break;
             case kHIDPage_Button: self->button_event(result, element, value); break;
         }
@@ -420,7 +563,7 @@ struct CocoaVideoDriver::EventBridge {
 
     void enqueue(Event* event) {
         event_queue.emplace(event);
-        antares_event_translator_cancel(translator.c_obj());
+        antares_window_cancel_event(window.c_obj());
     }
 
     void send_all() {
@@ -437,6 +580,17 @@ struct CocoaVideoDriver::EventBridge {
         CGLFlushDrawable(context.c_obj());
     }
 };
+
+bool CocoaVideoDriver::start_editing(TextReceiver* text) {
+    _bridge->text_receiver = text;
+    return true;
+}
+
+void CocoaVideoDriver::stop_editing(TextReceiver* text) {
+    if (_bridge->text_receiver == text) {
+        _bridge->text_receiver = nullptr;
+    }
+}
 
 void CocoaVideoDriver::loop(Card* initial) {
     CGLPixelFormatAttribute attrs[] = {
@@ -455,8 +609,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context     context(pixel_format.c_obj(), NULL);
     AntaresWindow    window(pixel_format, context);
-    _window = window.c_obj();
-    antares_event_translator_set_window(_translator.c_obj(), window.c_obj());
+    _window             = window.c_obj();
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
     CGLSetCurrentContext(context.c_obj());
@@ -464,29 +617,16 @@ void CocoaVideoDriver::loop(Card* initial) {
     MainLoop main_loop(*this, initial);
     main_loop.draw();
     CGLFlushDrawable(context.c_obj());
-    EventBridge bridge = {_input_mode, main_loop, context, _translator};
+    EventBridge bridge = {_input_mode, main_loop, context, window};
+    _bridge            = &bridge;
 
-    antares_event_translator_set_mouse_down_callback(
-            _translator.c_obj(), EventBridge::mouse_down, &bridge);
-    antares_event_translator_set_mouse_up_callback(
-            _translator.c_obj(), EventBridge::mouse_up, &bridge);
-    antares_event_translator_set_mouse_move_callback(
-            _translator.c_obj(), EventBridge::mouse_move, &bridge);
-    antares_event_translator_set_caps_lock_callback(
-            _translator.c_obj(), EventBridge::caps_lock, &bridge);
-    antares_event_translator_set_caps_unlock_callback(
-            _translator.c_obj(), EventBridge::caps_unlock, &bridge);
+    antares_window_set_callback(_window, EventBridge::text, &bridge);
 
-    cf::MutableDictionary keyboard(CFDictionaryCreateMutable(
-            NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-    keyboard.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
-    keyboard.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
     cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
             NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
     gamepad.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     gamepad.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_GamePad).c_obj());
     cf::MutableArray criteria(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
-    criteria.append(keyboard.c_obj());
     criteria.append(gamepad.c_obj());
 
     auto hid_manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
@@ -501,8 +641,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     while (!main_loop.done()) {
         wall_time at;
         if (main_loop.top()->next_timer(at)) {
-            if (antares_event_translator_next(
-                        _translator.c_obj(), at.time_since_epoch().count())) {
+            if (antares_window_next_event(_window, at.time_since_epoch().count())) {
                 bridge.send_all();
             } else {
                 main_loop.top()->fire_timer();
@@ -511,7 +650,7 @@ void CocoaVideoDriver::loop(Card* initial) {
             }
         } else {
             at = wall_time::max();
-            antares_event_translator_next(_translator.c_obj(), at.time_since_epoch().count());
+            antares_window_next_event(_window, at.time_since_epoch().count());
             bridge.send_all();
         }
     }

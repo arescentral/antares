@@ -119,30 +119,30 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
                     if (line.size() > 3) {
                         id = line.substr(3);
                     }
-                    _lines.push_back(Line{Line::BACKGROUND, Resource::texture(id), nullptr});
+                    _lines.push_back(Line{Line::BACKGROUND, Resource::texture(id), {}});
                 } else {
                     pn::string_view id = line.substr(2);
-                    _lines.push_back(Line{Line::PICTURE, Resource::texture(id), nullptr});
+                    _lines.push_back(Line{Line::PICTURE, Resource::texture(id), {}});
                 }
             }
         } else {
-            unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
-            auto                   red = GetRGBTranslateColorShade(Hue::RED, LIGHTEST);
-            styled->set_fore_color(red);
+            auto       red = GetRGBTranslateColorShade(Hue::RED, LIGHTEST);
+            pn::string content;
             if (line.data() == raw_lines.back().data()) {
-                styled->set_retro_text(line);
+                content = line.copy();
             } else {
-                styled->set_retro_text(pn::format("{0}\n", line));
+                content = pn::format("{0}\n", line);
             }
-            styled->wrap_to(_size.width - 11, 0, 2);
-            _lines.push_back(Line{Line::TEXT, nullptr, std::move(styled)});
+            _lines.push_back(Line{
+                    Line::TEXT, nullptr,
+                    StyledText::retro(content, {sys.fonts.title, _size.width - 11, 0, 2}, red)});
         }
     }
 
     for (const auto& line : _lines) {
         switch (line.type) {
             case Line::PICTURE: _size.height += line.texture.size().height; break;
-            case Line::TEXT: _size.height += line.text->height(); break;
+            case Line::TEXT: _size.height += line.text.height(); break;
             case Line::BACKGROUND: break;
         }
     }
@@ -153,7 +153,7 @@ void BuildPix::draw(Point origin) const {
     for (const auto& line : _lines) {
         switch (line.type) {
             case Line::PICTURE: draw.add_picture(line.texture); break;
-            case Line::TEXT: draw.add_text(*line.text); break;
+            case Line::TEXT: draw.add_text(line.text); break;
             case Line::BACKGROUND: draw.set_background(line.texture); break;
         }
     }

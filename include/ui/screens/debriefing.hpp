@@ -59,16 +59,15 @@ class DebriefingScreen : public Card {
     friend const char* stringify(State state);
     State              _state;
 
-    pn::string                  _message;
-    std::unique_ptr<StyledText> _score;
-    Rect                        _pix_bounds;
-    Rect                        _message_bounds;
-    Rect                        _score_bounds;
+    pn::string _message;
+    Rect       _pix_bounds;
+    Rect       _message_bounds;
+    Rect       _score_bounds;
 
     wall_time _next_update;
-    int       _typed_chars;
 
-    BoxRect _data_item;
+    BoxRect    _data_item;
+    StyledText _score;
 };
 
 const char* stringify(DebriefingScreen::State state);

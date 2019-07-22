@@ -18,6 +18,7 @@
 
 #include "game/player-ship.hpp"
 
+#include <algorithm>
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
@@ -109,8 +110,13 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
 
 }  // namespace
 
-bool PlayerEvent::operator==(PlayerEvent other) const { return key == other.key; }
-bool PlayerEvent::operator<(PlayerEvent other) const { return key < other.key; }
+bool PlayerEvent::operator==(PlayerEvent other) const {
+    return (type == other.type) && (data == other.data);
+}
+
+bool PlayerEvent::operator<(PlayerEvent other) const {
+    return (type != other.type) ? (type < other.type) : (data < other.data);
+}
 
 void ResetPlayerShip() {
     g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, Hue::YELLOW);
@@ -198,6 +204,7 @@ static void engage_autopilot() {
 static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
     Handle<SpaceObject> flagship = adm->flagship();
     Handle<Label>       label;
+    Hue                 hue;
 
     if (adm == g.admiral) {
         globals()->lastSelectedObject   = ship;
@@ -206,6 +213,7 @@ static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral>
     if (target) {
         adm->set_target(ship);
         label = g.target_label;
+        hue   = Hue::SKY_BLUE;
 
         if (!(flagship->attributes & kOnAutoPilot)) {
             SetObjectDestination(flagship);
@@ -213,6 +221,7 @@ static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral>
     } else {
         adm->set_control(ship);
         label = g.control_label;
+        hue   = Hue::YELLOW;
     }
 
     if (adm == g.admiral) {
@@ -221,7 +230,9 @@ static void select_object(Handle<SpaceObject> ship, bool target, Handle<Admiral>
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
         }
-        label->set_string(name_with_hot_key_suffix(ship));
+        label->text() = StyledText::plain(
+                name_with_hot_key_suffix(ship), sys.fonts.tactical,
+                GetRGBTranslateColorShade(hue, LIGHTEST));
     }
 }
 
@@ -310,19 +321,21 @@ static PlayerEvent hot_key_up(int i) {
     bool target     = (gHotKeyState[i] == HOT_KEY_TARGET);
     gHotKeyState[i] = HOT_KEY_UP;
     if (now() >= gHotKeyTime[i] + kHotKeyHoldDuration) {
-        return PlayerEvent{
-                static_cast<PlayerEventType>(static_cast<int>(PlayerEventType::SET_HOTKEY_1) + i)};
+        return PlayerEvent{PlayerEventType::HOTKEY_SET, i};
     } else if (use_target_key() || target) {
-        return PlayerEvent{static_cast<PlayerEventType>(
-                static_cast<int>(PlayerEventType::TARGET_HOTKEY_1) + i)};
+        return PlayerEvent{PlayerEventType::HOTKEY_TARGET, i};
     } else {
-        return PlayerEvent{static_cast<PlayerEventType>(
-                static_cast<int>(PlayerEventType::SELECT_HOTKEY_1) + i)};
+        return PlayerEvent{PlayerEventType::HOTKEY_SELECT, i};
     }
 }
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
+
+    if (event.key() == Key::RETURN) {
+        _message.start_editing();
+        return;
+    }
 
     if (!active()) {
         return;
@@ -697,49 +710,42 @@ bool PlayerShip::active() const {
 
 static void handle_destination_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerEventType::TARGET_SELF && (g.ship->attributes & kCanBeDestination)) {
+        if (e.type == PlayerEventType::TARGET_SELF && (g.ship->attributes & kCanBeDestination)) {
             target_self();
         }
     }
 }
 
-static int hot_key_index(const PlayerEvent& e) {
-    if ((PlayerEventType::SET_HOTKEY_1 <= e.key) && (e.key <= PlayerEventType::TARGET_HOTKEY_10)) {
-        return static_cast<int>(e.key) & 0xf;
-    }
-    return -1;
-}
-
 static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        int i = hot_key_index(e);
-        if (i < 0) {
-            continue;
-        }
+        switch (e.type) {
+            case PlayerEventType::HOTKEY_SET:
+                if (globals()->lastSelectedObject.get()) {
+                    auto o = globals()->lastSelectedObject;
+                    if (o->active && (o->id == globals()->lastSelectedObjectID)) {
+                        globals()->hotKey[e.data].object   = globals()->lastSelectedObject;
+                        globals()->hotKey[e.data].objectID = globals()->lastSelectedObjectID;
+                        Update_LabelStrings_ForHotKeyChange();
+                        sys.sound.select();
+                    }
+                }
+                break;
 
-        if ((PlayerEventType::SET_HOTKEY_1 <= e.key) &&
-            (e.key <= PlayerEventType::SET_HOTKEY_10)) {
-            if (globals()->lastSelectedObject.get()) {
-                auto o = globals()->lastSelectedObject;
-                if (o->active && (o->id == globals()->lastSelectedObjectID)) {
-                    globals()->hotKey[i].object   = globals()->lastSelectedObject;
-                    globals()->hotKey[i].objectID = globals()->lastSelectedObjectID;
-                    Update_LabelStrings_ForHotKeyChange();
-                    sys.sound.select();
+            case PlayerEventType::HOTKEY_SELECT:
+            case PlayerEventType::HOTKEY_TARGET:
+                if (globals()->hotKey[e.data].object.get()) {
+                    auto o = globals()->hotKey[e.data].object;
+                    if (o->active && (o->id == globals()->hotKey[e.data].objectID)) {
+                        bool target = (e.type == PlayerEventType::HOTKEY_TARGET) ||
+                                      (o->owner != g.admiral);
+                        select_object(o, target, g.admiral);
+                    } else {
+                        globals()->hotKey[e.data].object = SpaceObject::none();
+                    }
                 }
-            }
-        } else {
-            bool target = (PlayerEventType::TARGET_HOTKEY_1 <= e.key) &&
-                          (e.key <= PlayerEventType::TARGET_HOTKEY_10);
-            if (globals()->hotKey[i].object.get()) {
-                auto o = globals()->hotKey[i].object;
-                if (o->active && (o->id == globals()->hotKey[i].objectID)) {
-                    target = target || (o->owner != g.admiral);
-                    select_object(o, target, g.admiral);
-                } else {
-                    globals()->hotKey[i].object = SpaceObject::none();
-                }
-            }
+                break;
+
+            default: break;
         }
     }
 }
@@ -747,7 +753,7 @@ static void handle_hotkeys(const std::vector<PlayerEvent>& player_events) {
 static void handle_target_keys(const std::vector<PlayerEvent>& player_events) {
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     for (const auto& e : player_events) {
-        switch (e.key) {
+        switch (e.type) {
             case PlayerEventType::SELECT_FRIEND: select_friendly(g.ship, g.ship->direction); break;
             case PlayerEventType::TARGET_FRIEND: target_friendly(g.ship, g.ship->direction); break;
             case PlayerEventType::TARGET_FOE: target_hostile(g.ship, g.ship->direction); break;
@@ -782,7 +788,7 @@ static void handle_pilot_keys(
 
 static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerEventType::ORDER) {
+        if (e.type == PlayerEventType::ORDER) {
             g.ship->keysDown |= kGiveCommandKey;
         }
     }
@@ -790,24 +796,24 @@ static void handle_order_key(const std::vector<PlayerEvent>& player_events) {
 
 static void handle_autopilot_keys(const std::vector<PlayerEvent>& player_events) {
     for (const auto& e : player_events) {
-        if (e.key == PlayerEventType::AUTOPILOT) {
+        if (e.type == PlayerEventType::AUTOPILOT) {
             engage_autopilot();
         }
     }
 }
 
-void PlayerShip::update(bool enter_message) {
+void PlayerShip::update() {
     if (!g.ship.get()) {
         return;
     }
 
-    if (enter_message) {
+    if (_message.editing()) {
         _player_events.clear();
-        // TODO(sfiera): cancel any in-flight events
+        gTheseKeys = 0;
     }
 
     for (auto e : _player_events) {
-        switch (e.key) {
+        switch (e.type) {
             case PlayerEventType::ACCEL_ON: gTheseKeys |= (kUpKey & ~g.key_mask); break;
             case PlayerEventType::DECEL_ON: gTheseKeys |= (kDownKey & ~g.key_mask); break;
             case PlayerEventType::CCW_ON: gTheseKeys |= (kLeftKey & ~g.key_mask); break;
@@ -837,12 +843,7 @@ void PlayerShip::update(bool enter_message) {
             case PlayerEventType::ZOOM_ALL: zoom_shortcut(Zoom::ALL); break;
             case PlayerEventType::TRANSFER: transfer_control(g.admiral); break;
 
-            case PlayerEventType::MINI_BUILD_1: build_ship(g.admiral, 0); break;
-            case PlayerEventType::MINI_BUILD_2: build_ship(g.admiral, 1); break;
-            case PlayerEventType::MINI_BUILD_3: build_ship(g.admiral, 2); break;
-            case PlayerEventType::MINI_BUILD_4: build_ship(g.admiral, 3); break;
-            case PlayerEventType::MINI_BUILD_5: build_ship(g.admiral, 4); break;
-            case PlayerEventType::MINI_BUILD_6: build_ship(g.admiral, 5); break;
+            case PlayerEventType::MINI_BUILD: build_ship(g.admiral, e.data); break;
 
             case PlayerEventType::MINI_HOLD: hold_position(g.admiral); break;
             case PlayerEventType::MINI_COME: come_to_me(g.admiral); break;
@@ -955,7 +956,7 @@ void PlayerShip::update(bool enter_message) {
 
     Handle<SpaceObject> flagship = g.ship;  // Pilot same ship even after minicomputer transfer.
     for (auto e : _player_events) {
-        switch (e.key) {
+        switch (e.type) {
             case PlayerEventType::MINI_TRANSFER: transfer_control(g.admiral); break;
             default: break;
         }
@@ -983,6 +984,55 @@ bool PlayerShip::show_target() const {
 }
 
 int32_t PlayerShip::control_direction() const { return _control_direction; }
+
+PlayerShip::MessageText::MessageText() : EditableText{"<", ">"} {}
+
+void PlayerShip::MessageText::start_editing() {
+    _editing = true;
+    if (sys.video->start_editing(this)) {
+        update("<>", {1, 1}, {-1, -1});
+    }
+}
+
+void PlayerShip::MessageText::stop_editing() {
+    _editing = false;
+    sys.video->stop_editing(this);
+    g.send_label->text() = StyledText{};
+}
+
+void PlayerShip::MessageText::update(pn::string_view text, range<int> selection, range<int> mark) {
+    g.send_label->text() = StyledText::plain(
+            text, {sys.fonts.tactical, viewport().width() / 2},
+            GetRGBTranslateColorShade(Hue::GREEN, LIGHTEST));
+    g.send_label->text().select(selection.begin, selection.end);
+    g.send_label->text().mark(mark.begin, mark.end);
+
+    g.send_label->set_position(
+            viewport().left + ((viewport().width() / 2) - (g.send_label->width() / 2)),
+            viewport().top + ((play_screen().height() / 2)));
+}
+
+StyledText&       PlayerShip::MessageText::styled_text() { return g.send_label->text(); }
+const StyledText& PlayerShip::MessageText::styled_text() const { return g.send_label->text(); }
+
+void PlayerShip::MessageText::accept() {
+    Cheat cheat = GetCheatFromString(text());
+    if (cheat != Cheat::NONE) {
+        ExecuteCheat(cheat, g.admiral);
+    } else if (!text().empty()) {
+        if (g.admiral->cheats() & kNameObjectBit) {
+            SetAdmiralBuildAtName(g.admiral, text());
+            g.admiral->cheats() &= ~kNameObjectBit;
+        }
+    }
+
+    stop_editing();
+}
+
+void PlayerShip::MessageText::escape() {
+    stop_editing();
+    g.admiral->cheats() &= ~kNameObjectBit;
+}
 
 void PlayerShipHandleClick(Point where, int button) {
     if (g.key_mask & kMouseMask) {
@@ -1157,7 +1207,9 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         if (target == g.ship) {
             g.target_label->set_age(Label::kVisibleTime);
         }
-        g.target_label->set_string(name_with_hot_key_suffix(target));
+        g.target_label->text() = StyledText::plain(
+                name_with_hot_key_suffix(target), sys.fonts.tactical,
+                GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHTEST));
     }
 
     auto control = g.admiral->control();
@@ -1167,7 +1219,9 @@ void Update_LabelStrings_ForHotKeyChange(void) {
             g.control_label->set_age(Label::kVisibleTime);
         }
         sys.sound.select();
-        g.control_label->set_string(name_with_hot_key_suffix(control));
+        g.control_label->text() = StyledText::plain(
+                name_with_hot_key_suffix(control), sys.fonts.tactical,
+                GetRGBTranslateColorShade(Hue::YELLOW, LIGHTEST));
     }
 }
 

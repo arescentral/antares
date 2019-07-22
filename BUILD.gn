@@ -21,6 +21,7 @@ group("default") {
     ":antares-ls-scenarios",
     ":build-pix",
     ":color-test",
+    ":editable-text-test",
     ":fixed-test",
     ":hash-data",
     ":object-data",
@@ -328,6 +329,7 @@ source_set("libantares-sound") {
 source_set("libantares-ui") {
   sources = [
     "include/ui/card.hpp",
+    "include/ui/editable-text.hpp",
     "include/ui/event-scheduler.hpp",
     "include/ui/event.hpp",
     "include/ui/flows/master.hpp",
@@ -347,6 +349,7 @@ source_set("libantares-ui") {
     "include/ui/screens/select-level.hpp",
     "include/ui/widget.hpp",
     "src/ui/card.cpp",
+    "src/ui/editable-text.cpp",
     "src/ui/event-scheduler.cpp",
     "src/ui/event.cpp",
     "src/ui/flows/master.cpp",
@@ -527,6 +530,18 @@ executable("color-test") {
   testonly = true
   sources = [
     "src/drawing/color.test.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+    "//ext/gmock:gmock_main",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("editable-text-test") {
+  testonly = true
+  sources = [
+    "src/ui/editable-text.test.cpp",
   ]
   deps = [
     ":libantares-test",

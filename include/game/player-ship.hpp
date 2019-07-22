@@ -24,6 +24,7 @@
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
 #include "game/cursor.hpp"
+#include "ui/editable-text.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -78,49 +79,15 @@ enum class PlayerEventType {
     MINI_PREV_PAGE    = 0x042,
     MINI_LAST_MESSAGE = 0x043,
 
-    MINI_BUILD_1 = 0x050,
-    MINI_BUILD_2 = 0x051,
-    MINI_BUILD_3 = 0x052,
-    MINI_BUILD_4 = 0x053,
-    MINI_BUILD_5 = 0x054,
-    MINI_BUILD_6 = 0x055,
-
-    SET_HOTKEY_1  = 0x060,
-    SET_HOTKEY_2  = 0x061,
-    SET_HOTKEY_3  = 0x062,
-    SET_HOTKEY_4  = 0x063,
-    SET_HOTKEY_5  = 0x064,
-    SET_HOTKEY_6  = 0x065,
-    SET_HOTKEY_7  = 0x066,
-    SET_HOTKEY_8  = 0x067,
-    SET_HOTKEY_9  = 0x068,
-    SET_HOTKEY_10 = 0x069,
-
-    SELECT_HOTKEY_1  = 0x070,
-    SELECT_HOTKEY_2  = 0x071,
-    SELECT_HOTKEY_3  = 0x072,
-    SELECT_HOTKEY_4  = 0x073,
-    SELECT_HOTKEY_5  = 0x074,
-    SELECT_HOTKEY_6  = 0x075,
-    SELECT_HOTKEY_7  = 0x076,
-    SELECT_HOTKEY_8  = 0x077,
-    SELECT_HOTKEY_9  = 0x078,
-    SELECT_HOTKEY_10 = 0x079,
-
-    TARGET_HOTKEY_1  = 0x080,
-    TARGET_HOTKEY_2  = 0x081,
-    TARGET_HOTKEY_3  = 0x082,
-    TARGET_HOTKEY_4  = 0x083,
-    TARGET_HOTKEY_5  = 0x084,
-    TARGET_HOTKEY_6  = 0x085,
-    TARGET_HOTKEY_7  = 0x086,
-    TARGET_HOTKEY_8  = 0x087,
-    TARGET_HOTKEY_9  = 0x088,
-    TARGET_HOTKEY_10 = 0x089,
+    MINI_BUILD    = 0x050,
+    HOTKEY_SET    = 0x051,
+    HOTKEY_SELECT = 0x052,
+    HOTKEY_TARGET = 0x053,
 };
 
 struct PlayerEvent {
-    PlayerEventType key;
+    PlayerEventType type;
+    int             data;
 
     bool operator==(PlayerEvent other) const;
     bool operator!=(PlayerEvent other) const { return !(*this == other); }
@@ -148,7 +115,7 @@ class PlayerShip : public EventReceiver {
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
     virtual void gamepad_stick(const GamepadStickEvent& event);
 
-    void update(bool enter_message);
+    void update();
 
     bool    show_select() const;
     bool    show_target() const;
@@ -156,6 +123,8 @@ class PlayerShip : public EventReceiver {
 
     GameCursor&       cursor() { return _cursor; }
     const GameCursor& cursor() const { return _cursor; }
+
+    bool entering_message() const { return _message.editing(); }
 
   private:
     bool active() const;
@@ -178,6 +147,29 @@ class PlayerShip : public EventReceiver {
     bool         _control_active;
     int32_t      _control_direction;
     GameCursor   _cursor;
+
+    class MessageText : public EditableText {
+      public:
+        using TextReceiver::range;
+
+        MessageText();
+
+        void start_editing();
+        void stop_editing();
+        bool editing() const { return _editing; }
+
+        virtual void accept();
+        virtual void escape();
+
+      protected:
+        virtual void        update(pn::string_view text, range<int> selection, range<int> mark);
+        virtual StyledText& styled_text();
+        virtual const StyledText& styled_text() const;
+
+      private:
+        bool _editing = false;
+    };
+    MessageText _message;
 };
 
 void ResetPlayerShip();

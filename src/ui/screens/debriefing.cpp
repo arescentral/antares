@@ -101,38 +101,32 @@ int score(
     return score;
 }
 
-unique_ptr<StyledText> style_score_text(pn::string text) {
-    unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
-    result->set_fore_color(GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST));
-    result->set_back_color(GetRGBTranslateColorShade(Hue::GOLD, DARKEST));
-    result->set_retro_text(text);
-    return result;
-}
-
 }  // namespace
 
 DebriefingScreen::DebriefingScreen(pn::string_view message)
-        : _state(DONE), _typed_chars(0), _data_item(initialize(message, false)) {}
+        : _state(DONE), _data_item(initialize(message, false)) {}
 
 DebriefingScreen::DebriefingScreen(
         pn::string_view message, game_ticks your_time, game_ticks par_time, int your_loss,
         int par_loss, int your_kill, int par_kill)
-        : _state(TYPING), _typed_chars(0), _data_item(initialize(message, true)) {
+        : _state(TYPING),
+          _data_item(initialize(message, true)),
+          _score{StyledText::retro(
+                  build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill),
+                  {sys.fonts.button, _message_bounds.width(), 0, 2, 60},
+                  GetRGBTranslateColorShade(Hue::GOLD, LIGHTEST),
+                  GetRGBTranslateColorShade(Hue::GOLD, DARKEST))} {
     Rect score_area = _message_bounds;
     score_area.top  = score_area.bottom - kScoreTableHeight;
 
-    _score = style_score_text(
-            build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill));
-    _score->set_tab_width(60);
-    _score->wrap_to(_message_bounds.width(), 0, 2);
-    _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
+    _score_bounds = Rect(0, 0, _score.auto_width(), _score.height());
     _score_bounds.center_in(score_area);
 
     _score_bounds.offset(_pix_bounds.left, _pix_bounds.top);
 }
 
 void DebriefingScreen::become_front() {
-    _typed_chars = 0;
+    _score.hide();
     if (_state == TYPING) {
         _next_update = now() + kTypingDelay;
     } else {
@@ -145,8 +139,8 @@ void DebriefingScreen::resign_front() {}
 void DebriefingScreen::draw() const {
     next()->draw();
     Rects().fill(_pix_bounds, RgbColor::black());
-    if (_score) {
-        _score->draw_range(_score_bounds, 0, _typed_chars);
+    if (!_score.empty()) {
+        _score.draw(_score_bounds);
     }
     Rect interface_bounds = _message_bounds;
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
@@ -199,9 +193,9 @@ void DebriefingScreen::fire_timer() {
     sys.sound.teletype();
     wall_time now = antares::now();
     while (_next_update <= now) {
-        if (_typed_chars < _score->size()) {
+        if (!_score.done()) {
             _next_update += kTypingDelay;
-            ++_typed_chars;
+            _score.advance();
         } else {
             _next_update = wall_time();
             _state       = DONE;

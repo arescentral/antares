@@ -41,20 +41,19 @@ const Font& interface_font(InterfaceStyle style) {
 }
 
 void draw_text_in_rect(Rect tRect, pn::string_view text, InterfaceStyle style, Hue hue) {
-    RgbColor   color = GetRGBTranslateColorShade(hue, LIGHTEST);
-    StyledText interface_text(interface_font(style));
-    interface_text.set_fore_color(color);
-    interface_text.set_interface_text(text);
-    interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
+    const StyledText interface_text = StyledText::interface(
+            text,
+            {interface_font(style), tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer},
+            GetRGBTranslateColorShade(hue, LIGHTEST));
     tRect.offset(0, -kInterfaceTextVBuffer);
     interface_text.draw(tRect);
 }
 
 int16_t GetInterfaceTextHeightFromWidth(
         pn::string_view text, InterfaceStyle style, int16_t boundsWidth) {
-    StyledText interface_text(interface_font(style));
-    interface_text.set_interface_text(text);
-    interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);
+    const StyledText interface_text = StyledText::interface(
+            text,
+            {interface_font(style), boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer});
     return interface_text.height();
 }
 

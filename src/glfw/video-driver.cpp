@@ -133,10 +133,10 @@ static Key kGLFWKeyToUSB[GLFW_KEY_LAST + 1] = {
         Key::N_PLUS,
         Key::N_ENTER,
         Key::N_EQUALS,
-        [GLFW_KEY_LEFT_SHIFT] = Key::L_SHIFT,
-        Key::L_CONTROL,
-        Key::L_OPTION,
-        Key::L_COMMAND,
+        [GLFW_KEY_LEFT_SHIFT] = Key::SHIFT,
+        Key::CONTROL,
+        Key::OPTION,
+        Key::COMMAND,
         [GLFW_KEY_RIGHT_SHIFT] = Key::R_SHIFT,
         Key::R_CONTROL,
         Key::R_OPTION,
@@ -148,7 +148,7 @@ static void throw_error(int code, const char* message) {
     throw std::runtime_error(pn::format("{0}: {1}", code, message).c_str());
 }
 
-GLFWVideoDriver::GLFWVideoDriver() : _screen_size(640, 480), _last_click_count(0) {
+GLFWVideoDriver::GLFWVideoDriver() : _screen_size(640, 480), _last_click_count(0), _text(nullptr) {
     if (!glfwInit()) {
         throw std::runtime_error("glfwInit()");
     }
@@ -165,9 +165,25 @@ Point GLFWVideoDriver::get_mouse() {
 
 InputMode GLFWVideoDriver::input_mode() const { return KEYBOARD_MOUSE; }
 
+bool GLFWVideoDriver::start_editing(TextReceiver* text) {
+    _text = text;
+    return true;
+}
+
+void GLFWVideoDriver::stop_editing(TextReceiver* text) {
+    if (_text == text) {
+        _text = nullptr;
+    }
+}
+
 wall_time GLFWVideoDriver::now() const { return wall_time(usecs(int64_t(glfwGetTime() * 1e6))); }
 
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
+    if (_text) {
+        edit(key, action, mods);
+        return;
+    }
+
     if (key < 0) {
         return;
     }
@@ -181,6 +197,133 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
         KeyUpEvent(now(), usb_key).send(_loop->top());
     } else {
         return;
+    }
+}
+
+void GLFWVideoDriver::char_(unsigned int code_point) {
+    if (!_text) {
+        return;
+    }
+    _text->replace(_text->selection(), pn::rune{code_point});
+}
+
+static void backspace(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if (s.begin != s.end) {
+        // delete selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.begin = text->offset(s.begin, TextReceiver::THIS_START, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::WORDS);
+    } else {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::GLYPHS);
+    }
+    text->replace(s, "");
+}
+
+static void fwd_delete(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if (s.begin != s.end) {
+        // delete selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.end = text->offset(s.end, TextReceiver::THIS_END, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::WORDS);
+    } else {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::GLYPHS);
+    }
+    text->replace(s, "");
+}
+
+static void left(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.begin = text->offset(s.begin, TextReceiver::THIS_START, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::WORDS);
+    } else {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_START, TextReceiver::GLYPHS);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.end = s.begin;
+    }
+    text->select(s);
+}
+
+static void right(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else if (mods & GLFW_MOD_SUPER) {
+        s.end = text->offset(s.end, TextReceiver::THIS_END, TextReceiver::LINES);
+    } else if (mods & (GLFW_MOD_CONTROL | GLFW_MOD_ALT)) {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::WORDS);
+    } else {
+        s.end = text->offset(s.end, TextReceiver::NEXT_END, TextReceiver::GLYPHS);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.begin = s.end;
+    }
+    text->select(s);
+}
+
+static void up(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else {
+        s.begin = text->offset(s.begin, TextReceiver::PREV_SAME, TextReceiver::LINES);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.end = s.begin;
+    }
+    text->select(s);
+}
+
+static void down(TextReceiver* text, int mods) {
+    auto s = text->selection();
+    if ((s.begin != s.end) && !(mods & GLFW_MOD_SHIFT)) {
+        // exit selection
+    } else {
+        s.end = text->offset(s.end, TextReceiver::NEXT_SAME, TextReceiver::LINES);
+    }
+    if (!(mods & GLFW_MOD_SHIFT)) {
+        s.begin = s.end;
+    }
+    text->select(s);
+}
+
+void GLFWVideoDriver::edit(int key, int action, int mods) {
+    if (action == GLFW_RELEASE) {
+        return;
+    }
+
+    switch (key) {
+        case GLFW_KEY_ESCAPE:
+            if (action != GLFW_REPEAT) {
+                _text->escape();
+            }
+            break;
+
+        case GLFW_KEY_ENTER:
+            if (action == GLFW_REPEAT) {
+                return;
+            } else if (mods & GLFW_MOD_SHIFT) {
+                _text->newline();
+            } else {
+                _text->accept();
+            }
+            break;
+
+        case GLFW_KEY_BACKSPACE: backspace(_text, mods); break;
+        case GLFW_KEY_DELETE: fwd_delete(_text, mods); break;
+
+        case GLFW_KEY_LEFT: left(_text, mods); break;
+        case GLFW_KEY_RIGHT: right(_text, mods); break;
+        case GLFW_KEY_UP: up(_text, mods); break;
+        case GLFW_KEY_DOWN: down(_text, mods); break;
     }
 }
 
@@ -214,6 +357,11 @@ void GLFWVideoDriver::key_callback(GLFWwindow* w, int key, int scancode, int act
     driver->key(key, scancode, action, mods);
 }
 
+void GLFWVideoDriver::char_callback(GLFWwindow* w, unsigned int code_point) {
+    GLFWVideoDriver* driver = reinterpret_cast<GLFWVideoDriver*>(glfwGetWindowUserPointer(w));
+    driver->char_(code_point);
+}
+
 void GLFWVideoDriver::mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
     GLFWVideoDriver* driver = reinterpret_cast<GLFWVideoDriver*>(glfwGetWindowUserPointer(w));
     driver->mouse_button(button, action, mods);
@@ -245,6 +393,7 @@ void GLFWVideoDriver::loop(Card* initial) {
 
     glfwSetWindowUserPointer(_window, this);
     glfwSetKeyCallback(_window, key_callback);
+    glfwSetCharCallback(_window, char_callback);
     glfwSetMouseButtonCallback(_window, mouse_button_callback);
     glfwSetCursorPosCallback(_window, mouse_move_callback);
     glfwSetWindowSizeCallback(_window, window_size_callback);
