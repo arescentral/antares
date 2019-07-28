@@ -184,9 +184,7 @@ source_set("libantares-data") {
   configs += [ ":antares_private" ]
 
   if (target_os == "win") {
-    deps -= [ "//ext/libzipxx" ]
     sources -= [
-      "src/data/extractor.cpp",
       "src/data/replay.cpp",
       "src/data/scenario-list.cpp",
     ]
