@@ -22,6 +22,12 @@ PASSED = "PASSED"
 FAILED = "FAILED"
 EXCEPT = "EXCEPT"
 
+WINE_TESTS = [
+    "color-test",
+    "editable-text-test",
+    "fixed-test",
+]
+
 
 def run(queue, name, cmd):
     sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -33,7 +39,10 @@ def run(queue, name, cmd):
 
 
 def unit_test(opts, queue, name, args=[]):
-    return run(queue, name, ["out/cur/%s" % name] + args)
+    if opts.wine:
+        return run(queue, name, ["wine", "out/cur/%s.exe" % name] + args)
+    else:
+        return run(queue, name, ["out/cur/%s" % name] + args)
 
 
 def diff_test(queue, name, cmd, expected):
@@ -115,6 +124,7 @@ def main():
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--wine", action="store_true")
     parser.add_argument("-t", "--type", action="append", choices=test_types)
     parser.add_argument("test", nargs="*")
     opts = parser.parse_args()
@@ -165,6 +175,9 @@ def main():
             tests = [t for t in tests if t[0] != offscreen_test]
         if "replay" not in opts.type:
             tests = [t for t in tests if t[0] != replay_test]
+
+    if opts.wine:
+        tests = [t for t in tests if t[3] in WINE_TESTS]
 
     sys.stderr.write("Running %d tests:\n" % len(tests))
     start = time.time()

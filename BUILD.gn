@@ -180,10 +180,7 @@ source_set("libantares-data") {
   configs += [ ":antares_private" ]
 
   if (target_os == "win") {
-    sources -= [
-      "src/data/replay.cpp",
-      "src/data/scenario-list.cpp",
-    ]
+    sources -= [ "src/data/scenario-list.cpp" ]
   }
 }
 

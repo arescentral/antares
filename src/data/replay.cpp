@@ -19,7 +19,6 @@
 #include "data/replay.hpp"
 
 #include <fcntl.h>
-#include <glob.h>
 #include <time.h>
 #include <unistd.h>
 #include <pn/input>
@@ -343,36 +342,22 @@ void ReplayData::Action::write_to(pn::output_view out) const {
 
 ReplayBuilder::ReplayBuilder() {}
 
-namespace {
-
-// TODO(sfiera): put globbing in a central location.
-struct ScopedGlob {
-    glob_t data;
-    ScopedGlob() { memset(&data, 0, sizeof(data)); }
-    ~ScopedGlob() { globfree(&data); }
-};
-
-}  // namespace
+static bool is_replay(pn::string_view s) { return s.rfind(".nlrp") == (s.size() - 5); }
 
 // Deletes the oldest replay until there are fewer than `count` in the replays folder.
 static void cull_replays(size_t count) {
     if (path::isdir(dirs().replays)) {
-        ScopedGlob g;
-        pn::string str = pn::format("{0}/*.nlrp", dirs().replays);
-        glob(str.c_str(), 0, NULL, &g.data);
-
-        map<int64_t, const char*> files;
-        for (int i = 0; i < g.data.gl_pathc; ++i) {
-            struct stat st;
-            if (stat(g.data.gl_pathv[i], &st) < 0) {
-                continue;
+        map<int64_t, pn::string> files;
+        for (const auto& ent : sfz::scandir(dirs().replays)) {
+            if (is_replay(ent.name)) {
+                // TODO(sfiera): make the pn::string_view{} constructor unnecessary.
+                files[ent.st.st_mtime] =
+                        sfz::path::join(dirs().replays, pn::string_view{ent.name});
             }
-            files[st.st_mtime] = g.data.gl_pathv[i];
         }
         while (files.size() >= count) {
-            if (unlink(files.begin()->second) < 0) {
-                break;
-            }
+            sfz::unlink(files.begin()->second);
+            files.erase(files.begin());
         }
     } else {
         sfz::makedirs(dirs().replays, 0755);
@@ -388,13 +373,21 @@ void ReplayBuilder::init(
     _global_seed         = global_seed;
 }
 
+static bool safe_localtime(time_t* t, struct tm* tm) {
+#ifdef _WIN32
+    return localtime_s(tm, t) == 0;
+#else
+    return localtime_r(t, tm) != nullptr;
+#endif
+}
+
 void ReplayBuilder::start() {
     _at = 1;
     cull_replays(10);
     time_t    t;
     struct tm tm;
     char      buffer[1024];
-    if ((time(&t) < 0) || !localtime_r(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
+    if ((time(&t) < 0) || !safe_localtime(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
     pn::string path = pn::format("{0}/Replay {1}.nlrp", dirs().replays, buffer);

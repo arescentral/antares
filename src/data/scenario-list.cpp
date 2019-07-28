@@ -18,7 +18,6 @@
 
 #include "data/scenario-list.hpp"
 
-#include <glob.h>
 #include <string.h>
 #include <pn/input>
 #include <sfz/sfz.hpp>
@@ -30,16 +29,6 @@
 using std::vector;
 
 namespace antares {
-
-namespace {
-
-struct ScopedGlob {
-    glob_t data;
-    ScopedGlob() { memset(&data, 0, sizeof(data)); }
-    ~ScopedGlob() { globfree(&data); }
-};
-
-}  // namespace
 
 std::vector<Info> scenario_list() {
     std::vector<Info> scenarios;
@@ -58,32 +47,32 @@ std::vector<Info> scenario_list() {
         // ignore
     }
 
-    ScopedGlob g;
-    pn::string str = pn::format("{0}/*/info.pn", dirs().scenarios);
-    glob(str.c_str(), 0, NULL, &g.data);
-
-    size_t prefix_len = dirs().scenarios.size() + 1;
-    size_t suffix_len = 8;
-    for (int i = 0; i < g.data.gl_pathc; ++i) {
-        const pn::string path = g.data.gl_pathv[i];
-        pn::string_view  identifier =
-                path.substr(prefix_len, path.size() - prefix_len - suffix_len);
-        if (identifier == kFactoryScenarioIdentifier) {
-            continue;
-        }
-
-        try {
-            sfz::mapped_file file(path);
-            pn::input        in = file.data().input();
-            pn::value        x;
-            pn_error_t       e;
-            if (!pn::parse(in, &x, &e)) {
+    try {
+        for (const auto& ent : sfz::scandir(dirs().scenarios)) {
+            // TODO(sfiera): make the pn::string_view{} constructor unnecessary.
+            pn::string info_pn =
+                    sfz::path::join(dirs().scenarios, pn::string_view{ent.name}, "info.pn");
+            if (!sfz::path::isfile(info_pn)) {
+                continue;
+            } else if (ent.name == kFactoryScenarioIdentifier) {
                 continue;
             }
-            scenarios.emplace_back(info(path_value{x}));
-        } catch (...) {
-            // ignore
+
+            try {
+                sfz::mapped_file file(info_pn);
+                pn::input        in = file.data().input();
+                pn::value        x;
+                pn_error_t       e;
+                if (!pn::parse(in, &x, &e)) {
+                    continue;
+                }
+                scenarios.emplace_back(info(path_value{x}));
+            } catch (...) {
+                // ignore
+            }
         }
+    } catch (...) {
+        // ignore
     }
 
     return scenarios;
