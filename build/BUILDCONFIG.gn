@@ -31,6 +31,8 @@ if (host_os == "mac") {
     set_default_toolchain("//build/lib/linux")
   } else if (target_os == "mac") {
     set_default_toolchain("//build/lib/linux:cross_mac")
+  } else if (target_os == "win") {
+    set_default_toolchain("//build/lib/linux:cross_win")
   } else {
     assert(false, "linux cannot cross-compile for $target_os")
   }
@@ -43,7 +45,9 @@ _default_configs = [ "//build/lib:c++11" ]
 # libc++ is necessary because libstdc++ does not allow move construction of std::map<> when the key
 # type is movable but not copyable:
 # https://stackoverflow.com/questions/36475497/error-by-move-assignment-of-map-with-non-copyable-but-movable-key
-_default_configs += [ "//build/lib:libc++" ]
+if (target_os != "win") {
+  _default_configs += [ "//build/lib:libc++" ]
+}
 
 if (mode == "dev") {
   _default_configs += [ "//build/lib:dev" ]

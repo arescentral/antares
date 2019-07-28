@@ -33,6 +33,16 @@ group("default") {
   if (target_os == "mac") {
     deps += [ ":antares" ]
   }
+  if (target_os == "win") {
+    deps -= [
+      ":antares-glfw",
+      ":antares-install-data",
+      ":antares-ls-scenarios",
+      ":build-pix",
+      ":offscreen",
+      ":replay",
+    ]
+  }
 }
 
 config("antares_private") {
@@ -51,6 +61,7 @@ config("antares_private") {
 
 source_set("libantares") {
   public_deps = [
+    ":libantares-$target_os",
     ":libantares-build",
     ":libantares-config",
     ":libantares-data",
@@ -62,11 +73,6 @@ source_set("libantares") {
     ":libantares-ui",
     ":libantares-video",
   ]
-  if (target_os == "mac") {
-    public_deps += [ ":libantares-mac" ]
-  } else if (target_os == "linux") {
-    public_deps += [ ":libantares-linux" ]
-  }
 }
 
 source_set("libantares-build") {
@@ -172,6 +178,10 @@ source_set("libantares-data") {
     "//ext/libzipxx",
   ]
   configs += [ ":antares_private" ]
+
+  if (target_os == "win") {
+    sources -= [ "src/data/scenario-list.cpp" ]
+  }
 }
 
 source_set("libantares-drawing") {
@@ -324,6 +334,11 @@ source_set("libantares-sound") {
     libs += [ "OpenAL.framework" ]
   } else if (target_os == "linux") {
     libs += [ "openal" ]
+  } else if (target_os == "win") {
+    sources -= [
+      "include/sound/openal-driver.hpp",
+      "src/sound/openal-driver.cpp",
+    ]
   }
   configs += [ ":antares_private" ]
 }
@@ -394,11 +409,11 @@ source_set("libantares-video") {
   deps = [
     ":embed_glsl_fragment",
     ":embed_glsl_vertex",
+    "//ext/libpng",
   ]
   public_deps = [
     ":libantares-game",
     ":libantares-lang",
-    "//ext/libpng",
     "//ext/libsfz",
   ]
   libs = []
@@ -411,6 +426,13 @@ source_set("libantares-video") {
     ]
   }
   configs += [ ":antares_private" ]
+
+  if (target_os == "win") {
+    sources -= [
+      "include/video/opengl-driver.hpp",
+      "src/video/opengl-driver.cpp",
+    ]
+  }
 }
 
 embed("embed_glsl_fragment") {
@@ -437,6 +459,9 @@ embed("embed_glsl_vertex") {
 
 executable("hash-data") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/hash-data.cpp",
   ]
@@ -447,6 +472,9 @@ executable("hash-data") {
 }
 
 executable("antares-ls-scenarios") {
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/ls-scenarios.cpp",
   ]
@@ -459,6 +487,9 @@ executable("antares-ls-scenarios") {
 
 executable("object-data") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/object-data.cpp",
   ]
@@ -470,6 +501,9 @@ executable("object-data") {
 
 executable("shapes") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/shapes.cpp",
   ]
@@ -481,6 +515,9 @@ executable("shapes") {
 
 executable("tint") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/tint.cpp",
   ]
@@ -526,10 +563,20 @@ source_set("libantares-test") {
     ]
   }
   configs += [ ":antares_private" ]
+
+  if (target_os == "win") {
+    sources -= [
+      "include/video/offscreen-driver.hpp",
+      "src/video/offscreen-driver.cpp",
+    ]
+  }
 }
 
 executable("color-test") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/drawing/color.test.cpp",
   ]
@@ -542,6 +589,9 @@ executable("color-test") {
 
 executable("editable-text-test") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/ui/editable-text.test.cpp",
   ]
@@ -554,6 +604,9 @@ executable("editable-text-test") {
 
 executable("fixed-test") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/math/fixed.test.cpp",
   ]
@@ -566,6 +619,9 @@ executable("fixed-test") {
 
 executable("offscreen") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/offscreen.cpp",
   ]
@@ -577,6 +633,9 @@ executable("offscreen") {
 
 executable("replay") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/replay.cpp",
   ]
@@ -588,6 +647,9 @@ executable("replay") {
 
 executable("build-pix") {
   testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/build-pix.cpp",
   ]
@@ -598,6 +660,9 @@ executable("build-pix") {
 }
 
 executable("antares-glfw") {
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "include/glfw/video-driver.hpp",
     "src/glfw/main.cpp",
@@ -612,6 +677,9 @@ executable("antares-glfw") {
 }
 
 executable("antares-install-data") {
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "src/bin/install-data.cpp",
   ]
@@ -728,6 +796,16 @@ if (target_os == "mac") {
       "//ext/procyon:procyon-cpp",
     ]
     libs = [ "neon" ]
+    configs += [ ":antares_private" ]
+  }
+} else if (target_os == "win") {
+  source_set("libantares-win") {
+    sources = [
+      "src/win/http.cpp",
+    ]
+    public_deps = [
+      "//ext/procyon:procyon-cpp",
+    ]
     configs += [ ":antares_private" ]
   }
 }

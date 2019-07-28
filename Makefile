@@ -19,6 +19,10 @@ build:
 test: build
 	scripts/test.py
 
+.PHONY: test-wine
+test-wine: build
+	scripts/test.py --wine
+
 .PHONY: smoke-test
 smoke-test: build
 	scripts/test.py --smoke

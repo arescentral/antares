@@ -18,6 +18,7 @@
 
 #include "ui/screens/select-level.hpp"
 
+#include <algorithm>
 #include <pn/output>
 
 #include "config/keys.hpp"

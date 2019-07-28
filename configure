@@ -121,6 +121,7 @@ def check_target(args):
         checker = {
             ("mac", "mac"): check_mac,
             ("linux", "linux"): check_linux_native,
+            ("linux", "win"): check_win_on_linux,
         }.get((cfg.host_os(), args.target_os))
         if checker is None:
             msg(args.target_os, color="red")
@@ -199,6 +200,37 @@ def check_linux_native(args):
         command = ["sudo"] + command + list(package[pkg] for pkg in missing_pkgs)
         print("    $ %s\n" % (" ".join(quote(arg) for arg in command)))
         print("Then, try ./configure again")
+        sys.exit(1)
+
+
+def check_win_on_linux(args):
+    with cfg.step("checking Linux distro") as msg:
+        distro = platform.linux_distribution()
+        if distro == ("Ubuntu", "18.10", "cosmic"):
+            msg(" ".join(distro), color="green")
+        else:
+            msg(" ".join(distro), color="red")
+            print("\nSorry! Cross-compilation currently requires Ubuntu 18.10 cosmic")
+            sys.exit(1)
+
+    missing = collections.OrderedDict()
+    if not check_clang("clang++"):
+        missing["clang"] = "clang"
+
+    with cfg.step("checking for mingw") as msg:
+        if os.path.exists("/usr/x86_64-w64-mingw32/include/windows.h"):
+            msg("ok", color="green")
+        else:
+            msg("missing", color="red")
+            missing["mingw"] = "mingw-w64"
+
+    if missing:
+        print("\nmissing dependencies: %s" % " ".join(missing.keys()))
+        if len(missing) == 1:
+            print("\nYou can install it with:\n")
+        else:
+            print("\nYou can install them with:\n")
+        print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
         sys.exit(1)
 
 
