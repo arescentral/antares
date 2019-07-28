@@ -152,7 +152,7 @@ static const Key key_codes[key_code_count] = {
         Key::F12,
 
         Key::NONE,      Key::F15,        Key::HELP,        Key::HOME,       Key::PAGE_UP,
-        Key::DELETE,    Key::F4,         Key::END,         Key::F2,         Key::PAGE_DOWN,
+        Key::DEL,       Key::F4,         Key::END,         Key::F2,         Key::PAGE_DOWN,
         Key::F1,        Key::LEFT_ARROW, Key::RIGHT_ARROW, Key::DOWN_ARROW, Key::UP_ARROW,
         Key::NONE,
 };

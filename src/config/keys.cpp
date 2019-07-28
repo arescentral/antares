@@ -50,7 +50,7 @@ bool KeyMap::equals(const KeyMap& other) const {
 
 void KeyMap::copy(const KeyMap& other) { memcpy(_data, other._data, kDataSize); }
 
-void KeyMap::clear() { bzero(_data, kDataSize); }
+void KeyMap::clear() { memset(_data, 0, kDataSize); }
 
 bool operator==(const KeyMap& a, const KeyMap& b) { return a.equals(b); }
 

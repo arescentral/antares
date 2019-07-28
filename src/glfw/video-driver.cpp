@@ -88,7 +88,7 @@ static Key kGLFWKeyToUSB[GLFW_KEY_LAST + 1] = {
         Key::TAB,
         Key::BACKSPACE,
         Key::NONE /* Key::INSERT */,
-        Key::DELETE,
+        Key::DEL,
         [GLFW_KEY_RIGHT] = Key::RIGHT_ARROW,
         Key::LEFT_ARROW,
         Key::DOWN_ARROW,

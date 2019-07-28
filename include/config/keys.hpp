@@ -110,7 +110,7 @@ enum class Key {
     // Keys above arrow keys.
     HOME      = 0x4a,
     PAGE_UP   = 0x4b,
-    DELETE    = 0x4c,
+    DEL       = 0x4c,
     END       = 0x4d,
     PAGE_DOWN = 0x4e,
     HELP      = 0x75,
