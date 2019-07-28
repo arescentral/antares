@@ -162,14 +162,14 @@ source_set("libantares-data") {
   ]
   public_deps = [
     ":libantares-lang",
-    "//ext/libpng",
     "//ext/libsfz",
-    "//ext/libzipxx",
     "//ext/procyon:procyon-cpp",
   ]
   deps = [
     "//ext/libmodplug",
+    "//ext/libpng",
     "//ext/libsndfile",
+    "//ext/libzipxx",
   ]
   configs += [ ":antares_private" ]
 }
@@ -201,8 +201,10 @@ source_set("libantares-drawing") {
   public_deps = [
     ":libantares-data",
     ":libantares-lang",
-    "//ext/libpng",
     "//ext/libsfz",
+  ]
+  deps = [
+    "//ext/libpng",
   ]
   configs += [ ":antares_private" ]
 }
@@ -632,7 +634,6 @@ if (target_os == "mac") {
       "src/mac/http.cpp",
     ]
     public_deps = [
-      "//ext/libpng",
       "//ext/libsfz",
       "//ext/procyon:procyon-cpp",
     ]
