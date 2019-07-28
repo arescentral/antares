@@ -184,10 +184,7 @@ source_set("libantares-data") {
   configs += [ ":antares_private" ]
 
   if (target_os == "win") {
-    deps -= [
-      "//ext/libpng",
-      "//ext/libzipxx",
-    ]
+    deps -= [ "//ext/libzipxx" ]
     sources -= [
       "src/data/extractor.cpp",
       "src/data/replay.cpp",
@@ -229,11 +226,6 @@ source_set("libantares-drawing") {
     "//ext/libpng",
   ]
   configs += [ ":antares_private" ]
-
-  if (target_os == "win") {
-    sources -= [ "src/drawing/libpng-pix-map.cpp" ]
-    deps -= [ "//ext/libpng" ]
-  }
 }
 
 source_set("libantares-game") {
@@ -445,7 +437,6 @@ source_set("libantares-video") {
   configs += [ ":antares_private" ]
 
   if (target_os == "win") {
-    deps -= [ "//ext/libpng" ]
     sources -= [
       "include/video/opengl-driver.hpp",
       "src/video/opengl-driver.cpp",
