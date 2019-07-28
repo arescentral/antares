@@ -185,13 +185,10 @@ source_set("libantares-data") {
 
   if (target_os == "win") {
     deps -= [
-      "//ext/libmodplug",
       "//ext/libpng",
-      "//ext/libsndfile",
       "//ext/libzipxx",
     ]
     sources -= [
-      "src/data/audio.cpp",
       "src/data/extractor.cpp",
       "src/data/replay.cpp",
       "src/data/scenario-list.cpp",
