@@ -43,6 +43,24 @@ matrix:
         - make smoke-test
         - make test-install
 
+    - os:        linux
+      services:
+        - docker
+      before_install:
+        - git submodule update --init
+        - docker run -d --name cosmic -v $(pwd):/antares -w /antares ubuntu:cosmic sleep infinity
+        - docker ps
+
+      install:
+        - docker exec cosmic apt-get update
+        - docker exec cosmic apt-get install -y --no-install-recommends build-essential clang make python
+        - docker exec cosmic apt-get install -y --no-install-recommends mingw-w64 xvfb wine
+
+      script:
+        - docker exec cosmic scripts/set-version $(git describe --tags HEAD)
+        - docker exec cosmic ./configure -owin
+        - docker exec cosmic make build
+
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
 git:
