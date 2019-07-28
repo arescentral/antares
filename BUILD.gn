@@ -61,6 +61,7 @@ config("antares_private") {
 
 source_set("libantares") {
   public_deps = [
+    ":libantares-$target_os",
     ":libantares-build",
     ":libantares-config",
     ":libantares-data",
@@ -72,11 +73,6 @@ source_set("libantares") {
     ":libantares-ui",
     ":libantares-video",
   ]
-  if (target_os == "mac") {
-    public_deps += [ ":libantares-mac" ]
-  } else if (target_os == "linux") {
-    public_deps += [ ":libantares-linux" ]
-  }
 }
 
 source_set("libantares-build") {
@@ -803,6 +799,16 @@ if (target_os == "mac") {
       "//ext/procyon:procyon-cpp",
     ]
     libs = [ "neon" ]
+    configs += [ ":antares_private" ]
+  }
+} else if (target_os == "win") {
+  source_set("libantares-win") {
+    sources = [
+      "src/win/http.cpp",
+    ]
+    public_deps = [
+      "//ext/procyon:procyon-cpp",
+    ]
     configs += [ ":antares_private" ]
   }
 }
