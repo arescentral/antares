@@ -136,7 +136,7 @@ def ls_scenarios():
     if FACTORY_SCENARIO:
         args += ["--factory-scenario", FACTORY_SCENARIO]
     print(" ".join(args))
-    out = subprocess.check_output(args)
+    out = subprocess.check_output(args, stderr=subprocess.STDOUT)
     scenarios = []
     for line in out.splitlines():
         if not line[0].isspace():
