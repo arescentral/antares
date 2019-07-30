@@ -96,7 +96,7 @@ void main(int argc, char* const* argv) {
     if (m.empty()) {
         exit(1);
     }
-    pn::err.dump(m);
+    pn::out.dump(m);
 }
 
 }  // namespace antares
