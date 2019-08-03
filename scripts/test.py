@@ -26,10 +26,16 @@ WINE_TESTS = [
     "color-test",
     "editable-text-test",
     "fixed-test",
+    "object-data",
+    "shapes",
+    "tint",
 ]
 
 
-def run(queue, name, cmd):
+def run(opts, queue, name, cmd):
+    if opts.wine and cmd[0].startswith("out/cur/"):
+        cmd[0] += ".exe"
+        cmd.insert(0, "wine")
     sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, _ = sub.communicate()
     if sub.returncode != 0:
@@ -39,16 +45,13 @@ def run(queue, name, cmd):
 
 
 def unit_test(opts, queue, name, args=[]):
-    if opts.wine:
-        return run(queue, name, ["wine", "out/cur/%s.exe" % name] + args)
-    else:
-        return run(queue, name, ["out/cur/%s" % name] + args)
+    return run(opts, queue, name, ["out/cur/%s" % name] + args)
 
 
-def diff_test(queue, name, cmd, expected):
+def diff_test(opts, queue, name, cmd, expected):
     with NamedTemporaryDir() as d:
-        return (run(queue, name, cmd + ["--output=%s" % d])
-                and run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
+        return (run(opts, queue, name, cmd + ["--output=%s" % d]) and run(
+            opts, queue, name, ["diff", "--strip-trailing-cr", "-ru", "-x.*", expected, d]))
 
 
 def data_test(opts, queue, name, args=[], smoke_args=[]):
@@ -57,7 +60,7 @@ def data_test(opts, queue, name, args=[], smoke_args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    return diff_test(queue, name, ["out/cur/%s" % name] + args, expected)
+    return diff_test(opts, queue, name, ["out/cur/%s" % name] + args, expected)
 
 
 def offscreen_test(opts, queue, name, args=[]):
@@ -67,7 +70,7 @@ def offscreen_test(opts, queue, name, args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    return diff_test(queue, name, cmd + args, expected)
+    return diff_test(opts, queue, name, cmd + args, expected)
 
 
 def replay_test(opts, queue, name, args=[]):
@@ -77,7 +80,7 @@ def replay_test(opts, queue, name, args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    return diff_test(queue, name, cmd + args, expected)
+    return diff_test(opts, queue, name, cmd + args, expected)
 
 
 def call(args):
