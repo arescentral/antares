@@ -806,6 +806,7 @@ if (target_os == "mac") {
     public_deps = [
       "//ext/procyon:procyon-cpp",
     ]
+    libs = [ "wininet" ]
     configs += [ ":antares_private" ]
   }
 }
