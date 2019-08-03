@@ -74,11 +74,11 @@ tracks the leading timestamp of each of the peer_'s logs_.
 
 Every tick:
 
- 1. The local player_'s `input log`_ is updated.
- 2. tail_ is updated as far the shortest `input log`_ runs.
- 3. tail_ is copied wholesale to head_, discarding head_.
- 4. head_ is updated as far the longest `input log`_ runs (which would
-    be the local player's log).
+1. The local player_'s `input log`_ is updated.
+2. tail_ is updated as far the shortest `input log`_ runs.
+3. tail_ is copied wholesale to head_, discarding head_.
+4. head_ is updated as far the longest `input log`_ runs (which would
+   be the local player's log).
 
 Some things should happen only on the final iteration of step 4.  For
 example, sounds and the starfield should be updated as if head_ were the
@@ -87,8 +87,8 @@ true state of the universe.
 The net protocol loops independently of the above.  At each iteration,
 to each peer_, for each player_, a node_ sends:
 
-  * The leading timestamp of the local log_ for that player_.
-  * Any input after the end of the peer_'s log_ for that player_.
+*  The leading timestamp of the local log_ for that player_.
+*  Any input after the end of the peer_'s log_ for that player_.
 
 Nothing need be sent reliably (e.g. via TCP).  Any input that the peer_
 doesn't know about will be resent until it does.  The networking can
@@ -165,18 +165,18 @@ Pausing
 
 We could go a few ways on this:
 
- 1. There is no pausing.  A player_ can go into the play-again screen
-    and choose to forfeit, but it won't pause the game on any other
-    node_.
+1. There is no pausing.  A player_ can go into the play-again screen
+   and choose to forfeit, but it won't pause the game on any other
+   node_.
 
- 2. When a player_ hits ESC, their node_ immediately pauses.  Other
-    nodes_ pause as soon as their tail_ advances to that time, and
-    discard any input generated after that time.  When unpausing, nodes_
-    other than the pauser will be rewound slightly.
+2. When a player_ hits ESC, their node_ immediately pauses.  Other
+   nodes_ pause as soon as their tail_ advances to that time, and
+   discard any input generated after that time.  When unpausing, nodes_
+   other than the pauser will be rewound slightly.
 
- 3. When a player_ hits ESC, it starts a (3-second?) timer, at the end
-    of which all nodes_ pause the game.  No node_ advances past that
-    time until unpausing.
+3. When a player_ hits ESC, it starts a (3-second?) timer, at the end
+   of which all nodes_ pause the game.  No node_ advances past that
+   time until unpausing.
 
 Honestly, the first option seems best.
 
@@ -206,4 +206,4 @@ Replays
 The `input logs`_ in a game have all the information we need to make a
 replay, so we should implement them as such.
 
-..  -*- tab-width: 4; fill-column: 72 -*-
+..  -*- tab-width: 3; fill-column: 72 -*-
