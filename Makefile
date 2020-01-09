@@ -105,6 +105,7 @@ install-data: build
 	cp -r data/sounds $(DESTDIR)$(DATADIR)/app
 	cp -r data/sprites $(DESTDIR)$(DATADIR)/app
 	cp -r data/strings $(DESTDIR)$(DATADIR)/app
+	cp -r data/text $(DESTDIR)$(DATADIR)/app
 
 .PHONY: install-scenario
 install-scenario: build
