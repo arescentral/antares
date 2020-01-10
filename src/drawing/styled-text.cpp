@@ -19,6 +19,7 @@
 #include "drawing/styled-text.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 #include <limits>
 #include <pn/output>
 
