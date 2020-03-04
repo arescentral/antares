@@ -21,6 +21,7 @@
 #include <GLFW/glfw3.h>
 #include <sys/time.h>
 #include <unistd.h>
+
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
@@ -32,117 +33,139 @@ namespace antares {
 
 static const ticks kDoubleClickInterval = ticks(30);
 
-static Key kGLFWKeyToUSB[GLFW_KEY_LAST + 1] = {
-        [GLFW_KEY_SPACE]      = Key::SPACE,
-        [GLFW_KEY_APOSTROPHE] = Key::QUOTE,
-        [GLFW_KEY_COMMA]      = Key::COMMA,
-        Key::MINUS,
-        Key::PERIOD,
-        Key::SLASH,
-        [GLFW_KEY_0] = Key::K0,
-        Key::K1,
-        Key::K2,
-        Key::K3,
-        Key::K4,
-        Key::K5,
-        Key::K6,
-        Key::K7,
-        Key::K8,
-        Key::K9,
-        [GLFW_KEY_SEMICOLON] = Key::SEMICOLON,
-        [GLFW_KEY_EQUAL]     = Key::EQUALS,
-        [GLFW_KEY_A]         = Key::A,
-        Key::B,
-        Key::C,
-        Key::D,
-        Key::E,
-        Key::F,
-        Key::G,
-        Key::H,
-        Key::I,
-        Key::J,
-        Key::K,
-        Key::L,
-        Key::M,
-        Key::N,
-        Key::O,
-        Key::P,
-        Key::Q,
-        Key::R,
-        Key::S,
-        Key::T,
-        Key::U,
-        Key::V,
-        Key::W,
-        Key::X,
-        Key::Y,
-        Key::Z,
-        [GLFW_KEY_LEFT_BRACKET] = Key::L_BRACKET,
-        Key::BACKSLASH,
-        Key::R_BRACKET,
-        [GLFW_KEY_GRAVE_ACCENT] = Key::BACKTICK,
-        [GLFW_KEY_WORLD_1]      = Key::NONE,
-        Key::NONE,
-        [GLFW_KEY_ESCAPE] = Key::ESCAPE,
-        Key::RETURN,
-        Key::TAB,
-        Key::BACKSPACE,
-        Key::NONE /* Key::INSERT */,
-        Key::DEL,
-        [GLFW_KEY_RIGHT] = Key::RIGHT_ARROW,
-        Key::LEFT_ARROW,
-        Key::DOWN_ARROW,
-        Key::UP_ARROW,
-        Key::PAGE_UP,
-        Key::PAGE_DOWN,
-        Key::HOME,
-        Key::END,
-        [GLFW_KEY_CAPS_LOCK] = Key::CAPS_LOCK,
-        Key::NONE /* SCROLL_LOCK */,
-        Key::NONE /* NUM_LOCK */,
-        [GLFW_KEY_PRINT_SCREEN] = Key::NONE /* PRINT_SCREEN */,
-        Key::NONE /* PAUSE */,
-        [GLFW_KEY_F1] = Key::F1,
-        Key::F2,
-        Key::F3,
-        Key::F4,
-        Key::F5,
-        Key::F6,
-        Key::F7,
-        Key::F8,
-        Key::F9,
-        Key::F10,
-        Key::F11,
-        Key::F12,
-        Key::F13,
-        Key::F14,
-        Key::F15,
-        [GLFW_KEY_KP_1] = Key::N1,
-        Key::N2,
-        Key::N3,
-        Key::N4,
-        Key::N5,
-        Key::N6,
-        Key::N7,
-        Key::N8,
-        Key::N9,
-        [GLFW_KEY_KP_DECIMAL] = Key::N_PERIOD,
-        Key::N_DIVIDE,
-        Key::N_TIMES,
-        Key::N_MINUS,
-        Key::N_PLUS,
-        Key::N_ENTER,
-        Key::N_EQUALS,
-        [GLFW_KEY_LEFT_SHIFT] = Key::SHIFT,
-        Key::CONTROL,
-        Key::OPTION,
-        Key::COMMAND,
-        [GLFW_KEY_RIGHT_SHIFT] = Key::R_SHIFT,
-        Key::R_CONTROL,
-        Key::R_OPTION,
-        Key::R_COMMAND,
-        [GLFW_KEY_MENU] = Key::NONE /* MENU */,
+namespace {
+
+struct GLFWKeyMap {
+    Key map[GLFW_KEY_LAST + 1];
 };
+
+}  // namespace
+
+static GLFWKeyMap glfw_key_to_usb() {
+    GLFWKeyMap keys = {};
+
+    keys.map[GLFW_KEY_SPACE]      = Key::SPACE;
+    keys.map[GLFW_KEY_APOSTROPHE] = Key::QUOTE;
+    keys.map[GLFW_KEY_COMMA]      = Key::COMMA;
+    keys.map[GLFW_KEY_MINUS]      = Key::MINUS;
+    keys.map[GLFW_KEY_PERIOD]     = Key::PERIOD;
+    keys.map[GLFW_KEY_SLASH]      = Key::SLASH;
+
+    keys.map[GLFW_KEY_0] = Key::K0;
+    keys.map[GLFW_KEY_1] = Key::K1;
+    keys.map[GLFW_KEY_2] = Key::K2;
+    keys.map[GLFW_KEY_3] = Key::K3;
+    keys.map[GLFW_KEY_4] = Key::K4;
+    keys.map[GLFW_KEY_5] = Key::K5;
+    keys.map[GLFW_KEY_6] = Key::K6;
+    keys.map[GLFW_KEY_7] = Key::K7;
+    keys.map[GLFW_KEY_8] = Key::K8;
+    keys.map[GLFW_KEY_9] = Key::K9;
+
+    keys.map[GLFW_KEY_SEMICOLON] = Key::SEMICOLON;
+    keys.map[GLFW_KEY_EQUAL]     = Key::EQUALS;
+
+    keys.map[GLFW_KEY_A] = Key::A;
+    keys.map[GLFW_KEY_B] = Key::B;
+    keys.map[GLFW_KEY_C] = Key::C;
+    keys.map[GLFW_KEY_D] = Key::D;
+    keys.map[GLFW_KEY_E] = Key::E;
+    keys.map[GLFW_KEY_F] = Key::F;
+    keys.map[GLFW_KEY_G] = Key::G;
+    keys.map[GLFW_KEY_H] = Key::H;
+    keys.map[GLFW_KEY_I] = Key::I;
+    keys.map[GLFW_KEY_J] = Key::J;
+    keys.map[GLFW_KEY_K] = Key::K;
+    keys.map[GLFW_KEY_L] = Key::L;
+    keys.map[GLFW_KEY_M] = Key::M;
+    keys.map[GLFW_KEY_N] = Key::N;
+    keys.map[GLFW_KEY_O] = Key::O;
+    keys.map[GLFW_KEY_P] = Key::P;
+    keys.map[GLFW_KEY_Q] = Key::Q;
+    keys.map[GLFW_KEY_R] = Key::R;
+    keys.map[GLFW_KEY_S] = Key::S;
+    keys.map[GLFW_KEY_T] = Key::T;
+    keys.map[GLFW_KEY_U] = Key::U;
+    keys.map[GLFW_KEY_V] = Key::V;
+    keys.map[GLFW_KEY_W] = Key::W;
+    keys.map[GLFW_KEY_X] = Key::X;
+    keys.map[GLFW_KEY_Y] = Key::Y;
+    keys.map[GLFW_KEY_Z] = Key::Z;
+
+    keys.map[GLFW_KEY_LEFT_BRACKET]  = Key::L_BRACKET;
+    keys.map[GLFW_KEY_BACKSLASH]     = Key::BACKSLASH;
+    keys.map[GLFW_KEY_RIGHT_BRACKET] = Key::R_BRACKET;
+    keys.map[GLFW_KEY_GRAVE_ACCENT]  = Key::BACKTICK;
+    keys.map[GLFW_KEY_WORLD_1]       = Key::NONE;
+    keys.map[GLFW_KEY_WORLD_2]       = Key::NONE;
+    keys.map[GLFW_KEY_ESCAPE]        = Key::ESCAPE;
+    keys.map[GLFW_KEY_ENTER]         = Key::RETURN;
+    keys.map[GLFW_KEY_TAB]           = Key::TAB;
+    keys.map[GLFW_KEY_BACKSPACE]     = Key::BACKSPACE;
+    keys.map[GLFW_KEY_INSERT]        = Key::NONE;
+    keys.map[GLFW_KEY_DELETE]        = Key::DEL;
+    keys.map[GLFW_KEY_RIGHT]         = Key::RIGHT_ARROW;
+    keys.map[GLFW_KEY_LEFT]          = Key::LEFT_ARROW;
+    keys.map[GLFW_KEY_DOWN]          = Key::DOWN_ARROW;
+    keys.map[GLFW_KEY_UP]            = Key::UP_ARROW;
+    keys.map[GLFW_KEY_PAGE_UP]       = Key::PAGE_UP;
+    keys.map[GLFW_KEY_PAGE_DOWN]     = Key::PAGE_DOWN;
+    keys.map[GLFW_KEY_HOME]          = Key::HOME;
+    keys.map[GLFW_KEY_END]           = Key::END;
+    keys.map[GLFW_KEY_CAPS_LOCK]     = Key::CAPS_LOCK;
+    keys.map[GLFW_KEY_SCROLL_LOCK]   = Key::NONE;
+    keys.map[GLFW_KEY_NUM_LOCK]      = Key::NONE;
+    keys.map[GLFW_KEY_PRINT_SCREEN]  = Key::NONE;
+    keys.map[GLFW_KEY_PAUSE]         = Key::NONE;
+
+    keys.map[GLFW_KEY_F1]  = Key::F1;
+    keys.map[GLFW_KEY_F2]  = Key::F2;
+    keys.map[GLFW_KEY_F3]  = Key::F3;
+    keys.map[GLFW_KEY_F4]  = Key::F4;
+    keys.map[GLFW_KEY_F5]  = Key::F5;
+    keys.map[GLFW_KEY_F6]  = Key::F6;
+    keys.map[GLFW_KEY_F7]  = Key::F7;
+    keys.map[GLFW_KEY_F8]  = Key::F8;
+    keys.map[GLFW_KEY_F9]  = Key::F9;
+    keys.map[GLFW_KEY_F10] = Key::F10;
+    keys.map[GLFW_KEY_F11] = Key::F11;
+    keys.map[GLFW_KEY_F12] = Key::F12;
+    keys.map[GLFW_KEY_F13] = Key::F13;
+    keys.map[GLFW_KEY_F14] = Key::F14;
+    keys.map[GLFW_KEY_F15] = Key::F15;
+
+    keys.map[GLFW_KEY_KP_1] = Key::N1;
+    keys.map[GLFW_KEY_KP_2] = Key::N2;
+    keys.map[GLFW_KEY_KP_3] = Key::N3;
+    keys.map[GLFW_KEY_KP_4] = Key::N4;
+    keys.map[GLFW_KEY_KP_5] = Key::N5;
+    keys.map[GLFW_KEY_KP_6] = Key::N6;
+    keys.map[GLFW_KEY_KP_7] = Key::N7;
+    keys.map[GLFW_KEY_KP_8] = Key::N8;
+    keys.map[GLFW_KEY_KP_9] = Key::N9;
+
+    keys.map[GLFW_KEY_KP_DECIMAL]  = Key::N_PERIOD;
+    keys.map[GLFW_KEY_KP_DIVIDE]   = Key::N_DIVIDE;
+    keys.map[GLFW_KEY_KP_MULTIPLY] = Key::N_TIMES;
+    keys.map[GLFW_KEY_KP_SUBTRACT] = Key::N_MINUS;
+    keys.map[GLFW_KEY_KP_ADD]      = Key::N_PLUS;
+    keys.map[GLFW_KEY_KP_ENTER]    = Key::N_ENTER;
+    keys.map[GLFW_KEY_KP_EQUAL]    = Key::N_EQUALS;
+
+    keys.map[GLFW_KEY_LEFT_SHIFT]    = Key::SHIFT;
+    keys.map[GLFW_KEY_LEFT_CONTROL]  = Key::CONTROL;
+    keys.map[GLFW_KEY_LEFT_ALT]      = Key::OPTION;
+    keys.map[GLFW_KEY_LEFT_SUPER]    = Key::COMMAND;
+    keys.map[GLFW_KEY_RIGHT_SHIFT]   = Key::R_SHIFT;
+    keys.map[GLFW_KEY_RIGHT_CONTROL] = Key::R_CONTROL;
+    keys.map[GLFW_KEY_RIGHT_ALT]     = Key::R_OPTION;
+    keys.map[GLFW_KEY_RIGHT_SUPER]   = Key::R_COMMAND;
+    keys.map[GLFW_KEY_MENU]          = Key::NONE;
+
+    return keys;
+}
+
+static GLFWKeyMap kGLFWKeyToUSB = glfw_key_to_usb();
 
 static void throw_error(int code, const char* message) {
     throw std::runtime_error(pn::format("{0}: {1}", code, message).c_str());
@@ -187,7 +210,7 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     if (key < 0) {
         return;
     }
-    Key usb_key = kGLFWKeyToUSB[key];
+    Key usb_key = kGLFWKeyToUSB.map[key];
     if (usb_key == Key::NONE) {
         return;
     }
