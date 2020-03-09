@@ -2,65 +2,85 @@ language:  cpp
 
 matrix:
   include:
-    - os:         osx
+#   - os:         osx
+
+#     install:
+#       - scripts/load-cert.sh
+
+#     script:
+#       - scripts/set-version $(git describe --tags HEAD)
+#       - ./configure
+#       - make build
+#       - make smoke-test
+
+#     before_deploy:
+#       - make dist
+#       - make macdist
+
+#     deploy:
+#       provider:       gcs
+#       skip_cleanup:   true
+#       access_key_id:  GOOG5V7J5HCR4SRF4YCUI7EL
+#       secret_access_key:
+#         secure: BSha8nkjJqEnsqW12HZshAs00Q8BKniDhJ7W94ecbYMxm7ZKcTWIVGZ1I8r+1TmgFFXaqxaTYEvQ7Ga7GUfdon9ow2zq9Z/T6nsCYIYax7pXuc2mWk8ndX504dTLue72XhXRlXIUvqJyIAAips8cIsSybnt1KKOlYuoAcNonQtY=
+#       bucket:      downloads.arescentral.org
+#       local-dir:   dist
+#       upload-dir:  Antares
+#       on:
+#         all_branches:  true
+
+#   - os:       linux
+#     dist:     xenial
+
+#     install:
+#       - sudo apt-get update
+#       - sudo scripts/installdeps.py
+
+#     script:
+#       - scripts/set-version $(git describe --tags HEAD)
+#       - ./configure
+#       - make build
+#       - make smoke-test
+#       - make test-install
+
+#   - os:        linux
+#     services:
+#       - docker
+#     before_install:
+#       - git submodule update --init
+#       - docker run -d --name cosmic -v $(pwd):/antares -w /antares ubuntu:cosmic sleep infinity
+#       - docker ps
+
+#     install:
+#       - docker exec cosmic apt-get update
+#       - docker exec cosmic apt-get install -y --no-install-recommends build-essential clang make python
+#       - docker exec cosmic apt-get install -y --no-install-recommends mingw-w64 xvfb wine
+
+#     script:
+#       - docker exec cosmic scripts/set-version $(git describe --tags HEAD)
+#       - docker exec cosmic ./configure -owin
+#       - docker exec cosmic make build
+#       - docker exec cosmic make test-wine
+
+    - os:  windows
 
       install:
-        - scripts/load-cert.sh
+        - echo $PATH
+        - ls /
+        - ls /c/
+        - choco install msys2
+        - echo $PATH
+        - /c/tools/msys64/usr/bin/bash.exe --not-a-flag
+        - /c/tools/msys64/usr/bin/bash.exe -lc 'echo OK'
+        - /c/tools/msys64/usr/bin/bash.exe -lc 'pacman install --noconfirm --needed -Syuuvv mingw-w64-clang mingw-w64-glfw make'
+        - echo $PATH
+        - ls /c/tools/msys64/usr/bin/
 
       script:
-        - scripts/set-version $(git describe --tags HEAD)
-        - ./configure
-        - make build
-        - make smoke-test
-
-      before_deploy:
-        - make dist
-        - make macdist
-
-      deploy:
-        provider:       gcs
-        skip_cleanup:   true
-        access_key_id:  GOOG5V7J5HCR4SRF4YCUI7EL
-        secret_access_key:
-          secure: BSha8nkjJqEnsqW12HZshAs00Q8BKniDhJ7W94ecbYMxm7ZKcTWIVGZ1I8r+1TmgFFXaqxaTYEvQ7Ga7GUfdon9ow2zq9Z/T6nsCYIYax7pXuc2mWk8ndX504dTLue72XhXRlXIUvqJyIAAips8cIsSybnt1KKOlYuoAcNonQtY=
-        bucket:      downloads.arescentral.org
-        local-dir:   dist
-        upload-dir:  Antares
-        on:
-          all_branches:  true
-
-    - os:       linux
-      dist:     xenial
-
-      install:
-        - sudo apt-get update
-        - sudo scripts/installdeps.py
-
-      script:
-        - scripts/set-version $(git describe --tags HEAD)
-        - ./configure
-        - make build
-        - make smoke-test
-        - make test-install
-
-    - os:        linux
-      services:
-        - docker
-      before_install:
-        - git submodule update --init
-        - docker run -d --name cosmic -v $(pwd):/antares -w /antares ubuntu:cosmic sleep infinity
-        - docker ps
-
-      install:
-        - docker exec cosmic apt-get update
-        - docker exec cosmic apt-get install -y --no-install-recommends build-essential clang make python
-        - docker exec cosmic apt-get install -y --no-install-recommends mingw-w64 xvfb wine
-
-      script:
-        - docker exec cosmic scripts/set-version $(git describe --tags HEAD)
-        - docker exec cosmic ./configure -owin
-        - docker exec cosmic make build
-        - docker exec cosmic make test-wine
+        - /c/tools/msys64/usr/bin/bash -lc 'scripts/set-version $(git describe --tags HEAD)'
+        - /c/tools/msys64/usr/bin/bash -lc './configure'
+        - /c/tools/msys64/usr/bin/bash -lc 'make build'
+        - /c/tools/msys64/usr/bin/bash -lc 'make smoke-test'
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
