@@ -55,7 +55,7 @@ matrix:
       install:
         - $SH apt-get update
         - $SH apt-get install -y --no-install-recommends make python3
-        - $SH scripts/installdeps.py
+        - $SH scripts/installdeps.py ubuntu -y
 
       script:
         - $SH scripts/set-version $(git describe --tags HEAD)

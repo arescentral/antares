@@ -42,19 +42,18 @@ def main():
 
     if len(sys.argv) == 1:
         distro = linux_distribution()[0].lower()
+        flags = []
         if not distro:
             sys.stderr.write("This script is Linux-only, sorry.\n")
             sys.exit(1)
-    elif len(sys.argv) == 2:
+    elif len(sys.argv) >= 2:
         distro = sys.argv[1]
-    else:
-        sys.stderr.write("usage: {} [DISTRO]\n".format(sys.argv[0]))
-        sys.exit(64)
+        flags = sys.argv[2:]
 
     if distro not in COMMAND:
         sys.stderr.write("I don't know {}, sorry.\n".format(distro))
         sys.exit(1)
-    command = COMMAND[distro] + list(PACKAGE[distro].values())
+    command = COMMAND[distro] + flags + list(PACKAGE[distro].values())
     print(" ".join(quote(arg) for arg in command))
     os.execvp(command[0], command)
 
