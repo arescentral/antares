@@ -48,7 +48,7 @@ matrix:
         - docker
       before_install:
         - git submodule update --init
-        - docker run -d --name wine -v $(pwd):/antares -w /antares ubuntu:eoan sleep infinity
+        - docker run -d --name wine -v $(pwd):/antares -w /antares ubuntu:focal sleep infinity
         - docker ps
 
       install:
