@@ -118,9 +118,6 @@ pull-request:
 
 .PHONY: test-install
 test-install: build
-	# Check that deps for launcher were installed:
-	python -c "from scripts import antares_launcher"
-
 	# Check that antares-ls-scenarios finds scenario only after installation:
 	sudo rm -Rf $(prefix)/share/games/antares
 	! out/cur/antares-ls-scenarios
