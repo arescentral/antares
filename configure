@@ -218,7 +218,7 @@ def check_linux_native(args):
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = platform.linux_distribution()
+        distro = linux_distribution()
         if distro == ("Ubuntu", "20.04", "focal"):
             msg(" ".join(distro), color="green")
         else:
