@@ -177,7 +177,7 @@ def check_linux_native(args):
 
     if check_pkg_config():
         libs = """
-            gl glfw3 glu libmodplug libzip libpng16 neon openal sndfile
+            gl glfw3 glu libmodplug libzip libpng neon openal sndfile
             x11 xcursor xinerama xrandr xxf86vm zlib
         """.split()
         for lib in libs:
