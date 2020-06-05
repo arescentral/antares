@@ -53,7 +53,7 @@ matrix:
 
       install:
         - docker exec wine apt-get update
-        - docker exec wine apt-get install -y --no-install-recommends build-essential clang make python
+        - docker exec wine apt-get install -y --no-install-recommends build-essential clang make python3
         - docker exec wine apt-get install -y --no-install-recommends mingw-w64 xvfb wine-stable
 
       script:
