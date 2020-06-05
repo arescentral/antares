@@ -3,6 +3,7 @@ language:  cpp
 matrix:
   include:
     - os:         osx
+      osx_image: xcode11.5
 
       install:
         - scripts/load-cert.sh
