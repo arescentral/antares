@@ -7,7 +7,7 @@
 import argparse
 import collections
 import contextlib
-import cStringIO
+import io
 import multiprocessing.pool
 import os
 import shutil
@@ -90,7 +90,7 @@ def call(args):
     name = args[3]
     args = list(args[4:])
 
-    sys.stdout = cStringIO.StringIO()
+    sys.stdout = io.StringIO()
 
     queue.put((
         name,
