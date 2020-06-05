@@ -31,7 +31,8 @@ PACKAGE[UBUNTU] = PACKAGE[DEBIAN] = collections.OrderedDict([
     ("zlib", "zlib1g-dev"),
 ])
 
-if __name__ == "__main__":
+
+def main():
     import os
     import platform
     try:
@@ -40,7 +41,7 @@ if __name__ == "__main__":
         from pipes import quote
 
     if len(sys.argv) == 1:
-        distro = platform.linux_distribution()[0].lower()
+        distro = linux_distribution()[0].lower()
         if not distro:
             sys.stderr.write("This script is Linux-only, sorry.\n")
             sys.exit(1)
@@ -56,3 +57,25 @@ if __name__ == "__main__":
     command = COMMAND[distro] + list(PACKAGE[distro].values())
     print(" ".join(quote(arg) for arg in command))
     os.execvp(command[0], command)
+
+
+def linux_distribution():
+    """Replacement for deprecated platform.linux_distribution()
+
+    Only tested on Ubuntu so far.
+    """
+    try:
+        with open("/etc/lsb-release") as f:
+            lines = f.readlines()
+    except (OSError, IOError):
+        return ("", "", "")
+    distrib = dict(line.split("=", 1) for line in lines)
+    return (
+        distrib.get("DISTRIB_ID", "").strip(),
+        distrib.get("DISTRIB_RELEASE", "").strip(),
+        distrib.get("DISTRIB_CODENAME", "").strip(),
+    )
+
+
+if __name__ == "__main__":
+    main()

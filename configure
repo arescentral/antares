@@ -155,27 +155,9 @@ def check_mac(args):
         sys.exit(1)
 
 
-def linux_distribution():
-    """Replacement for deprecated platform.linux_distribution()
-
-    Only tested on Ubuntu so far.
-    """
-    try:
-        with open("/etc/lsb-release") as f:
-            lines = f.readlines()
-    except (OSError, IOError):
-        return ("", "", "")
-    distrib = dict(line.split("=", 1) for line in lines)
-    return (
-        distrib.get("DISTRIB_ID", "").strip(),
-        distrib.get("DISTRIB_RELEASE", "").strip(),
-        distrib.get("DISTRIB_CODENAME", "").strip(),
-    )
-
-
 def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = linux_distribution()
+        distro = installdeps.linux_distribution()
         if distro[0].lower() in installdeps.COMMAND:
             msg(" ".join(distro), color="green")
             distro = distro[0]
@@ -218,7 +200,7 @@ def check_linux_native(args):
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = linux_distribution()
+        distro = installdeps.linux_distribution()
         if distro == ("Ubuntu", "20.04", "focal"):
             msg(" ".join(distro), color="green")
         else:
