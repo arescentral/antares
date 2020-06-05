@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
@@ -155,9 +155,27 @@ def check_mac(args):
         sys.exit(1)
 
 
+def linux_distribution():
+    """Replacement for deprecated platform.linux_distribution()
+
+    Only tested on Ubuntu so far.
+    """
+    try:
+        with open("/etc/lsb-release") as f:
+            lines = f.readlines()
+    except (OSError, IOError):
+        return ("", "", "")
+    distrib = dict(line.split("=", 1) for line in lines)
+    return (
+        distrib.get("DISTRIB_ID", "").strip(),
+        distrib.get("DISTRIB_RELEASE", "").strip(),
+        distrib.get("DISTRIB_CODENAME", "").strip(),
+    )
+
+
 def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = platform.linux_distribution()
+        distro = linux_distribution()
         if distro[0].lower() in installdeps.COMMAND:
             msg(" ".join(distro), color="green")
             distro = distro[0]

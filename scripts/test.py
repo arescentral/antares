@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
