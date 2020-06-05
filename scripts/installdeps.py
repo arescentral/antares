@@ -19,7 +19,7 @@ PACKAGE[UBUNTU] = PACKAGE[DEBIAN] = collections.OrderedDict([
     ("libc++abi", "libc++abi-dev"),
     ("libmodplug", "libmodplug-dev"),
     ("libzip", "libzip-dev"),
-    ("libpng16", "libpng16-dev"),
+    ("libpng16", "libpng-dev"),
     ("neon", "libneon27-dev"),
     ("openal", "libopenal-dev"),
     ("sndfile", "libsndfile1-dev"),
