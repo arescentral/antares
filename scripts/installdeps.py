@@ -29,8 +29,6 @@ PACKAGE[UBUNTU] = PACKAGE[DEBIAN] = collections.OrderedDict([
     ("xrandr", "libxrandr-dev"),
     ("xxf86vm", "libxxf86vm-dev"),
     ("zlib", "zlib1g-dev"),
-    ("python-gi", "python-gi"),
-    ("python-gtk3", "gir1.2-gtk-3.0"),
 ])
 
 if __name__ == "__main__":
