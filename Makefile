@@ -38,7 +38,7 @@ dist:
 	scripts/dist.py bz2
 
 .PHONY: macdist
-macdist: sign
+macdist: sign notarize
 	scripts/dist.py mac
 
 .PHONY: distclean
@@ -54,9 +54,15 @@ run: build
 .PHONY: sign
 sign: build
 	codesign --force \
+		--options runtime \
+		--timestamp \
 		--sign "Developer ID Application" \
 		--entitlements resources/entitlements.plist \
 		out/cur/Antares.app
+
+.PHONY: notarize
+notarize: sign
+	scripts/notarize
 
 .PHONY: install-deps
 install-deps:
