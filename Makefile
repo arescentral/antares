@@ -44,7 +44,7 @@ macdist: sign
 .PHONY: distclean
 distclean:
 	rm -Rf out/
-	rm -f build/lib/scripts/*.pyc build/lib/scripts/gn build/lib/scripts/ninja
+	rm -f scripts/*.pyc build/lib/scripts/*.pyc
 
 .PHONY: run
 run: build
@@ -126,7 +126,7 @@ test-install: build
 
 .PHONY: friends
 friends:
-	@echo "Sure! You can email me at sfiera@sfzmail.com."
+	@echo "Sure! You can email me at sfiera@twotaled.com."
 
 .PHONY: love
 love:
