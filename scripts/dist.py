@@ -29,10 +29,10 @@ def main():
             assert travis_version == version, "%s != %s" % (travis_version, version)
         elif os.environ["TRAVIS_BRANCH"] != "master":
             print("not building distfiles; not on master")
-            sys.exit(1)
+            return
         elif os.environ["TRAVIS_PULL_REQUEST"] != "false":
             print("not building distfiles; pull request")
-            sys.exit(1)
+            return
         else:
             filename_version = "git"
 
