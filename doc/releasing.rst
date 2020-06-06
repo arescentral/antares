@@ -6,11 +6,8 @@ Starting a release
 
 1.  Run ``./scripts/release start ${VERSION?}`` (this checks out the
     release branch).
-2.  Run ``make dist`` to build ``antares-X.X.X~rc1.zip``.
-3.  Unzip the distfile and run ``./configure && make appdist`` in it to
-    build ``antares-mac-X.X.X~rc1.zip``.
-4.  Upload the archives to `downloads.arescentral.org`_.
-5.  Add a new news article to `arescentral.org`_.
+2.  ``git push --tags`` the release to trigger a Travis build
+3.  Add a new news article to `arescentral.org`_.
 
 ..  _BUILD.gn: /BUILD.gn
 
@@ -19,11 +16,9 @@ Bumping a release
 
 1.  Checkout the ``release/X.X.X`` branch.
 2.  Increase the ``rcN`` number in ``antares_version`` in `BUILD.gn`_.
-3.  Run ``make dist`` to build ``antares-X.X.X~rcN.zip``.
-4.  Unzip the distfile and run ``./configure && make appdist`` in it to
-    build ``antares-mac-X.X.X~rcN.zip``.
-5.  Upload the archives to `downloads.arescentral.org`_.
-6.  Add a new news article to `arescentral.org`_.
+3.  Tag ``X.X.XrcN``
+4.  ``git push --tags`` the release to trigger a Travis build
+5.  Add a new news article to `arescentral.org`_.
 
 Finishing a release
 -------------------
