@@ -45,6 +45,7 @@ if [[ $ACTION == start ]]; then
     git checkout -b release/$VERSION
     scripts/set-version ${VERSION}~rc1
     git commit BUILD.gn README.rst -m "Create release branch for $VERSION."
+    git tag ${VERSION}rc1
 else
     set -o verbose
     scripts/set-version $VERSION

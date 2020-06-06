@@ -18,10 +18,10 @@ Bumping a release
 -----------------
 
 1.  Checkout the ``release/X.X.X`` branch.
-2.  Increase the ``rcX`` number in ``antares_version`` in `BUILD.gn`_.
-3.  Run ``make dist`` to build ``antares-X.X.X~rc1.zip``.
+2.  Increase the ``rcN`` number in ``antares_version`` in `BUILD.gn`_.
+3.  Run ``make dist`` to build ``antares-X.X.X~rcN.zip``.
 4.  Unzip the distfile and run ``./configure && make appdist`` in it to
-    build ``antares-mac-X.X.X~rc1.zip``.
+    build ``antares-mac-X.X.X~rcN.zip``.
 5.  Upload the archives to `downloads.arescentral.org`_.
 6.  Add a new news article to `arescentral.org`_.
 
