@@ -126,7 +126,7 @@ test-install: build
 
 .PHONY: friends
 friends:
-	@echo "Sure! You can email me at sfiera@sfzmail.com."
+	@echo "Sure! You can email me at sfiera@twotaled.com."
 
 .PHONY: love
 love:
