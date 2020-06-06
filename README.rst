@@ -30,7 +30,7 @@ Antares
           :target: https://cloud.drone.io/arescentral/antares
 
 Antares is based on Ares_, a game developed by `Nathan Lamont`_, and
-released for the classic Mac OS in 1996. After a re-release by `Ambrosia
+released for the classic Mac OS in 1998. After a re-release by `Ambrosia
 Software`_ and a major expansion which added support for plug-ins, the
 game fell into obscurity, as it was not ported to Mac OS X. However, in
 2008, the source code was released. Antares is a port of that code to
