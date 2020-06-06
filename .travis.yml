@@ -3,6 +3,7 @@ language:  cpp
 matrix:
   include:
     - os:         osx
+      osx_image: xcode11.5
 
       install:
         - scripts/load-cert.sh
@@ -48,19 +49,45 @@ matrix:
         - docker
       before_install:
         - git submodule update --init
-        - docker run -d --name wine -v $(pwd):/antares -w /antares ubuntu:eoan sleep infinity
+        - docker run -d --name focal -v $(pwd):/antares -w /antares ubuntu:focal sleep infinity
         - docker ps
 
       install:
-        - docker exec wine apt-get update
-        - docker exec wine apt-get install -y --no-install-recommends build-essential clang make python
-        - docker exec wine apt-get install -y --no-install-recommends mingw-w64 xvfb wine-stable
+        - $SH apt-get update
+        - $SH apt-get install -y --no-install-recommends make python3 xvfb sudo
+        - $SH scripts/installdeps.py ubuntu -y
 
       script:
-        - docker exec wine scripts/set-version $(git describe --tags HEAD)
-        - docker exec wine ./configure -owin
-        - docker exec wine make build
-        - docker exec wine make test-wine
+        - $SH scripts/set-version $(git describe --tags HEAD)
+        - $SH ./configure
+        - $SH make build
+        - $SH make smoke-test
+        - $SH make test-install
+
+      env:
+        - SH="docker exec -e DEBIAN_FRONTEND=noninteractive focal"
+
+    - os:        linux
+      services:
+        - docker
+      before_install:
+        - git submodule update --init
+        - docker run -d --name wine -v $(pwd):/antares -w /antares ubuntu:focal sleep infinity
+        - docker ps
+
+      install:
+        - $SH apt-get update
+        - $SH apt-get install -y --no-install-recommends build-essential clang make python3
+        - $SH apt-get install -y --no-install-recommends mingw-w64 xvfb wine-stable
+
+      script:
+        - $SH scripts/set-version $(git describe --tags HEAD)
+        - $SH ./configure -owin
+        - $SH make build
+        - $SH make test-wine
+
+      env:
+        - SH="docker exec -e DEBIAN_FRONTEND=noninteractive wine"
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
