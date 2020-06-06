@@ -1,0 +1,78 @@
+---
+kind: pipeline
+type: docker
+name: xenial
+
+steps:
+- name: submodule
+  image: alpine/git
+  commands:
+  - git submodule update --init
+
+- name: test
+  image: ubuntu:xenial
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  commands:
+  - apt-get update
+  - apt-get install -y --no-install-recommends make python3 xvfb sudo
+  - scripts/installdeps.py ubuntu -y
+
+  - scripts/set-version $(git describe --tags HEAD)
+  - ./configure
+  - make build
+  - make smoke-test
+  - make test-install
+
+---
+kind: pipeline
+type: docker
+name: focal
+
+steps:
+- name: submodule
+  image: alpine/git
+  commands:
+  - git submodule update --init
+
+- name: test
+  image: ubuntu:focal
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  commands:
+  - apt-get update
+  - apt-get install -y --no-install-recommends make python3 xvfb sudo
+  - scripts/installdeps.py ubuntu -y
+
+  - scripts/set-version $(git describe --tags HEAD)
+  - ./configure
+  - make build
+  - make smoke-test
+  - make test-install
+
+---
+kind: pipeline
+type: docker
+name: wine
+
+steps:
+- name: submodule
+  image: alpine/git
+  commands:
+  - git submodule update --init
+
+- name: test
+  image: ubuntu:focal
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  commands:
+  - apt-get update
+  - apt-get install -y --no-install-recommends build-essential clang make python3
+  - apt-get install -y --no-install-recommends mingw-w64 xvfb wine-stable
+
+  - scripts/set-version $(git describe --tags HEAD)
+  - ./configure -o win
+  - make build
+  - make test-wine
+
+...
