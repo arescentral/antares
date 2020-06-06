@@ -28,7 +28,9 @@ matrix:
         local-dir:   dist
         upload-dir:  Antares
         on:
-          all_branches:  true
+          all_branches: true
+          condition: ( "$TRAVIS_BRANCH" = master ) || ( -n "$TRAVIS_TAG" )
+
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
