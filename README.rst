@@ -19,8 +19,15 @@ Antares
 
 ..  _Antares 0.9.0 for Mac OS X 10.7+: http://downloads.arescentral.org/Antares/Antares-0.9.0.zip
 
-..  image:: https://travis-ci.org/arescentral/antares.svg?branch=master
-    :target: https://travis-ci.org/arescentral/antares
+.. list-table::
+   :widths: auto
+
+   * - Mac
+     - .. image:: https://travis-ci.org/arescentral/antares.svg?branch=master
+          :target: https://travis-ci.org/arescentral/antares
+   * - Linux
+     - .. image:: https://cloud.drone.io/api/badges/arescentral/antares/status.svg?ref=refs/heads/master
+          :target: https://cloud.drone.io/arescentral/antares
 
 Antares is based on Ares_, a game developed by `Nathan Lamont`_, and
 released for the classic Mac OS in 1996. After a re-release by `Ambrosia
