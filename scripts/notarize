@@ -5,10 +5,10 @@
 
 import json
 import os
-import requests
 import subprocess
 import sys
 import time
+import urllib.request
 import zipfile
 
 APP = "out/cur/Antares.app"
@@ -74,9 +74,8 @@ def notarization_info(req_id):
             time.sleep(10)
             continue
         url = result["notarization-info"]["LogFileURL"]
-        resp = requests.get(url)
-        resp.raise_for_status()
-        print(resp.content.decode("utf-8"))
+        with urllib.request.urlopen(url) as response:
+            print(response.read().decode("utf-8"))
         if status == "invalid":
             sys.exit(1)
         else:
