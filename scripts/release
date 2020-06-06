@@ -17,7 +17,7 @@ if [[ $# != 2 ]]; then
 fi
 
 # Check that there is a line 'VERSION = "..."' in the gn file.
-grep >/dev/null '^  antares_version = ".*"$' BUILD.gn
+grep >/dev/null '^antares_version = ".*"$' BUILD.gn
 ACTION=$1
 VERSION=$2
 
