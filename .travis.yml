@@ -30,65 +30,6 @@ matrix:
         on:
           all_branches:  true
 
-    - os:       linux
-      dist:     xenial
-
-      install:
-        - sudo apt-get update
-        - sudo scripts/installdeps.py
-
-      script:
-        - scripts/set-version $(git describe --tags HEAD)
-        - ./configure
-        - make build
-        - make smoke-test
-        - make test-install
-
-    - os:        linux
-      services:
-        - docker
-      before_install:
-        - git submodule update --init
-        - docker run -d --name focal -v $(pwd):/antares -w /antares ubuntu:focal sleep infinity
-        - docker ps
-
-      install:
-        - $SH apt-get update
-        - $SH apt-get install -y --no-install-recommends make python3 xvfb sudo
-        - $SH scripts/installdeps.py ubuntu -y
-
-      script:
-        - $SH scripts/set-version $(git describe --tags HEAD)
-        - $SH ./configure
-        - $SH make build
-        - $SH make smoke-test
-        - $SH make test-install
-
-      env:
-        - SH="docker exec -e DEBIAN_FRONTEND=noninteractive focal"
-
-    - os:        linux
-      services:
-        - docker
-      before_install:
-        - git submodule update --init
-        - docker run -d --name wine -v $(pwd):/antares -w /antares ubuntu:focal sleep infinity
-        - docker ps
-
-      install:
-        - $SH apt-get update
-        - $SH apt-get install -y --no-install-recommends build-essential clang make python3
-        - $SH apt-get install -y --no-install-recommends mingw-w64 xvfb wine-stable
-
-      script:
-        - $SH scripts/set-version $(git describe --tags HEAD)
-        - $SH ./configure -owin
-        - $SH make build
-        - $SH make test-wine
-
-      env:
-        - SH="docker exec -e DEBIAN_FRONTEND=noninteractive wine"
-
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
 git:
