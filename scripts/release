@@ -58,13 +58,13 @@ case $ACTION in
         + git checkout -b release/$VERSION
         + scripts/set-version ${VERSION}~rc1
         + git commit BUILD.gn -m "Create release branch for $VERSION"
-        + git tag ${VERSION}rc1
+        + git tag v${VERSION}rc1
         ;;
 
     continue)
         + scripts/set-version ${VERSION}~${CANDIDATE}
         + git commit BUILD.gn -m "Update to $VERSION~$CANDIDATE"
-        + git tag ${VERSION}${CANDIDATE}
+        + git tag v${VERSION}${CANDIDATE}
         ;;
 
     finish)
@@ -74,6 +74,6 @@ case $ACTION in
 
         + git checkout stable
         + git merge --no-ff release/$VERSION
-        + git tag $VERSION
+        + git tag v$VERSION
         ;;
 esac
