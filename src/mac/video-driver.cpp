@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <sys/time.h>
+
 #include <algorithm>
 #include <pn/output>
 
@@ -141,9 +142,9 @@ static const Key key_codes[key_code_count] = {
         Key::MUTE,      Key::N_DIVIDE,   Key::N_ENTER,     Key::NONE,       Key::N_MINUS,
         Key::F18,
 
-        Key::F19,       Key::N_EQUALS,   Key::K0,          Key::K1,         Key::K2,
-        Key::K3,        Key::K4,         Key::K5,          Key::K6,         Key::K7,
-        Key::F20,       Key::K8,         Key::K9,          Key::J_YEN,      Key::J_UNDERSCORE,
+        Key::F19,       Key::N_EQUALS,   Key::N0,          Key::N1,         Key::N2,
+        Key::N3,        Key::N4,         Key::N5,          Key::N6,         Key::N7,
+        Key::F20,       Key::N8,         Key::N9,          Key::J_YEN,      Key::J_UNDERSCORE,
         Key::K_COMMA,
 
         Key::F5,        Key::F6,         Key::F7,          Key::F3,         Key::F8,
