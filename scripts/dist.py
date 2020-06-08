@@ -24,7 +24,7 @@ def main():
     if os.environ.get("TRAVIS") == "true":
         travis_tag = os.environ["TRAVIS_TAG"]
         if travis_tag:
-            assert tag == travis_tag, "%s != %s" % (tag, travis_tag)
+            tag = travis_tag
         elif os.environ["TRAVIS_BRANCH"] != "master":
             print("not building distfiles; not on master")
             return
