@@ -15,18 +15,14 @@ def main():
 
     try:
         tag = subprocess.check_output("git describe --tags --exact-match HEAD".split())
-        version = tag.decode().strip().lstrip("v")
     except subprocess.CalledProcessError:
         tag = None
-        version = "git"
-
     if subprocess.check_output("git status --porcelain".split()):
         tag = None
-        version = "git"
 
     if os.environ.get("TRAVIS") == "true":
         if os.environ["TRAVIS_TAG"]:
-            assert tag == os.environ["TRAVIS_TAG"]
+            tag = os.environ["TRAVIS_TAG"]
         elif os.environ["TRAVIS_BRANCH"] != "master":
             print("not building distfiles; not on master")
             return
@@ -39,7 +35,12 @@ def main():
     except FileExistsError:
         pass
 
+    if tag is None:
+        version = "git"
+    else:
+        version = tag.decode().strip().lstrip("v")
     archive_root = "antares-%s" % version
+
     if archive_format == "zip":
         path = "dist/%s.%s" % (archive_root, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
