@@ -15,14 +15,16 @@ def main():
 
     try:
         tag = subprocess.check_output("git describe --tags --exact-match HEAD".split())
+        tag = tag.decode("utf-8").strip()
     except subprocess.CalledProcessError:
         tag = None
     if subprocess.check_output("git status --porcelain".split()):
         tag = None
 
     if os.environ.get("TRAVIS") == "true":
-        if os.environ["TRAVIS_TAG"]:
-            tag = os.environ["TRAVIS_TAG"]
+        travis_tag = os.environ["TRAVIS_TAG"]
+        if travis_tag:
+            assert tag == travis_tag, "%s != %s" % (tag, travis_tag)
         elif os.environ["TRAVIS_BRANCH"] != "master":
             print("not building distfiles; not on master")
             return
@@ -38,7 +40,7 @@ def main():
     if tag is None:
         version = "git"
     else:
-        version = tag.decode().strip().lstrip("v")
+        version = tag.lstrip("v")
     archive_root = "antares-%s" % version
 
     if archive_format == "zip":
