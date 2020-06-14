@@ -47,7 +47,7 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
             "  Antares: a tactical space combat game\n"
             "\n"
             "  arguments:\n"
-            "    scenario            select scenario\n"
+            "    scenario            path to plugin file (default: factory scenario)\n"
             "\n"
             "  options:\n"
             "    -a, --app-data      set path to application data\n"
@@ -99,10 +99,6 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
-    if (!scenario.has_value()) {
-        scenario.emplace(kFactoryScenarioIdentifier);
-    }
-
     if (!sfz::path::isdir(application_path())) {
         if (application_path() == default_application_path()) {
             throw std::runtime_error(
@@ -118,19 +114,8 @@ void main(int argc, char* const* argv) {
 
     FilePrefsDriver prefs;
 
-    if (scenario.has_value()) {
-        bool              have_scenario = false;
-        std::vector<Info> scenarios     = scenario_list();
-        for (const Info& entry : scenarios) {
-            if (entry.identifier.hash == *scenario) {
-                have_scenario = true;
-                break;
-            }
-        }
-        if (!have_scenario) {
-            throw std::runtime_error(
-                    pn::format("{1}: scenario not installed\n", progname, *scenario).c_str());
-        }
+    if (!scenario.has_value()) {
+        scenario.emplace(factory_scenario_path().copy());
     }
 
     DirectoryLedger   ledger;

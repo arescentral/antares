@@ -246,12 +246,24 @@ static bool isWebScheme(NSURL* url) {
     if (![sender success]) {
         return;
     }
-    NSString*   user_scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
-    CFStringRef error_message;
     _application_should_terminate = NSTerminateCancel;
-    if (!antares_controller_loop(drivers, [user_scenario UTF8String], &error_message)) {
+
+    NSFileManager* files = [NSFileManager defaultManager];
+    NSURL*         url   = [files URLForDirectory:NSApplicationSupportDirectory
+                               inDomain:NSUserDomainMask
+                      appropriateForURL:nil
+                                 create:NO
+                                  error:nil];
+
+    NSString* scenario_identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
+    NSString* scenario_path       = [[url.path stringByAppendingPathComponent:@"Antares/Scenarios"]
+            stringByAppendingPathComponent:scenario_identifier];
+
+    CFStringRef error_message;
+    if (!antares_controller_loop(drivers, [scenario_path UTF8String], &error_message)) {
         [self fail:(NSString*)error_message];
     }
+
     antares_controller_destroy_drivers(drivers);
     _application_should_terminate = NSTerminateNow;
     [NSApp terminate:self];

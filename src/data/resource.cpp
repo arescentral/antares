@@ -86,7 +86,7 @@ class ResourceLister : public sfz::TreeWalker {
 static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_view extension) {
     std::vector<pn::string> resources;
     pn::string              path;
-    if (plug.identifier == kFactoryScenarioIdentifier) {
+    if (plug.info.identifier.hash == kFactoryScenarioIdentifier) {
         path = pn::format("{0}/{1}", application_path(), dir);
     } else {
         path = pn::format("{0}/{1}", plug.path, dir);

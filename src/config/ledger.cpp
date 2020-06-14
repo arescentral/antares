@@ -76,7 +76,7 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
 }
 
 std::set<int> DirectoryLedger::load() {
-    pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.identifier);
+    pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.info.identifier.hash);
 
     std::set<int> chapters;
     pn::input     in{path, pn::text};
@@ -102,7 +102,7 @@ std::set<int> DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save(const std::set<int> chapters) {
-    const pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.identifier);
+    const pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.info.identifier.hash);
 
     pn::array unlocked_chapters;
     for (std::set<int>::const_iterator it = chapters.begin(); it != chapters.end(); ++it) {

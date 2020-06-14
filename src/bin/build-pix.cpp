@@ -16,8 +16,11 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include "drawing/build-pix.hpp"
+
 #include <fcntl.h>
 #include <getopt.h>
+
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
@@ -26,7 +29,6 @@
 #include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
@@ -51,7 +53,7 @@ class DrawPix : public Card {
             : _set_capture_rect(set_capture_rect), _text(text), _width(width) {}
 
     virtual void draw() const {
-        PluginInit(kFactoryScenarioIdentifier);
+        PluginInit(factory_scenario_path());
         BuildPix pix(_text(), _width);
         pix.draw({0, 0});
         _set_capture_rect({0, 0, _width, pix.size().height});

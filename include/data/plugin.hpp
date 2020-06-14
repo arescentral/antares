@@ -33,7 +33,6 @@ union Level;
 struct Race;
 
 struct ScenarioGlobals {
-    pn::string identifier;
     pn::string path;
 
     Info                             info;
@@ -48,7 +47,7 @@ struct ScenarioGlobals {
 
 extern ScenarioGlobals plug;
 
-void PluginInit(pn::string_view identifier);
+void PluginInit(pn::string_view path);
 
 void load_race(const NamedHandle<const Race>& r);
 void load_object(const NamedHandle<const BaseObject>& o);
