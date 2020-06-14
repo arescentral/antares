@@ -65,22 +65,24 @@ void NullLedger::unlocked_chapters(std::vector<int>* chapters) {
 DirectoryLedger::DirectoryLedger() { load(); }
 
 void DirectoryLedger::unlock_chapter(int chapter) {
-    _chapters.insert(chapter);
-    save();
+    std::set<int> chapters = load();
+    chapters.insert(chapter);
+    save(chapters);
 }
 
 void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
-    *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
+    std::set<int> set = load();
+    *chapters         = std::vector<int>(set.begin(), set.end());
 }
 
-void DirectoryLedger::load() {
+std::set<int> DirectoryLedger::load() {
     pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.identifier);
 
-    _chapters.clear();
-    pn::input in{path, pn::text};
+    std::set<int> chapters;
+    pn::input     in{path, pn::text};
     if (!in) {
-        _chapters.insert(1);
-        return;
+        chapters.insert(1);
+        return chapters;
     }
 
     pn::value x;
@@ -88,21 +90,22 @@ void DirectoryLedger::load() {
         throw std::runtime_error("bad ledger");
     }
 
-    pn::map_cref   data     = x.as_map();
-    pn::map_cref   unlocked = data.get("unlocked").as_map();
-    pn::array_cref chapters = unlocked.get("chapters").as_array();
-    for (pn::value_cref chapter : chapters) {
+    pn::map_cref data     = x.as_map();
+    pn::map_cref unlocked = data.get("unlocked").as_map();
+    for (pn::value_cref chapter : unlocked.get("chapters").as_array()) {
         if (chapter.is_int()) {
-            _chapters.insert(chapter.as_int());
+            chapters.insert(chapter.as_int());
         }
     }
+
+    return chapters;
 }
 
-void DirectoryLedger::save() {
+void DirectoryLedger::save(const std::set<int> chapters) {
     const pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.identifier);
 
     pn::array unlocked_chapters;
-    for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
+    for (std::set<int>::const_iterator it = chapters.begin(); it != chapters.end(); ++it) {
         unlocked_chapters.push_back(*it);
     }
 
