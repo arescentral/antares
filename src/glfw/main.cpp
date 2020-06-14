@@ -17,8 +17,8 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <GLFW/glfw3.h>
-
 #include <time.h>
+
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
@@ -119,7 +119,6 @@ void main(int argc, char* const* argv) {
     FilePrefsDriver prefs;
 
     if (scenario.has_value()) {
-        sys.prefs->set_scenario_identifier(*scenario);
         bool              have_scenario = false;
         std::vector<Info> scenarios     = scenario_list();
         for (const Info& entry : scenarios) {
@@ -137,7 +136,7 @@ void main(int argc, char* const* argv) {
     DirectoryLedger   ledger;
     OpenAlSoundDriver sound;
     GLFWVideoDriver   video;
-    video.loop(new Master(time(NULL)));
+    video.loop(new Master(*scenario, time(NULL)));
 }
 
 }  // namespace

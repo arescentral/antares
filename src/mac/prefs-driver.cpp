@@ -19,6 +19,7 @@
 #include "mac/prefs-driver.hpp"
 
 #include <CoreFoundation/CoreFoundation.h>
+
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
@@ -39,7 +40,6 @@ static const char kIdleMusicPreference[]   = "PlayIdleMusic";
 static const char kGameMusicPreference[]   = "PlayGameMusic";
 static const char kSpeechOnPreference[]    = "SpeechOn";
 static const char kVolumePreference[]      = "Volume";
-static const char kScenarioPreference[]    = "Scenario";
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -110,12 +110,6 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
             _current.volume = clamp<int>(8 * val, 0, 8);
         }
     }
-
-    cf::String cfstr;
-    pn::string id;
-    if (cf::get_preference(kScenarioPreference, cfstr) && cf::unwrap(cfstr, id)) {
-        _current.scenario_identifier = id.copy();
-    }
 }
 
 void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
@@ -131,7 +125,6 @@ void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
     cf::set_preference(kGameMusicPreference, cf::wrap(preferences.play_music_in_game));
     cf::set_preference(kSpeechOnPreference, cf::wrap(preferences.speech_on));
     cf::set_preference(kVolumePreference, cf::wrap(0.125 * preferences.volume));
-    cf::set_preference(kScenarioPreference, cf::wrap(preferences.scenario_identifier));
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 }
 

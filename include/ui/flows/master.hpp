@@ -27,7 +27,7 @@ namespace antares {
 
 class Master : public Card {
   public:
-    Master(int32_t seed);
+    Master(pn::string_view plugin_identifier, int32_t seed);
 
     virtual void become_front();
     virtual void draw() const;
@@ -45,6 +45,7 @@ class Master : public Card {
     };
 
     State         _state;
+    pn::string    _plugin_identifier;
     const int32_t _seed;
     bool          _skipped;
     Texture       _publisher_screen;

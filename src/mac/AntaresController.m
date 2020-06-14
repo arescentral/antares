@@ -246,9 +246,10 @@ static bool isWebScheme(NSURL* url) {
     if (![sender success]) {
         return;
     }
+    NSString*   user_scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
     CFStringRef error_message;
     _application_should_terminate = NSTerminateCancel;
-    if (!antares_controller_loop(drivers, &error_message)) {
+    if (!antares_controller_loop(drivers, [user_scenario UTF8String], &error_message)) {
         [self fail:(NSString*)error_message];
     }
     antares_controller_destroy_drivers(drivers);
