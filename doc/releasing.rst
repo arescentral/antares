@@ -4,38 +4,26 @@ Releasing Antares
 Starting a release
 ------------------
 
-1.  Run ``./scripts/release start ${VERSION?}`` (this checks out the
-    release branch).
-2.  Run ``make dist`` to build ``antares-X.X.X~rc1.zip``.
-3.  Unzip the distfile and run ``./configure && make appdist`` in it to
-    build ``antares-mac-X.X.X~rc1.zip``.
-4.  Upload the archives to `downloads.arescentral.org`_.
-5.  Add a new news article to `arescentral.org`_.
-
-..  _BUILD.gn: /BUILD.gn
+1.  Run ``./scripts/release start ${VERSION?}`` on master.
+2.  ``git push --tags origin release/${VERSION?}`` to trigger a Travis
+    build.
+3.  Add a new news article to `arescentral.org`_.
 
 Bumping a release
 -----------------
 
-1.  Checkout the ``release/X.X.X`` branch.
-2.  Increase the ``rcX`` number in ``antares_version`` in `BUILD.gn`_.
-3.  Run ``make dist`` to build ``antares-X.X.X~rc1.zip``.
-4.  Unzip the distfile and run ``./configure && make appdist`` in it to
-    build ``antares-mac-X.X.X~rc1.zip``.
-5.  Upload the archives to `downloads.arescentral.org`_.
-6.  Add a new news article to `arescentral.org`_.
+1.  Run ``./scripts/release start ${VERSION?} rc${N?}`` on release/X.
+2.  ``git push --tags origin release/${VERSION?}`` the release to
+    trigger a Travis build.
+3.  Add a new news article to `arescentral.org`_.
 
 Finishing a release
 -------------------
 
-1.  Run ``./scripts/release finish ${VERSION?}`` (this checks out the
-    stable branch).
-2.  Run ``make dist`` to build ``antares-X.X.X.zip``.
-3.  Unzip the distfile and run ``./configure && make appdist`` in it to
-    build ``antares-mac-X.X.X~rc1.zip``.
-4.  Build the `Ubuntu packages`_ from ``antares-X.X.X.tgz``.
-5.  Upload the archives to `downloads.arescentral.org`_.
-6.  Announce the release.
+1.  Run ``./scripts/release finish ${VERSION?}`` on release/X.
+2.  ``git push --tags stable`` to trigger a Travis build.
+3.  Build the `Ubuntu packages`_ from ``antares-X.X.X.tgz``.
+4.  Announce the release.
 
     a.  Push ``stable`` to Github, including ``--tags``.
     b.  Push the new debs to `apt.arescentral.org`_.
@@ -45,7 +33,7 @@ Finishing a release
     f.  Create a new thread in the `Ares Briefing Room`_.
     g.  Update the topic on the `#ares irc channel`_.
 
-7.  Create a pull request and merge ``release/X.X.X`` to ``master``.
+5.  Create a pull request and merge ``release/X.X.X`` to ``master``.
 
 ..  _downloads.arescentral.org: http://downloads.arescentral.org/
 ..  _arescentral.org: https://github.com/arescentral/arescentral.org

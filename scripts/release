@@ -5,53 +5,75 @@
 
 set -o errexit
 
-progname=$(basename $0)
-usage() {
-    echo >&2 "usage: $progname start VERSION"
-    echo >&2 "       $progname finish VERSION"
-    exit 1
-}
-
-if [[ $# != 2 ]]; then
-    usage
-fi
-
-# Check that there is a line 'VERSION = "..."' in the gn file.
-grep >/dev/null '^  antares_version = ".*"$' BUILD.gn
+PROGNAME=$(basename $0)
 ACTION=$1
 VERSION=$2
+CANDIDATE=$3
 
-if [[ $1 = start ]]; then
-    if [[ $(git rev-parse HEAD) != $(git rev-parse master) ]]; then
-        echo >&2 "must be on master"
-        exit 1
+die() { cat >&2; exit $@ }
+
+require_branch() {
+    if [[ $(git symbolic-ref HEAD) != refs/heads/$1 ]]; then
+        echo "must be on $1" | die 1
     fi
-elif [[ $1 = finish ]]; then
-    if [[ $(git rev-parse HEAD) != $(git rev-parse release/$VERSION) ]]; then
-        echo >&2 "must be on release/$VERSION"
-        exit 1
-    fi
-else
-    usage
+}
+
+case $ACTION in
+    start|continue|finish) ;;
+    *) die 64 << EOF
+usage: $PROGNAME start VERSION
+       $PROGNAME continue VERSION rcX
+       $PROGNAME finish VERSION
+EOF
+esac
+
+case $ACTION-$# in
+    start-2) require_branch master ;;
+    start-*) echo "usage: $PROGNAME start VERSION" | die 64 ;;
+    continue-3) require_branch release/$VERSION ;;
+    continue-*) echo "usage: $PROGNAME continue VERSION rcX" | die 64 ;;
+    finish-2) require_branch release/$VERSION ;;
+    finish-*) echo "usage: $PROGNAME finish VERSION" | die 64 ;;
+esac
+
+# Check that there is a line 'VERSION = "..."' in the gn file.
+grep >/dev/null '^antares_version = ".*"$' BUILD.gn
+
+if git status --porcelain | grep . ; then
+    echo "branch has uncommitted changes" | die 1
 fi
 
 update-readme() {
-    sed 's/\(Antares[- ]\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst >.README.rst.tmp
+    sed 's/\([Aa]ntares[- ]\S*\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst >.README.rst.tmp
     mv .README.rst.tmp README.rst
 }
 
-if [[ $ACTION == start ]]; then
-    set -o verbose
-    git checkout -b release/$VERSION
-    scripts/set-version ${VERSION}~rc1
-    git commit BUILD.gn README.rst -m "Create release branch for $VERSION."
-else
-    set -o verbose
-    scripts/set-version $VERSION
-    update-readme $VERSION
-    git commit BUILD.gn README.rst -m "Release Antares $VERSION."
++() {
+    echo + $@
+    $@
+}
 
-    git checkout stable
-    git merge --no-ff release/$VERSION
-    git tag $VERSION
-fi
+case $ACTION in
+    start)
+        + git checkout -b release/$VERSION
+        + scripts/set-version ${VERSION}~rc1
+        + git commit BUILD.gn -m "Create release branch for $VERSION"
+        + git tag v${VERSION}rc1
+        ;;
+
+    continue)
+        + scripts/set-version ${VERSION}~${CANDIDATE}
+        + git commit BUILD.gn -m "Update to $VERSION~$CANDIDATE"
+        + git tag v${VERSION}${CANDIDATE}
+        ;;
+
+    finish)
+        + scripts/set-version $VERSION
+        + update-readme $VERSION
+        + git commit BUILD.gn README.rst -m "Release Antares $VERSION"
+
+        + git checkout stable
+        + git merge --no-ff release/$VERSION
+        + git tag v$VERSION
+        ;;
+esac

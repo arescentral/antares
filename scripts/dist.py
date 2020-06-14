@@ -4,6 +4,7 @@
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
 import os
+import subprocess
 import sys
 import tarfile
 import zipfile
@@ -12,49 +13,48 @@ import zipfile
 def main():
     progname, archive_format = sys.argv
 
-    with open("./BUILD.gn") as f:
-        version = None
-        for line in f.readlines():
-            if line.startswith("antares_version = "):
-                version = line.split("=", 1)[1].strip().strip('"')
-                break
-    if not version:
-        print("couldn't determine antares version")
-        sys.exit(1)
+    try:
+        tag = subprocess.check_output("git describe --tags --exact-match HEAD".split())
+        tag = tag.decode("utf-8").strip()
+    except subprocess.CalledProcessError:
+        tag = None
+    if subprocess.check_output("git status --porcelain".split()):
+        tag = None
 
-    filename_version = version
     if os.environ.get("TRAVIS") == "true":
-        if os.environ["TRAVIS_TAG"]:
-            travis_version = os.environ["TRAVIS_TAG"]
-            assert travis_version == version, "%s != %s" % (travis_version, version)
+        travis_tag = os.environ["TRAVIS_TAG"]
+        if travis_tag:
+            tag = travis_tag
         elif os.environ["TRAVIS_BRANCH"] != "master":
             print("not building distfiles; not on master")
-            sys.exit(1)
+            return
         elif os.environ["TRAVIS_PULL_REQUEST"] != "false":
             print("not building distfiles; pull request")
-            sys.exit(1)
-        else:
-            filename_version = "git"
-
-    archive_root = "antares-%s" % version
+            return
 
     try:
         os.makedirs("dist")
-    except OSError:
+    except FileExistsError:
         pass
 
+    if tag is None:
+        version = "git"
+    else:
+        version = tag.lstrip("v")
+    archive_root = "antares-%s" % version
+
     if archive_format == "zip":
-        path = "dist/antares-%s.%s" % (filename_version, archive_format)
+        path = "dist/%s.%s" % (archive_root, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk(archive_root, "."):
                 z.write(real_path, archive_path)
     elif archive_format in ["gz", "bz2"]:
-        path = "dist/antares-%s.t%s" % (filename_version, archive_format)
+        path = "dist/%s.t%s" % (archive_root, archive_format)
         with tarfile.open(path, "w:%s" % archive_format) as t:
             for real_path, archive_path in walk(archive_root, "."):
                 t.add(real_path, arcname=archive_path)
     elif archive_format == "mac":
-        path = "dist/antares-mac-%s.zip" % filename_version
+        path = "dist/antares-mac-%s.zip" % version
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk("Antares.app", "out/mac/opt/Antares.app"):
                 z.write(real_path, archive_path)
