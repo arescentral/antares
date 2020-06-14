@@ -18,9 +18,11 @@
 
 #include <fcntl.h>
 #include <getopt.h>
+
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"
@@ -137,7 +139,7 @@ void main(int argc, char* const* argv) {
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, {});
     init_globals();
-    PluginInit();
+    PluginInit(kFactoryScenarioIdentifier);
 
     ObjectDataBuilder builder(output_dir);
     pn::string_view   ids[] = {

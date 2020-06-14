@@ -33,6 +33,9 @@ union Level;
 struct Race;
 
 struct ScenarioGlobals {
+    pn::string identifier;
+    pn::string path;
+
     Info                             info;
     std::map<int, const Level*>      chapters;
     std::map<pn::string, Level>      levels;
@@ -45,7 +48,7 @@ struct ScenarioGlobals {
 
 extern ScenarioGlobals plug;
 
-void PluginInit();
+void PluginInit(pn::string_view identifier);
 
 void load_race(const NamedHandle<const Race>& r);
 void load_object(const NamedHandle<const BaseObject>& o);

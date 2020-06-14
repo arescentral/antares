@@ -56,7 +56,14 @@ static void read_all_levels() {
     }
 }
 
-void PluginInit() {
+void PluginInit(pn::string_view identifier) {
+    plug.identifier = identifier.copy();
+    if (identifier == kFactoryScenarioIdentifier) {
+        plug.path = factory_scenario_path().copy();
+    } else {
+        plug.path = pn::format("{0}/{1}", dirs().scenarios, identifier);
+    }
+
     plug.info = Resource::info();
     try {
         if (plug.info.format != kPluginFormat) {

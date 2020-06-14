@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+
 #include <cmath>
 #include <pn/array>
 #include <pn/input>
@@ -30,6 +31,7 @@
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
@@ -72,8 +74,7 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
 }
 
 void DirectoryLedger::load() {
-    const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    pn::string            path        = pn::format("{0}/{1}.pn", dirs().registry, scenario_id);
+    pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.identifier);
 
     _chapters.clear();
     pn::input in{path, pn::text};
@@ -98,8 +99,7 @@ void DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save() {
-    const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    const pn::string      path        = pn::format("{0}/{1}.pn", dirs().registry, scenario_id);
+    const pn::string path = pn::format("{0}/{1}.pn", dirs().registry, plug.identifier);
 
     pn::array unlocked_chapters;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {

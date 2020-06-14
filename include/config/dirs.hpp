@@ -44,8 +44,6 @@ pn::string_view default_factory_scenario_path();
 pn::string_view factory_scenario_path();
 void            set_factory_scenario_path(pn::string_view path);
 
-pn::string scenario_path();
-
 }  // namespace antares
 
 #endif  // ANTARES_CONFIG_DIRS_HPP_

@@ -21,6 +21,7 @@
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
@@ -138,7 +139,7 @@ void ReplayMaster::init() {
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    PluginInit();
+    PluginInit(kFactoryScenarioIdentifier);
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
     Admiral::init();
     Vectors::init();

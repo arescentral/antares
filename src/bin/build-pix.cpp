@@ -21,6 +21,7 @@
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "data/level.hpp"
 #include "data/plugin.hpp"
@@ -50,7 +51,7 @@ class DrawPix : public Card {
             : _set_capture_rect(set_capture_rect), _text(text), _width(width) {}
 
     virtual void draw() const {
-        PluginInit();
+        PluginInit(kFactoryScenarioIdentifier);
         BuildPix pix(_text(), _width);
         pix.draw({0, 0});
         _set_capture_rect({0, 0, _width, pix.size().height});

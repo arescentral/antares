@@ -127,7 +127,7 @@ void Master::init() {
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    PluginInit();
+    PluginInit(sys.prefs->scenario_identifier());
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
     Admiral::init();
     Vectors::init();

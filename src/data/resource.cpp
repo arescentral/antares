@@ -19,6 +19,7 @@
 #include "data/resource.hpp"
 
 #include <stdio.h>
+
 #include <array>
 #include <pn/input>
 #include <sfz/sfz.hpp>
@@ -35,6 +36,7 @@
 #include "data/initial.hpp"
 #include "data/interface.hpp"
 #include "data/level.hpp"
+#include "data/plugin.hpp"
 #include "data/races.hpp"
 #include "data/replay.hpp"
 #include "data/sprite-data.hpp"
@@ -84,10 +86,10 @@ class ResourceLister : public sfz::TreeWalker {
 static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_view extension) {
     std::vector<pn::string> resources;
     pn::string              path;
-    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
+    if (plug.identifier == kFactoryScenarioIdentifier) {
         path = pn::format("{0}/{1}", application_path(), dir);
     } else {
-        path = pn::format("{0}/{1}", scenario_path(), dir);
+        path = pn::format("{0}/{1}", plug.path, dir);
     }
     if (sfz::path::isdir(path)) {
         sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
@@ -99,7 +101,7 @@ std::vector<pn::string> Resource::list_levels() { return list_resources("levels"
 std::vector<pn::string> Resource::list_replays() { return list_resources("replays", ".NLRP"); }
 
 static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
-    pn::string      scenario = scenario_path();
+    pn::string_view scenario = plug.path;
     pn::string_view factory  = factory_scenario_path();
     pn::string_view app      = application_path();
     for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
@@ -125,7 +127,7 @@ static pn::value procyon(pn::string_view path) {
 }
 
 static bool exists(pn::string_view resource_path) {
-    pn::string      scenario = scenario_path();
+    pn::string_view scenario = plug.path;
     pn::string_view factory  = factory_scenario_path();
     pn::string_view app      = application_path();
     for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {

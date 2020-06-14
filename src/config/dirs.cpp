@@ -47,12 +47,4 @@ pn::string_view factory_scenario_path() {
 
 void set_factory_scenario_path(pn::string_view path) { factory_scenario.emplace(path.copy()); }
 
-pn::string scenario_path() {
-    pn::string_view identifier = sys.prefs->scenario_identifier();
-    if (identifier == kFactoryScenarioIdentifier) {
-        return factory_scenario_path().copy();
-    }
-    return pn::format("{0}/{1}", dirs().scenarios, identifier);
-}
-
 }  // namespace antares
