@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -147,8 +147,8 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         _buffer.copy(bounds, pix);
         pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
         sfz::makedirs(path::dirname(path), 0755);
-        pn::file file = pn::open(path, "w");
-        pix.encode(file);
+        pn::output out{path, pn::binary};
+        pix.encode(out);
     }
 
     void  draw() { _loop.draw(); }
@@ -184,6 +184,10 @@ OffscreenVideoDriver::OffscreenVideoDriver(
         _output_dir.emplace(output_dir->copy());
     }
 }
+
+bool OffscreenVideoDriver::start_editing(TextReceiver* text) { return false; }
+
+void OffscreenVideoDriver::stop_editing(TextReceiver* text) {}
 
 void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
     _scheduler = &scheduler;

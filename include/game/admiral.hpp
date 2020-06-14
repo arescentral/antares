@@ -207,7 +207,7 @@ void            SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, pn::string_v
 pn::string_view GetDestBalanceName(Handle<Destination> whichDestObject);
 pn::string_view GetAdmiralName(Handle<Admiral> whichAdmiral);
 
-void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType* where);
+void SetObjectLocationDestination(Handle<SpaceObject> o, Point* where);
 void SetObjectDestination(Handle<SpaceObject> o);
 void OverrideObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject);
 void RemoveObjectFromDestination(Handle<SpaceObject> o);

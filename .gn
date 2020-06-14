@@ -3,3 +3,4 @@
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
 buildconfig = "//build/BUILDCONFIG.gn"
+script_executable = "python3"

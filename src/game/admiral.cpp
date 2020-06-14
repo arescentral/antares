@@ -346,7 +346,10 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
 }
 
 void SetAdmiralBuildAtName(Handle<Admiral> a, pn::string_view name) {
-    auto   destObject = a->buildAtObject();
+    auto destObject = a->buildAtObject();
+    if (!destObject.get()) {
+        return;
+    }
     size_t rune_count = 0;
     for (pn::string_view::iterator it = name.begin(); it != name.end(); ++it) {
         if (rune_count++ == kDestinationNameLen) {
@@ -369,7 +372,7 @@ pn::string_view GetAdmiralName(Handle<Admiral> a) {
     }
 }
 
-void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType* where) {
+void SetObjectLocationDestination(Handle<SpaceObject> o, Point* where) {
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
         o->destObject            = SpaceObject::none();

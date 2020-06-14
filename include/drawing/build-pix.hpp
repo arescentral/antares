@@ -40,8 +40,8 @@ class BuildPix {
             BACKGROUND,
             TEXT,
         } type;
-        Texture                     texture;
-        std::unique_ptr<StyledText> text;
+        Texture    texture;
+        StyledText text;
     };
     std::vector<Line> _lines;
     Size              _size;

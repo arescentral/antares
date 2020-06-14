@@ -164,8 +164,9 @@ static bool isWebScheme(NSURL* url) {
         NSString*     title      = [scenario objectForKey:kTitle];
         NSString*     identifier = [scenario objectForKey:kIdentifier];
 
-        NSMenuItem* menu_item = [
-                [[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@""] autorelease];
+        NSMenuItem* menu_item = [[[NSMenuItem alloc] initWithTitle:title
+                                                            action:nil
+                                                     keyEquivalent:@""] autorelease];
         [menu_item setRepresentedObject:scenario];
         [menu_item setTarget:self];
         [menu_item setAction:@selector(setScenarioFrom:)];
@@ -191,6 +192,7 @@ static bool isWebScheme(NSURL* url) {
     [self updateScenarioList];
     bool skip_settings = [[NSUserDefaults standardUserDefaults] boolForKey:kSkipSettings];
     [_skip_checkbox setIntValue:skip_settings];
+    _application_should_terminate = NSTerminateNow;
 }
 
 - (IBAction)openScenarioURL:(id)sender {
@@ -245,11 +247,17 @@ static bool isWebScheme(NSURL* url) {
         return;
     }
     CFStringRef error_message;
+    _application_should_terminate = NSTerminateCancel;
     if (!antares_controller_loop(drivers, &error_message)) {
         [self fail:(NSString*)error_message];
     }
     antares_controller_destroy_drivers(drivers);
+    _application_should_terminate = NSTerminateNow;
     [NSApp terminate:self];
+}
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender {
+    return _application_should_terminate;
 }
 
 - (void)dealloc {

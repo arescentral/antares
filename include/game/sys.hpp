@@ -32,6 +32,7 @@ namespace antares {
 class SoundDriver;
 class PrefsDriver;
 class VideoDriver;
+class Ledger;
 
 struct SystemGlobals {
     struct {
@@ -53,6 +54,8 @@ struct SystemGlobals {
     SoundDriver* audio = nullptr;
     VideoDriver* video = nullptr;
     PrefsDriver* prefs = nullptr;
+
+    Ledger* ledger = nullptr;
 
     std::vector<pn::string> messages;
 

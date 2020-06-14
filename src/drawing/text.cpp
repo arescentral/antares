@@ -19,8 +19,8 @@
 #include "drawing/text.hpp"
 
 #include <algorithm>
-#include <pn/file>
 #include <pn/map>
+#include <pn/output>
 #include <pn/string>
 #include <pn/value>
 
@@ -68,7 +68,7 @@ Font::~Font() {}
 Rect Font::glyph_rect(pn::rune rune) const {
     auto it = _glyphs.find(rune);
     if (it == _glyphs.end()) {
-        return Rect();
+        return glyph_rect(pn::rune{'?'});
     }
     return it->second;
 }
@@ -81,7 +81,9 @@ void Font::draw(const Quads& quads, Point cursor, pn::string_view string, RgbCol
     cursor.offset(0, -ascent);
     for (pn::rune rune : string) {
         auto glyph = glyph_rect(rune);
-        quads.draw(Rect(cursor, glyph.size()), glyph, color);
+        if (rune.value() > ' ') {
+            quads.draw(Rect(cursor, glyph.size()), glyph, color);
+        }
         cursor.offset(glyph.width(), 0);
     }
 }

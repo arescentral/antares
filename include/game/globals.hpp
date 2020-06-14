@@ -26,6 +26,7 @@
 #include "data/handle.hpp"
 #include "data/level.hpp"
 #include "drawing/color.hpp"
+#include "game/action.hpp"
 #include "game/starfield.hpp"
 #include "math/random.hpp"
 #include "math/units.hpp"
@@ -41,12 +42,15 @@ const int32_t kRightPanelWidth  = 32;
 const int32_t kSmallScreenWidth = 640;
 const int32_t kRadarSize        = 110;
 
-struct miniScreenLineType;
+struct MiniLine;
+struct MiniButton;
 struct miniComputerDataType {
-    std::unique_ptr<miniScreenLineType[]> lineData;
-    int32_t                               selectLine;
-    Screen                                currentScreen;
-    int32_t                               clickLine;
+    std::unique_ptr<MiniLine[]> lines;
+    std::unique_ptr<MiniButton> accept;
+    std::unique_ptr<MiniButton> cancel;
+    int32_t                     selectLine;
+    Screen                      currentScreen;
+    int32_t                     clickLine;
 };
 
 struct hotKeyType {
@@ -85,6 +89,8 @@ struct GlobalState {
     std::vector<int32_t>             initial_ids;  // Ditto.
 
     std::vector<bool> condition_enabled;  // Check conditions if enabled or persistent.
+
+    ActionQueue action_queue;  // Actions pending due to “delay” action.
 
     bool            game_over;             // True if an admiral won or lost the level.
     game_ticks      game_over_at;          // The time to stop the game (ignored unless game_over).

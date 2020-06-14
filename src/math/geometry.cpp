@@ -19,7 +19,7 @@
 #include "math/geometry.hpp"
 
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 
 namespace antares {
 

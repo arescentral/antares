@@ -22,8 +22,9 @@
 #include <unistd.h>
 #include <cmath>
 #include <pn/array>
-#include <pn/file>
+#include <pn/input>
 #include <pn/map>
+#include <pn/output>
 #include <pn/value>
 #include <sfz/sfz.hpp>
 
@@ -32,9 +33,9 @@
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::StringMap;
 using sfz::makedirs;
 using sfz::range;
+using sfz::StringMap;
 using std::unique_ptr;
 using std::vector;
 
@@ -42,18 +43,14 @@ namespace path = sfz::path;
 
 namespace antares {
 
-static ANTARES_GLOBAL Ledger* ledger;
-
 Ledger::Ledger() {
-    if (antares::ledger) {
+    if (sys.ledger) {
         throw std::runtime_error("Ledger is a singleton");
     }
-    antares::ledger = this;
+    sys.ledger = this;
 }
 
-Ledger::~Ledger() { antares::ledger = NULL; }
-
-Ledger* Ledger::ledger() { return ::antares::ledger; }
+Ledger::~Ledger() { sys.ledger = nullptr; }
 
 NullLedger::NullLedger() : _chapters{1} {}
 
@@ -79,14 +76,14 @@ void DirectoryLedger::load() {
     pn::string            path        = pn::format("{0}/{1}.pn", dirs().registry, scenario_id);
 
     _chapters.clear();
-    pn::file file = pn::open(path, "r");
-    if (!file) {
+    pn::input in{path, pn::text};
+    if (!in) {
         _chapters.insert(1);
         return;
     }
 
     pn::value x;
-    if (!pn::parse(file, x, nullptr)) {
+    if (!pn::parse(in, &x, nullptr)) {
         throw std::runtime_error("bad ledger");
     }
 
@@ -110,14 +107,13 @@ void DirectoryLedger::save() {
     }
 
     makedirs(path::dirname(path), 0755);
-    pn::file file = pn::open(path, "w");
-    pn::dump(
-            file, pn::map{
-                          {"unlocked",
-                           pn::map{
-                                   {"chapters", std::move(unlocked_chapters)},
-                           }},
-                  });
+    pn::output out{path, pn::text};
+    out.dump(pn::map{
+            {"unlocked",
+             pn::map{
+                     {"chapters", std::move(unlocked_chapters)},
+             }},
+    });
 }
 
 }  // namespace antares

@@ -18,7 +18,7 @@
 
 #include <fcntl.h>
 #include <getopt.h>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/ledger.hpp"
@@ -92,7 +92,7 @@ class ReplayMaster : public Card {
                 if (_output_path.has_value()) {
                     pn::string path = pn::format("{0}/debriefing.txt", *_output_path);
                     sfz::makedirs(path::dirname(path), 0755);
-                    pn::file outcome = pn::open(path, "w");
+                    pn::output outcome{path, pn::text};
                     if (g.victory_text.has_value()) {
                         outcome.write(*g.victory_text);
                         if (_game_result == WIN_GAME) {
@@ -140,14 +140,12 @@ void ReplayMaster::init() {
     SpriteHandlingInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
-    InitMotion();
     Admiral::init();
     Vectors::init();
 }
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
+    out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
             "  Plays a replay into a set of images and a log of sounds\n"
@@ -216,7 +214,7 @@ void main(int argc, char* const* argv) {
         } else if (opt == "smoke") {
             return callbacks.short_option(pn::rune{'s'}, get_value);
         } else if (opt == "help") {
-            usage(stdout, sfz::path::basename(argv[0]), 0);
+            usage(pn::out, sfz::path::basename(argv[0]), 0);
             return true;
         } else {
             return false;

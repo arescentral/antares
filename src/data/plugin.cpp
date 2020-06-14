@@ -19,7 +19,7 @@
 #include "data/plugin.hpp"
 
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"

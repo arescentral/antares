@@ -34,6 +34,8 @@ VideoDriver::~VideoDriver() { sys.video = NULL; }
 
 Texture::Impl::~Impl() {}
 
+TextReceiver::~TextReceiver() { sys.video->stop_editing(this); }
+
 Points::Points() { sys.video->begin_points(); }
 
 Points::~Points() { sys.video->end_points(); }

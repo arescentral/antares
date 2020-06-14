@@ -31,21 +31,20 @@
 
 namespace antares {
 
-static const Hue   kLoadingScreenColor = Hue::PALE_GREEN;
-static const ticks kTypingDelay        = kMinorTick;
+static const Hue      kLoadingScreenColor = Hue::PALE_GREEN;
+static const RgbColor kLoadingForeColor   = GetRGBTranslateColorShade(Hue::PALE_GREEN, LIGHTEST);
+static const ticks    kTypingDelay        = kMinorTick;
 
 LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("loading", {0, 0, 640, 480}),
           _state(TYPING),
           _level(level),
           _cancelled(cancelled),
+          _name_text{StyledText::retro(
+                  level.base.name, {sys.fonts.title, 640, 0, 2, 220}, kLoadingForeColor)},
           _next_update(now() + kTypingDelay),
-          _chars_typed(0) {
-    _name_text.reset(new StyledText(sys.fonts.title));
-    _name_text->set_fore_color(GetRGBTranslateColorShade(Hue::PALE_GREEN, LIGHTEST));
-    _name_text->set_retro_text(level.base.name);
-    _name_text->set_tab_width(220);
-    _name_text->wrap_to(640, 0, 2);
+          _next_teletype(_next_update) {
+    _name_text.hide();
 }
 
 LoadingScreen::~LoadingScreen() {}
@@ -65,16 +64,19 @@ void LoadingScreen::fire_timer() {
     switch (_state) {
         case TYPING:
             while (_next_update < now()) {
-                if (_chars_typed >= _name_text->size()) {
+                if (_name_text.done()) {
                     _state      = LOADING;
                     _load_state = start_construct_level(_level);
                     return;
                 }
-                if ((_chars_typed % 3) == 0) {
-                    sys.sound.teletype();
-                }
                 _next_update += kTypingDelay;
-                ++_chars_typed;
+                _name_text.advance();
+            }
+            if (_next_teletype < now()) {
+                sys.sound.teletype();
+                while (_next_teletype < now()) {
+                    _next_teletype += 3 * kTypingDelay;
+                }
             }
             break;
 
@@ -98,13 +100,11 @@ void LoadingScreen::overlay() const {
     Rect above_content(0, 0, 640, 480);
     above_content.center_in(world());
     above_content.bottom = widget(0)->inner_bounds().top;
-    Rect bounds(0, 0, _name_text->auto_width(), _name_text->height());
+    Rect bounds(0, 0, _name_text.auto_width(), _name_text.height());
     bounds.center_in(above_content);
 
-    _name_text->draw_range(bounds, 0, _chars_typed);
-    if (_chars_typed < _name_text->size()) {
-        _name_text->draw_cursor(bounds, _chars_typed);
-    }
+    _name_text.draw(bounds);
+    _name_text.draw_cursor(bounds, kLoadingForeColor);
 
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark  = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);

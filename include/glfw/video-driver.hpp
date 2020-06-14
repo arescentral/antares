@@ -44,26 +44,33 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
+    virtual bool start_editing(TextReceiver* text);
+    virtual void stop_editing(TextReceiver* text);
+
     virtual wall_time now() const;
 
     void loop(Card* initial);
 
   private:
     void        key(int key, int scancode, int action, int mods);
+    void        char_(unsigned int code_point);
+    void        edit(int key, int action, int mods);
     void        mouse_button(int button, int action, int mods);
     void        mouse_move(double x, double y);
     void        window_size(int width, int height);
     static void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods);
+    static void char_callback(GLFWwindow* w, unsigned int code_point);
     static void mouse_button_callback(GLFWwindow* w, int button, int action, int mods);
     static void mouse_move_callback(GLFWwindow* w, double x, double y);
     static void window_size_callback(GLFWwindow* w, int width, int height);
 
-    Size        _screen_size;
-    Size        _viewport_size;
-    GLFWwindow* _window;
-    MainLoop*   _loop;
-    wall_time   _last_click_usecs;
-    int         _last_click_count;
+    Size          _screen_size;
+    Size          _viewport_size;
+    GLFWwindow*   _window;
+    MainLoop*     _loop;
+    wall_time     _last_click_usecs;
+    int           _last_click_count;
+    TextReceiver* _text;
 };
 
 }  // namespace antares

@@ -53,11 +53,6 @@ namespace antares {
 
 namespace {
 
-#ifdef DATA_COVERAGE
-ANTARES_GLOBAL set<int32_t> possible_objects;
-ANTARES_GLOBAL set<int32_t> possible_actions;
-#endif  // DATA_COVERAGE
-
 enum class Required : bool {
     NO  = false,
     YES = true,
@@ -80,10 +75,6 @@ void AddBaseObjectMedia(
             return;
         }
     }
-
-#ifdef DATA_COVERAGE
-    possible_objects.insert(base.number());
-#endif  // DATA_COVERAGE
 
     // Load sprites in all possible colors.
     //
@@ -128,10 +119,6 @@ void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16
 }
 
 void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
-#ifdef DATA_COVERAGE
-    possible_actions.insert(action.number());
-#endif  // DATA_COVERAGE
-
     switch (action.type()) {
         case Action::Type::CREATE:
             AddBaseObjectMedia(action.create.base, all_colors, Required::YES);
@@ -163,11 +150,11 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
     }
 }
 
-static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
+static Point rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     mAddAngle(rotation, 90);
     Fixed lcos, lsin;
     GetRotPoint(&lcos, &lsin, rotation);
-    coordPointType coord;
+    Point coord;
     coord.h =
             (kUniversalCenter + (Fixed::from_val(h) * -lcos).val() -
              (Fixed::from_val(v) * -lsin).val());
@@ -177,7 +164,7 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(Handle<const Initial> initial, coordPointType* coord, int32_t rotation) {
+void GetInitialCoord(Handle<const Initial> initial, Point* coord, int32_t rotation) {
     *coord = rotate_coords(initial->at.h, initial->at.v, rotation);
 }
 
@@ -256,7 +243,10 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
     // in all colors; the other three are needed only as neutral
     // objects by default.
     const NamedHandle<const BaseObject>* blessed[] = {
-            &kEnergyBlob, &kWarpInFlare, &kWarpOutFlare, &kPlayerBody,
+            &kEnergyBlob,
+            &kWarpInFlare,
+            &kWarpOutFlare,
+            &kPlayerBody,
     };
     for (auto id : blessed) {
         AddBaseObjectMedia(*id, all_colors, Required::YES);
@@ -389,8 +379,7 @@ void DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::stri
 //  This is really just for the mission briefing.  It calculates the best scale
 //  at which to show the entire scenario.
 
-void GetLevelFullScaleAndCorner(
-        int32_t rotation, coordPointType* corner, int32_t* scale, Rect* bounds) {
+void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, Scale* scale, Rect* bounds) {
     int32_t biggest, mustFit;
     Point   coord, otherCoord, tempCoord;
 
@@ -401,10 +390,10 @@ void GetLevelFullScaleAndCorner(
     biggest = 0;
     for (const auto& initial : Initial::all()) {
         if (!initial->hide.value_or(false)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
+            GetInitialCoord(initial, &coord, g.angle);
 
             for (const auto& other : Initial::all()) {
-                GetInitialCoord(other, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
+                GetInitialCoord(other, &otherCoord, g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
                     biggest = ABS(otherCoord.h - coord.h);
@@ -427,7 +416,7 @@ void GetLevelFullScaleAndCorner(
     coord.v      = kUniversalCenter;
     for (const auto& initial : Initial::all()) {
         if (!initial->hide.value_or(false)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
+            GetInitialCoord(initial, &tempCoord, g.angle);
 
             if (tempCoord.h < coord.h) {
                 coord.h = tempCoord.h;
@@ -445,19 +434,13 @@ void GetLevelFullScaleAndCorner(
         }
     }
 
-    biggest = bounds->right - bounds->left;
-    biggest *= SCALE_SCALE;
-    biggest /= *scale;
-    biggest /= 2;
+    biggest   = (((bounds->right - bounds->left) * SCALE_SCALE) / *scale) / 2;
     corner->h = (coord.h + (otherCoord.h - coord.h) / 2) - biggest;
-    biggest   = (bounds->bottom - bounds->top);
-    biggest *= SCALE_SCALE;
-    biggest /= *scale;
-    biggest /= 2;
+    biggest   = (((bounds->bottom - bounds->top) * SCALE_SCALE) / *scale) / 2;
     corner->v = (coord.v + (otherCoord.v - coord.v) / 2) - biggest;
 }
 
-coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v) {
+Point Translate_Coord_To_Level_Rotation(int32_t h, int32_t v) {
     return rotate_coords(h, v, g.angle);
 }
 

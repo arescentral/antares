@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sed 's/antares_version = ".*"/antares_version = "'$1'"/' BUILD.gn >.BUILD.gn.tmp
+mv .BUILD.gn.tmp BUILD.gn

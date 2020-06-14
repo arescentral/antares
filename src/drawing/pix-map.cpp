@@ -19,7 +19,7 @@
 #include "drawing/pix-map.hpp"
 
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "lang/casts.hpp"

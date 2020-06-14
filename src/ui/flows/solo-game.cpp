@@ -18,7 +18,7 @@
 
 #include "ui/flows/solo-game.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
@@ -59,7 +59,7 @@ void SoloGame::become_front() {
                 stack()->pop(this);
                 break;
             }
-        // else fall through.
+            // else fall through.
 
         case START_LEVEL:
             _state = PROLOGUE;
@@ -68,7 +68,7 @@ void SoloGame::become_front() {
                         *_level->solo.prologue, 450, kSlowScrollInterval, Music::prologue_song));
                 break;
             }
-        // else fall through
+            // else fall through
 
         case PROLOGUE:
         case RESTART_LEVEL:
@@ -119,7 +119,7 @@ void SoloGame::epilogue_done() {
 
     if (g.next_level) {
         if (g.next_level && g.next_level->base.chapter.has_value()) {
-            Ledger::ledger()->unlock_chapter(*g.next_level->base.chapter);
+            sys.ledger->unlock_chapter(*g.next_level->base.chapter);
             _level = g.next_level;
             _state = START_LEVEL;
         }

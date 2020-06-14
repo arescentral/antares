@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 
 #include "video/driver.hpp"
 

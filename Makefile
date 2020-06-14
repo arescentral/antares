@@ -11,16 +11,20 @@ APPDIR=$(prefix)/share/applications
 ICONDIR=$(prefix)/share/icons
 DATADIR=$(prefix)/share/games/antares
 
-.PHONY: all
-all:
+.PHONY: build
+build:
 	@$(NINJA)
 
 .PHONY: test
-test: all
+test: build
 	scripts/test.py
 
+.PHONY: test-wine
+test-wine: build
+	scripts/test.py --wine
+
 .PHONY: smoke-test
-smoke-test: all
+smoke-test: build
 	scripts/test.py --smoke
 
 .PHONY: clean
@@ -33,22 +37,32 @@ dist:
 	scripts/dist.py gz
 	scripts/dist.py bz2
 
+.PHONY: macdist
+macdist: sign notarize
+	scripts/dist.py mac
+
 .PHONY: distclean
 distclean:
 	rm -Rf out/
-	rm -f build/lib/scripts/*.pyc build/lib/scripts/gn build/lib/scripts/ninja
+	rm -f scripts/*.pyc build/lib/scripts/*.pyc
 
 .PHONY: run
-run: all
+run: build
 	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
 	@[ ! -f $(MAC_BIN) ] && scripts/antares_launcher.py || true
 
 .PHONY: sign
-sign:
+sign: build
 	codesign --force \
+		--options runtime \
+		--timestamp \
 		--sign "Developer ID Application" \
 		--entitlements resources/entitlements.plist \
 		out/cur/Antares.app
+
+.PHONY: notarize
+notarize: sign
+	scripts/notarize
 
 .PHONY: install-deps
 install-deps:
@@ -59,7 +73,7 @@ ifeq ($(target_os), "linux")
 install: install-bin install-data install-scenario
 
 .PHONY: install-bin
-install-bin: all
+install-bin: build
 	install -m 755 -d $(DESTDIR)$(BINDIR)
 	install -m 755 scripts/antares_launcher.py $(DESTDIR)$(BINDIR)/antares
 	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
@@ -67,7 +81,7 @@ install-bin: all
 	install -m 755 out/cur/antares-ls-scenarios $(DESTDIR)$(BINDIR)/antares-ls-scenarios
 
 .PHONY: install-data
-install-data: all
+install-data: build
 	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/16x16/apps
 	install -m 644 resources/antares.iconset/icon_16x16.png $(DESTDIR)$(ICONDIR)/hicolor/16x16/apps/antares.png
 	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/32x32/apps
@@ -97,21 +111,19 @@ install-data: all
 	cp -r data/sounds $(DESTDIR)$(DATADIR)/app
 	cp -r data/sprites $(DESTDIR)$(DATADIR)/app
 	cp -r data/strings $(DESTDIR)$(DATADIR)/app
+	cp -r data/text $(DESTDIR)$(DATADIR)/app
 
 .PHONY: install-scenario
-install-scenario: all
+install-scenario: build
 	out/cur/antares-install-data -s $(DESTDIR)$(DATADIR)/downloads -d $(DESTDIR)$(DATADIR)/scenarios
 endif
 
-.PHONY: travis-test-mac
-travis-test-mac: smoke-test
+.PHONY: pull-request
+pull-request:
+	hub pull-request -b arescentral:master
 
-.PHONY: travis-test-linux
-travis-test-linux: smoke-test
-
-	# Check that deps for launcher were installed:
-	python -c "from scripts import antares_launcher"
-
+.PHONY: test-install
+test-install: build
 	# Check that antares-ls-scenarios finds scenario only after installation:
 	sudo rm -Rf $(prefix)/share/games/antares
 	! out/cur/antares-ls-scenarios
@@ -120,7 +132,7 @@ travis-test-linux: smoke-test
 
 .PHONY: friends
 friends:
-	@echo "Sure! You can email me at sfiera@sfzmail.com."
+	@echo "Sure! You can email me at sfiera@twotaled.com."
 
 .PHONY: love
 love:

@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -144,8 +144,8 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
     void snapshot_to(pn::string_view relpath) {
         pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
         sfz::makedirs(path::dirname(path), 0755);
-        pn::file file = pn::open(path, "w");
-        file.write(_driver._log);
+        pn::output out{path, pn::binary};
+        out.write(_driver._log);
     }
 
     void draw() {
@@ -170,6 +170,10 @@ TextVideoDriver::TextVideoDriver(Size screen_size, const sfz::optional<pn::strin
 }
 
 int TextVideoDriver::scale() const { return 1; }
+
+bool TextVideoDriver::start_editing(TextReceiver* text) { return false; }
+
+void TextVideoDriver::stop_editing(TextReceiver* text) {}
 
 Texture TextVideoDriver::texture(pn::string_view name, const PixMap& content, int scale) {
     static_cast<void>(scale);  // TODO(sfiera): test HiDPI?

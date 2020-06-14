@@ -20,7 +20,6 @@
 #define ANTARES_MATH_FIXED_HPP_
 
 #include <math.h>
-#include <pn/file>
 #include <pn/string>
 
 namespace antares {

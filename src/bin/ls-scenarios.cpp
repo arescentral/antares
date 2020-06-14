@@ -17,7 +17,7 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <stdlib.h>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -28,9 +28,8 @@ namespace args = sfz::args;
 
 namespace antares {
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
+    out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
             "  Lists installed Antares scenarios\n"
@@ -64,7 +63,7 @@ void main(int argc, char* const* argv) {
         switch (opt.value()) {
             case 'a': set_application_path(get_value()); return true;
             case 'f': set_factory_scenario_path(get_value()); return true;
-            case 'h': usage(stdout, progname, 0); return true;
+            case 'h': usage(pn::out, progname, 0); return true;
             default: return false;
         }
     };
@@ -97,7 +96,7 @@ void main(int argc, char* const* argv) {
     if (m.empty()) {
         exit(1);
     }
-    pn::dump(stdout, m);
+    pn::out.dump(m);
 }
 
 }  // namespace antares

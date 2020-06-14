@@ -42,6 +42,9 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
+    virtual bool start_editing(TextReceiver* text);
+    virtual void stop_editing(TextReceiver* text);
+
     virtual wall_time now() const;
 
     void loop(Card* initial);
@@ -50,19 +53,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     static wall_time _now();
 
     struct EventBridge;
-
-    class EventTranslator {
-      public:
-        EventTranslator() : _c_obj(antares_event_translator_create()) {}
-        EventTranslator(const EventTranslator&) = delete;
-        EventTranslator& operator=(const EventTranslator&) = delete;
-        ~EventTranslator() { antares_event_translator_destroy(_c_obj); }
-        AntaresEventTranslator* c_obj() const { return _c_obj; }
-
-      private:
-        AntaresEventTranslator* _c_obj;
-    };
-    EventTranslator _translator;
+    EventBridge* _bridge = nullptr;
 
     InputMode      _input_mode = KEYBOARD_MOUSE;
     AntaresWindow* _window     = nullptr;

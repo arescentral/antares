@@ -22,7 +22,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <pn/array>
-#include <pn/file>
+#include <pn/output>
 #include <pn/string>
 #include <sfz/sfz.hpp>
 #include <zipxx/zipxx.hpp>
@@ -157,9 +157,9 @@ const SoundInfo kNonFreeSounds[] = {
 // Not verified for special values (positive and negative zero and infinity, NaN) correctly,
 // because those aren't valid sample rates, and that's the reason this function was written.
 //
-// @param [out] out     The pn::file_view to write the value to.
+// @param [out] out     The pn::output_view to write the value to.
 // @param [in] d        A double-precision floating point value.
-pn::file_view write_float80(pn::file_view out, double d) {
+pn::output_view write_float80(pn::output_view out, double d) {
     // Reinterpret `d` as uint64_t, since we will be manupulating bits.
     uint64_t sample_rate_bits;
     memcpy(&sample_rate_bits, &d, sizeof(uint64_t));
@@ -199,11 +199,11 @@ pn::data convert_snd(const SoundInfo& info, pn::data_view data) {
     uint64_t zeros       = 0;
     uint16_t sample_size = 8;
     pn::data sample_rate;
-    write_float80(sample_rate.open("w"), info.input.sample_rate).check();
+    write_float80(sample_rate.output(), info.input.sample_rate).check();
 
-    pn::data out;
-    pn::file f = out.open("w").check();
-    f.write(form, form_size, aiff, comm, comm_size, channels, data_size, sample_size, sample_rate,
+    pn::data   out;
+    pn::output o = out.output().check();
+    o.write(form, form_size, aiff, comm, comm_size, channels, data_size, sample_size, sample_rate,
             ssnd, ssnd_size, zeros, samples)
             .check();
     return out;
@@ -219,7 +219,7 @@ Info info_for_zip_archive(ZipArchive& archive) {
     try {
         pn::value  x;
         pn_error_t e;
-        if (!pn::parse(file.data().open(), x, &e)) {
+        if (!pn::parse(file.data().input(), &x, &e)) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
@@ -275,8 +275,8 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
     if (path != out_path) {
         makedirs(path::dirname(out_path), 0755);
         mapped_file file(path);
-        pn::file    f = pn::open(out_path, "w");
-        f.write(file.data());
+        pn::output  o = pn::output{out_path, pn::binary};
+        o.write(file.data());
     }
     pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, found_scenario);
     if (path::exists(scenario_dir)) {
@@ -348,7 +348,7 @@ void DataExtractor::download(
     // the right file, then throw an exception without writing it to disk.  Otherwise, write it to
     // disk.
     pn::data download;
-    http::get(url, download.open("w"));
+    http::get(url, download.output());
     sha1 sha;
     sha.write(download);
     if (sha.compute() != expected_digest) {
@@ -361,8 +361,7 @@ void DataExtractor::download(
 
     // If we got the file, write it out at `full_path`.
     makedirs(path::dirname(full_path), 0755);
-    pn::file file = pn::open(full_path, "w");
-    file.write(download);
+    pn::output{full_path, pn::binary}.write(download).check();
 }
 
 void DataExtractor::extract_original(Observer* observer, pn::string_view file) const {
@@ -384,8 +383,7 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
         pn::string output = pn::format(
                 "{0}/{1}/sounds/{2}.aiff", _output_dir, kFactoryScenarioIdentifier, info.name);
         makedirs(path::dirname(output), 0755);
-        pn::file file = pn::open(output, "w");
-        file.write(data);
+        pn::output(output, pn::binary).write(data).check();
     }
 }
 
@@ -411,7 +409,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
 
         pn::string output_path = pn::format("{0}/{1}/{2}", _output_dir, _scenario, in_path);
         makedirs(path::dirname(output_path), 0755);
-        pn::open(output_path, "w").write(file.data()).check();
+        pn::output(output_path, pn::binary).write(file.data()).check();
     }
 }
 

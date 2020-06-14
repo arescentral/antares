@@ -158,30 +158,30 @@ Url::Url(pn::string_view string) : Object<CFURLRef>(create_url(string)) {}
 
 Boolean wrap(bool value) {
     if (value) {
-        return Boolean(kCFBooleanTrue);
+        return Boolean{kCFBooleanTrue};
     } else {
-        return Boolean(kCFBooleanFalse);
+        return Boolean{kCFBooleanFalse};
     }
 }
 
-Number wrap(short value) { return Number(CFNumberCreate(NULL, kCFNumberShortType, &value)); }
+Number wrap(short value) { return Number{CFNumberCreate(NULL, kCFNumberShortType, &value)}; }
 
-Number wrap(int value) { return Number(CFNumberCreate(NULL, kCFNumberIntType, &value)); }
+Number wrap(int value) { return Number{CFNumberCreate(NULL, kCFNumberIntType, &value)}; }
 
-Number wrap(long value) { return Number(CFNumberCreate(NULL, kCFNumberLongType, &value)); }
+Number wrap(long value) { return Number{CFNumberCreate(NULL, kCFNumberLongType, &value)}; }
 
 Number wrap(long long value) {
-    return Number(CFNumberCreate(NULL, kCFNumberLongLongType, &value));
+    return Number{CFNumberCreate(NULL, kCFNumberLongLongType, &value)};
 }
 
-Number wrap(float value) { return Number(CFNumberCreate(NULL, kCFNumberFloatType, &value)); }
+Number wrap(float value) { return Number{CFNumberCreate(NULL, kCFNumberFloatType, &value)}; }
 
-Number wrap(double value) { return Number(CFNumberCreate(NULL, kCFNumberDoubleType, &value)); }
+Number wrap(double value) { return Number{CFNumberCreate(NULL, kCFNumberDoubleType, &value)}; }
 
 String wrap(pn::string_view value) {
-    return String(CFStringCreateWithBytes(
+    return String{CFStringCreateWithBytes(
             NULL, reinterpret_cast<const uint8_t*>(value.data()), value.size(),
-            kCFStringEncodingUTF8, false));
+            kCFStringEncodingUTF8, false)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

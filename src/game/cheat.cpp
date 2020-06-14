@@ -19,7 +19,7 @@
 #include "game/cheat.hpp"
 
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
@@ -36,103 +36,90 @@ namespace antares {
 
 const int32_t kCheatCodeValue = 5;
 
-const int16_t kActivateCheatCheat = 1;
-const int16_t kAutoPlayCheat      = 2;
-const int16_t kPayMoneyCheat      = 3;
-const int16_t kNameObjectCheat    = 4;
-const int16_t kObserverCheat      = 5;  // makes your ship appear to not be engageable
-const int16_t kBuildFastCheat     = 6;
-const int16_t kRaisePayRateCheat  = 7;  // determines your payscale
-const int16_t kLowerPayRateCheat  = 8;
+void CheatFeedback(Cheat c, bool activate, Handle<Admiral> whichPlayer);
+void CheatFeedbackPlus(Cheat c, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra);
 
-void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
-void CheatFeedbackPlus(
-        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra);
-
-int16_t GetCheatNumFromString(pn::string_view s) {
+Cheat GetCheatFromString(pn::string_view s) {
     pn::string code_string;
     for (pn::rune r : s) {
         code_string += pn::rune{r.value() + kCheatCodeValue};
     }
     auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), code_string);
     if (it == sys.cheat.codes.end()) {
-        return -1;
+        return Cheat::NONE;
     }
-    return it - sys.cheat.codes.begin() + 1;
+    return static_cast<Cheat>(it - sys.cheat.codes.begin() + 1);
 }
 
-void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
-    if (whichCheat == kNameObjectCheat) {
-        whichPlayer->cheats() |= kNameObjectBit;
-        CheatFeedback(whichCheat, true, whichPlayer);
-        return;
-    }
+void ExecuteCheat(Cheat c, Handle<Admiral> a) {
+    switch (c) {
+        case Cheat::NONE: break;
 
-    switch (whichCheat) {
-        case kActivateCheatCheat:
+        case Cheat::NAME_OBJECT:
+            a->cheats() |= kNameObjectBit;
+            CheatFeedback(c, true, a);
+            break;
+
+        case Cheat::ACTIVATE_CHEAT:
             for (auto adm : Admiral::all()) {
                 adm->cheats() = 0;
             }
-            CheatFeedback(whichCheat, false, whichPlayer);
+            CheatFeedback(c, false, a);
             break;
 
-        case kPayMoneyCheat:
-            whichPlayer->pay_absolute(Cash{Fixed::from_long(15000)});
-            CheatFeedback(whichCheat, true, whichPlayer);
+        case Cheat::PAY_MONEY:
+            a->pay_absolute(Cash{Fixed::from_long(15000)});
+            CheatFeedback(c, true, a);
             break;
 
-        case kAutoPlayCheat:
-            whichPlayer->cheats() ^= kAutoPlayBit;
-            CheatFeedback(whichCheat, whichPlayer->cheats() & kAutoPlayBit, whichPlayer);
+        case Cheat::AUTO_PLAY:
+            a->cheats() ^= kAutoPlayBit;
+            CheatFeedback(c, a->cheats() & kAutoPlayBit, a);
             break;
 
-        case kBuildFastCheat:
-            whichPlayer->cheats() ^= kBuildFastBit;
-            CheatFeedback(whichCheat, whichPlayer->cheats() & kBuildFastBit, whichPlayer);
+        case Cheat::BUILD_FAST:
+            a->cheats() ^= kBuildFastBit;
+            CheatFeedback(c, a->cheats() & kBuildFastBit, a);
             break;
 
-        case kObserverCheat:
-            if (whichPlayer->flagship().get()) {
-                whichPlayer->flagship()->attributes &= ~(kCanBeEngaged | kHated);
-                CheatFeedback(whichCheat, true, whichPlayer);
+        case Cheat::OBSERVER:
+            if (a->flagship().get()) {
+                a->flagship()->attributes &= ~(kCanBeEngaged | kHated);
+                CheatFeedback(c, true, a);
             }
             break;
 
-        case kRaisePayRateCheat:
-            whichPlayer->set_earning_power(
-                    whichPlayer->earning_power() + Fixed::from_float(0.125));
-            CheatFeedbackPlus(
-                    whichCheat, true, whichPlayer, stringify(Fixed(whichPlayer->earning_power())));
+        case Cheat::RAISE_PAY_RATE:
+            a->set_earning_power(a->earning_power() + Fixed::from_float(0.125));
+            CheatFeedbackPlus(c, true, a, stringify(Fixed(a->earning_power())));
             break;
 
-        case kLowerPayRateCheat:
-            whichPlayer->set_earning_power(
-                    whichPlayer->earning_power() - Fixed::from_float(0.125));
-            CheatFeedbackPlus(
-                    whichCheat, true, whichPlayer, stringify(Fixed(whichPlayer->earning_power())));
+        case Cheat::LOWER_PAY_RATE:
+            a->set_earning_power(a->earning_power() - Fixed::from_float(0.125));
+            CheatFeedbackPlus(c, true, a, stringify(Fixed(a->earning_power())));
             break;
     }
 }
 
-void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer) {
+void CheatFeedback(Cheat c, bool activate, Handle<Admiral> whichPlayer) {
     pn::string_view admiral_name = GetAdmiralName(whichPlayer);
     pn::string_view feedback;
     if (activate) {
-        feedback = sys.cheat.on.at(whichCheat - 1);
+        feedback = sys.cheat.on.at(static_cast<int>(c) - 1);
     } else {
-        feedback = sys.cheat.off.at(whichCheat - 1);
+        feedback = sys.cheat.off.at(static_cast<int>(c) - 1);
     }
     Messages::add(pn::format("{0}{1}", admiral_name, feedback));
 }
 
 void CheatFeedbackPlus(
-        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra) {
+        Cheat c, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra) {
     pn::string_view admiral_name = GetAdmiralName(whichPlayer);
     pn::string_view feedback;
     if (activate) {
-        feedback = sys.cheat.on.at(whichCheat - 1);
+        feedback = sys.cheat.on.at(static_cast<int>(c) - 1);
     } else {
-        feedback = sys.cheat.off.at(whichCheat - 1);
+        feedback = sys.cheat.off.at(static_cast<int>(c) - 1);
     }
     Messages::add(pn::format("{0}{1}{2}", admiral_name, feedback, extra));
 }

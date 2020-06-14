@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <sys/param.h>
 #include <unistd.h>
-#include <pn/file>
+#include <pn/output>
 #include "build/defs.hpp"
 
 namespace antares {

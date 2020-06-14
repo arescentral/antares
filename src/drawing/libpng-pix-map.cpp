@@ -22,11 +22,33 @@
 
 namespace antares {
 
-ArrayPixMap read_png(pn::file_view in) {
+static void png_read_data(png_struct* png, png_byte* data, png_size_t length) {
+    pn::input_view* in = reinterpret_cast<pn::input_view*>(png_get_io_ptr(png));
+    pn_read(in->c_obj(), "$", data, static_cast<size_t>(length));
+    in->check();
+}
+
+static void png_write_data(png_struct* png, png_byte* data, png_size_t length) {
+    pn::output_view* out = reinterpret_cast<pn::output_view*>(png_get_io_ptr(png));
+    pn_write(out->c_obj(), "$", data, static_cast<size_t>(length));
+    out->check();
+}
+
+static void png_flush_data(png_struct* png) {
+    pn::output_view* out = reinterpret_cast<pn::output_view*>(png_get_io_ptr(png));
+    switch (out->c_obj()->type) {
+        case PN_OUTPUT_TYPE_C_FILE: fflush(out->c_obj()->c_file); break;
+        case PN_OUTPUT_TYPE_STDOUT: fflush(stdout); break;
+        case PN_OUTPUT_TYPE_STDERR: fflush(stderr); break;
+        default: break;
+    }
+}
+
+ArrayPixMap read_png(pn::input_view in) {
     ArrayPixMap pix{0, 0};
     png_byte    sig[8];
-    fread(sig, 1, 8, in.c_obj());
-    if (png_sig_cmp(sig, 0, 8) != 0) {
+    if (!(pn_read(in.c_obj(), "$", &sig, static_cast<size_t>(8)) &&
+          (png_sig_cmp(sig, 0, 8) == 0))) {
         throw std::runtime_error("invalid png signature");
     }
 
@@ -47,7 +69,7 @@ ArrayPixMap read_png(pn::file_view in) {
     }
 
     png_set_sig_bytes(png, 8);
-    png_init_io(png, in.c_obj());
+    png_set_read_fn(png, &in, png_read_data);
     png_read_info(png, info);
 
     png_uint_32 width;
@@ -89,7 +111,7 @@ ArrayPixMap read_png(pn::file_view in) {
     return pix;
 }
 
-void PixMap::encode(pn::file_view out) {
+void PixMap::encode(pn::output_view out) {
     png_struct* png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
         throw std::runtime_error("couldn't create png_struct");
@@ -106,7 +128,7 @@ void PixMap::encode(pn::file_view out) {
         throw std::runtime_error("reading png failed");
     }
 
-    png_init_io(png, out.c_obj());
+    png_set_write_fn(png, out.c_obj(), png_write_data, png_flush_data);
     png_set_IHDR(png, info, size().width, size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
     png_set_swap_alpha(png);
 

@@ -23,7 +23,7 @@
 
 #include "ui/interface-handling.hpp"
 
-#include <pn/file>
+#include <pn/output>
 #include <vector>
 
 #include "config/keys.hpp"
@@ -123,13 +123,13 @@ bool BothCommandAndQ() {
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
         Key key = sys.prefs->key(i);
         q |= (key == Key::Q);
-        command |= (key == Key::L_COMMAND);
+        command |= (key == Key::COMMAND);
     }
 
     return command && q;
 }
 
-void CreateObjectDataText(pn::string& text, const BaseObject& object) {
+pn::string CreateObjectDataText(const BaseObject& object) {
     pn::string data = Resource::text(kShipDataTextID);
 
     auto keys   = Resource::strings(kShipDataKeyStringID);
@@ -173,7 +173,7 @@ void CreateObjectDataText(pn::string& text, const BaseObject& object) {
     CreateWeaponDataText(&data, object.weapons.beam, values.at(kShipDataBeamStringNum));
     CreateWeaponDataText(&data, object.weapons.special, values.at(kShipDataSpecialStringNum));
 
-    text = std::move(data);
+    return data;
 }
 
 void CreateWeaponDataText(
@@ -267,8 +267,8 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t res
         }
 
         // Double backslashes.  The text produced here will be fed into
-        // StyledText.set_retro_text(), which interprets backslashes
-        // specially.  Don't do this until after padding, though.
+        // StyledText::retro(), which interprets backslashes specially.
+        // Don't do this until after padding, though.
         size_t pos = 0;
         while ((pos = find_replace(replace, pos, pn::string{"\\"}, "\\\\")) != replace.npos) {
             pos += 2;  // Don't find the just-inserted backslashes again.

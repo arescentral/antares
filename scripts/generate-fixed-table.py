@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
@@ -21,6 +21,6 @@ for i in xrange(1000):
     table[fix] = rep, err
 
 print "static const char fractions[][5] = {"
-for _, (rep, _) in sorted(table.iteritems()):
+for _, (rep, _) in sorted(table.items()):
     print '    ".%s",' % rep
 print "};"

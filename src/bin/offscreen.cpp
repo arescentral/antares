@@ -18,7 +18,7 @@
 
 #include <getopt.h>
 #include <sys/time.h>
-#include <pn/file>
+#include <pn/output>
 #include <queue>
 #include <sfz/sfz.hpp>
 
@@ -46,9 +46,8 @@ void options(EventScheduler& scheduler);
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger);
 void pause(EventScheduler& scheduler);
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
+    out.format(
             "usage: {0} [OPTIONS] SCRIPT\n"
             "\n"
             "Simulates a game off-screen\n"
@@ -88,7 +87,7 @@ void main(int argc, char* const* argv) {
         switch (opt.value()) {
             case 'o': output_dir.emplace(get_value().copy()); return true;
             case 't': text = true; return true;
-            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            case 'h': usage(pn::out, sfz::path::basename(argv[0]), 0); return true;
             default: return false;
         }
     };
@@ -155,7 +154,7 @@ void fast_motion(EventScheduler& scheduler) {
     // Skip the intro.  Start the first tutorial and skip the prologue.
     scheduler.schedule_key(Key::Q, 1756, 1757);
     scheduler.schedule_key(Key::S, 1816, 1817);
-    scheduler.schedule_key(Key::L_SHIFT, 1860, 1863);
+    scheduler.schedule_key(Key::SHIFT, 1860, 1863);
     scheduler.schedule_key(Key::K8, 1861, 1862);
     scheduler.schedule_key(Key::K0, 1864, 1865);
     scheduler.schedule_key(Key::K6, 1866, 1867);

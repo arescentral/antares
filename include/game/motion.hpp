@@ -20,31 +20,20 @@
 #define ANTARES_GAME_MOTION_HPP_
 
 #include "data/base-object.hpp"
+#include "math/scale.hpp"
 #include "math/units.hpp"
 
 namespace antares {
 
-const int32_t kUnitsToCheckNumber = 5;
-
-struct adjacentUnitType {
-    uint8_t adjacentUnit;  // the normal adjacent unit
-    Point   superOffset;   // the offset of the super unit (for wrap-around)
+struct ScaledScreen {
+    Scale scale;
+    Rect  bounds;
 };
+extern ScaledScreen scaled_screen;
+Point               scale_to_viewport(Point p);
 
-struct proximityUnitType {
-    Handle<SpaceObject> nearObject;                         // for collision checking
-    Handle<SpaceObject> farObject;                          // for distance checking
-    adjacentUnitType    unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
-};
-
-extern coordPointType gGlobalCorner;
-
-void InitMotion();
 void ResetMotionGlobals();
 
-Size center_scale();
-
-void MotionCleanup();
 void MoveSpaceObjects(ticks unitsToDo);
 void CollideSpaceObjects();
 

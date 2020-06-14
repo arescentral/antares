@@ -39,7 +39,7 @@ FIELD_READER(BaseObject::Layer) {
     return static_cast<BaseObject::Layer>(int_field_within(x, {1, 4}));
 }
 
-FIELD_READER(BaseObject::Scale) { return BaseObject::Scale{read_field<Fixed>(x).val() << 4}; }
+FIELD_READER(Scale) { return Scale{read_field<Fixed>(x).val() << 4}; }
 
 FIELD_READER(sfz::optional<BaseObject::Rotation>) {
     using Rotation = BaseObject::Rotation;

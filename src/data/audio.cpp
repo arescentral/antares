@@ -21,8 +21,9 @@
 #include <libmodplug/modplug.h>
 #include <sndfile.h>
 #include <string.h>
+
 #include <memory>
-#include <pn/file>
+#include <pn/output>
 
 namespace antares {
 
@@ -104,15 +105,19 @@ static sf_count_t sf_vio_tell(void* user_data) {
 }
 
 SoundData convert(pn::data_view in) {
-    SF_VIRTUAL_IO io = {
-            .get_filelen = sf_vio_get_filelen,
-            .seek        = sf_vio_seek,
-            .read        = sf_vio_read,
-            .write       = sf_vio_write,
-            .tell        = sf_vio_tell,
-    };
-    VirtualFile                                   userdata = {.data = in, .pointer = 0};
-    SF_INFO                                       info     = {};
+    SF_VIRTUAL_IO io = {};
+    io.get_filelen   = sf_vio_get_filelen;
+    io.seek          = sf_vio_seek;
+    io.read          = sf_vio_read;
+    io.write         = sf_vio_write;
+    io.tell          = sf_vio_tell;
+
+    VirtualFile userdata = {};
+    userdata.data        = in;
+    userdata.pointer     = 0;
+
+    SF_INFO info = {};
+
     std::unique_ptr<SNDFILE, decltype(&sf_close)> file(
             sf_open_virtual(&io, SFM_READ, &info, &userdata), sf_close);
 

@@ -102,13 +102,8 @@ struct actionQueueType {
     bool empty() const { return cursor.begin == cursor.end; }
 };
 
-static ANTARES_GLOBAL actionQueueType* gFirstActionQueue = NULL;
-
-static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
-
-#ifdef DATA_COVERAGE
-ANTARES_GLOBAL set<int32_t> covered_actions;
-#endif  // DATA_COVERAGE
+ActionQueue::ActionQueue()  = default;
+ActionQueue::~ActionQueue() = default;
 
 static void queue_action(ActionCursor cursor, ticks delayTime);
 
@@ -171,7 +166,7 @@ static void apply(
         } else if (a.relative_direction.value_or(false)) {
             direction = direct->direction;
         }
-        coordPointType at = direct->location;
+        Point at = direct->location;
         at.h += offset.h;
         at.v += offset.v;
 
@@ -248,21 +243,7 @@ static void apply(
         location.h = direct->sprite->where.h;
         location.v = direct->sprite->where.v;
     } else {
-        int32_t l = (direct->location.h - gGlobalCorner.h) * gAbsoluteScale;
-        l >>= SHIFT_SCALE;
-        if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
-            location.h = l + viewport().left;
-        } else {
-            location.h = -kSpriteMaxSize;
-        }
-
-        l = (direct->location.v - gGlobalCorner.v) * gAbsoluteScale;
-        l >>= SHIFT_SCALE; /*+ CLIP_TOP*/
-        if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
-            location.v = l + viewport().top;
-        } else {
-            location.v = -kSpriteMaxSize;
-        }
+        location = scale_to_viewport(direct->location);
     }
     int32_t decay = round(1023 / a.age.count());
     globals()->starfield.make_sparks(a.count, decay, a.velocity, a.hue, &location);
@@ -511,7 +492,7 @@ static void apply(
 static void apply(
         const MoveAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    coordPointType newLocation;
+    Point newLocation;
     switch (a.origin.value_or(MoveAction::Origin::LEVEL)) {
         case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
         case MoveAction::Origin::SUBJECT:
@@ -522,8 +503,8 @@ static void apply(
             break;
     }
 
-    coordPointType off = a.to.value_or(coordPointType{0, 0});
-    off                = Translate_Coord_To_Level_Rotation(off.h, off.v);
+    Point off = a.to.value_or(Point{0, 0});
+    off       = Translate_Coord_To_Level_Rotation(off.h, off.v);
     newLocation.h += off.h - kUniversalCenter;
     newLocation.v += off.v - kUniversalCenter;
 
@@ -852,11 +833,11 @@ void exec(
 }
 
 void reset_action_queue() {
-    gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
+    g.action_queue.data.reset(new actionQueueType[kActionQueueLength]);
 
-    gFirstActionQueue = NULL;
+    g.action_queue.first = NULL;
 
-    actionQueueType* action = gActionQueueData.get();
+    actionQueueType* action = g.action_queue.data.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
         action->cursor.begin = action->cursor.end = nullptr;
         ++action;
@@ -865,7 +846,7 @@ void reset_action_queue() {
 
 static void queue_action(ActionCursor cursor, ticks delayTime) {
     int32_t          queueNumber = 0;
-    actionQueueType* actionQueue = gActionQueueData.get();
+    actionQueueType* actionQueue = g.action_queue.data.get();
     while (!actionQueue->empty() && (queueNumber < kActionQueueLength)) {
         actionQueue++;
         queueNumber++;
@@ -878,7 +859,7 @@ static void queue_action(ActionCursor cursor, ticks delayTime) {
     actionQueue->scheduledTime = delayTime;
 
     actionQueueType* previousQueue = NULL;
-    actionQueueType* nextQueue     = gFirstActionQueue;
+    actionQueueType* nextQueue     = g.action_queue.first;
     while (nextQueue && (nextQueue->scheduledTime < delayTime)) {
         previousQueue = nextQueue;
         nextQueue     = nextQueue->nextActionQueue;
@@ -888,37 +869,39 @@ static void queue_action(ActionCursor cursor, ticks delayTime) {
 
         previousQueue->nextActionQueue = actionQueue;
     } else {
-        actionQueue->nextActionQueue = gFirstActionQueue;
-        gFirstActionQueue            = actionQueue;
+        actionQueue->nextActionQueue = g.action_queue.first;
+        g.action_queue.first         = actionQueue;
     }
 }
 
 void execute_action_queue() {
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        auto actionQueue = &gActionQueueData[i];
+        auto actionQueue = &g.action_queue.data[i];
         if (!actionQueue->empty()) {
             actionQueue->scheduledTime -= kMajorTick;
         }
     }
 
-    while (gFirstActionQueue && !gFirstActionQueue->empty() &&
-           (gFirstActionQueue->scheduledTime <= ticks(0))) {
+    while (g.action_queue.first && !g.action_queue.first->empty() &&
+           (g.action_queue.first->scheduledTime <= ticks(0))) {
         int32_t subjectid = -1;
-        if (gFirstActionQueue->cursor.subject.get() && gFirstActionQueue->cursor.subject->active) {
-            subjectid = gFirstActionQueue->cursor.subject->id;
+        if (g.action_queue.first->cursor.subject.get() &&
+            g.action_queue.first->cursor.subject->active) {
+            subjectid = g.action_queue.first->cursor.subject->id;
         }
 
         int32_t directid = -1;
-        if (gFirstActionQueue->cursor.direct.get() && gFirstActionQueue->cursor.direct->active) {
-            directid = gFirstActionQueue->cursor.direct->id;
+        if (g.action_queue.first->cursor.direct.get() &&
+            g.action_queue.first->cursor.direct->active) {
+            directid = g.action_queue.first->cursor.direct->id;
         }
-        if ((subjectid == gFirstActionQueue->cursor.subject_id) &&
-            (directid == gFirstActionQueue->cursor.direct_id)) {
-            execute_actions(std::move(gFirstActionQueue->cursor));
+        if ((subjectid == g.action_queue.first->cursor.subject_id) &&
+            (directid == g.action_queue.first->cursor.direct_id)) {
+            execute_actions(std::move(g.action_queue.first->cursor));
         }
 
-        gFirstActionQueue->cursor.begin = gFirstActionQueue->cursor.end = nullptr;
-        gFirstActionQueue = gFirstActionQueue->nextActionQueue;
+        g.action_queue.first->cursor.begin = g.action_queue.first->cursor.end = nullptr;
+        g.action_queue.first = g.action_queue.first->nextActionQueue;
     }
 }
 

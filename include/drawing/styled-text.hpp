@@ -19,7 +19,9 @@
 #ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
+#include <map>
 #include <pn/string>
+#include <utility>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -40,32 +42,62 @@ struct inlinePictType {
     const BaseObject* object;  // May be null.
 };
 
+struct WrapMetrics {
+    const Font* font;
+    int         width;
+    int         side_margin;
+    int         line_spacing;
+    int         tab_width;
+
+    WrapMetrics(
+            const Font& font, int width = std::numeric_limits<int>::max(), int side_margin = 0,
+            int line_spacing = 0, int tab_width = 0)
+            : font{&font},
+              width{width},
+              side_margin{side_margin},
+              line_spacing{line_spacing},
+              tab_width{tab_width} {}
+};
+
 class StyledText {
   public:
-    StyledText(const Font& font);
+    StyledText();
     StyledText(const StyledText&) = delete;
+    StyledText(StyledText&&)      = default;
     StyledText& operator=(const StyledText&) = delete;
+    StyledText& operator=(StyledText&&) = default;
     ~StyledText();
 
-    void set_fore_color(RgbColor fore_color);
-    void set_back_color(RgbColor back_color);
-    void set_tab_width(int tab_width);
-    void set_retro_text(pn::string_view text);
-    void set_interface_text(pn::string_view text);
-    void wrap_to(int width, int side_margin, int line_spacing);
+    static StyledText plain(
+            pn::string_view text, WrapMetrics metrics, RgbColor fore_color = RgbColor::white(),
+            RgbColor back_color = RgbColor::black());
+    static StyledText retro(
+            pn::string_view text, WrapMetrics metrics, RgbColor fore_color = RgbColor::white(),
+            RgbColor back_color = RgbColor::black());
+    static StyledText interface(
+            pn::string_view text, WrapMetrics metrics, RgbColor fore_color = RgbColor::white(),
+            RgbColor back_color = RgbColor::black());
 
-    int                                size() const;
-    int                                tab_width() const;
-    int                                width() const;
+    bool                               empty() const;
     int                                height() const;
     int                                auto_width() const;
     const std::vector<inlinePictType>& inline_picts() const;
 
-    void draw(const Rect& bounds) const;
-    void draw_range(const Rect& bounds, int begin, int end) const;
-    void draw_char(const Rect& bounds, int index) const;
+    void hide();
+    void advance();
+    bool done() const;
 
-    void draw_cursor(const Rect& bounds, int index) const;
+    pn::string_view     text() const;
+    void                select(int from, int to);
+    std::pair<int, int> selection() const;
+    void                mark(int from, int to);
+    std::pair<int, int> mark() const;
+
+    void draw(const Rect& bounds) const;
+
+    void draw_cursor(const Rect& bounds, const RgbColor& color, bool ends = true) const;
+
+    int offset(int origin, TextReceiver::Offset offset, TextReceiver::OffsetUnit unit) const;
 
   private:
     enum SpecialChar {
@@ -73,38 +105,49 @@ class StyledText {
         TAB,
         WORD_BREAK,
         LINE_BREAK,
+        NO_BREAK,
         PICTURE,
         DELAY,
     };
 
     struct StyledChar {
         StyledChar(
-                uint32_t character, SpecialChar special, const RgbColor& fore_color,
+                SpecialChar special, int pict_index, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
-        pn::rune    character;
         SpecialChar special;
+        int         pict_index;
         RgbColor    fore_color;
         RgbColor    back_color;
-        int         h;
-        int         v;
+        Rect        bounds;
     };
 
-    void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
-    int  move_word_down(int index, int v);
+    void rewrap();
+    int  move_word_down(std::map<pn::string::iterator, StyledChar>::iterator it, int v);
+    bool is_selected(std::map<pn::string::iterator, StyledChar>::const_iterator it) const;
 
-    RgbColor                    _fore_color;
-    RgbColor                    _back_color;
-    std::vector<StyledChar>     _chars;
-    std::vector<inlinePictType> _inline_picts;
-    std::vector<Texture>        _textures;
-    int                         _tab_width;
-    int                         _width;
-    int                         _height;
-    int                         _auto_width;
-    int                         _side_margin;
-    int                         _line_spacing;
-    const Font&                 _font;
+    bool is_line_start(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) const;
+    bool is_line_end(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it) const;
+    bool is_start(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+            TextReceiver::OffsetUnit unit) const;
+    bool is_end(
+            pn::string::iterator begin, pn::string::iterator end, pn::string::iterator it,
+            TextReceiver::OffsetUnit unit) const;
+    pn::string::iterator line_up(pn::string::iterator it) const;
+    pn::string::iterator line_down(pn::string::iterator it) const;
+
+    pn::string                                                  _text;
+    std::unique_ptr<std::map<pn::string::iterator, StyledChar>> _chars;
+    std::vector<inlinePictType>                                 _inline_picts;
+    std::vector<Texture>                                        _textures;
+    WrapMetrics                                                 _wrap_metrics;
+    std::map<pn::string::iterator, StyledChar>::const_iterator  _until;
+    Size                                                        _auto_size;
+    std::pair<int, int>                                         _selection = {-1, -1};
+    std::pair<int, int>                                         _mark      = {-1, -1};
 };
 
 }  // namespace antares

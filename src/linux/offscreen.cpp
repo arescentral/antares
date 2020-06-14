@@ -18,7 +18,7 @@
 
 #include "linux/offscreen.hpp"
 
-#include <pn/file>
+#include <pn/output>
 
 namespace antares {
 

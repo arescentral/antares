@@ -247,10 +247,10 @@ struct MoveAction : public ActionBase {
         SUBJECT,  // relative to subject object
         DIRECT,   // relative to direct object
     };
-    sfz::optional<Origin>         origin;
-    sfz::optional<coordPointType> to;
-    sfz::optional<int64_t>        distance;
-    Within                        within;
+    sfz::optional<Origin>  origin;
+    sfz::optional<Point>   to;
+    sfz::optional<int64_t> distance;
+    Within                 within;
 };
 
 struct OccupyAction : public ActionBase {

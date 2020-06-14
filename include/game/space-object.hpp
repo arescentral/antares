@@ -21,6 +21,7 @@
 
 #include "data/base-object.hpp"
 #include "game/globals.hpp"
+#include "math/scale.hpp"
 #include "math/units.hpp"
 
 namespace antares {
@@ -95,10 +96,9 @@ class SpaceObject {
 
     SpaceObject() = default;
     SpaceObject(
-            const BaseObject& type, Random seed, int32_t object_id,
-            const coordPointType& initial_location, int32_t relative_direction,
-            fixedPointType* relative_velocity, Handle<Admiral> new_owner,
-            sfz::optional<pn::string_view> spriteIDOverride);
+            const BaseObject& type, Random seed, int32_t object_id, const Point& initial_location,
+            int32_t relative_direction, fixedPointType* relative_velocity,
+            Handle<Admiral> new_owner, sfz::optional<pn::string_view> spriteIDOverride);
 
     void change_base_type(
             const BaseObject& base, sfz::optional<pn::string_view> spriteIDOverride,
@@ -130,19 +130,20 @@ class SpaceObject {
 
     int32_t offlineTime = 0;
 
-    coordPointType      location = {0, 0};
-    Point               collisionGrid;
+    Point location = {0, 0};  // [1073610752..1073872896), or [0x3ffe0000..0x40020000)
+    Point collisionGrid;      // [524224..524352), or [0x7ffc0..0x80040)
+    Point distanceGrid;       // [32764..32772), or [0x7ffc..0x8004)
+
     Handle<SpaceObject> nextNearObject;
-    Point               distanceGrid;
     Handle<SpaceObject> nextFarObject;
     Handle<SpaceObject> previousObject;
     Handle<SpaceObject> nextObject;
 
-    int32_t        runTimeFlags        = 0;       // distance from origin to destination
-    coordPointType destinationLocation = {0, 0};  // coords of our destination ( or kNoDestination)
-    Handle<SpaceObject> destObject;               // target of this object.
-    Handle<SpaceObject> destObjectDest;  // # of our destination's destination in case it dies
-    Handle<Destination> asDestination;   // If this object kIsDestination.
+    int32_t runTimeFlags        = 0;       // distance from origin to destination
+    Point   destinationLocation = {0, 0};  // coords of our destination ( or kNoDestination)
+    Handle<SpaceObject> destObject;        // target of this object.
+    Handle<SpaceObject> destObjectDest;    // # of our destination's destination in case it dies
+    Handle<Destination> asDestination;     // If this object kIsDestination.
     int32_t             destObjectID     = kNoShip;  // ID of our dest object
     int32_t             destObjectDestID = kNoShip;  // id of our dest's destination
 
@@ -159,7 +160,7 @@ class SpaceObject {
     ticks          timeFromOrigin    = ticks(0);  // time it's been since we left
     fixedPointType idealLocationCalc = {Fixed::zero(),
                                         Fixed::zero()};  // calced when we got origin
-    coordPointType originLocation    = {0, 0};           // coords of our origin
+    Point          originLocation    = {0, 0};           // coords of our origin
 
     fixedPointType motionFraction = {Fixed::zero(), Fixed::zero()};
     fixedPointType velocity       = {Fixed::zero(), Fixed::zero()};
@@ -203,7 +204,7 @@ class SpaceObject {
     Handle<Admiral> owner;
     bool            expires      = false;
     ticks           expire_after = ticks(-1);
-    int32_t         naturalScale = SCALE_SCALE;
+    Scale           naturalScale = SCALE_SCALE;
     int32_t         id           = kNoShip;
     ticks           rechargeTime = ticks(0);
     int16_t         active       = kObjectAvailable;
@@ -227,7 +228,7 @@ class SpaceObject {
     union {
         struct {
             int16_t speed;
-            int16_t scale;
+            Scale   scale;
         } landing;
         struct {
             uint8_t step;
@@ -273,8 +274,8 @@ void ResetAllSpaceObjects(void);
 void RemoveAllSpaceObjects(void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
-        int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
+        const BaseObject& whichBase, fixedPointType* velocity, Point* location, int32_t direction,
+        Handle<Admiral> owner, uint32_t specialAttributes,
         sfz::optional<pn::string_view> spriteIDOverride);
 int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);
 
@@ -287,7 +288,7 @@ bool tags_match(const BaseObject& o, const Tags& query);
 
 sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
 BaseObject::Layer              sprite_layer(const BaseObject& o);
-int32_t                        sprite_scale(const BaseObject& o);
+Scale                          sprite_scale(const BaseObject& o);
 int32_t                        rotation_resolution(const BaseObject& o);
 
 }  // namespace antares

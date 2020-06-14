@@ -19,8 +19,8 @@
 #include "drawing/pix-table.hpp"
 
 #include <pn/array>
-#include <pn/file>
 #include <pn/map>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
@@ -29,8 +29,8 @@
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
-using sfz::StringMap;
 using sfz::range;
+using sfz::StringMap;
 using std::unique_ptr;
 using std::vector;
 

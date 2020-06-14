@@ -6,10 +6,9 @@ declare_args() {
   # Installation prefix (default: /usr/local)
   # Used only on linux. Data files are expected under $prefix/share/antares/app.
   prefix = "/usr/local"
-
-  # Antares version. Can be overridden for nightlies and release builds.
-  antares_version = "0.9.0"
 }
+
+antares_version = "0.9.1"
 
 import("//build/lib/embed.gni")
 import("//build/lib/mac/version.gni")
@@ -22,6 +21,7 @@ group("default") {
     ":antares-ls-scenarios",
     ":build-pix",
     ":color-test",
+    ":editable-text-test",
     ":fixed-test",
     ":hash-data",
     ":object-data",
@@ -32,6 +32,16 @@ group("default") {
   ]
   if (target_os == "mac") {
     deps += [ ":antares" ]
+  }
+  if (target_os == "win") {
+    deps -= [
+      ":antares-glfw",
+      ":antares-install-data",
+      ":antares-ls-scenarios",
+      ":build-pix",
+      ":offscreen",
+      ":replay",
+    ]
   }
 }
 
@@ -51,6 +61,7 @@ config("antares_private") {
 
 source_set("libantares") {
   public_deps = [
+    ":libantares-$target_os",
     ":libantares-build",
     ":libantares-config",
     ":libantares-data",
@@ -62,11 +73,6 @@ source_set("libantares") {
     ":libantares-ui",
     ":libantares-video",
   ]
-  if (target_os == "mac") {
-    public_deps += [ ":libantares-mac" ]
-  } else if (target_os == "linux") {
-    public_deps += [ ":libantares-linux" ]
-  }
 }
 
 source_set("libantares-build") {
@@ -162,16 +168,20 @@ source_set("libantares-data") {
   ]
   public_deps = [
     ":libantares-lang",
-    "//ext/libpng",
     "//ext/libsfz",
-    "//ext/libzipxx",
     "//ext/procyon:procyon-cpp",
   ]
   deps = [
     "//ext/libmodplug",
+    "//ext/libpng",
     "//ext/libsndfile",
+    "//ext/libzipxx",
   ]
   configs += [ ":antares_private" ]
+
+  if (target_os == "win") {
+    sources -= [ "src/data/scenario-list.cpp" ]
+  }
 }
 
 source_set("libantares-drawing") {
@@ -201,9 +211,9 @@ source_set("libantares-drawing") {
   public_deps = [
     ":libantares-data",
     ":libantares-lang",
-    "//ext/libpng",
     "//ext/libsfz",
   ]
+  deps = [ "//ext/libpng" ]
   configs += [ ":antares_private" ]
 }
 
@@ -283,12 +293,14 @@ source_set("libantares-math") {
     "include/math/macros.hpp",
     "include/math/random.hpp",
     "include/math/rotation.hpp",
+    "include/math/scale.hpp",
     "include/math/special.hpp",
     "include/math/units.hpp",
     "src/math/fixed.cpp",
     "src/math/geometry.cpp",
     "src/math/random.cpp",
     "src/math/rotation.cpp",
+    "src/math/scale.cpp",
     "src/math/special.cpp",
   ]
   public_deps = [
@@ -319,7 +331,12 @@ source_set("libantares-sound") {
   if (target_os == "mac") {
     libs += [ "OpenAL.framework" ]
   } else if (target_os == "linux") {
-    libs += [ "-lopenal" ]
+    libs += [ "openal" ]
+  } else if (target_os == "win") {
+    sources -= [
+      "include/sound/openal-driver.hpp",
+      "src/sound/openal-driver.cpp",
+    ]
   }
   configs += [ ":antares_private" ]
 }
@@ -327,6 +344,7 @@ source_set("libantares-sound") {
 source_set("libantares-ui") {
   sources = [
     "include/ui/card.hpp",
+    "include/ui/editable-text.hpp",
     "include/ui/event-scheduler.hpp",
     "include/ui/event.hpp",
     "include/ui/flows/master.hpp",
@@ -346,6 +364,7 @@ source_set("libantares-ui") {
     "include/ui/screens/select-level.hpp",
     "include/ui/widget.hpp",
     "src/ui/card.cpp",
+    "src/ui/editable-text.cpp",
     "src/ui/event-scheduler.cpp",
     "src/ui/event.cpp",
     "src/ui/flows/master.cpp",
@@ -388,11 +407,11 @@ source_set("libantares-video") {
   deps = [
     ":embed_glsl_fragment",
     ":embed_glsl_vertex",
+    "//ext/libpng",
   ]
   public_deps = [
     ":libantares-game",
     ":libantares-lang",
-    "//ext/libpng",
     "//ext/libsfz",
   ]
   libs = []
@@ -400,18 +419,23 @@ source_set("libantares-video") {
     libs += [ "OpenGL.framework" ]
   } else if (target_os == "linux") {
     libs += [
-      "-lGL",
-      "-lX11",
+      "GL",
+      "X11",
     ]
   }
   configs += [ ":antares_private" ]
+
+  if (target_os == "win") {
+    sources -= [
+      "include/video/opengl-driver.hpp",
+      "src/video/opengl-driver.cpp",
+    ]
+  }
 }
 
 embed("embed_glsl_fragment") {
   symbol = "antares::glsl::fragment"
-  sources = [
-    "src/video/glsl/fragment.frag",
-  ]
+  sources = [ "src/video/glsl/fragment.frag" ]
   outputs = [
     "include/video/glsl/fragment.hpp",
     "src/video/glsl/fragment.cpp",
@@ -420,9 +444,7 @@ embed("embed_glsl_fragment") {
 
 embed("embed_glsl_vertex") {
   symbol = "antares::glsl::vertex"
-  sources = [
-    "src/video/glsl/vertex.vert",
-  ]
+  sources = [ "src/video/glsl/vertex.vert" ]
   outputs = [
     "include/video/glsl/vertex.hpp",
     "src/video/glsl/vertex.cpp",
@@ -431,19 +453,19 @@ embed("embed_glsl_vertex") {
 
 executable("hash-data") {
   testonly = true
-  sources = [
-    "src/bin/hash-data.cpp",
-  ]
-  deps = [
-    ":libantares-test",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/hash-data.cpp" ]
+  deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("antares-ls-scenarios") {
-  sources = [
-    "src/bin/ls-scenarios.cpp",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/ls-scenarios.cpp" ]
   deps = [
     ":libantares",
     ":libantares-real",
@@ -453,44 +475,37 @@ executable("antares-ls-scenarios") {
 
 executable("object-data") {
   testonly = true
-  sources = [
-    "src/bin/object-data.cpp",
-  ]
-  deps = [
-    ":libantares-test",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/object-data.cpp" ]
+  deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("shapes") {
   testonly = true
-  sources = [
-    "src/bin/shapes.cpp",
-  ]
-  deps = [
-    ":libantares-test",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/shapes.cpp" ]
+  deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("tint") {
   testonly = true
-  sources = [
-    "src/bin/tint.cpp",
-  ]
-  deps = [
-    ":libantares-test",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/tint.cpp" ]
+  deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 source_set("libantares-real") {
-  sources = [
-    "src/config/$target_os-dirs.cpp",
-  ]
-  public_deps = [
-    ":libantares-config",
-  ]
+  sources = [ "src/config/$target_os-dirs.cpp" ]
+  public_deps = [ ":libantares-config" ]
   configs += [ ":antares_private" ]
 }
 
@@ -520,13 +535,34 @@ source_set("libantares-test") {
     ]
   }
   configs += [ ":antares_private" ]
+
+  if (target_os == "win") {
+    sources -= [
+      "include/video/offscreen-driver.hpp",
+      "src/video/offscreen-driver.cpp",
+    ]
+  }
 }
 
 executable("color-test") {
   testonly = true
-  sources = [
-    "src/drawing/color.test.cpp",
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/drawing/color.test.cpp" ]
+  deps = [
+    ":libantares-test",
+    "//ext/gmock:gmock_main",
   ]
+  configs += [ ":antares_private" ]
+}
+
+executable("editable-text-test") {
+  testonly = true
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/ui/editable-text.test.cpp" ]
   deps = [
     ":libantares-test",
     "//ext/gmock:gmock_main",
@@ -536,9 +572,10 @@ executable("color-test") {
 
 executable("fixed-test") {
   testonly = true
-  sources = [
-    "src/math/fixed.test.cpp",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/math/fixed.test.cpp" ]
   deps = [
     ":libantares-test",
     "//ext/gmock:gmock_main",
@@ -548,38 +585,38 @@ executable("fixed-test") {
 
 executable("offscreen") {
   testonly = true
-  sources = [
-    "src/bin/offscreen.cpp",
-  ]
-  deps = [
-    ":libantares-test",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/offscreen.cpp" ]
+  deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("replay") {
   testonly = true
-  sources = [
-    "src/bin/replay.cpp",
-  ]
-  deps = [
-    ":libantares-test",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/replay.cpp" ]
+  deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("build-pix") {
   testonly = true
-  sources = [
-    "src/bin/build-pix.cpp",
-  ]
-  deps = [
-    ":libantares-test",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/build-pix.cpp" ]
+  deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("antares-glfw") {
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
   sources = [
     "include/glfw/video-driver.hpp",
     "src/glfw/main.cpp",
@@ -594,9 +631,10 @@ executable("antares-glfw") {
 }
 
 executable("antares-install-data") {
-  sources = [
-    "src/bin/install-data.cpp",
-  ]
+  if (target_os == "win") {
+    output_extension = "exe"
+  }
+  sources = [ "src/bin/install-data.cpp" ]
   deps = [
     ":libantares",
     ":libantares-real",
@@ -616,7 +654,6 @@ if (target_os == "mac") {
       "src/mac/http.cpp",
     ]
     public_deps = [
-      "//ext/libpng",
       "//ext/libsfz",
       "//ext/procyon:procyon-cpp",
     ]
@@ -668,8 +705,8 @@ if (target_os == "mac") {
     ]
 
     resources = [
-      ":antares_app_resource_data",
       ":antares_app_embedded_scenario_data",
+      ":antares_app_resource_data",
     ]
     configs = [ ":antares_private" ]
   }
@@ -703,14 +740,19 @@ if (target_os == "mac") {
   }
 } else if (target_os == "linux") {
   source_set("libantares-linux") {
-    sources = [
-      "src/linux/http.cpp",
-    ]
+    sources = [ "src/linux/http.cpp" ]
     public_deps = [
       "//ext/libsfz",
       "//ext/procyon:procyon-cpp",
     ]
-    libs = [ "-lneon" ]
+    libs = [ "neon" ]
+    configs += [ ":antares_private" ]
+  }
+} else if (target_os == "win") {
+  source_set("libantares-win") {
+    sources = [ "src/win/http.cpp" ]
+    public_deps = [ "//ext/procyon:procyon-cpp" ]
+    libs = [ "wininet" ]
     configs += [ ":antares_private" ]
   }
 }

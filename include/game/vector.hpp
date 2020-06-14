@@ -41,10 +41,9 @@ struct Vector {
     bool                is_ray    = false;
     bool                to_coord  = false;
     bool                lightning = false;
-    Rect                thisLocation;
-    coordPointType      lastGlobalLocation;
-    coordPointType      objectLocation;
-    coordPointType      lastApparentLocation;
+    Point               lastGlobalLocation;
+    Point               objectLocation;
+    Point               lastApparentLocation;
     bool                visible;
     RgbColor            color;
     sfz::optional<Hue>  hue;
@@ -59,7 +58,6 @@ struct Vector {
     int32_t             accuracy;
     int32_t             range;
     Point               thisBoltPoint[kBoltPointNum];
-    Point               lastBoltPoint[kBoltPointNum];
 
   private:
     friend class Vectors;
@@ -70,12 +68,11 @@ class Vectors {
   public:
     static void           init();
     static void           reset();
-    static Handle<Vector> add(coordPointType* location, const BaseObject::Ray& r);
-    static Handle<Vector> add(coordPointType* location, const BaseObject::Bolt& b);
+    static Handle<Vector> add(Point* location, const BaseObject::Ray& r);
+    static Handle<Vector> add(Point* location, const BaseObject::Bolt& b);
     static void set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObject> sourceObject);
     static void update();
     static void draw();
-    static void show_all();
     static void cull();
 };
 

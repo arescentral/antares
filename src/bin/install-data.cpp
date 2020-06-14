@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -31,12 +31,11 @@ namespace {
 
 class PrintStatusObserver : public DataExtractor::Observer {
   public:
-    virtual void status(pn::string_view status) { pn::format(stderr, "{0}\n", status); }
+    virtual void status(pn::string_view status) { pn::err.format("{0}\n", status); }
 };
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
+    out.format(
             "usage: {0} [OPTIONS] [plugin]\n"
             "\n"
             "  Downloads and extracts game data\n"
@@ -75,7 +74,7 @@ void main(int argc, char* const* argv) {
             case 's': source = get_value().copy(); return true;
             case 'd': dest = get_value().copy(); return true;
             case 'c': check = true; return true;
-            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            case 'h': usage(pn::out, sfz::path::basename(argv[0]), 0); return true;
             default: return false;
         }
     };
@@ -103,15 +102,15 @@ void main(int argc, char* const* argv) {
     }
 
     if (extractor.current()) {
-        pn::format(stderr, "{0} is up-to-date!\n", dest);
+        pn::err.format("{0} is up-to-date!\n", dest);
     } else if (check) {
-        pn::format(stderr, "{0} is not up-to-date.\n", dest);
+        pn::err.format("{0} is not up-to-date.\n", dest);
         exit(1);
     } else {
-        pn::format(stderr, "Extracting to {0}...\n", dest);
+        pn::err.format("Extracting to {0}...\n", dest);
         PrintStatusObserver observer;
         extractor.extract(&observer);
-        pn::format(stderr, "done.\n");
+        pn::err.format("done.\n");
     }
 }
 

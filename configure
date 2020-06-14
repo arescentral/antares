@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
@@ -31,24 +31,30 @@ str = type("")  # For Python2
 def main():
     os.chdir(os.path.dirname(sys.argv[0]))
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument(
-        "-m",
-        "--mode",
-        metavar="MODE",
-        type=str,
-        choices="dbg dev opt".split(),
-        default="opt",
-        help="set build configuration:\n"
-        "  - opt: compile for fast binaries (default)\n"
-        "  - dev: compile for fast builds\n"
-        "  - dbg: add debugging symbols")
-    parser.add_argument(
-        "-o", "--target-os", metavar="OS", type=str, help="target os (default: host os)")
-    parser.add_argument(
-        "--prefix",
-        type=str,
-        default="/usr/local",
-        help="installation prefix (default: /usr/local)")
+    parser.add_argument("-m",
+                        "--mode",
+                        metavar="MODE",
+                        type=str,
+                        choices="dbg dev opt".split(),
+                        default="opt",
+                        help="set build configuration:\n"
+                        "  - opt: compile for fast binaries (default)\n"
+                        "  - dev: compile for fast builds\n"
+                        "  - dbg: add debugging symbols")
+    parser.add_argument("-o",
+                        "--target-os",
+                        metavar="OS",
+                        type=str,
+                        help="target os (default: host os)")
+    parser.add_argument("--prefix",
+                        type=str,
+                        default="/usr/local",
+                        help="installation prefix (default: /usr/local)")
+    parser.add_argument("-v",
+                        "--antares-version",
+                        metavar="X.X.X",
+                        type=str,
+                        help="override antares_version string")
     args = parser.parse_args()
 
     check_submodules()
@@ -61,6 +67,8 @@ def main():
     gn_args["mode"] = args.mode
     gn_args["target_os"] = args.target_os
     gn_args["prefix"] = args.prefix
+    if args.antares_version:
+        gn_args["antares_version"] = args.antares_version
     if args.target_os == "mac":
         gn_args["macosx_version_min"] = "10.7"
     cfg.gn(**gn_args)
@@ -113,6 +121,7 @@ def check_target(args):
         checker = {
             ("mac", "mac"): check_mac,
             ("linux", "linux"): check_linux_native,
+            ("linux", "win"): check_win_on_linux,
         }.get((cfg.host_os(), args.target_os))
         if checker is None:
             msg(args.target_os, color="red")
@@ -148,7 +157,7 @@ def check_mac(args):
 
 def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = platform.linux_distribution()
+        distro = installdeps.linux_distribution()
         if distro[0].lower() in installdeps.COMMAND:
             msg(" ".join(distro), color="green")
             distro = distro[0]
@@ -166,14 +175,9 @@ def check_linux_native(args):
     if not check_libcxxabi("clang++"):
         missing_pkgs.append("libc++abi")
 
-    if not check_python_gi():
-        missing_pkgs.append("python-gi")
-    elif not check_python_gtk():
-        missing_pkgs.append("python-gtk3")
-
     if check_pkg_config():
         libs = """
-            gl glfw3 glu libmodplug libzip libpng16 neon openal sndfile
+            gl glfw3 glu libmodplug libzip libpng neon openal sndfile
             x11 xcursor xinerama xrandr xxf86vm zlib
         """.split()
         for lib in libs:
@@ -194,13 +198,43 @@ def check_linux_native(args):
         sys.exit(1)
 
 
+def check_win_on_linux(args):
+    with cfg.step("checking Linux distro") as msg:
+        distro = installdeps.linux_distribution()
+        if distro == ("Ubuntu", "20.04", "focal"):
+            msg(" ".join(distro), color="green")
+        else:
+            msg(" ".join(distro), color="red")
+            print("\nSorry! Cross-compilation currently requires Ubuntu 20.04 focal")
+            sys.exit(1)
+
+    missing = collections.OrderedDict()
+    if not check_clang("clang++"):
+        missing["clang"] = "clang"
+
+    with cfg.step("checking for mingw") as msg:
+        if os.path.exists("/usr/x86_64-w64-mingw32/include/windows.h"):
+            msg("ok", color="green")
+        else:
+            msg("missing", color="red")
+            missing["mingw"] = "mingw-w64"
+
+    if missing:
+        print("\nmissing dependencies: %s" % " ".join(missing.keys()))
+        if len(missing) == 1:
+            print("\nYou can install it with:\n")
+        else:
+            print("\nYou can install them with:\n")
+        print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
+        sys.exit(1)
+
+
 def check_clang(executable=""):
     """Compile a basic C++11 binary."""
     executable = executable or "clang++"
-    return cfg.check_bin(
-        ("%s -x c++ -std=c++11 - -o /dev/null" % executable).split(),
-        what="clang",
-        input="int main() { return 1; }")
+    return cfg.check_bin(("%s -x c++ -std=c++11 - -o /dev/null" % executable).split(),
+                         what="clang",
+                         input="int main() { return 1; }")
 
 
 def check_libcxx(executable=""):
@@ -220,38 +254,15 @@ def check_libcxxabi(executable=""):
     """
     executable = executable or "clang++"
     return cfg.check_bin(
-            ("%s -x c++ -std=c++11 -stdlib=libc++ -I/usr/include/libcxxabi - -o /dev/null" % executable).split(),
-            what="libc++abi",
-            input="#include <cxxabi.h>\n\nint main() { return 0; }")
+        ("%s -x c++ -std=c++11 -stdlib=libc++ -I/usr/include/libcxxabi - -o /dev/null" %
+         executable).split(),
+        what="libc++abi",
+        input="#include <cxxabi.h>\n\nint main() { return 0; }")
 
 
 def check_pkg_config():
     """Run pkg-config --version."""
     return cfg.check_bin("pkg-config --version".split())
-
-
-def check_python_gi():
-    """Check if Python can import python-gi."""
-    with cfg.step("checking for python-gi") as msg:
-        try:
-            import gi
-            return True
-        except ImportError:
-            msg("missing", color="red")
-    return False
-
-
-def check_python_gtk():
-    """Check if Python can load Gtk 3.0 through python-gi."""
-    with cfg.step("checking for python Gtk") as msg:
-        try:
-            import gi
-            gi.require_version("Gtk", "3.0")
-            from gi.repository import Gtk
-            return True
-        except ImportError:
-            msg("missing", color="red")
-    return False
 
 
 if __name__ == "__main__":

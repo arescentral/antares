@@ -19,7 +19,7 @@
 #include "config/dirs.hpp"
 
 #include <unistd.h>
-#include <pn/file>
+#include <pn/output>
 
 #include "mac/core-foundation.hpp"
 

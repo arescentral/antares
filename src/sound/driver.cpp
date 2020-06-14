@@ -19,7 +19,7 @@
 #include "sound/driver.hpp"
 
 #include <fcntl.h>
-#include <pn/file>
+#include <pn/output>
 
 #include "game/sys.hpp"
 #include "game/time.hpp"
@@ -93,21 +93,19 @@ class LogSoundDriver::LogChannel : public SoundChannel {
 
     void play(pn::string_view kind, pn::string_view sound_path, uint8_t volume) {
         int64_t t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        pn::format(
-                _driver._sound_log, "{0}\t{1}\tplay\t{2}\t{3}\t{4}\n", t, _id, kind, volume,
-                sound_path);
+        _driver._sound_log.format(
+                "{0}\t{1}\tplay\t{2}\t{3}\t{4}\n", t, _id, kind, volume, sound_path);
     }
 
     void loop(pn::string_view kind, pn::string_view sound_path, uint8_t volume) {
         int64_t t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        pn::format(
-                _driver._sound_log, "{0}\t{1}\tloop\t{2}\t{3}\t{4}\n", t, _id, kind, volume,
-                sound_path);
+        _driver._sound_log.format(
+                "{0}\t{1}\tloop\t{2}\t{3}\t{4}\n", t, _id, kind, volume, sound_path);
     }
 
     void quiet() override {
         int64_t t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        pn::format(_driver._sound_log, "{0}\t{1}\tquiet\n", t, _id);
+        _driver._sound_log.format("{0}\t{1}\tquiet\n", t, _id);
     }
 
   private:
@@ -130,7 +128,7 @@ class LogSoundDriver::LogSound : public Sound {
 };
 
 LogSoundDriver::LogSoundDriver(pn::string_view path)
-        : _sound_log(pn::open(path, "w")), _last_id(-1), _active_channel(NULL) {}
+        : _sound_log(pn::output(path, pn::text)), _last_id(-1), _active_channel(NULL) {}
 
 unique_ptr<SoundChannel> LogSoundDriver::open_channel() {
     return unique_ptr<SoundChannel>(new LogChannel(*this));

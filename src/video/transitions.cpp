@@ -133,7 +133,7 @@ void PictFade::become_front() {
                 _wane_start = now() + this->display_time();
                 break;
             }
-        // fall through.
+            // fall through.
 
         case WANING:
             _state = NEW;

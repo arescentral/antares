@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 #include <algorithm>
-#include <pn/file>
+#include <pn/output>
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -44,8 +44,8 @@
 #include <GL/glu.h>
 #endif
 
-using std::min;
 using std::max;
+using std::min;
 using std::unique_ptr;
 
 namespace antares {
@@ -102,7 +102,7 @@ static const char* _gl_error_string(GLenum err) {
 static void _gl_check(const char* fn, const char* file, int line) {
     int error = glGetError();
     if (error != GL_NO_ERROR) {
-        pn::format(stderr, "{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line);
+        pn::err.format("{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line);
     }
 }
 
@@ -182,7 +182,7 @@ void gl_log(GLint object) {
     } else {
         glGetProgramInfoLog(object, log_size, &log_size, log.get());
     }
-    pn::format(stderr, "object {0} log: {1}\n", object, (const char*)log.get());
+    pn::err.format("object {0} log: {1}\n", object, (const char*)log.get());
 }
 
 class OpenGlTextureImpl : public Texture::Impl {
@@ -432,7 +432,10 @@ void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbuf[1]);
     GLubyte colors[] = {
-            color.red, color.green, color.blue, color.alpha,
+            color.red,
+            color.green,
+            color.blue,
+            color.alpha,
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
     glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);

@@ -129,7 +129,6 @@ void Master::init() {
     SpriteHandlingInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
-    InitMotion();
     Admiral::init();
     Vectors::init();
 

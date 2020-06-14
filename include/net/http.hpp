@@ -24,7 +24,7 @@
 namespace antares {
 namespace http {
 
-void get(pn::string_view url, pn::file_view out);
+void get(pn::string_view url, pn::output_view out);
 
 }  // namespace http
 }  // namespace antares

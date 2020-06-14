@@ -18,7 +18,7 @@
 
 #include <fcntl.h>
 #include <getopt.h>
-#include <pn/file>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -51,8 +51,7 @@ class ObjectDataBuilder {
     ObjectDataBuilder& operator=(const ObjectDataBuilder&) = delete;
 
     void save(const BaseObject& object, pn::string_view portrait) {
-        pn::string data;
-        CreateObjectDataText(data, object);
+        pn::string data = CreateObjectDataText(object);
         if (_output_dir.has_value()) {
             pn::string      path = pn::format("{0}/{1}.txt", *_output_dir, portrait);
             pn::string_view dir  = sfz::path::dirname(path);
@@ -62,8 +61,8 @@ class ObjectDataBuilder {
                 std::throw_with_nested(std::runtime_error(dir.copy().c_str()));
             }
             try {
-                pn::file file = pn::open(path, "w").check();
-                file.write(data);
+                pn::output out = pn::output{path, pn::text}.check();
+                out.write(data);
             } catch (...) {
                 std::throw_with_nested(std::runtime_error(path.copy().c_str()));
             }
@@ -74,9 +73,8 @@ class ObjectDataBuilder {
     sfz::optional<pn::string> _output_dir;
 };
 
-void usage(pn::file_view out, pn::string_view progname, int retcode) {
-    pn::format(
-            out,
+void usage(pn::output_view out, pn::string_view progname, int retcode) {
+    out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
             "  Builds all of the scrolling text images in the game\n"
@@ -115,7 +113,7 @@ void main(int argc, char* const* argv) {
                                      pn::rune opt, const args::callbacks::get_value_f& get_value) {
         switch (opt.value()) {
             case 'o': output_dir.emplace(get_value().copy()); return true;
-            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            case 'h': usage(pn::out, sfz::path::basename(argv[0]), 0); return true;
             default: return false;
         }
     };

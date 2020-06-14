@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import collections
 import sys
@@ -19,7 +19,7 @@ PACKAGE[UBUNTU] = PACKAGE[DEBIAN] = collections.OrderedDict([
     ("libc++abi", "libc++abi-dev"),
     ("libmodplug", "libmodplug-dev"),
     ("libzip", "libzip-dev"),
-    ("libpng16", "libpng16-dev"),
+    ("libpng", "libpng-dev"),
     ("neon", "libneon27-dev"),
     ("openal", "libopenal-dev"),
     ("sndfile", "libsndfile1-dev"),
@@ -29,11 +29,10 @@ PACKAGE[UBUNTU] = PACKAGE[DEBIAN] = collections.OrderedDict([
     ("xrandr", "libxrandr-dev"),
     ("xxf86vm", "libxxf86vm-dev"),
     ("zlib", "zlib1g-dev"),
-    ("python-gi", "python-gi"),
-    ("python-gtk3", "gir1.2-gtk-3.0"),
 ])
 
-if __name__ == "__main__":
+
+def main():
     import os
     import platform
     try:
@@ -42,19 +41,40 @@ if __name__ == "__main__":
         from pipes import quote
 
     if len(sys.argv) == 1:
-        distro = platform.linux_distribution()[0].lower()
+        distro = linux_distribution()[0].lower()
+        flags = []
         if not distro:
             sys.stderr.write("This script is Linux-only, sorry.\n")
             sys.exit(1)
-    elif len(sys.argv) == 2:
+    elif len(sys.argv) >= 2:
         distro = sys.argv[1]
-    else:
-        sys.stderr.write("usage: {} [DISTRO]\n".format(sys.argv[0]))
-        sys.exit(64)
+        flags = sys.argv[2:]
 
     if distro not in COMMAND:
         sys.stderr.write("I don't know {}, sorry.\n".format(distro))
         sys.exit(1)
-    command = COMMAND[distro] + list(PACKAGE[distro].values())
+    command = COMMAND[distro] + flags + list(PACKAGE[distro].values())
     print(" ".join(quote(arg) for arg in command))
     os.execvp(command[0], command)
+
+
+def linux_distribution():
+    """Replacement for deprecated platform.linux_distribution()
+
+    Only tested on Ubuntu so far.
+    """
+    try:
+        with open("/etc/lsb-release") as f:
+            lines = f.readlines()
+    except (OSError, IOError):
+        return ("", "", "")
+    distrib = dict(line.split("=", 1) for line in lines)
+    return (
+        distrib.get("DISTRIB_ID", "").strip(),
+        distrib.get("DISTRIB_RELEASE", "").strip(),
+        distrib.get("DISTRIB_CODENAME", "").strip(),
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 # Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
@@ -7,7 +7,7 @@
 import argparse
 import collections
 import contextlib
-import cStringIO
+import io
 import multiprocessing.pool
 import os
 import shutil
@@ -22,8 +22,20 @@ PASSED = "PASSED"
 FAILED = "FAILED"
 EXCEPT = "EXCEPT"
 
+WINE_TESTS = [
+    "color-test",
+    "editable-text-test",
+    "fixed-test",
+    "object-data",
+    "shapes",
+    "tint",
+]
 
-def run(queue, name, cmd):
+
+def run(opts, queue, name, cmd):
+    if opts.wine and cmd[0].startswith("out/cur/"):
+        cmd[0] += ".exe"
+        cmd.insert(0, "wine")
     sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, _ = sub.communicate()
     if sub.returncode != 0:
@@ -33,13 +45,13 @@ def run(queue, name, cmd):
 
 
 def unit_test(opts, queue, name, args=[]):
-    return run(queue, name, ["out/cur/%s" % name] + args)
+    return run(opts, queue, name, ["out/cur/%s" % name] + args)
 
 
-def diff_test(queue, name, cmd, expected):
+def diff_test(opts, queue, name, cmd, expected):
     with NamedTemporaryDir() as d:
-        return (run(queue, name, cmd + ["--output=%s" % d])
-                and run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
+        return (run(opts, queue, name, cmd + ["--output=%s" % d]) and run(
+            opts, queue, name, ["diff", "--strip-trailing-cr", "-ru", "-x.*", expected, d]))
 
 
 def data_test(opts, queue, name, args=[], smoke_args=[]):
@@ -48,7 +60,7 @@ def data_test(opts, queue, name, args=[], smoke_args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    return diff_test(queue, name, ["out/cur/%s" % name] + args, expected)
+    return diff_test(opts, queue, name, ["out/cur/%s" % name] + args, expected)
 
 
 def offscreen_test(opts, queue, name, args=[]):
@@ -58,7 +70,7 @@ def offscreen_test(opts, queue, name, args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    return diff_test(queue, name, cmd + args, expected)
+    return diff_test(opts, queue, name, cmd + args, expected)
 
 
 def replay_test(opts, queue, name, args=[]):
@@ -68,7 +80,7 @@ def replay_test(opts, queue, name, args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    return diff_test(queue, name, cmd + args, expected)
+    return diff_test(opts, queue, name, cmd + args, expected)
 
 
 def call(args):
@@ -78,7 +90,7 @@ def call(args):
     name = args[3]
     args = list(args[4:])
 
-    sys.stdout = cStringIO.StringIO()
+    sys.stdout = io.StringIO()
 
     queue.put((
         name,
@@ -115,6 +127,7 @@ def main():
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--wine", action="store_true")
     parser.add_argument("-t", "--type", action="append", choices=test_types)
     parser.add_argument("test", nargs="*")
     opts = parser.parse_args()
@@ -123,12 +136,13 @@ def main():
     pool = multiprocessing.pool.ThreadPool()
     tests = [
         (unit_test, opts, queue, "color-test"),
+        (unit_test, opts, queue, "editable-text-test"),
         (unit_test, opts, queue, "fixed-test"),
         (data_test, opts, queue, "build-pix", [], ["--text"]),
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
-        (offscreen_test, opts, queue, "fast-motion"),
+        (offscreen_test, opts, queue, "fast-motion", ["--text"]),
         (offscreen_test, opts, queue, "main-screen"),
         (offscreen_test, opts, queue, "mission-briefing", ["--text"]),
         (offscreen_test, opts, queue, "options"),
@@ -164,6 +178,9 @@ def main():
             tests = [t for t in tests if t[0] != offscreen_test]
         if "replay" not in opts.type:
             tests = [t for t in tests if t[0] != replay_test]
+
+    if opts.wine:
+        tests = [t for t in tests if t[3] in WINE_TESTS]
 
     sys.stderr.write("Running %d tests:\n" % len(tests))
     start = time.time()

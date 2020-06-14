@@ -19,10 +19,10 @@
 #include "data/replay.hpp"
 
 #include <fcntl.h>
-#include <glob.h>
 #include <time.h>
 #include <unistd.h>
-#include <pn/file>
+#include <pn/input>
+#include <pn/output>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -40,7 +40,7 @@ namespace antares {
 ReplayData::ReplayData() {}
 
 ReplayData::ReplayData(pn::data_view in) {
-    if (!read_from(in.open(), this)) {
+    if (!read_from(in.input(), this)) {
         throw std::runtime_error("error while reading replay data");
     }
 }
@@ -85,7 +85,7 @@ enum {
     ACTION_KEY_UP   = (0x03 << 3) | VARINT,
 };
 
-static void write_varint(pn::file_view out, uint64_t value) {
+static void write_varint(pn::output_view out, uint64_t value) {
     if (value == 0) {
         constexpr uint8_t zero = '\0';
         out.write(pn::data_view{&zero, 1});
@@ -100,7 +100,7 @@ static void write_varint(pn::file_view out, uint64_t value) {
     }
 }
 
-static void tag_varint(pn::file_view out, uint64_t tag, uint64_t value) {
+static void tag_varint(pn::output_view out, uint64_t tag, uint64_t value) {
     write_varint(out, tag);
     write_varint(out, value);
 }
@@ -110,16 +110,16 @@ static void tag_varint(pn::file_view out, uint64_t tag, uint64_t value) {
 // both without getting a linker error for having a duplicate symbol.
 // It doesn't matter which version we use if they're the same.
 template <typename T, bool is_size_t = std::is_same<T, size_t>::value>
-static bool read_varint(pn::file_view in, T* out);
+static bool read_varint(pn::input_view in, T* out);
 
 template <>
-bool read_varint<uint64_t, false>(pn::file_view in, uint64_t* out) {
+bool read_varint<uint64_t, false>(pn::input_view in, uint64_t* out) {
     uint64_t byte;
     *out      = 0;
     int shift = 0;
     do {
         uint8_t c;
-        if (fread(&c, 1, 1, in.c_obj()) != 1) {
+        if (!in.read(&c)) {
             return false;
         }
         byte = c;
@@ -130,7 +130,7 @@ bool read_varint<uint64_t, false>(pn::file_view in, uint64_t* out) {
 }
 
 template <>
-bool read_varint<int64_t, false>(pn::file_view in, int64_t* out) {
+bool read_varint<int64_t, false>(pn::input_view in, int64_t* out) {
     uint64_t u64;
     if (!read_varint<uint64_t, false>(in, &u64)) {
         return false;
@@ -143,7 +143,7 @@ bool read_varint<int64_t, false>(pn::file_view in, int64_t* out) {
 }
 
 template <>
-bool read_varint<size_t, true>(pn::file_view in, size_t* out) {
+bool read_varint<size_t, true>(pn::input_view in, size_t* out) {
     uint64_t u64;
     if (!read_varint<uint64_t, false>(in, &u64)) {
         return false;
@@ -153,7 +153,7 @@ bool read_varint<size_t, true>(pn::file_view in, size_t* out) {
 }
 
 template <>
-bool read_varint<int32_t, false>(pn::file_view in, int32_t* out) {
+bool read_varint<int32_t, false>(pn::input_view in, int32_t* out) {
     int64_t i64;
     if (!read_varint<int64_t, false>(in, &i64)) {
         return false;
@@ -163,7 +163,7 @@ bool read_varint<int32_t, false>(pn::file_view in, int32_t* out) {
 }
 
 template <>
-bool read_varint<uint8_t, false>(pn::file_view in, uint8_t* out) {
+bool read_varint<uint8_t, false>(pn::input_view in, uint8_t* out) {
     uint64_t u64;
     if (!read_varint<uint64_t, false>(in, &u64)) {
         return false;
@@ -172,20 +172,20 @@ bool read_varint<uint8_t, false>(pn::file_view in, uint8_t* out) {
     return true;
 }
 
-static void tag_string(pn::file_view out, uint64_t tag, pn::string_view s) {
+static void tag_string(pn::output_view out, uint64_t tag, pn::string_view s) {
     write_varint(out, tag);
     write_varint(out, s.size());
     out.write(s);
 }
 
-static bool read_string(pn::file_view in, pn::string* out) {
+static bool read_string(pn::input_view in, pn::string* out) {
     size_t size;
     if (!read_varint(in, &size)) {
         return false;
     }
     pn::data data;
     data.resize(size);
-    if (fread(data.data(), 1, data.size(), in.c_obj()) != data.size()) {
+    if (!in.read(&data)) {
         return false;
     }
     *out = data.as_string().copy();
@@ -193,29 +193,29 @@ static bool read_string(pn::file_view in, pn::string* out) {
 }
 
 template <typename T>
-static void tag_message(pn::file_view out, uint64_t tag, const T& message) {
+static void tag_message(pn::output_view out, uint64_t tag, const T& message) {
     pn::data bytes;
-    message.write_to(bytes.open("a"));
+    message.write_to(bytes.output());
     write_varint(out, tag);
     write_varint(out, bytes.size());
     out.write(bytes);
 }
 
 template <typename T>
-static bool read_message(pn::file_view in, T* out) {
+static bool read_message(pn::input_view in, T* out) {
     size_t size;
     if (!read_varint(in, &size)) {
         return false;
     }
     pn::data d;
     d.resize(size);
-    if (fread(d.data(), 1, d.size(), in.c_obj()) != d.size()) {
+    if (!in.read(&d)) {
         return false;
     }
-    return read_from(d.open(), out);
+    return read_from(d.input(), out);
 }
 
-bool read_from(pn::file_view in, ReplayData* replay) {
+bool read_from(pn::input_view in, ReplayData* replay) {
     while (true) {
         uint64_t tag;
         if (!read_varint(in, &tag)) {
@@ -256,7 +256,7 @@ bool read_from(pn::file_view in, ReplayData* replay) {
     }
 }
 
-bool read_from(pn::file_view in, ReplayData::Scenario* scenario) {
+bool read_from(pn::input_view in, ReplayData::Scenario* scenario) {
     while (true) {
         uint64_t tag;
         if (!read_varint(in, &tag)) {
@@ -281,7 +281,7 @@ bool read_from(pn::file_view in, ReplayData::Scenario* scenario) {
     }
 }
 
-bool read_from(pn::file_view in, ReplayData::Action* action) {
+bool read_from(pn::input_view in, ReplayData::Action* action) {
     while (true) {
         uint64_t tag;
         if (!read_varint(in, &tag)) {
@@ -315,7 +315,7 @@ bool read_from(pn::file_view in, ReplayData::Action* action) {
     }
 }
 
-void ReplayData::write_to(pn::file_view out) const {
+void ReplayData::write_to(pn::output_view out) const {
     tag_message(out, SCENARIO, scenario);
     tag_varint(out, CHAPTER, chapter_id);
     tag_varint(out, GLOBAL_SEED, global_seed);
@@ -325,12 +325,12 @@ void ReplayData::write_to(pn::file_view out) const {
     }
 }
 
-void ReplayData::Scenario::write_to(pn::file_view out) const {
+void ReplayData::Scenario::write_to(pn::output_view out) const {
     tag_string(out, SCENARIO_IDENTIFIER, identifier);
     tag_string(out, SCENARIO_VERSION, version);
 }
 
-void ReplayData::Action::write_to(pn::file_view out) const {
+void ReplayData::Action::write_to(pn::output_view out) const {
     tag_varint(out, ACTION_AT, at);
     for (uint8_t key : keys_down) {
         tag_varint(out, ACTION_KEY_DOWN, key);
@@ -342,36 +342,22 @@ void ReplayData::Action::write_to(pn::file_view out) const {
 
 ReplayBuilder::ReplayBuilder() {}
 
-namespace {
-
-// TODO(sfiera): put globbing in a central location.
-struct ScopedGlob {
-    glob_t data;
-    ScopedGlob() { memset(&data, 0, sizeof(data)); }
-    ~ScopedGlob() { globfree(&data); }
-};
-
-}  // namespace
+static bool is_replay(pn::string_view s) { return s.rfind(".nlrp") == (s.size() - 5); }
 
 // Deletes the oldest replay until there are fewer than `count` in the replays folder.
 static void cull_replays(size_t count) {
     if (path::isdir(dirs().replays)) {
-        ScopedGlob g;
-        pn::string str = pn::format("{0}/*.nlrp", dirs().replays);
-        glob(str.c_str(), 0, NULL, &g.data);
-
-        map<int64_t, const char*> files;
-        for (int i = 0; i < g.data.gl_pathc; ++i) {
-            struct stat st;
-            if (stat(g.data.gl_pathv[i], &st) < 0) {
-                continue;
+        map<int64_t, pn::string> files;
+        for (const auto& ent : sfz::scandir(dirs().replays)) {
+            if (is_replay(ent.name)) {
+                // TODO(sfiera): make the pn::string_view{} constructor unnecessary.
+                files[ent.st.st_mtime] =
+                        sfz::path::join(dirs().replays, pn::string_view{ent.name});
             }
-            files[st.st_mtime] = g.data.gl_pathv[i];
         }
         while (files.size() >= count) {
-            if (unlink(files.begin()->second) < 0) {
-                break;
-            }
+            sfz::unlink(files.begin()->second);
+            files.erase(files.begin());
         }
     } else {
         sfz::makedirs(dirs().replays, 0755);
@@ -387,27 +373,35 @@ void ReplayBuilder::init(
     _global_seed         = global_seed;
 }
 
+static bool safe_localtime(time_t* t, struct tm* tm) {
+#ifdef _WIN32
+    return localtime_s(tm, t) == 0;
+#else
+    return localtime_r(t, tm) != nullptr;
+#endif
+}
+
 void ReplayBuilder::start() {
     _at = 1;
     cull_replays(10);
     time_t    t;
     struct tm tm;
     char      buffer[1024];
-    if ((time(&t) < 0) || !localtime_r(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
+    if ((time(&t) < 0) || !safe_localtime(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
     pn::string path = pn::format("{0}/Replay {1}.nlrp", dirs().replays, buffer);
-    pn::file   f    = pn::open(path, "w");
-    if (f.c_obj()) {
-        _file = std::move(f);
-        tag_message(_file, SCENARIO, _scenario);
-        tag_varint(_file, CHAPTER, _chapter_id);
-        tag_varint(_file, GLOBAL_SEED, _global_seed);
+    pn::output o    = pn::output{path, pn::binary};
+    if (o) {
+        _out = std::move(o);
+        tag_message(_out, SCENARIO, _scenario);
+        tag_varint(_out, CHAPTER, _chapter_id);
+        tag_varint(_out, GLOBAL_SEED, _global_seed);
     }
 }
 
 void ReplayBuilder::key_down(const KeyDownEvent& event) {
-    if (!_file.c_obj()) {
+    if (!_out.c_obj()) {
         return;
     }
     for (auto i : range<int>(KEY_COUNT)) {
@@ -415,13 +409,13 @@ void ReplayBuilder::key_down(const KeyDownEvent& event) {
             ReplayData::Action action = {};
             action.at                 = _at;
             action.keys_down.push_back(i);
-            tag_message(_file, ACTION, action);
+            tag_message(_out, ACTION, action);
         }
     }
 }
 
 void ReplayBuilder::key_up(const KeyUpEvent& event) {
-    if (_file.c_obj()) {
+    if (_out.c_obj()) {
         return;
     }
     for (auto i : range<int>(KEY_COUNT)) {
@@ -429,7 +423,7 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
             ReplayData::Action action = {};
             action.at                 = _at;
             action.keys_up.push_back(i);
-            tag_message(_file, ACTION, action);
+            tag_message(_out, ACTION, action);
             break;
         }
     }
@@ -438,10 +432,10 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
 void ReplayBuilder::next() { ++_at; }
 
 void ReplayBuilder::finish() {
-    if (!_file.c_obj()) {
+    if (!_out.c_obj()) {
         return;
     }
-    tag_varint(_file, DURATION, _at);
+    tag_varint(_out, DURATION, _at);
 }
 
 }  // namespace antares

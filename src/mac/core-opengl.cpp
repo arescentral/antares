@@ -19,7 +19,7 @@
 #include "mac/core-opengl.hpp"
 
 #include <OpenGL/OpenGL.h>
-#include <pn/file>
+#include <pn/output>
 
 namespace antares {
 namespace cgl {

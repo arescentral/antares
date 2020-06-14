@@ -42,31 +42,114 @@ int32_t        antares_window_screen_height(const AntaresWindow* window);
 int32_t        antares_window_viewport_width(const AntaresWindow* window);
 int32_t        antares_window_viewport_height(const AntaresWindow* window);
 
-typedef struct AntaresEventTranslator AntaresEventTranslator;
-AntaresEventTranslator*               antares_event_translator_create();
-void antares_event_translator_destroy(AntaresEventTranslator* translator);
+void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y);
 
-void antares_event_translator_set_window(
-        AntaresEventTranslator* translator, AntaresWindow* window);
-void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y);
+typedef enum {
+    ANTARES_WINDOW_CALLBACK_KEY_DOWN,
+    ANTARES_WINDOW_CALLBACK_KEY_UP,
+    ANTARES_WINDOW_CALLBACK_CAPS_LOCK,
+    ANTARES_WINDOW_CALLBACK_CAPS_UNLOCK,
 
-void antares_event_translator_set_mouse_down_callback(
-        AntaresEventTranslator* translator,
-        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
+    ANTARES_WINDOW_CALLBACK_MOUSE_DOWN,
+    ANTARES_WINDOW_CALLBACK_MOUSE_UP,
+    ANTARES_WINDOW_CALLBACK_MOUSE_MOVE,
+
+    ANTARES_WINDOW_CALLBACK_REPLACE,
+    ANTARES_WINDOW_CALLBACK_SELECT,
+    ANTARES_WINDOW_CALLBACK_MARK,
+    ANTARES_WINDOW_CALLBACK_ACCEPT,
+    ANTARES_WINDOW_CALLBACK_NEWLINE,
+    ANTARES_WINDOW_CALLBACK_TAB,
+    ANTARES_WINDOW_CALLBACK_ESCAPE,
+
+    ANTARES_WINDOW_CALLBACK_GET_EDITING,
+    ANTARES_WINDOW_CALLBACK_GET_OFFSET,
+    ANTARES_WINDOW_CALLBACK_GET_SIZE,
+    ANTARES_WINDOW_CALLBACK_GET_SELECTION,
+    ANTARES_WINDOW_CALLBACK_GET_MARK,
+    ANTARES_WINDOW_CALLBACK_GET_TEXT,
+} antares_window_callback_type;
+
+typedef struct {
+    int begin, end;
+} antares_window_callback_range;
+
+typedef enum {
+    ANTARES_WINDOW_CALLBACK_OFFSET_PREV_SAME  = -4,
+    ANTARES_WINDOW_CALLBACK_OFFSET_PREV_START = -3,
+    ANTARES_WINDOW_CALLBACK_OFFSET_PREV_END   = -2,
+    ANTARES_WINDOW_CALLBACK_OFFSET_THIS_START = -1,
+    ANTARES_WINDOW_CALLBACK_OFFSET_THIS_END   = +1,
+    ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_START = +2,
+    ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_END   = +3,
+    ANTARES_WINDOW_CALLBACK_OFFSET_NEXT_SAME  = +4,
+} antares_window_callback_offset;
+
+typedef enum {
+    ANTARES_WINDOW_CALLBACK_UNIT_GLYPHS     = 0,
+    ANTARES_WINDOW_CALLBACK_UNIT_WORDS      = 1,
+    ANTARES_WINDOW_CALLBACK_UNIT_LINES      = 2,
+    ANTARES_WINDOW_CALLBACK_UNIT_PARAGRAPHS = 3,
+} antares_window_callback_unit;
+
+typedef union {
+    int key_down;
+    int key_up;
+
+    struct {
+        int     button;
+        int32_t x, y;
+        int     count;
+    } mouse_down;
+
+    struct {
+        int     button;
+        int32_t x, y;
+    } mouse_up;
+
+    struct {
+        int32_t x, y;
+    } mouse_move;
+
+    struct {
+        antares_window_callback_range range;
+        const char*                   data;
+        int                           size;
+    } replace;
+
+    antares_window_callback_range select;
+
+    antares_window_callback_range mark;
+
+    bool* get_editing;
+
+    struct {
+        int                            origin;
+        antares_window_callback_offset to;
+        antares_window_callback_unit   unit;
+        int*                           offset;
+    } get_offset;
+
+    int*                           get_size;
+    antares_window_callback_range* get_selection;
+    antares_window_callback_range* get_mark;
+
+    struct {
+        antares_window_callback_range range;
+        const char**                  data;
+        int*                          size;
+    } get_text;
+} antares_window_callback_data;
+
+void antares_window_set_callback(
+        AntaresWindow* window,
+        void (*callback)(
+                antares_window_callback_type type, antares_window_callback_data data,
+                void* userdata),
         void* userdata);
-void antares_event_translator_set_mouse_up_callback(
-        AntaresEventTranslator* translator,
-        void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata);
-void antares_event_translator_set_mouse_move_callback(
-        AntaresEventTranslator* translator, void (*callback)(int32_t x, int32_t y, void* userdata),
-        void*                   userdata);
-void antares_event_translator_set_caps_lock_callback(
-        AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata);
-void antares_event_translator_set_caps_unlock_callback(
-        AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata);
 
-bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until);
-void antares_event_translator_cancel(AntaresEventTranslator* translator);
+bool antares_window_next_event(AntaresWindow* window, int64_t until);
+void antares_window_cancel_event(AntaresWindow* window);
 
 #ifdef __cplusplus
 }  // extern "C"
