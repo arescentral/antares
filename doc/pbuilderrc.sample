@@ -40,3 +40,6 @@ APTCACHE="/var/cache/pbuilder/$NAME/aptcache/"
 BUILDPLACE="/var/cache/pbuilder/build"
 HOOKDIR="/var/cache/pbuilder/hook.d/"
 USENETWORK="no"
+
+mkdir -p $BUILDRESULT
+mkdir -p $APTCACHE
