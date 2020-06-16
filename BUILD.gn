@@ -13,6 +13,12 @@ antares_version = "0.9.1"
 import("//build/lib/embed.gni")
 import("//build/lib/mac/version.gni")
 
+if (target_os == "win") {
+  exe = "exe"
+} else {
+  exe = ""
+}
+
 group("default") {
   testonly = true
   deps = [
@@ -453,18 +459,14 @@ embed("embed_glsl_vertex") {
 
 executable("hash-data") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/hash-data.cpp" ]
   deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("antares-ls-scenarios") {
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/ls-scenarios.cpp" ]
   deps = [
     ":libantares",
@@ -475,9 +477,7 @@ executable("antares-ls-scenarios") {
 
 executable("object-data") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/object-data.cpp" ]
   deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
@@ -485,9 +485,7 @@ executable("object-data") {
 
 executable("shapes") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/shapes.cpp" ]
   deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
@@ -495,9 +493,7 @@ executable("shapes") {
 
 executable("tint") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/tint.cpp" ]
   deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
@@ -546,9 +542,7 @@ source_set("libantares-test") {
 
 executable("color-test") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/drawing/color.test.cpp" ]
   deps = [
     ":libantares-test",
@@ -559,9 +553,7 @@ executable("color-test") {
 
 executable("editable-text-test") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/ui/editable-text.test.cpp" ]
   deps = [
     ":libantares-test",
@@ -572,9 +564,7 @@ executable("editable-text-test") {
 
 executable("fixed-test") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/math/fixed.test.cpp" ]
   deps = [
     ":libantares-test",
@@ -585,9 +575,7 @@ executable("fixed-test") {
 
 executable("offscreen") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/offscreen.cpp" ]
   deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
@@ -595,9 +583,7 @@ executable("offscreen") {
 
 executable("replay") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/replay.cpp" ]
   deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
@@ -605,18 +591,14 @@ executable("replay") {
 
 executable("build-pix") {
   testonly = true
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/build-pix.cpp" ]
   deps = [ ":libantares-test" ]
   configs += [ ":antares_private" ]
 }
 
 executable("antares-glfw") {
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [
     "include/glfw/video-driver.hpp",
     "src/glfw/main.cpp",
@@ -631,9 +613,7 @@ executable("antares-glfw") {
 }
 
 executable("antares-install-data") {
-  if (target_os == "win") {
-    output_extension = "exe"
-  }
+  output_extension = exe
   sources = [ "src/bin/install-data.cpp" ]
   deps = [
     ":libantares",
