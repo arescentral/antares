@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdint.h>
+
 #include <pn/array>
 #include <pn/output>
 #include <pn/string>
@@ -210,113 +211,29 @@ pn::data convert_snd(const SoundInfo& info, pn::data_view data) {
 }
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static int64_t    kVersion        = 21;
-
-static const char kPluginInfoFile[] = "info.pn";
-
-Info info_for_zip_archive(ZipArchive& archive) {
-    ZipFileReader file{archive, kPluginInfoFile};
-    try {
-        pn::value  x;
-        pn_error_t e;
-        if (!pn::parse(file.data().input(), &x, &e)) {
-            throw std::runtime_error(
-                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
-        }
-        return info(path_value{x});
-    } catch (...) {
-        std::throw_with_nested(std::runtime_error(archive.path().copy().c_str()));
-    }
-}
-
-void check_version(const Info& archive, int64_t expected) {
-    int64_t actual = archive.format;
-    if (actual != expected) {
-        throw std::runtime_error(
-                pn::format("unsupported plugin version {0}", pn::dump(actual, pn::dump_short))
-                        .c_str());
-    }
-}
-
-void check_identifier(const Info& archive, pn::string_view expected) {
-    if (archive.identifier.hash != expected) {
-        throw std::runtime_error(pn::format(
-                                         "mismatch in plugin identifier {0}",
-                                         pn::dump(archive.identifier.hash, pn::dump_short))
-                                         .c_str());
-    }
-}
 
 }  // namespace
 
 DataExtractor::Observer::~Observer() {}
 
 DataExtractor::DataExtractor(pn::string_view downloads_dir, pn::string_view output_dir)
-        : _downloads_dir(downloads_dir.copy()),
-          _output_dir(output_dir.copy()),
-          _scenario(kFactoryScenarioIdentifier) {}
+        : _downloads_dir(downloads_dir.copy()), _output_dir(output_dir.copy()) {}
 
-void DataExtractor::set_scenario(pn::string_view scenario) { _scenario = scenario.copy(); }
-
-void DataExtractor::set_plugin_file(pn::string_view path) {
-    pn::string found_scenario;
-    {
-        // Make sure that the provided file is actually an archive that
-        // will be usable as a plugin, then get its identifier.
-        ZipArchive archive(path, 0);
-        Info       info = info_for_zip_archive(archive);
-        check_version(info, kVersion);
-        found_scenario = info.identifier.hash.copy();
+void DataExtractor::extract(Observer* observer) const {
+    if (current()) {
+        return;
     }
+    download(
+            observer, kDownloadBase, "Ares", "1.2.0",
+            {0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931});
 
-    // Copy it to $DOWNLOADS/$IDENTIFIER.antaresplugin.  This is where
-    // extract_scenario() will expect it later.
-    pn::string out_path = pn::format("{0}/{1}.antaresplugin", _downloads_dir, found_scenario);
-    if (path != out_path) {
-        makedirs(path::dirname(out_path), 0755);
-        mapped_file file(path);
-        pn::output  o = pn::output{out_path, pn::binary};
-        o.write(file.data());
-    }
-    pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, found_scenario);
-    if (path::exists(scenario_dir)) {
-        rmtree(scenario_dir);
-    }
-
-    std::swap(_scenario, found_scenario);
+    pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier);
+    rmtree(scenario_dir);
+    extract_original(observer, "Ares-1.2.0.zip");
 }
 
 bool DataExtractor::current() const {
-    return scenario_current(_scenario) && scenario_current(kFactoryScenarioIdentifier);
-}
-
-void DataExtractor::extract(Observer* observer) const {
-    extract_factory_scenario(observer);
-    extract_plugin_scenario(observer);
-}
-
-void DataExtractor::extract_factory_scenario(Observer* observer) const {
-    if (!scenario_current(kFactoryScenarioIdentifier)) {
-        download(
-                observer, kDownloadBase, "Ares", "1.2.0",
-                {0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931});
-
-        pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier);
-        rmtree(scenario_dir);
-        extract_original(observer, "Ares-1.2.0.zip");
-    }
-}
-
-void DataExtractor::extract_plugin_scenario(Observer* observer) const {
-    if ((_scenario != kFactoryScenarioIdentifier) && !scenario_current(_scenario)) {
-        pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, _scenario);
-        rmtree(scenario_dir);
-        extract_plugin(observer);
-    }
-}
-
-bool DataExtractor::scenario_current(pn::string_view scenario) const {
-    return sfz::path::isdir(pn::format("{0}/{1}", _output_dir, scenario));
+    return sfz::path::isdir(pn::format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier));
 }
 
 void DataExtractor::download(
@@ -384,32 +301,6 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
                 "{0}/{1}/sounds/{2}.aiff", _output_dir, kFactoryScenarioIdentifier, info.name);
         makedirs(path::dirname(output), 0755);
         pn::output(output, pn::binary).write(data).check();
-    }
-}
-
-void DataExtractor::extract_plugin(Observer* observer) const {
-    pn::string file   = pn::format("{0}.antaresplugin", _scenario);
-    pn::string status = pn::format("Extracting {0}...", file);
-    observer->status(status);
-    pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
-    ZipArchive archive(full_path, 0);
-    Info       info = info_for_zip_archive(archive);
-
-    check_version(info, kVersion);
-    check_identifier(info, _scenario);
-
-    for (size_t i : range(archive.size())) {
-        ZipFileReader   file(archive, i);
-        pn::string_view in_path = file.path();
-
-        // Skip directories and identifier file.
-        if (in_path.rfind("/") == (in_path.size() - 1)) {
-            continue;
-        }
-
-        pn::string output_path = pn::format("{0}/{1}/{2}", _output_dir, _scenario, in_path);
-        makedirs(path::dirname(output_path), 0755);
-        pn::output(output_path, pn::binary).write(file.data()).check();
     }
 }
 

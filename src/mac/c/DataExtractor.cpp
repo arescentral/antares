@@ -41,29 +41,11 @@ class UserDataObserver : public DataExtractor::Observer {
 
 }  // namespace
 
-extern "C" bool antares_data_extract_path(
-        const char* download_dir, const char* scenario_dir, const char* plugin_file,
-        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message) {
+extern "C" bool antares_data_extract(
+        const char* download_dir, const char* scenario_dir, void (*callback)(const char*, void*),
+        void* userdata, CFStringRef* error_message) {
     try {
         DataExtractor extractor(download_dir, scenario_dir);
-        extractor.set_plugin_file(plugin_file);
-        if (!extractor.current()) {
-            UserDataObserver observer(callback, userdata);
-            extractor.extract(&observer);
-        }
-    } catch (std::exception& e) {
-        *error_message = cf::wrap(pn::string_view{full_exception_string(e)}).release();
-        return false;
-    }
-    return true;
-}
-
-extern "C" bool antares_data_extract_identifier(
-        const char* download_dir, const char* scenario_dir, const char* identifier,
-        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message) {
-    try {
-        DataExtractor extractor(download_dir, scenario_dir);
-        extractor.set_scenario(identifier);
         if (!extractor.current()) {
             UserDataObserver observer(callback, userdata);
             extractor.extract(&observer);

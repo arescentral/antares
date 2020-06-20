@@ -36,12 +36,9 @@ class PrintStatusObserver : public DataExtractor::Observer {
 
 void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
-            "usage: {0} [OPTIONS] [plugin]\n"
+            "usage: {0} [OPTIONS]\n"
             "\n"
             "  Downloads and extracts game data\n"
-            "\n"
-            "  arguments:\n"
-            "    plugin              a plugin to install (default: install factory scenario)\n"
             "\n"
             "  options:\n"
             "    -s, --source=SOURCE directory in which to store or expect zip files\n"
@@ -54,16 +51,6 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
 
 void main(int argc, char* const* argv) {
     args::callbacks callbacks;
-
-    sfz::optional<pn::string> plugin;
-    callbacks.argument = [&plugin](pn::string_view arg) {
-        if (!plugin.has_value()) {
-            plugin.emplace(arg.copy());
-        } else {
-            return false;
-        }
-        return true;
-    };
 
     pn::string source      = dirs().downloads.copy();
     pn::string dest        = dirs().scenarios.copy();
@@ -97,9 +84,6 @@ void main(int argc, char* const* argv) {
     args::parse(argc - 1, argv + 1, callbacks);
 
     DataExtractor extractor(source, dest);
-    if (plugin.has_value()) {
-        extractor.set_plugin_file(*plugin);
-    }
 
     if (extractor.current()) {
         pn::err.format("{0} is up-to-date!\n", dest);

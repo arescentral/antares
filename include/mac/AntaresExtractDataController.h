@@ -22,10 +22,8 @@
 #include <Cocoa/Cocoa.h>
 
 @interface AntaresExtractDataController : NSObject {
-    id        _target;
-    SEL       _selector;
-    NSString* _path;
-    NSString* _scenario;
+    id  _target;
+    SEL _selector;
 
     NSWindow*            _window;
     NSProgressIndicator* _progress_bar;

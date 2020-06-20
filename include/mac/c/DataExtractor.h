@@ -25,12 +25,9 @@
 extern "C" {
 #endif
 
-bool antares_data_extract_path(
-        const char* download_dir, const char* scenario_dir, const char* plugin_file,
-        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message);
-bool antares_data_extract_identifier(
-        const char* download_dir, const char* scenario_dir, const char* identifier,
-        void (*callback)(const char*, void*), void* userdata, CFStringRef* error_message);
+bool antares_data_extract(
+        const char* download_dir, const char* scenario_dir, void (*callback)(const char*, void*),
+        void* userdata, CFStringRef* error_message);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -33,28 +33,17 @@ class DataExtractor {
 
     DataExtractor(pn::string_view downloads_dir, pn::string_view output_dir);
 
-    void set_scenario(pn::string_view scenario);
-    void set_plugin_file(pn::string_view path);
-
     bool current() const;
     void extract(Observer* observer) const;
 
   private:
-    bool scenario_current(pn::string_view scenario) const;
-
-    void extract_factory_scenario(Observer* observer) const;
-    void extract_plugin_scenario(Observer* observer) const;
-
     void download(
             Observer* observer, pn::string_view base, pn::string_view name,
             pn::string_view version, const sfz::sha1::digest& digest) const;
     void extract_original(Observer* observer, pn::string_view zip) const;
-    void extract_supplemental(Observer* observer, pn::string_view zip) const;
-    void extract_plugin(Observer* observer) const;
 
     const pn::string _downloads_dir;
     const pn::string _output_dir;
-    pn::string       _scenario;
 };
 
 }  // namespace antares
