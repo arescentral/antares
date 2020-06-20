@@ -23,6 +23,7 @@
 #include <array>
 #include <pn/input>
 #include <sfz/sfz.hpp>
+#include <zipxx/zipxx.hpp>
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
@@ -43,6 +44,8 @@
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
 #include "video/driver.hpp"
+
+using zipxx::ZipArchive;
 
 namespace path = sfz::path;
 
@@ -86,10 +89,12 @@ class ResourceLister : public sfz::TreeWalker {
 static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_view extension) {
     std::vector<pn::string> resources;
     pn::string              path;
-    if (plug.info.identifier.hash == kFactoryScenarioIdentifier) {
-        path = pn::format("{0}/{1}", application_path(), dir);
+    if (plug.dir.has_value()) {
+        path = pn::format("{0}/{1}", *plug.dir, dir);
+    } else if (plug.zip) {
+        return resources;
     } else {
-        path = pn::format("{0}/{1}", plug.path, dir);
+        path = pn::format("{0}/{1}", application_path(), dir);
     }
     if (sfz::path::isdir(path)) {
         sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
@@ -100,19 +105,63 @@ static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_vi
 std::vector<pn::string> Resource::list_levels() { return list_resources("levels", ".pn"); }
 std::vector<pn::string> Resource::list_replays() { return list_resources("replays", ".NLRP"); }
 
+static bool exists(pn::string_view dir, pn::string_view resource_path) {
+    return path::isfile(pn::format("{0}/{1}", dir, resource_path));
+}
+
+static std::unique_ptr<sfz::mapped_file> try_load(
+        pn::string_view dir, pn::string_view resource_path) {
+    pn::string path = pn::format("{0}/{1}", dir, resource_path);
+    if (!path::isfile(path)) {
+        return nullptr;
+    }
+    return std::unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
+}
+
+static bool exists(const ZipArchive& zip, pn::string_view resource_path) { return false; }
+
+static std::unique_ptr<sfz::mapped_file> try_load(
+        const ZipArchive& zip, pn::string_view resource_path) {
+    return nullptr;
+}
+
+static bool exists(pn::string_view resource_path) {
+    return (plug.dir.has_value() && exists(*plug.dir, resource_path)) ||
+           (plug.zip && exists(*plug.zip, resource_path)) ||
+           exists(factory_scenario_path(), resource_path) ||
+           exists(application_path(), resource_path);
+}
+
 static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
-    pn::string_view scenario = plug.path;
-    pn::string_view factory  = factory_scenario_path();
-    pn::string_view app      = application_path();
-    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
-        pn::string path = pn::format("{0}/{1}", dir, resource_path);
-        if (path::isfile(path)) {
-            return std::unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
-        }
+    std::unique_ptr<sfz::mapped_file> result = nullptr;
+    if ((plug.dir.has_value() && (result = try_load(*plug.dir, resource_path))) ||
+        (plug.zip && (result = try_load(*plug.zip, resource_path))) ||
+        (result = try_load(factory_scenario_path(), resource_path)) ||
+        (result = try_load(application_path(), resource_path))) {
+        return result;
     }
     throw std::runtime_error(
             pn::format("couldn't find resource {0}", pn::dump(resource_path, pn::dump_short))
                     .c_str());
+}
+
+static std::unique_ptr<sfz::mapped_file> info_load() {
+    std::unique_ptr<sfz::mapped_file> result = nullptr;
+    if (plug.dir.has_value()) {
+        if (!(result = try_load(*plug.dir, "info.pn"))) {
+            throw std::runtime_error(pn::format("{}: not an antares plugin", *plug.dir).c_str());
+        }
+    } else if (plug.zip) {
+        if (!(result = try_load(*plug.zip, "info.pn"))) {
+            throw std::runtime_error(
+                    pn::format("{}: not an antares plugin", plug.zip->path()).c_str());
+        }
+    } else {
+        if (!(result = try_load(application_path(), "info.pn"))) {
+            throw std::runtime_error("missing application data");
+        }
+    }
+    return result;
 }
 
 static pn::value procyon(pn::string_view path) {
@@ -126,17 +175,15 @@ static pn::value procyon(pn::string_view path) {
     return x;
 }
 
-static bool exists(pn::string_view resource_path) {
-    pn::string_view scenario = plug.path;
-    pn::string_view factory  = factory_scenario_path();
-    pn::string_view app      = application_path();
-    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
-        pn::string path = pn::format("{0}/{1}", dir, resource_path);
-        if (path::isfile(path)) {
-            return true;
-        }
+static pn::value info_procyon() {
+    pn::value  x;
+    pn_error_t e;
+    if (!pn::parse(info_load()->data().input(), &x, &e)) {
+        throw std::runtime_error(
+                pn::format("info.pn: {0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
+                        .c_str());
     }
-    return false;
+    return x;
 }
 
 static Texture load_hidpi_texture(pn::string_view name) {
@@ -205,14 +252,7 @@ Texture Resource::font_image(pn::string_view name) {
     return load_hidpi_texture(pn::format("fonts/{0}", name));
 }
 
-Info Resource::info() {
-    static const char path[] = "info.pn";
-    try {
-        return ::antares::info(path_value{procyon(path)});
-    } catch (...) {
-        std::throw_with_nested(std::runtime_error(path));
-    }
-}
+Info Resource::info() { return ::antares::info(path_value{info_procyon()}); }
 
 InterfaceData Resource::interface(pn::string_view name) {
     pn::string path = pn::format("interfaces/{0}.pn", name);

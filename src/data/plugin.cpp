@@ -20,6 +20,8 @@
 
 #include <algorithm>
 #include <pn/output>
+#include <sfz/sfz.hpp>
+#include <zipxx/zipxx.hpp>
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
@@ -35,6 +37,8 @@
 
 using sfz::range;
 using std::vector;
+
+namespace path = sfz::path;
 
 namespace antares {
 
@@ -56,8 +60,17 @@ static void read_all_levels() {
     }
 }
 
-void PluginInit(pn::string_view path) {
-    plug.path = path.copy();
+void PluginInit(sfz::optional<pn::string_view> path) {
+    plug.dir = sfz::nullopt;
+    plug.zip = nullptr;
+    if (path.has_value()) {
+        if (path::isdir(*path)) {
+            plug.dir.emplace(path->copy());
+        } else {
+            plug.zip.reset(new zipxx::ZipArchive(*path, 0));
+        }
+    }
+
     plug.info = Resource::info();
     try {
         if (plug.info.format != kPluginFormat) {

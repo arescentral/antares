@@ -19,6 +19,8 @@
 #ifndef ANTARES_UI_FLOWS_MASTER_HPP_
 #define ANTARES_UI_FLOWS_MASTER_HPP_
 
+#include <sfz/sfz.hpp>
+
 #include "game/main.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/play-again.hpp"
@@ -27,7 +29,7 @@ namespace antares {
 
 class Master : public Card {
   public:
-    Master(pn::string_view plugin_path, int32_t seed);
+    Master(sfz::optional<pn::string_view> plugin_path, int32_t seed);
 
     virtual void become_front();
     virtual void draw() const;
@@ -44,12 +46,12 @@ class Master : public Card {
         MAIN_SCREEN,
     };
 
-    State         _state;
-    pn::string    _plugin_path;
-    const int32_t _seed;
-    bool          _skipped;
-    Texture       _publisher_screen;
-    Texture       _ego_screen;
+    State                     _state;
+    sfz::optional<pn::string> _plugin_path;
+    const int32_t             _seed;
+    bool                      _skipped;
+    Texture                   _publisher_screen;
+    Texture                   _ego_screen;
 };
 
 }  // namespace antares

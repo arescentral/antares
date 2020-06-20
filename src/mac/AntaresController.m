@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include "mac/AntaresExtractDataController.h"
 #include "mac/c/AntaresController.h"
-#include "mac/c/scenario-list.h"
 
 #define kScreenWidth @"ScreenWidth"
 #define kScreenHeight @"ScreenHeight"
@@ -38,20 +37,6 @@
 
 #define kFactoryScenarioIdentifier @"4cab7415715aeeacf1486a352267ae82c0efb220"
 
-static NSInteger compare_scenarios(id x, id y, void* unused) {
-    (void)unused;
-
-    return [[x objectForKey:kTitle] caseInsensitiveCompare:[y objectForKey:kTitle]];
-}
-
-static NSString* str(const char* utf8_bytes) { return [NSString stringWithUTF8String:utf8_bytes]; }
-
-static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8_bytes)]; }
-
-static bool isWebScheme(NSURL* url) {
-    return [[url scheme] isEqual:@"http"] || [[url scheme] isEqual:@"https"];
-}
-
 @interface AntaresController (Private)
 - (void)fail:(NSString*)message;
 
@@ -64,13 +49,6 @@ static bool isWebScheme(NSURL* url) {
 @implementation AntaresController
 - (void)application:(NSApplication*)app openFile:(NSString*)filename {
     [_window orderOut:self];
-    AntaresExtractDataController* extract =
-            [[[AntaresExtractDataController alloc] initWithTarget:self
-                                                         selector:@selector(installDone:)
-                                                             path:filename] autorelease];
-    if (!extract) {
-        [self fail:@"Failed to create AntaresExtractDataController"];
-    }
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
@@ -120,76 +98,7 @@ static bool isWebScheme(NSURL* url) {
     [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:kScenario];
 }
 
-- (void)updateScenarioList {
-    NSString* user_scenario    = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
-    int       factory_scenario = -1;
-    int       best_scenario    = -1;
-
-    NSMutableArray*      scenarios = [NSMutableArray array];
-    AntaresScenarioList* list      = antares_scenario_list_create();
-    size_t               i;
-    for (i = 0; i < antares_scenario_list_size(list); ++i) {
-        AntaresScenarioListEntry* entry      = antares_scenario_list_at(list, i);
-        NSString*                 title      = str(antares_scenario_list_entry_title(entry));
-        NSString*                 identifier = str(antares_scenario_list_entry_identifier(entry));
-        NSString*                 author     = str(antares_scenario_list_entry_author(entry));
-        NSString*                 version    = str(antares_scenario_list_entry_version(entry));
-        NSURL*                    download_url = antares_scenario_list_entry_download_url(entry)
-                                      ? url(antares_scenario_list_entry_download_url(entry))
-                                      : nil;
-        NSURL* author_url = antares_scenario_list_entry_author_url(entry)
-                                    ? url(antares_scenario_list_entry_author_url(entry))
-                                    : nil;
-
-        NSMutableDictionary* scenario_info = [NSMutableDictionary dictionary];
-        [scenario_info setObject:identifier forKey:kIdentifier];
-        [scenario_info setObject:title forKey:kTitle];
-        [scenario_info setObject:author forKey:kAuthor];
-        if (download_url && isWebScheme(download_url)) {
-            [scenario_info setObject:download_url forKey:kDownloadURL];
-        }
-        if (author_url && isWebScheme(author_url)) {
-            [scenario_info setObject:author_url forKey:kAuthorURL];
-        }
-        [scenario_info setObject:version forKey:kVersion];
-
-        [scenarios addObject:scenario_info];
-    }
-    antares_scenario_list_destroy(list);
-    [scenarios sortUsingFunction:compare_scenarios context:nil];
-
-    [_scenario_list removeAllItems];
-    for (i = 0; i < [scenarios count]; ++i) {
-        NSDictionary* scenario   = [scenarios objectAtIndex:i];
-        NSString*     title      = [scenario objectForKey:kTitle];
-        NSString*     identifier = [scenario objectForKey:kIdentifier];
-
-        NSMenuItem* menu_item = [[[NSMenuItem alloc] initWithTitle:title
-                                                            action:nil
-                                                     keyEquivalent:@""] autorelease];
-        [menu_item setRepresentedObject:scenario];
-        [menu_item setTarget:self];
-        [menu_item setAction:@selector(setScenarioFrom:)];
-        [[_scenario_list menu] addItem:menu_item];
-
-        if ([identifier isEqualToString:user_scenario]) {
-            best_scenario = i;
-        }
-        if ([identifier isEqualToString:kFactoryScenarioIdentifier]) {
-            factory_scenario = i;
-        }
-    }
-
-    if (best_scenario < 0) {
-        best_scenario = factory_scenario;
-    }
-
-    [_scenario_list selectItemAtIndex:best_scenario];
-    [self setScenarioFrom:[_scenario_list itemAtIndex:best_scenario]];
-}
-
 - (void)awakeFromNib {
-    [self updateScenarioList];
     bool skip_settings = [[NSUserDefaults standardUserDefaults] boolForKey:kSkipSettings];
     [_skip_checkbox setIntValue:skip_settings];
     _application_should_terminate = NSTerminateNow;
@@ -217,11 +126,9 @@ static bool isWebScheme(NSURL* url) {
         [self fail:(NSString*)error_message];
     }
 
-    NSString* scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
-    AntaresExtractDataController* extract =
-            [[[AntaresExtractDataController alloc] initWithTarget:self
-                                                         selector:@selector(extractDone:)
-                                                         scenario:scenario] autorelease];
+    AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
+            initWithTarget:self
+                  selector:@selector(extractDone:)] autorelease];
     if (!extract) {
         [self fail:@"Failed to create AntaresExtractDataController"];
     }
@@ -237,7 +144,6 @@ static bool isWebScheme(NSURL* url) {
 }
 
 - (void)installDone:(id)sender {
-    [self updateScenarioList];
     [_window center];
     [_window makeKeyAndOrderFront:self];
 }
@@ -258,9 +164,11 @@ static bool isWebScheme(NSURL* url) {
     NSString* scenario_identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
     NSString* scenario_path       = [[url.path stringByAppendingPathComponent:@"Antares/Scenarios"]
             stringByAppendingPathComponent:scenario_identifier];
+    const char* path              = [scenario_path UTF8String];
+    path                          = nil;
 
     CFStringRef error_message;
-    if (!antares_controller_loop(drivers, [scenario_path UTF8String], &error_message)) {
+    if (!antares_controller_loop(drivers, path, &error_message)) {
         [self fail:(NSString*)error_message];
     }
 

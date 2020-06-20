@@ -139,7 +139,7 @@ void main(int argc, char* const* argv) {
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, {});
     init_globals();
-    PluginInit(factory_scenario_path());
+    PluginInit(sfz::nullopt);
 
     ObjectDataBuilder builder(output_dir);
     pn::string_view   ids[] = {

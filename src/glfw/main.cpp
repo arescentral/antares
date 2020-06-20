@@ -26,7 +26,6 @@
 #include "config/file-prefs-driver.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
-#include "data/scenario-list.hpp"
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "lang/exception.hpp"
@@ -64,10 +63,10 @@ void main(int argc, char* const* argv) {
 
     args::callbacks callbacks;
 
-    sfz::optional<pn::string> scenario;
+    sfz::optional<pn::string_view> scenario;
     callbacks.argument = [&scenario](pn::string_view arg) {
         if (!scenario.has_value()) {
-            scenario.emplace(arg.copy());
+            scenario.emplace(arg);
         } else {
             return false;
         }
@@ -114,14 +113,10 @@ void main(int argc, char* const* argv) {
 
     FilePrefsDriver prefs;
 
-    if (!scenario.has_value()) {
-        scenario.emplace(factory_scenario_path().copy());
-    }
-
     DirectoryLedger   ledger;
     OpenAlSoundDriver sound;
     GLFWVideoDriver   video;
-    video.loop(new Master(*scenario, time(NULL)));
+    video.loop(new Master(scenario, time(NULL)));
 }
 
 }  // namespace

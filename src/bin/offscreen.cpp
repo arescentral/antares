@@ -143,10 +143,10 @@ void main(int argc, char* const* argv) {
 
     if (text) {
         TextVideoDriver video({640, 480}, output_dir);
-        video.loop(new Master(factory_scenario_path(), 14586), scheduler);
+        video.loop(new Master(sfz::nullopt, 14586), scheduler);
     } else {
         OffscreenVideoDriver video({640, 480}, output_dir);
-        video.loop(new Master(factory_scenario_path(), 14586), scheduler);
+        video.loop(new Master(sfz::nullopt, 14586), scheduler);
     }
 }
 

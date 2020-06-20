@@ -20,11 +20,16 @@
 #define ANTARES_DATA_PLUGIN_HPP_
 
 #include <map>
+#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/handle.hpp"
 #include "data/info.hpp"
 #include "video/driver.hpp"
+
+namespace zipxx {
+class ZipArchive;
+}
 
 namespace antares {
 
@@ -33,7 +38,8 @@ union Level;
 struct Race;
 
 struct ScenarioGlobals {
-    pn::string path;
+    sfz::optional<pn::string>          dir;
+    std::unique_ptr<zipxx::ZipArchive> zip;
 
     Info                             info;
     std::map<int, const Level*>      chapters;
@@ -47,7 +53,7 @@ struct ScenarioGlobals {
 
 extern ScenarioGlobals plug;
 
-void PluginInit(pn::string_view path);
+void PluginInit(sfz::optional<pn::string_view> path);
 
 void load_race(const NamedHandle<const Race>& r);
 void load_object(const NamedHandle<const BaseObject>& o);

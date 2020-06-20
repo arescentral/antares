@@ -34,20 +34,7 @@ static void set_label(const char* status, void* userdata) {
 @synthesize _progress_bar;
 @synthesize _status_field;
 
-- (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path {
-    if (!(self = [super init])) {
-        return NULL;
-    }
-    _target   = [target retain];
-    _selector = selector;
-    if (![[NSBundle mainBundle] loadNibNamed:@"ExtractData" owner:self topLevelObjects:nil]) {
-        [self release];
-        return nil;
-    }
-    return self;
-}
-
-- (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario {
+- (id)initWithTarget:(id)target selector:(SEL)selector {
     if (!(self = [super init])) {
         return NULL;
     }

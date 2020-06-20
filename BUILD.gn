@@ -24,7 +24,6 @@ group("default") {
   deps = [
     ":antares-glfw",
     ":antares-install-data",
-    ":antares-ls-scenarios",
     ":build-pix",
     ":color-test",
     ":editable-text-test",
@@ -43,7 +42,6 @@ group("default") {
     deps -= [
       ":antares-glfw",
       ":antares-install-data",
-      ":antares-ls-scenarios",
       ":build-pix",
       ":offscreen",
       ":replay",
@@ -146,7 +144,6 @@ source_set("libantares-data") {
     "include/data/range.hpp",
     "include/data/replay.hpp",
     "include/data/resource.hpp",
-    "include/data/scenario-list.hpp",
     "include/data/sprite-data.hpp",
     "include/data/tags.hpp",
     "src/data/action.cpp",
@@ -169,7 +166,6 @@ source_set("libantares-data") {
     "src/data/races.cpp",
     "src/data/replay.cpp",
     "src/data/resource.cpp",
-    "src/data/scenario-list.cpp",
     "src/data/sprite-data.cpp",
   ]
   public_deps = [
@@ -184,10 +180,6 @@ source_set("libantares-data") {
     "//ext/libzipxx",
   ]
   configs += [ ":antares_private" ]
-
-  if (target_os == "win") {
-    sources -= [ "src/data/scenario-list.cpp" ]
-  }
 }
 
 source_set("libantares-drawing") {
@@ -465,16 +457,6 @@ executable("hash-data") {
   configs += [ ":antares_private" ]
 }
 
-executable("antares-ls-scenarios") {
-  output_extension = exe
-  sources = [ "src/bin/ls-scenarios.cpp" ]
-  deps = [
-    ":libantares",
-    ":libantares-real",
-  ]
-  configs += [ ":antares_private" ]
-}
-
 executable("object-data") {
   testonly = true
   output_extension = exe
@@ -662,7 +644,6 @@ if (target_os == "mac") {
       "include/mac/c/AntaresController.hpp",
       "include/mac/c/CocoaVideoDriver.hpp",
       "include/mac/c/DataExtractor.h",
-      "include/mac/c/scenario-list.h",
       "include/mac/prefs-driver.hpp",
       "include/mac/video-driver.hpp",
       "src/mac/AntaresController.m",
@@ -670,7 +651,6 @@ if (target_os == "mac") {
       "src/mac/c/AntaresController.cpp",
       "src/mac/c/CocoaVideoDriver.m",
       "src/mac/c/DataExtractor.cpp",
-      "src/mac/c/scenario-list.cpp",
       "src/mac/main.m",
       "src/mac/prefs-driver.cpp",
       "src/mac/video-driver.cpp",

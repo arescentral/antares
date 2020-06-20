@@ -141,7 +141,7 @@ void ReplayMaster::init() {
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    PluginInit(factory_scenario_path());
+    PluginInit(sfz::nullopt);
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
     Admiral::init();
     Vectors::init();

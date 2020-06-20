@@ -35,8 +35,7 @@
 @property(strong) IBOutlet NSProgressIndicator* _progress_bar;
 @property(strong) IBOutlet NSTextField* _status_field;
 
-- (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path;
-- (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario;
+- (id)initWithTarget:(id)target selector:(SEL)selector;
 
 - (bool)success;
 

@@ -53,7 +53,7 @@ class DrawPix : public Card {
             : _set_capture_rect(set_capture_rect), _text(text), _width(width) {}
 
     virtual void draw() const {
-        PluginInit(factory_scenario_path());
+        PluginInit(sfz::nullopt);
         BuildPix pix(_text(), _width);
         pix.draw({0, 0});
         _set_capture_rect({0, 0, _width, pix.size().height});
