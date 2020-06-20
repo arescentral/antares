@@ -22,6 +22,7 @@ def main():
 
     archive()
     result = notarize_app()
+    time.sleep(5)
     notarization_info(result["notarization-upload"]["RequestUUID"])
     staple()
 
