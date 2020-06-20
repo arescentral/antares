@@ -8,7 +8,7 @@ declare_args() {
   prefix = "/usr/local"
 }
 
-antares_version = "0.9.1"
+antares_version = ""
 
 import("//build/lib/embed.gni")
 import("//build/lib/mac/version.gni")

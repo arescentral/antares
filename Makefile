@@ -49,7 +49,6 @@ distclean:
 .PHONY: run
 run: build
 	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
-	@[ ! -f $(MAC_BIN) ] && scripts/antares_launcher.py || true
 
 .PHONY: sign
 sign: build
@@ -75,7 +74,6 @@ install: install-bin install-data install-scenario
 .PHONY: install-bin
 install-bin: build
 	install -m 755 -d $(DESTDIR)$(BINDIR)
-	install -m 755 scripts/antares_launcher.py $(DESTDIR)$(BINDIR)/antares
 	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
 	install -m 755 out/cur/antares-install-data $(DESTDIR)$(BINDIR)/antares-install-data
 

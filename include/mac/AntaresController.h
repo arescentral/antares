@@ -24,30 +24,8 @@
 @interface AntaresController : NSObject {
     struct AntaresDrivers* drivers;
 
-    NSURL* _download_url;
-    NSURL* _author_url;
-
     NSApplicationTerminateReply _application_should_terminate;
-
-    IBOutlet NSWindow* _window;
-    IBOutlet NSButton* _no_show_again_checkbox;
-
-    IBOutlet NSPopUpButton* _scenario_list;
-    IBOutlet NSButton* _scenario_button;
-    IBOutlet NSTextField* _scenario_label;
-    IBOutlet NSButton* _author_button;
-    IBOutlet NSTextField* _author_label;
-    IBOutlet NSTextField* _version_label;
-
-    IBOutlet NSButton* _skip_checkbox;
 }
-
-- (IBAction)openScenarioURL:(id)sender;
-- (IBAction)openAuthorURL:(id)sender;
-- (IBAction)setSkipSettingsFrom:(id)sender;
-
-- (IBAction)settingsDone:(id)sender;
-
 @end
 
 #endif  // ANTARES_MAC_ANTARES_CONTROLLER_H_
