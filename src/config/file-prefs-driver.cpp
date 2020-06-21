@@ -19,6 +19,7 @@
 #include "config/file-prefs-driver.hpp"
 
 #include <fcntl.h>
+
 #include <pn/input>
 #include <pn/map>
 #include <pn/output>
@@ -100,10 +101,9 @@ static void set_from(
     }
 }
 
-FilePrefsDriver::FilePrefsDriver() {
-    pn::string path = pn::format("{0}/config.pn", dirs().root);
-    pn::value  x;
-    pn::input  in = pn::input{path, pn::text};
+FilePrefsDriver::FilePrefsDriver(pn::string_view path) : _path(path.copy()) {
+    pn::value x;
+    pn::input in = pn::input{_path, pn::text};
     if (!in || !pn::parse(in, &x, nullptr)) {
         return;
     }
@@ -127,9 +127,8 @@ void FilePrefsDriver::set(const Preferences& p) {
         keys[kKeyNames[i]] = static_cast<int>(p.keys[i]);
     }
 
-    pn::string path = pn::format("{0}/config.pn", dirs().root);
-    makedirs(dirname(path), 0755);
-    pn::output output = pn::output{path, pn::text};
+    makedirs(dirname(_path), 0755);
+    pn::output output = pn::output{_path, pn::text};
     output.dump(pn::map{{"sound", pn::map{{"volume", p.volume},
                                           {"speech", p.speech_on},
                                           {"idle music", p.play_idle_music},

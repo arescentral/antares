@@ -25,12 +25,13 @@ namespace antares {
 
 class FilePrefsDriver : public PrefsDriver {
   public:
-    FilePrefsDriver();
+    FilePrefsDriver(pn::string_view path);
 
     virtual const Preferences& get() const { return _current; }
     virtual void               set(const Preferences& preferences);
 
   private:
+    pn::string  _path;
     Preferences _current;
 };
 
