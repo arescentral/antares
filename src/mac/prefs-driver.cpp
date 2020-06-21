@@ -35,11 +35,14 @@ namespace antares {
 
 namespace {
 
-static const char kKeySettingsPreference[] = "KeySettings";
-static const char kIdleMusicPreference[]   = "PlayIdleMusic";
-static const char kGameMusicPreference[]   = "PlayGameMusic";
-static const char kSpeechOnPreference[]    = "SpeechOn";
-static const char kVolumePreference[]      = "Volume";
+static const char kKeySettingsPreference[]  = "KeySettings";
+static const char kIdleMusicPreference[]    = "PlayIdleMusic";
+static const char kGameMusicPreference[]    = "PlayGameMusic";
+static const char kSpeechOnPreference[]     = "SpeechOn";
+static const char kVolumePreference[]       = "Volume";
+static const char kFullscreenPreference[]   = "Fullscreen";
+static const char kWindowWidthPreference[]  = "WindowWidth";
+static const char kWindowHeightPreference[] = "WindowHeight";
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -101,6 +104,9 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
         if (cf::get_preference(kSpeechOnPreference, cfbool) && cf::unwrap(cfbool, val)) {
             _current.speech_on = val;
         }
+        if (cf::get_preference(kFullscreenPreference, cfbool) && cf::unwrap(cfbool, val)) {
+            _current.fullscreen = val;
+        }
     }
 
     {
@@ -108,6 +114,17 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
         double     val;
         if (cf::get_preference(kVolumePreference, cfnum) && cf::unwrap(cfnum, val)) {
             _current.volume = clamp<int>(8 * val, 0, 8);
+        }
+    }
+
+    {
+        cf::Number cfnum;
+        int        val;
+        if (cf::get_preference(kWindowWidthPreference, cfnum) && cf::unwrap(cfnum, val)) {
+            _current.window_size.width = val;
+        }
+        if (cf::get_preference(kWindowHeightPreference, cfnum) && cf::unwrap(cfnum, val)) {
+            _current.window_size.height = val;
         }
     }
 }
@@ -125,6 +142,9 @@ void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
     cf::set_preference(kGameMusicPreference, cf::wrap(preferences.play_music_in_game));
     cf::set_preference(kSpeechOnPreference, cf::wrap(preferences.speech_on));
     cf::set_preference(kVolumePreference, cf::wrap(0.125 * preferences.volume));
+    cf::set_preference(kFullscreenPreference, cf::wrap(preferences.fullscreen));
+    cf::set_preference(kWindowWidthPreference, cf::wrap(preferences.window_size.width));
+    cf::set_preference(kWindowHeightPreference, cf::wrap(preferences.window_size.height));
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 }
 

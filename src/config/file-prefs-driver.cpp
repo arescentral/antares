@@ -69,6 +69,14 @@ static bool get(pn::value_cref x, int& v) {
     return false;
 }
 
+static bool get(pn::value_cref x, int16_t& v) {
+    if (x.is_int()) {
+        v = x.as_int();
+        return true;
+    }
+    return false;
+}
+
 static bool get(pn::value_cref x, Key& v) {
     if (x.is_int()) {
         v = static_cast<Key>(x.as_int());
@@ -77,31 +85,16 @@ static bool get(pn::value_cref x, Key& v) {
     return false;
 }
 
-template <typename ValueType, typename ValueKey, typename PrefsMethod>
-static void set_from(
-        pn::map_cref x, const char* section_key, ValueKey value_key, Preferences& prefs,
-        PrefsMethod pmeth) {
-    auto      section = x.get(section_key).as_map();
-    auto      value   = section.get(value_key);
-    ValueType typed;
-    if (get(value, typed)) {
-        (prefs.*pmeth) = typed;
+static bool get(pn::value_cref x, Size& s) {
+    if (x.is_map()) {
+        return get(x.as_map().get("width"), s.width) && get(x.as_map().get("height"), s.height);
     }
-}
-
-template <typename ValueType, typename ValueKey, typename PrefsMethod>
-static void set_from(
-        pn::map_cref x, const char* section_key, ValueKey value_key, Preferences& prefs,
-        PrefsMethod pmeth, int index) {
-    auto      section = x.get(section_key).as_map();
-    auto      value   = section.get(value_key);
-    ValueType typed;
-    if (get(value, typed)) {
-        (prefs.*pmeth)[index] = typed;
-    }
+    return false;
 }
 
 FilePrefsDriver::FilePrefsDriver(pn::string_view path) : _path(path.copy()) {
+    using ::antares::get;
+
     pn::value x;
     pn::input in = pn::input{_path, pn::text};
     if (!in || !pn::parse(in, &x, nullptr)) {
@@ -109,14 +102,20 @@ FilePrefsDriver::FilePrefsDriver(pn::string_view path) : _path(path.copy()) {
     }
     pn::map_cref m = x.as_map();
 
-    set_from<int>(m, "sound", "volume", _current, &Preferences::volume);
-    set_from<bool>(m, "sound", "speech", _current, &Preferences::speech_on);
-    set_from<bool>(m, "sound", "idle music", _current, &Preferences::play_idle_music);
-    set_from<bool>(m, "sound", "game music", _current, &Preferences::play_music_in_game);
+    pn::map_cref sound = m.get("sound").as_map();
+    get(sound.get("volume"), _current.volume);
+    get(sound.get("speech"), _current.speech_on);
+    get(sound.get("idle music"), _current.play_idle_music);
+    get(sound.get("game music"), _current.play_music_in_game);
 
+    pn::map_cref keys = m.get("keys").as_map();
     for (auto i : range<size_t>(KEY_COUNT)) {
-        set_from<Key>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
+        get(keys.get(kKeyNames[i]), _current.keys[i]);
     }
+
+    pn::map_cref video = m.get("video").as_map();
+    get(video.get("fullscreen"), _current.fullscreen);
+    get(video.get("window"), _current.window_size);
 }
 
 void FilePrefsDriver::set(const Preferences& p) {
@@ -129,11 +128,25 @@ void FilePrefsDriver::set(const Preferences& p) {
 
     makedirs(dirname(_path), 0755);
     pn::output output = pn::output{_path, pn::text};
-    output.dump(pn::map{{"sound", pn::map{{"volume", p.volume},
-                                          {"speech", p.speech_on},
-                                          {"idle music", p.play_idle_music},
-                                          {"game music", p.play_music_in_game}}},
-                        {"keys", std::move(keys)}});
+    output.dump(pn::map{
+            {"sound",
+             pn::map{
+                     {"volume", p.volume},
+                     {"speech", p.speech_on},
+                     {"idle music", p.play_idle_music},
+                     {"game music", p.play_music_in_game},
+             }},
+            {"keys", std::move(keys)},
+            {"video",
+             pn::map{
+                     {"fullscreen", p.fullscreen},
+                     {"window",
+                      pn::map{
+                              {"width", p.window_size.width},
+                              {"height", p.window_size.height},
+                      }},
+             }},
+    });
 }
 
 }  // namespace antares
