@@ -23,19 +23,7 @@
 #include "mac/AntaresExtractDataController.h"
 #include "mac/c/AntaresController.h"
 
-#define kScreenWidth @"ScreenWidth"
-#define kScreenHeight @"ScreenHeight"
 #define kScenario @"Scenario"
-#define kSkipSettings @"SkipSettings"
-
-#define kIdentifier @"Identifier"
-#define kTitle @"Title"
-#define kDownloadURL @"DownloadURL"
-#define kAuthor @"Author"
-#define kAuthorURL @"AuthorURL"
-#define kVersion @"Version"
-
-#define kFactoryScenarioIdentifier @"4cab7415715aeeacf1486a352267ae82c0efb220"
 
 @interface AntaresController (Private)
 - (void)fail:(NSString*)message;
@@ -43,6 +31,7 @@
 
 @implementation AntaresController
 - (void)application:(NSApplication*)app openFile:(NSString*)filename {
+    _plugin_path = [filename retain];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
@@ -79,21 +68,8 @@
     }
     _application_should_terminate = NSTerminateCancel;
 
-    NSFileManager* files = [NSFileManager defaultManager];
-    NSURL*         url   = [files URLForDirectory:NSApplicationSupportDirectory
-                               inDomain:NSUserDomainMask
-                      appropriateForURL:nil
-                                 create:NO
-                                  error:nil];
-
-    NSString* scenario_identifier = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
-    NSString* scenario_path       = [[url.path stringByAppendingPathComponent:@"Antares/Scenarios"]
-            stringByAppendingPathComponent:scenario_identifier];
-    const char* path              = [scenario_path UTF8String];
-    path                          = nil;
-
     CFStringRef error_message;
-    if (!antares_controller_loop(drivers, path, &error_message)) {
+    if (!antares_controller_loop(drivers, [_plugin_path UTF8String], &error_message)) {
         [self fail:(NSString*)error_message];
     }
 
@@ -104,5 +80,10 @@
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender {
     return _application_should_terminate;
+}
+
+- (void)dealloc {
+    [_plugin_path release];
+    [super dealloc];
 }
 @end

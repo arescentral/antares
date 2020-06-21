@@ -24,6 +24,8 @@
 @interface AntaresController : NSObject {
     struct AntaresDrivers* drivers;
 
+    NSString* _plugin_path;
+
     NSApplicationTerminateReply _application_should_terminate;
 }
 @end
