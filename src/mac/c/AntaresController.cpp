@@ -60,9 +60,12 @@ extern "C" AntaresDrivers* antares_controller_create_drivers(CFStringRef* error_
 
 extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) { delete drivers; }
 
-extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message) {
+extern "C" bool antares_controller_loop(
+        AntaresDrivers* drivers, const char* plugin_path, CFStringRef* error_message) {
     try {
-        drivers->video.loop(new Master(time(NULL)));
+        drivers->video.loop(new Master(
+                plugin_path ? sfz::make_optional<pn::string_view>(plugin_path) : sfz::nullopt,
+                time(NULL)));
     } catch (std::exception& e) {
         *error_message = cf::wrap(pn::string_view{antares::full_exception_string(e)}).release();
         return false;

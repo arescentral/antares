@@ -17,8 +17,8 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <GLFW/glfw3.h>
-
 #include <time.h>
+
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
@@ -26,7 +26,6 @@
 #include "config/file-prefs-driver.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
-#include "data/scenario-list.hpp"
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "lang/exception.hpp"
@@ -47,7 +46,7 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
             "  Antares: a tactical space combat game\n"
             "\n"
             "  arguments:\n"
-            "    scenario            select scenario\n"
+            "    scenario            path to plugin file (default: factory scenario)\n"
             "\n"
             "  options:\n"
             "    -a, --app-data      set path to application data\n"
@@ -64,10 +63,10 @@ void main(int argc, char* const* argv) {
 
     args::callbacks callbacks;
 
-    sfz::optional<pn::string> scenario;
+    sfz::optional<pn::string_view> scenario;
     callbacks.argument = [&scenario](pn::string_view arg) {
         if (!scenario.has_value()) {
-            scenario.emplace(arg.copy());
+            scenario.emplace(arg);
         } else {
             return false;
         }
@@ -99,10 +98,6 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
-    if (!scenario.has_value()) {
-        scenario.emplace(kFactoryScenarioIdentifier);
-    }
-
     if (!sfz::path::isdir(application_path())) {
         if (application_path() == default_application_path()) {
             throw std::runtime_error(
@@ -118,26 +113,10 @@ void main(int argc, char* const* argv) {
 
     FilePrefsDriver prefs;
 
-    if (scenario.has_value()) {
-        sys.prefs->set_scenario_identifier(*scenario);
-        bool              have_scenario = false;
-        std::vector<Info> scenarios     = scenario_list();
-        for (const Info& entry : scenarios) {
-            if (entry.identifier.hash == *scenario) {
-                have_scenario = true;
-                break;
-            }
-        }
-        if (!have_scenario) {
-            throw std::runtime_error(
-                    pn::format("{1}: scenario not installed\n", progname, *scenario).c_str());
-        }
-    }
-
     DirectoryLedger   ledger;
     OpenAlSoundDriver sound;
     GLFWVideoDriver   video;
-    video.loop(new Master(time(NULL)));
+    video.loop(new Master(scenario, time(NULL)));
 }
 
 }  // namespace

@@ -20,8 +20,6 @@
 
 #include "mac/c/DataExtractor.h"
 
-static NSString* kAntaresDidInstallScenarioFromPath = @"AntaresDidInstallScenarioFromPath";
-
 static void set_label(const char* status, void* userdata) {
     AntaresExtractDataController* controller = userdata;
     NSString*                     label      = [[NSString alloc] initWithUTF8String:status];
@@ -36,29 +34,12 @@ static void set_label(const char* status, void* userdata) {
 @synthesize _progress_bar;
 @synthesize _status_field;
 
-- (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path {
+- (id)initWithTarget:(id)target selector:(SEL)selector {
     if (!(self = [super init])) {
         return NULL;
     }
     _target   = [target retain];
     _selector = selector;
-    _path     = [path retain];
-    _scenario = nil;
-    if (![[NSBundle mainBundle] loadNibNamed:@"ExtractData" owner:self topLevelObjects:nil]) {
-        [self release];
-        return nil;
-    }
-    return self;
-}
-
-- (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario {
-    if (!(self = [super init])) {
-        return NULL;
-    }
-    _target   = [target retain];
-    _selector = selector;
-    _path     = nil;
-    _scenario = [scenario retain];
     if (![[NSBundle mainBundle] loadNibNamed:@"ExtractData" owner:self topLevelObjects:nil]) {
         [self release];
         return nil;
@@ -68,8 +49,6 @@ static void set_label(const char* status, void* userdata) {
 
 - (void)dealloc {
     [_target release];
-    [_path release];
-    [_scenario release];
     [super dealloc];
 }
 
@@ -96,12 +75,6 @@ static void set_label(const char* status, void* userdata) {
         [alert addButtonWithTitle:@"Quit"];
         [alert runModal];
         [error_message release];
-    } else {
-        [[NSDistributedNotificationCenter defaultCenter]
-                postNotificationName:kAntaresDidInstallScenarioFromPath
-                              object:[_path stringByStandardizingPath]
-                            userInfo:nil
-                  deliverImmediately:YES];
     }
     [_target performSelector:_selector withObject:self];
 }
@@ -116,24 +89,12 @@ static void set_label(const char* status, void* userdata) {
     NSString* scenarios = [antares stringByAppendingPathComponent:@"Scenarios"];
 
     CFStringRef error_message;
-    if (_path) {
-        if (!antares_data_extract_path(
-                    [downloads UTF8String], [scenarios UTF8String], [_path UTF8String], set_label,
-                    self, &error_message)) {
-            [self performSelectorOnMainThread:@selector(done:)
-                                     withObject:(NSString*)error_message
-                                  waitUntilDone:NO];
-            return;
-        }
-    } else {
-        if (!antares_data_extract_identifier(
-                    [downloads UTF8String], [scenarios UTF8String], [_scenario UTF8String],
-                    set_label, self, &error_message)) {
-            [self performSelectorOnMainThread:@selector(done:)
-                                     withObject:(NSString*)error_message
-                                  waitUntilDone:NO];
-            return;
-        }
+    if (!antares_data_extract(
+                [downloads UTF8String], [scenarios UTF8String], set_label, self, &error_message)) {
+        [self performSelectorOnMainThread:@selector(done:)
+                               withObject:(NSString*)error_message
+                            waitUntilDone:NO];
+        return;
     }
     [self performSelectorOnMainThread:@selector(done:) withObject:nil waitUntilDone:NO];
     [pool release];

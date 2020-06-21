@@ -41,7 +41,6 @@ using range = TextReceiver::range<int>;
 class EditableTextTest : public testing::Test {
   public:
     EditableTextTest() : video({640, 480}, sfz::nullopt) {
-        sys.prefs->set_scenario_identifier(kFactoryScenarioIdentifier);
         sys_init();
     }
     TextVideoDriver video;

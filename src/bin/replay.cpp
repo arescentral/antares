@@ -16,15 +16,18 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include "data/replay.hpp"
+
 #include <fcntl.h>
 #include <getopt.h>
+
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
-#include "data/replay.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -138,7 +141,7 @@ void ReplayMaster::init() {
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    PluginInit();
+    PluginInit(sfz::nullopt);
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
     Admiral::init();
     Vectors::init();

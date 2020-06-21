@@ -19,9 +19,11 @@
 #include "data/resource.hpp"
 
 #include <stdio.h>
+
 #include <array>
 #include <pn/input>
 #include <sfz/sfz.hpp>
+#include <zipxx/zipxx.hpp>
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
@@ -35,6 +37,7 @@
 #include "data/initial.hpp"
 #include "data/interface.hpp"
 #include "data/level.hpp"
+#include "data/plugin.hpp"
 #include "data/races.hpp"
 #include "data/replay.hpp"
 #include "data/sprite-data.hpp"
@@ -79,18 +82,133 @@ class ResourceLister : public sfz::TreeWalker {
     std::vector<pn::string>* const _names;
 };
 
+class ResourceData {
+  public:
+    static bool exists(pn::string_view dir, pn::string_view resource_path) {
+        return path::isfile(pn::format("{0}/{1}", dir, resource_path));
+    }
+
+    static bool exists(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
+        return zip.locate(resource_path.copy().c_str()) != zip.npos;
+    }
+
+    bool load(pn::string_view dir, pn::string_view resource_path) {
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
+        if (!path::isfile(path)) {
+            return false;
+        }
+        _dir_file.reset(new sfz::mapped_file(path));
+        return true;
+    }
+
+    bool load(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
+        auto index = zip.locate(resource_path.copy().c_str());
+        if (index < 0) {
+            return false;
+        }
+        _zip_file.reset(new zipxx::ZipFileReader(zip, index));
+        return true;
+    }
+
+    static bool exists(pn::string_view resource_path) {
+        return (plug.dir.has_value() && exists(*plug.dir, resource_path)) ||
+               (plug.zip && exists(*plug.zip, resource_path)) ||
+               exists(factory_scenario_path(), resource_path) ||
+               exists(application_path(), resource_path);
+    }
+
+    static ResourceData load(pn::string_view resource_path) {
+        ResourceData data;
+        if ((plug.dir.has_value() && data.load(*plug.dir, resource_path)) ||
+            (plug.zip && data.load(*plug.zip, resource_path)) ||
+            data.load(factory_scenario_path(), resource_path) ||
+            data.load(application_path(), resource_path)) {
+            return data;
+        }
+        throw std::runtime_error(
+                pn::format("couldn't find resource {0}", pn::dump(resource_path, pn::dump_short))
+                        .c_str());
+    }
+
+    static ResourceData load_info() {
+        ResourceData data;
+        if (plug.dir.has_value()) {
+            if (!data.load(*plug.dir, "info.pn")) {
+                throw std::runtime_error(
+                        pn::format("{}: not an antares plugin", *plug.dir).c_str());
+            }
+        } else if (plug.zip) {
+            if (!data.load(*plug.zip, "info.pn")) {
+                throw std::runtime_error(
+                        pn::format("{}: not an antares plugin", plug.zip->path()).c_str());
+            }
+        } else {
+            if (!data.load(application_path(), "info.pn")) {
+                throw std::runtime_error("missing application data");
+            }
+        }
+        return data;
+    }
+
+    pn::data_view data() const {
+        if (_dir_file) {
+            return _dir_file->data();
+        } else if (_zip_file) {
+            return _zip_file->data();
+        } else {
+            return pn::data_view{};
+        }
+    }
+
+    pn::string_view string() const {
+        if (_dir_file) {
+            return _dir_file->string();
+        } else if (_zip_file) {
+            return _zip_file->string();
+        } else {
+            return pn::string_view{};
+        }
+    }
+
+  private:
+    ResourceData() {}
+
+    std::unique_ptr<sfz::mapped_file>     _dir_file;
+    std::unique_ptr<zipxx::ZipFileReader> _zip_file;
+};
+
+static bool startswith(pn::string_view s, pn::string_view prefix) {
+    return (s.size() >= prefix.size()) && (s.substr(0, prefix.size()) == prefix);
+}
+
+static bool endswith(pn::string_view s, pn::string_view suffix) {
+    return (s.size() >= suffix.size()) && (s.substr(s.size() - suffix.size()) == suffix);
+}
+
 }  // namespace
 
 static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_view extension) {
     std::vector<pn::string> resources;
-    pn::string              path;
-    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
-        path = pn::format("{0}/{1}", application_path(), dir);
+    if (plug.dir.has_value()) {
+        pn::string path = pn::format("{0}/{1}", *plug.dir, dir);
+        if (sfz::path::isdir(path)) {
+            sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
+        }
+    } else if (plug.zip) {
+        pn::string prefix = pn::format("{0}/", dir);
+        for (auto i : sfz::range(plug.zip->size())) {
+            pn::string_view name = plug.zip->name(i);
+            if (startswith(name, prefix) && endswith(name, extension)) {
+                resources.push_back(
+                        name.substr(prefix.size(), name.size() - prefix.size() - extension.size())
+                                .copy());
+            }
+        }
     } else {
-        path = pn::format("{0}/{1}", scenario_path(), dir);
-    }
-    if (sfz::path::isdir(path)) {
-        sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
+        pn::string path = pn::format("{0}/{1}", application_path(), dir);
+        if (sfz::path::isdir(path)) {
+            sfz::walk(path, sfz::WALK_PHYSICAL, ResourceLister(path, extension, &resources));
+        }
     }
     return resources;
 }
@@ -98,25 +216,10 @@ static std::vector<pn::string> list_resources(pn::string_view dir, pn::string_vi
 std::vector<pn::string> Resource::list_levels() { return list_resources("levels", ".pn"); }
 std::vector<pn::string> Resource::list_replays() { return list_resources("replays", ".NLRP"); }
 
-static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
-    pn::string      scenario = scenario_path();
-    pn::string_view factory  = factory_scenario_path();
-    pn::string_view app      = application_path();
-    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
-        pn::string path = pn::format("{0}/{1}", dir, resource_path);
-        if (path::isfile(path)) {
-            return std::unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
-        }
-    }
-    throw std::runtime_error(
-            pn::format("couldn't find resource {0}", pn::dump(resource_path, pn::dump_short))
-                    .c_str());
-}
-
 static pn::value procyon(pn::string_view path) {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(load(path)->data().input(), &x, &e)) {
+    if (!pn::parse(ResourceData::load(path).data().input(), &x, &e)) {
         throw std::runtime_error(
                 pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
                         .c_str());
@@ -124,17 +227,15 @@ static pn::value procyon(pn::string_view path) {
     return x;
 }
 
-static bool exists(pn::string_view resource_path) {
-    pn::string      scenario = scenario_path();
-    pn::string_view factory  = factory_scenario_path();
-    pn::string_view app      = application_path();
-    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
-        pn::string path = pn::format("{0}/{1}", dir, resource_path);
-        if (path::isfile(path)) {
-            return true;
-        }
+static pn::value info_procyon() {
+    pn::value  x;
+    pn_error_t e;
+    if (!pn::parse(ResourceData::load_info().data().input(), &x, &e)) {
+        throw std::runtime_error(
+                pn::format("info.pn: {0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
+                        .c_str());
     }
-    return false;
+    return x;
 }
 
 static Texture load_hidpi_texture(pn::string_view name) {
@@ -146,12 +247,12 @@ static Texture load_hidpi_texture(pn::string_view name) {
         } else {
             path = pn::format("{0}.png", name);
         }
-        if (!exists(path)) {
+        if (!ResourceData::exists(path)) {
             scale >>= 1;
             continue;
         }
         try {
-            ArrayPixMap pix = read_png(load(path)->data().input());
+            ArrayPixMap pix = read_png(ResourceData::load(path).data().input());
             return sys.video->texture(pn::format("/{0}", path), pix, scale);
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
@@ -173,11 +274,11 @@ static SoundData load_audio(pn::string_view name) {
 
     for (const auto& fmt : fmts) {
         pn::string path = pn::format("{0}{1}", name, fmt.ext);
-        if (!exists(path)) {
+        if (!ResourceData::exists(path)) {
             continue;
         }
         try {
-            return fmt.fn(load(path)->data());
+            return fmt.fn(ResourceData::load(path).data());
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
         }
@@ -187,7 +288,7 @@ static SoundData load_audio(pn::string_view name) {
 }
 
 bool Resource::object_exists(pn::string_view name) {
-    return exists(pn::format("objects/{0}.pn", name));
+    return ResourceData::exists(pn::format("objects/{0}.pn", name));
 }
 
 FontData Resource::font(pn::string_view name) {
@@ -203,14 +304,7 @@ Texture Resource::font_image(pn::string_view name) {
     return load_hidpi_texture(pn::format("fonts/{0}", name));
 }
 
-Info Resource::info() {
-    static const char path[] = "info.pn";
-    try {
-        return ::antares::info(path_value{procyon(path)});
-    } catch (...) {
-        std::throw_with_nested(std::runtime_error(path));
-    }
-}
+Info Resource::info() { return ::antares::info(path_value{info_procyon()}); }
 
 InterfaceData Resource::interface(pn::string_view name) {
     pn::string path = pn::format("interfaces/{0}.pn", name);
@@ -299,7 +393,7 @@ Race Resource::race(pn::string_view name) {
 ReplayData Resource::replay(pn::string_view name) {
     pn::string path = pn::format("replays/{0}.NLRP", name);
     try {
-        return ReplayData(load(path)->data());
+        return ReplayData(ResourceData::load(path).data());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -308,8 +402,8 @@ ReplayData Resource::replay(pn::string_view name) {
 std::vector<int32_t> Resource::rotation_table() {
     const char path[] = "rotation-table";
     try {
-        auto                 mapped_file = load(path);
-        pn::input            in          = mapped_file->data().input();
+        auto                 rsrc = ResourceData::load(path);
+        pn::input            in   = rsrc.data().input();
         std::vector<int32_t> v;
         v.resize(SystemGlobals::ROT_TABLE_SIZE);
         for (int32_t& i : v) {
@@ -356,7 +450,7 @@ SpriteData Resource::sprite_data(pn::string_view name) {
 ArrayPixMap Resource::sprite_image(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/image.png", name);
     try {
-        return read_png(load(path)->data().input());
+        return read_png(ResourceData::load(path).data().input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -365,7 +459,7 @@ ArrayPixMap Resource::sprite_image(pn::string_view name) {
 ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/overlay.png", name);
     try {
-        return read_png(load(path)->data().input());
+        return read_png(ResourceData::load(path).data().input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -374,7 +468,7 @@ ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
 pn::string Resource::text(int id) {
     pn::string path = pn::format("text/{0}.txt", id);
     try {
-        return load(path)->string().copy();
+        return ResourceData::load(path).string().copy();
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }

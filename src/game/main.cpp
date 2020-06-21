@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <math.h>
+
 #include <algorithm>
 #include <pn/output>
 #include <set>
@@ -30,7 +31,6 @@
 #include "data/plugin.hpp"
 #include "data/replay.hpp"
 #include "data/resource.hpp"
-#include "data/scenario-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"

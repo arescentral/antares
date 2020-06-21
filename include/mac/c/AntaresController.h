@@ -28,7 +28,8 @@ extern "C" {
 typedef struct AntaresDrivers AntaresDrivers;
 AntaresDrivers*               antares_controller_create_drivers(CFStringRef* error_message);
 void                          antares_controller_destroy_drivers(AntaresDrivers* drivers);
-bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message);
+bool                          antares_controller_loop(
+                                 AntaresDrivers* drivers, const char* plugin_identifier, CFStringRef* error_message);
 
 #ifdef __cplusplus
 }  // extern "C"

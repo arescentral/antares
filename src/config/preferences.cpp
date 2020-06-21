@@ -97,18 +97,15 @@ Preferences::Preferences() {
     speech_on          = false;
 
     volume = 7;
-
-    scenario_identifier = kFactoryScenarioIdentifier;
 }
 
 Preferences Preferences::copy() const {
     Preferences copy;
     memcpy(copy.keys, keys, sizeof(keys));
-    copy.play_idle_music     = play_idle_music;
-    copy.play_music_in_game  = play_music_in_game;
-    copy.speech_on           = speech_on;
-    copy.volume              = volume;
-    copy.scenario_identifier = scenario_identifier.copy();
+    copy.play_idle_music    = play_idle_music;
+    copy.play_music_in_game = play_music_in_game;
+    copy.speech_on          = speech_on;
+    copy.volume             = volume;
     return copy;
 }
 
@@ -148,12 +145,6 @@ void PrefsDriver::set_speech_on(bool on) {
 void PrefsDriver::set_volume(int volume) {
     Preferences p(get().copy());
     p.volume = volume;
-    set(p);
-}
-
-void PrefsDriver::set_scenario_identifier(pn::string_view id) {
-    Preferences p(get().copy());
-    p.scenario_identifier = id.copy();
     set(p);
 }
 

@@ -58,10 +58,8 @@ class DirectoryLedger : public Ledger {
   private:
     class Visitor;
 
-    void load();
-    void save();
-
-    std::set<int> _chapters;
+    std::set<int> load();
+    void          save(const std::set<int> chapters);
 };
 
 }  // namespace antares

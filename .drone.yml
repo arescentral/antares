@@ -22,7 +22,6 @@ steps:
   - ./configure
   - make build
   - make smoke-test
-  - make test-install
 
 ---
 kind: pipeline
@@ -48,7 +47,6 @@ steps:
   - ./configure
   - make build
   - make smoke-test
-  - make test-install
 
 ---
 kind: pipeline

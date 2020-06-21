@@ -62,7 +62,13 @@ class TitleScreenFade : public PictFade {
 
 }  // namespace
 
-Master::Master(int32_t seed) : _state(START), _seed(seed), _skipped(false) {}
+Master::Master(sfz::optional<pn::string_view> plugin_path, int32_t seed)
+        : _state(START),
+          _plugin_path(
+                  plugin_path.has_value() ? sfz::make_optional(plugin_path->copy())
+                                          : sfz::nullopt),
+          _seed(seed),
+          _skipped(false) {}
 
 void Master::become_front() {
     switch (_state) {
@@ -127,7 +133,9 @@ void Master::init() {
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    PluginInit();
+    PluginInit(
+            _plugin_path.has_value() ? sfz::make_optional<pn::string_view>(*_plugin_path)
+                                     : sfz::nullopt);
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
     Admiral::init();
     Vectors::init();
