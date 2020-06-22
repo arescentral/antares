@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include <game/sys.hpp>
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
@@ -161,7 +162,11 @@ static void throw_error(int code, const char* message) {
     throw std::runtime_error(pn::format("{0}: {1}", code, message).c_str());
 }
 
-GLFWVideoDriver::GLFWVideoDriver() : _screen_size(640, 480), _last_click_count(0), _text(nullptr) {
+GLFWVideoDriver::GLFWVideoDriver()
+        : _fullscreen(sys.prefs->fullscreen()),
+          _screen_size(sys.prefs->window_size()),
+          _last_click_count(0),
+          _text(nullptr) {
     if (!glfwInit()) {
         throw std::runtime_error("glfwInit()");
     }
@@ -362,6 +367,9 @@ void GLFWVideoDriver::mouse_move(double x, double y) {
 
 void GLFWVideoDriver::window_size(int width, int height) {
     _screen_size = {width, height};
+    if (!_fullscreen) {
+        sys.prefs->set_window_size(_screen_size);
+    }
     glfwGetFramebufferSize(_window, &_viewport_size.width, &_viewport_size.height);
 }
 
@@ -397,7 +405,20 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
+    if (_fullscreen) {
+        GLFWmonitor*       monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode    = glfwGetVideoMode(monitor);
+
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+        _screen_size = {mode->width, mode->height};
+        _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", monitor, NULL);
+    } else {
+        _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
+    }
     if (!_window) {
         throw std::runtime_error("glfwCreateWindow");
     }

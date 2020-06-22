@@ -64,6 +64,7 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     static void mouse_move_callback(GLFWwindow* w, double x, double y);
     static void window_size_callback(GLFWwindow* w, int width, int height);
 
+    bool          _fullscreen;
     Size          _screen_size;
     Size          _viewport_size;
     GLFWwindow*   _window;
