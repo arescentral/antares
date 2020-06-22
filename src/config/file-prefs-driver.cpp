@@ -53,47 +53,39 @@ static const char* kKeyNames[KEY_COUNT] = {
         "hotkey 6",        "hotkey 7",       "hotkey 8",    "hotkey 9",     "hotkey 10",
 };
 
-static bool get(pn::value_cref x, bool& v) {
+static void set(bool& v, pn::value_cref x) {
     if (x.is_bool()) {
         v = x.as_bool();
-        return true;
     }
-    return false;
 }
 
-static bool get(pn::value_cref x, int& v) {
+static void set(int& v, pn::value_cref x) {
     if (x.is_int()) {
         v = x.as_int();
-        return true;
     }
-    return false;
 }
 
-static bool get(pn::value_cref x, int16_t& v) {
+static void set(int16_t& v, pn::value_cref x) {
     if (x.is_int()) {
         v = x.as_int();
-        return true;
     }
-    return false;
 }
 
-static bool get(pn::value_cref x, Key& v) {
+static void set(Key& v, pn::value_cref x) {
     if (x.is_int()) {
         v = static_cast<Key>(x.as_int());
-        return true;
     }
-    return false;
 }
 
-static bool get(pn::value_cref x, Size& s) {
+static void set(Size& s, pn::value_cref x) {
     if (x.is_map()) {
-        return get(x.as_map().get("width"), s.width) && get(x.as_map().get("height"), s.height);
+        set(s.width, x.as_map().get("width"));
+        set(s.height, x.as_map().get("height"));
     }
-    return false;
 }
 
 FilePrefsDriver::FilePrefsDriver(pn::string_view path) : _path(path.copy()) {
-    using ::antares::get;
+    using ::antares::set;
 
     pn::value x;
     pn::input in = pn::input{_path, pn::text};
@@ -103,19 +95,19 @@ FilePrefsDriver::FilePrefsDriver(pn::string_view path) : _path(path.copy()) {
     pn::map_cref m = x.as_map();
 
     pn::map_cref sound = m.get("sound").as_map();
-    get(sound.get("volume"), _current.volume);
-    get(sound.get("speech"), _current.speech_on);
-    get(sound.get("idle music"), _current.play_idle_music);
-    get(sound.get("game music"), _current.play_music_in_game);
+    set(_current.volume, sound.get("volume"));
+    set(_current.speech_on, sound.get("speech"));
+    set(_current.play_idle_music, sound.get("idle music"));
+    set(_current.play_music_in_game, sound.get("game music"));
 
     pn::map_cref keys = m.get("keys").as_map();
     for (auto i : range<size_t>(KEY_COUNT)) {
-        get(keys.get(kKeyNames[i]), _current.keys[i]);
+        set(_current.keys[i], keys.get(kKeyNames[i]));
     }
 
     pn::map_cref video = m.get("video").as_map();
-    get(video.get("fullscreen"), _current.fullscreen);
-    get(video.get("window"), _current.window_size);
+    set(_current.fullscreen, video.get("fullscreen"));
+    set(_current.window_size, video.get("window"));
 }
 
 void FilePrefsDriver::set(const Preferences& p) {
