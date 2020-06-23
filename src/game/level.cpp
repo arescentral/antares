@@ -388,11 +388,11 @@ void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, Scale* scale, R
         mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for (const auto& initial : Initial::all()) {
+    for (auto initial : Initial::all()) {
         if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, &coord, g.angle);
 
-            for (const auto& other : Initial::all()) {
+            for (auto other : Initial::all()) {
                 GetInitialCoord(other, &otherCoord, g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
@@ -414,7 +414,7 @@ void GetLevelFullScaleAndCorner(int32_t rotation, Point* corner, Scale* scale, R
     otherCoord.v = kUniversalCenter;
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
-    for (const auto& initial : Initial::all()) {
+    for (auto initial : Initial::all()) {
         if (!initial->hide.value_or(false)) {
             GetInitialCoord(initial, &tempCoord, g.angle);
 

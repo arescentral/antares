@@ -219,7 +219,7 @@ T required_struct(path_value x, const std::map<pn::string_view, field<T>>& field
             path_value v = x.get(kv.first);
             kv.second.set(&t, v);
         }
-        for (const auto& kv : x.value().as_map()) {
+        for (auto kv : x.value().as_map()) {
             pn::string_view k = kv.key();
             path_value      v = x.get(k);
             if (fields.find(k) == fields.end()) {
