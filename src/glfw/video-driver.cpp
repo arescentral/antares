@@ -197,6 +197,13 @@ void GLFWVideoDriver::stop_editing(TextReceiver* text) {
 wall_time GLFWVideoDriver::now() const { return wall_time(usecs(int64_t(glfwGetTime() * 1e6))); }
 
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
+#if GLFW_VERSION_MINOR >= 2
+    if ((key == GLFW_KEY_ENTER) && (mods == GLFW_MOD_ALT)) {
+        window_maximize(!_fullscreen);
+        return;
+    }
+#endif
+
     if (_text) {
         edit(key, action, mods);
         return;
@@ -373,6 +380,34 @@ void GLFWVideoDriver::window_size(int width, int height) {
     glfwGetFramebufferSize(_window, &_viewport_size.width, &_viewport_size.height);
 }
 
+void GLFWVideoDriver::window_maximize(bool maximized) {
+#if GLFW_VERSION_MINOR >= 2
+    if (maximized == _fullscreen) {
+        return;
+    }
+    _fullscreen = maximized;
+    sys.prefs->set_fullscreen(maximized);
+
+    GLFWmonitor*       monitor = nullptr;
+    const GLFWvidmode* mode;
+    if (_fullscreen) {
+        monitor      = glfwGetPrimaryMonitor();
+        mode         = glfwGetVideoMode(monitor);
+        _screen_size = {mode->width, mode->height};
+    } else {
+        mode         = glfwGetVideoMode(glfwGetWindowMonitor(_window));
+        _screen_size = sys.prefs->window_size();
+    }
+
+    Rect screen_rect{Point{0, 0}, Size{mode->width, mode->height}};
+    Rect window_rect{Point{0, 0}, _screen_size};
+    window_rect.center_in(screen_rect);
+    glfwSetWindowMonitor(
+            _window, monitor, window_rect.left, window_rect.top, window_rect.width(),
+            window_rect.height(), mode->refreshRate);
+#endif
+}
+
 void GLFWVideoDriver::key_callback(GLFWwindow* w, int key, int scancode, int action, int mods) {
     GLFWVideoDriver* driver = reinterpret_cast<GLFWVideoDriver*>(glfwGetWindowUserPointer(w));
     driver->key(key, scancode, action, mods);
@@ -396,6 +431,11 @@ void GLFWVideoDriver::mouse_move_callback(GLFWwindow* w, double x, double y) {
 void GLFWVideoDriver::window_size_callback(GLFWwindow* w, int width, int height) {
     GLFWVideoDriver* driver = reinterpret_cast<GLFWVideoDriver*>(glfwGetWindowUserPointer(w));
     driver->window_size(width, height);
+}
+
+void GLFWVideoDriver::window_maximize_callback(GLFWwindow* w, int maximized) {
+    GLFWVideoDriver* driver = reinterpret_cast<GLFWVideoDriver*>(glfwGetWindowUserPointer(w));
+    driver->window_maximize(maximized);
 }
 
 void GLFWVideoDriver::loop(Card* initial) {
@@ -431,6 +471,9 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwSetMouseButtonCallback(_window, mouse_button_callback);
     glfwSetCursorPosCallback(_window, mouse_move_callback);
     glfwSetWindowSizeCallback(_window, window_size_callback);
+#if GLFW_VERSION_MINOR >= 3
+    glfwSetWindowMaximizeCallback(_window, window_maximize_callback);
+#endif
 
     /* Make the _window's context current */
     glfwMakeContextCurrent(_window);
