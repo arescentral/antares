@@ -29,6 +29,8 @@
 #include <algorithm>
 #include <pn/output>
 
+#include "config/preferences.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "mac/c/CocoaVideoDriver.h"
 #include "mac/core-foundation.hpp"
@@ -47,7 +49,9 @@ namespace {
 class AntaresWindow {
   public:
     AntaresWindow(const cgl::PixelFormat& pixel_format, const cgl::Context& context)
-            : _c_obj(antares_window_create(pixel_format.c_obj(), context.c_obj())) {}
+            : _c_obj(antares_window_create(
+                      pixel_format.c_obj(), context.c_obj(), sys.prefs->fullscreen(),
+                      sys.prefs->window_size().width, sys.prefs->window_size().height)) {}
 
     ~AntaresWindow() { antares_window_destroy(_c_obj); }
 
@@ -174,6 +178,16 @@ struct CocoaVideoDriver::EventBridge {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
 
         switch (type) {
+            case ANTARES_WINDOW_CALLBACK_FULLSCREEN:
+                sys.prefs->set_fullscreen(data.fullscreen);
+                break;
+
+            case ANTARES_WINDOW_CALLBACK_RESIZE:
+                if (!sys.prefs->fullscreen()) {
+                    sys.prefs->set_window_size(Size{data.resize.width, data.resize.height});
+                }
+                break;
+
             case ANTARES_WINDOW_CALLBACK_KEY_DOWN:
                 self->enqueue(new KeyDownEvent(_now(), key_codes[data.key_down]));
                 break;

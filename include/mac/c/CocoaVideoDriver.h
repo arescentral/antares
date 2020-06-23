@@ -35,16 +35,22 @@ void antares_mouse_hide();
 void antares_mouse_show();
 
 typedef struct AntaresWindow AntaresWindow;
-AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextObj context);
-void           antares_window_destroy(AntaresWindow* window);
-int32_t        antares_window_screen_width(const AntaresWindow* window);
-int32_t        antares_window_screen_height(const AntaresWindow* window);
-int32_t        antares_window_viewport_width(const AntaresWindow* window);
-int32_t        antares_window_viewport_height(const AntaresWindow* window);
+
+AntaresWindow* antares_window_create(
+        CGLPixelFormatObj pixel_format, CGLContextObj context, bool fullscreen, int width,
+        int height);
+void    antares_window_destroy(AntaresWindow* window);
+int32_t antares_window_screen_width(const AntaresWindow* window);
+int32_t antares_window_screen_height(const AntaresWindow* window);
+int32_t antares_window_viewport_width(const AntaresWindow* window);
+int32_t antares_window_viewport_height(const AntaresWindow* window);
 
 void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y);
 
 typedef enum {
+    ANTARES_WINDOW_CALLBACK_FULLSCREEN,
+    ANTARES_WINDOW_CALLBACK_RESIZE,
+
     ANTARES_WINDOW_CALLBACK_KEY_DOWN,
     ANTARES_WINDOW_CALLBACK_KEY_UP,
     ANTARES_WINDOW_CALLBACK_CAPS_LOCK,
@@ -93,6 +99,11 @@ typedef enum {
 } antares_window_callback_unit;
 
 typedef union {
+    bool fullscreen;
+    struct {
+        int32_t width, height;
+    } resize;
+
     int key_down;
     int key_up;
 

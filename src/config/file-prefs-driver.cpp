@@ -19,6 +19,7 @@
 #include "config/file-prefs-driver.hpp"
 
 #include <fcntl.h>
+
 #include <pn/input>
 #include <pn/map>
 #include <pn/output>
@@ -52,71 +53,61 @@ static const char* kKeyNames[KEY_COUNT] = {
         "hotkey 6",        "hotkey 7",       "hotkey 8",    "hotkey 9",     "hotkey 10",
 };
 
-static bool get(pn::value_cref x, bool& v) {
+static void set(bool& v, pn::value_cref x) {
     if (x.is_bool()) {
         v = x.as_bool();
-        return true;
     }
-    return false;
 }
 
-static bool get(pn::value_cref x, int& v) {
+static void set(int& v, pn::value_cref x) {
     if (x.is_int()) {
         v = x.as_int();
-        return true;
     }
-    return false;
 }
 
-static bool get(pn::value_cref x, Key& v) {
+static void set(int16_t& v, pn::value_cref x) {
+    if (x.is_int()) {
+        v = x.as_int();
+    }
+}
+
+static void set(Key& v, pn::value_cref x) {
     if (x.is_int()) {
         v = static_cast<Key>(x.as_int());
-        return true;
-    }
-    return false;
-}
-
-template <typename ValueType, typename ValueKey, typename PrefsMethod>
-static void set_from(
-        pn::map_cref x, const char* section_key, ValueKey value_key, Preferences& prefs,
-        PrefsMethod pmeth) {
-    auto      section = x.get(section_key).as_map();
-    auto      value   = section.get(value_key);
-    ValueType typed;
-    if (get(value, typed)) {
-        (prefs.*pmeth) = typed;
     }
 }
 
-template <typename ValueType, typename ValueKey, typename PrefsMethod>
-static void set_from(
-        pn::map_cref x, const char* section_key, ValueKey value_key, Preferences& prefs,
-        PrefsMethod pmeth, int index) {
-    auto      section = x.get(section_key).as_map();
-    auto      value   = section.get(value_key);
-    ValueType typed;
-    if (get(value, typed)) {
-        (prefs.*pmeth)[index] = typed;
+static void set(Size& s, pn::value_cref x) {
+    if (x.is_map()) {
+        set(s.width, x.as_map().get("width"));
+        set(s.height, x.as_map().get("height"));
     }
 }
 
-FilePrefsDriver::FilePrefsDriver() {
-    pn::string path = pn::format("{0}/config.pn", dirs().root);
-    pn::value  x;
-    pn::input  in = pn::input{path, pn::text};
+FilePrefsDriver::FilePrefsDriver(pn::string_view path) : _path(path.copy()) {
+    using ::antares::set;
+
+    pn::value x;
+    pn::input in = pn::input{_path, pn::text};
     if (!in || !pn::parse(in, &x, nullptr)) {
         return;
     }
     pn::map_cref m = x.as_map();
 
-    set_from<int>(m, "sound", "volume", _current, &Preferences::volume);
-    set_from<bool>(m, "sound", "speech", _current, &Preferences::speech_on);
-    set_from<bool>(m, "sound", "idle music", _current, &Preferences::play_idle_music);
-    set_from<bool>(m, "sound", "game music", _current, &Preferences::play_music_in_game);
+    pn::map_cref sound = m.get("sound").as_map();
+    set(_current.volume, sound.get("volume"));
+    set(_current.speech_on, sound.get("speech"));
+    set(_current.play_idle_music, sound.get("idle music"));
+    set(_current.play_music_in_game, sound.get("game music"));
 
+    pn::map_cref keys = m.get("keys").as_map();
     for (auto i : range<size_t>(KEY_COUNT)) {
-        set_from<Key>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
+        set(_current.keys[i], keys.get(kKeyNames[i]));
     }
+
+    pn::map_cref video = m.get("video").as_map();
+    set(_current.fullscreen, video.get("fullscreen"));
+    set(_current.window_size, video.get("window"));
 }
 
 void FilePrefsDriver::set(const Preferences& p) {
@@ -127,14 +118,27 @@ void FilePrefsDriver::set(const Preferences& p) {
         keys[kKeyNames[i]] = static_cast<int>(p.keys[i]);
     }
 
-    pn::string path = pn::format("{0}/config.pn", dirs().root);
-    makedirs(dirname(path), 0755);
-    pn::output output = pn::output{path, pn::text};
-    output.dump(pn::map{{"sound", pn::map{{"volume", p.volume},
-                                          {"speech", p.speech_on},
-                                          {"idle music", p.play_idle_music},
-                                          {"game music", p.play_music_in_game}}},
-                        {"keys", std::move(keys)}});
+    makedirs(dirname(_path), 0755);
+    pn::output output = pn::output{_path, pn::text};
+    output.dump(pn::map{
+            {"sound",
+             pn::map{
+                     {"volume", p.volume},
+                     {"speech", p.speech_on},
+                     {"idle music", p.play_idle_music},
+                     {"game music", p.play_music_in_game},
+             }},
+            {"keys", std::move(keys)},
+            {"video",
+             pn::map{
+                     {"fullscreen", p.fullscreen},
+                     {"window",
+                      pn::map{
+                              {"width", p.window_size.width},
+                              {"height", p.window_size.height},
+                      }},
+             }},
+    });
 }
 
 }  // namespace antares

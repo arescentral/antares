@@ -35,6 +35,8 @@ struct Preferences {
     bool    play_music_in_game;
     bool    speech_on;
     int16_t volume;
+    bool    fullscreen;
+    Size    window_size;
 };
 
 class PrefsDriver {
@@ -50,12 +52,16 @@ class PrefsDriver {
     bool play_music_in_game() const { return get().play_music_in_game; }
     bool speech_on() const { return get().speech_on; }
     int  volume() const { return get().volume; }
+    int  fullscreen() const { return get().fullscreen; }
+    Size window_size() const { return get().window_size; }
 
     void set_key(size_t index, Key key);
     void set_play_idle_music(bool on);
     void set_play_music_in_game(bool on);
     void set_speech_on(bool on);
     void set_volume(int volume);
+    void set_fullscreen(bool on);
+    void set_window_size(Size size);
 
     static PrefsDriver* driver();
 };

@@ -97,6 +97,9 @@ Preferences::Preferences() {
     speech_on          = false;
 
     volume = 7;
+
+    fullscreen  = false;
+    window_size = {640, 480};
 }
 
 Preferences Preferences::copy() const {
@@ -106,6 +109,8 @@ Preferences Preferences::copy() const {
     copy.play_music_in_game = play_music_in_game;
     copy.speech_on          = speech_on;
     copy.volume             = volume;
+    copy.fullscreen         = fullscreen;
+    copy.window_size        = window_size;
     return copy;
 }
 
@@ -145,6 +150,18 @@ void PrefsDriver::set_speech_on(bool on) {
 void PrefsDriver::set_volume(int volume) {
     Preferences p(get().copy());
     p.volume = volume;
+    set(p);
+}
+
+void PrefsDriver::set_fullscreen(bool on) {
+    Preferences p(get().copy());
+    p.fullscreen = on;
+    set(p);
+}
+
+void PrefsDriver::set_window_size(Size size) {
+    Preferences p(get().copy());
+    p.window_size = size;
     set(p);
 }
 

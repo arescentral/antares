@@ -58,7 +58,7 @@ typedef enum {
     SelectionDirectionLeft,
 } SelectionDirection;
 
-@interface AntaresView : NSOpenGLView <NSTextInputClient> {
+@interface AntaresView : NSOpenGLView <NSTextInputClient, NSWindowDelegate> {
   @public
     void (*callback)(
             antares_window_callback_type type, antares_window_callback_data data, void* userdata);
@@ -104,12 +104,14 @@ static void* memdup(void* data, size_t size) {
     return copy;
 }
 
-AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextObj context) {
+AntaresWindow* antares_window_create(
+        CGLPixelFormatObj pixel_format, CGLContextObj context, bool fullscreen, int width,
+        int height) {
     AntaresWindow window = {};
     window.pixel_format  = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
     window.context       = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
 
-    NSRect window_rect = NSMakeRect(0, 0, 640, 480);
+    NSRect window_rect = NSMakeRect(0, 0, width, height);
     int    style_mask  = NSTitledWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
 
     window.view = [[AntaresView alloc] initWithFrame:window_rect pixelFormat:window.pixel_format];
@@ -124,7 +126,12 @@ AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextO
     [window.window setContentView:window.view];
     [window.window makeKeyAndOrderFront:NSApp];
     [window.window makeFirstResponder:window.view];
-    [window.window center];
+    if (fullscreen) {
+        [window.window toggleFullScreen:nil];
+    } else {
+        [window.window center];
+    }
+    window.window.delegate = window.view;
     return memdup(&window, sizeof(AntaresWindow));
 }
 
@@ -381,6 +388,26 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 
 - (void)mouseMoved:(NSEvent*)event {
     mouse_move(self, event);
+}
+
+// NSWindowDelegate
+
+- (void)windowDidResize:(NSNotification*)notification {
+    antares_window_callback_data data = {.resize = {
+                                                 .width  = self.bounds.size.width,
+                                                 .height = self.bounds.size.height,
+                                         }};
+    callback(ANTARES_WINDOW_CALLBACK_RESIZE, data, userdata);
+}
+
+- (void)windowWillEnterFullScreen:(NSNotification*)notification {
+    antares_window_callback_data data = {.fullscreen = true};
+    callback(ANTARES_WINDOW_CALLBACK_FULLSCREEN, data, userdata);
+}
+
+- (void)windowDidExitFullScreen:(NSNotification*)notification {
+    antares_window_callback_data data = {.fullscreen = false};
+    callback(ANTARES_WINDOW_CALLBACK_FULLSCREEN, data, userdata);
 }
 
 // NSResponder
