@@ -319,7 +319,7 @@ DEFINE_FIELD_READER(Tags) {
     } else if (x.value().is_map()) {
         pn::map_cref m = x.value().as_map();
         Tags         result;
-        for (const auto& kv : m) {
+        for (auto kv : m) {
             auto v = read_field<sfz::optional<bool>>(x.get(kv.key()));
             if (v.has_value()) {
                 result.tags[kv.key().copy()] = *v;
