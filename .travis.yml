@@ -10,6 +10,7 @@ matrix:
 
       script:
         - scripts/set-version $(git describe --tags HEAD)
+        - build/lib/scripts/bootstrap.py
         - ./configure
         - make build
         - make smoke-test

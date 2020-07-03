@@ -34,3 +34,9 @@
 [submodule "ext/zlib"]
 	path = ext/zlib
 	url = https://github.com/sfiera/zlib-gn.git
+[submodule "ext/gn"]
+	path = ext/gn
+	url = https://gn.googlesource.com/gn
+[submodule "ext/ninja"]
+	path = ext/ninja
+	url = https://github.com/ninja-build/ninja
