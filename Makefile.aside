@@ -1,66 +1,35 @@
-# Copyright (C) 2020 The Antares Authors
+# Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
-all:
+-include out/cur/args.gn
+NINJA=build/lib/bin/ninja -C out/cur
+MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 
-OUT ?= out/cur
-ANTARES_ROOT ?= .
-EXT ?= ext
-PROCYON ?= $(EXT)/procyon
-GMOCK ?= $(EXT)/gmock
-LIBSFZ_ROOT ?= $(EXT)/libsfz
-LIBZIPXX_ROOT ?= $(EXT)/libzipxx
-LIBMODPLUG_ROOT ?= $(EXT)/libmodplug
-LIBSNDFILE_ROOT ?= $(EXT)/libsndfile
-LIBPNG_ROOT ?= $(EXT)/libpng
-GLFW_ROOT ?= $(EXT)/glfw
-MKDIR_P ?= mkdir -p
+BINDIR=$(prefix)/games
+APPDIR=$(prefix)/share/applications
+ICONDIR=$(prefix)/share/icons
+DATADIR=$(prefix)/share/games/antares
 
-VERSION=
-MACOSX_VERSION_MIN=10.7
-
--include $(OUT)/config.mk
-
-CPPFLAGS += -MMD -MP -D ANTARES_VERSION=\"$(VERSION)\"
-CFLAGS += -Wall
-CXXFLAGS += -std=c++11 -stdlib=libc++ -Wall
-LDFLAGS += -std=c++11 -stdlib=libc++
-
-ifeq ($(TARGET_OS),mac)
--mmacosx-version-min=10.7
-endif
-
-include ext/gmock/build/targets.mk
-include ext/procyon/build/targets.mk
-include ext/libsfz/build/targets.mk
-include ext/libzipxx/build/targets.mk
-include ext/libmodplug/build/targets.mk
-include ext/libsndfile/build/targets.mk
-include ext/libpng/build/targets.mk
-include ext/glfw/build/targets.mk
-include build/targets.mk
-
-all: $(ANTARES) \
-	$(REPLAY) $(OFFSCREEN) \
-	$(TINT) $(OBJECT_DATA) $(BUILD_PIX) $(SHAPES) \
-	$(COLOR_TEST) $(EDITABLE_TEXT_TEST) $(FIXED_TEST)
-
-.PHONY: run
-run: all
-	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
+.PHONY: build
+build:
+	@$(NINJA)
 
 .PHONY: test
-test: all
+test: build
 	scripts/test.py
 
 .PHONY: test-wine
-test-wine: all
+test-wine: build
 	scripts/test.py --wine
 
 .PHONY: smoke-test
-smoke-test: all
+smoke-test: build
 	scripts/test.py --smoke
+
+.PHONY: clean
+clean:
+	@$(NINJA) -t clean
 
 .PHONY: dist
 dist:
@@ -71,6 +40,15 @@ dist:
 .PHONY: macdist
 macdist: sign notarize
 	scripts/dist.py mac
+
+.PHONY: distclean
+distclean:
+	rm -Rf out/
+	rm -f scripts/*.pyc build/lib/scripts/*.pyc
+
+.PHONY: run
+run: build
+	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
 
 .PHONY: sign
 sign: build
@@ -89,12 +67,7 @@ notarize: sign
 install-deps:
 	@scripts/installdeps.py
 
-BINDIR=$(PREFIX)/games
-APPDIR=$(PREFIX)/share/applications
-ICONDIR=$(PREFIX)/share/icons
-DATADIR=$(PREFIX)/share/games/antares
-
-ifeq ($(TARGET_OS),linux)
+ifeq ($(target_os), "linux")
 .PHONY: install
 install: install-bin install-data install-scenario
 
@@ -142,13 +115,9 @@ install-scenario: build
 	out/cur/antares-install-data -s $(DESTDIR)$(DATADIR)/downloads -d $(DESTDIR)$(DATADIR)/scenarios
 endif
 
-.PHONY: clean
-clean:
-	$(RM) -r $(OUT)/
-
-.PHONY: distclean
-distclean:
-	$(RM) -r out
+.PHONY: pull-request
+pull-request:
+	hub pull-request -b arescentral:master
 
 .PHONY: friends
 friends:

@@ -31,6 +31,3 @@
 [submodule "ext/procyon"]
 	path = ext/procyon
 	url = https://github.com/arescentral/procyon.git
-[submodule "ext/zlib"]
-	path = ext/zlib
-	url = https://github.com/sfiera/zlib-gn.git

@@ -20,7 +20,7 @@ steps:
 
   - scripts/set-version $(git describe --tags HEAD)
   - ./configure
-  - make build
+  - make -j4 build
   - make smoke-test
 
 ---
@@ -45,7 +45,7 @@ steps:
 
   - scripts/set-version $(git describe --tags HEAD)
   - ./configure
-  - make build
+  - make -j4 build
   - make smoke-test
 
 ---
@@ -70,7 +70,7 @@ steps:
 
   - scripts/set-version $(git describe --tags HEAD)
   - ./configure -o win
-  - make build
+  - make -j4 build
   - make test-wine
 
 ...
