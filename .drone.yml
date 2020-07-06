@@ -15,12 +15,12 @@ steps:
     DEBIAN_FRONTEND: noninteractive
   commands:
   - apt-get update
-  - apt-get install -y --no-install-recommends make python3 xvfb sudo
+  - apt-get install -y --no-install-recommends make python3 xvfb sudo git
   - scripts/installdeps.py ubuntu -y
 
   - scripts/set-version $(git describe --tags HEAD)
   - ./configure
-  - make build
+  - make -j4 build
   - make smoke-test
 
 ---
@@ -40,12 +40,12 @@ steps:
     DEBIAN_FRONTEND: noninteractive
   commands:
   - apt-get update
-  - apt-get install -y --no-install-recommends make python3 xvfb sudo
+  - apt-get install -y --no-install-recommends make python3 xvfb sudo git
   - scripts/installdeps.py ubuntu -y
 
   - scripts/set-version $(git describe --tags HEAD)
   - ./configure
-  - make build
+  - make -j4 build
   - make smoke-test
 
 ---
@@ -65,12 +65,11 @@ steps:
     DEBIAN_FRONTEND: noninteractive
   commands:
   - apt-get update
-  - apt-get install -y --no-install-recommends build-essential clang make python3
-  - apt-get install -y --no-install-recommends mingw-w64 xvfb wine-stable
+  - apt-get install -y --no-install-recommends build-essential clang make python3 git mingw-w64 xvfb wine-stable
 
   - scripts/set-version $(git describe --tags HEAD)
   - ./configure -o win
-  - make build
+  - make -j4 build
   - make test-wine
 
 ...

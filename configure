@@ -3,18 +3,12 @@
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
-from __future__ import division, print_function, unicode_literals
-
 import argparse
 import collections
 import os
+import pipes
 import platform
 import sys
-
-try:
-    from shlex import quote
-except ImportError:
-    from pipes import quote
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "scripts"))
 import installdeps
@@ -25,7 +19,29 @@ try:
 except ImportError:
     pass
 
-str = type("")  # For Python2
+MODES = {
+    "dbg": ["-g", "-O0"],
+    "dev": ["-O0"],
+    "opt": ["-O3"],
+}
+
+PLATFORMS = {
+    ("mac", "mac"): {
+        "cc": "clang",
+        "cxx": "clang++",
+        "ar": "ar",
+    },
+    ("linux", "linux"): {
+        "cc": "clang",
+        "cxx": "clang++",
+        "ar": "ar",
+    },
+    ("linux", "win"): {
+        "cc": "clang -target x86_64-w64-mingw32 -static",
+        "cxx": "clang++ -target x86_64-w64-mingw32 -static",
+        "ar": "x86_64-w64-mingw32-ar",
+    },
+}
 
 
 def main():
@@ -41,6 +57,11 @@ def main():
                         "  - opt: compile for fast binaries (default)\n"
                         "  - dev: compile for fast builds\n"
                         "  - dbg: add debugging symbols")
+    parser.add_argument("--host-os",
+                        metavar="OS",
+                        type=str,
+                        default=cfg.host_os(),
+                        help="host os (default: host os)")
     parser.add_argument("-o",
                         "--target-os",
                         metavar="OS",
@@ -63,15 +84,19 @@ def main():
 
     with cfg.step("configure mode") as msg:
         msg(args.mode, color="green")
-    gn_args = {}
-    gn_args["mode"] = args.mode
-    gn_args["target_os"] = args.target_os
-    gn_args["prefix"] = args.prefix
+    settings = {}
+    settings.update(PLATFORMS[args.host_os, args.target_os])
+    settings["host_os"] = args.host_os
+    settings["target_os"] = args.target_os
+    settings["prefix"] = args.prefix
+    settings["cflags"] = MODES[args.mode]
+    settings["cxxflags"] = MODES[args.mode]
     if args.antares_version:
-        gn_args["antares_version"] = args.antares_version
+        settings["antares_version"] = args.antares_version
     if args.target_os == "mac":
-        gn_args["macosx_version_min"] = "10.7"
-    cfg.gn(**gn_args)
+        settings["macosx_version_min"] = "10.7"
+    cfg.configure(os.path.join("out", args.target_os, args.mode),
+                  **settings)
 
     print("make(1) it so!")
 
@@ -193,7 +218,7 @@ def check_linux_native(args):
         else:
             print("On %s, you can install them with:\n" % distro)
         command = ["sudo"] + command + list(package[pkg] for pkg in missing_pkgs)
-        print("    $ %s\n" % (" ".join(quote(arg) for arg in command)))
+        print("    $ %s\n" % (" ".join(pipes.quote(arg) for arg in command)))
         print("Then, try ./configure again")
         sys.exit(1)
 
