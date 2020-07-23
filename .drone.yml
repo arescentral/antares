@@ -19,8 +19,7 @@ steps:
   - scripts/deps.py install -- -y
   - ln -s /usr/include/libcxxabi/__cxxabi_config.h /usr/include/c++/v1/
 
-  - scripts/set-version $(git describe --tags HEAD)
-  - ./configure
+  - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
   - make smoke-test
 
@@ -44,8 +43,7 @@ steps:
   - apt-get install -y --no-install-recommends make python3 xvfb sudo git gnupg
   - scripts/deps.py install -- -y
 
-  - scripts/set-version $(git describe --tags HEAD)
-  - ./configure
+  - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
   - make smoke-test
 
@@ -74,8 +72,7 @@ steps:
   - apt-get install -y --no-install-recommends make python3 xvfb sudo git gnupg
   - scripts/deps.py install -- -y
 
-  - scripts/set-version $(git describe --tags HEAD)
-  - ./configure
+  - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
   - make smoke-test
 
@@ -103,8 +100,7 @@ steps:
   - apt-get update
   - apt-get install -y --no-install-recommends build-essential clang make python3 git mingw-w64 xvfb wine-stable gn ninja-build
 
-  - scripts/set-version $(git describe --tags HEAD)
-  - ./configure -o win
+  - ./configure -o win --antares-version=$(git describe --tags HEAD)
   - make build
   - make test-wine
 

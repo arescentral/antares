@@ -9,9 +9,8 @@ matrix:
         - scripts/load-cert.sh
 
       script:
-        - scripts/set-version $(git describe --tags HEAD)
         - scripts/deps.py install
-        - ./configure
+        - ./configure --antares-version=$(git describe --tags HEAD)
         - make build
         - make smoke-test
 
