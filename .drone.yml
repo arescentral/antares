@@ -5,7 +5,7 @@ name: xenial
 
 steps:
 - name: submodule
-  image: alpine/git
+  image: drone/git
   commands:
   - git submodule update --init
 
@@ -31,7 +31,7 @@ name: focal
 
 steps:
 - name: submodule
-  image: alpine/git
+  image: drone/git
   commands:
   - git submodule update --init
 
@@ -52,11 +52,41 @@ steps:
 ---
 kind: pipeline
 type: docker
+name: raspi
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+- name: submodule
+  image: drone/git
+  commands:
+  - git submodule update --init
+
+- name: test
+  # buster armhf (default is armel)
+  image: debian@sha256:43e8691b4e25f4b0fd0f10bca8ea11b9f0578b0e5d2fe3b085290455dd07c0b6
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  commands:
+  - apt-get update
+  - apt-get install -y --no-install-recommends make python3 xvfb sudo git gnupg
+  - scripts/deps.py install -- -y
+
+  - scripts/set-version $(git describe --tags HEAD)
+  - ./configure
+  - make build
+  - make smoke-test
+
+---
+kind: pipeline
+type: docker
 name: wine
 
 steps:
 - name: submodule
-  image: alpine/git
+  image: drone/git
   commands:
   - git submodule update --init
 
