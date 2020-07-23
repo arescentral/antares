@@ -3,7 +3,7 @@
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
 -include out/cur/args.gn
-NINJA=build/lib/bin/ninja -C out/cur
+NINJA=ninja -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 
 BINDIR=$(prefix)/games

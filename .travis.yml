@@ -10,6 +10,7 @@ matrix:
 
       script:
         - scripts/set-version $(git describe --tags HEAD)
+        - scripts/deps.py install
         - ./configure
         - make build
         - make smoke-test
