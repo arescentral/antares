@@ -17,6 +17,7 @@ steps:
   - apt-get update
   - apt-get install -y --no-install-recommends make python3 xvfb sudo
   - scripts/installdeps.py ubuntu -y
+  - ln -s /usr/include/libcxxabi/__cxxabi_config.h /usr/include/c++/v1/
 
   - scripts/set-version $(git describe --tags HEAD)
   - ./configure
