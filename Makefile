@@ -74,7 +74,7 @@ install: install-bin install-data install-scenario
 .PHONY: install-bin
 install-bin: build
 	install -m 755 -d $(DESTDIR)$(BINDIR)
-	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
+	install -m 755 out/cur/antares $(DESTDIR)$(BINDIR)/antares
 	install -m 755 out/cur/antares-install-data $(DESTDIR)$(BINDIR)/antares-install-data
 
 .PHONY: install-data
