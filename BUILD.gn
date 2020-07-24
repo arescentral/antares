@@ -22,7 +22,7 @@ if (target_os == "win") {
 group("default") {
   testonly = true
   deps = [
-    ":antares-glfw",
+    ":antares",
     ":antares-install-data",
     ":build-pix",
     ":color-test",
@@ -36,11 +36,11 @@ group("default") {
     ":tint",
   ]
   if (target_os == "mac") {
-    deps += [ ":antares" ]
+    deps += [ ":antares_app" ]
   }
   if (target_os == "win") {
     deps -= [
-      ":antares-glfw",
+      ":antares",
       ":antares-install-data",
       ":build-pix",
       ":offscreen",
@@ -579,7 +579,7 @@ executable("build-pix") {
   configs += [ ":antares_private" ]
 }
 
-executable("antares-glfw") {
+executable("antares") {
   output_extension = exe
   sources = [
     "include/glfw/video-driver.hpp",
@@ -631,7 +631,7 @@ if (target_os == "mac") {
   # xcode_settings:
   # CODE_SIGN_IDENTITY=Developer ID Application
   # CODE_SIGN_ENTITLEMENTS=resources/entitlements.plist
-  app("antares") {
+  app("antares_app") {
     output_name = "Antares"
     info_plist = "resources/Antares-Info.plist"
     info_plist_defines = [
