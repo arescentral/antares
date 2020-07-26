@@ -17,7 +17,7 @@ except ImportError:
     from pipes import quote
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "scripts"))
-import installdeps
+import deps
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "build", "lib", "scripts"))
 try:
@@ -141,10 +141,26 @@ def check_mac(args):
         msg("%d.%d" % ver, color="green")
 
     missing = collections.OrderedDict()
-    if not (check_clang() and check_libcxx()):
+    if not (cfg.check_clang() and cfg.check_libcxx()):
         missing["xcode"] = ("* To install Xcode, open the App Store:\n"
                             "    https://itunes.apple.com/en/app/xcode/id497799835\n"
                             "  After installing, open it and accept the license agreement\n")
+    if not cfg.check_brew():
+        missing["brew"] = (
+            "* To install Homebrew, run:\n"
+            '    $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"\n'
+        )
+
+    missing_pkgs = collections.OrderedDict()
+    if not cfg.check_gn():
+        missing_pkgs["gn"] = "sfiera/gn/gn"
+    if not cfg.check_ninja():
+        missing_pkgs["ninja"] = "ninja"
+    if missing_pkgs:
+        names = " ".join(missing_pkgs)
+        pkgs = " ".join(missing_pkgs.values())
+        missing[names] = ("* To install packages with Homebrew, run:\n"
+                          "    $ brew install %s\n" % pkgs)
 
     if missing:
         print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
@@ -157,59 +173,28 @@ def check_mac(args):
 
 def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = installdeps.linux_distribution()
-        if distro[0].lower() in installdeps.COMMAND:
-            msg(" ".join(distro), color="green")
-            distro = distro[0]
+        pretty, distro, codename = cfg.dist_proto()
+        if distro in deps.INSTALL:
+            msg(pretty, color="green")
         else:
-            msg(" ".join(distro) + " (untested)", color="yellow")
-            distro = "Ubuntu"
-        command = installdeps.COMMAND[distro.lower()]
-        package = installdeps.PACKAGE[distro.lower()]
-
-    missing_pkgs = []
-    if not check_clang("clang++"):
-        missing_pkgs.append("clang")
-    if not check_libcxx("clang++"):
-        missing_pkgs.append("libc++")
-    if not check_libcxxabi("clang++"):
-        missing_pkgs.append("libc++abi")
-
-    if check_pkg_config():
-        libs = """
-            gl glfw3 glu libmodplug libzip libpng neon openal sndfile
-            x11 xcursor xinerama xrandr xxf86vm zlib
-        """.split()
-        for lib in libs:
-            if not cfg.check_pkg(lib):
-                missing_pkgs.append(lib)
-    else:
-        missing_pkgs.append("pkg-config")
-
-    if missing_pkgs:
-        print("\nmissing dependencies: %s" % " ".join(missing_pkgs))
-        if len(missing_pkgs) == 1:
-            print("On %s, you can install it with:\n" % distro)
-        else:
-            print("On %s, you can install them with:\n" % distro)
-        command = ["sudo"] + command + list(package[pkg] for pkg in missing_pkgs)
-        print("    $ %s\n" % (" ".join(quote(arg) for arg in command)))
-        print("Then, try ./configure again")
+            msg(pretty + " (untested)", color="yellow")
+            distro = "debian"
+    if not deps.check(distro=distro, codename=codename):
         sys.exit(1)
 
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:
-        distro = installdeps.linux_distribution()
-        if distro == ("Ubuntu", "20.04", "focal"):
-            msg(" ".join(distro), color="green")
+        pretty, distro, codename = cfg.dist_proto()
+        if (distro, codename) == ("debian", "focal"):
+            msg(pretty, color="green")
         else:
-            msg(" ".join(distro), color="red")
+            msg(pretty, color="red")
             print("\nSorry! Cross-compilation currently requires Ubuntu 20.04 focal")
             sys.exit(1)
 
     missing = collections.OrderedDict()
-    if not check_clang("clang++"):
+    if not cfg.check_clang("clang++"):
         missing["clang"] = "clang"
 
     with cfg.step("checking for mingw") as msg:
@@ -227,42 +212,6 @@ def check_win_on_linux(args):
             print("\nYou can install them with:\n")
         print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
         sys.exit(1)
-
-
-def check_clang(executable=""):
-    """Compile a basic C++11 binary."""
-    executable = executable or "clang++"
-    return cfg.check_bin(("%s -x c++ -std=c++11 - -o /dev/null" % executable).split(),
-                         what="clang",
-                         input="int main() { return 1; }")
-
-
-def check_libcxx(executable=""):
-    """Compile a basic C++11, libc++ binary."""
-    executable = executable or "clang++"
-    return cfg.check_bin(
-        ("%s -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null" % executable).split(),
-        what="libc++",
-        input="#include <chrono>\n\nint main() { return std::chrono::seconds(1).count(); }")
-
-
-def check_libcxxabi(executable=""):
-    """Compile a basic C++11, libc++ binary, including cxxabi.h.
-
-    Pass -I/usr/include/libcxxabi explicitly to work around a broken
-    environment on Ubuntu.
-    """
-    executable = executable or "clang++"
-    return cfg.check_bin(
-        ("%s -x c++ -std=c++11 -stdlib=libc++ -I/usr/include/libcxxabi - -o /dev/null" %
-         executable).split(),
-        what="libc++abi",
-        input="#include <cxxabi.h>\n\nint main() { return 0; }")
-
-
-def check_pkg_config():
-    """Run pkg-config --version."""
-    return cfg.check_bin("pkg-config --version".split())
 
 
 if __name__ == "__main__":

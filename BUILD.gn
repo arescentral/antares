@@ -6,9 +6,9 @@ declare_args() {
   # Installation prefix (default: /usr/local)
   # Used only on linux. Data files are expected under $prefix/share/antares/app.
   prefix = "/usr/local"
-}
 
-antares_version = ""
+  antares_version = "0.0.0"
+}
 
 import("//build/lib/embed.gni")
 import("//build/lib/mac/version.gni")
