@@ -20,6 +20,7 @@
 #define ANTARES_DATA_TAGS_HPP_
 
 #include <stdint.h>
+
 #include <memory>
 #include <pn/string>
 #include <sfz/sfz.hpp>
@@ -37,6 +38,20 @@
 namespace antares {
 
 struct Tags {
+    Tags()            = default;
+    Tags(const Tags&) = delete;
+    Tags(Tags&&)      = default;
+    Tags& operator=(const Tags&) = delete;
+
+    // Old libstdc++ has an issue that precludes default here.
+    // When std::map’s key type is movable but not copyable,
+    // the map is move-constructible but not move-assignable.
+    // The issue is in libstdc++ 5.4.0 but is fixed by 9.3.0.
+    Tags& operator=(Tags&& other) {
+        std::swap(tags, other.tags);
+        return *this;
+    }
+
     std::map<pn::string, bool> tags;
 };
 

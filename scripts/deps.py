@@ -33,8 +33,6 @@ PACKAGE[DEBIAN] = collections.OrderedDict([
     ("gl", "libgl1-mesa-dev"),
     ("glfw3", "libglfw3-dev"),
     ("glu", "libglu1-mesa-dev"),
-    ("libc++", "libc++-dev"),
-    ("libc++abi", "libc++abi-dev"),
     ("libmodplug", "libmodplug-dev"),
     ("libpng", "libpng-dev"),
     ("libzip", "libzip-dev"),
@@ -89,8 +87,6 @@ def main():
 
 _CHECKERS = {
     "clang": lambda: cfg.check_clang("clang++"),
-    "libc++": lambda: cfg.check_libcxx("clang++"),
-    "libc++abi": lambda: cfg.check_libcxxabi("clang++"),
     "gn": cfg.check_gn,
     "ninja": cfg.check_ninja,
 }
