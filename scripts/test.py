@@ -39,7 +39,8 @@ def run(opts, queue, name, cmd):
     sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, _ = sub.communicate()
     if sub.returncode != 0:
-        print("%s failed:\n%s" % (os.path.basename(cmd[0]), output))
+        print("%s failed:\n%s" %
+              (os.path.basename(cmd[0]), output.decode("utf-8", errors="replace")))
         return False
     return True
 
