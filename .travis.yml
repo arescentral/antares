@@ -7,9 +7,10 @@ matrix:
 
       install:
         - scripts/load-cert.sh
+        - brew update
+        - HOMEBREW_VERBOSE_USING_DOTS=true scripts/deps.py install -- -v
 
       script:
-        - HOMEBREW_VERBOSE_USING_DOTS=true scripts/deps.py install -- -v
         - ./configure --antares-version=$(git describe --tags HEAD)
         - make build
         - make smoke-test
