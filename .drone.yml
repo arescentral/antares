@@ -17,7 +17,6 @@ steps:
   - apt-get update
   - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
   - scripts/deps.py install -- -y
-  - ln -s /usr/include/libcxxabi/__cxxabi_config.h /usr/include/c++/v1/
 
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
