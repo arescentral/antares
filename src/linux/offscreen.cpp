@@ -40,15 +40,15 @@ GLXFBConfig* fb_configs(Display* display) {
     return configs;
 }
 
-const int kContextAttrs[] = {GLX_CONTEXT_MAJOR_VERSION_ARB,
-                             3,
-                             GLX_CONTEXT_MINOR_VERSION_ARB,
-                             2,
-                             GLX_CONTEXT_PROFILE_MASK_ARB,
-                             GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-                             None};
-
-GLXContext new_context(Display* display, GLXFBConfig config) {
+GLXContext new_context(
+        Display* display, GLXFBConfig config, int gl_major_version, int gl_minor_version) {
+    const int kContextAttrs[] = {GLX_CONTEXT_MAJOR_VERSION_ARB,
+                                 gl_major_version,
+                                 GLX_CONTEXT_MINOR_VERSION_ARB,
+                                 gl_minor_version,
+                                 GLX_CONTEXT_PROFILE_MASK_ARB,
+                                 GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+                                 None};
     typedef GLXContext (*glXCreateContextAttribsARBProc)(
             Display*, GLXFBConfig, GLXContext, Bool, const int*);
     glXCreateContextAttribsARBProc glXCreateContextAttribsARB =
@@ -64,10 +64,12 @@ GLXPbuffer new_pbuffer(Display* display, GLXFBConfig config, Size size) {
     return glXCreatePbuffer(display, config, attrs);
 }
 
-Offscreen::Offscreen(Size size)
+Offscreen::Offscreen(Size size, std::pair<int, int> gl_version)
         : _display(check_nonnull(XOpenDisplay(nullptr), "XOpenDisplay()"), XCloseDisplay),
           _fb_configs(fb_configs(_display.get()), XFree),
-          _context(new_context(_display.get(), _fb_configs[0]), {_display.get()}) {
+          _context(
+                  new_context(_display.get(), _fb_configs[0], gl_version.first, gl_version.second),
+                  {_display.get()}) {
     typedef Bool (*glXMakeContextCurrentARBProc)(Display*, GLXDrawable, GLXDrawable, GLXContext);
     glXMakeContextCurrentARBProc glXMakeContextCurrentARB =
             (glXMakeContextCurrentARBProc)glXGetProcAddressARB(

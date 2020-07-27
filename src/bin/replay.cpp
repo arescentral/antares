@@ -261,7 +261,7 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({width, height}, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     } else {
-        OffscreenVideoDriver video({width, height}, output_dir);
+        OffscreenVideoDriver video({width, height}, {3, 2}, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     }
 }

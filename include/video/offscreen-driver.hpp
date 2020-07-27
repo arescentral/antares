@@ -21,6 +21,7 @@
 
 #include <pn/string>
 #include <sfz/sfz.hpp>
+#include <utility>
 
 #include "config/keys.hpp"
 #include "ui/event-scheduler.hpp"
@@ -32,7 +33,9 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     class MainLoop;
 
   public:
-    OffscreenVideoDriver(Size screen_size, const sfz::optional<pn::string>& output_dir);
+    OffscreenVideoDriver(
+            Size screen_size, std::pair<int, int> gl_version,
+            const sfz::optional<pn::string>& output_dir);
 
     virtual Size viewport_size() const { return _screen_size; }
     virtual Size screen_size() const { return _screen_size; }
@@ -51,6 +54,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
 
   private:
     const Size                _screen_size;
+    const std::pair<int, int> _gl_version;
     sfz::optional<pn::string> _output_dir;
     Rect                      _capture_rect;
 
