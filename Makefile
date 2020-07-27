@@ -8,6 +8,7 @@ MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 
 BINDIR=$(prefix)/games
 APPDIR=$(prefix)/share/applications
+MIMEDIR=$(prefix)/share/mime/packages
 ICONDIR=$(prefix)/share/icons
 DATADIR=$(prefix)/share/games/antares
 
@@ -90,6 +91,9 @@ install-data: build
 	
 	install -m 755 -d $(DESTDIR)$(APPDIR)
 	install -m 644 resources/antares.desktop $(DESTDIR)$(APPDIR)
+	
+	install -m 755 -d $(DESTDIR)$(MIMEDIR)
+	install -m 644 resources/antares.xml $(DESTDIR)$(MIMEDIR)
 	
 	install -m 755 -d $(DESTDIR)$(DATADIR)/app
 	install -m 644 data/COPYING $(DESTDIR)$(DATADIR)/app
