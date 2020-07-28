@@ -36,6 +36,8 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
     CocoaVideoDriver();
 
+    virtual pn::string_view glsl_version() const;
+
     virtual Size viewport_size() const;
     virtual Size screen_size() const;
 

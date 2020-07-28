@@ -163,8 +163,7 @@ static void throw_error(int code, const char* message) {
 }
 
 GLFWVideoDriver::GLFWVideoDriver()
-        : OpenGlVideoDriver("330 core"),
-          _fullscreen(sys.prefs->fullscreen()),
+        : _fullscreen(sys.prefs->fullscreen()),
           _screen_size(sys.prefs->window_size()),
           _last_click_count(0),
           _text(nullptr) {
@@ -175,6 +174,8 @@ GLFWVideoDriver::GLFWVideoDriver()
 }
 
 GLFWVideoDriver::~GLFWVideoDriver() { glfwTerminate(); }
+
+pn::string_view GLFWVideoDriver::glsl_version() const { return "330 core"; }
 
 Point GLFWVideoDriver::get_mouse() {
     double x, y;
@@ -383,6 +384,7 @@ void GLFWVideoDriver::window_size(int width, int height) {
 
 void GLFWVideoDriver::window_maximize(bool maximized) {
 #if GLFW_VERSION_MINOR >= 2
+    pn::err.format("maximized: {}; _fullscreen: {}\n", maximized, _fullscreen);
     if (maximized == _fullscreen) {
         return;
     }
@@ -403,6 +405,10 @@ void GLFWVideoDriver::window_maximize(bool maximized) {
     Rect screen_rect{Point{0, 0}, Size{mode->width, mode->height}};
     Rect window_rect{Point{0, 0}, _screen_size};
     window_rect.center_in(screen_rect);
+    pn::err.format(
+            "glfwSetWindowMonitor({}, {}, {}, {}, {}, {}, {})\n", (void*)_window, (void*)monitor,
+            window_rect.left, window_rect.top, window_rect.width(), window_rect.height(),
+            mode->refreshRate);
     glfwSetWindowMonitor(
             _window, monitor, window_rect.left, window_rect.top, window_rect.width(),
             window_rect.height(), mode->refreshRate);

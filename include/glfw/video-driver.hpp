@@ -38,6 +38,8 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     GLFWVideoDriver();
     virtual ~GLFWVideoDriver();
 
+    virtual pn::string_view glsl_version() const;
+
     virtual Size viewport_size() const { return _viewport_size; }
     virtual Size screen_size() const { return _screen_size; }
 

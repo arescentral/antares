@@ -19,6 +19,7 @@
 #include "video/opengl-driver.hpp"
 
 #include <stdint.h>
+
 #include <algorithm>
 #include <pn/output>
 
@@ -26,13 +27,12 @@
 #include "drawing/pix-map.hpp"
 #include "drawing/shapes.hpp"
 #include "game/globals.hpp"
+#include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "video/glsl/fragment.hpp"
 #include "video/glsl/vertex.hpp"
-
-#include "game/time.hpp"
 
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
@@ -372,8 +372,7 @@ class OpenGlTextureImpl : public Texture::Impl {
 
 }  // namespace
 
-OpenGlVideoDriver::OpenGlVideoDriver(pn::string_view glsl_version)
-        : _static_seed{0}, _glsl_version{glsl_version.copy()} {}
+OpenGlVideoDriver::OpenGlVideoDriver() : _static_seed{0} {}
 
 int OpenGlVideoDriver::scale() const { return viewport_size().width / screen_size().width; }
 
@@ -581,8 +580,8 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
-    GLuint fragment = make_shader(GL_FRAGMENT_SHADER, glsl::fragment, driver._glsl_version);
-    GLuint vertex   = make_shader(GL_VERTEX_SHADER, glsl::vertex, driver._glsl_version);
+    GLuint fragment = make_shader(GL_FRAGMENT_SHADER, glsl::fragment, driver.glsl_version());
+    GLuint vertex   = make_shader(GL_VERTEX_SHADER, glsl::vertex, driver.glsl_version());
 
     GLuint program = glCreateProgram();
     glAttachShader(program, fragment);
