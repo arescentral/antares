@@ -129,9 +129,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--wine", action="store_true")
+    parser.add_argument("--opengl", choices=["2.0", "3.2"])
     parser.add_argument("-t", "--type", action="append", choices=test_types)
     parser.add_argument("test", nargs="*")
     opts = parser.parse_args()
+
+    opengl = []
+    if opts.opengl:
+        opengl = ["--opengl=%s" % opts.opengl]
 
     queue = multiprocessing.Queue()
     pool = multiprocessing.pool.ThreadPool()
@@ -139,14 +144,14 @@ def main():
         (unit_test, opts, queue, "color-test"),
         (unit_test, opts, queue, "editable-text-test"),
         (unit_test, opts, queue, "fixed-test"),
-        (data_test, opts, queue, "build-pix", [], ["--text"]),
+        (data_test, opts, queue, "build-pix", opengl, ["--text"]),
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
         (offscreen_test, opts, queue, "fast-motion", ["--text"]),
-        (offscreen_test, opts, queue, "main-screen"),
+        (offscreen_test, opts, queue, "main-screen", opengl),
         (offscreen_test, opts, queue, "mission-briefing", ["--text"]),
-        (offscreen_test, opts, queue, "options"),
+        (offscreen_test, opts, queue, "options", opengl),
         (offscreen_test, opts, queue, "pause", ["--text"]),
         (replay_test, opts, queue, "and-it-feels-so-good"),
         (replay_test, opts, queue, "astrotrash-plus"),
@@ -169,6 +174,9 @@ def main():
     if opts.test:
         test_map = dict((t[3], t) for t in tests)
         tests = [test_map[test] for test in opts.test]
+
+    if opts.opengl:
+        tests = [t for t in tests if opengl in t]
 
     if opts.type:
         if "unit" not in opts.type:

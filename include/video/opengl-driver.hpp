@@ -52,7 +52,7 @@ struct Uniform {
 
 class OpenGlVideoDriver : public VideoDriver {
   public:
-    OpenGlVideoDriver();
+    OpenGlVideoDriver(pn::string_view glsl_version);
 
     virtual int scale() const;
 
@@ -111,7 +111,8 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void end_rects();
     virtual void batch_rect(const Rect& rect, const RgbColor& color);
 
-    Random _static_seed;
+    Random     _static_seed;
+    pn::string _glsl_version;
 
     Uniforms _uniforms;
 

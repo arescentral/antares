@@ -67,14 +67,16 @@ class DrawPix : public Card {
 
 void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
-            "usage: {0} [OPTIONS]\n"
+            "usage: {0} [OPTIONS]"
             "\n"
-            "  Builds all of the scrolling text images in the game\n"
+            "\n  Builds all of the scrolling text images in the game"
             "\n"
-            "  options:\n"
-            "    -o, --output=OUTPUT place output in this directory\n"
-            "    -h, --help          display this help screen\n"
-            "    -t, --text          produce text output\n",
+            "\n  options:"
+            "\n    -o, --output=OUTPUT  place output in this directory"
+            "\n    -t, --text           produce text output"
+            "\n        --opengl=2.0|3.2 select OpenGL version (default: 3.2)"
+            "\n    -h, --help           display this help screen"
+            "\n",
             progname);
     exit(retcode);
 }
@@ -129,9 +131,10 @@ void main(int argc, char* const* argv) {
     callbacks.argument = [](pn::string_view arg) { return false; };
 
     sfz::optional<pn::string> output_dir;
-    bool                      text = false;
-    callbacks.short_option         = [&argv, &output_dir, &text](
-                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+    bool                      text         = false;
+    std::pair<int, int>       gl_version   = {3, 2};
+    pn::string_view           glsl_version = "330 core";
+    callbacks.short_option = [&](pn::rune opt, const args::callbacks::get_value_f& get_value) {
         switch (opt.value()) {
             case 'o': output_dir.emplace(get_value().copy()); return true;
             case 't': text = true; return true;
@@ -139,18 +142,29 @@ void main(int argc, char* const* argv) {
             default: return false;
         }
     };
-    callbacks.long_option =
-            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
-                if (opt == "output") {
-                    return callbacks.short_option(pn::rune{'o'}, get_value);
-                } else if (opt == "text") {
-                    return callbacks.short_option(pn::rune{'t'}, get_value);
-                } else if (opt == "help") {
-                    return callbacks.short_option(pn::rune{'h'}, get_value);
-                } else {
-                    return false;
-                }
-            };
+    callbacks.long_option = [&](pn::string_view                     opt,
+                                const args::callbacks::get_value_f& get_value) {
+        if (opt == "output") {
+            return callbacks.short_option(pn::rune{'o'}, get_value);
+        } else if (opt == "text") {
+            return callbacks.short_option(pn::rune{'t'}, get_value);
+        } else if (opt == "opengl") {
+            if (get_value() == "2.0") {
+                gl_version   = {2, 0};
+                glsl_version = "110";
+            } else if (get_value() == "3.2") {
+                gl_version   = {3, 2};
+                glsl_version = "330 core";
+            } else {
+                throw std::runtime_error("invalid OpenGL version");
+            }
+            return true;
+        } else if (opt == "help") {
+            return callbacks.short_option(pn::rune{'h'}, get_value);
+        } else {
+            return false;
+        }
+    };
 
     args::parse(argc - 1, argv + 1, callbacks);
 
@@ -163,7 +177,7 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({540, 2000}, output_dir);
         run(&video, "txt", [](Rect) {});
     } else {
-        OffscreenVideoDriver video({540, 2000}, output_dir);
+        OffscreenVideoDriver video({540, 2000}, gl_version, glsl_version, output_dir);
         run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
     }
 }

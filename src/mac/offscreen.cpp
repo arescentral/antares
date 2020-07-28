@@ -26,8 +26,12 @@ static const CGLPixelFormatAttribute kAttrs[] = {
         kCGLPFAAccelerated,   static_cast<CGLPixelFormatAttribute>(0),
 };
 
-Offscreen::Offscreen(Size size) : _pix(kAttrs), _context(_pix.c_obj(), nullptr) {
+Offscreen::Offscreen(Size size, std::pair<int, int> gl_version)
+        : _pix(kAttrs), _context(_pix.c_obj(), nullptr) {
     static_cast<void>(size);
+    if (gl_version != std::make_pair(3, 2)) {
+        throw std::runtime_error("GL version must be 3.2");
+    }
     cgl::check(CGLSetCurrentContext(_context.c_obj()));
 }
 

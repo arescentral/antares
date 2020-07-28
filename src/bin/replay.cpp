@@ -149,22 +149,24 @@ void ReplayMaster::init() {
 
 void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
-            "usage: {0} [OPTIONS]\n"
+            "usage: {0} [OPTIONS]"
             "\n"
-            "  Plays a replay into a set of images and a log of sounds\n"
+            "\n  Plays a replay into a set of images and a log of sounds"
             "\n"
-            "  arguments:\n"
-            "    replay              an Antares replay script\n"
+            "\n  arguments:"
+            "\n    replay              an Antares replay script"
             "\n"
-            "  options:\n"
-            "    -o, --output=OUTPUT place output in this directory\n"
-            "    -i, --interval=INTERVAL\n"
-            "                        take one screenshot per this many ticks (default: 60)\n"
-            "    -w, --width=WIDTH   screen width (default: 640)\n"
-            "    -h, --height=HEIGHT screen height (default: 480)\n"
-            "    -t, --text          produce text output\n"
-            "    -s, --smoke         run as smoke text\n"
-            "        --help          display this help screen\n",
+            "\n  options:"
+            "\n    -o, --output=OUTPUT  place output in this directory"
+            "\n    -i, --interval=INTERVAL"
+            "\n                         take one screenshot per this many ticks (default: 60)"
+            "\n    -w, --width=WIDTH    screen width (default: 640)"
+            "\n    -h, --height=HEIGHT  screen height (default: 480)"
+            "\n    -t, --text           produce text output"
+            "\n    -s, --smoke          run as smoke text"
+            "\n        --opengl=2.0|3.2 select OpenGL version (default: 3.2)"
+            "\n        --help           display this help screen"
+            "\n",
             progname);
     exit(retcode);
 }
@@ -183,13 +185,14 @@ void main(int argc, char* const* argv) {
     };
 
     sfz::optional<pn::string> output_dir;
-    int                       interval = 60;
-    int                       width    = 640;
-    int                       height   = 480;
-    bool                      text     = false;
-    bool                      smoke    = false;
-    callbacks.short_option             = [&output_dir, &interval, &width, &height, &text, &smoke](
-                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+    int                       interval     = 60;
+    int                       width        = 640;
+    int                       height       = 480;
+    bool                      text         = false;
+    bool                      smoke        = false;
+    std::pair<int, int>       gl_version   = {3, 2};
+    pn::string_view           glsl_version = "330 core";
+    callbacks.short_option = [&](pn::rune opt, const args::callbacks::get_value_f& get_value) {
         switch (opt.value()) {
             case 'o': output_dir.emplace(get_value().copy()); return true;
             case 'i': sfz::args::integer_option(get_value(), &interval); return true;
@@ -201,9 +204,8 @@ void main(int argc, char* const* argv) {
         }
     };
 
-    callbacks.long_option = [&argv, &callbacks](
-                                    pn::string_view                     opt,
-                                    const args::callbacks::get_value_f& get_value) {
+    callbacks.long_option = [&](pn::string_view                     opt,
+                                const args::callbacks::get_value_f& get_value) {
         if (opt == "output") {
             return callbacks.short_option(pn::rune{'o'}, get_value);
         } else if (opt == "interval") {
@@ -216,6 +218,17 @@ void main(int argc, char* const* argv) {
             return callbacks.short_option(pn::rune{'t'}, get_value);
         } else if (opt == "smoke") {
             return callbacks.short_option(pn::rune{'s'}, get_value);
+        } else if (opt == "opengl") {
+            if (get_value() == "2.0") {
+                gl_version   = {2, 0};
+                glsl_version = "110";
+            } else if (get_value() == "3.2") {
+                gl_version   = {3, 2};
+                glsl_version = "330 core";
+            } else {
+                throw std::runtime_error("invalid OpenGL version");
+            }
+            return true;
         } else if (opt == "help") {
             usage(pn::out, sfz::path::basename(argv[0]), 0);
             return true;
@@ -261,7 +274,7 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({width, height}, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     } else {
-        OffscreenVideoDriver video({width, height}, output_dir);
+        OffscreenVideoDriver video({width, height}, gl_version, glsl_version, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     }
 }

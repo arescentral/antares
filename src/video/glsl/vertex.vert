@@ -16,9 +16,15 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#version 330 core
+#if __VERSION__ == 330
+#elif __VERSION__ == 110
+# define in attribute
+# define out varying
+#else
+# error
+#endif
 
-in vec2 vertex;
+in vec4 vertex;
 in vec4 in_color;
 in vec2 tex_coord;
 
@@ -32,8 +38,8 @@ void main() {
     mat4 transform =
             mat4(2.0 / screen.x, 0, 0, 0, 0, -2.0 / screen.y, 0, 0, 0, 0, 0, 0, -1.0, 1.0, 0, 1);
 
-    gl_Position     = transform * vec4(vertex, 0, 1);
+    gl_Position     = transform * vertex;
     uv              = tex_coord;
-    screen_position = vertex;
+    screen_position = vertex.xy;
     color           = in_color;
 }

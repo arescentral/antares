@@ -122,7 +122,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
             OffscreenVideoDriver& driver, const sfz::optional<pn::string>& output_dir,
             Card* initial)
             : _driver(driver),
-              _offscreen(driver._screen_size),
+              _offscreen(driver._screen_size, driver._gl_version),
               _setup(*this),
               _loop(driver, initial) {
         if (output_dir.has_value()) {
@@ -178,8 +178,12 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
 };
 
 OffscreenVideoDriver::OffscreenVideoDriver(
-        Size screen_size, const sfz::optional<pn::string>& output_dir)
-        : _screen_size(screen_size), _capture_rect(screen_size.as_rect()) {
+        Size screen_size, std::pair<int, int> gl_version, pn::string_view glsl_version,
+        const sfz::optional<pn::string>& output_dir)
+        : OpenGlVideoDriver(glsl_version),
+          _screen_size(screen_size),
+          _gl_version(gl_version),
+          _capture_rect(screen_size.as_rect()) {
     if (output_dir.has_value()) {
         _output_dir.emplace(output_dir->copy());
     }

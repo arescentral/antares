@@ -372,7 +372,8 @@ class OpenGlTextureImpl : public Texture::Impl {
 
 }  // namespace
 
-OpenGlVideoDriver::OpenGlVideoDriver() : _static_seed{0} {}
+OpenGlVideoDriver::OpenGlVideoDriver(pn::string_view glsl_version)
+        : _static_seed{0}, _glsl_version{glsl_version.copy()} {}
 
 int OpenGlVideoDriver::scale() const { return viewport_size().width / screen_size().width; }
 
@@ -556,9 +557,11 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     _pluses[size].draw_shaded(to, color);
 }
 
-static GLuint make_shader(GLenum shader_type, const GLchar* source) {
-    GLuint shader = glCreateShader(shader_type);
-    glShaderSource(shader, 1, &source, NULL);
+static GLuint make_shader(GLenum shader_type, const GLchar* source, pn::string_view version) {
+    GLuint        shader      = glCreateShader(shader_type);
+    pn::string    version_def = pn::format("#version {}\n", version);
+    const GLchar* sources[2]  = {version_def.c_str(), source};
+    glShaderSource(shader, 2, sources, NULL);
     glCompileShader(shader);
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -578,8 +581,8 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
-    GLuint fragment = make_shader(GL_FRAGMENT_SHADER, glsl::fragment);
-    GLuint vertex   = make_shader(GL_VERTEX_SHADER, glsl::vertex);
+    GLuint fragment = make_shader(GL_FRAGMENT_SHADER, glsl::fragment, driver._glsl_version);
+    GLuint vertex   = make_shader(GL_VERTEX_SHADER, glsl::vertex, driver._glsl_version);
 
     GLuint program = glCreateProgram();
     glAttachShader(program, fragment);

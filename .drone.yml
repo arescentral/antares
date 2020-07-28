@@ -13,6 +13,7 @@ steps:
   image: ubuntu:xenial
   environment:
     DEBIAN_FRONTEND: noninteractive
+    LIBGL_ALWAYS_SOFTWARE: true
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
@@ -20,7 +21,9 @@ steps:
 
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
-  - make smoke-test
+  - make test
+  - scripts/test.py --opengl=2.0
+  - scripts/test.py --opengl=3.2
 
 ---
 kind: pipeline
@@ -37,6 +40,7 @@ steps:
   image: ubuntu:focal
   environment:
     DEBIAN_FRONTEND: noninteractive
+    LIBGL_ALWAYS_SOFTWARE: true
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
@@ -44,7 +48,7 @@ steps:
 
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
-  - make smoke-test
+  - make test
 
 ---
 kind: pipeline
@@ -66,6 +70,7 @@ steps:
   image: debian@sha256:43e8691b4e25f4b0fd0f10bca8ea11b9f0578b0e5d2fe3b085290455dd07c0b6
   environment:
     DEBIAN_FRONTEND: noninteractive
+    LIBGL_ALWAYS_SOFTWARE: true
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
@@ -73,7 +78,7 @@ steps:
 
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
-  - make smoke-test
+  - make test
 
 ---
 kind: pipeline
@@ -89,6 +94,7 @@ steps:
 - name: test
   image: ubuntu:focal
   environment:
+    LIBGL_ALWAYS_SOFTWARE: true
     DEBIAN_FRONTEND: noninteractive
   commands:
   - apt-get update

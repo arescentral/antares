@@ -26,7 +26,7 @@ namespace antares {
 
 class Offscreen {
   public:
-    Offscreen(Size size);
+    Offscreen(Size size, std::pair<int, int> gl_version);
     ~Offscreen();
 
   private:
