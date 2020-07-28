@@ -145,7 +145,7 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({640, 480}, output_dir);
         video.loop(new Master(sfz::nullopt, 14586), scheduler);
     } else {
-        OffscreenVideoDriver video({640, 480}, {3, 2}, output_dir);
+        OffscreenVideoDriver video({640, 480}, {3, 2}, "330 core", output_dir);
         video.loop(new Master(sfz::nullopt, 14586), scheduler);
     }
 }

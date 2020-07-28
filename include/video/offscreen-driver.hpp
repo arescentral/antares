@@ -34,7 +34,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
 
   public:
     OffscreenVideoDriver(
-            Size screen_size, std::pair<int, int> gl_version,
+            Size screen_size, std::pair<int, int> gl_version, pn::string_view glsl_version,
             const sfz::optional<pn::string>& output_dir);
 
     virtual Size viewport_size() const { return _screen_size; }

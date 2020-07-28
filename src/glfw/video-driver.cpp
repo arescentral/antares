@@ -163,7 +163,8 @@ static void throw_error(int code, const char* message) {
 }
 
 GLFWVideoDriver::GLFWVideoDriver()
-        : _fullscreen(sys.prefs->fullscreen()),
+        : OpenGlVideoDriver("330 core"),
+          _fullscreen(sys.prefs->fullscreen()),
           _screen_size(sys.prefs->window_size()),
           _last_click_count(0),
           _text(nullptr) {

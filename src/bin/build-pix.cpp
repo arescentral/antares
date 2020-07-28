@@ -163,7 +163,7 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({540, 2000}, output_dir);
         run(&video, "txt", [](Rect) {});
     } else {
-        OffscreenVideoDriver video({540, 2000}, {3, 2}, output_dir);
+        OffscreenVideoDriver video({540, 2000}, {3, 2}, "330 core", output_dir);
         run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
     }
 }

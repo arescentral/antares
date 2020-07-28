@@ -89,7 +89,7 @@ static int32_t get_iohid_property(IOHIDDeviceRef device, CFStringRef key) {
     return 0;
 }
 
-CocoaVideoDriver::CocoaVideoDriver() {}
+CocoaVideoDriver::CocoaVideoDriver() : OpenGlVideoDriver("330 core") {}
 
 Size CocoaVideoDriver::viewport_size() const {
     return {
