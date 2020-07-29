@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <strings.h>
+
 #include <algorithm>
 #include <pn/output>
 #include <sfz/sfz.hpp>
@@ -36,12 +37,14 @@
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
+
 #include "mac/offscreen.hpp"
 #else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glu.h>
+
 #include "linux/offscreen.hpp"
 #endif
 
@@ -180,14 +183,16 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
 OffscreenVideoDriver::OffscreenVideoDriver(
         Size screen_size, std::pair<int, int> gl_version, pn::string_view glsl_version,
         const sfz::optional<pn::string>& output_dir)
-        : OpenGlVideoDriver(glsl_version),
-          _screen_size(screen_size),
+        : _screen_size(screen_size),
           _gl_version(gl_version),
+          _glsl_version(glsl_version.copy()),
           _capture_rect(screen_size.as_rect()) {
     if (output_dir.has_value()) {
         _output_dir.emplace(output_dir->copy());
     }
 }
+
+pn::string_view OffscreenVideoDriver::glsl_version() const { return _glsl_version; }
 
 bool OffscreenVideoDriver::start_editing(TextReceiver* text) { return false; }
 

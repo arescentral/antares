@@ -20,6 +20,7 @@
 #define ANTARES_VIDEO_OPEN_GL_DRIVER_HPP_
 
 #include <stdint.h>
+
 #include <map>
 
 #include "drawing/color.hpp"
@@ -52,7 +53,7 @@ struct Uniform {
 
 class OpenGlVideoDriver : public VideoDriver {
   public:
-    OpenGlVideoDriver(pn::string_view glsl_version);
+    OpenGlVideoDriver();
 
     virtual int scale() const;
 
@@ -96,7 +97,8 @@ class OpenGlVideoDriver : public VideoDriver {
         CardStack          _stack;
     };
 
-    virtual Size viewport_size() const = 0;
+    virtual Size            viewport_size() const = 0;
+    virtual pn::string_view glsl_version() const  = 0;
 
   private:
     virtual void begin_points();
@@ -111,8 +113,7 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void end_rects();
     virtual void batch_rect(const Rect& rect, const RgbColor& color);
 
-    Random     _static_seed;
-    pn::string _glsl_version;
+    Random _static_seed;
 
     Uniforms _uniforms;
 
