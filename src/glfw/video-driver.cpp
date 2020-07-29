@@ -159,7 +159,7 @@ static Key glfw_key_to_usb(int key) {
 }
 
 static void throw_error(int code, const char* message) {
-    throw std::runtime_error(pn::format("{0}: {1}", code, message).c_str());
+    pn::err.format("{0}: {1}\n", code, message);
 }
 
 GLFWVideoDriver::GLFWVideoDriver()
