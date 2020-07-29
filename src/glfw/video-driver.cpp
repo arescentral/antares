@@ -200,7 +200,7 @@ wall_time GLFWVideoDriver::now() const { return wall_time(usecs(int64_t(glfwGetT
 
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
 #if GLFW_VERSION_MINOR >= 2
-    if ((key == GLFW_KEY_ENTER) && (mods == GLFW_MOD_ALT)) {
+    if ((key == GLFW_KEY_ENTER) && (mods == GLFW_MOD_ALT) && (action == GLFW_PRESS)) {
         window_maximize(!_fullscreen);
         return;
     }
@@ -384,7 +384,6 @@ void GLFWVideoDriver::window_size(int width, int height) {
 
 void GLFWVideoDriver::window_maximize(bool maximized) {
 #if GLFW_VERSION_MINOR >= 2
-    pn::err.format("maximized: {}; _fullscreen: {}\n", maximized, _fullscreen);
     if (maximized == _fullscreen) {
         return;
     }
@@ -405,10 +404,6 @@ void GLFWVideoDriver::window_maximize(bool maximized) {
     Rect screen_rect{Point{0, 0}, Size{mode->width, mode->height}};
     Rect window_rect{Point{0, 0}, _screen_size};
     window_rect.center_in(screen_rect);
-    pn::err.format(
-            "glfwSetWindowMonitor({}, {}, {}, {}, {}, {}, {})\n", (void*)_window, (void*)monitor,
-            window_rect.left, window_rect.top, window_rect.width(), window_rect.height(),
-            mode->refreshRate);
     glfwSetWindowMonitor(
             _window, monitor, window_rect.left, window_rect.top, window_rect.width(),
             window_rect.height(), mode->refreshRate);
@@ -481,7 +476,6 @@ void GLFWVideoDriver::loop(Card* initial) {
         }
         _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", monitor, NULL);
         if (_window) {
-            pn::err.format("glsl version: {}\n", _glsl_version);
             break;
         }
     }
@@ -498,9 +492,6 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwSetMouseButtonCallback(_window, mouse_button_callback);
     glfwSetCursorPosCallback(_window, mouse_move_callback);
     glfwSetWindowSizeCallback(_window, window_size_callback);
-#if GLFW_VERSION_MINOR >= 3
-    glfwSetWindowMaximizeCallback(_window, window_maximize_callback);
-#endif
 
     /* Make the _window's context current */
     glfwMakeContextCurrent(_window);
