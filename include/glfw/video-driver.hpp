@@ -68,14 +68,15 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     static void window_size_callback(GLFWwindow* w, int width, int height);
     static void window_maximize_callback(GLFWwindow* w, int maximized);
 
-    bool          _fullscreen;
-    Size          _screen_size;
-    Size          _viewport_size;
-    GLFWwindow*   _window;
-    MainLoop*     _loop;
-    wall_time     _last_click_usecs;
-    int           _last_click_count;
-    TextReceiver* _text;
+    bool            _fullscreen;
+    Size            _screen_size;
+    Size            _viewport_size;
+    pn::string_view _glsl_version;
+    GLFWwindow*     _window;
+    MainLoop*       _loop;
+    wall_time       _last_click_usecs;
+    int             _last_click_count;
+    TextReceiver*   _text;
 };
 
 }  // namespace antares
