@@ -40,8 +40,10 @@ if (host_os == "mac") {
   assert(false, "unsupported host_os $host_os")
 }
 
-_default_configs = [ "//build/lib:c++11" ]
-
+_default_configs = [
+  "//build/lib:c++11",
+  "//build:add_flags",
+]
 if (target_os == "mac") {
   _default_configs += [ "//build/lib:libc++" ]
 }
