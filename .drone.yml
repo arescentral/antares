@@ -71,6 +71,7 @@ steps:
   environment:
     DEBIAN_FRONTEND: noninteractive
     LIBGL_ALWAYS_SOFTWARE: true
+    CPPFLAGS: -target armv6-linux-gnueabihf -mfloat-abi=hard
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
