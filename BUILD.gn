@@ -28,6 +28,7 @@ group("default") {
     ":color-test",
     ":editable-text-test",
     ":fixed-test",
+    ":gen-install",
     ":hash-data",
     ":object-data",
     ":offscreen",
@@ -47,6 +48,16 @@ group("default") {
       ":replay",
     ]
   }
+}
+
+action("gen-install") {
+  script = "scripts/gen-install.py"
+  sources = []
+  outputs = [ "$target_out_dir/install" ]
+  args = [
+    "--prefix=" + prefix,
+    "--out=install",
+  ]
 }
 
 config("antares_private") {

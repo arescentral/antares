@@ -1,0 +1,17 @@
+# Copyright (C) 2020 The Antares Authors
+# This file is part of Antares, a tactical space combat game.
+# Antares is free software, distributed under the LGPL+. See COPYING.
+
+declare_args() {
+  add_cflags = []
+  add_cflags_c = []
+  add_cflags_cc = []
+  add_ldflags = []
+}
+
+config("add_flags") {
+  cflags = add_cflags
+  cflags_c = add_cflags_c
+  cflags_cc = add_cflags_cc
+  ldflags = add_ldflags
+}

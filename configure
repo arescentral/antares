@@ -9,12 +9,8 @@ import argparse
 import collections
 import os
 import platform
+import shlex
 import sys
-
-try:
-    from shlex import quote
-except ImportError:
-    from pipes import quote
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "scripts"))
 import deps
@@ -67,6 +63,10 @@ def main():
     gn_args["mode"] = args.mode
     gn_args["target_os"] = args.target_os
     gn_args["prefix"] = args.prefix
+    gn_args["add_cflags"] = shlex.split(os.environ.get("CPPFLAGS", ""))
+    gn_args["add_cflags_c"] = shlex.split(os.environ.get("CFLAGS", ""))
+    gn_args["add_cflags_cc"] = shlex.split(os.environ.get("CXXFLAGS", ""))
+    gn_args["add_ldflags"] = shlex.split(os.environ.get("LDFLAGS", ""))
     if args.antares_version:
         gn_args["antares_version"] = args.antares_version
     if args.target_os == "mac":

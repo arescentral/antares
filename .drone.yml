@@ -24,6 +24,7 @@ steps:
   - make test
   - scripts/test.py --opengl=2.0
   - scripts/test.py --opengl=3.2
+  - make install
 
 ---
 kind: pipeline
@@ -49,6 +50,7 @@ steps:
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
   - make test
+  - make install
 
 ---
 kind: pipeline
@@ -71,6 +73,7 @@ steps:
   environment:
     DEBIAN_FRONTEND: noninteractive
     LIBGL_ALWAYS_SOFTWARE: true
+    CPPFLAGS: -target armv6-linux-gnueabihf -mfloat-abi=hard
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
@@ -79,6 +82,7 @@ steps:
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
   - make test
+  - make install
 
 ---
 kind: pipeline
