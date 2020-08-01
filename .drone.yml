@@ -24,6 +24,7 @@ steps:
   - make test
   - scripts/test.py --opengl=2.0
   - scripts/test.py --opengl=3.2
+  - make install
 
 ---
 kind: pipeline
@@ -49,6 +50,7 @@ steps:
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
   - make test
+  - make install
 
 ---
 kind: pipeline
@@ -80,6 +82,7 @@ steps:
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
   - make test
+  - make install
 
 ---
 kind: pipeline
