@@ -2,12 +2,14 @@
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
-NINJA=ninja -C out/cur
-MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
+NINJA ?= ninja
+
+MAC_BIN := out/cur/Antares.app/Contents/MacOS/Antares
+BUILD := $(NINJA) -C out/cur
 
 .PHONY: build
 build:
-	@$(NINJA)
+	@$(BUILD)
 
 .PHONY: test
 test: build
@@ -23,7 +25,7 @@ smoke-test: build
 
 .PHONY: clean
 clean:
-	@$(NINJA) -t clean
+	@$(BUILD) -t clean
 
 .PHONY: dist
 dist:

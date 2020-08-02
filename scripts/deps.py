@@ -85,34 +85,41 @@ def main():
 
 
 _CHECKERS = {
-    "clang": lambda: cfg.check_clang("clang++"),
+    "clang": cfg.check_clang,
     "gn": cfg.check_gn,
     "ninja": cfg.check_ninja,
+    "pkg-config": cfg.check_pkg_config,
 }
 
 
 def check(*, distro, codename):
     have_pkg_config = None
     missing_pkgs = []
+    deps = {}
     for name in PACKAGE[distro]:
         if name in _CHECKERS:
-            if not _CHECKERS[name]():
+            dep = _CHECKERS[name]()
+            if dep is None:
                 missing_pkgs.append(name)
+            else:
+                deps[name] = dep
             continue
 
         if have_pkg_config is False:
             continue
         elif have_pkg_config is None:
-            have_pkg_config = cfg.check_pkg_config()
-            if not have_pkg_config:
+            pkg_config = _CHECKERS["pkg-config"]()
+            if pkg_config is None:
+                have_pkg_config = False
                 missing_pkgs.append("pkg-config")
                 continue
+            have_pkg_config = True
 
-        if not cfg.check_pkg(name):
+        if not cfg.check_pkg(pkg_config, name):
             missing_pkgs.append(name)
 
     if not missing_pkgs:
-        return True
+        return deps
     commands = []
 
     for name, url, component in SOURCES[distro]:
