@@ -27,7 +27,6 @@ PACKAGE[DEBIAN] = collections.OrderedDict([
     ("clang", "clang"),
     ("gn", "gn"),
     ("ninja", "ninja-build"),
-    ("pkg-config", "pkg-config"),
 
     # Libraries
     ("gl", "libgl1-mesa-dev"),
