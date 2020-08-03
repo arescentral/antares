@@ -2,10 +2,8 @@
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
-NINJA ?= ninja
-
 MAC_BIN := out/cur/Antares.app/Contents/MacOS/Antares
-BUILD := $(NINJA) -C out/cur
+BUILD := out/cur/ninja -C out/cur
 
 .PHONY: build
 build:

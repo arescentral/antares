@@ -25,6 +25,7 @@ UPDATE[DEBIAN] = "apt-get update".split()
 PACKAGE[DEBIAN] = collections.OrderedDict([
     # Binaries
     ("clang", "clang"),
+    ("clang++", "clang"),
     ("gn", "gn"),
     ("ninja", "ninja-build"),
 
@@ -86,6 +87,7 @@ def main():
 
 _CHECKERS = {
     "clang": cfg.check_clang,
+    "clang++": cfg.check_clangxx,
     "gn": cfg.check_gn,
     "ninja": cfg.check_ninja,
     "pkg-config": cfg.check_pkg_config,
@@ -95,14 +97,14 @@ _CHECKERS = {
 def check(*, distro, codename):
     have_pkg_config = None
     missing_pkgs = []
-    deps = {}
+    config = {}
     for name in PACKAGE[distro]:
         if name in _CHECKERS:
             dep = _CHECKERS[name]()
             if dep is None:
                 missing_pkgs.append(name)
             else:
-                deps[name] = dep
+                config[name] = dep
             continue
 
         if have_pkg_config is False:
@@ -119,7 +121,7 @@ def check(*, distro, codename):
             missing_pkgs.append(name)
 
     if not missing_pkgs:
-        return deps
+        return config
     commands = []
 
     for name, url, component in SOURCES[distro]:
