@@ -156,7 +156,7 @@ def check_mac(args):
         print("Then, try ./configure again")
         sys.exit(1)
 
-    config = deps.check(distro=distro, codename=codename)
+    config = deps.check(distro="mac", codename="mac")
     if config is None:
         sys.exit(1)
     return config

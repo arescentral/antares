@@ -20,8 +20,8 @@ SOURCES = {}
 KEYS = {}
 
 DEBIAN = "debian"
-INSTALL[DEBIAN] = "apt-get install".split()
-UPDATE[DEBIAN] = "apt-get update".split()
+INSTALL[DEBIAN] = "sudo apt-get install".split()
+UPDATE[DEBIAN] = "sudo apt-get update".split()
 PACKAGE[DEBIAN] = collections.OrderedDict([
     # Binaries
     ("clang", "clang"),
@@ -50,10 +50,8 @@ SOURCES[DEBIAN] = [
     ("arescentral", "http://apt.arescentral.org", "contrib"),
 ]
 KEYS[DEBIAN] = [
-    [
-        "apt-key", "adv", "--keyserver", "keyserver.ubuntu.com", "--recv",
-        "5A4F5210FF46CEE4B799098BAC879AADD5B51AE9"
-    ],
+    ("sudo apt-key adv --keyserver keyserver.ubuntu.com --recv"
+     " 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9").split(),
 ]
 
 MAC = "mac"
@@ -133,11 +131,12 @@ def check(*, distro, codename):
                         tuple(shlex.quote(arg) for arg in [url, codename, component, path]))
     if commands:
         for keys in KEYS[distro]:
-            commands.append("sudo " + " ".join(shlex.quote(arg) for arg in keys))
+            commands.append(" ".join(shlex.quote(arg) for arg in keys))
 
-    commands.append("sudo " + " ".join(shlex.quote(arg) for arg in UPDATE[distro]))
+    if distro in UPDATE:
+        commands.append(" ".join(shlex.quote(arg) for arg in UPDATE[distro]))
     install = INSTALL[distro] + [PACKAGE[distro][pkg] for pkg in missing_pkgs]
-    commands.append("sudo " + " ".join(shlex.quote(arg) for arg in install))
+    commands.append(" ".join(shlex.quote(arg) for arg in install))
 
     print()
     print("missing dependencies: %s" % " ".join(missing_pkgs))
@@ -150,7 +149,7 @@ def check(*, distro, codename):
         print("    $ %s" % command)
     print()
     print("Then, try ./configure again")
-    return False
+    return None
 
 
 def install(*, distro, codename, dry_run=False, flags=[]):
@@ -169,7 +168,7 @@ def install(*, distro, codename, dry_run=False, flags=[]):
 
 
 def run(dry_run, command):
-    print("+ " + " ".join(shlex.quote(arg) for arg in command))
+    print(" ".join(shlex.quote(arg) for arg in command))
     if not dry_run:
         subprocess.check_call(command)
 
