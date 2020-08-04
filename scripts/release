@@ -75,5 +75,8 @@ case $ACTION in
         + git checkout stable
         + git merge --no-ff release/$VERSION
         + git tag v$VERSION
+
+        + git checkout master
+        + git merge --no-ff v$VERSION
         ;;
 esac
