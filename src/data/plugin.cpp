@@ -55,7 +55,14 @@ static void read_all_levels() {
     for (pn::string_view name : Resource::list_levels()) {
         auto it = plug.levels.emplace(name.copy(), Resource::level(name)).first;
         if (it->second.base.chapter.has_value()) {
-            plug.chapters[*it->second.base.chapter] = &it->second;
+            auto chapter = *it->second.base.chapter;
+            if (plug.chapters.find(chapter) != plug.chapters.end()) {
+                throw std::runtime_error(pn::format(
+                                                 "duplicate chapter {} in levels {} and {}",
+                                                 chapter, plug.chapters[chapter], name)
+                                                 .c_str());
+            }
+            plug.chapters[chapter] = name.copy();
         }
     }
 }

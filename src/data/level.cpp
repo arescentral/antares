@@ -63,7 +63,7 @@ Level::~Level() {
     }
 }
 
-const Level* Level::get(int number) { return plug.chapters[number]; }
+const Level* Level::get(int number) { return Level::get(plug.chapters[number]); }
 
 const Level* Level::get(pn::string_view name) {
     auto it = plug.levels.find(name.copy());
