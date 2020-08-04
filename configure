@@ -54,24 +54,22 @@ def main():
     args = parser.parse_args()
 
     check_submodules()
-    check_host()
-    check_target(args)
+    config = check_deps(args)
 
     with cfg.step("configure mode") as msg:
         msg(args.mode, color="green")
-    gn_args = {}
-    gn_args["mode"] = args.mode
-    gn_args["target_os"] = args.target_os
-    gn_args["prefix"] = args.prefix
-    gn_args["add_cflags"] = shlex.split(os.environ.get("CPPFLAGS", ""))
-    gn_args["add_cflags_c"] = shlex.split(os.environ.get("CFLAGS", ""))
-    gn_args["add_cflags_cc"] = shlex.split(os.environ.get("CXXFLAGS", ""))
-    gn_args["add_ldflags"] = shlex.split(os.environ.get("LDFLAGS", ""))
+    config["mode"] = args.mode
+    config["target_os"] = args.target_os
+    config["prefix"] = args.prefix
+    config["add_cflags"] = shlex.split(os.environ.get("CPPFLAGS", ""))
+    config["add_cflags_c"] = shlex.split(os.environ.get("CFLAGS", ""))
+    config["add_cflags_cc"] = shlex.split(os.environ.get("CXXFLAGS", ""))
+    config["add_ldflags"] = shlex.split(os.environ.get("LDFLAGS", ""))
     if args.antares_version:
-        gn_args["antares_version"] = args.antares_version
+        config["antares_version"] = args.antares_version
     if args.target_os == "mac":
-        gn_args["macosx_version_min"] = "10.7"
-    cfg.gn(**gn_args)
+        config["macosx_version_min"] = "10.7"
+    cfg.gn(**config)
 
     print("make(1) it so!")
 
@@ -104,7 +102,7 @@ def check_submodules():
         sys.exit(1)
 
 
-def check_host():
+def check_deps(args):
     with cfg.step("checking host os") as msg:
         if cfg.host_os() in ["mac", "linux"]:
             msg(cfg.host_os(), color="green")
@@ -113,8 +111,6 @@ def check_host():
             print("\nSorry! Antares requires Mac OS X or Linux")
             sys.exit(1)
 
-
-def check_target(args):
     with cfg.step("checking target os") as msg:
         if args.target_os is None:
             args.target_os = cfg.host_os()
@@ -127,7 +123,8 @@ def check_target(args):
             msg(args.target_os, color="red")
             sys.exit(1)
         msg(args.target_os, color="green")
-    checker(args)
+
+    return checker(args)
 
 
 def check_mac(args):
@@ -151,17 +148,6 @@ def check_mac(args):
             '    $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"\n'
         )
 
-    missing_pkgs = collections.OrderedDict()
-    if not cfg.check_gn():
-        missing_pkgs["gn"] = "sfiera/gn/gn"
-    if not cfg.check_ninja():
-        missing_pkgs["ninja"] = "ninja"
-    if missing_pkgs:
-        names = " ".join(missing_pkgs)
-        pkgs = " ".join(missing_pkgs.values())
-        missing[names] = ("* To install packages with Homebrew, run:\n"
-                          "    $ brew install %s\n" % pkgs)
-
     if missing:
         print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
         for step in missing.values():
@@ -169,6 +155,11 @@ def check_mac(args):
         print("")
         print("Then, try ./configure again")
         sys.exit(1)
+
+    config = deps.check(distro="mac", codename="mac")
+    if config is None:
+        sys.exit(1)
+    return config
 
 
 def check_linux_native(args):
@@ -179,8 +170,10 @@ def check_linux_native(args):
         else:
             msg(pretty + " (untested)", color="yellow")
             distro = "debian"
-    if not deps.check(distro=distro, codename=codename):
+    config = deps.check(distro=distro, codename=codename, prefix="sudo")
+    if config is None:
         sys.exit(1)
+    return config
 
 
 def check_win_on_linux(args):
@@ -212,6 +205,11 @@ def check_win_on_linux(args):
             print("\nYou can install them with:\n")
         print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
         sys.exit(1)
+
+    return {
+        "ninja": "ninja",
+        "gn": "gn",
+    }
 
 
 if __name__ == "__main__":

@@ -16,11 +16,14 @@ steps:
     LIBGL_ALWAYS_SOFTWARE: true
   commands:
   - apt-get update
-  - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
+  - apt-get install -y --no-install-recommends make python3 git gnupg
+  - ./configure || true
   - scripts/deps.py install -- -y
 
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
+
+  - apt-get install -y --no-install-recommends xvfb xauth
   - make test
   - scripts/test.py --opengl=2.0
   - scripts/test.py --opengl=3.2
@@ -44,11 +47,14 @@ steps:
     LIBGL_ALWAYS_SOFTWARE: true
   commands:
   - apt-get update
-  - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
+  - apt-get install -y --no-install-recommends make python3 git gnupg
+  - ./configure || true
   - scripts/deps.py install -- -y
 
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
+
+  - apt-get install -y --no-install-recommends xvfb xauth
   - make test
   - make install
 
@@ -76,11 +82,14 @@ steps:
     CPPFLAGS: -target armv6-linux-gnueabihf -mfloat-abi=hard
   commands:
   - apt-get update
-  - apt-get install -y --no-install-recommends make python3 xvfb xauth git gnupg
+  - apt-get install -y --no-install-recommends make python3 git gnupg
+  - ./configure || true
   - scripts/deps.py install -- -y
 
   - ./configure --antares-version=$(git describe --tags HEAD)
   - make build
+
+  - apt-get install -y --no-install-recommends xvfb xauth
   - make test
   - make install
 
@@ -107,10 +116,12 @@ steps:
   - apt-key adv --keyserver keyserver.ubuntu.com --recv 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9
 
   - apt-get update
-  - apt-get install -y --no-install-recommends build-essential clang make python3 git mingw-w64 xvfb wine-stable gn ninja-build
+  - apt-get install -y --no-install-recommends make build-essential clang python3 git mingw-w64 wine-stable gn ninja-build
 
   - ./configure -o win --antares-version=$(git describe --tags HEAD)
   - make build
+
+  - apt-get install -y --no-install-recommends xvfb xauth
   - make test-wine
 
 ...

@@ -25,6 +25,7 @@ UPDATE[DEBIAN] = "apt-get update".split()
 PACKAGE[DEBIAN] = collections.OrderedDict([
     # Binaries
     ("clang", "clang"),
+    ("clang++", "clang"),
     ("gn", "gn"),
     ("ninja", "ninja-build"),
     ("pkg-config", "pkg-config"),
@@ -50,10 +51,8 @@ SOURCES[DEBIAN] = [
     ("arescentral", "http://apt.arescentral.org", "contrib"),
 ]
 KEYS[DEBIAN] = [
-    [
-        "apt-key", "adv", "--keyserver", "keyserver.ubuntu.com", "--recv",
-        "5A4F5210FF46CEE4B799098BAC879AADD5B51AE9"
-    ],
+    ("apt-key adv --keyserver keyserver.ubuntu.com --recv"
+     " 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9").split(),
 ]
 
 MAC = "mac"
@@ -62,8 +61,6 @@ PACKAGE[MAC] = collections.OrderedDict([
     ("ninja", "ninja"),
     ("gn", "sfiera/gn/gn"),
 ])
-SOURCES[MAC] = {}
-KEYS[MAC] = {}
 
 
 def main():
@@ -86,50 +83,53 @@ def main():
 
 
 _CHECKERS = {
-    "clang": lambda: cfg.check_clang("clang++"),
+    "clang": cfg.check_clang,
+    "clang++": cfg.check_clangxx,
     "gn": cfg.check_gn,
     "ninja": cfg.check_ninja,
+    "pkg-config": cfg.check_pkg_config,
 }
 
 
-def check(*, distro, codename):
-    have_pkg_config = None
+def check(*, distro, codename, prefix=""):
+    pkg_config = None
     missing_pkgs = []
+    config = {}
     for name in PACKAGE[distro]:
         if name in _CHECKERS:
-            if not _CHECKERS[name]():
+            dep = _CHECKERS[name]()
+            if dep is None:
                 missing_pkgs.append(name)
+            else:
+                config[name] = dep
             continue
 
-        if have_pkg_config is False:
+        pkg_config = config.pop("pkg-config", pkg_config)
+        if pkg_config is None:
             continue
-        elif have_pkg_config is None:
-            have_pkg_config = cfg.check_pkg_config()
-            if not have_pkg_config:
-                missing_pkgs.append("pkg-config")
-                continue
-
-        if not cfg.check_pkg(name):
+        if not cfg.check_pkg(pkg_config, name):
             missing_pkgs.append(name)
 
     if not missing_pkgs:
-        return True
+        return config
     commands = []
 
-    for name, url, component in SOURCES[distro]:
+    for name, url, component in SOURCES.get(distro, []):
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
-        line = "deb %s %s %s" % (url, codename, component)
-        commands.append("echo deb %s %s %s | sudo tee %s" %
-                        tuple(shlex.quote(arg) for arg in [url, codename, component, path]))
+        commands.append("%s | %s" % (
+            _command("", ["echo", "deb", url, codename, component]),
+            _command(prefix, ["tee", path]),
+        ))
     if commands:
-        for keys in KEYS[distro]:
-            commands.append("sudo " + " ".join(shlex.quote(arg) for arg in keys))
+        for keys in KEYS.get(distro, []):
+            commands.append(_command(prefix, keys))
 
-    commands.append("sudo " + " ".join(shlex.quote(arg) for arg in UPDATE[distro]))
-    install = INSTALL[distro] + [PACKAGE[distro][pkg] for pkg in missing_pkgs]
-    commands.append("sudo " + " ".join(shlex.quote(arg) for arg in install))
+    if distro in UPDATE:
+        commands.append(_command(prefix, UPDATE[distro]))
+    missing_pkgs = sorted(set(PACKAGE[distro][pkg] for pkg in missing_pkgs))
+    commands.append(_command(prefix, INSTALL[distro] + missing_pkgs))
 
     print()
     print("missing dependencies: %s" % " ".join(missing_pkgs))
@@ -142,26 +142,30 @@ def check(*, distro, codename):
         print("    $ %s" % command)
     print()
     print("Then, try ./configure again")
-    return False
+    return None
+
+
+def _command(prefix, args):
+    return " ".join(shlex.quote(x) for x in shlex.split(prefix) + args)
 
 
 def install(*, distro, codename, dry_run=False, flags=[]):
-    for name, url, component in SOURCES[distro]:
+    for name, url, component in SOURCES.get(distro, []):
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
         line = "deb %s %s %s" % (url, codename, component)
         write(dry_run, line, path)
-    for keys in KEYS[distro]:
+    for keys in KEYS.get(distro, []):
         run(dry_run, keys)
 
-    if SOURCES[distro]:
+    if SOURCES.get(distro, []):
         run(dry_run, UPDATE[distro])
     run(dry_run, INSTALL[distro] + list(PACKAGE[distro].values()) + flags)
 
 
 def run(dry_run, command):
-    print("+ " + " ".join(shlex.quote(arg) for arg in command))
+    print(" ".join(shlex.quote(arg) for arg in command))
     if not dry_run:
         subprocess.check_call(command)
 
