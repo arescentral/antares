@@ -206,7 +206,10 @@ def check_win_on_linux(args):
         print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
         sys.exit(1)
 
-    return {}
+    return {
+        "ninja": "ninja",
+        "gn": "gn",
+    }
 
 
 if __name__ == "__main__":
