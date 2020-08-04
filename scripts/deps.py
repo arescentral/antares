@@ -20,8 +20,8 @@ SOURCES = {}
 KEYS = {}
 
 DEBIAN = "debian"
-INSTALL[DEBIAN] = "sudo apt-get install".split()
-UPDATE[DEBIAN] = "sudo apt-get update".split()
+INSTALL[DEBIAN] = "apt-get install".split()
+UPDATE[DEBIAN] = "apt-get update".split()
 PACKAGE[DEBIAN] = collections.OrderedDict([
     # Binaries
     ("clang", "clang"),
@@ -51,7 +51,7 @@ SOURCES[DEBIAN] = [
     ("arescentral", "http://apt.arescentral.org", "contrib"),
 ]
 KEYS[DEBIAN] = [
-    ("sudo apt-key adv --keyserver keyserver.ubuntu.com --recv"
+    ("apt-key adv --keyserver keyserver.ubuntu.com --recv"
      " 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9").split(),
 ]
 
@@ -61,8 +61,6 @@ PACKAGE[MAC] = collections.OrderedDict([
     ("ninja", "ninja"),
     ("gn", "sfiera/gn/gn"),
 ])
-SOURCES[MAC] = {}
-KEYS[MAC] = {}
 
 
 def main():
@@ -93,7 +91,7 @@ _CHECKERS = {
 }
 
 
-def check(*, distro, codename):
+def check(*, distro, codename, prefix=""):
     pkg_config = None
     missing_pkgs = []
     config = {}
@@ -116,20 +114,22 @@ def check(*, distro, codename):
         return config
     commands = []
 
-    for name, url, component in SOURCES[distro]:
+    for name, url, component in SOURCES.get(distro, []):
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
-        commands.append("echo deb %s %s %s | sudo tee %s" %
-                        tuple(shlex.quote(arg) for arg in [url, codename, component, path]))
+        commands.append("%s | %s" % (
+            _command("", ["echo", "deb", url, codename, component]),
+            _command(prefix, ["tee", path]),
+        ))
     if commands:
-        for keys in KEYS[distro]:
-            commands.append(" ".join(shlex.quote(arg) for arg in keys))
+        for keys in KEYS.get(distro, []):
+            commands.append(_command(prefix, keys))
 
     if distro in UPDATE:
-        commands.append(" ".join(shlex.quote(arg) for arg in UPDATE[distro]))
-    install = INSTALL[distro] + [PACKAGE[distro][pkg] for pkg in missing_pkgs]
-    commands.append(" ".join(shlex.quote(arg) for arg in install))
+        commands.append(_command(prefix, UPDATE[distro]))
+    missing_pkgs = sorted(set(PACKAGE[distro][pkg] for pkg in missing_pkgs))
+    commands.append(_command(prefix, INSTALL[distro] + missing_pkgs))
 
     print()
     print("missing dependencies: %s" % " ".join(missing_pkgs))
@@ -145,17 +145,21 @@ def check(*, distro, codename):
     return None
 
 
+def _command(prefix, args):
+    return " ".join(shlex.quote(x) for x in shlex.split(prefix) + args)
+
+
 def install(*, distro, codename, dry_run=False, flags=[]):
-    for name, url, component in SOURCES[distro]:
+    for name, url, component in SOURCES.get(distro, []):
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
         line = "deb %s %s %s" % (url, codename, component)
         write(dry_run, line, path)
-    for keys in KEYS[distro]:
+    for keys in KEYS.get(distro, []):
         run(dry_run, keys)
 
-    if SOURCES[distro]:
+    if SOURCES.get(distro, []):
         run(dry_run, UPDATE[distro])
     run(dry_run, INSTALL[distro] + list(PACKAGE[distro].values()) + flags)
 

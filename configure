@@ -170,7 +170,7 @@ def check_linux_native(args):
         else:
             msg(pretty + " (untested)", color="yellow")
             distro = "debian"
-    config = deps.check(distro=distro, codename=codename)
+    config = deps.check(distro=distro, codename=codename, prefix="sudo")
     if config is None:
         sys.exit(1)
     return config
