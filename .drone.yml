@@ -17,6 +17,7 @@ steps:
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends sudo make python3 xvfb xauth git gnupg
+  - ./configure || true
   - scripts/deps.py install -- -y
 
   - ./configure --antares-version=$(git describe --tags HEAD)
@@ -45,6 +46,7 @@ steps:
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends sudo make python3 xvfb xauth git gnupg
+  - ./configure || true
   - scripts/deps.py install -- -y
 
   - ./configure --antares-version=$(git describe --tags HEAD)
@@ -77,6 +79,7 @@ steps:
   commands:
   - apt-get update
   - apt-get install -y --no-install-recommends sudo make python3 xvfb xauth git gnupg
+  - ./configure || true
   - scripts/deps.py install -- -y
 
   - ./configure --antares-version=$(git describe --tags HEAD)

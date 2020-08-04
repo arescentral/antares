@@ -28,6 +28,7 @@ PACKAGE[DEBIAN] = collections.OrderedDict([
     ("clang++", "clang"),
     ("gn", "gn"),
     ("ninja", "ninja-build"),
+    ("pkg-config", "pkg-config"),
 
     # Libraries
     ("gl", "libgl1-mesa-dev"),
@@ -93,7 +94,7 @@ _CHECKERS = {
 
 
 def check(*, distro, codename):
-    have_pkg_config = None
+    pkg_config = None
     missing_pkgs = []
     config = {}
     for name in PACKAGE[distro]:
@@ -105,16 +106,9 @@ def check(*, distro, codename):
                 config[name] = dep
             continue
 
-        if have_pkg_config is False:
+        pkg_config = config.pop("pkg-config", pkg_config)
+        if pkg_config is None:
             continue
-        elif have_pkg_config is None:
-            pkg_config = _CHECKERS["pkg-config"]()
-            if pkg_config is None:
-                have_pkg_config = False
-                missing_pkgs.append("pkg-config")
-                continue
-            have_pkg_config = True
-
         if not cfg.check_pkg(pkg_config, name):
             missing_pkgs.append(name)
 
@@ -126,7 +120,6 @@ def check(*, distro, codename):
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
-        line = "deb %s %s %s" % (url, codename, component)
         commands.append("echo deb %s %s %s | sudo tee %s" %
                         tuple(shlex.quote(arg) for arg in [url, codename, component, path]))
     if commands:
