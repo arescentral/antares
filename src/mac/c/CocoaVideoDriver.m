@@ -223,41 +223,24 @@ static void hide_unhide(AntaresView* view, NSPoint location) {
     }
 }
 
-static int button_for(NSEvent* event) {
-    switch ([event type]) {
-        case NSLeftMouseDown:
-        case NSLeftMouseUp: return 0;
-
-        case NSRightMouseDown:
-        case NSRightMouseUp: return 1;
-
-        case NSOtherMouseDown:
-        case NSOtherMouseUp: return 2;
-
-        default: return -1;
-    }
-}
-
-static void mouse_down(AntaresView* view, NSEvent* event) {
+static void mouse_down(AntaresView* view, NSEvent* event, int button) {
     NSPoint where;
     if (!translate_coords(view, event, &where)) {
         return;
     }
     hide_unhide(view, where);
-    int                          button = button_for(event);
-    antares_window_callback_data data   = {
+    antares_window_callback_data data = {
             .mouse_down = {button, where.x, where.y, [event clickCount]}};
     view->callback(ANTARES_WINDOW_CALLBACK_MOUSE_DOWN, data, view->userdata);
 }
 
-static void mouse_up(AntaresView* view, NSEvent* event) {
+static void mouse_up(AntaresView* view, NSEvent* event, int button) {
     NSPoint where;
     if (!translate_coords(view, event, &where)) {
         return;
     }
     hide_unhide(view, where);
-    int                          button = button_for(event);
-    antares_window_callback_data data   = {.mouse_up = {button, where.x, where.y}};
+    antares_window_callback_data data = {.mouse_up = {button, where.x, where.y}};
     view->callback(ANTARES_WINDOW_CALLBACK_MOUSE_UP, data, view->userdata);
 }
 
@@ -375,11 +358,27 @@ static BOOL          isNoRange(NSRange range) { return NSEqualRanges(range, kNoR
 }
 
 - (void)mouseDown:(NSEvent*)event {
-    mouse_down(self, event);
+    mouse_down(self, event, 0);
 }
 
 - (void)mouseUp:(NSEvent*)event {
-    mouse_up(self, event);
+    mouse_up(self, event, 0);
+}
+
+- (void)rightMouseDown:(NSEvent*)event {
+    mouse_down(self, event, 1);
+}
+
+- (void)rightMouseUp:(NSEvent*)event {
+    mouse_up(self, event, 1);
+}
+
+- (void)otherMouseDown:(NSEvent*)event {
+    mouse_down(self, event, 2);
+}
+
+- (void)otherMouseUp:(NSEvent*)event {
+    mouse_up(self, event, 2);
 }
 
 - (void)mouseDragged:(NSEvent*)event {
