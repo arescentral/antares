@@ -12,16 +12,15 @@ import platform
 import shlex
 import sys
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "scripts"))
-import deps
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "build", "lib", "scripts"))
+sys.path[0:0] = [
+    os.path.join(os.path.dirname(__file__), "scripts"),
+    os.path.join(os.path.dirname(__file__), "build", "lib", "scripts"),
+]
 try:
+    import deps
     import cfg
 except ImportError:
     pass
-
-str = type("")  # For Python2
 
 
 def main():
