@@ -3,11 +3,12 @@ language:  cpp
 matrix:
   include:
     - os:         osx
-      osx_image: xcode12.2
+      osx_image:  xcode12u
 
       install:
         - scripts/load-cert.sh
         - brew update
+        - brew unlink python@3.8  # temporary until Travis image defaults to 3.9?
         - HOMEBREW_VERBOSE_USING_DOTS=true scripts/deps.py install -- -v
 
       script:
