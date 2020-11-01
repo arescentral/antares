@@ -45,7 +45,10 @@ _default_configs = [
   "//build:add_flags",
 ]
 if (target_os == "mac") {
-  _default_configs += [ "//build/lib:libc++" ]
+  _default_configs += [
+    "//build/lib:libc++",
+    "//build:mac-universal",
+  ]
 }
 
 if (mode == "dev") {

@@ -12,7 +12,7 @@ matrix:
         - HOMEBREW_VERBOSE_USING_DOTS=true scripts/deps.py install -- -v
 
       script:
-        - ./configure --antares-version=$(git describe --tags HEAD)
+        - CPPFLAGS='-isysroot /Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk' LDFLAGS='-isysroot /Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk' ./configure --antares-version=$(git describe --tags HEAD)
         - make build
         - make smoke-test
 
