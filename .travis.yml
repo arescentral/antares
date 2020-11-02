@@ -5,14 +5,23 @@ matrix:
     - os:         osx
       osx_image:  xcode12u
 
+      env:
+        - XCODE_APP=/Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app
+        - DEVELOPER_DIR=$XCODE_APP/Contents/Developer/
+        - CPPFLAGS="-isysroot $DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+        - LDFLAGS="-isysroot $DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+        - ITMS=$XCODE_APP/Contents/SharedFrameworks/ContentDeliveryServices.framework/Versions/A/itms/
+
       install:
+        - ls $ITMS
+        - sudo ln -s java-x86_64 $ITMS/java  # temporary until Xcode links Java correctly?
         - scripts/load-cert.sh
         - brew update
         - brew unlink python@3.8  # temporary until Travis image defaults to 3.9?
         - HOMEBREW_VERBOSE_USING_DOTS=true scripts/deps.py install -- -v
 
       script:
-        - CPPFLAGS='-isysroot /Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk' LDFLAGS='-isysroot /Applications/Xcode-12.for.macOS.Universal.Apps.beta.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk' ./configure --antares-version=$(git describe --tags HEAD)
+        - ./configure --antares-version=$(git describe --tags HEAD)
         - make build
         - make smoke-test
 
