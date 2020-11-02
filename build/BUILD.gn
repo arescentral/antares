@@ -15,3 +15,18 @@ config("add_flags") {
   cflags_cc = add_cflags_cc
   ldflags = add_ldflags
 }
+
+config("mac-universal") {
+  cflags = [
+    "-arch",
+    "x86_64",
+    "-arch",
+    "arm64",
+  ]
+  ldflags = [
+    "-arch",
+    "x86_64",
+    "-arch",
+    "arm64",
+  ]
+}
