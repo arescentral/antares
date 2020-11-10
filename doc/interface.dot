@@ -28,11 +28,11 @@ digraph G {
     briefing:rtrn -> game;
     briefing:esc -> briefing_cancel;
 
-    game [shape="record", label="{Play Game|{<caps>CAPS|<esc>ESC|<lose>lose|<win>win}}"];
+    game [shape="record", label="{Play Game|{<caps>CAPS|<esc>ESC|<win>win|<lose>lose}}"];
     game:caps -> paused;
     game:esc -> escape;
-    game:lose -> lose;
     game:win -> win;
+    game:lose -> lose;
 
     paused [shape="record", label="{Paused|<caps>CAPS}"];
     paused:caps -> unpause;
