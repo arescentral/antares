@@ -21,16 +21,19 @@ digraph G {
 
     prologue [label="Prologue", style="rounded,dashed"];
     loading_single [label="Loading"];
-    briefing [shape="record" label="{Briefing|{LEFT|RGHT|<rtrn>RTRN|<esc>ESC}}", style="dashed"];
+    briefing [shape="record" label="{Briefing|{LEFT|RGHT|<n>1-9|<rtrn>RTRN|<esc>ESC}}", style="dashed"];
+    object_data [label="Object Data"];
     briefing_cancel [label="Main Screen", style="dotted"];
     prologue -> loading_single [penwidth="5"];
     loading_single -> briefing;
+    briefing:n -> object_data [dir="both"];
     briefing:rtrn -> game;
     briefing:esc -> briefing_cancel;
 
-    game [shape="record", label="{Play Game|{<caps>CAPS|<esc>ESC|<win>win|<lose>lose}}"];
+    game [shape="record", label="{Play Game|{<f1>F1|<caps>CAPS|<esc>ESC|<win>win|<lose>lose}}"];
     game:caps -> paused;
     game:esc -> escape;
+    game:f1 -> help [dir="both"];
     game:win -> win;
     game:lose -> lose;
 
@@ -45,6 +48,8 @@ digraph G {
 
     unpause [label="Unpause", shape="none"];
     unpause -> game;
+
+    help [shape="record", label="{Help|{F1|ESC}}"];
 
     lose [label="Lose Screen", style="dashed"];
     lose -> play_again;
