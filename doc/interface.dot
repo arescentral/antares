@@ -4,10 +4,10 @@ digraph G {
     edge [fontname="Inconsolata"];
 
     start [shape="none", label="Start"];
-    publisher [label="Ambrosia Software"];
-    developer [label="A Game by Nathan Lamont"];
+    publisher [label="Ambrosia Software", style="dashed", color="gray", fontcolor="gray"];
+    developer [label="A Game by Nathan Lamont", style="dashed"];
     splash [label="ARES"];
-    intro [label="Introduction", style="rounded"];
+    intro [label="Introduction", style="rounded", style="dashed"];
     start -> publisher -> developer -> splash -> intro [penwidth="5"];
     intro -> main;
 
@@ -19,20 +19,23 @@ digraph G {
     select_level:rtrn -> prologue [penwidth="5"];
     select_level:esc -> select_level_cancel;
 
-    prologue [label="Prologue", style="rounded"];
+    prologue [label="Prologue", style="rounded,dashed"];
     loading_single [label="Loading"];
-    briefing [shape="record" label="{Mission Briefing|{LEFT|RGHT|<rtrn>RTRN|<esc>ESC}}"];
+    briefing [shape="record" label="{Briefing|{LEFT|RGHT|<n>1-9|<rtrn>RTRN|<esc>ESC}}", style="dashed"];
+    object_data [label="Object Data"];
     briefing_cancel [label="Main Screen", style="dotted"];
     prologue -> loading_single [penwidth="5"];
     loading_single -> briefing;
+    briefing:n -> object_data [dir="both"];
     briefing:rtrn -> game;
     briefing:esc -> briefing_cancel;
 
-    game [shape="record", label="{Play Game|{<caps>CAPS|<esc>ESC|<lose>lose|<win>win}}"];
+    game [shape="record", label="{Play Game|{<f1>F1|<caps>CAPS|<esc>ESC|<win>win|<lose>lose}}"];
     game:caps -> paused;
     game:esc -> escape;
-    game:lose -> lose;
+    game:f1 -> help [dir="both"];
     game:win -> win;
+    game:lose -> lose;
 
     paused [shape="record", label="{Paused|<caps>CAPS}"];
     paused:caps -> unpause;
@@ -46,15 +49,17 @@ digraph G {
     unpause [label="Unpause", shape="none"];
     unpause -> game;
 
-    lose [label="Lose Screen"];
+    help [shape="record", label="{Help|{F1|ESC}}"];
+
+    lose [label="Lose Screen", style="dashed"];
     lose -> play_again;
 
     play_again [shape="record", label="{Play Again|{<rtrn>RTRN|<q>Q}}"];
     play_again:rtrn -> restart_level [penwidth="5"];
     play_again:q -> game_done;
 
-    win [label="Win Screen"];
-    epilogue [label="Epilogue", style="rounded"];
+    win [label="Win Screen", style="dashed"];
+    epilogue [label="Epilogue", style="rounded,dashed"];
     win -> epilogue [penwidth="5"];
     epilogue -> next_level;
     epilogue -> game_done;
