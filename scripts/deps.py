@@ -82,22 +82,21 @@ def main():
         install(distro=args.distro, codename=args.codename, dry_run=args.dry_run, flags=flags)
 
 
-_CHECKERS = {
-    "clang": cfg.check_clang,
-    "clang++": cfg.check_clangxx,
-    "gn": cfg.check_gn,
-    "ninja": cfg.check_ninja,
-    "pkg-config": cfg.check_pkg_config,
-}
-
-
 def check(*, distro, codename, prefix=""):
+    checkers = {
+        "clang": cfg.check_clang,
+        "clang++": cfg.check_clangxx,
+        "gn": cfg.check_gn,
+        "ninja": cfg.check_ninja,
+        "pkg-config": cfg.check_pkg_config,
+    }
+
     pkg_config = None
     missing_pkgs = []
     config = {}
     for name in PACKAGE[distro]:
-        if name in _CHECKERS:
-            dep = _CHECKERS[name]()
+        if name in checkers:
+            dep = checkers[name]()
             if dep is None:
                 missing_pkgs.append(name)
             else:
