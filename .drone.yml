@@ -28,6 +28,7 @@ steps:
   - scripts/test.py --opengl=2.0
   - scripts/test.py --opengl=3.2
   - make install
+  - /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
 
 ---
 kind: pipeline
@@ -57,6 +58,7 @@ steps:
   - apt-get install -y --no-install-recommends xvfb xauth
   - make test
   - make install
+  - /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
 
 ---
 kind: pipeline
@@ -92,6 +94,7 @@ steps:
   - apt-get install -y --no-install-recommends xvfb xauth
   - make test
   - make install
+  - /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
 
 ---
 kind: pipeline
