@@ -36,7 +36,7 @@ def main():
             1-bin)
                 @ install -m 755 -d $BINDIR
                 for BIN in $BINARIES; do
-                    @ install -m 755 out/cur/$BIN $BINDIR/antares
+                    @ install -m 755 out/cur/$BIN $BINDIR/
                 done
                 ;;
 
