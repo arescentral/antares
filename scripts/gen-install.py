@@ -57,9 +57,9 @@ def main():
                 @ install -m 755 -d "$DATADIR/app"
                 for DATA in data/*; do
                     if [[ -d "$DATA" ]]; then
-                        @ cp -r data/fonts "$DATADIR/app"
+                        @ cp -r "$DATA" "$DATADIR/app"
                     else
-                        @ install -m 644 $DATA "$DATADIR/app"
+                        @ install -m 644 "$DATA" "$DATADIR/app"
                     fi
                 done
                 ;;
