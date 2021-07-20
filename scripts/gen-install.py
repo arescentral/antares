@@ -18,12 +18,12 @@ def main():
         set -o errexit
         set -o nounset
 
-        PREFIX=${{DESTDIR-}}{args.prefix}
-        BINDIR=$PREFIX/games
-        APPDIR=$PREFIX/share/applications
-        MIMEDIR=$PREFIX/share/mime/packages
-        ICONDIR=$PREFIX/share/icons
-        DATADIR=$PREFIX/share/games/antares
+        PREFIX="${{DESTDIR-}}{args.prefix}"
+        BINDIR="$PREFIX/games"
+        APPDIR="$PREFIX/share/applications"
+        MIMEDIR="$PREFIX/share/mime/packages"
+        ICONDIR="$PREFIX/share/icons"
+        DATADIR="$PREFIX/share/games/antares"
 
         BINARIES="antares antares-install-data"
 
@@ -34,9 +34,9 @@ def main():
 
         case "$#-$1" in
             1-bin)
-                @ install -m 755 -d $BINDIR
+                @ install -m 755 -d "$BINDIR"
                 for BIN in $BINARIES; do
-                    @ install -m 755 out/cur/$BIN $BINDIR/antares
+                    @ install -m 755 out/cur/$BIN "$BINDIR/"
                 done
                 ;;
 
@@ -44,28 +44,28 @@ def main():
                 for ICON in resources/antares.iconset/icon_*.png; do
                     ICONSIZE=${{ICON#resources/antares.iconset/icon_}}
                     ICONSIZE=${{ICON%.png}}
-                    @ install -m 755 -d $ICONDIR/hicolor/$ICONSIZE/apps
-                    @ install -m 644 $ICON $ICONDIR/hicolor/$ICONSIZE/apps/antares.png
+                    @ install -m 755 -d "$ICONDIR/hicolor/$ICONSIZE/apps"
+                    @ install -m 644 $ICON "$ICONDIR/hicolor/$ICONSIZE/apps/antares.png"
                 done
 
-                @ install -m 755 -d $APPDIR
-                @ install -m 644 resources/antares.desktop $APPDIR
+                @ install -m 755 -d "$APPDIR"
+                @ install -m 644 resources/antares.desktop "$APPDIR"
 
-                @ install -m 755 -d $MIMEDIR
-                @ install -m 644 resources/antares.xml $MIMEDIR
+                @ install -m 755 -d "$MIMEDIR"
+                @ install -m 644 resources/antares.xml "$MIMEDIR"
 
-                @ install -m 755 -d $DATADIR/app
+                @ install -m 755 -d "$DATADIR/app"
                 for DATA in data/*; do
                     if [[ -d "$DATA" ]]; then
-                        @ cp -r data/fonts $DATADIR/app
+                        @ cp -r "$DATA" "$DATADIR/app"
                     else
-                        @ install -m 644 $DATA $DATADIR/app
+                        @ install -m 644 "$DATA" "$DATADIR/app"
                     fi
                 done
                 ;;
 
             1-scenario)
-                   @ out/cur/antares-install-data -s $DATADIR/downloads -d $DATADIR/scenarios
+                   @ out/cur/antares-install-data -s "$DATADIR/downloads" -d "$DATADIR/scenarios"
                ;;
         esac
     """).lstrip().format(args=args)
