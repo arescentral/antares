@@ -44,8 +44,6 @@ class TextVideoDriver : public VideoDriver {
 
     virtual Texture texture(pn::string_view name, const PixMap& content, int scale);
     virtual void    dither_rect(const Rect& rect, const RgbColor& color);
-    virtual void    draw_point(const Point& at, const RgbColor& color);
-    virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color);
     virtual void    draw_triangle(const Rect& rect, const RgbColor& color);
     virtual void    draw_diamond(const Rect& rect, const RgbColor& color);
     virtual void    draw_plus(const Rect& rect, const RgbColor& color);
@@ -57,6 +55,8 @@ class TextVideoDriver : public VideoDriver {
     class MainLoop;
     class TextureImpl;
 
+    virtual void batch_point(const Point& at, const RgbColor& color);
+    virtual void batch_line(const Point& from, const Point& to, const RgbColor& color);
     virtual void batch_rect(const Rect& rect, const RgbColor& color);
 
     void            add_arg(pn::string_view arg, std::vector<std::pair<size_t, size_t>>& args);
