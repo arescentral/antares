@@ -191,11 +191,11 @@ void TextVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     log("dither", rect.left, rect.top, rect.right, rect.bottom, hex(color));
 }
 
-void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
+void TextVideoDriver::batch_point(const Point& at, const RgbColor& color) {
     log("point", at.h, at.v, hex(color));
 }
 
-void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
+void TextVideoDriver::batch_line(const Point& from, const Point& to, const RgbColor& color) {
     log("line", from.h, from.v, to.h, to.v, hex(color));
 }
 

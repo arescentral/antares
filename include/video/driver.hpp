@@ -53,13 +53,11 @@ class VideoDriver {
 
     virtual wall_time now() const = 0;
 
-    virtual Texture texture(pn::string_view name, const PixMap& content, int scale)      = 0;
-    virtual void    dither_rect(const Rect& rect, const RgbColor& color)                 = 0;
-    virtual void    draw_point(const Point& at, const RgbColor& color)                   = 0;
-    virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
-    virtual void    draw_triangle(const Rect& rect, const RgbColor& color)               = 0;
-    virtual void    draw_diamond(const Rect& rect, const RgbColor& color)                = 0;
-    virtual void    draw_plus(const Rect& rect, const RgbColor& color)                   = 0;
+    virtual Texture texture(pn::string_view name, const PixMap& content, int scale) = 0;
+    virtual void    dither_rect(const Rect& rect, const RgbColor& color)            = 0;
+    virtual void    draw_triangle(const Rect& rect, const RgbColor& color)          = 0;
+    virtual void    draw_diamond(const Rect& rect, const RgbColor& color)           = 0;
+    virtual void    draw_plus(const Rect& rect, const RgbColor& color)              = 0;
 
   private:
     friend class Points;
@@ -68,13 +66,11 @@ class VideoDriver {
 
     virtual void begin_points() {}
     virtual void end_points() {}
-    virtual void batch_point(const Point& at, const RgbColor& color) { draw_point(at, color); }
+    virtual void batch_point(const Point& at, const RgbColor& color) = 0;
 
     virtual void begin_lines() {}
     virtual void end_lines() {}
-    virtual void batch_line(const Point& from, const Point& to, const RgbColor& color) {
-        draw_line(from, to, color);
-    }
+    virtual void batch_line(const Point& from, const Point& to, const RgbColor& color) = 0;
 
     virtual void begin_rects() {}
     virtual void end_rects() {}
