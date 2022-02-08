@@ -36,18 +36,6 @@ class PixMap;
 class Texture;
 class TextReceiver;
 
-enum GameState {
-    UNKNOWN,
-    MAIN_SCREEN_INTERFACE,
-    OPTIONS_INTERFACE,
-    KEY_CONTROL_INTERFACE,
-    SELECT_LEVEL_INTERFACE,
-    MISSION_INTERFACE,
-    PLAY_GAME,
-    GAME_PAUSED,
-    DONE_GAME,
-};
-
 class VideoDriver {
   public:
     VideoDriver();
