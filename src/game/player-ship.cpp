@@ -835,7 +835,7 @@ void PlayerShip::update() {
             case PlayerEventType::ZOOM_OUT: zoom_out(); break;
             case PlayerEventType::ZOOM_IN: zoom_in(); break;
             case PlayerEventType::ZOOM_1X: zoom_shortcut(Zoom::ACTUAL); break;
-            case PlayerEventType::ZOOM_2X: zoom_shortcut(Zoom::DOUBLE); break;
+            case PlayerEventType::ZOOM_2X: zoom_shortcut(Zoom::HALF); break;
             case PlayerEventType::ZOOM_4X: zoom_shortcut(Zoom::QUARTER); break;
             case PlayerEventType::ZOOM_16X: zoom_shortcut(Zoom::SIXTEENTH); break;
             case PlayerEventType::ZOOM_FOE: zoom_shortcut(Zoom::FOE); break;
