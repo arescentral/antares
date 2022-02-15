@@ -51,6 +51,8 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
 
     virtual wall_time now() const;
 
+    virtual void* get_proc_address(const char* proc_name) const;
+
     void loop(Card* initial);
 
   private:

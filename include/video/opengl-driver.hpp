@@ -65,6 +65,8 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void    draw_diamond(const Rect& rect, const RgbColor& color);
     virtual void    draw_plus(const Rect& rect, const RgbColor& color);
 
+    virtual void*   get_proc_address(const char* proc_name) const;
+
     struct Uniforms {
         Uniform<vec2>          screen          = {"screen"};
         Uniform<int>           scale           = {"scale"};

@@ -44,6 +44,14 @@
 #include <GL/glu.h>
 #endif
 
+#if defined(_WIN32) && !defined(__LITTLE_ENDIAN__)
+#define __LITTLE_ENDIAN__ 1
+#endif
+
+#ifdef _MSC_VER
+#include "video/opengl-dynamic.hpp"
+#endif
+
 using std::max;
 using std::min;
 using std::unique_ptr;
@@ -556,6 +564,10 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     _pluses[size].draw_shaded(to, color);
 }
 
+void* OpenGlVideoDriver::get_proc_address(const char* proc_name) const {
+  return nullptr;
+}
+
 static GLuint make_shader(GLenum shader_type, const GLchar* source, pn::string_view version) {
     GLuint        shader      = glCreateShader(shader_type);
     pn::string    version_def = pn::format("#version {}\n", version);
@@ -572,6 +584,10 @@ static GLuint make_shader(GLenum shader_type, const GLchar* source, pn::string_v
 }
 
 OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
+#ifdef _MSC_VER
+    OpenGlDynLink::init_funcs(driver);
+#endif
+
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glClearColor(0, 0, 0, 1);
     glEnable(GL_BLEND);
