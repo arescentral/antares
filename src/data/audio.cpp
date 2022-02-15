@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <pn/output>
+#include <stdexcept>
 
 namespace antares {
 
@@ -161,7 +162,7 @@ SoundData convert(pn::data_view in) {
     s.channels  = 2;
     s.frequency = 44100;
     uint8_t buffer[1024];
-    ssize_t read;
+    pn::data_view::size_type read;
     do {
         read = ModPlug_Read(file.get(), buffer, 1024);
         s.data += pn::data_view(buffer, read);

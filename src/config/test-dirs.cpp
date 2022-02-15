@@ -18,8 +18,6 @@
 
 #include "config/dirs.hpp"
 
-#include <sys/param.h>
-#include <unistd.h>
 #include <pn/output>
 
 namespace antares {
