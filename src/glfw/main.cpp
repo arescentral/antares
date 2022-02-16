@@ -29,8 +29,13 @@
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "lang/exception.hpp"
-#include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
+
+#ifdef _WIN32
+#include "sound/driver.hpp"
+#else
+#include "sound/openal-driver.hpp"
+#endif
 
 using sfz::range;
 
@@ -126,7 +131,11 @@ void main(int argc, char* const* argv) {
     FilePrefsDriver prefs(config_path);
 
     DirectoryLedger   ledger;
+#ifdef _WIN32
+    NullSoundDriver sound;
+#else
     OpenAlSoundDriver sound;
+#endif
     GLFWVideoDriver   video;
     video.loop(new Master(scenario, time(NULL)));
 }

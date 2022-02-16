@@ -19,12 +19,12 @@
 #include "glfw/video-driver.hpp"
 
 #include <GLFW/glfw3.h>
-#include <sys/time.h>
-#include <unistd.h>
 
 #include <game/sys.hpp>
 #include <pn/output>
 #include <sfz/sfz.hpp>
+#include <thread>
+#include <chrono>
 
 #include "config/preferences.hpp"
 
@@ -197,6 +197,10 @@ void GLFWVideoDriver::stop_editing(TextReceiver* text) {
 }
 
 wall_time GLFWVideoDriver::now() const { return wall_time(usecs(int64_t(glfwGetTime() * 1e6))); }
+
+void* GLFWVideoDriver::get_proc_address(const char* proc_name) const {
+    return reinterpret_cast<void*>(glfwGetProcAddress(proc_name));
+}
 
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
 #if GLFW_VERSION_MINOR >= 2
@@ -510,7 +514,7 @@ void GLFWVideoDriver::loop(Card* initial) {
             main_loop.draw();
             glfwSwapBuffers(_window);
         } else {
-            usleep(10);
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
     }
 }
