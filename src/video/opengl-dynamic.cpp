@@ -76,7 +76,7 @@ struct OpenGlDynLinkFunctions {
 
 template<typename pfn>
 void OpenGlDynLinkFunctions::set_one(pfn& field, OpenGlVideoDriver& driver, const char* proc_name) {
-    field = static_cast<pfn>(driver.get_proc_address(proc_name));
+    field = reinterpret_cast<pfn>(driver.get_proc_address(proc_name));
 }
 
 OpenGlDynLinkFunctions OpenGlDynLinkFunctions::instance;

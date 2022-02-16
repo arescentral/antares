@@ -23,8 +23,13 @@
 #include <game/sys.hpp>
 #include <pn/output>
 #include <sfz/sfz.hpp>
-#include <thread>
-#include <chrono>
+
+#ifdef _MSC_VER
+#  include <thread>
+#  include <chrono>
+#else
+#  include <unistd.h>
+#endif
 
 #include "config/preferences.hpp"
 
@@ -514,7 +519,11 @@ void GLFWVideoDriver::loop(Card* initial) {
             main_loop.draw();
             glfwSwapBuffers(_window);
         } else {
+#ifdef _MSC_VER
             std::this_thread::sleep_for(std::chrono::microseconds(10));
+#else
+            usleep(10);
+#endif
         }
     }
 }
