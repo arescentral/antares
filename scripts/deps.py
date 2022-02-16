@@ -62,6 +62,14 @@ PACKAGE[MAC] = collections.OrderedDict([
     ("gn", "sfiera/gn/gn"),
 ])
 
+WIN = "win"
+INSTALL[WIN] = "python scripts/download".split()
+PACKAGE[WIN] = collections.OrderedDict([
+    ("ninja",
+     "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip:ninja.exe"),
+    ("gn", "https://chrome-infra-packages.appspot.com/dl/gn/gn/windows-amd64/+/latest:gn.exe"),
+])
+
 
 def main():
     import argparse
@@ -183,6 +191,8 @@ def defaults():
     elif platform.system() == "Linux":
         _, distro, codename = cfg.dist_proto()
         return distro, codename
+    elif platform.system() == "Windows":
+        return WIN, None
     else:
         sys.stderr.write("This script is Mac- and Linux-only, sorry.\n")
         sys.exit(1)
