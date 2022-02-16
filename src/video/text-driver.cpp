@@ -20,7 +20,6 @@
 
 #include <fcntl.h>
 #include <stdlib.h>
-#include <strings.h>
 #include <algorithm>
 #include <pn/output>
 #include <sfz/sfz.hpp>

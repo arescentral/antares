@@ -20,7 +20,6 @@
 
 #include <fcntl.h>
 #include <time.h>
-#include <unistd.h>
 #include <pn/input>
 #include <pn/output>
 #include <sfz/sfz.hpp>

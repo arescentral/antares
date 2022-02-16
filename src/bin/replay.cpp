@@ -18,9 +18,6 @@
 
 #include "data/replay.hpp"
 
-#include <fcntl.h>
-#include <getopt.h>
-
 #include <pn/output>
 #include <sfz/sfz.hpp>
 

@@ -18,9 +18,6 @@
 
 #include "config/ledger.hpp"
 
-#include <fcntl.h>
-#include <unistd.h>
-
 #include <cmath>
 #include <pn/array>
 #include <pn/input>

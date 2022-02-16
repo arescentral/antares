@@ -19,6 +19,7 @@
 #include "drawing/pix-map.hpp"
 
 #include <png.h>
+#include <stdexcept>
 
 namespace antares {
 

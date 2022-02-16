@@ -23,6 +23,7 @@
 
 #include <exception>
 #include <memory>
+#include <stdexcept>
 #include <pn/output>
 #include <pn/string>
 
