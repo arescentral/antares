@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with: { submodules: true }
+
+      - sudo apt-get update
+      - sudo apt-get install -y --no-install-recommends make python3 git gnupg
+      - run: sudo scripts/deps.py install -- -y
+
+      - run: ./configure --antares-version=$(git describe --tags HEAD)
+      - run: make
+      - run: make test
+      - run: scripts/test.py --opengl=2.0
+      - run: scripts/test.py --opengl=3.2
+
+      - run: sudo make install
+      - run: sudo /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
+
+  macOS:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+        with: { submodules: true }
+      - run: .github/workflows/ci-deps.sh macos-latest
+      - run: ./configure --antares-version=$(git describe --tags HEAD)
+      - run: make
+      - run: make smoke-test
+
+  Windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with: { submodules: true }
+      - run: bash .github/workflows/ci-deps.sh windows-latest
+      - uses: ilammy/msvc-dev-cmd@v1
+      - run: python configure --antares-version=$(git describe --tags HEAD)
+      - run: ./ninja -C out/win/opt
+      # - run: out/win/opt/procyon-cpp-test
+
+  Wine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with: { submodules: true }
+
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y --no-install-recommends gnupg
+      - run: echo deb http://apt.arescentral.org focal contrib | sudo tee /etc/apt/sources.list.d/arescentral.list
+      - run: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9
+
+      - run: sudo apt-get update
+      - run: sudo apt-get install -y --no-install-recommends make build-essential clang python3 git mingw-w64 wine-stable gn ninja-build
+
+      - run: ./configure -o win --antares-version=$(git describe --tags HEAD)
+      - run: make build
+
+      - run: sudo apt-get install -y --no-install-recommends xvfb xauth
+      - run: make test-wine

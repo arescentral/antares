@@ -62,6 +62,13 @@ PACKAGE[MAC] = collections.OrderedDict([
     ("gn", "sfiera/gn/gn"),
 ])
 
+WIN = "win"
+INSTALL[WIN] = "brew install".split()
+PACKAGE[WIN] = collections.OrderedDict([
+    ("ninja", "ninja"),
+    ("gn", "sfiera/gn/gn"),
+])
+
 
 def main():
     import argparse
@@ -183,6 +190,8 @@ def defaults():
     elif platform.system() == "Linux":
         _, distro, codename = cfg.dist_proto()
         return distro, codename
+    elif platform.system() == "Windows":
+        return WIN, None
     else:
         sys.stderr.write("This script is Mac- and Linux-only, sorry.\n")
         sys.exit(1)

@@ -186,10 +186,7 @@ def check_linux_native(args):
     return config
 
 def check_win_native(args):
-    return {
-        "ninja": "ninja",
-        "gn": "gn",
-    }
+    return deps.check(distro="win", codename="win")
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:
