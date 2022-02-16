@@ -6,3 +6,5 @@
 
 # Generated distfiles
 /dist
+
+.gn

@@ -41,7 +41,6 @@ group("default") {
   }
   if (target_os == "win") {
     deps -= [
-      ":antares",
       ":antares-install-data",
       ":build-pix",
       ":offscreen",
@@ -65,13 +64,15 @@ config("antares_private") {
     "include",
     "$target_gen_dir/include",
   ]
-  cflags = [
-    "-Wall",
-    "-Werror",
-    "-Wno-sign-compare",
-    "-Wno-deprecated-declarations",
-    "-ftemplate-depth=1024",
-  ]
+  if (current_toolchain != "//build/lib/win:msvc") {
+    cflags = [
+      "-Wall",
+      "-Werror",
+      "-Wno-sign-compare",
+      "-Wno-deprecated-declarations",
+      "-ftemplate-depth=1024",
+    ]
+  }
 }
 
 source_set("libantares") {
@@ -435,10 +436,8 @@ source_set("libantares-video") {
   configs += [ ":antares_private" ]
 
   if (target_os == "win") {
-    sources -= [
-      "include/video/opengl-driver.hpp",
-      "src/video/opengl-driver.cpp",
-    ]
+    public_configs = [ "//ext/mesa-gl:mesa_public" ]
+    sources += [ "src/video/opengl-dynamic.cpp" ]
   }
 }
 
@@ -521,6 +520,11 @@ source_set("libantares-test") {
     sources += [
       "src/linux/offscreen.cpp",
       "src/linux/offscreen.hpp",
+    ]
+  } else if (target_os == "win") {
+    sources += [
+      "src/win/offscreen.cpp",
+      "src/win/offscreen.hpp",
     ]
   }
   configs += [ ":antares_private" ]
@@ -723,7 +727,11 @@ if (target_os == "mac") {
   source_set("libantares-win") {
     sources = [ "src/win/http.cpp" ]
     public_deps = [ "//ext/procyon:procyon-cpp" ]
-    libs = [ "wininet" ]
+    if (current_toolchain == "//build/lib/win:msvc") {
+      libs = [ "wininet.lib", "Ole32.lib", "Shell32.lib", "Shlwapi.lib" ]
+    } else {
+      libs = [ "wininet", "ole32", "shell32", "shlwapi" ]
+    }
     configs += [ ":antares_private" ]
   }
 }

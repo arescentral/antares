@@ -24,7 +24,9 @@ except ImportError:
 
 
 def main():
-    os.chdir(os.path.dirname(sys.argv[0]))
+    config_dir = os.path.dirname(sys.argv[0])
+    if config_dir != "":
+        os.chdir(config_dir)
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("-m",
                         "--mode",
@@ -54,6 +56,14 @@ def main():
 
     check_submodules()
     config = check_deps(args)
+
+    script_executable = "python3"
+    if cfg.host_os() == "win":
+        script_executable = "python"
+
+    with open('.gn', 'w') as gnf:
+        gnf.write('buildconfig = "//build/BUILDCONFIG.gn"\n')
+        gnf.write('script_executable = "' + script_executable + '"\n')
 
     with cfg.step("configure mode") as msg:
         msg(args.mode, color="green")
@@ -103,7 +113,7 @@ def check_submodules():
 
 def check_deps(args):
     with cfg.step("checking host os") as msg:
-        if cfg.host_os() in ["mac", "linux"]:
+        if cfg.host_os() in ["mac", "linux", "win"]:
             msg(cfg.host_os(), color="green")
         else:
             msg(cfg.host_os(), color="red")
@@ -117,6 +127,7 @@ def check_deps(args):
             ("mac", "mac"): check_mac,
             ("linux", "linux"): check_linux_native,
             ("linux", "win"): check_win_on_linux,
+            ("win", "win"): check_win_native,
         }.get((cfg.host_os(), args.target_os))
         if checker is None:
             msg(args.target_os, color="red")
@@ -174,6 +185,11 @@ def check_linux_native(args):
         sys.exit(1)
     return config
 
+def check_win_native(args):
+    return {
+        "ninja": "ninja",
+        "gn": "gn",
+    }
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:

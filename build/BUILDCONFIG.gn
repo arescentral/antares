@@ -23,9 +23,14 @@ if (current_cpu == "") {
   current_cpu = target_cpu
 }
 
+_default_configs = [
+  "//build:add_flags",
+]
+
 if (host_os == "mac") {
   assert(target_os == host_os, "cross-compilation not supported on mac")
   set_default_toolchain("//build/lib/mac")
+  _default_configs += [ "//build/lib:c++11" ]
 } else if (host_os == "linux") {
   if (target_os == "linux") {
     set_default_toolchain("//build/lib/linux")
@@ -36,14 +41,15 @@ if (host_os == "mac") {
   } else {
     assert(false, "linux cannot cross-compile for $target_os")
   }
+  _default_configs += [ "//build/lib:c++11" ]
+} else if (host_os == "win") {
+  assert(target_os == host_os, "cross-compilation not supported on win")
+  set_default_toolchain("//build/lib/win:msvc")
+  _default_configs += [ "//build/lib:c++20", "//build/lib/win:console", "//build/lib/win:cpp_exceptions", "//build/lib:debug_symbols" ]
 } else {
   assert(false, "unsupported host_os $host_os")
 }
 
-_default_configs = [
-  "//build/lib:c++11",
-  "//build:add_flags",
-]
 if (target_os == "mac") {
   _default_configs += [
     "//build/lib:libc++",
