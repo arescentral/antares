@@ -34,3 +34,7 @@
 [submodule "ext/zlib"]
 	path = ext/zlib
 	url = https://github.com/sfiera/zlib-gn.git
+[submodule "ext/mesa-gl"]
+	path = ext/mesa-gl
+	url = https://github.com/elasota/mesa-gl.git
+	branch = master
