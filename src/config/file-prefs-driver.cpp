@@ -30,7 +30,6 @@
 
 using sfz::makedirs;
 using sfz::range;
-using sfz::StringMap;
 using sfz::path::dirname;
 using std::vector;
 

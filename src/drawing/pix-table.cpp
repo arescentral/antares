@@ -30,7 +30,6 @@
 #include "video/driver.hpp"
 
 using sfz::range;
-using sfz::StringMap;
 using std::unique_ptr;
 using std::vector;
 
