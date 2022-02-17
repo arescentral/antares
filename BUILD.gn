@@ -347,6 +347,12 @@ source_set("libantares-sound") {
       "include/sound/openal-driver.hpp",
       "src/sound/openal-driver.cpp",
     ]
+    if (current_toolchain == "//build/lib/win:msvc") {
+      sources += [
+        "include/sound/xaudio2-driver.hpp",
+        "src/sound/xaudio2-driver.cpp",
+      ]
+    }
   }
   configs += [ ":antares_private" ]
 }
