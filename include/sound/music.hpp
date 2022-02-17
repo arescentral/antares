@@ -42,6 +42,7 @@ class Music {
     };
 
     void init();
+    void shutdown();
     void play(Type type, pn::string_view song);
     void stop();
     void toggle();

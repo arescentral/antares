@@ -37,6 +37,7 @@ class SoundFX {
     ~SoundFX();
 
     void init();
+    void shutdown();
     void load(pn::string_view id);
     void reset();
     void stop();
