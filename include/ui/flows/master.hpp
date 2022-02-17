@@ -30,6 +30,7 @@ namespace antares {
 class Master : public Card {
   public:
     Master(sfz::optional<pn::string_view> plugin_path, int32_t seed);
+    ~Master();
 
     virtual void become_front();
     virtual void draw() const;
@@ -52,6 +53,7 @@ class Master : public Card {
     bool                      _skipped;
     Texture                   _publisher_screen;
     Texture                   _ego_screen;
+    bool                      _initialized;
 };
 
 }  // namespace antares

@@ -68,7 +68,15 @@ Master::Master(sfz::optional<pn::string_view> plugin_path, int32_t seed)
                   plugin_path.has_value() ? sfz::make_optional(plugin_path->copy())
                                           : sfz::nullopt),
           _seed(seed),
-          _skipped(false) {}
+          _skipped(false),
+          _initialized(false) {}
+
+
+Master::~Master() {
+    if (_initialized) {
+        sys_shutdown();
+    }
+}
 
 void Master::become_front() {
     switch (_state) {
@@ -118,6 +126,8 @@ void Master::become_front() {
 void Master::draw() const {}
 
 void Master::init() {
+    _initialized = true;
+
     RgbColor initialFadeColor;
 
     init_globals();

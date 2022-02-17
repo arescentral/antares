@@ -70,4 +70,11 @@ void sys_init() {
     sys.right_instrument_texture = Resource::texture(kInstRightPictID);
 }
 
+void sys_shutdown() {
+    if (sys.audio) {
+        sys.music.shutdown();
+        sys.sound.shutdown();
+    }
+}
+
 }  // namespace antares

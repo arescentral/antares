@@ -200,6 +200,11 @@ void SoundFX::init() {
     reset();
 }
 
+void SoundFX::shutdown() {
+    sounds.resize(0);
+    channels.resize(0);
+}
+
 void SoundFX::reset() {
     sounds.resize(kMinVolatileSound);
     for (int i = 0; i < kMinVolatileSound; ++i) {

@@ -76,6 +76,7 @@ struct SystemGlobals {
 extern SystemGlobals sys;
 
 void sys_init();
+void sys_shutdown();
 
 }  // namespace antares
 

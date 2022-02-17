@@ -42,6 +42,11 @@ void Music::init() {
     _channel = sys.audio->open_channel();
 }
 
+void Music::shutdown() {
+    _song_sound.reset();
+    _channel.reset();
+}
+
 void Music::play(Type type, pn::string_view song) {
     bool   play   = false;
     double volume = 1.0;
