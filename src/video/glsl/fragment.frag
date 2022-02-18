@@ -47,6 +47,27 @@ const int TINT_SPRITE_MODE    = 3;
 const int STATIC_SPRITE_MODE  = 4;
 const int OUTLINE_SPRITE_MODE = 5;
 
+vec3 pow3(vec3 v, float exp) {
+    return vec3(pow(v.x, exp), pow(v.y, exp), pow(v.z, exp));
+}
+
+vec3 apple_rgb_to_srgb(vec3 apple_rgb_color) {
+    vec3 linear_apple_rgb_color = pow3(max(apple_rgb_color, vec3(0)), 1.8);
+
+    // Convert from Apple RGB linear to sRGB linear
+    vec3 srgb_linear_color;
+    srgb_linear_color = linear_apple_rgb_color.r * vec3(1.06870538834699, 0.024110476735, 0.00173499822713);
+    srgb_linear_color += linear_apple_rgb_color.g * vec3(-0.07859532843279, 0.96007030899244, 0.02974755969275);
+    srgb_linear_color += linear_apple_rgb_color.b * vec3(0.00988984558395, 0.01581936633364, 0.96851741859153);
+    srgb_linear_color = max(srgb_linear_color, vec3(0));
+
+    // Convert to sRGB gamma
+    vec3 linear_section = min(12.92 * srgb_linear_color, vec3(0.040449936));
+    vec3 exp_section = 1.055 * pow3(srgb_linear_color, 1.0 / 2.4) - 0.055;
+
+    return min(vec3(1), max(linear_section, exp_section));
+}
+
 void main() {
     vec4 sprite_color = texture2DRect(sprite, uv);
     if (color_mode == FILL_MODE) {
@@ -85,4 +106,5 @@ void main() {
             frag_color = vec4(0, 0, 0, 0);
         }
     }
+    frag_color.rgb = apple_rgb_to_srgb(frag_color.rgb);
 }
