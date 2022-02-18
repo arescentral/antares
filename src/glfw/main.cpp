@@ -32,7 +32,11 @@
 #include "ui/flows/master.hpp"
 
 #ifdef _WIN32
-#include "sound/driver.hpp"
+#  ifdef _MSC_VER
+#    include "sound/xaudio2-driver.hpp"
+#  else
+#    include "sound/driver.hpp"
+#  endif
 #else
 #include "sound/openal-driver.hpp"
 #endif
@@ -132,7 +136,11 @@ void main(int argc, char* const* argv) {
 
     DirectoryLedger   ledger;
 #ifdef _WIN32
+#  ifdef _MSC_VER
+    XAudio2SoundDriver sound;
+#  else
     NullSoundDriver sound;
+#  endif
 #else
     OpenAlSoundDriver sound;
 #endif
