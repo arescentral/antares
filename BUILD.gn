@@ -613,6 +613,12 @@ executable("antares") {
     "//ext/glfw:libglfw",
   ]
   configs += [ ":antares_private" ]
+  defines = []
+  if (mode == "opt" && host_os == "win") {
+    configs -= [ "//build/lib/win:console" ]
+    configs += [ "//build/lib/win:windows" ]
+    sources += [ "src/glfw/main-win32.cpp" ]
+  }
 }
 
 executable("antares-install-data") {
