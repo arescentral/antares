@@ -17,7 +17,6 @@ PACKAGE = {}
 INSTALL = {}
 UPDATE = {}
 SOURCES = {}
-KEYS = {}
 
 DEBIAN = "debian"
 INSTALL[DEBIAN] = "apt-get install".split()
@@ -48,11 +47,9 @@ PACKAGE[DEBIAN] = collections.OrderedDict([
     ("zlib", "zlib1g-dev"),
 ])
 SOURCES[DEBIAN] = [
-    ("arescentral", "http://apt.arescentral.org", "contrib"),
-]
-KEYS[DEBIAN] = [
-    ("apt-key adv --keyserver keyserver.ubuntu.com --recv"
-     " 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9").split(),
+    ("arescentral", "http://apt.arescentral.org", "contrib",
+     "apt-key adv --keyserver keyserver.ubuntu.com --recv"
+     " 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9".split()),
 ]
 
 MAC = "mac"
@@ -121,17 +118,17 @@ def check(*, distro, codename, prefix=""):
         return config
     commands = []
 
-    for name, url, component in SOURCES.get(distro, []):
+    for name, url, component, keys in SOURCES.get(distro, []):
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
-        commands.append("%s | %s" % (
-            _command("", ["echo", "deb", url, codename, component]),
-            _command(prefix, ["tee", path]),
-        ))
-    if commands:
-        for keys in KEYS.get(distro, []):
-            commands.append(_command(prefix, keys))
+        commands.extend([
+            _command(prefix, keys),
+            "%s | %s" % (
+                _command("", ["echo", "deb", url, codename, component]),
+                _command(prefix, ["tee", path]),
+            ),
+        ])
 
     if distro in UPDATE:
         commands.append(_command(prefix, UPDATE[distro]))
@@ -157,16 +154,17 @@ def _command(prefix, args):
 
 
 def install(*, distro, codename, dry_run=False, flags=[]):
-    for name, url, component in SOURCES.get(distro, []):
+    update = False
+    for name, url, component, keys in SOURCES.get(distro, []):
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
+        run(dry_run, keys)
         line = "deb %s %s %s" % (url, codename, component)
         write(dry_run, line, path)
-    for keys in KEYS.get(distro, []):
-        run(dry_run, keys)
+        update = True
 
-    if SOURCES.get(distro, []):
+    if update:
         run(dry_run, UPDATE[distro])
     run(dry_run, INSTALL[distro] + list(PACKAGE[distro].values()) + flags)
 
