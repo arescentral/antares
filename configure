@@ -166,7 +166,7 @@ def check_mac(args):
         print("Then, try ./configure again")
         sys.exit(1)
 
-    config = deps.check(distro="mac", codename="mac")
+    config = deps.check(distro=deps.DISTROS["mac"], codename="mac")
     if config is None:
         sys.exit(1)
     return config
@@ -175,21 +175,23 @@ def check_mac(args):
 def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
         pretty, distro, codename = cfg.dist_proto()
-        if distro in deps.INSTALL:
+        if distro in deps.DISTROS:
             msg(pretty, color="green")
         else:
             msg(pretty + " (untested)", color="yellow")
             distro = "debian"
-    config = deps.check(distro=distro, codename=codename, prefix="sudo")
+    config = deps.check(distro=deps.DISTROS[distro], codename=codename, prefix="sudo")
     if config is None:
         sys.exit(1)
     return config
 
+
 def check_win_native(args):
-    config = deps.check(distro="win", codename="win")
+    config = deps.check(distro=deps.DISTROS["win"], codename="win")
     config["gn"] = "gn"
     config["ninja"] = "ninja"
     return config
+
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:

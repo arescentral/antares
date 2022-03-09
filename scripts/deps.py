@@ -13,78 +13,98 @@ try:
 except ImportError:
     pass
 
-PACKAGE = {}
-INSTALL = {}
-UPDATE = {}
-SOURCES = {}
+Distro = collections.namedtuple("Distro", "name packages sources install update add_key".split())
 
-DEBIAN = "debian"
-INSTALL[DEBIAN] = "apt-get install".split()
-UPDATE[DEBIAN] = "apt-get update".split()
-PACKAGE[DEBIAN] = collections.OrderedDict([
-    # Binaries
-    ("clang", "clang"),
-    ("clang++", "clang"),
-    ("gn", "gn"),
-    ("ninja", "ninja-build"),
-    ("pkg-config", "pkg-config"),
+DEBIAN = Distro(
+    name="debian",
+    packages={
+        # Binaries
+        "clang": "clang",
+        "clang++": "clang",
+        "gn": "gn",
+        "ninja": "ninja-build",
+        "pkg-config": "pkg-config",
 
-    # Libraries
-    ("gl", "libgl1-mesa-dev"),
-    ("glfw3", "libglfw3-dev"),
-    ("glu", "libglu1-mesa-dev"),
-    ("libmodplug", "libmodplug-dev"),
-    ("libpng", "libpng-dev"),
-    ("libzip", "libzip-dev"),
-    ("neon", "libneon27-dev"),
-    ("openal", "libopenal-dev"),
-    ("sndfile", "libsndfile1-dev"),
-    ("x11", "libx11-dev"),
-    ("xcursor", "libxcursor-dev"),
-    ("xinerama", "libxinerama-dev"),
-    ("xrandr", "libxrandr-dev"),
-    ("xxf86vm", "libxxf86vm-dev"),
-    ("zlib", "zlib1g-dev"),
-])
-SOURCES[DEBIAN] = [
-    ("arescentral", "http://apt.arescentral.org", "contrib",
-     "apt-key adv --keyserver keyserver.ubuntu.com --recv"
-     " 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9".split()),
-]
+        # Libraries
+        "gl": "libgl1-mesa-dev",
+        "glfw3": "libglfw3-dev",
+        "glu": "libglu1-mesa-dev",
+        "libmodplug": "libmodplug-dev",
+        "libpng": "libpng-dev",
+        "libzip": "libzip-dev",
+        "neon": "libneon27-dev",
+        "openal": "libopenal-dev",
+        "sndfile": "libsndfile1-dev",
+        "x11": "libx11-dev",
+        "xcursor": "libxcursor-dev",
+        "xinerama": "libxinerama-dev",
+        "xrandr": "libxrandr-dev",
+        "xxf86vm": "libxxf86vm-dev",
+        "zlib": "zlib1g-dev",
+    },
+    sources=[
+        ("arescentral", "http://apt.arescentral.org", "contrib",
+         "5A4F5210FF46CEE4B799098BAC879AADD5B51AE9"),
+    ],
+    install="apt-get install".split(),
+    update="apt-get update".split(),
+    add_key="apt-key adv --keyserver keyserver.ubuntu.com --recv".split(),
+)
 
-MAC = "mac"
-INSTALL[MAC] = "brew install".split()
-PACKAGE[MAC] = collections.OrderedDict([
-    ("ninja", "ninja"),
-    ("gn", "sfiera/gn/gn"),
-])
+MAC = Distro(
+    name="mac",
+    packages={
+        "ninja": "ninja",
+        "gn": "sfiera/gn/gn",
+    },
+    sources=[],
+    install="brew install".split(),
+    update=None,
+    add_key=None,
+)
 
-WIN = "win"
-INSTALL[WIN] = "python scripts/download".split()
-PACKAGE[WIN] = collections.OrderedDict([
-    ("ninja",
-     "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip:ninja.exe"),
-    ("gn", "https://chrome-infra-packages.appspot.com/dl/gn/gn/windows-amd64/+/latest:gn.exe"),
-])
+WIN = Distro(
+    name="win",
+    packages={
+        "ninja":
+        "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip:ninja.exe",
+        "gn": "https://chrome-infra-packages.appspot.com/dl/gn/gn/windows-amd64/+/latest:gn.exe",
+    },
+    sources=[],
+    install="python scripts/download".split(),
+    update=None,
+    add_key=None,
+)
+
+DISTROS = {d.name: d for d in [DEBIAN, MAC, WIN]}
 
 
 def main():
     import argparse
 
-    distro, codename = defaults()
+    if platform.system() == "Darwin":
+        distro, codename = MAC.name, None
+    elif platform.system() == "Linux":
+        _, distro, codename = cfg.dist_proto()
+    elif platform.system() == "Windows":
+        distro, codename = WIN.name, None
+    else:
+        sys.stderr.write("This script is Mac-, Linux-, and Windows-only, sorry.\n")
+        sys.exit(1)
 
     parser = argparse.ArgumentParser(description="Install build deps for Antares")
     parser.add_argument("action", choices="check install".split())
-    parser.add_argument("--distro", choices=sorted(INSTALL.keys()), default=distro)
+    parser.add_argument("--distro", choices=sorted(DISTROS.keys()), default=distro)
     parser.add_argument("--codename", type=str, default=codename)
     parser.add_argument("--dry-run", action="store_const", const=True, default=False)
     args, flags = parser.parse_known_args()
 
+    distro = DISTROS[args.distro]
     if args.action == "check":
-        if not check(distro=args.distro, codename=args.codename):
+        if not check(distro=distro, codename=args.codename):
             sys.exit(1)
     elif args.action == "install":
-        install(distro=args.distro, codename=args.codename, dry_run=args.dry_run, flags=flags)
+        install(distro=distro, codename=args.codename, dry_run=args.dry_run, flags=flags)
 
 
 def check(*, distro, codename, prefix=""):
@@ -99,7 +119,7 @@ def check(*, distro, codename, prefix=""):
     pkg_config = None
     missing_pkgs = []
     config = {}
-    for name in PACKAGE[distro]:
+    for name in distro.packages:
         if name in checkers:
             dep = checkers[name]()
             if dep is None:
@@ -118,22 +138,22 @@ def check(*, distro, codename, prefix=""):
         return config
     commands = []
 
-    for name, url, component, keys in SOURCES.get(distro, []):
+    for name, url, component, key in distro.sources:
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
         commands.extend([
-            _command(prefix, keys),
+            _command(prefix, distro.add_key + [key]),
             "%s | %s" % (
                 _command("", ["echo", "deb", url, codename, component]),
                 _command(prefix, ["tee", path]),
             ),
         ])
 
-    if distro in UPDATE:
-        commands.append(_command(prefix, UPDATE[distro]))
-    missing_pkgs = sorted(set(PACKAGE[distro][pkg] for pkg in missing_pkgs))
-    commands.append(_command(prefix, INSTALL[distro] + missing_pkgs))
+    if distro.update:
+        commands.append(_command(prefix, distro.update))
+    missing_pkgs = sorted(set(distro.packages[pkg] for pkg in missing_pkgs))
+    commands.append(_command(prefix, distro.install + missing_pkgs))
 
     print()
     print("missing dependencies: %s" % " ".join(missing_pkgs))
@@ -155,18 +175,18 @@ def _command(prefix, args):
 
 def install(*, distro, codename, dry_run=False, flags=[]):
     update = False
-    for name, url, component, keys in SOURCES.get(distro, []):
+    for name, url, component, key in distro.sources:
         path = "/etc/apt/sources.list.d/%s.list" % name
         if os.path.exists(path):
             continue
-        run(dry_run, keys)
+        run(dry_run, distro.add_key + [key])
         line = "deb %s %s %s" % (url, codename, component)
         write(dry_run, line, path)
         update = True
 
     if update:
-        run(dry_run, UPDATE[distro])
-    run(dry_run, INSTALL[distro] + list(PACKAGE[distro].values()) + flags)
+        run(dry_run, distro.update)
+    run(dry_run, distro.install + list(distro.packages.values()) + flags)
 
 
 def run(dry_run, command):
@@ -181,19 +201,6 @@ def write(dry_run, content, path):
     if not dry_run:
         with open(path, "w") as f:
             f.write(content)
-
-
-def defaults():
-    if platform.system() == "Darwin":
-        return MAC, None
-    elif platform.system() == "Linux":
-        _, distro, codename = cfg.dist_proto()
-        return distro, codename
-    elif platform.system() == "Windows":
-        return WIN, None
-    else:
-        sys.stderr.write("This script is Mac- and Linux-only, sorry.\n")
-        sys.exit(1)
 
 
 if __name__ == "__main__":
