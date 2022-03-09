@@ -17,7 +17,6 @@ sys.path[0:0] = [
     os.path.join(os.path.dirname(__file__), "build", "lib", "scripts"),
 ]
 try:
-    import deps
     import cfg
 except ImportError:
     pass
@@ -138,6 +137,8 @@ def check_deps(args):
 
 
 def check_mac(args):
+    import deps
+
     with cfg.step("checking Mac OS X version") as msg:
         ver = platform.mac_ver()[0]
         ver = tuple(int(x) for x in ver.split(".")[:2])
@@ -166,13 +167,15 @@ def check_mac(args):
         print("Then, try ./configure again")
         sys.exit(1)
 
-    config = deps.check(distro=deps.DISTROS["mac"], codename="mac")
+    config = cfg.check_all(distro=deps.DISTROS["mac"], codename="mac")
     if config is None:
         sys.exit(1)
     return config
 
 
 def check_linux_native(args):
+    import deps
+
     with cfg.step("checking Linux distro") as msg:
         pretty, distro, codename = cfg.dist_proto()
         if distro in deps.DISTROS:
@@ -180,14 +183,16 @@ def check_linux_native(args):
         else:
             msg(pretty + " (untested)", color="yellow")
             distro = "debian"
-    config = deps.check(distro=deps.DISTROS[distro], codename=codename, prefix="sudo")
+    config = cfg.check_all(distro=deps.DISTROS[distro], codename=codename, prefix="sudo")
     if config is None:
         sys.exit(1)
     return config
 
 
 def check_win_native(args):
-    config = deps.check(distro=deps.DISTROS["win"], codename="win")
+    import deps
+
+    config = cfg.check_all(distro=deps.DISTROS["win"], codename="win")
     config["gn"] = "gn"
     config["ninja"] = "ninja"
     return config
