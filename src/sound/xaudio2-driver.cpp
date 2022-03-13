@@ -80,17 +80,27 @@ class XAudio2SoundDriver::XAudio2SoundInstance {
             XAudio2SoundDriver& driver, std::vector<BYTE>&& data, float frequency_ratio)
             : _driver(driver),
               _data(std::move(data)),
-              _frequency_ratio(frequency_ratio)
+              _frequency_ratio(frequency_ratio),
+              _ref_count(1)
     {}
 
     const BYTE* get_data() const { return _data.data(); }
     size_t      get_data_size() const { return _data.size(); }
     float       get_frequency_ratio() const { return _frequency_ratio; }
 
+    void add_ref() { InterlockedIncrement(&_ref_count); }
+    void dec_ref() {
+        if (InterlockedDecrement(&_ref_count) == 0) {
+            delete this;
+        }
+    }
+
+
   private:
     XAudio2SoundDriver&     _driver;
     float                   _frequency_ratio;
     std::vector<BYTE>       _data;
+    volatile LONG           _ref_count;
 };
 
 class XAudio2SoundDriver::XAudio2VoiceInstance {
@@ -109,157 +119,62 @@ class XAudio2SoundDriver::XAudio2SourceVoiceInstance {
   public:
     XAudio2SourceVoiceInstance(XAudio2SoundDriver& driver, IXAudio2SourceVoice* voice)
             : _driver(driver),
-              _voice(voice),
-              _active_sound(nullptr),
-              _active_is_loop(false),
-              _active_volume(1.0f),
-              _pending_sound(nullptr),
-              _pending_looping(false),
-              _pending_volume(1.0f),
-              _source_voice_state(SourceVoiceState::Idle)
+              _voice(voice)
     {
-        InitializeCriticalSection(&_mutex);
     }
 
     ~XAudio2SourceVoiceInstance() {
-        reset_and_play_sound(nullptr, false, 0.0f);
-
         _voice->DestroyVoice();
-
-        DeleteCriticalSection(&_mutex);
-
-        assert(_active_sound == nullptr);
     }
 
     IXAudio2SourceVoice* get_voice() const { _voice; }
-
-    void on_buffer_end();
-    void reset_and_play_sound(const std::shared_ptr<XAudio2SoundInstance>& sound, bool looping, float volume);
+    void reset_and_play_sound(XAudio2SoundInstance* sound, bool looping, float volume);
 
   private:
-    // To simplify XAudio2 voice state handling, we only ever submit one buffer at a time.
-    enum class SourceVoiceState {
-        Idle,                     // No buffers are submitted, _active_sound and _pending_sound are both null.
-        Playing,                  // A buffer was submitted and will eventually play.
-        Resetting,                // A buffer was submitted, but a stop was also submitted.  OnBufferEnd will transition to pending state.
-    };
-
-    void submit_active_sound();
-    void set_and_submit_sound(const std::shared_ptr<XAudio2SoundInstance>& sound, bool looping, float volume);
-
     XAudio2SoundDriver&   _driver;
-
     IXAudio2SourceVoice*  _voice;
-
-    // Mutex-guarded fields
-    CRITICAL_SECTION                        _mutex;
-    std::shared_ptr<XAudio2SoundInstance>   _pending_sound;
-    float                                   _pending_volume;
-    bool                                    _pending_looping;
-
-    std::shared_ptr<XAudio2SoundInstance>   _active_sound;
-    float                                   _active_volume;
-    bool                                    _active_is_loop;
-
-    SourceVoiceState                        _source_voice_state;
 };
-
-void XAudio2SoundDriver::XAudio2SourceVoiceInstance::on_buffer_end() {
-    EnterCriticalSection(&_mutex);
-    if (_source_voice_state == SourceVoiceState::Playing) {
-        if (_active_is_loop) {
-            submit_active_sound();
-        } else {
-            _source_voice_state = SourceVoiceState::Resetting;
-        }
-    }
-
-    if (_source_voice_state == SourceVoiceState::Resetting) {
-        _active_sound       = _pending_sound;
-        _active_is_loop     = _pending_looping;
-        _active_volume      = _pending_volume;
-
-        _pending_sound = nullptr;
-        _pending_looping = false;
-        _pending_volume  = 1.0f;
-
-        if (_active_sound) {
-            _source_voice_state = SourceVoiceState::Playing;
-            submit_active_sound();
-        } else {
-            _source_voice_state = SourceVoiceState::Idle;
-        }
-    }
-    LeaveCriticalSection(&_mutex);
-}
 
 
 void XAudio2SoundDriver::XAudio2SourceVoiceInstance::reset_and_play_sound(
-        const std::shared_ptr<XAudio2SoundInstance>& sound, bool looping, float volume) {
+        XAudio2SoundInstance* sound, bool looping, float volume) {
 
-    EnterCriticalSection(&_mutex);
+    _voice->Stop(0, 0);
+    _voice->FlushSourceBuffers();
 
-    switch (_source_voice_state) {
-        case SourceVoiceState::Idle:
-            // No sound is submitted, submit this one
-            assert(!_pending_sound);
-            assert(!_active_sound);
-            if (sound) {
-                _source_voice_state = SourceVoiceState::Playing;
-                set_and_submit_sound(sound, looping, volume);
-            }
-        break;
-        case SourceVoiceState::Playing:
-            // A sound was submitted, stop it and change to the specified one
-            _pending_sound      = sound;
-            _source_voice_state = SourceVoiceState::Resetting;
-            _voice->Stop(0, 0);
-            _voice->FlushSourceBuffers();
-            break;
-        case SourceVoiceState::Resetting:
-            // A sound was submitted but a stop was already requested, wait for it
-            _pending_sound = sound;
-            break;
-        default: break;
+    if (!sound) {
+        return;
     }
-    _pending_looping = looping;
-    _pending_volume  = volume;
+    
+    sound->add_ref();
 
-    LeaveCriticalSection(&_mutex);
-}
-
-void XAudio2SoundDriver::XAudio2SourceVoiceInstance::submit_active_sound() {
     XAUDIO2_BUFFER buffer;
-    buffer.Flags = 0;
-    buffer.AudioBytes = _active_sound->get_data_size();
-    buffer.pAudioData = _active_sound->get_data();
+    buffer.Flags      = 0;
+    buffer.AudioBytes = sound->get_data_size();
+    buffer.pAudioData = sound->get_data();
     buffer.PlayBegin  = 0;
-    buffer.PlayLength = 0;
+    buffer.PlayLength = buffer.AudioBytes / (sizeof(int16_t) * 2);
     buffer.LoopBegin  = 0;
     buffer.LoopLength = 0;
     buffer.LoopCount  = 0;
-    buffer.pContext   = this;
+    buffer.pContext   = sound;
+
+    if (looping) {
+        buffer.LoopLength = buffer.PlayLength;
+        buffer.LoopCount  = XAUDIO2_LOOP_INFINITE;
+    }
 
     UINT32 operation_set = _driver.alloc_operation_set();
 
-    _voice->SetFrequencyRatio(_active_sound->get_frequency_ratio(), operation_set);
-    _voice->SetVolume(_active_volume, operation_set);
+    _voice->SetFrequencyRatio(sound->get_frequency_ratio(), operation_set);
+    _voice->SetVolume(volume, operation_set);
     _voice->Start(0, operation_set);
 
     _driver.get_xa2()->CommitChanges(operation_set);
 
     if (FAILED(_voice->SubmitSourceBuffer(&buffer, nullptr))) {
-        _active_sound       = nullptr;
-        _source_voice_state = SourceVoiceState::Idle;
+        sound->dec_ref();
     }
-}
-
-void XAudio2SoundDriver::XAudio2SourceVoiceInstance::set_and_submit_sound(
-    const std::shared_ptr<XAudio2SoundInstance>& sound, bool looping, float volume) {
-    _active_sound   = sound;
-    _active_is_loop = looping;
-    _active_volume  = volume;
-    submit_active_sound();
 }
 
 class XAudio2SoundDriver::XAudio2Sound : public Sound {
@@ -271,7 +186,10 @@ class XAudio2SoundDriver::XAudio2Sound : public Sound {
     virtual void loop(uint8_t volume);
 
     void buffer(const SoundData& s) {
-        _instance.reset();
+        if (_instance) {
+            _instance->dec_ref();
+            _instance = nullptr;
+        }
 
         if (s.channels == 0) {
             return;
@@ -287,14 +205,14 @@ class XAudio2SoundDriver::XAudio2Sound : public Sound {
         frequency_ratio = std::min(
                 XAUDIO2_MAX_FREQ_RATIO, std::max(XAUDIO2_MIN_FREQ_RATIO, frequency_ratio));
 
-        _instance = std::make_shared<XAudio2SoundInstance>(_driver, std::move(data), frequency_ratio);
+        _instance = new XAudio2SoundInstance(_driver, std::move(data), frequency_ratio);
     }
 
-    const std::shared_ptr<XAudio2SoundInstance>& sound_instance() const { return _instance; }
+    XAudio2SoundInstance* sound_instance() const { return _instance; }
 
   private:
-    XAudio2SoundDriver&                   _driver;
-    std::shared_ptr<XAudio2SoundInstance> _instance;
+    XAudio2SoundDriver&     _driver;
+    XAudio2SoundInstance*   _instance;
 };
 
 class XAudio2SoundDriver::XAudio2VoiceCallbacks : public IXAudio2VoiceCallback {
@@ -304,8 +222,7 @@ class XAudio2SoundDriver::XAudio2VoiceCallbacks : public IXAudio2VoiceCallback {
     void STDMETHODCALLTYPE OnStreamEnd() override {}
     void STDMETHODCALLTYPE OnBufferStart(void* pBufferContext) override {}
     void STDMETHODCALLTYPE OnBufferEnd(void* pBufferContext) override {
-        static_cast<XAudio2SoundDriver::XAudio2SourceVoiceInstance*>(pBufferContext)
-                ->on_buffer_end();
+        static_cast<XAudio2SoundDriver::XAudio2SoundInstance*>(pBufferContext)->dec_ref();
     }
     void STDMETHODCALLTYPE OnLoopEnd(void* pBufferContext) override {}
     void STDMETHODCALLTYPE OnVoiceError(void* pBufferContext, HRESULT Error) override {}
