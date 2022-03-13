@@ -337,8 +337,7 @@ class XAudio2SoundDriver::XAudio2Channel : public SoundChannel {
         IXAudio2SourceVoice* source_voice;
         check_hresult(
                 "CreateSourceVoice", _driver.get_xa2()->CreateSourceVoice(
-                        &source_voice, &format, XAUDIO2_VOICE_NOSRC,
-                                             XAUDIO2_MAX_FREQ_RATIO, _driver.get_voice_callbacks()));
+                        &source_voice, &format, 0, XAUDIO2_MAX_FREQ_RATIO, _driver.get_voice_callbacks()));
 
         try {
             _source_voice.reset(new XAudio2SourceVoiceInstance(_driver, source_voice));
