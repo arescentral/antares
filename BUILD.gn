@@ -41,7 +41,6 @@ group("default") {
   }
   if (target_os == "win") {
     deps -= [
-      ":antares-install-data",
       ":build-pix",
       ":offscreen",
       ":replay",
@@ -740,9 +739,19 @@ if (target_os == "mac") {
     sources = [ "src/win/http.cpp" ]
     public_deps = [ "//ext/procyon:procyon-cpp" ]
     if (current_toolchain == "//build/lib/win:msvc") {
-      libs = [ "wininet.lib", "Ole32.lib", "Shell32.lib", "Shlwapi.lib" ]
+      libs = [
+        "wininet.lib",
+        "Ole32.lib",
+        "Shell32.lib",
+        "Shlwapi.lib",
+      ]
     } else {
-      libs = [ "wininet", "ole32", "shell32", "shlwapi" ]
+      libs = [
+        "wininet",
+        "ole32",
+        "shell32",
+        "shlwapi",
+      ]
     }
     configs += [ ":antares_private" ]
   }
