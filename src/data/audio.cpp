@@ -152,7 +152,7 @@ SoundData convert(pn::data_view in) {
     settings.mChannels         = 2;
     settings.mBits             = 16;
     settings.mFrequency        = 44100;
-    settings.mStereoSeparation = 128;
+    settings.mStereoSeparation = 256;
     settings.mResamplingMode   = MODPLUG_RESAMPLE_NEAREST;  // "Low" quality, but matches original game's behavior and makes most instruments sound sharper
     ModPlug_SetSettings(&settings);
     std::unique_ptr<::ModPlugFile, decltype(&ModPlug_Unload)> file(
