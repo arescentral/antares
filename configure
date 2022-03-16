@@ -54,11 +54,29 @@ def main():
                         type=str,
                         help="override antares_version string")
     args = parser.parse_args()
-    configure("Antares", args)
+
+    config = {
+        "mode": args.mode,
+        "target_os": args.target_os,
+        "prefix": args.prefix,
+        "add_cflags": shlex.split(os.environ.get("CPPFLAGS", "")),
+        "add_cflags_c": shlex.split(os.environ.get("CFLAGS", "")),
+        "add_cflags_cc": shlex.split(os.environ.get("CXXFLAGS", "")),
+        "add_ldflags": shlex.split(os.environ.get("LDFLAGS", "")),
+    }
+    if args.antares_version:
+        config["antares_version"] = args.antares_version
+    if config["target_os"] == "mac":
+        config["macosx_version_min"] = "10.7"
+
+    import deps
+    configure("Antares", deps.DISTROS, config)
 
 
-def configure(project, args):
-    config = check_deps(project, args)
+def configure(project, distros, config):
+    for k, v in check_deps(project, distros, config).items():
+        if k not in config:
+            config[k] = v
 
     script_executable = "python3"
     if cfg.host_os() == "win":
@@ -69,18 +87,7 @@ def configure(project, args):
         gnf.write('script_executable = "' + script_executable + '"\n')
 
     with cfg.step("configure mode") as msg:
-        msg(args.mode, color="green")
-    config["mode"] = args.mode
-    config["target_os"] = args.target_os
-    config["prefix"] = args.prefix
-    config["add_cflags"] = shlex.split(os.environ.get("CPPFLAGS", ""))
-    config["add_cflags_c"] = shlex.split(os.environ.get("CFLAGS", ""))
-    config["add_cflags_cc"] = shlex.split(os.environ.get("CXXFLAGS", ""))
-    config["add_ldflags"] = shlex.split(os.environ.get("LDFLAGS", ""))
-    if args.antares_version:
-        config["antares_version"] = args.antares_version
-    if args.target_os == "mac":
-        config["macosx_version_min"] = "10.7"
+        msg(config["mode"], color="green")
     cfg.gn(**config)
 
     print("make(1) it so!")
@@ -114,7 +121,7 @@ def check_submodules():
         sys.exit(1)
 
 
-def check_deps(project, args):
+def check_deps(project, distros, config):
     with cfg.step("checking host os") as msg:
         if cfg.host_os() in ["mac", "linux", "win"]:
             msg(cfg.host_os(), color="green")
@@ -124,25 +131,23 @@ def check_deps(project, args):
             sys.exit(1)
 
     with cfg.step("checking target os") as msg:
-        if args.target_os is None:
-            args.target_os = cfg.host_os()
+        if config["target_os"] is None:
+            config["target_os"] = cfg.host_os()
         checker = {
             ("mac", "mac"): check_mac,
             ("linux", "linux"): check_linux_native,
             ("linux", "win"): check_win_on_linux,
             ("win", "win"): check_win_native,
-        }.get((cfg.host_os(), args.target_os))
+        }.get((cfg.host_os(), config["target_os"]))
         if checker is None:
-            msg(args.target_os, color="red")
+            msg(config["target_os"], color="red")
             sys.exit(1)
-        msg(args.target_os, color="green")
+        msg(config["target_os"], color="green")
 
-    return checker(project, args)
+    return checker(project, distros)
 
 
-def check_mac(project, args):
-    import deps
-
+def check_mac(project, distros):
     with cfg.step("checking Mac OS X version") as msg:
         ver = platform.mac_ver()[0]
         ver = tuple(int(x) for x in ver.split(".")[:2])
@@ -171,38 +176,34 @@ def check_mac(project, args):
         print("Then, try ./configure again")
         sys.exit(1)
 
-    config = cfg.check_all(distro=deps.DISTROS["mac"], codename="mac")
+    config = cfg.check_all(distro=distros["mac"], codename="mac")
     if config is None:
         sys.exit(1)
     return config
 
 
-def check_linux_native(project, args):
-    import deps
-
+def check_linux_native(project, distros):
     with cfg.step("checking Linux distro") as msg:
         pretty, distro, codename = cfg.dist_proto()
-        if distro in deps.DISTROS:
+        if distro in distros:
             msg(pretty, color="green")
         else:
             msg(pretty + " (untested)", color="yellow")
             distro = "debian"
-    config = cfg.check_all(distro=deps.DISTROS[distro], codename=codename, prefix="sudo")
+    config = cfg.check_all(distro=distros[distro], codename=codename, prefix="sudo")
     if config is None:
         sys.exit(1)
     return config
 
 
-def check_win_native(project, args):
-    import deps
-
-    config = cfg.check_all(distro=deps.DISTROS["win"], codename="win")
+def check_win_native(project, distros):
+    config = cfg.check_all(distro=distros["win"], codename="win")
     if config is None:
         sys.exit(1)
     return config
 
 
-def check_win_on_linux(project, args):
+def check_win_on_linux(project):
     with cfg.step("checking Linux distro") as msg:
         pretty, distro, codename = cfg.dist_proto()
         if (distro, codename) == ("debian", "focal"):
