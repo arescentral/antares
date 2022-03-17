@@ -3,12 +3,8 @@
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
-from __future__ import division, print_function, unicode_literals
-
 import argparse
-import collections
 import os
-import platform
 import shlex
 import sys
 
@@ -17,13 +13,14 @@ sys.path[0:0] = [
     os.path.join(os.path.dirname(__file__), "build", "lib", "scripts"),
 ]
 try:
-    import deps
     import cfg
 except ImportError:
     pass
 
 
 def main():
+    check_submodules()
+
     config_dir = os.path.dirname(sys.argv[0])
     if config_dir != "":
         os.chdir(config_dir)
@@ -54,33 +51,22 @@ def main():
                         help="override antares_version string")
     args = parser.parse_args()
 
-    check_submodules()
-    config = check_deps(args)
-
-    script_executable = "python3"
-    if cfg.host_os() == "win":
-        script_executable = "python"
-
-    with open('.gn', 'w') as gnf:
-        gnf.write('buildconfig = "//build/BUILDCONFIG.gn"\n')
-        gnf.write('script_executable = "' + script_executable + '"\n')
-
-    with cfg.step("configure mode") as msg:
-        msg(args.mode, color="green")
-    config["mode"] = args.mode
-    config["target_os"] = args.target_os
-    config["prefix"] = args.prefix
-    config["add_cflags"] = shlex.split(os.environ.get("CPPFLAGS", ""))
-    config["add_cflags_c"] = shlex.split(os.environ.get("CFLAGS", ""))
-    config["add_cflags_cc"] = shlex.split(os.environ.get("CXXFLAGS", ""))
-    config["add_ldflags"] = shlex.split(os.environ.get("LDFLAGS", ""))
+    config = {
+        "mode": args.mode,
+        "target_os": args.target_os,
+        "prefix": args.prefix,
+        "add_cflags": shlex.split(os.environ.get("CPPFLAGS", "")),
+        "add_cflags_c": shlex.split(os.environ.get("CFLAGS", "")),
+        "add_cflags_cc": shlex.split(os.environ.get("CXXFLAGS", "")),
+        "add_ldflags": shlex.split(os.environ.get("LDFLAGS", "")),
+    }
     if args.antares_version:
         config["antares_version"] = args.antares_version
-    if args.target_os == "mac":
+    if config["target_os"] == "mac":
         config["macosx_version_min"] = "10.7"
-    cfg.gn(**config)
 
-    print("make(1) it so!")
+    import deps
+    cfg.configure("Antares", deps.DISTROS, config)
 
 
 def check_submodules():
@@ -109,122 +95,6 @@ def check_submodules():
         print("")
         print("Then, try ./configure again")
         sys.exit(1)
-
-
-def check_deps(args):
-    with cfg.step("checking host os") as msg:
-        if cfg.host_os() in ["mac", "linux", "win"]:
-            msg(cfg.host_os(), color="green")
-        else:
-            msg(cfg.host_os(), color="red")
-            print("\nSorry! Antares requires Mac OS X or Linux")
-            sys.exit(1)
-
-    with cfg.step("checking target os") as msg:
-        if args.target_os is None:
-            args.target_os = cfg.host_os()
-        checker = {
-            ("mac", "mac"): check_mac,
-            ("linux", "linux"): check_linux_native,
-            ("linux", "win"): check_win_on_linux,
-            ("win", "win"): check_win_native,
-        }.get((cfg.host_os(), args.target_os))
-        if checker is None:
-            msg(args.target_os, color="red")
-            sys.exit(1)
-        msg(args.target_os, color="green")
-
-    return checker(args)
-
-
-def check_mac(args):
-    with cfg.step("checking Mac OS X version") as msg:
-        ver = platform.mac_ver()[0]
-        ver = tuple(int(x) for x in ver.split(".")[:2])
-        if ver < (10, 9):
-            msg("%d.%d" % ver, color="red")
-            print("\nSorry! Antares requires Mac OS X 10.9+")
-            sys.exit(1)
-        msg("%d.%d" % ver, color="green")
-
-    missing = collections.OrderedDict()
-    if not (cfg.check_clang() and cfg.check_libcxx()):
-        missing["xcode"] = ("* To install Xcode, open the App Store:\n"
-                            "    https://itunes.apple.com/en/app/xcode/id497799835\n"
-                            "  After installing, open it and accept the license agreement\n")
-    if not cfg.check_brew():
-        missing["brew"] = (
-            "* To install Homebrew, run:\n"
-            '    $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"\n'
-        )
-
-    if missing:
-        print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
-        for step in missing.values():
-            sys.stdout.write(step)
-        print("")
-        print("Then, try ./configure again")
-        sys.exit(1)
-
-    config = deps.check(distro="mac", codename="mac")
-    if config is None:
-        sys.exit(1)
-    return config
-
-
-def check_linux_native(args):
-    with cfg.step("checking Linux distro") as msg:
-        pretty, distro, codename = cfg.dist_proto()
-        if distro in deps.INSTALL:
-            msg(pretty, color="green")
-        else:
-            msg(pretty + " (untested)", color="yellow")
-            distro = "debian"
-    config = deps.check(distro=distro, codename=codename, prefix="sudo")
-    if config is None:
-        sys.exit(1)
-    return config
-
-def check_win_native(args):
-    config = deps.check(distro="win", codename="win")
-    config["gn"] = "gn"
-    config["ninja"] = "ninja"
-    return config
-
-def check_win_on_linux(args):
-    with cfg.step("checking Linux distro") as msg:
-        pretty, distro, codename = cfg.dist_proto()
-        if (distro, codename) == ("debian", "focal"):
-            msg(pretty, color="green")
-        else:
-            msg(pretty, color="red")
-            print("\nSorry! Cross-compilation currently requires Ubuntu 20.04 focal")
-            sys.exit(1)
-
-    missing = collections.OrderedDict()
-    if not cfg.check_clang("clang++"):
-        missing["clang"] = "clang"
-
-    with cfg.step("checking for mingw") as msg:
-        if os.path.exists("/usr/x86_64-w64-mingw32/include/windows.h"):
-            msg("ok", color="green")
-        else:
-            msg("missing", color="red")
-            missing["mingw"] = "mingw-w64"
-
-    if missing:
-        print("\nmissing dependencies: %s" % " ".join(missing.keys()))
-        if len(missing) == 1:
-            print("\nYou can install it with:\n")
-        else:
-            print("\nYou can install them with:\n")
-        print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
-        sys.exit(1)
-
-    return {
-        "ninja": "ninja",
-        "gn": "gn",
-    }
 
 
 if __name__ == "__main__":
