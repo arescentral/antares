@@ -33,7 +33,7 @@ Finishing a release
 
 5. Create a pull request and merge ``release/X.X.X`` to ``master``.
 
-.. _downloads.arescentral.org: http://downloads.arescentral.org/
+.. _downloads.arescentral.org: https://downloads.arescentral.org/
 .. _arescentral.org: https://github.com/arescentral/arescentral.org
 .. _apt.arescentral.org: https://github.com/arescentral/apt.arescentral.org
 .. _announcement mailing list: https://groups.google.com/a/arescentral.org/group/antares-announce

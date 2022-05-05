@@ -39,7 +39,7 @@ thought around upgrades.
 
 ..  _antares: https://github.com/arescentral/antares
 ..  _antares-data: https://github.com/arescentral/antares-data
-..  _Ares-1.2.0.zip: http://downloads.arescentral.org/Ares/Ares-1.2.0.zip
+..  _Ares-1.2.0.zip: https://downloads.arescentral.org/Ares/Ares-1.2.0.zip
 
 Dependencies
 ------------

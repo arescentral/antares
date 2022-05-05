@@ -11,13 +11,13 @@ Antares
 .. |antares-latest-osx| replace:: Antares 0.9.1 for Mac OS X 10.7+
 .. |antares-latest-ubuntu| replace:: Antares 0.9.1 for Ubuntu
 .. |antares-latest-src| replace:: Antares 0.9.1 sources
-.. |antares-latest-src-url| replace:: http://downloads.arescentral.org/Antares/antares-0.9.1.zip
+.. |antares-latest-src-url| replace:: https://downloads.arescentral.org/Antares/antares-0.9.1.zip
 
-.. _antares-latest-src: http://downloads.arescentral.org/Antares/antares-0.9.1.zip
+.. _antares-latest-src: https://downloads.arescentral.org/Antares/antares-0.9.1.zip
 .. _antares-latest-ubuntu: https://arescentral.org/antares/linux/
-.. _antares-latest-osx: http://downloads.arescentral.org/Antares/antares-mac-0.9.0.zip
+.. _antares-latest-osx: https://downloads.arescentral.org/Antares/antares-mac-0.9.0.zip
 
-.. _Antares 0.9.1 for Mac OS X 10.7+: http://downloads.arescentral.org/Antares/Antares-0.9.1.zip
+.. _Antares 0.9.1 for Mac OS X 10.7+: https://downloads.arescentral.org/Antares/Antares-0.9.1.zip
 
 .. image:: https://github.com/arescentral/antares/actions/workflows/ci.yaml/badge.svg?branch=master
    :target: https://github.com/arescentral/antares/actions/workflows/ci.yaml
