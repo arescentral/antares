@@ -58,6 +58,11 @@ jobs:
           APPLE_USER: ${{ secrets.APPLE_USER }}
           APPLE_PASS: ${{ secrets.APPLE_PASS }}
       - if: ${{ github.event_name != 'pull_request' }}
+        run: scripts/load-cert.sh
+        env:
+          DEVELOPER_P12_BASE64: ${{ secrets.DEVELOPER_P12_BASE64 }}
+          DEVELOPER_P12_PASS_BASE64: ${{ secrets.DEVELOPER_P12_PASS_BASE64 }}
+      - if: ${{ github.event_name != 'pull_request' }}
         uses: 'google-github-actions/auth@v0'
         with:
           credentials_json: '${{ secrets.GCLOUD_CREDENTIALS_JSON }}'
