@@ -28,6 +28,18 @@ jobs:
       - run: sudo make install
       - run: sudo /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
 
+      - if: ${{ github.event_name != 'pull_request' }}
+        run: make dist
+      - if: ${{ github.event_name != 'pull_request' }}
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCLOUD_CREDENTIALS_JSON }}'
+      - if: ${{ github.event_name != 'pull_request' }}
+        uses: 'google-github-actions/upload-cloud-storage@v0'
+        with:
+          path: dist/antares-git.zip
+          destination: 'downloads.arescentral.org/Antares'
+
   macOS:
     runs-on: macos-latest
     steps:
@@ -39,6 +51,21 @@ jobs:
       - run: ./configure --antares-version=$(git describe --tags HEAD)
       - run: make
       - run: make smoke-test
+
+      - if: ${{ github.event_name != 'pull_request' }}
+        run: make macdist
+        env:
+          APPLE_USER: ${{ secrets.APPLE_USER }}
+          APPLE_PASS: ${{ secrets.APPLE_PASS }}
+      - if: ${{ github.event_name != 'pull_request' }}
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCLOUD_CREDENTIALS_JSON }}'
+      - if: ${{ github.event_name != 'pull_request' }}
+        uses: 'google-github-actions/upload-cloud-storage@v0'
+        with:
+          path: dist/antares-mac-git.zip
+          destination: 'downloads.arescentral.org/Antares'
 
   Windows:
     runs-on: windows-latest
@@ -52,6 +79,18 @@ jobs:
       - run: python configure --antares-version=$(git describe --tags HEAD)
       - run: ./ninja -C out/win/opt
       # - run: out/win/opt/procyon-cpp-test
+
+      - if: ${{ github.event_name != 'pull_request' }}
+        run: python scripts/dist.py win
+      - if: ${{ github.event_name != 'pull_request' }}
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCLOUD_CREDENTIALS_JSON }}'
+      - if: ${{ github.event_name != 'pull_request' }}
+        uses: 'google-github-actions/upload-cloud-storage@v0'
+        with:
+          path: dist/antares-win-git.zip
+          destination: 'downloads.arescentral.org/Antares'
 
 #  Wine:
 #    runs-on: ubuntu-latest

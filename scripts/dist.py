@@ -58,6 +58,10 @@ def main():
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk("Antares.app", "out/mac/opt/Antares.app"):
                 z.write(real_path, archive_path)
+    elif archive_format == "win":
+        path = "dist/antares-win-%s.zip" % version
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
+            z.write("out/win/opt/antares.exe", "antares.exe")
     else:
         raise RuntimeError(archive_format)
 

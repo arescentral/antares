@@ -3,19 +3,25 @@
 set -o errexit
 set -o nounset
 
-if [[ "$TRAVIS_OS_NAME" != "osx" ]] || [[ -z "${CERTIFICATE_OSX_PASS:-}" ]]; then
-    exit
+if [[ -z "${DEVELOPER_P12_PASS_BASE64:-}" ]]; then
+    exit 1
 fi
 
-security create-keychain -p "$CERTIFICATE_OSX_PASS" build.keychain
-security default-keychain -s build.keychain
-security unlock-keychain -p "$CERTIFICATE_OSX_PASS" build.keychain
-security set-keychain-settings -t 3600 -l build.keychain
+CERT=build/developer.p12
+KEYCHAIN=build.keychain
+
+echo "$DEVELOPER_P12_BASE64" | base64 -D > $CERT
+DEVELOPER_P12_PASS="$(echo $DEVELOPER_P12_PASS_BASE64 | base64 -D)"
+
+security create-keychain -p "$DEVELOPER_P12_PASS" $KEYCHAIN
+security default-keychain -s $KEYCHAIN
+security unlock-keychain -p "$DEVELOPER_P12_PASS" $KEYCHAIN
+security set-keychain-settings -t 21600 -l $KEYCHAIN
 
 security import build/AppleWWDRCA.cer \
-    -k build.keychain -T /usr/bin/codesign
-security import build/developer.p12 -P "$CERTIFICATE_OSX_PASS" \
-    -k build.keychain -T /usr/bin/codesign
-security set-key-partition-list -S apple-tool:,apple: -s -k "$CERTIFICATE_OSX_PASS" \
-    build.keychain >/dev/null
+    -k $KEYCHAIN -T /usr/bin/codesign
+security import $CERT -P "$DEVELOPER_P12_PASS" \
+    -k $KEYCHAIN -T /usr/bin/codesign
+security set-key-partition-list -S apple-tool:,apple: -s -k "$DEVELOPER_P12_PASS" \
+    $KEYCHAIN >/dev/null
 security find-identity -v | grep 'Developer ID Application'  # Fail if missing
