@@ -254,6 +254,7 @@ class PauseScreen : public Card {
         // TODO(sfiera): cancel any active transition.
         sys.sound.pause();
         _visible     = true;
+        _asleep      = false;
         _next_switch = now() + kSwitchAfter;
         _sleep_at    = now() + kSleepAfter;
     }
@@ -271,15 +272,18 @@ class PauseScreen : public Card {
     }
 
     virtual bool next_timer(wall_time& time) {
-        time = std::min(_next_switch, _sleep_at);
-        return true;
+        if (!_asleep) {
+            time = std::min(_next_switch, _sleep_at);
+            return true;
+        }
+        return false;
     }
 
     virtual void fire_timer() { show_hide(); }
 
     virtual void draw() const {
         next()->draw();
-        if (asleep() || _visible) {
+        if (_visible) {
             const RgbColor& light_green = GetRGBTranslateColorShade(Hue::GREEN, LIGHTER);
             const RgbColor& dark_green  = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
 
@@ -294,7 +298,7 @@ class PauseScreen : public Card {
 
             sys.fonts.title.draw(_text_origin, _pause_string, light_green);
         }
-        if (asleep()) {
+        if (_asleep) {
             Rects().fill(world(), rgba(0, 0, 0, 63));
         }
     }
@@ -302,17 +306,23 @@ class PauseScreen : public Card {
   private:
     void show_hide() {
         const wall_time now = antares::now();
-        while (_next_switch < now) {
-            _visible = !_visible;
-            _next_switch += kSwitchAfter;
+        if (_sleep_at < now) {
+            _asleep = _visible = true;
+        } else {
+            while (_next_switch < now) {
+                _visible = !_visible;
+                _next_switch += kSwitchAfter;
+            }
         }
     }
 
-    bool asleep() const { return _sleep_at < now(); }
-
-    void wake() { _sleep_at = now() + kSleepAfter; }
+    void wake() {
+        _asleep   = false;
+        _sleep_at = now() + kSleepAfter;
+    }
 
     bool       _visible;
+    bool       _asleep;
     wall_time  _next_switch;
     wall_time  _sleep_at;
     pn::string _pause_string;
