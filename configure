@@ -187,6 +187,8 @@ def check_linux_native(args):
 
 def check_win_native(args):
     config = deps.check(distro="win", codename="win")
+    if config is None:
+        sys.exit(1)
     config["gn"] = "gn"
     config["ninja"] = "ninja"
     return config
