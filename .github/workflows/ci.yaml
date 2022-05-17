@@ -27,9 +27,8 @@ jobs:
 
       - run: sudo make install
       - run: sudo /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
+      - run: make dist
 
-      - if: ${{ github.event_name != 'pull_request' }}
-        run: make dist
       - if: ${{ github.event_name != 'pull_request' }}
         uses: 'google-github-actions/auth@v0'
         with:
@@ -84,9 +83,8 @@ jobs:
       - run: python configure --antares-version=$(git describe --tags HEAD)
       - run: ./ninja -C out/win/opt
       # - run: out/win/opt/procyon-cpp-test
+      - run: python scripts/dist.py win
 
-      - if: ${{ github.event_name != 'pull_request' }}
-        run: python scripts/dist.py win
       - if: ${{ github.event_name != 'pull_request' }}
         uses: 'google-github-actions/auth@v0'
         with:
