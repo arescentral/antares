@@ -28,7 +28,7 @@ jobs:
       - run: sudo make install
       - run: sudo /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
 
-      - run: make dist
+      - run: ./scripts/dist.py src zip
       - uses: actions/upload-artifact@v3
         with:
           path: dist/antares-git.zip
@@ -66,7 +66,7 @@ jobs:
           APPLE_USER: ${{ secrets.APPLE_USER }}
           APPLE_PASS: ${{ secrets.APPLE_PASS }}
 
-      - run: ./scripts/dist.py mac
+      - run: ./scripts/dist.py mac zip
       - uses: actions/upload-artifact@v3
         with:
           path: dist/antares-mac-git.zip
@@ -94,7 +94,7 @@ jobs:
       - run: ./ninja -C out/win/opt
       # - run: out/win/opt/procyon-cpp-test
 
-      - run: python scripts/dist.py win
+      - run: python scripts/dist.py win zip
       - uses: actions/upload-artifact@v3
         with:
           path: dist/antares-win-git.zip
