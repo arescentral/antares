@@ -31,6 +31,7 @@ jobs:
       - run: ./scripts/dist.py src zip
       - uses: actions/upload-artifact@v3
         with:
+          name: antares-git.zip
           path: dist/antares-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
@@ -69,6 +70,7 @@ jobs:
       - run: ./scripts/dist.py mac zip
       - uses: actions/upload-artifact@v3
         with:
+          name: antares-mac-git.zip
           path: dist/antares-mac-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
@@ -97,6 +99,7 @@ jobs:
       - run: python scripts/dist.py win zip
       - uses: actions/upload-artifact@v3
         with:
+          name: antares-win-git.zip
           path: dist/antares-win-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
