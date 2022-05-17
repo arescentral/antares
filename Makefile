@@ -27,13 +27,9 @@ clean:
 
 .PHONY: dist
 dist:
-	scripts/dist.py zip
-	scripts/dist.py gz
-	scripts/dist.py bz2
-
-.PHONY: macdist
-macdist: sign notarize
-	scripts/dist.py mac
+	scripts/dist.py src zip
+	scripts/dist.py src gz
+	scripts/dist.py src bz2
 
 .PHONY: distclean
 distclean:

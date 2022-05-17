@@ -11,26 +11,20 @@ import zipfile
 
 
 def main():
-    progname, archive_format = sys.argv
+    try:
+        archive_content, archive_format = sys.argv[1:]
+    except ValueError:
+        sys.stdout.write(f"usage: {sys.argv[0]} src|mac|win zip|gz|bz2\n")
+        sys.exit(64)
 
     try:
-        tag = subprocess.check_output("git describe --tags --exact-match HEAD".split())
+        tag = subprocess.check_output("git describe --tags --exact-match HEAD".split(),
+                                      stderr=subprocess.DEVNULL)
         tag = tag.decode("utf-8").strip()
     except subprocess.CalledProcessError:
         tag = None
     if subprocess.check_output("git status --porcelain".split()):
         tag = None
-
-    if os.environ.get("TRAVIS") == "true":
-        travis_tag = os.environ["TRAVIS_TAG"]
-        if travis_tag:
-            tag = travis_tag
-        elif os.environ["TRAVIS_BRANCH"] != "master":
-            print("not building distfiles; not on master")
-            return
-        elif os.environ["TRAVIS_PULL_REQUEST"] != "false":
-            print("not building distfiles; pull request")
-            return
 
     try:
         os.makedirs("dist")
@@ -41,29 +35,45 @@ def main():
         version = "git"
     else:
         version = tag.lstrip("v")
+    if archive_content != "src":
+        version = "%s-%s" % (archive_content, version)
     archive_root = "antares-%s" % version
 
     if archive_format == "zip":
         path = "dist/%s.%s" % (archive_root, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            for real_path, archive_path in walk(archive_root, "."):
+
+            def add(real_path, archive_path):
+                print(archive_path)
                 z.write(real_path, archive_path)
+
+            add_files(archive_content, archive_root, add)
     elif archive_format in ["gz", "bz2"]:
         path = "dist/%s.t%s" % (archive_root, archive_format)
         with tarfile.open(path, "w:%s" % archive_format) as t:
-            for real_path, archive_path in walk(archive_root, "."):
+
+            def add(real_path, archive_path):
+                print(archive_path)
                 t.add(real_path, arcname=archive_path)
-    elif archive_format == "mac":
-        path = "dist/antares-mac-%s.zip" % version
-        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            for real_path, archive_path in walk("Antares.app", "out/mac/opt/Antares.app"):
-                z.write(real_path, archive_path)
-    elif archive_format == "win":
-        path = "dist/antares-win-%s.zip" % version
-        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            z.write("out/win/opt/antares.exe", "antares.exe")
+
+            add_files(archive_content, archive_root, add)
     else:
         raise RuntimeError(archive_format)
+
+
+def add_files(archive_content, archive_root, add):
+    if archive_content == "src":
+        for real_path, archive_path in walk(archive_root, "."):
+            add(real_path, archive_path)
+    elif archive_content == "mac":
+        for real_path, archive_path in walk("Antares.app", "out/mac/opt/Antares.app"):
+            add(real_path, archive_path)
+    elif archive_content == "win":
+        for real_path, archive_path in walk("Antares/Antares Data ƒ", "data"):
+            add(real_path, archive_path)
+        add("out/win/opt/antares.exe", "Antares/Antares.exe")
+    else:
+        raise RuntimeError(archive_content)
 
 
 def walk(archive_root, walk_root):
