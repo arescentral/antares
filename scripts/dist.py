@@ -61,7 +61,9 @@ def main():
     elif archive_format == "win":
         path = "dist/antares-win-%s.zip" % version
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-            z.write("out/win/opt/antares.exe", "antares.exe")
+            for real_path, archive_path in walk("Antares/Antares Data ƒ", "data"):
+                z.write(real_path, archive_path)
+            z.write("out/win/opt/antares.exe", "Antares/Antares.exe")
     else:
         raise RuntimeError(archive_format)
 
