@@ -27,7 +27,11 @@ jobs:
 
       - run: sudo make install
       - run: sudo /usr/local/games/antares-install-data -s "/usr/local/share/games/antares/downloads" -d "/usr/local/share/games/antares/scenarios"
+
       - run: make dist
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/antares-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
         uses: 'google-github-actions/auth@v0'
@@ -57,10 +61,16 @@ jobs:
           DEVELOPER_P12_BASE64: ${{ secrets.DEVELOPER_P12_BASE64 }}
           DEVELOPER_P12_PASS_BASE64: ${{ secrets.DEVELOPER_P12_PASS_BASE64 }}
       - if: ${{ github.event_name != 'pull_request' }}
-        run: make macdist
+        run: make sign notarize
         env:
           APPLE_USER: ${{ secrets.APPLE_USER }}
           APPLE_PASS: ${{ secrets.APPLE_PASS }}
+
+      - run: ./scripts/dist.py mac
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/antares-mac-git.zip
+
       - if: ${{ github.event_name != 'pull_request' }}
         uses: 'google-github-actions/auth@v0'
         with:
@@ -83,7 +93,11 @@ jobs:
       - run: python configure --antares-version=$(git describe --tags HEAD)
       - run: ./ninja -C out/win/opt
       # - run: out/win/opt/procyon-cpp-test
+
       - run: python scripts/dist.py win
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/antares-win-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
         uses: 'google-github-actions/auth@v0'

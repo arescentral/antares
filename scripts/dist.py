@@ -14,7 +14,8 @@ def main():
     progname, archive_format = sys.argv
 
     try:
-        tag = subprocess.check_output("git describe --tags --exact-match HEAD".split())
+        tag = subprocess.check_output("git describe --tags --exact-match HEAD".split(),
+                                      stderr=subprocess.DEVNULL)
         tag = tag.decode("utf-8").strip()
     except subprocess.CalledProcessError:
         tag = None

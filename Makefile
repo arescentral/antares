@@ -31,10 +31,6 @@ dist:
 	scripts/dist.py gz
 	scripts/dist.py bz2
 
-.PHONY: macdist
-macdist: sign notarize
-	scripts/dist.py mac
-
 .PHONY: distclean
 distclean:
 	rm -Rf out/
