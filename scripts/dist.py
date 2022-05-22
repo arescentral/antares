@@ -69,7 +69,7 @@ def add_files(archive_content, archive_root, add):
         for real_path, archive_path in walk("Antares.app", "out/mac/opt/Antares.app"):
             add(real_path, archive_path)
     elif archive_content == "win":
-        for real_path, archive_path in walk("Antares/Antares Data ƒ", "data"):
+        for real_path, archive_path in walk("Antares/data", "data"):
             add(real_path, archive_path)
         add("out/win/opt/antares.exe", "Antares/Antares.exe")
     else:
