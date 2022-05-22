@@ -160,6 +160,16 @@ class ResourceData {
         }
     }
 
+    pn::input input() const {
+        if (_dir_file) {
+            return _dir_file->data().input();
+        } else if (_zip_file) {
+            return _zip_file->data().input();
+        } else {
+            return pn::input{};
+        }
+    }
+
     pn::string_view string() const {
         if (_dir_file) {
             return _dir_file->string();
@@ -219,7 +229,7 @@ std::vector<pn::string> Resource::list_replays() { return list_resources("replay
 static pn::value procyon(pn::string_view path) {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(ResourceData::load(path).data().input(), &x, &e)) {
+    if (!pn::parse(ResourceData::load(path).input(), &x, &e)) {
         throw std::runtime_error(
                 pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
                         .c_str());
@@ -230,7 +240,7 @@ static pn::value procyon(pn::string_view path) {
 static pn::value info_procyon() {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(ResourceData::load_info().data().input(), &x, &e)) {
+    if (!pn::parse(ResourceData::load_info().input(), &x, &e)) {
         throw std::runtime_error(
                 pn::format("info.pn: {0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
                         .c_str());
@@ -252,7 +262,7 @@ static Texture load_hidpi_texture(pn::string_view name) {
             continue;
         }
         try {
-            ArrayPixMap pix = read_png(ResourceData::load(path).data().input());
+            ArrayPixMap pix = read_png(ResourceData::load(path).input());
             return sys.video->texture(pn::format("/{0}", path), pix, scale);
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
@@ -393,7 +403,7 @@ Race Resource::race(pn::string_view name) {
 ReplayData Resource::replay(pn::string_view name) {
     pn::string path = pn::format("replays/{0}.NLRP", name);
     try {
-        return ReplayData(ResourceData::load(path).data().input());
+        return ReplayData(ResourceData::load(path).input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -403,7 +413,7 @@ std::vector<int32_t> Resource::rotation_table() {
     const char path[] = "rotation-table";
     try {
         auto                 rsrc = ResourceData::load(path);
-        pn::input            in   = rsrc.data().input();
+        pn::input            in   = rsrc.input();
         std::vector<int32_t> v;
         v.resize(SystemGlobals::ROT_TABLE_SIZE);
         for (int32_t& i : v) {
@@ -450,7 +460,7 @@ SpriteData Resource::sprite_data(pn::string_view name) {
 ArrayPixMap Resource::sprite_image(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/image.png", name);
     try {
-        return read_png(ResourceData::load(path).data().input());
+        return read_png(ResourceData::load(path).input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -459,7 +469,7 @@ ArrayPixMap Resource::sprite_image(pn::string_view name) {
 ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/overlay.png", name);
     try {
-        return read_png(ResourceData::load(path).data().input());
+        return read_png(ResourceData::load(path).input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
