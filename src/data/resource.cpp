@@ -84,32 +84,6 @@ class ResourceLister : public sfz::TreeWalker {
 
 class ResourceData {
   public:
-    static bool exists(pn::string_view dir, pn::string_view resource_path) {
-        return path::isfile(pn::format("{0}/{1}", dir, resource_path));
-    }
-
-    static bool exists(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
-        return zip.locate(resource_path.copy().c_str()) != zip.npos;
-    }
-
-    bool load(pn::string_view dir, pn::string_view resource_path) {
-        pn::string path = pn::format("{0}/{1}", dir, resource_path);
-        if (!path::isfile(path)) {
-            return false;
-        }
-        _dir_file.reset(new sfz::mapped_file(path));
-        return true;
-    }
-
-    bool load(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
-        auto index = zip.locate(resource_path.copy().c_str());
-        if (index < 0) {
-            return false;
-        }
-        _zip_file.reset(new zipxx::ZipFileReader(zip, index));
-        return true;
-    }
-
     static bool exists(pn::string_view resource_path) {
         return (plug.dir.has_value() && exists(*plug.dir, resource_path)) ||
                (plug.zip && exists(*plug.zip, resource_path)) ||
@@ -182,6 +156,32 @@ class ResourceData {
 
   private:
     ResourceData() {}
+
+    static bool exists(pn::string_view dir, pn::string_view resource_path) {
+        return path::isfile(pn::format("{0}/{1}", dir, resource_path));
+    }
+
+    static bool exists(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
+        return zip.locate(resource_path.copy().c_str()) != zip.npos;
+    }
+
+    bool load(pn::string_view dir, pn::string_view resource_path) {
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
+        if (!path::isfile(path)) {
+            return false;
+        }
+        _dir_file.reset(new sfz::mapped_file(path));
+        return true;
+    }
+
+    bool load(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
+        auto index = zip.locate(resource_path.copy().c_str());
+        if (index < 0) {
+            return false;
+        }
+        _zip_file.reset(new zipxx::ZipFileReader(zip, index));
+        return true;
+    }
 
     std::unique_ptr<sfz::mapped_file>     _dir_file;
     std::unique_ptr<zipxx::ZipFileReader> _zip_file;
