@@ -64,9 +64,9 @@ namespace {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(pn::data_view data, const sfz::optional<pn::string>& output_path)
+    ReplayMaster(pn::input_view in, const sfz::optional<pn::string>& output_path)
             : _state(NEW),
-              _replay_data(data),
+              _replay_data(in),
               _random_seed(_replay_data.global_seed),
               _game_result(NO_GAME),
               _input_source(&_replay_data) {
@@ -263,16 +263,16 @@ void main(int argc, char* const* argv) {
     }
     NullLedger ledger;
 
-    sfz::mapped_file replay_file(*replay_path);
+    pn::input replay_file{*replay_path, pn::binary};
     if (smoke) {
         TextVideoDriver video({width, height}, sfz::optional<pn::string>());
-        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
+        video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
     } else if (text) {
         TextVideoDriver video({width, height}, output_dir);
-        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
+        video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
     } else {
         OffscreenVideoDriver video({width, height}, gl_version, glsl_version, output_dir);
-        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
+        video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
     }
 }
 

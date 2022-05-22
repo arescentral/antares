@@ -393,7 +393,7 @@ Race Resource::race(pn::string_view name) {
 ReplayData Resource::replay(pn::string_view name) {
     pn::string path = pn::format("replays/{0}.NLRP", name);
     try {
-        return ReplayData(ResourceData::load(path).data());
+        return ReplayData(ResourceData::load(path).data().input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
