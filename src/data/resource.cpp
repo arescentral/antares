@@ -82,43 +82,10 @@ class ResourceLister : public sfz::TreeWalker {
     std::vector<pn::string>* const _names;
 };
 
-class ResourceData {
+class TextResourceData {
   public:
-    static bool exists(pn::string_view dir, pn::string_view resource_path) {
-        return path::isfile(pn::format("{0}/{1}", dir, resource_path));
-    }
-
-    static bool exists(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
-        return zip.locate(resource_path.copy().c_str()) != zip.npos;
-    }
-
-    bool load(pn::string_view dir, pn::string_view resource_path) {
-        pn::string path = pn::format("{0}/{1}", dir, resource_path);
-        if (!path::isfile(path)) {
-            return false;
-        }
-        _dir_file.reset(new sfz::mapped_file(path));
-        return true;
-    }
-
-    bool load(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
-        auto index = zip.locate(resource_path.copy().c_str());
-        if (index < 0) {
-            return false;
-        }
-        _zip_file.reset(new zipxx::ZipFileReader(zip, index));
-        return true;
-    }
-
-    static bool exists(pn::string_view resource_path) {
-        return (plug.dir.has_value() && exists(*plug.dir, resource_path)) ||
-               (plug.zip && exists(*plug.zip, resource_path)) ||
-               exists(factory_scenario_path(), resource_path) ||
-               exists(application_path(), resource_path);
-    }
-
-    static ResourceData load(pn::string_view resource_path) {
-        ResourceData data;
+    static TextResourceData load(pn::string_view resource_path) {
+        TextResourceData data;
         if ((plug.dir.has_value() && data.load(*plug.dir, resource_path)) ||
             (plug.zip && data.load(*plug.zip, resource_path)) ||
             data.load(factory_scenario_path(), resource_path) ||
@@ -130,8 +97,8 @@ class ResourceData {
                         .c_str());
     }
 
-    static ResourceData load_info() {
-        ResourceData data;
+    static TextResourceData load_info() {
+        TextResourceData data;
         if (plug.dir.has_value()) {
             if (!data.load(*plug.dir, "info.pn")) {
                 throw std::runtime_error(
@@ -150,32 +117,103 @@ class ResourceData {
         return data;
     }
 
-    pn::data_view data() const {
-        if (_dir_file) {
-            return _dir_file->data();
-        } else if (_zip_file) {
-            return _zip_file->data();
-        } else {
-            return pn::data_view{};
+    pn::string string() {
+        pn::string s;
+        if (_input.read(pn::all(s)).error()) {
+            throw std::runtime_error("read error");
         }
+        return s;
     }
 
-    pn::string_view string() const {
-        if (_dir_file) {
-            return _dir_file->string();
-        } else if (_zip_file) {
-            return _zip_file->string();
-        } else {
-            return pn::string_view{};
-        }
-    }
+    pn::input_view input() const { return _input; }
 
   private:
-    ResourceData() {}
+    bool load(pn::string_view dir, pn::string_view resource_path) {
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
+        if (!path::isfile(path)) {
+            return false;
+        }
+        _input = pn::input{path, pn::text};
+        return true;
+    }
 
-    std::unique_ptr<sfz::mapped_file>     _dir_file;
+    bool load(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
+        auto index = zip.locate(resource_path.copy().c_str());
+        if (index < 0) {
+            return false;
+        }
+        _zip_file.reset(new zipxx::ZipFileReader(zip, index));
+        _input = _zip_file->string().input();
+        return true;
+    }
+
     std::unique_ptr<zipxx::ZipFileReader> _zip_file;
+    pn::input                             _input;
 };
+
+class BinaryResourceData {
+  public:
+    static BinaryResourceData load(pn::string_view resource_path) {
+        BinaryResourceData data;
+        if ((plug.dir.has_value() && data.load(*plug.dir, resource_path)) ||
+            (plug.zip && data.load(*plug.zip, resource_path)) ||
+            data.load(factory_scenario_path(), resource_path) ||
+            data.load(application_path(), resource_path)) {
+            return data;
+        }
+        throw std::runtime_error(
+                pn::format("couldn't find resource {0}", pn::dump(resource_path, pn::dump_short))
+                        .c_str());
+    }
+
+    pn::data_view data() {
+        pn::data d;
+        if (_input.read(pn::all(d)).error()) {
+            throw std::runtime_error("read error");
+        }
+        return d;
+    }
+
+    pn::input_view input() const { return _input; }
+
+  private:
+    bool load(pn::string_view dir, pn::string_view resource_path) {
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
+        if (!path::isfile(path)) {
+            return false;
+        }
+        _input = pn::input{path, pn::binary};
+        return true;
+    }
+
+    bool load(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
+        auto index = zip.locate(resource_path.copy().c_str());
+        if (index < 0) {
+            return false;
+        }
+        _zip_file.reset(new zipxx::ZipFileReader(zip, index));
+        _input = _zip_file->data().input();
+        return true;
+    }
+
+    std::unique_ptr<zipxx::ZipFileReader> _zip_file;
+    pn::input                             _input;
+};
+
+static bool resource_exists_in_dir(pn::string_view dir, pn::string_view resource_path) {
+    return path::isfile(pn::format("{0}/{1}", dir, resource_path));
+}
+
+static bool resource_exists_in_zip(const zipxx::ZipArchive& zip, pn::string_view resource_path) {
+    return zip.locate(resource_path.copy().c_str()) != zip.npos;
+}
+
+static bool resource_exists(pn::string_view resource_path) {
+    return (plug.dir.has_value() && resource_exists_in_dir(*plug.dir, resource_path)) ||
+           (plug.zip && resource_exists_in_zip(*plug.zip, resource_path)) ||
+           resource_exists_in_dir(factory_scenario_path(), resource_path) ||
+           resource_exists_in_dir(application_path(), resource_path);
+}
 
 static bool startswith(pn::string_view s, pn::string_view prefix) {
     return (s.size() >= prefix.size()) && (s.substr(0, prefix.size()) == prefix);
@@ -219,7 +257,7 @@ std::vector<pn::string> Resource::list_replays() { return list_resources("replay
 static pn::value procyon(pn::string_view path) {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(ResourceData::load(path).data().input(), &x, &e)) {
+    if (!pn::parse(TextResourceData::load(path).input(), &x, &e)) {
         throw std::runtime_error(
                 pn::format("{0}: {1}:{2}: {3}", path, e.lineno, e.column, pn_strerror(e.code))
                         .c_str());
@@ -230,7 +268,7 @@ static pn::value procyon(pn::string_view path) {
 static pn::value info_procyon() {
     pn::value  x;
     pn_error_t e;
-    if (!pn::parse(ResourceData::load_info().data().input(), &x, &e)) {
+    if (!pn::parse(TextResourceData::load_info().input(), &x, &e)) {
         throw std::runtime_error(
                 pn::format("info.pn: {0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
                         .c_str());
@@ -247,12 +285,12 @@ static Texture load_hidpi_texture(pn::string_view name) {
         } else {
             path = pn::format("{0}.png", name);
         }
-        if (!ResourceData::exists(path)) {
+        if (!resource_exists(path)) {
             scale >>= 1;
             continue;
         }
         try {
-            ArrayPixMap pix = read_png(ResourceData::load(path).data().input());
+            ArrayPixMap pix = read_png(BinaryResourceData::load(path).input());
             return sys.video->texture(pn::format("/{0}", path), pix, scale);
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
@@ -274,11 +312,11 @@ static SoundData load_audio(pn::string_view name) {
 
     for (const auto& fmt : fmts) {
         pn::string path = pn::format("{0}{1}", name, fmt.ext);
-        if (!ResourceData::exists(path)) {
+        if (!resource_exists(path)) {
             continue;
         }
         try {
-            return fmt.fn(ResourceData::load(path).data());
+            return fmt.fn(BinaryResourceData::load(path).data());
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
         }
@@ -288,7 +326,7 @@ static SoundData load_audio(pn::string_view name) {
 }
 
 bool Resource::object_exists(pn::string_view name) {
-    return ResourceData::exists(pn::format("objects/{0}.pn", name));
+    return resource_exists(pn::format("objects/{0}.pn", name));
 }
 
 FontData Resource::font(pn::string_view name) {
@@ -393,7 +431,7 @@ Race Resource::race(pn::string_view name) {
 ReplayData Resource::replay(pn::string_view name) {
     pn::string path = pn::format("replays/{0}.NLRP", name);
     try {
-        return ReplayData(ResourceData::load(path).data());
+        return ReplayData(BinaryResourceData::load(path).input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -402,8 +440,8 @@ ReplayData Resource::replay(pn::string_view name) {
 std::vector<int32_t> Resource::rotation_table() {
     const char path[] = "rotation-table";
     try {
-        auto                 rsrc = ResourceData::load(path);
-        pn::input            in   = rsrc.data().input();
+        auto                 rsrc = BinaryResourceData::load(path);
+        pn::input_view       in   = rsrc.input();
         std::vector<int32_t> v;
         v.resize(SystemGlobals::ROT_TABLE_SIZE);
         for (int32_t& i : v) {
@@ -450,7 +488,7 @@ SpriteData Resource::sprite_data(pn::string_view name) {
 ArrayPixMap Resource::sprite_image(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/image.png", name);
     try {
-        return read_png(ResourceData::load(path).data().input());
+        return read_png(BinaryResourceData::load(path).input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -459,7 +497,7 @@ ArrayPixMap Resource::sprite_image(pn::string_view name) {
 ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
     pn::string path = pn::format("sprites/{0}/overlay.png", name);
     try {
-        return read_png(ResourceData::load(path).data().input());
+        return read_png(BinaryResourceData::load(path).input());
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
@@ -468,7 +506,7 @@ ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
 pn::string Resource::text(int id) {
     pn::string path = pn::format("text/{0}.txt", id);
     try {
-        return ResourceData::load(path).string().copy();
+        return TextResourceData::load(path).string();
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }

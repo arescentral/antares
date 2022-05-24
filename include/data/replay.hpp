@@ -50,7 +50,7 @@ struct ReplayData {
     std::vector<Action> actions;
 
     ReplayData();
-    ReplayData(pn::data_view in);
+    ReplayData(pn::input_view in);
 
     void write_to(pn::output_view out) const;
     void key_down(uint64_t at, uint32_t key);

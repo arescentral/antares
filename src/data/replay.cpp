@@ -38,8 +38,8 @@ namespace antares {
 
 ReplayData::ReplayData() {}
 
-ReplayData::ReplayData(pn::data_view in) {
-    if (!read_from(in.input(), this)) {
+ReplayData::ReplayData(pn::input_view in) {
+    if (!read_from(in, this)) {
         throw std::runtime_error("error while reading replay data");
     }
 }
