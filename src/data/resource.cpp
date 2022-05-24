@@ -166,7 +166,7 @@ class BinaryResourceData {
                         .c_str());
     }
 
-    pn::data_view data() {
+    pn::data data() {
         pn::data d;
         if (_input.read(pn::all(d)).error()) {
             throw std::runtime_error("read error");
