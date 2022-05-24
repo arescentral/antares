@@ -117,25 +117,15 @@ class TextResourceData {
         return data;
     }
 
-    pn::string_view string() const {
-        if (_dir_file) {
-            return _dir_file->string();
-        } else if (_zip_file) {
-            return _zip_file->string();
-        } else {
-            return pn::string_view{};
+    pn::string string() {
+        pn::string s;
+        if (_input.read(pn::all(s)).error()) {
+            throw std::runtime_error("read error");
         }
+        return s;
     }
 
-    pn::input input() const {
-        if (_dir_file) {
-            return _dir_file->string().input();
-        } else if (_zip_file) {
-            return _zip_file->string().input();
-        } else {
-            return pn::input{};
-        }
-    }
+    pn::input_view input() const { return _input; }
 
   private:
     bool load(pn::string_view dir, pn::string_view resource_path) {
@@ -143,7 +133,7 @@ class TextResourceData {
         if (!path::isfile(path)) {
             return false;
         }
-        _dir_file.reset(new sfz::mapped_file(path));
+        _input = pn::input{path, pn::text};
         return true;
     }
 
@@ -153,11 +143,12 @@ class TextResourceData {
             return false;
         }
         _zip_file.reset(new zipxx::ZipFileReader(zip, index));
+        _input = _zip_file->string().input();
         return true;
     }
 
-    std::unique_ptr<sfz::mapped_file>     _dir_file;
     std::unique_ptr<zipxx::ZipFileReader> _zip_file;
+    pn::input                             _input;
 };
 
 class BinaryResourceData {
@@ -175,25 +166,15 @@ class BinaryResourceData {
                         .c_str());
     }
 
-    pn::data_view data() const {
-        if (_dir_file) {
-            return _dir_file->data();
-        } else if (_zip_file) {
-            return _zip_file->data();
-        } else {
-            return pn::data_view{};
+    pn::data_view data() {
+        pn::data d;
+        if (_input.read(pn::all(d)).error()) {
+            throw std::runtime_error("read error");
         }
+        return d;
     }
 
-    pn::input input() const {
-        if (_dir_file) {
-            return _dir_file->data().input();
-        } else if (_zip_file) {
-            return _zip_file->data().input();
-        } else {
-            return pn::input{};
-        }
-    }
+    pn::input_view input() const { return _input; }
 
   private:
     bool load(pn::string_view dir, pn::string_view resource_path) {
@@ -201,7 +182,7 @@ class BinaryResourceData {
         if (!path::isfile(path)) {
             return false;
         }
-        _dir_file.reset(new sfz::mapped_file(path));
+        _input = pn::input{path, pn::binary};
         return true;
     }
 
@@ -211,11 +192,12 @@ class BinaryResourceData {
             return false;
         }
         _zip_file.reset(new zipxx::ZipFileReader(zip, index));
+        _input = _zip_file->data().input();
         return true;
     }
 
-    std::unique_ptr<sfz::mapped_file>     _dir_file;
     std::unique_ptr<zipxx::ZipFileReader> _zip_file;
+    pn::input                             _input;
 };
 
 static bool resource_exists_in_dir(pn::string_view dir, pn::string_view resource_path) {
@@ -459,7 +441,7 @@ std::vector<int32_t> Resource::rotation_table() {
     const char path[] = "rotation-table";
     try {
         auto                 rsrc = BinaryResourceData::load(path);
-        pn::input            in   = rsrc.input();
+        pn::input_view       in   = rsrc.input();
         std::vector<int32_t> v;
         v.resize(SystemGlobals::ROT_TABLE_SIZE);
         for (int32_t& i : v) {
@@ -524,7 +506,7 @@ ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
 pn::string Resource::text(int id) {
     pn::string path = pn::format("text/{0}.txt", id);
     try {
-        return TextResourceData::load(path).string().copy();
+        return TextResourceData::load(path).string();
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
