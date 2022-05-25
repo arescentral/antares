@@ -69,6 +69,7 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
             "                        (default: {1})\n"
             "    -c, --config        set path to config file\n"
             "                        (default: {2})\n"
+            "        --console       allocate console\n"
             "    -f, --factory       set path to factory scenario\n"
             "                        (default: {3})\n"
             "    -h, --help          display this help screen\n",
@@ -114,6 +115,15 @@ void main(int argc, char* const* argv) {
                     return callbacks.short_option(pn::rune{'f'}, get_value);
                 } else if (opt == "help") {
                     return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else if (opt == "console") {
+                    FILE* f;
+                    if (!AttachConsole(ATTACH_PARENT_PROCESS)) {
+                        AllocConsole();
+                    }
+                    freopen_s(&f, "CONIN$", "r", stdin);
+                    freopen_s(&f, "CONOUT$", "w", stdout);
+                    freopen_s(&f, "CONOUT$", "w", stderr);
+                    return true;
                 } else {
                     return false;
                 }
