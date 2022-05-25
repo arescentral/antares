@@ -1,5 +1,4 @@
-// Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2015-2017 The Antares Authors
+// Copyright (C) 2022 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,11 +15,18 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include <GLFW/glfw3.h>
-#include <time.h>
+#include <windows.h>
 
+#undef min
+#undef max
+#undef interface
+#include <GLFW/glfw3.h>
+#include <shellapi.h>
+#include <time.h>
 #include <pn/output>
+#include <pn/string>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "config/dirs.hpp"
 #include "config/file-prefs-driver.hpp"
@@ -29,8 +35,13 @@
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "lang/exception.hpp"
-#include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
+
+#ifdef _MSC_VER
+#include "sound/xaudio2-driver.hpp"
+#else
+#include "sound/driver.hpp"
+#endif
 
 using sfz::range;
 
@@ -58,6 +69,7 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
             "                        (default: {1})\n"
             "    -c, --config        set path to config file\n"
             "                        (default: {2})\n"
+            "        --console       allocate console\n"
             "    -f, --factory       set path to factory scenario\n"
             "                        (default: {3})\n"
             "    -h, --help          display this help screen\n",
@@ -103,6 +115,15 @@ void main(int argc, char* const* argv) {
                     return callbacks.short_option(pn::rune{'f'}, get_value);
                 } else if (opt == "help") {
                     return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else if (opt == "console") {
+                    FILE* f;
+                    if (!AttachConsole(ATTACH_PARENT_PROCESS)) {
+                        AllocConsole();
+                    }
+                    freopen_s(&f, "CONIN$", "r", stdin);
+                    freopen_s(&f, "CONOUT$", "w", stdout);
+                    freopen_s(&f, "CONOUT$", "w", stderr);
+                    return true;
                 } else {
                     return false;
                 }
@@ -111,27 +132,61 @@ void main(int argc, char* const* argv) {
     args::parse(argc - 1, argv + 1, callbacks);
 
     if (!sfz::path::isdir(application_path())) {
-        if (application_path() == default_application_path()) {
-            throw std::runtime_error(
-                    "application data not installed\n"
-                    "\n"
-                    "Please install it, or specify a path with --app-data");
-        } else {
-            throw std::runtime_error(
-                    pn::format("{0}: application data not found", application_path()).c_str());
-        }
-        exit(1);
+        throw std::runtime_error(
+                "Application data not found."
+                " Please keep Antares next to the data folder.");
     }
 
     FilePrefsDriver prefs(config_path);
 
-    DirectoryLedger   ledger;
-    OpenAlSoundDriver sound;
-    GLFWVideoDriver   video;
+    DirectoryLedger ledger;
+#ifdef _MSC_VER
+    XAudio2SoundDriver sound;
+#else
+    NullSoundDriver sound;
+#endif
+    GLFWVideoDriver video;
     video.loop(new Master(scenario, time(NULL)));
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }
+int APIENTRY WinMain(HINSTANCE h_inst, HINSTANCE h_inst_prev, PSTR cmd_line, int cmd_show) {
+    LPWSTR* wargv;
+    int     argc;
+
+    wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if (!wargv) {
+        return -1;
+    }
+
+    std::vector<std::string> arg_strings;
+    std::vector<char*>       argv_vector;
+
+    for (int i = 0; i < argc; i++) {
+        const wchar_t* warg = wargv[i];
+        arg_strings.push_back(pn::string(warg).cpp_str());
+    }
+
+    LocalFree(wargv);
+
+    for (int i = 0; i < argc; i++) {
+        argv_vector.push_back(arg_strings[i].data());
+    }
+
+    char* const* argv = nullptr;
+    if (argc > 0) {
+        argv = &argv_vector[0];
+    }
+
+    try {
+        antares::main(argc, argv);
+    } catch (std::exception& e) {
+        MessageBox(
+                NULL, antares::full_exception_string(e).c_str(), "Antares Error",
+                MB_APPLMODAL | MB_ICONEXCLAMATION | MB_OK);
+        return 1;
+    }
+    return 0;
+}
