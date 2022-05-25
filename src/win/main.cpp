@@ -122,16 +122,9 @@ void main(int argc, char* const* argv) {
     args::parse(argc - 1, argv + 1, callbacks);
 
     if (!sfz::path::isdir(application_path())) {
-        if (application_path() == default_application_path()) {
-            throw std::runtime_error(
-                    "application data not installed\n"
-                    "\n"
-                    "Please install it, or specify a path with --app-data");
-        } else {
-            throw std::runtime_error(
-                    pn::format("{0}: application data not found", application_path()).c_str());
-        }
-        exit(1);
+        throw std::runtime_error(
+                "Application data not found."
+                " Please keep Antares next to the data folder.");
     }
 
     FilePrefsDriver prefs(config_path);
