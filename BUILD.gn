@@ -616,7 +616,7 @@ executable("antares") {
   if (mode == "opt" && host_os == "win") {
     configs -= [ "//build/lib/win:console" ]
     configs += [ "//build/lib/win:windows" ]
-    sources += [ "src/glfw/main-win32.cpp" ]
+    sources += [ "src/win/main.cpp" ]
   }
 }
 
