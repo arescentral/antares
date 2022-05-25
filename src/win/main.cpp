@@ -177,5 +177,13 @@ int APIENTRY WinMain(HINSTANCE h_inst, HINSTANCE h_inst_prev, PSTR cmd_line, int
         argv = &argv_vector[0];
     }
 
-    return antares::wrap_main(antares::main, argc, argv);
+    try {
+        antares::main(argc, argv);
+    } catch (std::exception& e) {
+        MessageBox(
+                NULL, antares::full_exception_string(e).c_str(), "Antares Error",
+                MB_APPLMODAL | MB_ICONEXCLAMATION | MB_OK);
+        return 1;
+    }
+    return 0;
 }
