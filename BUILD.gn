@@ -603,7 +603,6 @@ executable("antares") {
   output_extension = exe
   sources = [
     "include/glfw/video-driver.hpp",
-    "src/glfw/main.cpp",
     "src/glfw/video-driver.cpp",
   ]
   deps = [
@@ -613,10 +612,13 @@ executable("antares") {
   ]
   configs += [ ":antares_private" ]
   defines = []
-  if (mode == "opt" && host_os == "win") {
-    configs -= [ "//build/lib/win:console" ]
-    configs += [ "//build/lib/win:windows" ]
+
+  if (host_os == "win") {
+    configs -= [ "//build/lib/win:console"]
+    configs += [ "//build/lib/win:windows"]
     sources += [ "src/win/main.cpp" ]
+  } else {
+    sources += [ "src/glfw/main.cpp" ]
   }
 }
 

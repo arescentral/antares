@@ -29,17 +29,8 @@
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "lang/exception.hpp"
-#include "ui/flows/master.hpp"
-
-#ifdef _WIN32
-#  ifdef _MSC_VER
-#    include "sound/xaudio2-driver.hpp"
-#  else
-#    include "sound/driver.hpp"
-#  endif
-#else
 #include "sound/openal-driver.hpp"
-#endif
+#include "ui/flows/master.hpp"
 
 using sfz::range;
 
@@ -135,15 +126,7 @@ void main(int argc, char* const* argv) {
     FilePrefsDriver prefs(config_path);
 
     DirectoryLedger   ledger;
-#ifdef _WIN32
-#  ifdef _MSC_VER
-    XAudio2SoundDriver sound;
-#  else
-    NullSoundDriver sound;
-#  endif
-#else
     OpenAlSoundDriver sound;
-#endif
     GLFWVideoDriver   video;
     video.loop(new Master(scenario, time(NULL)));
 }
