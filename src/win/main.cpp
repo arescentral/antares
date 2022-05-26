@@ -32,6 +32,7 @@
 #include "config/file-prefs-driver.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/extractor.hpp"
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "lang/exception.hpp"
@@ -76,6 +77,20 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
             progname, default_application_path(), default_config_path(),
             default_factory_scenario_path());
     exit(retcode);
+}
+
+class NullStatusObserver : public DataExtractor::Observer {
+  public:
+    virtual void status(pn::string_view) {}
+};
+
+void extract_data() {
+    DataExtractor extractor(dirs().downloads, dirs().scenarios);
+    if (extractor.current()) {
+        return;
+    }
+    NullStatusObserver observer;
+    extractor.extract(&observer);
 }
 
 void main(int argc, char* const* argv) {
@@ -136,6 +151,8 @@ void main(int argc, char* const* argv) {
                 "Application data not found."
                 " Please keep Antares next to the data folder.");
     }
+
+    extract_data();
 
     FilePrefsDriver prefs(config_path);
 
