@@ -52,8 +52,8 @@ class path_value {
         return path_value{this, Kind::KEY, key, 0, _value.as_map().get(key)};
     }
     path_value get(int64_t index) const {
-        return path_value{this, Kind::INDEX, pn::string_view{}, index,
-                          array_get(_value.as_array(), index)};
+        return path_value{
+                this, Kind::INDEX, pn::string_view{}, index, array_get(_value.as_array(), index)};
     }
 
     bool       is_root() const;
@@ -74,6 +74,8 @@ class path_value {
     int64_t           _index;
     pn::value_cref    _value;
 };
+
+pn::string_view type_string(pn::value_cref x);
 
 template <typename T>
 struct field_reader;
@@ -195,7 +197,9 @@ T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) 
 template <typename T>
 T required_object_type(path_value x, T (*get_type)(path_value x)) {
     if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
     return get_type(x.get("type"));
 }
@@ -228,7 +232,9 @@ T required_struct(path_value x, const std::map<pn::string_view, field<T>>& field
         }
         return t;
     } else {
-        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -239,7 +245,9 @@ sfz::optional<T> optional_struct(path_value x, const std::map<pn::string_view, f
     } else if (x.value().is_map()) {
         return sfz::make_optional(required_struct(x, fields));
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -253,7 +261,9 @@ static std::vector<T> required_array(path_value x) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}must be array", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be array (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -269,7 +279,10 @@ static std::vector<T> optional_array(path_value x) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or array", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format(
+                        "{0}must be null or array (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
