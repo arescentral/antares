@@ -24,6 +24,19 @@
 
 namespace antares {
 
+pn::string_view type_string(pn::value_cref x) {
+    switch (x.type()) {
+        case PN_NULL: return "null";
+        case PN_BOOL: return "bool";
+        case PN_INT: return "int";
+        case PN_FLOAT: return "float";
+        case PN_DATA: return "data";
+        case PN_STRING: return "string";
+        case PN_ARRAY: return "array";
+        case PN_MAP: return "map";
+    };
+}
+
 pn::string path_value::path() const {
     if (_parent && (_parent->_kind != Kind::ROOT)) {
         if (_kind == Kind::KEY) {
@@ -74,7 +87,9 @@ DEFINE_FIELD_READER(sfz::optional<bool>) {
     } else if (x.value().is_bool()) {
         return sfz::make_optional(x.value().as_bool());
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or bool", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or bool (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -82,7 +97,9 @@ DEFINE_FIELD_READER(bool) {
     if (x.value().is_bool()) {
         return x.value().as_bool();
     } else {
-        throw std::runtime_error(pn::format("{0}must be bool", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be bool (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -92,7 +109,9 @@ DEFINE_FIELD_READER(sfz::optional<int64_t>) {
     } else if (x.value().is_int()) {
         return sfz::make_optional(x.value().as_int());
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or int (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -100,7 +119,9 @@ DEFINE_FIELD_READER(int64_t) {
     if (x.value().is_int()) {
         return x.value().as_int();
     } else {
-        throw std::runtime_error(pn::format("{0}must be int", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be int (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -124,7 +145,9 @@ DEFINE_FIELD_READER(double) {
     if (x.value().is_number()) {
         return x.value().as_number();
     } else {
-        throw std::runtime_error(pn::format("{0}must be number", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be number (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -134,7 +157,10 @@ DEFINE_FIELD_READER(sfz::optional<Fixed>) {
     } else if (x.value().is_number()) {
         return sfz::make_optional(Fixed::from_float(x.value().as_number()));
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or number", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format(
+                        "{0}must be null or number (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -142,7 +168,9 @@ DEFINE_FIELD_READER(Fixed) {
     if (x.value().is_number()) {
         return Fixed::from_float(x.value().as_number());
     } else {
-        throw std::runtime_error(pn::format("{0}must be number", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be number (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -152,7 +180,10 @@ DEFINE_FIELD_READER(sfz::optional<pn::string_view>) {
     } else if (x.value().is_string()) {
         return sfz::make_optional(x.value().as_string());
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or string", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format(
+                        "{0}must be null or string (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -162,7 +193,10 @@ DEFINE_FIELD_READER(sfz::optional<pn::string>) {
     } else if (x.value().is_string()) {
         return sfz::make_optional(x.value().as_string().copy());
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or string", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format(
+                        "{0}must be null or string (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -170,7 +204,9 @@ DEFINE_FIELD_READER(pn::string_view) {
     if (x.value().is_string()) {
         return x.value().as_string();
     } else {
-        throw std::runtime_error(pn::format("{0}must be string", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be string (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -327,7 +363,9 @@ DEFINE_FIELD_READER(Tags) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -348,7 +386,9 @@ DEFINE_FIELD_READER(sfz::optional<NamedHandle<const BaseObject>>) {
     } else if (x.value().is_int()) {
         return sfz::make_optional(NamedHandle<const BaseObject>(x.value().as_string()));
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or int (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -362,7 +402,9 @@ DEFINE_FIELD_READER(sfz::optional<Handle<const Initial>>) {
     } else if (x.value().is_int()) {
         return sfz::make_optional(Handle<const Initial>(x.value().as_int()));
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or int (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -370,7 +412,9 @@ DEFINE_FIELD_READER(Handle<const Initial>) {
     if (x.value().is_int()) {
         return Handle<const Initial>(x.value().as_int());
     } else {
-        throw std::runtime_error(pn::format("{0}must be int", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be int (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -380,7 +424,9 @@ DEFINE_FIELD_READER(sfz::optional<Handle<const Condition>>) {
     } else if (x.value().is_int()) {
         return sfz::make_optional(Handle<const Condition>(x.value().as_int()));
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or int", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or int (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -430,7 +476,10 @@ DEFINE_FIELD_READER(sfz::optional<Range<int64_t>>) {
         auto r = range<int64_t>(x);
         return sfz::make_optional(Range<int64_t>{r.first, r.second});
     } else {
-        throw std::runtime_error(pn::format("{0}must be null, int, or map", x.prefix()).c_str());
+        throw std::runtime_error(pn::format(
+                                         "{0}must be null, int, or map (was {1})", x.prefix(),
+                                         type_string(x.value()))
+                                         .c_str());
     }
 }
 
@@ -442,7 +491,9 @@ DEFINE_FIELD_READER(Range<int64_t>) {
         auto r = range<int64_t>(x);
         return {r.first, r.second};
     } else {
-        throw std::runtime_error(pn::format("{0}must be int or map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be int or map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -457,7 +508,9 @@ DEFINE_FIELD_READER(sfz::optional<Range<Fixed>>) {
         auto r = range<Fixed>(x);
         return sfz::make_optional(Range<Fixed>{r.first, r.second});
     } else {
-        throw std::runtime_error(pn::format("{0}must be float or map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be float or map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -470,7 +523,9 @@ DEFINE_FIELD_READER(Range<Fixed>) {
         auto r = range<Fixed>(x);
         return {r.first, r.second};
     } else {
-        throw std::runtime_error(pn::format("{0}must be float or map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be float or map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -484,7 +539,10 @@ DEFINE_FIELD_READER(sfz::optional<Range<ticks>>) {
         auto r = range<ticks>(x);
         return sfz::make_optional(Range<ticks>{r.first, r.second});
     } else {
-        throw std::runtime_error(pn::format("{0}must be null, string or map", x.prefix()).c_str());
+        throw std::runtime_error(pn::format(
+                                         "{0}must be null, string or map (was {1})", x.prefix(),
+                                         type_string(x.value()))
+                                         .c_str());
     }
 }
 
@@ -496,7 +554,10 @@ DEFINE_FIELD_READER(Range<ticks>) {
         auto r = range<ticks>(x);
         return {r.first, r.second};
     } else {
-        throw std::runtime_error(pn::format("{0}must be string or map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format(
+                        "{0}must be string or map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -532,7 +593,9 @@ DEFINE_FIELD_READER(sfz::optional<RgbColor>) {
     } else if (x.value().is_map() || x.value().is_string()) {
         return sfz::make_optional<RgbColor>(read_field<RgbColor>(x));
     } else {
-        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
+        throw std::runtime_error(
+                pn::format("{0}must be null or map (was {1})", x.prefix(), type_string(x.value()))
+                        .c_str());
     }
 }
 
@@ -584,7 +647,8 @@ DEFINE_FIELD_READER(RgbColor) {
         }
         // TODO(sfiera): hex colors.
     }
-    throw std::runtime_error(pn::format("{0}must be color", x.prefix()).c_str());
+    throw std::runtime_error(
+            pn::format("{0}must be color (was {1})", x.prefix(), type_string(x.value())).c_str());
 }
 
 DEFINE_FIELD_READER(sfz::optional<Hue>) {
