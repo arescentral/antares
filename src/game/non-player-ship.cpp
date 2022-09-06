@@ -1324,16 +1324,7 @@ bool ThinkObjectResolveTarget(
 uint32_t ThinkObjectEngageTarget(
         Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject, uint32_t distance,
         int16_t* theta) {
-    uint32_t keysDown = 0;
-    Point    dest;
-    int32_t  difference;
-    int16_t  angle, beta;
-    Fixed    slope;
-
-    *theta = 0xffff;
-
-    dest.h = targetObject->location.h;
-    dest.v = targetObject->location.v;
+    Point dest = {targetObject->location.h, targetObject->location.v};
     if (targetObject->cloakState > 250) {
         dest.h -= 70;
         dest.h += anObject->randomSeed.next(140);
@@ -1343,59 +1334,20 @@ uint32_t ThinkObjectEngageTarget(
 
     // if target is in our weapon range & we hate the object
     if ((distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
-        (targetObject->attributes & kCanBeEngaged) && (targetObject->attributes & kHated)) {
-        // find "best" weapon (how do we want to aim?)
-        // difference = closest range
-
-        if (anObject->attributes & kCanAcceptDestination) {
-            anObject->timeFromOrigin += kMajorTick;
-        }
-
-        const BaseObject* bestWeapon = nullptr;
-        difference                   = anObject->longestWeaponRange;
-
-        if (anObject->beam.base) {
-            auto weaponObject = bestWeapon = anObject->beam.base;
-            if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                (weaponObject->device->range.squared < difference)) {
-                bestWeapon = weaponObject;
-                difference = weaponObject->device->range.squared;
-            }
-        }
-
-        if (anObject->pulse.base) {
-            auto weaponObject = anObject->pulse.base;
-            if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                (weaponObject->device->range.squared < difference)) {
-                bestWeapon = weaponObject;
-                difference = weaponObject->device->range.squared;
-            }
-        }
-
-        if (anObject->special.base) {
-            auto weaponObject = anObject->special.base;
-            if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                (weaponObject->device->range.squared < difference)) {
-                bestWeapon = weaponObject;
-                difference = weaponObject->device->range.squared;
-            }
-        }
-        //      dest.h = targetObject->location.h;
-        //      dest.v = targetObject->location.v;
-    }  // target is not in our weapon range (or we don't hate it)
+        (targetObject->attributes & kCanBeEngaged) && (targetObject->attributes & kHated) &&
+        (anObject->attributes & kCanAcceptDestination)) {
+        anObject->timeFromOrigin += kMajorTick;
+    }
 
     // We don't need to worry if it is very far away, since it must be within farthest weapon range
     // find angle between me & dest
-    slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
-    angle = AngleFromSlope(slope);
-
-    if (dest.h < anObject->location.h)
+    Fixed   slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
+    int16_t angle = AngleFromSlope(slope);
+    if (dest.h < anObject->location.h) {
         mAddAngle(angle, 180);
-    else if ((anObject->location.h == dest.h) && (dest.v < anObject->location.v))
+    } else if ((anObject->location.h == dest.h) && (dest.v < anObject->location.v)) {
         angle = 0;
+    }
 
     if (targetObject->cloakState > 250) {
         angle -= 45;
@@ -1409,7 +1361,7 @@ uint32_t ThinkObjectEngageTarget(
             anObject->directionGoal = angle;
         }
 
-        beta = targetObject->direction;
+        int16_t beta = targetObject->direction;
         mAddAngle(beta, ROT_180);
         *theta = mAngleDifference(beta, angle);
     } else {
@@ -1417,41 +1369,33 @@ uint32_t ThinkObjectEngageTarget(
         *theta              = 0;
     }
 
-    // if target object is in range
-    if ((distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
-        (targetObject->attributes & kHated)) {
-        // fire away
-        beta = anObject->direction;
-        beta = mAngleDifference(beta, angle);
+    // if target object is not in range or not hated
+    if ((distance >= static_cast<uint32_t>(anObject->longestWeaponRange)) ||
+        !(targetObject->attributes & kHated)) {
+        return 0;
+    }  // else fire away
 
-        if (anObject->pulse.base) {
-            auto weaponObject = anObject->pulse.base;
-            if ((weaponObject->device->usage.attacking) &&
-                ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
-                keysDown |= kPulseKey;
-            }
-        }
+    bool              in_front = ABS(mAngleDifference(anObject->direction, angle)) <= kShootAngle;
+    const BaseObject* pulse    = anObject->pulse.base;
+    const BaseObject* beam     = anObject->beam.base;
+    const BaseObject* special  = anObject->special.base;
 
-        if (anObject->beam.base) {
-            auto weaponObject = anObject->beam.base;
-            if ((weaponObject->device->usage.attacking) &&
-                ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
-                keysDown |= kBeamKey;
-            }
-        }
-
-        if (anObject->special.base) {
-            auto weaponObject = anObject->special.base;
-            if ((weaponObject->device->usage.attacking) &&
-                ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
-                keysDown |= kSpecialKey;
-            }
-        }
-    }  // target is not in range
-    return (keysDown);
+    uint32_t keysDown = 0;
+    if (pulse && pulse->device->usage.attacking &&
+        (in_front || (pulse->attributes & kAutoTarget)) &&
+        (distance < static_cast<uint32_t>(pulse->device->range.squared))) {
+        keysDown |= kPulseKey;
+    }
+    if (beam && beam->device->usage.attacking && (in_front || (beam->attributes & kAutoTarget)) &&
+        (distance < static_cast<uint32_t>(beam->device->range.squared))) {
+        keysDown |= kBeamKey;
+    }
+    if (special && special->device->usage.attacking &&
+        (in_front || (special->attributes & kAutoTarget)) &&
+        (distance < static_cast<uint32_t>(special->device->range.squared))) {
+        keysDown |= kSpecialKey;
+    }
+    return keysDown;
 }
 
 static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
