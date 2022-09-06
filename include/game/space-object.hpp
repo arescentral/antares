@@ -96,8 +96,8 @@ class SpaceObject {
 
     SpaceObject() = default;
     SpaceObject(
-            const BaseObject& type, Random seed, int32_t object_id, const Point& initial_location,
-            int32_t relative_direction, fixedPointType* relative_velocity,
+            const BaseObject& type, Random seed, int32_t object_id, Point initial_location,
+            int32_t relative_direction, fixedPointType relative_velocity,
             Handle<Admiral> new_owner, sfz::optional<pn::string_view> spriteIDOverride);
 
     void change_base_type(
@@ -158,9 +158,9 @@ class SpaceObject {
     Handle<SpaceObject> bestConsideredTargetNumber;
 
     ticks          timeFromOrigin    = ticks(0);  // time it's been since we left
-    fixedPointType idealLocationCalc = {Fixed::zero(),
-                                        Fixed::zero()};  // calced when we got origin
-    Point          originLocation    = {0, 0};           // coords of our origin
+    fixedPointType idealLocationCalc = {
+            Fixed::zero(), Fixed::zero()};  // calced when we got origin
+    Point originLocation = {0, 0};          // coords of our origin
 
     fixedPointType motionFraction = {Fixed::zero(), Fixed::zero()};
     fixedPointType velocity       = {Fixed::zero(), Fixed::zero()};
@@ -274,7 +274,7 @@ void ResetAllSpaceObjects(void);
 void RemoveAllSpaceObjects(void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        const BaseObject& whichBase, fixedPointType* velocity, Point* location, int32_t direction,
+        const BaseObject& whichBase, fixedPointType velocity, Point location, int32_t direction,
         Handle<Admiral> owner, uint32_t specialAttributes,
         sfz::optional<pn::string_view> spriteIDOverride);
 int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);

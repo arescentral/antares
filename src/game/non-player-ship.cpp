@@ -828,7 +828,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
             anObject->attributes &= ~kOccupiesSpace;
             fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
             CreateAnySpaceObject(
-                    *kWarpInFlare, &newVel, &anObject->location, anObject->direction,
+                    *kWarpInFlare, newVel, anObject->location, anObject->direction,
                     Admiral::none(), 0, sfz::nullopt);
         } else {
             anObject->presenceState = kNormalPresence;
@@ -898,8 +898,8 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObje
         fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
 
         CreateAnySpaceObject(
-                *kWarpOutFlare, &newVel, &(anObject->location), anObject->direction,
-                Admiral::none(), 0, sfz::nullopt);
+                *kWarpOutFlare, newVel, anObject->location, anObject->direction, Admiral::none(),
+                0, sfz::nullopt);
     }
     return keysDown;
 }

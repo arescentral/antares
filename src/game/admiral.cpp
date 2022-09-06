@@ -572,7 +572,7 @@ static void AdmiralBuildAtObject(
     if (base) {
         auto coord = buildAtDest->whichObject->location;
 
-        auto newObject = CreateAnySpaceObject(*base, &v, &coord, 0, admiral, 0, sfz::nullopt);
+        auto newObject = CreateAnySpaceObject(*base, v, coord, 0, admiral, 0, sfz::nullopt);
         if (newObject.get()) {
             SetObjectDestination(newObject);
             if (admiral == g.admiral) {

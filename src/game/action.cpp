@@ -176,8 +176,8 @@ static void apply(
             at.v += p.v;
         }
 
-        auto product = CreateAnySpaceObject(
-                *a.base, &vel, &at, direction, direct->owner, 0, sfz::nullopt);
+        auto product =
+                CreateAnySpaceObject(*a.base, vel, at, direction, direct->owner, 0, sfz::nullopt);
         if (!product.get()) {
             continue;
         }
@@ -566,7 +566,7 @@ static void apply(
     direct->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
     CreateAnySpaceObject(
-            *kWarpInFlare, &newVel, &direct->location, direct->direction, Admiral::none(), 0,
+            *kWarpInFlare, newVel, direct->location, direct->direction, Admiral::none(), 0,
             sfz::nullopt);
 }
 
