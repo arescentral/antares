@@ -826,10 +826,9 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
             anObject->presenceState    = kWarpingPresence;
             anObject->presence.warping = anObject->base->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
-            fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
             CreateAnySpaceObject(
-                    *kWarpInFlare, newVel, anObject->location, anObject->direction,
-                    Admiral::none(), 0, sfz::nullopt);
+                    *kWarpInFlare, {Fixed::zero(), Fixed::zero()}, anObject->location,
+                    anObject->direction, Admiral::none(), 0, sfz::nullopt);
         } else {
             anObject->presenceState = kNormalPresence;
             anObject->_energy       = 0;
@@ -840,35 +839,28 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
 }
 
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
-    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask, distance;
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
     if (anObject->energy() <= 0) {
         anObject->presenceState = kWarpOutPresence;
     }
     if ((!(anObject->attributes & kRemoteOrHuman)) || (anObject->attributes & kOnAutoPilot)) {
         Point               dest;
-        Handle<SpaceObject> targetObject;
-        int16_t             angle;
-        ThinkObjectResolveDestination(anObject, &dest, &targetObject);
+        Handle<SpaceObject> target;
+        ThinkObjectResolveDestination(anObject, &dest, &target);
+        uint32_t distance;
+        int16_t  angle;
         ThinkObjectGetCoordVector(anObject, &dest, &distance, &angle);
 
-        if (anObject->attributes & kHasDirectionGoal) {
-            int16_t theta = mAngleDifference(angle, anObject->directionGoal);
-            if (ABS(theta) > kDirectionError) {
-                anObject->directionGoal = angle;
-            }
-        } else {
+        if (!(anObject->attributes & kHasDirectionGoal)) {
             anObject->direction = angle;
+        } else if (ABS(mAngleDifference(angle, anObject->directionGoal)) > kDirectionError) {
+            anObject->directionGoal = angle;
         }
 
-        if (distance < anObject->base->warpOutDistance.squared) {
-            if (targetObject.get()) {
-                if ((targetObject->presenceState == kWarpInPresence) ||
-                    (targetObject->presenceState == kWarpingPresence)) {
-                    keysDown |= kWarpKey;
-                }
-            }
-        } else {
+        if ((distance >= anObject->base->warpOutDistance.squared) ||
+            (target.get() && ((target->presenceState == kWarpInPresence) ||
+                              (target->presenceState == kWarpingPresence)))) {
             keysDown |= kWarpKey;
         }
     }
@@ -880,26 +872,20 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObje
     anObject->presence.warp_out -= Fixed::from_long(kWarpAcceleration);
     if (anObject->presence.warp_out < anObject->maxVelocity) {
         anObject->refund_warp_energy();
-
         anObject->presenceState = kNormalPresence;
         anObject->attributes |= baseObject->attributes & kOccupiesSpace;
 
-        // warp out
-
-        Fixed fdist, calcv;
-        GetRotPoint(&fdist, &calcv, anObject->direction);
-
-        // multiply by max velocity
-
-        fdist                 = (anObject->maxVelocity * fdist);
-        calcv                 = (anObject->maxVelocity * calcv);
-        anObject->velocity.h  = fdist;
-        anObject->velocity.v  = calcv;
-        fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
+        // Clamp speed to max velocity in current direction
+        Fixed x, y;
+        GetRotPoint(&x, &y, anObject->direction);
+        anObject->velocity = fixedPointType{
+                anObject->maxVelocity * x,
+                anObject->maxVelocity * y,
+        };
 
         CreateAnySpaceObject(
-                *kWarpOutFlare, newVel, anObject->location, anObject->direction, Admiral::none(),
-                0, sfz::nullopt);
+                *kWarpOutFlare, {Fixed::zero(), Fixed::zero()}, anObject->location,
+                anObject->direction, Admiral::none(), 0, sfz::nullopt);
     }
     return keysDown;
 }
