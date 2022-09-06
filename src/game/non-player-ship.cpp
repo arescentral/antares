@@ -728,58 +728,41 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
             if ((distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
                 (targetObject->attributes & kHated)) {
                 // find "best" weapon (how do we want to aim?)
-                // difference = closest range
+                const BaseObject* beam          = anObject->beam.base;
+                const BaseObject* pulse         = anObject->pulse.base;
+                const BaseObject* special       = anObject->special.base;
+                const BaseObject* bestWeapon    = beam;
+                int32_t           closest_range = anObject->longestWeaponRange;
 
-                int32_t difference = anObject->longestWeaponRange;
-
-                const BaseObject* bestWeapon = nullptr;
-
-                if (anObject->beam.base) {
-                    auto weaponObject = bestWeapon = anObject->beam.base;
-                    if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                        (weaponObject->device->range.squared < difference)) {
-                        bestWeapon = weaponObject;
-                        difference = weaponObject->device->range.squared;
-                    }
+                if (beam && beam->device->usage.attacking &&
+                    (static_cast<uint32_t>(beam->device->range.squared) >= distance) &&
+                    (beam->device->range.squared < closest_range)) {
+                    bestWeapon    = beam;
+                    closest_range = beam->device->range.squared;
                 }
 
-                if (anObject->pulse.base) {
-                    auto weaponObject = anObject->pulse.base;
-                    if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                        (weaponObject->device->range.squared < difference)) {
-                        bestWeapon = weaponObject;
-                        difference = weaponObject->device->range.squared;
-                    }
+                if (pulse && pulse->device->usage.attacking &&
+                    (static_cast<uint32_t>(pulse->device->range.squared) >= distance) &&
+                    (pulse->device->range.squared < closest_range)) {
+                    bestWeapon    = pulse;
+                    closest_range = pulse->device->range.squared;
                 }
 
-                if (anObject->special.base) {
-                    auto weaponObject = anObject->special.base;
-                    if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                        (weaponObject->device->range.squared < difference)) {
-                        bestWeapon = weaponObject;
-                        difference = weaponObject->device->range.squared;
-                    }
+                if (special && special->device->usage.attacking &&
+                    (static_cast<uint32_t>(special->device->range.squared) >= distance) &&
+                    (special->device->range.squared < closest_range)) {
+                    bestWeapon    = special;
+                    closest_range = special->device->range.squared;
                 }
 
                 // offset dest for anticipated position -- overkill?
-
                 if (bestWeapon) {
                     uint32_t dcalc = lsqrt(distance);
-
-                    Fixed calcv = targetObject->velocity.h - anObject->velocity.h;
-                    Fixed fdist = Fixed::from_long(dcalc);
-                    fdist *= bestWeapon->device->speed.inverse;
-                    calcv      = (calcv * fdist);
-                    difference = mFixedToLong(calcv);
-                    dest.h -= difference;
-
-                    calcv      = targetObject->velocity.v - anObject->velocity.v;
-                    calcv      = (calcv * fdist);
-                    difference = mFixedToLong(calcv);
-                    dest.v -= difference;
+                    Fixed    fdist = Fixed::from_long(dcalc) * bestWeapon->device->speed.inverse;
+                    dest.h -= mFixedToLong(
+                            (targetObject->velocity.h - anObject->velocity.h) * fdist);
+                    dest.v -= mFixedToLong(
+                            (targetObject->velocity.v - anObject->velocity.v) * fdist);
                 }
             }  // target is not in our weapon range (or we don't hate it)
 
