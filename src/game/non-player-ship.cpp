@@ -1094,13 +1094,13 @@ void ThinkObjectGetCoordVector(
     }
 }
 
-void ThinkObjectGetCoordDistance(Handle<SpaceObject> anObject, Point* dest, uint32_t* distance) {
+void ThinkObjectGetCoordDistance(Handle<SpaceObject> anObject, Point dest, uint32_t* distance) {
     int32_t  difference;
     uint32_t dcalc;
 
-    difference = ABS<int>(dest->h - anObject->location.h);
+    difference = ABS<int>(dest.h - anObject->location.h);
     dcalc      = difference;
-    difference = ABS<int>(dest->v - anObject->location.v);
+    difference = ABS<int>(dest.v - anObject->location.v);
     *distance  = difference;
     if ((*distance == 0) && (dcalc == 0)) {
         return;
@@ -1197,128 +1197,70 @@ void ThinkObjectResolveDestination(
 }
 
 bool ThinkObjectResolveTarget(
-        Handle<SpaceObject> anObject, Point* dest, uint32_t* distance,
-        Handle<SpaceObject>* targetObject) {
-    dest->h = dest->v = 0xffffffff;
-    *distance         = 0xffffffff;
+        Handle<SpaceObject> o, Point* dest, uint32_t* distance, Handle<SpaceObject>* target) {
+    *target      = o->targetObject;
+    auto closest = o->closestObject;
 
-    auto closestObject = anObject->closestObject;
-
-    // if we have no target  then
-    if (!anObject->targetObject.get()) {
-        // if the closest object is appropriate (if it exists, it should be, then
-        if (closestObject.get() && (closestObject->attributes & kPotentialTarget)) {
-            // select closest object as target (and for now be satisfied with our direction
-            if (anObject->attributes & kHasDirectionGoal) {
-                anObject->directionGoal = anObject->direction;
-            }
-            anObject->targetObject   = anObject->closestObject;
-            anObject->targetObjectID = closestObject->id;
-        } else  // otherwise, no target, no closest, cancel
-        {
-            *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
-            anObject->targetObjectID                               = kNoShip;
-            dest->h                                                = anObject->location.h;
-            dest->v                                                = anObject->location.v;
-            *distance                                              = anObject->engageRange;
-            return (false);
+    // if we have no target, then
+    if (!o->targetObject.get()) {
+        if (!closest.get() || !(closest->attributes & kPotentialTarget)) {
+            // no target, no closest, cancel
+            *target = o->targetObject = SpaceObject::none();
+            o->targetObjectID         = kNoShip;
+            *dest                     = o->location;
+            *distance                 = o->engageRange;
+            return false;
         }
+        // if the closest object is appropriate (if it exists, it should be)
+        // select closest object as target (and for now be satisfied with our direction)
+        if (o->attributes & kHasDirectionGoal) {
+            o->directionGoal = o->direction;
+        }
+        *target = o->targetObject = closest;
+        o->targetObjectID         = (*target)->id;
     }
 
-    // if we have a target of any kind (we must by now)
-    if (anObject->targetObject.get()) {
-        // make sure we're still talking about the same object
-        *targetObject = anObject->targetObject;
-
-        // if the object is wrong or smells at all funny, then
-        if ((!((*targetObject)->active)) || ((*targetObject)->id != anObject->targetObjectID) ||
-            (((*targetObject)->owner == anObject->owner) &&
-             ((*targetObject)->attributes & kHated)) ||
-            ((!((*targetObject)->attributes & kPotentialTarget)) &&
-             (!((*targetObject)->attributes & kHated)))) {
-            // if we have a closest ship
-            if (anObject->closestObject.get()) {
-                // make it our target
-                *targetObject = anObject->targetObject = closestObject = anObject->closestObject;
-                anObject->targetObjectID                               = closestObject->id;
-                if (!((*targetObject)->attributes & kPotentialTarget)) {  // cancel
-                    *targetObject = anObject->targetObject = SpaceObject::none();
-                    anObject->targetObjectID               = kNoShip;
-                    dest->h                                = anObject->location.h;
-                    dest->v                                = anObject->location.v;
-                    *distance                              = anObject->engageRange;
-                    return (false);
-                }
-            } else  // no legal target, no closest, cancel
-            {
-                *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
-                anObject->targetObjectID                               = kNoShip;
-                dest->h                                                = anObject->location.h;
-                dest->v                                                = anObject->location.v;
-                *distance                                              = anObject->engageRange;
-                return (false);
-            }
-        } /* else // the target *is* legal
-         {
-             if ( anObject->attributes & kIsGuided)
-             {
-                 if (((!(targetObject->attributes & kHated)) ||
-                     ( !(targetObject->active))) &&
-                     ( anObject->closestObject != kNoShip))
-                 {
-                     closestObject = gSpaceObjectData.get() + anObject->closestObject;
-                     if ( ( closestObject->attributes & kHated))
-                     {
-                         targetObject = closestObject;
-                         anObject->targetObjectNumber =
-                             anObject->closestObject;
-                         anObject->targetObjectID = targetObject->id;
-                     }
-                 }
-             }
-         }*/
-
-        dest->h = (*targetObject)->location.h;
-        dest->v = (*targetObject)->location.v;
-
-        // if it's not the closest object & we have a closest object
-        if ((anObject->closestObject.get()) &&
-            (anObject->targetObject != anObject->closestObject) &&
-            (!(anObject->attributes & kIsGuided)) &&
-            (closestObject->attributes & kPotentialTarget)) {
-            // then calculate the distance
-            ThinkObjectGetCoordDistance(anObject, dest, distance);
-
-            if (((*distance >> 1L) > anObject->closestDistance) ||
-                (!(anObject->attributes & kCanEngage)) ||
-                (anObject->attributes & kRemoteOrHuman)) {
-                *targetObject = anObject->targetObject = anObject->closestObject;
-                anObject->targetObjectID               = (*targetObject)->id;
-                dest->h                                = (*targetObject)->location.h;
-                dest->v                                = (*targetObject)->location.v;
-                *distance                              = anObject->closestDistance;
-                if ((*targetObject)->cloakState > 250) {
-                    dest->h -= 200;
-                    dest->v -= 200;
-                }
-            }
-            return (true);
-        } else  // if target is closest object
-        {
-            // otherwise distance is the closestDistance
-            *distance = anObject->closestDistance;
-            return (true);
+    // if the object is wrong or smells at all funny, then
+    if ((!((*target)->active)) ||                                                // Inactive
+        ((*target)->id != o->targetObjectID) ||                                  // Recreated
+        (((*target)->owner == o->owner) && ((*target)->attributes & kHated)) ||  // Hated friendly
+        ((!((*target)->attributes & kPotentialTarget)) &&
+         (!((*target)->attributes & kHated)))) {  // Non-hated invalid target
+        if (!closest.get() || !(closest->attributes & kPotentialTarget)) {
+            // no legal target, no closest, cancel
+            *target = o->targetObject = SpaceObject::none();
+            o->targetObjectID         = kNoShip;
+            *dest                     = o->location;
+            *distance                 = o->engageRange;
+            return false;
         }
-    } else  // we don't have a target object
-    {
-        // set the distance to the engage range ie nothing to engage
-        *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
-        anObject->targetObjectID                               = kNoShip;
-        dest->h                                                = anObject->location.h;
-        dest->v                                                = anObject->location.v;
-        *distance                                              = anObject->engageRange;
-        return (false);
+        // if we have a closest ship make it our target
+        *target = o->targetObject = closest;
+        o->targetObjectID         = (*target)->id;
     }
+
+    *dest = (*target)->location;
+    // if it's not the closest object & we have a closest object
+    if ((closest.get()) && (o->targetObject != closest) && (!(o->attributes & kIsGuided)) &&
+        (closest->attributes & kPotentialTarget)) {
+        // then calculate the distance
+        ThinkObjectGetCoordDistance(o, *dest, distance);
+        if (((*distance >> 1L) > o->closestDistance) || (!(o->attributes & kCanEngage)) ||
+            (o->attributes & kRemoteOrHuman)) {
+            *target = o->targetObject = closest;
+            o->targetObjectID         = (*target)->id;
+            *dest                     = (*target)->location;
+            *distance                 = o->closestDistance;
+            if ((*target)->cloakState > 250) {
+                dest->h -= 200;
+                dest->v -= 200;
+            }
+        }
+    } else {
+        // otherwise if target is closest object then distance is the closestDistance
+        *distance = o->closestDistance;
+    }
+    return true;
 }
 
 uint32_t ThinkObjectEngageTarget(
