@@ -428,9 +428,6 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
     uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
     if (!(anObject->attributes & kRemoteOrHuman) || (anObject->attributes & kOnAutoPilot)) {
-        // set all keys off
-        keysDown &= kSpecialKeyMask;
-
         // if target object exists and is within engage range
         Handle<SpaceObject> targetObject;
         Point               dest;
@@ -461,83 +458,52 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 
                     anObject->directionGoal = targetObject->direction;
 
+                    int16_t angle_offset = kEvadeAngle;
                     if (targetObject->attributes & kIsGuided) {
-                        if (theta > 0) {
-                            mAddAngle(anObject->directionGoal, 90);
-                        } else if (theta < 0) {
-                            mAddAngle(anObject->directionGoal, -90);
-                        } else {
-                            int16_t beta = 90;
-                            if (anObject->location.h & 0x00000001) {
-                                beta = -90;
-                            }
-                            mAddAngle(anObject->directionGoal, beta);
-                        }
-                        theta = mAngleDifference(anObject->directionGoal, anObject->direction);
-                        if (ABS(theta) < 90) {
-                            keysDown |= kUpKey;
-                        } else {
-                            keysDown |= kUpKey;  // try an always thrust strategy
-                        }
+                        angle_offset = 90;
+                    }
+                    if (theta > 0) {
+                        mAddAngle(anObject->directionGoal, angle_offset);
+                    } else if (theta < 0) {
+                        mAddAngle(anObject->directionGoal, -angle_offset);
+                    } else if (anObject->location.h & 0x00000001) {
+                        mAddAngle(anObject->directionGoal, -angle_offset);
                     } else {
-                        if (theta > 0) {
-                            mAddAngle(anObject->directionGoal, kEvadeAngle);
-                        } else if (theta < 0) {
-                            mAddAngle(anObject->directionGoal, -kEvadeAngle);
-                        } else {
-                            int16_t beta = kEvadeAngle;
-                            if (anObject->location.h & 0x00000001) {
-                                beta = -kEvadeAngle;
-                            }
-                            mAddAngle(anObject->directionGoal, beta);
-                        }
-                        theta = mAngleDifference(anObject->directionGoal, anObject->direction);
-                        if (ABS(theta) < kEvadeAngle) {
-                            keysDown |= kUpKey;
-                        } else {
-                            keysDown |= kUpKey;  // try an always thrust strategy
-                        }
+                        mAddAngle(anObject->directionGoal, angle_offset);
                     }
+                } else if (anObject->randomSeed.next(2)) {
+                    mAddAngle(anObject->direction, -kEvadeAngle);
                 } else {
-                    int16_t beta = kEvadeAngle;
-                    if (anObject->randomSeed.next(2)) {
-                        beta = -kEvadeAngle;
-                    }
-                    mAddAngle(anObject->direction, beta);
-                    keysDown |= kUpKey;
+                    mAddAngle(anObject->direction, kEvadeAngle);
                 }
-            } else {  // if we're not afraid, then
-                // if we are not within our closest weapon range then
-                if ((distance > static_cast<uint32_t>(anObject->shortestWeaponRange)) ||
+                keysDown |= kUpKey;
+            } else if (
+                    (distance > static_cast<uint32_t>(anObject->shortestWeaponRange)) ||
                     (anObject->attributes & kIsGuided)) {
-                    keysDown |= kUpKey;
-                } else {  // if we are as close as we like
-                    // if we're getting closer
-                    if ((distance < kMotionMargin) ||
-                        ((distance + kMotionMargin) <
-                         static_cast<uint32_t>(anObject->lastTargetDistance))) {
-                        keysDown |= kDownKey;
-                        anObject->lastTargetDistance = distance;
-                    } else if (
-                            (distance - kMotionMargin) >
-                            static_cast<uint32_t>(anObject->lastTargetDistance)) {
-                        // if we're not getting closer, then if we're getting farther
-                        keysDown |= kUpKey;
-                        anObject->lastTargetDistance = distance;
-                    }
-                }
+                // if we're not afraid, then
+                // if we are not within our closest weapon range then
+                keysDown |= kUpKey;
+            } else if (
+                    (distance < kMotionMargin) ||
+                    ((distance + kMotionMargin) <
+                     static_cast<uint32_t>(anObject->lastTargetDistance))) {
+                // if we are as close as we like
+                // if we're getting closer
+                keysDown |= kDownKey;
+                anObject->lastTargetDistance = distance;
+            } else if (
+                    (distance - kMotionMargin) >
+                    static_cast<uint32_t>(anObject->lastTargetDistance)) {
+                // if we're not getting closer, then if we're getting farther
+                keysDown |= kUpKey;
+                anObject->lastTargetDistance = distance;
             }
 
-            if (anObject->targetObject == anObject->destObject) {
-                if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
-                    if (baseObject->arrive.action.size() > 0) {
-                        if (!(anObject->runTimeFlags & kHasArrived)) {
-                            exec(baseObject->arrive.action, anObject, anObject->destObject,
-                                 {0, 0});
-                            anObject->runTimeFlags |= kHasArrived;
-                        }
-                    }
-                }
+            if ((anObject->targetObject == anObject->destObject) &&
+                (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) &&
+                !baseObject->arrive.action.empty() && !(anObject->runTimeFlags & kHasArrived)) {
+                exec(baseObject->arrive.action, anObject, anObject->destObject, {0, 0});
+                anObject->runTimeFlags |= kHasArrived;
             }
         } else if (anObject->attributes & kIsGuided) {
             keysDown |= kUpKey;
