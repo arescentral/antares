@@ -806,8 +806,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 }
 
 uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
-    uint32_t       keysDown = anObject->keysDown & kSpecialKeyMask;
-    fixedPointType newVel;
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
     if ((!(anObject->attributes & kRemoteOrHuman)) || (anObject->attributes & kOnAutoPilot)) {
         keysDown = kWarpKey;
@@ -827,7 +826,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
             anObject->presenceState    = kWarpingPresence;
             anObject->presence.warping = anObject->base->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
-            newVel.h = newVel.v = Fixed::zero();
+            fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
             CreateAnySpaceObject(
                     *kWarpInFlare, &newVel, &anObject->location, anObject->direction,
                     Admiral::none(), 0, sfz::nullopt);
@@ -837,24 +836,24 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
         }
     }
 
-    return (keysDown);
+    return keysDown;
 }
 
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
-    uint32_t            keysDown = anObject->keysDown & kSpecialKeyMask, distance;
-    Point               dest;
-    Handle<SpaceObject> targetObject;
-    int16_t             angle, theta;
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask, distance;
 
     if (anObject->energy() <= 0) {
         anObject->presenceState = kWarpOutPresence;
     }
     if ((!(anObject->attributes & kRemoteOrHuman)) || (anObject->attributes & kOnAutoPilot)) {
+        Point               dest;
+        Handle<SpaceObject> targetObject;
+        int16_t             angle;
         ThinkObjectResolveDestination(anObject, &dest, &targetObject);
         ThinkObjectGetCoordVector(anObject, &dest, &distance, &angle);
 
         if (anObject->attributes & kHasDirectionGoal) {
-            theta = mAngleDifference(angle, anObject->directionGoal);
+            int16_t theta = mAngleDifference(angle, anObject->directionGoal);
             if (ABS(theta) > kDirectionError) {
                 anObject->directionGoal = angle;
             }
@@ -873,14 +872,11 @@ uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
             keysDown |= kWarpKey;
         }
     }
-    return (keysDown);
+    return keysDown;
 }
 
 uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
-    uint32_t       keysDown = anObject->keysDown & kSpecialKeyMask;
-    Fixed          calcv, fdist;
-    fixedPointType newVel;
-
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
     anObject->presence.warp_out -= Fixed::from_long(kWarpAcceleration);
     if (anObject->presence.warp_out < anObject->maxVelocity) {
         anObject->refund_warp_energy();
@@ -890,21 +886,22 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObje
 
         // warp out
 
+        Fixed fdist, calcv;
         GetRotPoint(&fdist, &calcv, anObject->direction);
 
         // multiply by max velocity
 
-        fdist                = (anObject->maxVelocity * fdist);
-        calcv                = (anObject->maxVelocity * calcv);
-        anObject->velocity.h = fdist;
-        anObject->velocity.v = calcv;
-        newVel.h = newVel.v = Fixed::zero();
+        fdist                 = (anObject->maxVelocity * fdist);
+        calcv                 = (anObject->maxVelocity * calcv);
+        anObject->velocity.h  = fdist;
+        anObject->velocity.v  = calcv;
+        fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
 
         CreateAnySpaceObject(
-                *kWarpOutFlare, &(newVel), &(anObject->location), anObject->direction,
+                *kWarpOutFlare, &newVel, &(anObject->location), anObject->direction,
                 Admiral::none(), 0, sfz::nullopt);
     }
-    return (keysDown);
+    return keysDown;
 }
 
 uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
