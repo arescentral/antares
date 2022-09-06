@@ -425,19 +425,16 @@ uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
 }
 
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
-    uint32_t            keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    Point               dest;
-    Handle<SpaceObject> targetObject;
-    int32_t             difference;
-    Fixed               slope;
-    int16_t             angle, theta, beta;
-    Fixed               calcv, fdist;
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
     if (!(anObject->attributes & kRemoteOrHuman) || (anObject->attributes & kOnAutoPilot)) {
         // set all keys off
         keysDown &= kSpecialKeyMask;
 
         // if target object exists and is within engage range
+        Handle<SpaceObject> targetObject;
+        Point               dest;
+        uint32_t            distance;
         ThinkObjectResolveTarget(anObject, &dest, &distance, &targetObject);
 
         ///--->>> BEGIN TARGETING <<<---///
@@ -447,6 +444,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
               (distance < static_cast<uint32_t>(anObject->engageRange)) &&
               (anObject->timeFromOrigin < kTimeToCheckHome) &&
               (targetObject->attributes & kCanBeEngaged)))) {
+            int16_t theta;
             keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
             ///--->>> END TARGETING <<<---///
 
@@ -469,7 +467,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                         } else if (theta < 0) {
                             mAddAngle(anObject->directionGoal, -90);
                         } else {
-                            beta = 90;
+                            int16_t beta = 90;
                             if (anObject->location.h & 0x00000001) {
                                 beta = -90;
                             }
@@ -487,7 +485,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                         } else if (theta < 0) {
                             mAddAngle(anObject->directionGoal, -kEvadeAngle);
                         } else {
-                            beta = kEvadeAngle;
+                            int16_t beta = kEvadeAngle;
                             if (anObject->location.h & 0x00000001) {
                                 beta = -kEvadeAngle;
                             }
@@ -501,7 +499,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                         }
                     }
                 } else {
-                    beta = kEvadeAngle;
+                    int16_t beta = kEvadeAngle;
                     if (anObject->randomSeed.next(2)) {
                         beta = -kEvadeAngle;
                     }
@@ -549,6 +547,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                 (((!(anObject->attributes & kRemoteOrHuman)) &&
                   (distance < static_cast<uint32_t>(anObject->engageRange))) ||
                  (anObject->attributes & kIsGuided))) {
+                int16_t theta;
                 keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
                 if ((targetObject->attributes & kCanBeEngaged) &&
                     (anObject->attributes & kCanEngage) &&
@@ -574,7 +573,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                         } else if (theta < 0) {
                             mAddAngle(anObject->directionGoal, -kEvadeAngle);
                         } else {
-                            beta = kEvadeAngle;
+                            int16_t beta = kEvadeAngle;
                             if (anObject->location.h & 0x00000001) {
                                 beta = -kEvadeAngle;
                             }
@@ -587,7 +586,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                             keysDown |= kUpKey;
                         }
                     } else {
-                        beta = kEvadeAngle;
+                        int16_t beta = kEvadeAngle;
                         if (anObject->randomSeed.next(2)) {
                             beta = -kEvadeAngle;
                         }
@@ -671,8 +670,10 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                     dest.v       = anObject->destinationLocation.v;
                 }
 
+                int16_t angle;
                 ThinkObjectGetCoordVector(anObject, &dest, &distance, &angle);
 
+                int16_t theta;
                 if (anObject->attributes & kHasDirectionGoal) {
                     theta = mAngleDifference(angle, anObject->directionGoal);
                     if (ABS(theta) > kDirectionError) {
@@ -749,6 +750,9 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
             }
         }
     } else {  // object is human controlled -- we need to calc target angle
+        Handle<SpaceObject> targetObject;
+        Point               dest;
+        uint32_t            distance;
         ThinkObjectResolveTarget(anObject, &dest, &distance, &targetObject);
 
         if ((anObject->attributes & kCanEngage) &&
@@ -760,7 +764,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                 // find "best" weapon (how do we want to aim?)
                 // difference = closest range
 
-                difference = anObject->longestWeaponRange;
+                int32_t difference = anObject->longestWeaponRange;
 
                 const BaseObject* bestWeapon = nullptr;
 
@@ -797,10 +801,10 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                 // offset dest for anticipated position -- overkill?
 
                 if (bestWeapon) {
-                    dcalc = lsqrt(distance);
+                    uint32_t dcalc = lsqrt(distance);
 
-                    calcv = targetObject->velocity.h - anObject->velocity.h;
-                    fdist = Fixed::from_long(dcalc);
+                    Fixed calcv = targetObject->velocity.h - anObject->velocity.h;
+                    Fixed fdist = Fixed::from_long(dcalc);
                     fdist *= bestWeapon->device->speed.inverse;
                     calcv      = (calcv * fdist);
                     difference = mFixedToLong(calcv);
@@ -815,8 +819,8 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 
             // this is human controlled--if it's too far away, tough nougies
             // find angle between me & dest
-            slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
-            angle = AngleFromSlope(slope);
+            Fixed slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
+            int16_t angle = AngleFromSlope(slope);
 
             if (dest.h < anObject->location.h) {
                 mAddAngle(angle, 180);
