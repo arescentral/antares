@@ -424,6 +424,10 @@ uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
     return keys;
 }
 
+static bool can_engage(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanEngage) && (b->attributes & kCanBeEngaged);
+}
+
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
     uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
@@ -437,10 +441,9 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
         ///--->>> BEGIN TARGETING <<<---///
         if ((anObject->targetObject.get()) &&
             ((anObject->attributes & kIsGuided) ||
-             ((anObject->attributes & kCanEngage) && !(anObject->attributes & kRemoteOrHuman) &&
+             (can_engage(anObject, targetObject) && !(anObject->attributes & kRemoteOrHuman) &&
               (distance < static_cast<uint32_t>(anObject->engageRange)) &&
-              (anObject->timeFromOrigin < kTimeToCheckHome) &&
-              (targetObject->attributes & kCanBeEngaged)))) {
+              (anObject->timeFromOrigin < kTimeToCheckHome)))) {
             int16_t theta;
             keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
             ///--->>> END TARGETING <<<---///
@@ -515,8 +518,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                  (anObject->attributes & kIsGuided))) {
                 int16_t theta;
                 keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
-                if ((targetObject->attributes & kCanBeEngaged) &&
-                    (anObject->attributes & kCanEngage) &&
+                if (can_engage(anObject, targetObject) &&
                     (distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
                     (targetObject->attributes & kHated)) {
                 } else if (
