@@ -214,8 +214,8 @@ void RemoveAllSpaceObjects() {
 }
 
 SpaceObject::SpaceObject(
-        const BaseObject& type, Random seed, int32_t object_id, const Point& initial_location,
-        int32_t relative_direction, fixedPointType* relative_velocity, Handle<Admiral> new_owner,
+        const BaseObject& type, Random seed, int32_t object_id, Point initial_location,
+        int32_t relative_direction, fixedPointType relative_velocity, Handle<Admiral> new_owner,
         sfz::optional<pn::string_view> spriteIDOverride) {
     base       = &type;
     active     = kObjectInUse;
@@ -265,13 +265,10 @@ SpaceObject::SpaceObject(
         }
     }
     GetRotPoint(&velocity.h, &velocity.v, direction);
-    velocity.h = (velocity.h * f);
-    velocity.v = (velocity.v * f);
-
-    if (relative_velocity) {
-        velocity.h += relative_velocity->h;
-        velocity.v += relative_velocity->v;
-    }
+    velocity = fixedPointType{
+            (velocity.h * f) + relative_velocity.h,
+            (velocity.v * f) + relative_velocity.v,
+    };
 
     if (!(attributes & (kCanThink | kRemoteOrHuman))) {
         thrust = base->thrust;
@@ -513,13 +510,13 @@ void SpaceObject::change_base_type(
 }
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        const BaseObject& whichBase, fixedPointType* velocity, Point* location, int32_t direction,
+        const BaseObject& whichBase, fixedPointType velocity, Point location, int32_t direction,
         Handle<Admiral> owner, uint32_t specialAttributes,
         sfz::optional<pn::string_view> spriteIDOverride) {
     Random      random{g.random.next(32766)};
     int32_t     id = g.random.next(16384);
     SpaceObject newObject(
-            whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
+            whichBase, random, id, location, direction, velocity, owner, spriteIDOverride);
 
     auto obj = AddSpaceObject(&newObject);
     if (!obj.get()) {
@@ -721,7 +718,7 @@ void SpaceObject::destroy() {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
-                        *kEnergyBlob, &object->velocity, &object->location, object->direction,
+                        *kEnergyBlob, object->velocity, object->location, object->direction,
                         Admiral::none(), 0, sfz::nullopt);
                 energyNum--;
             }
@@ -802,8 +799,7 @@ void SpaceObject::create_floating_player_body() {
     }
 
     auto body = CreateAnySpaceObject(
-            body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0,
-            sfz::nullopt);
+            body_type, obj->velocity, obj->location, obj->direction, obj->owner, 0, sfz::nullopt);
     if (body.get()) {
         ChangePlayerShipNumber(obj->owner, body);
     } else {

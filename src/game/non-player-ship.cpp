@@ -424,35 +424,37 @@ uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
     return keys;
 }
 
+static bool can_engage(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanEngage) && (b->attributes & kCanBeEngaged);
+}
+
+static bool can_evade(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanEvade) && (b->attributes & kCanBeEvaded);
+}
+
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
-    uint32_t            keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    Point               dest;
-    Handle<SpaceObject> targetObject;
-    int32_t             difference;
-    Fixed               slope;
-    int16_t             angle, theta, beta;
-    Fixed               calcv, fdist;
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
     if (!(anObject->attributes & kRemoteOrHuman) || (anObject->attributes & kOnAutoPilot)) {
-        // set all keys off
-        keysDown &= kSpecialKeyMask;
-
         // if target object exists and is within engage range
+        Handle<SpaceObject> targetObject;
+        Point               dest;
+        uint32_t            distance;
         ThinkObjectResolveTarget(anObject, &dest, &distance, &targetObject);
 
         ///--->>> BEGIN TARGETING <<<---///
         if ((anObject->targetObject.get()) &&
             ((anObject->attributes & kIsGuided) ||
-             ((anObject->attributes & kCanEngage) && !(anObject->attributes & kRemoteOrHuman) &&
+             (can_engage(anObject, targetObject) && !(anObject->attributes & kRemoteOrHuman) &&
               (distance < static_cast<uint32_t>(anObject->engageRange)) &&
-              (anObject->timeFromOrigin < kTimeToCheckHome) &&
-              (targetObject->attributes & kCanBeEngaged)))) {
+              (anObject->timeFromOrigin < kTimeToCheckHome)))) {
+            int16_t theta;
             keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
             ///--->>> END TARGETING <<<---///
 
             // if I'm in target object's range & it's looking at us & my health is less
             // than 1/2 its -- or I can't engage it
-            if ((anObject->attributes & kCanEvade) && (targetObject->attributes & kCanBeEvaded) &&
+            if (can_evade(anObject, targetObject) &&
                 (distance < static_cast<uint32_t>(targetObject->longestWeaponRange)) &&
                 (targetObject->attributes & kHated) && (ABS(theta) < kParanoiaAngle) &&
                 ((!(targetObject->attributes & kCanBeEngaged)) ||
@@ -463,83 +465,52 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 
                     anObject->directionGoal = targetObject->direction;
 
+                    int16_t angle_offset = kEvadeAngle;
                     if (targetObject->attributes & kIsGuided) {
-                        if (theta > 0) {
-                            mAddAngle(anObject->directionGoal, 90);
-                        } else if (theta < 0) {
-                            mAddAngle(anObject->directionGoal, -90);
-                        } else {
-                            beta = 90;
-                            if (anObject->location.h & 0x00000001) {
-                                beta = -90;
-                            }
-                            mAddAngle(anObject->directionGoal, beta);
-                        }
-                        theta = mAngleDifference(anObject->directionGoal, anObject->direction);
-                        if (ABS(theta) < 90) {
-                            keysDown |= kUpKey;
-                        } else {
-                            keysDown |= kUpKey;  // try an always thrust strategy
-                        }
+                        angle_offset = 90;
+                    }
+                    if (theta > 0) {
+                        mAddAngle(anObject->directionGoal, angle_offset);
+                    } else if (theta < 0) {
+                        mAddAngle(anObject->directionGoal, -angle_offset);
+                    } else if (anObject->location.h & 0x00000001) {
+                        mAddAngle(anObject->directionGoal, -angle_offset);
                     } else {
-                        if (theta > 0) {
-                            mAddAngle(anObject->directionGoal, kEvadeAngle);
-                        } else if (theta < 0) {
-                            mAddAngle(anObject->directionGoal, -kEvadeAngle);
-                        } else {
-                            beta = kEvadeAngle;
-                            if (anObject->location.h & 0x00000001) {
-                                beta = -kEvadeAngle;
-                            }
-                            mAddAngle(anObject->directionGoal, beta);
-                        }
-                        theta = mAngleDifference(anObject->directionGoal, anObject->direction);
-                        if (ABS(theta) < kEvadeAngle) {
-                            keysDown |= kUpKey;
-                        } else {
-                            keysDown |= kUpKey;  // try an always thrust strategy
-                        }
+                        mAddAngle(anObject->directionGoal, angle_offset);
                     }
+                } else if (anObject->randomSeed.next(2)) {
+                    mAddAngle(anObject->direction, -kEvadeAngle);
                 } else {
-                    beta = kEvadeAngle;
-                    if (anObject->randomSeed.next(2)) {
-                        beta = -kEvadeAngle;
-                    }
-                    mAddAngle(anObject->direction, beta);
-                    keysDown |= kUpKey;
+                    mAddAngle(anObject->direction, kEvadeAngle);
                 }
-            } else {  // if we're not afraid, then
-                // if we are not within our closest weapon range then
-                if ((distance > static_cast<uint32_t>(anObject->shortestWeaponRange)) ||
+                keysDown |= kUpKey;
+            } else if (
+                    (distance > static_cast<uint32_t>(anObject->shortestWeaponRange)) ||
                     (anObject->attributes & kIsGuided)) {
-                    keysDown |= kUpKey;
-                } else {  // if we are as close as we like
-                    // if we're getting closer
-                    if ((distance < kMotionMargin) ||
-                        ((distance + kMotionMargin) <
-                         static_cast<uint32_t>(anObject->lastTargetDistance))) {
-                        keysDown |= kDownKey;
-                        anObject->lastTargetDistance = distance;
-                    } else if (
-                            (distance - kMotionMargin) >
-                            static_cast<uint32_t>(anObject->lastTargetDistance)) {
-                        // if we're not getting closer, then if we're getting farther
-                        keysDown |= kUpKey;
-                        anObject->lastTargetDistance = distance;
-                    }
-                }
+                // if we're not afraid, then
+                // if we are not within our closest weapon range then
+                keysDown |= kUpKey;
+            } else if (
+                    (distance < kMotionMargin) ||
+                    ((distance + kMotionMargin) <
+                     static_cast<uint32_t>(anObject->lastTargetDistance))) {
+                // if we are as close as we like
+                // if we're getting closer
+                keysDown |= kDownKey;
+                anObject->lastTargetDistance = distance;
+            } else if (
+                    (distance - kMotionMargin) >
+                    static_cast<uint32_t>(anObject->lastTargetDistance)) {
+                // if we're not getting closer, then if we're getting farther
+                keysDown |= kUpKey;
+                anObject->lastTargetDistance = distance;
             }
 
-            if (anObject->targetObject == anObject->destObject) {
-                if (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) {
-                    if (baseObject->arrive.action.size() > 0) {
-                        if (!(anObject->runTimeFlags & kHasArrived)) {
-                            exec(baseObject->arrive.action, anObject, anObject->destObject,
-                                 {0, 0});
-                            anObject->runTimeFlags |= kHasArrived;
-                        }
-                    }
-                }
+            if ((anObject->targetObject == anObject->destObject) &&
+                (distance < static_cast<uint32_t>(baseObject->arrive.distance.squared)) &&
+                !baseObject->arrive.action.empty() && !(anObject->runTimeFlags & kHasArrived)) {
+                exec(baseObject->arrive.action, anObject, anObject->destObject, {0, 0});
+                anObject->runTimeFlags |= kHasArrived;
             }
         } else if (anObject->attributes & kIsGuided) {
             keysDown |= kUpKey;
@@ -549,15 +520,13 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                 (((!(anObject->attributes & kRemoteOrHuman)) &&
                   (distance < static_cast<uint32_t>(anObject->engageRange))) ||
                  (anObject->attributes & kIsGuided))) {
+                int16_t theta;
                 keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
-                if ((targetObject->attributes & kCanBeEngaged) &&
-                    (anObject->attributes & kCanEngage) &&
+                if (can_engage(anObject, targetObject) &&
                     (distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
                     (targetObject->attributes & kHated)) {
                 } else if (
-                        (anObject->attributes & kCanEvade) &&
-                        (targetObject->attributes & kHated) &&
-                        (targetObject->attributes & kCanBeEvaded) &&
+                        can_evade(anObject, targetObject) && (targetObject->attributes & kHated) &&
                         (((distance < static_cast<uint32_t>(targetObject->longestWeaponRange)) &&
                           (ABS(theta) < kParanoiaAngle)) ||
                          (targetObject->attributes & kIsGuided))) {
@@ -568,32 +537,21 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                         }
 
                         anObject->directionGoal = targetObject->direction;
-
                         if (theta > 0) {
                             mAddAngle(anObject->directionGoal, kEvadeAngle);
                         } else if (theta < 0) {
                             mAddAngle(anObject->directionGoal, -kEvadeAngle);
+                        } else if (anObject->location.h & 0x00000001) {
+                            mAddAngle(anObject->directionGoal, -kEvadeAngle);
                         } else {
-                            beta = kEvadeAngle;
-                            if (anObject->location.h & 0x00000001) {
-                                beta = -kEvadeAngle;
-                            }
-                            mAddAngle(anObject->directionGoal, beta);
+                            mAddAngle(anObject->directionGoal, kEvadeAngle);
                         }
-                        theta = mAngleDifference(anObject->directionGoal, anObject->direction);
-                        if (ABS(theta) < kEvadeAngle) {
-                            keysDown |= kUpKey;
-                        } else {
-                            keysDown |= kUpKey;
-                        }
+                    } else if (anObject->randomSeed.next(2)) {
+                        mAddAngle(anObject->direction, -kEvadeAngle);
                     } else {
-                        beta = kEvadeAngle;
-                        if (anObject->randomSeed.next(2)) {
-                            beta = -kEvadeAngle;
-                        }
-                        mAddAngle(anObject->direction, beta);
-                        keysDown |= kUpKey;
+                        mAddAngle(anObject->direction, kEvadeAngle);
                     }
+                    keysDown |= kUpKey;
                 }
             }
             ///--->>> END TARGETING <<<---///
@@ -671,8 +629,10 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                     dest.v       = anObject->destinationLocation.v;
                 }
 
+                int16_t angle;
                 ThinkObjectGetCoordVector(anObject, &dest, &distance, &angle);
 
+                int16_t theta;
                 if (anObject->attributes & kHasDirectionGoal) {
                     theta = mAngleDifference(angle, anObject->directionGoal);
                     if (ABS(theta) > kDirectionError) {
@@ -749,6 +709,9 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
             }
         }
     } else {  // object is human controlled -- we need to calc target angle
+        Handle<SpaceObject> targetObject;
+        Point               dest;
+        uint32_t            distance;
         ThinkObjectResolveTarget(anObject, &dest, &distance, &targetObject);
 
         if ((anObject->attributes & kCanEngage) &&
@@ -758,65 +721,48 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
             if ((distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
                 (targetObject->attributes & kHated)) {
                 // find "best" weapon (how do we want to aim?)
-                // difference = closest range
+                const BaseObject* beam          = anObject->beam.base;
+                const BaseObject* pulse         = anObject->pulse.base;
+                const BaseObject* special       = anObject->special.base;
+                const BaseObject* bestWeapon    = beam;
+                int32_t           closest_range = anObject->longestWeaponRange;
 
-                difference = anObject->longestWeaponRange;
-
-                const BaseObject* bestWeapon = nullptr;
-
-                if (anObject->beam.base) {
-                    auto weaponObject = bestWeapon = anObject->beam.base;
-                    if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                        (weaponObject->device->range.squared < difference)) {
-                        bestWeapon = weaponObject;
-                        difference = weaponObject->device->range.squared;
-                    }
+                if (beam && beam->device->usage.attacking &&
+                    (static_cast<uint32_t>(beam->device->range.squared) >= distance) &&
+                    (beam->device->range.squared < closest_range)) {
+                    bestWeapon    = beam;
+                    closest_range = beam->device->range.squared;
                 }
 
-                if (anObject->pulse.base) {
-                    auto weaponObject = anObject->pulse.base;
-                    if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                        (weaponObject->device->range.squared < difference)) {
-                        bestWeapon = weaponObject;
-                        difference = weaponObject->device->range.squared;
-                    }
+                if (pulse && pulse->device->usage.attacking &&
+                    (static_cast<uint32_t>(pulse->device->range.squared) >= distance) &&
+                    (pulse->device->range.squared < closest_range)) {
+                    bestWeapon    = pulse;
+                    closest_range = pulse->device->range.squared;
                 }
 
-                if (anObject->special.base) {
-                    auto weaponObject = anObject->special.base;
-                    if ((weaponObject->device->usage.attacking) &&
-                        (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                        (weaponObject->device->range.squared < difference)) {
-                        bestWeapon = weaponObject;
-                        difference = weaponObject->device->range.squared;
-                    }
+                if (special && special->device->usage.attacking &&
+                    (static_cast<uint32_t>(special->device->range.squared) >= distance) &&
+                    (special->device->range.squared < closest_range)) {
+                    bestWeapon    = special;
+                    closest_range = special->device->range.squared;
                 }
 
                 // offset dest for anticipated position -- overkill?
-
                 if (bestWeapon) {
-                    dcalc = lsqrt(distance);
-
-                    calcv = targetObject->velocity.h - anObject->velocity.h;
-                    fdist = Fixed::from_long(dcalc);
-                    fdist *= bestWeapon->device->speed.inverse;
-                    calcv      = (calcv * fdist);
-                    difference = mFixedToLong(calcv);
-                    dest.h -= difference;
-
-                    calcv      = targetObject->velocity.v - anObject->velocity.v;
-                    calcv      = (calcv * fdist);
-                    difference = mFixedToLong(calcv);
-                    dest.v -= difference;
+                    uint32_t dcalc = lsqrt(distance);
+                    Fixed    fdist = Fixed::from_long(dcalc) * bestWeapon->device->speed.inverse;
+                    dest.h -= mFixedToLong(
+                            (targetObject->velocity.h - anObject->velocity.h) * fdist);
+                    dest.v -= mFixedToLong(
+                            (targetObject->velocity.v - anObject->velocity.v) * fdist);
                 }
             }  // target is not in our weapon range (or we don't hate it)
 
             // this is human controlled--if it's too far away, tough nougies
             // find angle between me & dest
-            slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
-            angle = AngleFromSlope(slope);
+            Fixed slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
+            int16_t angle = AngleFromSlope(slope);
 
             if (dest.h < anObject->location.h) {
                 mAddAngle(angle, 180);
@@ -836,8 +782,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 }
 
 uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
-    uint32_t       keysDown = anObject->keysDown & kSpecialKeyMask;
-    fixedPointType newVel;
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
     if ((!(anObject->attributes & kRemoteOrHuman)) || (anObject->attributes & kOnAutoPilot)) {
         keysDown = kWarpKey;
@@ -857,84 +802,68 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
             anObject->presenceState    = kWarpingPresence;
             anObject->presence.warping = anObject->base->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
-            newVel.h = newVel.v = Fixed::zero();
             CreateAnySpaceObject(
-                    *kWarpInFlare, &newVel, &anObject->location, anObject->direction,
-                    Admiral::none(), 0, sfz::nullopt);
+                    *kWarpInFlare, {Fixed::zero(), Fixed::zero()}, anObject->location,
+                    anObject->direction, Admiral::none(), 0, sfz::nullopt);
         } else {
             anObject->presenceState = kNormalPresence;
             anObject->_energy       = 0;
         }
     }
 
-    return (keysDown);
+    return keysDown;
 }
 
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
-    uint32_t            keysDown = anObject->keysDown & kSpecialKeyMask, distance;
-    Point               dest;
-    Handle<SpaceObject> targetObject;
-    int16_t             angle, theta;
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
     if (anObject->energy() <= 0) {
         anObject->presenceState = kWarpOutPresence;
     }
     if ((!(anObject->attributes & kRemoteOrHuman)) || (anObject->attributes & kOnAutoPilot)) {
-        ThinkObjectResolveDestination(anObject, &dest, &targetObject);
+        Point               dest;
+        Handle<SpaceObject> target;
+        ThinkObjectResolveDestination(anObject, &dest, &target);
+        uint32_t distance;
+        int16_t  angle;
         ThinkObjectGetCoordVector(anObject, &dest, &distance, &angle);
 
-        if (anObject->attributes & kHasDirectionGoal) {
-            theta = mAngleDifference(angle, anObject->directionGoal);
-            if (ABS(theta) > kDirectionError) {
-                anObject->directionGoal = angle;
-            }
-        } else {
+        if (!(anObject->attributes & kHasDirectionGoal)) {
             anObject->direction = angle;
+        } else if (ABS(mAngleDifference(angle, anObject->directionGoal)) > kDirectionError) {
+            anObject->directionGoal = angle;
         }
 
-        if (distance < anObject->base->warpOutDistance.squared) {
-            if (targetObject.get()) {
-                if ((targetObject->presenceState == kWarpInPresence) ||
-                    (targetObject->presenceState == kWarpingPresence)) {
-                    keysDown |= kWarpKey;
-                }
-            }
-        } else {
+        if ((distance >= anObject->base->warpOutDistance.squared) ||
+            (target.get() && ((target->presenceState == kWarpInPresence) ||
+                              (target->presenceState == kWarpingPresence)))) {
             keysDown |= kWarpKey;
         }
     }
-    return (keysDown);
+    return keysDown;
 }
 
 uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
-    uint32_t       keysDown = anObject->keysDown & kSpecialKeyMask;
-    Fixed          calcv, fdist;
-    fixedPointType newVel;
-
+    uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
     anObject->presence.warp_out -= Fixed::from_long(kWarpAcceleration);
     if (anObject->presence.warp_out < anObject->maxVelocity) {
         anObject->refund_warp_energy();
-
         anObject->presenceState = kNormalPresence;
         anObject->attributes |= baseObject->attributes & kOccupiesSpace;
 
-        // warp out
-
-        GetRotPoint(&fdist, &calcv, anObject->direction);
-
-        // multiply by max velocity
-
-        fdist                = (anObject->maxVelocity * fdist);
-        calcv                = (anObject->maxVelocity * calcv);
-        anObject->velocity.h = fdist;
-        anObject->velocity.v = calcv;
-        newVel.h = newVel.v = Fixed::zero();
+        // Clamp speed to max velocity in current direction
+        Fixed x, y;
+        GetRotPoint(&x, &y, anObject->direction);
+        anObject->velocity = fixedPointType{
+                anObject->maxVelocity * x,
+                anObject->maxVelocity * y,
+        };
 
         CreateAnySpaceObject(
-                *kWarpOutFlare, &(newVel), &(anObject->location), anObject->direction,
-                Admiral::none(), 0, sfz::nullopt);
+                *kWarpOutFlare, {Fixed::zero(), Fixed::zero()}, anObject->location,
+                anObject->direction, Admiral::none(), 0, sfz::nullopt);
     }
-    return (keysDown);
+    return keysDown;
 }
 
 uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
@@ -1124,13 +1053,13 @@ void ThinkObjectGetCoordVector(
     }
 }
 
-void ThinkObjectGetCoordDistance(Handle<SpaceObject> anObject, Point* dest, uint32_t* distance) {
+void ThinkObjectGetCoordDistance(Handle<SpaceObject> anObject, Point dest, uint32_t* distance) {
     int32_t  difference;
     uint32_t dcalc;
 
-    difference = ABS<int>(dest->h - anObject->location.h);
+    difference = ABS<int>(dest.h - anObject->location.h);
     dcalc      = difference;
-    difference = ABS<int>(dest->v - anObject->location.v);
+    difference = ABS<int>(dest.v - anObject->location.v);
     *distance  = difference;
     if ((*distance == 0) && (dcalc == 0)) {
         return;
@@ -1227,143 +1156,76 @@ void ThinkObjectResolveDestination(
 }
 
 bool ThinkObjectResolveTarget(
-        Handle<SpaceObject> anObject, Point* dest, uint32_t* distance,
-        Handle<SpaceObject>* targetObject) {
-    dest->h = dest->v = 0xffffffff;
-    *distance         = 0xffffffff;
+        Handle<SpaceObject> o, Point* dest, uint32_t* distance, Handle<SpaceObject>* target) {
+    *target      = o->targetObject;
+    auto closest = o->closestObject;
 
-    auto closestObject = anObject->closestObject;
-
-    // if we have no target  then
-    if (!anObject->targetObject.get()) {
-        // if the closest object is appropriate (if it exists, it should be, then
-        if (closestObject.get() && (closestObject->attributes & kPotentialTarget)) {
-            // select closest object as target (and for now be satisfied with our direction
-            if (anObject->attributes & kHasDirectionGoal) {
-                anObject->directionGoal = anObject->direction;
-            }
-            anObject->targetObject   = anObject->closestObject;
-            anObject->targetObjectID = closestObject->id;
-        } else  // otherwise, no target, no closest, cancel
-        {
-            *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
-            anObject->targetObjectID                               = kNoShip;
-            dest->h                                                = anObject->location.h;
-            dest->v                                                = anObject->location.v;
-            *distance                                              = anObject->engageRange;
-            return (false);
+    // if we have no target, then
+    if (!o->targetObject.get()) {
+        if (!closest.get() || !(closest->attributes & kPotentialTarget)) {
+            // no target, no closest, cancel
+            *target = o->targetObject = SpaceObject::none();
+            o->targetObjectID         = kNoShip;
+            *dest                     = o->location;
+            *distance                 = o->engageRange;
+            return false;
         }
+        // if the closest object is appropriate (if it exists, it should be)
+        // select closest object as target (and for now be satisfied with our direction)
+        if (o->attributes & kHasDirectionGoal) {
+            o->directionGoal = o->direction;
+        }
+        *target = o->targetObject = closest;
+        o->targetObjectID         = (*target)->id;
     }
 
-    // if we have a target of any kind (we must by now)
-    if (anObject->targetObject.get()) {
-        // make sure we're still talking about the same object
-        *targetObject = anObject->targetObject;
-
-        // if the object is wrong or smells at all funny, then
-        if ((!((*targetObject)->active)) || ((*targetObject)->id != anObject->targetObjectID) ||
-            (((*targetObject)->owner == anObject->owner) &&
-             ((*targetObject)->attributes & kHated)) ||
-            ((!((*targetObject)->attributes & kPotentialTarget)) &&
-             (!((*targetObject)->attributes & kHated)))) {
-            // if we have a closest ship
-            if (anObject->closestObject.get()) {
-                // make it our target
-                *targetObject = anObject->targetObject = closestObject = anObject->closestObject;
-                anObject->targetObjectID                               = closestObject->id;
-                if (!((*targetObject)->attributes & kPotentialTarget)) {  // cancel
-                    *targetObject = anObject->targetObject = SpaceObject::none();
-                    anObject->targetObjectID               = kNoShip;
-                    dest->h                                = anObject->location.h;
-                    dest->v                                = anObject->location.v;
-                    *distance                              = anObject->engageRange;
-                    return (false);
-                }
-            } else  // no legal target, no closest, cancel
-            {
-                *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
-                anObject->targetObjectID                               = kNoShip;
-                dest->h                                                = anObject->location.h;
-                dest->v                                                = anObject->location.v;
-                *distance                                              = anObject->engageRange;
-                return (false);
-            }
-        } /* else // the target *is* legal
-         {
-             if ( anObject->attributes & kIsGuided)
-             {
-                 if (((!(targetObject->attributes & kHated)) ||
-                     ( !(targetObject->active))) &&
-                     ( anObject->closestObject != kNoShip))
-                 {
-                     closestObject = gSpaceObjectData.get() + anObject->closestObject;
-                     if ( ( closestObject->attributes & kHated))
-                     {
-                         targetObject = closestObject;
-                         anObject->targetObjectNumber =
-                             anObject->closestObject;
-                         anObject->targetObjectID = targetObject->id;
-                     }
-                 }
-             }
-         }*/
-
-        dest->h = (*targetObject)->location.h;
-        dest->v = (*targetObject)->location.v;
-
-        // if it's not the closest object & we have a closest object
-        if ((anObject->closestObject.get()) &&
-            (anObject->targetObject != anObject->closestObject) &&
-            (!(anObject->attributes & kIsGuided)) &&
-            (closestObject->attributes & kPotentialTarget)) {
-            // then calculate the distance
-            ThinkObjectGetCoordDistance(anObject, dest, distance);
-
-            if (((*distance >> 1L) > anObject->closestDistance) ||
-                (!(anObject->attributes & kCanEngage)) ||
-                (anObject->attributes & kRemoteOrHuman)) {
-                *targetObject = anObject->targetObject = anObject->closestObject;
-                anObject->targetObjectID               = (*targetObject)->id;
-                dest->h                                = (*targetObject)->location.h;
-                dest->v                                = (*targetObject)->location.v;
-                *distance                              = anObject->closestDistance;
-                if ((*targetObject)->cloakState > 250) {
-                    dest->h -= 200;
-                    dest->v -= 200;
-                }
-            }
-            return (true);
-        } else  // if target is closest object
-        {
-            // otherwise distance is the closestDistance
-            *distance = anObject->closestDistance;
-            return (true);
+    // if the object is wrong or smells at all funny, then
+    if ((!((*target)->active)) ||                                                // Inactive
+        ((*target)->id != o->targetObjectID) ||                                  // Recreated
+        (((*target)->owner == o->owner) && ((*target)->attributes & kHated)) ||  // Hated friendly
+        ((!((*target)->attributes & kPotentialTarget)) &&
+         (!((*target)->attributes & kHated)))) {  // Non-hated invalid target
+        if (!closest.get() || !(closest->attributes & kPotentialTarget)) {
+            // no legal target, no closest, cancel
+            *target = o->targetObject = SpaceObject::none();
+            o->targetObjectID         = kNoShip;
+            *dest                     = o->location;
+            *distance                 = o->engageRange;
+            return false;
         }
-    } else  // we don't have a target object
-    {
-        // set the distance to the engage range ie nothing to engage
-        *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
-        anObject->targetObjectID                               = kNoShip;
-        dest->h                                                = anObject->location.h;
-        dest->v                                                = anObject->location.v;
-        *distance                                              = anObject->engageRange;
-        return (false);
+        // if we have a closest ship make it our target
+        *target = o->targetObject = closest;
+        o->targetObjectID         = (*target)->id;
     }
+
+    *dest = (*target)->location;
+    // if it's not the closest object & we have a closest object
+    if ((closest.get()) && (o->targetObject != closest) && (!(o->attributes & kIsGuided)) &&
+        (closest->attributes & kPotentialTarget)) {
+        // then calculate the distance
+        ThinkObjectGetCoordDistance(o, *dest, distance);
+        if (((*distance >> 1L) > o->closestDistance) || (!(o->attributes & kCanEngage)) ||
+            (o->attributes & kRemoteOrHuman)) {
+            *target = o->targetObject = closest;
+            o->targetObjectID         = (*target)->id;
+            *dest                     = (*target)->location;
+            *distance                 = o->closestDistance;
+            if ((*target)->cloakState > 250) {
+                dest->h -= 200;
+                dest->v -= 200;
+            }
+        }
+    } else {
+        // otherwise if target is closest object then distance is the closestDistance
+        *distance = o->closestDistance;
+    }
+    return true;
 }
 
 uint32_t ThinkObjectEngageTarget(
         Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject, uint32_t distance,
         int16_t* theta) {
-    uint32_t keysDown = 0;
-    Point    dest;
-    int32_t  difference;
-    int16_t  angle, beta;
-    Fixed    slope;
-
-    *theta = 0xffff;
-
-    dest.h = targetObject->location.h;
-    dest.v = targetObject->location.v;
+    Point dest = {targetObject->location.h, targetObject->location.v};
     if (targetObject->cloakState > 250) {
         dest.h -= 70;
         dest.h += anObject->randomSeed.next(140);
@@ -1373,59 +1235,20 @@ uint32_t ThinkObjectEngageTarget(
 
     // if target is in our weapon range & we hate the object
     if ((distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
-        (targetObject->attributes & kCanBeEngaged) && (targetObject->attributes & kHated)) {
-        // find "best" weapon (how do we want to aim?)
-        // difference = closest range
-
-        if (anObject->attributes & kCanAcceptDestination) {
-            anObject->timeFromOrigin += kMajorTick;
-        }
-
-        const BaseObject* bestWeapon = nullptr;
-        difference                   = anObject->longestWeaponRange;
-
-        if (anObject->beam.base) {
-            auto weaponObject = bestWeapon = anObject->beam.base;
-            if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                (weaponObject->device->range.squared < difference)) {
-                bestWeapon = weaponObject;
-                difference = weaponObject->device->range.squared;
-            }
-        }
-
-        if (anObject->pulse.base) {
-            auto weaponObject = anObject->pulse.base;
-            if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                (weaponObject->device->range.squared < difference)) {
-                bestWeapon = weaponObject;
-                difference = weaponObject->device->range.squared;
-            }
-        }
-
-        if (anObject->special.base) {
-            auto weaponObject = anObject->special.base;
-            if ((weaponObject->device->usage.attacking) &&
-                (static_cast<uint32_t>(weaponObject->device->range.squared) >= distance) &&
-                (weaponObject->device->range.squared < difference)) {
-                bestWeapon = weaponObject;
-                difference = weaponObject->device->range.squared;
-            }
-        }
-        //      dest.h = targetObject->location.h;
-        //      dest.v = targetObject->location.v;
-    }  // target is not in our weapon range (or we don't hate it)
+        (targetObject->attributes & kCanBeEngaged) && (targetObject->attributes & kHated) &&
+        (anObject->attributes & kCanAcceptDestination)) {
+        anObject->timeFromOrigin += kMajorTick;
+    }
 
     // We don't need to worry if it is very far away, since it must be within farthest weapon range
     // find angle between me & dest
-    slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
-    angle = AngleFromSlope(slope);
-
-    if (dest.h < anObject->location.h)
+    Fixed   slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
+    int16_t angle = AngleFromSlope(slope);
+    if (dest.h < anObject->location.h) {
         mAddAngle(angle, 180);
-    else if ((anObject->location.h == dest.h) && (dest.v < anObject->location.v))
+    } else if ((anObject->location.h == dest.h) && (dest.v < anObject->location.v)) {
         angle = 0;
+    }
 
     if (targetObject->cloakState > 250) {
         angle -= 45;
@@ -1439,7 +1262,7 @@ uint32_t ThinkObjectEngageTarget(
             anObject->directionGoal = angle;
         }
 
-        beta = targetObject->direction;
+        int16_t beta = targetObject->direction;
         mAddAngle(beta, ROT_180);
         *theta = mAngleDifference(beta, angle);
     } else {
@@ -1447,41 +1270,33 @@ uint32_t ThinkObjectEngageTarget(
         *theta              = 0;
     }
 
-    // if target object is in range
-    if ((distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
-        (targetObject->attributes & kHated)) {
-        // fire away
-        beta = anObject->direction;
-        beta = mAngleDifference(beta, angle);
+    // if target object is not in range or not hated
+    if ((distance >= static_cast<uint32_t>(anObject->longestWeaponRange)) ||
+        !(targetObject->attributes & kHated)) {
+        return 0;
+    }  // else fire away
 
-        if (anObject->pulse.base) {
-            auto weaponObject = anObject->pulse.base;
-            if ((weaponObject->device->usage.attacking) &&
-                ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
-                keysDown |= kPulseKey;
-            }
-        }
+    bool              in_front = ABS(mAngleDifference(anObject->direction, angle)) <= kShootAngle;
+    const BaseObject* pulse    = anObject->pulse.base;
+    const BaseObject* beam     = anObject->beam.base;
+    const BaseObject* special  = anObject->special.base;
 
-        if (anObject->beam.base) {
-            auto weaponObject = anObject->beam.base;
-            if ((weaponObject->device->usage.attacking) &&
-                ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
-                keysDown |= kBeamKey;
-            }
-        }
-
-        if (anObject->special.base) {
-            auto weaponObject = anObject->special.base;
-            if ((weaponObject->device->usage.attacking) &&
-                ((ABS(beta) <= kShootAngle) || (weaponObject->attributes & kAutoTarget)) &&
-                (distance < static_cast<uint32_t>(weaponObject->device->range.squared))) {
-                keysDown |= kSpecialKey;
-            }
-        }
-    }  // target is not in range
-    return (keysDown);
+    uint32_t keysDown = 0;
+    if (pulse && pulse->device->usage.attacking &&
+        (in_front || (pulse->attributes & kAutoTarget)) &&
+        (distance < static_cast<uint32_t>(pulse->device->range.squared))) {
+        keysDown |= kPulseKey;
+    }
+    if (beam && beam->device->usage.attacking && (in_front || (beam->attributes & kAutoTarget)) &&
+        (distance < static_cast<uint32_t>(beam->device->range.squared))) {
+        keysDown |= kBeamKey;
+    }
+    if (special && special->device->usage.attacking &&
+        (in_front || (special->attributes & kAutoTarget)) &&
+        (distance < static_cast<uint32_t>(special->device->range.squared))) {
+        keysDown |= kSpecialKey;
+    }
+    return keysDown;
 }
 
 static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
