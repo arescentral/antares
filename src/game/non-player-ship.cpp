@@ -537,32 +537,21 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                         }
 
                         anObject->directionGoal = targetObject->direction;
-
                         if (theta > 0) {
                             mAddAngle(anObject->directionGoal, kEvadeAngle);
                         } else if (theta < 0) {
                             mAddAngle(anObject->directionGoal, -kEvadeAngle);
+                        } else if (anObject->location.h & 0x00000001) {
+                            mAddAngle(anObject->directionGoal, -kEvadeAngle);
                         } else {
-                            int16_t beta = kEvadeAngle;
-                            if (anObject->location.h & 0x00000001) {
-                                beta = -kEvadeAngle;
-                            }
-                            mAddAngle(anObject->directionGoal, beta);
+                            mAddAngle(anObject->directionGoal, kEvadeAngle);
                         }
-                        theta = mAngleDifference(anObject->directionGoal, anObject->direction);
-                        if (ABS(theta) < kEvadeAngle) {
-                            keysDown |= kUpKey;
-                        } else {
-                            keysDown |= kUpKey;
-                        }
+                    } else if (anObject->randomSeed.next(2)) {
+                        mAddAngle(anObject->direction, -kEvadeAngle);
                     } else {
-                        int16_t beta = kEvadeAngle;
-                        if (anObject->randomSeed.next(2)) {
-                            beta = -kEvadeAngle;
-                        }
-                        mAddAngle(anObject->direction, beta);
-                        keysDown |= kUpKey;
+                        mAddAngle(anObject->direction, kEvadeAngle);
                     }
+                    keysDown |= kUpKey;
                 }
             }
             ///--->>> END TARGETING <<<---///
