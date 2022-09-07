@@ -428,6 +428,10 @@ static bool can_engage(const Handle<SpaceObject>& a, const Handle<SpaceObject>& 
     return (a->attributes & kCanEngage) && (b->attributes & kCanBeEngaged);
 }
 
+static bool can_evade(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanEvade) && (b->attributes & kCanBeEvaded);
+}
+
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject) {
     uint32_t keysDown = anObject->keysDown & kSpecialKeyMask;
 
@@ -450,7 +454,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
 
             // if I'm in target object's range & it's looking at us & my health is less
             // than 1/2 its -- or I can't engage it
-            if ((anObject->attributes & kCanEvade) && (targetObject->attributes & kCanBeEvaded) &&
+            if (can_evade(anObject, targetObject) &&
                 (distance < static_cast<uint32_t>(targetObject->longestWeaponRange)) &&
                 (targetObject->attributes & kHated) && (ABS(theta) < kParanoiaAngle) &&
                 ((!(targetObject->attributes & kCanBeEngaged)) ||
@@ -522,9 +526,7 @@ uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObjec
                     (distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
                     (targetObject->attributes & kHated)) {
                 } else if (
-                        (anObject->attributes & kCanEvade) &&
-                        (targetObject->attributes & kHated) &&
-                        (targetObject->attributes & kCanBeEvaded) &&
+                        can_evade(anObject, targetObject) && (targetObject->attributes & kHated) &&
                         (((distance < static_cast<uint32_t>(targetObject->longestWeaponRange)) &&
                           (ABS(theta) < kParanoiaAngle)) ||
                          (targetObject->attributes & kIsGuided))) {
