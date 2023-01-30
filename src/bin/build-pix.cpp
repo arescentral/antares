@@ -81,6 +81,10 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
     exit(retcode);
 }
 
+pn::string_view intro() { return *plug.info.intro; }
+
+pn::string_view about() { return *plug.info.about; }
+
 std::function<pn::string_view()> prologue(pn::string_view chapter) {
     return [chapter]() -> pn::string_view {
         return *plug.levels.find(chapter.copy())->second.solo.prologue;
@@ -91,6 +95,25 @@ std::function<pn::string_view()> epilogue(pn::string_view chapter) {
     return [chapter]() -> pn::string_view {
         return *plug.levels.find(chapter.copy())->second.solo.epilogue;
     };
+}
+
+pn::string_view charset() {
+    return "The quick brown fox jumps over the lazy dog.\n"
+           "\n"
+           "Benjamín pidió una bebida de kiwi y fresa."
+           " Noé, sin vergüenza, la más exquisita champaña del menú.\n"
+           "\n"
+           "Aa Åå Áá Àà Ââ Ää Ãã Ææ\n"
+           "Cc Çç\n"
+           "Ee Éé Èè Êê Ëë\n"
+           "Ii Íí Ìì Îî Ïï İı\n"
+           "Nn Ññ\n"
+           "Oo Óó Òò Ôô Öö Õõ Øø Œœ\n"
+           "Ss ß\n"
+           "Uu Úú Ùù Ûû Üü\n"
+           "Yy Ÿÿ\n"
+           "\n"
+           "\uf8ff\n";
 }
 
 template <typename VideoDriver>
@@ -112,8 +135,9 @@ void run(
             {"baz-prologue", 450, prologue("ch14")},
             {"ele-prologue", 450, prologue("ch13")},
             {"aud-prologue", 450, prologue("ch16")},
-            {"intro", 450, []() -> pn::string_view { return *plug.info.intro; }},
-            {"about", 540, []() -> pn::string_view { return *plug.info.about; }},
+            {"intro", 450, intro},
+            {"about", 540, about},
+            {"charset", 450, charset},
     };
 
     vector<pair<unique_ptr<Card>, pn::string>> pix;
