@@ -132,6 +132,7 @@ void main(int argc, char* const* argv) {
 
     sfz::optional<pn::string> output_dir;
     bool                      text         = false;
+    int                       scale        = 1;
     std::pair<int, int>       gl_version   = {3, 2};
     pn::string_view           glsl_version = "330 core";
     callbacks.short_option = [&](pn::rune opt, const args::callbacks::get_value_f& get_value) {
@@ -146,6 +147,9 @@ void main(int argc, char* const* argv) {
                                 const args::callbacks::get_value_f& get_value) {
         if (opt == "output") {
             return callbacks.short_option(pn::rune{'o'}, get_value);
+        } else if (opt == "hidpi") {
+            scale = 2;
+            return true;
         } else if (opt == "text") {
             return callbacks.short_option(pn::rune{'t'}, get_value);
         } else if (opt == "opengl") {
@@ -177,7 +181,7 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({540, 2000}, output_dir);
         run(&video, "txt", [](Rect) {});
     } else {
-        OffscreenVideoDriver video({540, 2000}, gl_version, glsl_version, output_dir);
+        OffscreenVideoDriver video({540, 2000}, scale, gl_version, glsl_version, output_dir);
         run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
     }
 }
