@@ -3,90 +3,53 @@
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
-import json
 import os
 import subprocess
-import sys
-import time
-import urllib.request
-import zipfile
 
 APP = "out/cur/Antares.app"
-BUNDLE_ID = "org.arescentral.antares"
-ARCHIVE = "out/cur/Antares.app.zip"
+KEYCHAIN = "build.keychain"
+PROFILE = "notary"
 
 
 def main():
-    assert os.getenv("APPLE_USER")
-    assert os.getenv("APPLE_PASS")
+    username = os.getenv("APPLE_USER")
+    password = os.getenv("APPLE_PASS")
+    team_id = os.getenv("APPLE_TEAM")
+    assert username
+    assert password
+    assert team_id
 
-    archive()
-    result = notarize_app()
-    time.sleep(5)
-    notarization_info(result["notarization-upload"]["RequestUUID"])
+    store_credentials(username, password, team_id)
+    submit()
     staple()
 
 
-def archive():
-    print("building %s…" % ARCHIVE)
-    with zipfile.ZipFile(ARCHIVE, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        for real_path, archive_path in walk("Antares.app", APP):
-            z.write(real_path, archive_path)
+def store_credentials(username, password, team_id):
+    subprocess.run(
+        ["xcrun", "notarytool", "store-credentials", PROFILE]
+        + ["--apple-id", username]
+        + ["--password", password]
+        + ["--team-id", team_id]
+        + ["--keychain", KEYCHAIN],
+        check=True,
+    )
 
 
-def walk(archive_root, walk_root):
-    for root, dirs, files in os.walk(walk_root):
-        root = root[1 + len(walk_root):]
-        for f in files:
-            real_path = os.path.join(walk_root, root, f)
-            archive_path = os.path.join(archive_root, root, f)
-            yield real_path, archive_path
+def submit():
+    subprocess.run(
+        ["xcrun", "notarytool", "submit", APP]
+        + ["--keychain-profile", PROFILE]
+        + ["--keychain", KEYCHAIN]
+        + ["--wait"],
+        check=True,
+    )
 
-
-def notarize_app():
-    print("uploading for notarization")
-    p = subprocess.Popen(["xcrun", "altool", "--notarize-app"] + ["-t", "osx"] + ["-f", ARCHIVE] +
-                         ["--primary-bundle-id", BUNDLE_ID] + ["-u", os.getenv("APPLE_USER")] +
-                         ["-p", "@env:APPLE_PASS"] + ["--output-format", "json"],
-                         stdout=subprocess.PIPE)
-    stdout, _ = p.communicate()
-    if p.returncode != 0:
-        print(stdout)
-        sys.exit(p.returncode)
-    print("done")
-    result = json.loads(stdout)
-    return result
-
-
-def notarization_info(req_id):
-    while True:
-        p = subprocess.Popen(["xcrun", "altool", "--notarization-info", req_id] +
-                             ["-u", os.getenv("APPLE_USER")] + ["-p", "@env:APPLE_PASS"] +
-                             ["--output-format", "json"],
-                             stdout=subprocess.PIPE)
-        stdout, _ = p.communicate()
-        if p.returncode != 0:
-            print(stdout)
-            sys.exit(p.returncode)
-        result = json.loads(stdout)
-        status = result["notarization-info"]["Status"]
-        if status == "in progress":
-            print("waiting")
-            time.sleep(10)
-            continue
-        url = result["notarization-info"]["LogFileURL"]
-        with urllib.request.urlopen(url) as response:
-            print(response.read().decode("utf-8"))
-        if status == "invalid":
-            sys.exit(1)
-        else:
-            break
-    print("success")
-    return result
 
 def staple():
-    print("stapling")
-    subprocess.check_call(["xcrun", "stapler", "staple", APP])
+    subprocess.run(
+        ["xcrun", "stapler", "staple", APP],
+        check=True,
+    )
 
 
 if __name__ == "__main__":

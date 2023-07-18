@@ -66,6 +66,7 @@ jobs:
         env:
           APPLE_USER: ${{ secrets.APPLE_USER }}
           APPLE_PASS: ${{ secrets.APPLE_PASS }}
+          APPLE_TEAM: ${{ secrets.APPLE_TEAM }}
 
       - run: ./scripts/dist.py mac zip
       - uses: actions/upload-artifact@v3
