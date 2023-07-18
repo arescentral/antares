@@ -35,8 +35,6 @@
 
 using sfz::dec;
 using std::make_pair;
-using std::max;
-using std::min;
 using std::pair;
 using std::unique_ptr;
 using std::vector;
@@ -49,9 +47,9 @@ namespace {
 pn::string hex(RgbColor color) {
     char s[9];
     if (color.alpha != 255) {
-        sprintf(s, "%02x%02x%02x%02x", color.red, color.green, color.blue, color.alpha);
+        snprintf(s, 9, "%02x%02x%02x%02x", color.red, color.green, color.blue, color.alpha);
     } else {
-        sprintf(s, "%02x%02x%02x", color.red, color.green, color.blue);
+        snprintf(s, 9, "%02x%02x%02x", color.red, color.green, color.blue);
     }
     return s;
 }

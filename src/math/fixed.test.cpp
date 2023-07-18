@@ -58,7 +58,7 @@ TEST_F(FixedTest, Print) {
     // All 2.x values should be printed with 1 digit of precision.
     for (int i = 0; i < 10; ++i) {
         char expected[4];
-        sprintf(expected, "2.%d", i);
+        snprintf(expected, 4, "2.%d", i);
         EXPECT_EQ(pn::string_view{expected}, stringify(Fixed::from_float(2.0 + (i / 10.0))));
     }
 
@@ -69,7 +69,7 @@ TEST_F(FixedTest, Print) {
             continue;
         }
         char expected[5];
-        sprintf(expected, "3.%02d", i);
+        snprintf(expected, 5, "3.%02d", i);
         EXPECT_EQ(pn::string_view{expected}, stringify(Fixed::from_float(3.0 + (i / 100.0))));
     }
 }
