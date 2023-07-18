@@ -61,10 +61,11 @@ jobs:
         env:
           DEVELOPER_P12_BASE64: ${{ secrets.DEVELOPER_P12_BASE64 }}
           DEVELOPER_P12_PASS_BASE64: ${{ secrets.DEVELOPER_P12_PASS_BASE64 }}
+      - run: ./scripts/dist.py mac zip
       - if: ${{ github.event_name != 'pull_request' }}
         uses: cocoalibs/xcode-notarization-action@v1
         with:
-          app-path: 'out/cur/Antares.app'
+          app-path: 'dist/antares-mac-git.zip'
           apple-id: ${{ secrets.APPLE_USER }}
           password: ${{ secrets.APPLE_PASS }}
           team-id: ${{ secrets.APPLE_TEAM }}
