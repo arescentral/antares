@@ -62,11 +62,12 @@ jobs:
           DEVELOPER_P12_BASE64: ${{ secrets.DEVELOPER_P12_BASE64 }}
           DEVELOPER_P12_PASS_BASE64: ${{ secrets.DEVELOPER_P12_PASS_BASE64 }}
       - if: ${{ github.event_name != 'pull_request' }}
-        run: make sign notarize
-        env:
-          APPLE_USER: ${{ secrets.APPLE_USER }}
-          APPLE_PASS: ${{ secrets.APPLE_PASS }}
-          APPLE_TEAM: ${{ secrets.APPLE_TEAM }}
+        uses: cocoalibs/xcode-notarization-action@v1
+        with:
+          app-path: 'out/cur/Antares.app'
+          apple-id: ${{ secrets.APPLE_USER }}
+          password: ${{ secrets.APPLE_PASS }}
+          team-id: ${{ secrets.APPLE_TEAM }}
 
       - run: ./scripts/dist.py mac zip
       - uses: actions/upload-artifact@v3
