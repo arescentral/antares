@@ -125,7 +125,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
             OffscreenVideoDriver& driver, const sfz::optional<pn::string>& output_dir,
             Card* initial)
             : _driver(driver),
-              _offscreen(driver._screen_size, driver._gl_version),
+              _offscreen(driver.viewport_size(), driver._gl_version),
               _setup(*this),
               _loop(driver, initial) {
         if (output_dir.has_value()) {
@@ -145,7 +145,13 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         if (!takes_snapshots()) {
             return;
         }
-        bounds.offset(0, _driver._screen_size.height - bounds.height() - bounds.top);
+        bounds = Rect{
+                bounds.left * _driver._scale,
+                bounds.top * _driver._scale,
+                bounds.right * _driver._scale,
+                bounds.bottom * _driver._scale,
+        };
+        bounds.offset(0, _driver.viewport_size().height - bounds.height() - bounds.top);
         ArrayPixMap pix(bounds.size());
         _buffer.copy(bounds, pix);
         pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
@@ -169,8 +175,8 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
             glBindFramebuffer(GL_FRAMEBUFFER, loop._fb.id);
             glBindRenderbuffer(GL_RENDERBUFFER, loop._rb.id);
             glRenderbufferStorage(
-                    GL_RENDERBUFFER, GL_RGBA, loop._driver._screen_size.width,
-                    loop._driver._screen_size.height);
+                    GL_RENDERBUFFER, GL_RGBA, loop._driver.viewport_size().width,
+                    loop._driver.viewport_size().height);
             glFramebufferRenderbuffer(
                     GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, loop._rb.id);
         }
@@ -181,9 +187,10 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
 };
 
 OffscreenVideoDriver::OffscreenVideoDriver(
-        Size screen_size, std::pair<int, int> gl_version, pn::string_view glsl_version,
+        Size screen_size, int scale, std::pair<int, int> gl_version, pn::string_view glsl_version,
         const sfz::optional<pn::string>& output_dir)
         : _screen_size(screen_size),
+          _scale(scale),
           _gl_version(gl_version),
           _glsl_version(glsl_version.copy()),
           _capture_rect(screen_size.as_rect()) {

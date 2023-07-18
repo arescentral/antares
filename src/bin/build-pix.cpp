@@ -81,6 +81,10 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
     exit(retcode);
 }
 
+pn::string_view intro() { return *plug.info.intro; }
+
+pn::string_view about() { return *plug.info.about; }
+
 std::function<pn::string_view()> prologue(pn::string_view chapter) {
     return [chapter]() -> pn::string_view {
         return *plug.levels.find(chapter.copy())->second.solo.prologue;
@@ -91,6 +95,25 @@ std::function<pn::string_view()> epilogue(pn::string_view chapter) {
     return [chapter]() -> pn::string_view {
         return *plug.levels.find(chapter.copy())->second.solo.epilogue;
     };
+}
+
+pn::string_view charset() {
+    return "The quick brown fox jumps over the lazy dog.\n"
+           "\n"
+           "Benjamín pidió una bebida de kiwi y fresa."
+           " Noé, sin vergüenza, la más exquisita champaña del menú.\n"
+           "\n"
+           "Aa Åå Áá Àà Ââ Ää Ãã Ææ\n"
+           "Cc Çç\n"
+           "Ee Éé Èè Êê Ëë\n"
+           "Ii Íí Ìì Îî Ïï İı\n"
+           "Nn Ññ\n"
+           "Oo Óó Òò Ôô Öö Õõ Øø Œœ\n"
+           "Ss ß\n"
+           "Uu Úú Ùù Ûû Üü\n"
+           "Yy Ÿÿ\n"
+           "\n"
+           "\uf8ff\n";
 }
 
 template <typename VideoDriver>
@@ -112,8 +135,9 @@ void run(
             {"baz-prologue", 450, prologue("ch14")},
             {"ele-prologue", 450, prologue("ch13")},
             {"aud-prologue", 450, prologue("ch16")},
-            {"intro", 450, []() -> pn::string_view { return *plug.info.intro; }},
-            {"about", 540, []() -> pn::string_view { return *plug.info.about; }},
+            {"intro", 450, intro},
+            {"about", 540, about},
+            {"charset", 450, charset},
     };
 
     vector<pair<unique_ptr<Card>, pn::string>> pix;
@@ -132,6 +156,7 @@ void main(int argc, char* const* argv) {
 
     sfz::optional<pn::string> output_dir;
     bool                      text         = false;
+    int                       scale        = 1;
     std::pair<int, int>       gl_version   = {3, 2};
     pn::string_view           glsl_version = "330 core";
     callbacks.short_option = [&](pn::rune opt, const args::callbacks::get_value_f& get_value) {
@@ -146,6 +171,9 @@ void main(int argc, char* const* argv) {
                                 const args::callbacks::get_value_f& get_value) {
         if (opt == "output") {
             return callbacks.short_option(pn::rune{'o'}, get_value);
+        } else if (opt == "hidpi") {
+            scale = 2;
+            return true;
         } else if (opt == "text") {
             return callbacks.short_option(pn::rune{'t'}, get_value);
         } else if (opt == "opengl") {
@@ -177,7 +205,7 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({540, 2000}, output_dir);
         run(&video, "txt", [](Rect) {});
     } else {
-        OffscreenVideoDriver video({540, 2000}, gl_version, glsl_version, output_dir);
+        OffscreenVideoDriver video({540, 2000}, scale, gl_version, glsl_version, output_dir);
         run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
     }
 }

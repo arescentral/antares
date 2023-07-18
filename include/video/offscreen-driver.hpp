@@ -34,12 +34,14 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
 
   public:
     OffscreenVideoDriver(
-            Size screen_size, std::pair<int, int> gl_version, pn::string_view glsl_version,
-            const sfz::optional<pn::string>& output_dir);
+            Size screen_size, int scale, std::pair<int, int> gl_version,
+            pn::string_view glsl_version, const sfz::optional<pn::string>& output_dir);
 
     virtual pn::string_view glsl_version() const;
 
-    virtual Size viewport_size() const { return _screen_size; }
+    virtual Size viewport_size() const {
+        return {_screen_size.width * _scale, _screen_size.height * _scale};
+    }
     virtual Size screen_size() const { return _screen_size; }
 
     virtual Point     get_mouse() { return _scheduler->get_mouse(); }
@@ -56,6 +58,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
 
   private:
     const Size                _screen_size;
+    const int                 _scale;
     const std::pair<int, int> _gl_version;
     const pn::string          _glsl_version;
     sfz::optional<pn::string> _output_dir;
