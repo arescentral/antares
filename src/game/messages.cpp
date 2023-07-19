@@ -60,6 +60,8 @@ static const int32_t kHBuffer = 4;
 
 static const int16_t kAutoPilotOnString  = 8;
 static const int16_t kAutoPilotOffString = 9;
+static const int16_t kShieldsLowString   = 13;
+static const int16_t kMaximumShipsString = 14;
 static const Hue     kStatusLabelColor   = Hue::AQUA;
 static const Hue     kStatusWarnColor    = Hue::PINK;
 
@@ -332,8 +334,8 @@ void Messages::zoom(Zoom zoom) {
 void Messages::autopilot(bool on) {
     set_status(sys.messages.at(on ? kAutoPilotOnString : kAutoPilotOffString), kStatusLabelColor);
 }
-void Messages::shields_low() { set_status("WARNING: Shields Low", kStatusWarnColor); }
-void Messages::max_ships_built() { set_status("Maximum number of ships built", Hue::ORANGE); }
+void Messages::shields_low() { set_status(sys.messages.at(kShieldsLowString), kStatusWarnColor); }
+void Messages::max_ships_built() { set_status(sys.messages.at(kMaximumShipsString), Hue::ORANGE); }
 
 std::pair<sfz::optional<int64_t>, int> Messages::current() {
     return {long_message_data->start_id, long_message_data->current_page_index};

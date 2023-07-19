@@ -59,6 +59,9 @@ const NamedHandle<const BaseObject> kWarpOutFlare{"sfx/warp/out"};
 const NamedHandle<const BaseObject> kPlayerBody{"sfx/crew"};
 const NamedHandle<const BaseObject> kEnergyBlob{"sfx/energy"};
 
+static const int16_t kBaseCapturedString = 15;
+static const int16_t kBaseLostString     = 16;
+
 const Hue kFriendlyColor               = Hue::GREEN;
 const Hue kHostileColor[kMaxPlayerNum] = {Hue::PINK, Hue::RED, Hue::YELLOW, Hue::ORANGE};
 const Hue kNeutralColor                = Hue::SKY_BLUE;
@@ -663,10 +666,13 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
     }
     if (message) {
         if (new_owner.get()) {
-            Messages::add(
-                    pn::format("{0} captured by {1}.", object->long_name(), new_owner->name()));
+            Messages::add(pn::format(
+                    sys.messages.at(kBaseCapturedString).c_str(), object->long_name(),
+                    new_owner->name()));
         } else if (old_owner.get()) {  // must be since can't both be -1
-            Messages::add(pn::format("{0} lost by {1}.", object->long_name(), old_owner->name()));
+            Messages::add(pn::format(
+                    sys.messages.at(kBaseLostString).c_str(), object->long_name(),
+                    old_owner->name()));
         }
     }
 }

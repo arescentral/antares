@@ -59,6 +59,8 @@ const int32_t kWeaponRatio        = 2;
 const int32_t kEnergyChunk        = kHealthRatio + (kWeaponRatio * 3);
 const int32_t kWarpInEnergyFactor = 3;
 
+static const int16_t kShipDestroyedString = 17;
+
 static const ticks    kCollideFlashDuration = ticks{3};
 static const RgbColor kCollideFlashColor    = rgba(255, 255, 255, 127);
 
@@ -1329,7 +1331,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
         (anObject->attributes & kCanAcceptDestination)) {
         int count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
         Messages::add(pn::format(
-                "\xc2\xa0{0} destroyed.  {1} remaining.\xc2\xa0", anObject->long_name(), count));
+                sys.messages.at(kShipDestroyedString).c_str(), anObject->long_name(), count));
     }
 
     if (sObject->active == kObjectInUse) {
