@@ -162,13 +162,16 @@ static size_t get_tab_num(size_t key) {
     return 4;
 }
 
+static constexpr char kTabNameStrings[]     = "2009";
+static constexpr char kControlNameStrings[] = "2005";
+
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
         : InterfaceScreen("options/keys", {0, 0, 640, 480}),
           _state(state),
           _selected_key(-1),
           _flashed_on(false),
-          _tabs(Resource::strings(2009)),
-          _keys(Resource::strings(2005)) {
+          _tabs(Resource::strings(kTabNameStrings)),
+          _keys(Resource::strings(kControlNameStrings)) {
     button(DONE)->bind({
             [this] {
                 *_state = OptionsScreen::ACCEPT;

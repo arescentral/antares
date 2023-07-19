@@ -37,7 +37,7 @@ namespace antares {
 
 static pn::string help_text() {
     pn::string text = Resource::text(6002);
-    Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
+    Replace_KeyCode_Strings_With_Actual_Key_Names(text, kKeyNameStrings, 4);
     return text;
 }
 

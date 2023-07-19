@@ -26,6 +26,9 @@ using sfz::range;
 
 namespace antares {
 
+constexpr char Gamepad::kNameStrings[];
+constexpr char Gamepad::kLongNameStrings[];
+
 Gamepad::Button Gamepad::num(pn::string_view name) {
     for (auto i : range<int>(BEGIN, END)) {
         if (sys.gamepad_names.at(i) == name) {

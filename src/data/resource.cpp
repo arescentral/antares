@@ -456,8 +456,8 @@ std::vector<int32_t> Resource::rotation_table() {
     }
 }
 
-std::vector<pn::string> Resource::strings(int id) {
-    pn::string path = pn::format("strings/{0}.pn", id);
+std::vector<pn::string> Resource::strings(pn::string_view name) {
+    pn::string path = pn::format("strings/{0}.pn", name);
     try {
         pn::value               x = procyon(path);
         pn::array_cref          l = x.as_array();

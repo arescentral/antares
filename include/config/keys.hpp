@@ -191,7 +191,7 @@ enum class Key {
 class KeyMap {
   public:
     KeyMap();
-    KeyMap(const KeyMap&) = delete;
+    KeyMap(const KeyMap&)            = delete;
     KeyMap& operator=(const KeyMap&) = delete;
 
     bool get(Key k) const;
@@ -212,11 +212,9 @@ class KeyMap {
 bool operator==(const KeyMap& a, const KeyMap& b);
 bool operator!=(const KeyMap& a, const KeyMap& b);
 
-enum {
-    KEY_NAMES      = 1000,
-    KEY_LONG_NAMES = 1002,
-};
-const int kKeyNameLength = 4;
+constexpr char kKeyNameStrings[]     = "1000";
+constexpr char kKeyLongNameStrings[] = "1002";
+const int      kKeyNameLength        = 4;
 
 inline bool mDeleteKey(const KeyMap& km) { return km.get(Key::BACKSPACE); }
 inline bool mCapsLockKey(const KeyMap& km) { return km.get(Key::CAPS_LOCK); }

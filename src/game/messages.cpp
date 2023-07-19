@@ -110,7 +110,7 @@ struct Messages::longMessageType {
 
 ANTARES_GLOBAL std::queue<pn::string> Messages::message_data;
 ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
-ANTARES_GLOBAL ticks Messages::time_count;
+ANTARES_GLOBAL ticks                      Messages::time_count;
 
 void MessageLabel_Set_Special(Handle<Label> id, pn::string_view text);
 
@@ -181,7 +181,7 @@ void Messages::clip() {
     }
 
     pn::string text = (*m->pages)[m->current_page_index].copy();
-    Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
+    Replace_KeyCode_Strings_With_Actual_Key_Names(text, kKeyLongNameStrings, 0);
     if (*text.begin() == pn::rune{'#'}) {
         m->labelMessage = true;
     } else {

@@ -30,10 +30,10 @@
 
 namespace antares {
 
-static const int16_t kMessageStringID    = 3100;
-static const int16_t kCheatStringListID  = 750;
-static const int16_t kCheatFeedbackOnID  = 751;
-static const int16_t kCheatFeedbackOffID = 752;
+static constexpr char kMessageStrings[]          = "3100";
+static constexpr char kCheatStrings[]            = "750";
+static constexpr char kCheatFeedbackOnStrings[]  = "751";
+static constexpr char kCheatFeedbackOffStrings[] = "752";
 
 constexpr char kInstLeftPictID[]  = "gui/instruments/left";
 constexpr char kInstRightPictID[] = "gui/instruments/right";
@@ -47,17 +47,17 @@ void sys_init() {
     sys.fonts.title        = font("title");
     sys.fonts.small_button = font("button-small");
 
-    sys.key_names          = Resource::strings(KEY_NAMES);
-    sys.key_long_names     = Resource::strings(KEY_LONG_NAMES);
-    sys.gamepad_names      = Resource::strings(Gamepad::NAMES);
-    sys.gamepad_long_names = Resource::strings(Gamepad::LONG_NAMES);
+    sys.key_names          = Resource::strings(kKeyNameStrings);
+    sys.key_long_names     = Resource::strings(kKeyLongNameStrings);
+    sys.gamepad_names      = Resource::strings(Gamepad::kNameStrings);
+    sys.gamepad_long_names = Resource::strings(Gamepad::kLongNameStrings);
 
     sys.rot_table = Resource::rotation_table();
 
-    sys.messages    = Resource::strings(kMessageStringID);
-    sys.cheat.codes = Resource::strings(kCheatStringListID);
-    sys.cheat.on    = Resource::strings(kCheatFeedbackOnID);
-    sys.cheat.off   = Resource::strings(kCheatFeedbackOffID);
+    sys.messages    = Resource::strings(kMessageStrings);
+    sys.cheat.codes = Resource::strings(kCheatStrings);
+    sys.cheat.on    = Resource::strings(kCheatFeedbackOnStrings);
+    sys.cheat.off   = Resource::strings(kCheatFeedbackOffStrings);
 
     if (sys.audio) {
         sys.sound.init();
