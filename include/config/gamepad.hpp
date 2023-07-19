@@ -57,8 +57,8 @@ struct Gamepad {
         BEGIN = static_cast<int>(Button::A),
         END   = static_cast<int>(Button::RT) + 1,
     };
-    static constexpr char kNameStrings[]     = "1001";
-    static constexpr char kLongNameStrings[] = "1003";
+    static constexpr char kNameStrings[]     = "gamepad/short";
+    static constexpr char kLongNameStrings[] = "gamepad/long";
 
     static Gamepad::Button num(pn::string_view name);
     static bool            name(Gamepad::Button button, pn::string& out);

@@ -162,8 +162,8 @@ static size_t get_tab_num(size_t key) {
     return 4;
 }
 
-static constexpr char kTabNameStrings[]     = "2009";
-static constexpr char kControlNameStrings[] = "2005";
+static constexpr char kTabNameStrings[]     = "tabs";
+static constexpr char kControlNameStrings[] = "controls";
 
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
         : InterfaceScreen("options/keys", {0, 0, 640, 480}),

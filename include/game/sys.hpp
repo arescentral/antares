@@ -58,6 +58,7 @@ struct SystemGlobals {
     Ledger* ledger = nullptr;
 
     std::vector<pn::string> messages;
+    std::vector<pn::string> minicomputer;
 
     struct {
         std::vector<pn::string> codes;

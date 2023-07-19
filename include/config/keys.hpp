@@ -212,8 +212,8 @@ class KeyMap {
 bool operator==(const KeyMap& a, const KeyMap& b);
 bool operator!=(const KeyMap& a, const KeyMap& b);
 
-constexpr char kKeyNameStrings[]     = "1000";
-constexpr char kKeyLongNameStrings[] = "1002";
+constexpr char kKeyNameStrings[]     = "keyboard/short";
+constexpr char kKeyLongNameStrings[] = "keyboard/long";
 const int      kKeyNameLength        = 4;
 
 inline bool mDeleteKey(const KeyMap& km) { return km.get(Key::BACKSPACE); }
