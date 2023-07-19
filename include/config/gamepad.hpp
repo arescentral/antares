@@ -54,11 +54,11 @@ struct Gamepad {
     };
 
     enum {
-        BEGIN      = static_cast<int>(Button::A),
-        END        = static_cast<int>(Button::RT) + 1,
-        NAMES      = 1001,
-        LONG_NAMES = 1003,
+        BEGIN = static_cast<int>(Button::A),
+        END   = static_cast<int>(Button::RT) + 1,
     };
+    static constexpr char kNameStrings[]     = "gamepad/short";
+    static constexpr char kLongNameStrings[] = "gamepad/long";
 
     static Gamepad::Button num(pn::string_view name);
     static bool            name(Gamepad::Button button, pn::string& out);

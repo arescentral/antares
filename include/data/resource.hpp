@@ -58,7 +58,7 @@ class Resource {
     static SpriteData              sprite_data(pn::string_view name);
     static ArrayPixMap             sprite_image(pn::string_view name);
     static ArrayPixMap             sprite_overlay(pn::string_view name);
-    static std::vector<pn::string> strings(int id);
+    static std::vector<pn::string> strings(pn::string_view name);
     static pn::string              text(int id);
     static Texture                 texture(pn::string_view name);
     static Texture                 texture(int16_t id);

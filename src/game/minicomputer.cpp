@@ -43,8 +43,6 @@
 #include "sound/fx.hpp"
 #include "video/driver.hpp"
 
-using sfz::bin;
-using sfz::range;
 using std::max;
 using std::vector;
 
@@ -146,6 +144,40 @@ const int32_t kMiniAmmoLeftSpecial = 100;
 const int32_t kMiniAmmoTextHBuffer = 2;
 
 const int32_t kMaxShipBuffer = 40;
+
+const int16_t kControlString = 0;
+const int16_t kTargetString  = 1;
+
+const int16_t kMainMenuHeaderString        = 2;
+const int16_t kMainMenuBuildString         = 3;
+const int16_t kMainMenuSpecialOrdersString = 4;
+const int16_t kMainMenuMessageString       = 5;
+const int16_t kMainMenuMissionStatusString = 6;
+const int16_t kMainMenuAcceptString        = 7;
+
+const int16_t kBuildShipsHeaderString = 8;
+const int16_t kBuildShipsAcceptString = 9;
+const int16_t kBuildShipsCancelString = 10;
+
+const int16_t kSpecialOrdersHeaderString          = 11;
+const int16_t kSpecialOrdersTransferControlString = 12;
+const int16_t kSpecialOrdersHoldPositionString    = 13;
+const int16_t kSpecialOrdersGoToMyPositionString  = 14;
+const int16_t kSpecialOrdersFireWeapon1String     = 15;
+const int16_t kSpecialOrdersFireWeapon2String     = 16;
+const int16_t kSpecialOrdersFireSpecialString     = 17;
+const int16_t kSpecialOrdersAcceptString          = 18;
+const int16_t kSpecialOrdersCancelString          = 19;
+
+const int16_t kMessagesHeaderString       = 20;
+const int16_t kMessagesNextPageString     = 21;
+const int16_t kMessagesPreviousPageString = 22;
+const int16_t kMessagesLastMessageString  = 23;
+const int16_t kMessagesAcceptString       = 24;
+const int16_t kMessagesCancelString       = 25;
+
+const int16_t kMissionStatusHeaderString = 26;
+const int16_t kMissionStatusCancelString = 27;
 
 void pad_to(pn::string& s, size_t width) {
     size_t length = pn::rune::count(s);
@@ -258,9 +290,9 @@ static void highlight(const Rects& rects, int line) {
 
 static void item_text(const Quads& quads, int line, pn::string_view string, bool dim) {
     RgbColor textcolor = !dim ? GetRGBTranslateColorShade(kMiniScreenColor, LIGHTEST)
-                              : (line == g.mini.selectLine)
-                                         ? GetRGBTranslateColorShade(kMiniScreenColor, VERY_DARK)
-                                         : GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
+                         : (line == g.mini.selectLine)
+                                 ? GetRGBTranslateColorShade(kMiniScreenColor, VERY_DARK)
+                                 : GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
     sys.fonts.computer.draw(
             quads,
             Point{kMiniScreenLeft + kMiniScreenLeftBuffer,
@@ -378,9 +410,11 @@ void draw_mini_screen() {
         case Screen::STATUS: draw_minicomputer_lines(); break;
     }
     draw_mini_ship_data(
-            g.admiral->control(), Hue::YELLOW, kMiniSelectTop + instrument_top(), "CONTROL");
+            g.admiral->control(), Hue::YELLOW, kMiniSelectTop + instrument_top(),
+            sys.minicomputer.at(kControlString));
     draw_mini_ship_data(
-            g.admiral->target(), Hue::SKY_BLUE, kMiniTargetTop + instrument_top(), "TARGET");
+            g.admiral->target(), Hue::SKY_BLUE, kMiniTargetTop + instrument_top(),
+            sys.minicomputer.at(kTargetString));
 }
 
 static MiniLine text(pn::string_view name, bool underlined) {
@@ -682,8 +716,9 @@ static void draw_mini_ship_data(
     {
         if ((obj->max_health() > 0) && (obj->_health > 0)) {
             Rects rects;
-            Rect  dRect = {Point(kMiniHealthLeft, screen_top + MiniIconMacLineTop()),
-                          Size(kMiniBarWidth, kMiniIconHeight)};
+            Rect  dRect = {
+                    Point(kMiniHealthLeft, screen_top + MiniIconMacLineTop()),
+                    Size(kMiniBarWidth, kMiniIconHeight)};
 
             uint32_t tlong = obj->_health * kMiniBarHeight;
             tlong /= obj->max_health();
@@ -706,8 +741,9 @@ static void draw_mini_ship_data(
     {
         if ((obj->max_energy() > 0) && (obj->_energy > 0)) {
             Rects rects;
-            Rect  dRect = {Point(kMiniEnergyLeft, screen_top + MiniIconMacLineTop()),
-                          Size(kMiniBarWidth, kMiniIconHeight)};
+            Rect  dRect = {
+                    Point(kMiniEnergyLeft, screen_top + MiniIconMacLineTop()),
+                    Size(kMiniBarWidth, kMiniIconHeight)};
 
             uint32_t tlong = obj->_energy * kMiniBarHeight;
             tlong /= obj->max_energy();
@@ -876,7 +912,7 @@ static void show_build_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
         return;
     }
     const MiniLine lines[] = {
-            text("BUILD SHIPS", false),
+            text(sys.minicomputer.at(kBuildShipsHeaderString), false),
             text("", true),
             selectable("", push_event({PlayerEventType::MINI_BUILD, 0})),
             selectable("", push_event({PlayerEventType::MINI_BUILD, 1})),
@@ -885,7 +921,9 @@ static void show_build_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
             selectable("", push_event({PlayerEventType::MINI_BUILD, 4})),
             selectable("", push_event({PlayerEventType::MINI_BUILD, 5})),
     };
-    make_mini_screen(Screen::BUILD, lines, accept("Build"), cancel("Main Menu"));
+    make_mini_screen(
+            Screen::BUILD, lines, accept(sys.minicomputer.at(kBuildShipsAcceptString)),
+            cancel(sys.minicomputer.at(kBuildShipsCancelString)));
     MiniComputerSetBuildStrings();
 }
 
@@ -894,15 +932,29 @@ static void show_special_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) 
         return;
     }
     const MiniLine lines[] = {
-            text("SPECIAL ORDERS", true),
-            selectable("Transfer Control", push_event({PlayerEventType::MINI_TRANSFER})),
-            selectable("Hold Position", push_event({PlayerEventType::MINI_HOLD})),
-            selectable("Go To My Position", push_event({PlayerEventType::MINI_COME})),
-            selectable("Fire Weapon 1", push_event({PlayerEventType::MINI_FIRE_1})),
-            selectable("Fire Weapon 2", push_event({PlayerEventType::MINI_FIRE_2})),
-            selectable("Fire Special", push_event({PlayerEventType::MINI_FIRE_S})),
+            text(sys.minicomputer.at(kSpecialOrdersHeaderString), true),
+            selectable(
+                    sys.minicomputer.at(kSpecialOrdersTransferControlString),
+                    push_event({PlayerEventType::MINI_TRANSFER})),
+            selectable(
+                    sys.minicomputer.at(kSpecialOrdersHoldPositionString),
+                    push_event({PlayerEventType::MINI_HOLD})),
+            selectable(
+                    sys.minicomputer.at(kSpecialOrdersGoToMyPositionString),
+                    push_event({PlayerEventType::MINI_COME})),
+            selectable(
+                    sys.minicomputer.at(kSpecialOrdersFireWeapon1String),
+                    push_event({PlayerEventType::MINI_FIRE_1})),
+            selectable(
+                    sys.minicomputer.at(kSpecialOrdersFireWeapon2String),
+                    push_event({PlayerEventType::MINI_FIRE_2})),
+            selectable(
+                    sys.minicomputer.at(kSpecialOrdersFireSpecialString),
+                    push_event({PlayerEventType::MINI_FIRE_S})),
     };
-    make_mini_screen(Screen::SPECIAL, lines, accept("Execute"), cancel("Main Menu"));
+    make_mini_screen(
+            Screen::SPECIAL, lines, accept(sys.minicomputer.at(kSpecialOrdersAcceptString)),
+            cancel(sys.minicomputer.at(kSpecialOrdersCancelString)));
 }
 
 static void show_message_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
@@ -910,12 +962,20 @@ static void show_message_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) 
         return;
     }
     const MiniLine lines[] = {
-            text("MESSAGES", true),
-            selectable("Next Page/Clear", push_event({PlayerEventType::MINI_NEXT_PAGE})),
-            selectable("Previous Page", push_event({PlayerEventType::MINI_PREV_PAGE})),
-            selectable("Last Message", push_event({PlayerEventType::MINI_LAST_MESSAGE})),
+            text(sys.minicomputer.at(kMessagesHeaderString), true),
+            selectable(
+                    sys.minicomputer.at(kMessagesNextPageString),
+                    push_event({PlayerEventType::MINI_NEXT_PAGE})),
+            selectable(
+                    sys.minicomputer.at(kMessagesPreviousPageString),
+                    push_event({PlayerEventType::MINI_PREV_PAGE})),
+            selectable(
+                    sys.minicomputer.at(kMessagesLastMessageString),
+                    push_event({PlayerEventType::MINI_LAST_MESSAGE})),
     };
-    make_mini_screen(Screen::MESSAGE, lines, accept("Execute"), cancel("Main Menu"));
+    make_mini_screen(
+            Screen::MESSAGE, lines, accept(sys.minicomputer.at(kMessagesAcceptString)),
+            cancel(sys.minicomputer.at(kMessagesCancelString)));
 }
 
 static void show_status_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
@@ -923,9 +983,11 @@ static void show_status_screen(Handle<Admiral> adm, std::vector<PlayerEvent>*) {
         return;
     }
     const MiniLine lines[] = {
-            text("MISSION STATUS", true),
+            text(sys.minicomputer.at(kMissionStatusHeaderString), true),
     };
-    make_mini_screen(Screen::STATUS, lines, no_button(), cancel("Main Menu"));
+    make_mini_screen(
+            Screen::STATUS, lines, no_button(),
+            cancel(sys.minicomputer.at(kMissionStatusCancelString)));
     MiniComputerSetStatusStrings();
 }
 
@@ -934,13 +996,14 @@ static void show_main_screen(Handle<Admiral> adm) {
         return;
     }
     const MiniLine lines[] = {
-            text("MAIN MENU", true),
-            selectable("<Build>", show_build_screen),
-            selectable("<Special Orders>", show_special_screen),
-            selectable("<Message>", show_message_screen),
-            selectable("<Mission Status>", show_status_screen),
+            text(sys.minicomputer.at(kMainMenuHeaderString), true),
+            selectable(sys.minicomputer.at(kMainMenuBuildString), show_build_screen),
+            selectable(sys.minicomputer.at(kMainMenuSpecialOrdersString), show_special_screen),
+            selectable(sys.minicomputer.at(kMainMenuMessageString), show_message_screen),
+            selectable(sys.minicomputer.at(kMainMenuMissionStatusString), show_status_screen),
     };
-    make_mini_screen(Screen::MAIN, lines, accept("Select"), no_button());
+    make_mini_screen(
+            Screen::MAIN, lines, accept(sys.minicomputer.at(kMainMenuAcceptString)), no_button());
 }
 
 void MiniComputerDoCancel() { show_main_screen(g.admiral); }

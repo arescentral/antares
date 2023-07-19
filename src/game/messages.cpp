@@ -60,6 +60,8 @@ static const int32_t kHBuffer = 4;
 
 static const int16_t kAutoPilotOnString  = 8;
 static const int16_t kAutoPilotOffString = 9;
+static const int16_t kShieldsLowString   = 13;
+static const int16_t kMaximumShipsString = 14;
 static const Hue     kStatusLabelColor   = Hue::AQUA;
 static const Hue     kStatusWarnColor    = Hue::PINK;
 
@@ -110,7 +112,7 @@ struct Messages::longMessageType {
 
 ANTARES_GLOBAL std::queue<pn::string> Messages::message_data;
 ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
-ANTARES_GLOBAL ticks Messages::time_count;
+ANTARES_GLOBAL ticks                      Messages::time_count;
 
 void MessageLabel_Set_Special(Handle<Label> id, pn::string_view text);
 
@@ -181,7 +183,7 @@ void Messages::clip() {
     }
 
     pn::string text = (*m->pages)[m->current_page_index].copy();
-    Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
+    Replace_KeyCode_Strings_With_Actual_Key_Names(text, kKeyLongNameStrings, 0);
     if (*text.begin() == pn::rune{'#'}) {
         m->labelMessage = true;
     } else {
@@ -332,8 +334,8 @@ void Messages::zoom(Zoom zoom) {
 void Messages::autopilot(bool on) {
     set_status(sys.messages.at(on ? kAutoPilotOnString : kAutoPilotOffString), kStatusLabelColor);
 }
-void Messages::shields_low() { set_status("WARNING: Shields Low", kStatusWarnColor); }
-void Messages::max_ships_built() { set_status("Maximum number of ships built", Hue::ORANGE); }
+void Messages::shields_low() { set_status(sys.messages.at(kShieldsLowString), kStatusWarnColor); }
+void Messages::max_ships_built() { set_status(sys.messages.at(kMaximumShipsString), Hue::ORANGE); }
 
 std::pair<sfz::optional<int64_t>, int> Messages::current() {
     return {long_message_data->start_id, long_message_data->current_page_index};

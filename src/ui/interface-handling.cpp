@@ -62,10 +62,10 @@ namespace antares {
 
 namespace {
 
-const int16_t kShipDataTextID      = 6001;
-const int16_t kShipDataKeyStringID = 6001;
-const int16_t kShipDataNameID      = 6002;
-const int16_t kWeaponDataTextID    = 6003;
+const int16_t  kShipDataTextID        = 6001;
+constexpr char kShipDataKeyStrings[]  = "6001";
+constexpr char kShipDataNameStrings[] = "6002";
+const int16_t  kWeaponDataTextID      = 6003;
 
 enum {
     kShipOrObjectStringNum     = 0,
@@ -93,7 +93,7 @@ enum {
     kShipDataSpecialStringNum = 7,
 };
 
-const int16_t kHelpScreenKeyStringID = 6003;
+constexpr char kHelpScreenKeyStrings[] = "6003";
 
 pn::string_view::size_type find_replace(
         pn::string_ref data, int pos, pn::string_view search, pn::string_view replace) {
@@ -132,8 +132,8 @@ bool BothCommandAndQ() {
 pn::string CreateObjectDataText(const BaseObject& object) {
     pn::string data = Resource::text(kShipDataTextID);
 
-    auto keys   = Resource::strings(kShipDataKeyStringID);
-    auto values = Resource::strings(kShipDataNameID);
+    auto keys   = Resource::strings(kShipDataKeyStrings);
+    auto values = Resource::strings(kShipDataNameStrings);
 
     // *** Replace place-holders in text with real data, using the fabulous find_replace routine
     // an object or a ship?
@@ -213,8 +213,8 @@ void CreateWeaponDataText(
         }
     }
 
-    auto keys   = Resource::strings(kShipDataKeyStringID);
-    auto values = Resource::strings(kShipDataNameID);
+    auto keys   = Resource::strings(kShipDataKeyStrings);
+    auto values = Resource::strings(kShipDataNameStrings);
 
     // weapon name #
     find_replace(data, 0, keys.at(kWeaponNumberStringNum), weaponName);
@@ -254,9 +254,10 @@ void CreateWeaponDataText(
     *text += data;
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo) {
-    auto keys   = Resource::strings(kHelpScreenKeyStringID);
-    auto values = Resource::strings(resID);
+void Replace_KeyCode_Strings_With_Actual_Key_Names(
+        pn::string& text, pn::string_view string_rsrc, size_t padTo) {
+    auto keys   = Resource::strings(kHelpScreenKeyStrings);
+    auto values = Resource::strings(string_rsrc);
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         pn::string_view search  = keys.at(i);

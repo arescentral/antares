@@ -44,9 +44,11 @@ namespace antares {
 
 namespace {
 
-const usecs kTypingDelay      = kMajorTick;
-const int   kScoreTableHeight = 120;
-const int   kTextWidth        = 300;
+const usecs    kTypingDelay              = kMajorTick;
+const int      kScoreTableHeight         = 120;
+const int      kTextWidth                = 300;
+constexpr char kParSubstitutionStrings[] = "6000";
+constexpr char kParDataStrings[]         = "6002";
 
 void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
     size_t index = s.find(in);
@@ -226,7 +228,8 @@ pn::string DebriefingScreen::build_score_text(
         int par_kill) {
     pn::string text = Resource::text(6000);
 
-    auto strings = Resource::strings(6000);
+    auto strings      = Resource::strings(kParSubstitutionStrings);
+    auto data_strings = Resource::strings(kParDataStrings);
 
     const int your_mins  = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
     const int your_secs  = duration_cast<secs>(your_time.time_since_epoch()).count() % 60;
@@ -244,7 +247,6 @@ pn::string DebriefingScreen::build_score_text(
         secs_string += dec(par_secs, 2);
         string_replace(text, strings.at(3), secs_string);
     } else {
-        auto data_strings = Resource::strings(6002);
         string_replace(text, strings.at(2), data_strings.at(8));  // = "N/A"
         string_replace(text, strings.at(3), "");
     }
