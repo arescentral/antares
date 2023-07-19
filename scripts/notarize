@@ -59,6 +59,7 @@ def archive(dirname, app):
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as z:
         for real_path, archive_path in walk(os.path.basename(app), app):
             z.write(real_path, archive_path)
+    return archive
 
 
 def walk(archive_root, walk_root):
