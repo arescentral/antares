@@ -3,12 +3,13 @@
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
+import contextlib
 import os
+import shutil
 import subprocess
-
-APP = "out/cur/Antares.app"
-KEYCHAIN = "build.keychain"
-PROFILE = "notary"
+import tempfile
+import uuid
+import zipfile
 
 
 def main():
@@ -19,37 +20,86 @@ def main():
     assert password
     assert team_id
 
-    store_credentials(username, password, team_id)
-    submit()
-    staple()
+    app = "out/cur/Antares.app"
+    with tempdir() as dirname:
+        with temp_keychain(dirname) as keychain:
+            arch = archive(dirname, app)
+            profile = store_credentials(keychain, username, password, team_id)
+            submit(keychain, arch, profile)
+            staple(app)
+    print("Done!")
 
 
-def store_credentials(username, password, team_id):
-    subprocess.run(
-        ["xcrun", "notarytool", "store-credentials", PROFILE]
+@contextlib.contextmanager
+def tempdir():
+    dirname = tempfile.mkdtemp()
+    try:
+        yield dirname
+    finally:
+        shutil.rmtree(dirname)
+
+
+@contextlib.contextmanager
+def temp_keychain(dirname):
+    try:
+        keychain_path = os.path.join(dirname, "notarization.keychain-db")
+        print("Creating keychain %s…" % keychain_path)
+        keychain_pass = str(uuid.uuid4())
+        run(["security", "create-keychain", "-p", keychain_pass, keychain_path])
+        run(["security", "set-keychain-settings", "-lut", "900", keychain_path])
+        run(["security", "unlock-keychain", "-p", keychain_pass, keychain_path])
+        yield keychain_path
+    finally:
+        run(["security", "delete-keychain", keychain_path])
+
+
+def archive(dirname, app):
+    archive = os.path.join(dirname, "antares.zip")
+    print("Archiving app to %s…" % archive)
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as z:
+        for real_path, archive_path in walk(os.path.basename(app), app):
+            z.write(real_path, archive_path)
+
+
+def walk(archive_root, walk_root):
+    for root, dirs, files in os.walk(walk_root):
+        root = root[1 + len(walk_root) :]
+        for f in files:
+            real_path = os.path.join(walk_root, root, f)
+            archive_path = os.path.join(archive_root, root, f)
+            yield real_path, archive_path
+
+
+def store_credentials(keychain, username, password, team_id):
+    profile = "notary"
+    print("Storing credentials to %s…" % profile)
+    run(
+        ["xcrun", "notarytool", "store-credentials", profile]
         + ["--apple-id", username]
         + ["--password", password]
         + ["--team-id", team_id]
-        + ["--keychain", KEYCHAIN],
-        check=True,
+        + ["--keychain", keychain],
     )
+    return profile
 
 
-def submit():
-    subprocess.run(
-        ["xcrun", "notarytool", "submit", APP]
-        + ["--keychain-profile", PROFILE]
-        + ["--keychain", KEYCHAIN]
+def submit(keychain, app, profile):
+    print("Submitting %s for notarization…" % app)
+    run(
+        ["xcrun", "notarytool", "submit", app]
+        + ["--keychain-profile", profile]
+        + ["--keychain", keychain]
         + ["--wait"],
-        check=True,
     )
 
 
-def staple():
-    subprocess.run(
-        ["xcrun", "stapler", "staple", APP],
-        check=True,
-    )
+def staple(app):
+    print("Stapling %s…\n" % app)
+    run(["xcrun", "stapler", "staple", app])
+
+
+def run(cmd):
+    return subprocess.run(cmd, check=True)
 
 
 if __name__ == "__main__":
