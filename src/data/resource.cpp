@@ -503,8 +503,8 @@ ArrayPixMap Resource::sprite_overlay(pn::string_view name) {
     }
 }
 
-pn::string Resource::text(int id) {
-    pn::string path = pn::format("text/{0}.txt", id);
+pn::string Resource::text(pn::string_view name) {
+    pn::string path = pn::format("text/{0}.txt", name);
     try {
         return TextResourceData::load(path).string();
     } catch (...) {

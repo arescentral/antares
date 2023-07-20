@@ -55,9 +55,9 @@ namespace antares {
 
 namespace {
 
-const int16_t  kShipDataTextID        = 6001;
-constexpr char kShipDataNameStrings[] = "6002";
-const int16_t  kWeaponDataTextID      = 6003;
+constexpr char kShipDataText[]        = "object";
+constexpr char kShipDataNameStrings[] = "object";
+constexpr char kWeaponDataText[]      = "weapon";
 
 enum {
     kShipDataDashStringNum    = 2,
@@ -68,7 +68,7 @@ enum {
     kShipDataSpecialStringNum = 7,
 };
 
-constexpr char kHelpScreenKeyStrings[] = "6003";
+constexpr char kHelpScreenKeyStrings[] = "controls/short";
 
 pn::string_view::size_type find_replace(
         pn::string_ref data, int pos, pn::string_view search, pn::string_view replace) {
@@ -104,7 +104,7 @@ bool BothCommandAndQ() {
 }
 
 pn::string CreateObjectDataText(const BaseObject& object) {
-    pn::string tpl = Resource::text(kShipDataTextID);
+    pn::string tpl = Resource::text(kShipDataText);
 
     auto values = Resource::strings(kShipDataNameStrings);
 
@@ -130,7 +130,7 @@ pn::string CreateWeaponDataText(
     const auto& weaponObject = weapon->base;
 
     // TODO(sfiera): catch exception.
-    pn::string tpl = Resource::text(kWeaponDataTextID);
+    pn::string tpl = Resource::text(kWeaponDataText);
 
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging

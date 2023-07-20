@@ -45,7 +45,7 @@ namespace {
 const usecs    kTypingDelay      = kMajorTick;
 const int      kScoreTableHeight = 120;
 const int      kTextWidth        = 300;
-constexpr char kParDataStrings[] = "6002";
+constexpr char kParDataStrings[] = "object";
 
 BoxRectData interface_item(const Rect& text_bounds) {
     BoxRectData r;
@@ -215,7 +215,7 @@ BoxRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
 pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    pn::string tpl = Resource::text(6000);
+    pn::string tpl = Resource::text("par");
 
     auto data_strings = Resource::strings(kParDataStrings);
 
