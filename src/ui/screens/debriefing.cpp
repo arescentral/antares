@@ -36,27 +36,16 @@
 #include "video/driver.hpp"
 
 using sfz::dec;
-using std::unique_ptr;
-using std::vector;
 using std::chrono::duration_cast;
 
 namespace antares {
 
 namespace {
 
-const usecs    kTypingDelay              = kMajorTick;
-const int      kScoreTableHeight         = 120;
-const int      kTextWidth                = 300;
-constexpr char kParSubstitutionStrings[] = "6000";
-constexpr char kParDataStrings[]         = "6002";
-
-void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
-    size_t index = s.find(in);
-    while (index != s.npos) {
-        s.replace(index, in.size(), out);
-        index = s.find(in, index + 1);
-    }
-}
+const usecs    kTypingDelay      = kMajorTick;
+const int      kScoreTableHeight = 120;
+const int      kTextWidth        = 300;
+constexpr char kParDataStrings[] = "object";
 
 BoxRectData interface_item(const Rect& text_bounds) {
     BoxRectData r;
@@ -226,9 +215,8 @@ BoxRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
 pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    pn::string text = Resource::text(6000);
+    pn::string tpl = Resource::text("par");
 
-    auto strings      = Resource::strings(kParSubstitutionStrings);
     auto data_strings = Resource::strings(kParDataStrings);
 
     const int your_mins  = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
@@ -238,25 +226,17 @@ pn::string DebriefingScreen::build_score_text(
     const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
     const int par_score  = 100;
 
-    string_replace(text, strings.at(0), pn::dump(your_mins, pn::dump_short));
-    string_replace(text, strings.at(1), dec(your_secs, 2));
+    pn::string your_minsecs, par_minsecs;
+    your_minsecs = pn::format("{0}:{1}", your_mins, dec(your_secs, 2));
     if (par_time > game_ticks()) {
-        string_replace(text, strings.at(2), pn::dump(par_mins, pn::dump_short));
-        pn::string secs_string;
-        secs_string += ":";
-        secs_string += dec(par_secs, 2);
-        string_replace(text, strings.at(3), secs_string);
+        par_minsecs = pn::format("{0}:{1}", par_mins, dec(par_secs, 2));
     } else {
-        string_replace(text, strings.at(2), data_strings.at(8));  // = "N/A"
-        string_replace(text, strings.at(3), "");
+        par_minsecs = data_strings.at(8).copy();
     }
-    string_replace(text, strings.at(4), pn::dump(your_loss, pn::dump_short));
-    string_replace(text, strings.at(5), pn::dump(par_loss, pn::dump_short));
-    string_replace(text, strings.at(6), pn::dump(your_kill, pn::dump_short));
-    string_replace(text, strings.at(7), pn::dump(par_kill, pn::dump_short));
-    string_replace(text, strings.at(8), pn::dump(your_score, pn::dump_short));
-    string_replace(text, strings.at(9), pn::dump(par_score, pn::dump_short));
-    return text;
+
+    return pn::format(
+            tpl.c_str(), your_minsecs, par_minsecs, your_loss, par_loss, your_kill, par_kill,
+            your_score, par_score);
 }
 
 const char* stringify(DebriefingScreen::State state) {
