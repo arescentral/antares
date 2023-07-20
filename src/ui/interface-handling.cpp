@@ -51,38 +51,13 @@
 #include "video/driver.hpp"
 #include "video/transitions.hpp"
 
-using std::make_pair;
-using std::max;
-using std::min;
-using std::pair;
-using std::unique_ptr;
-using std::vector;
-
 namespace antares {
 
 namespace {
 
 const int16_t  kShipDataTextID        = 6001;
-constexpr char kShipDataKeyStrings[]  = "6001";
 constexpr char kShipDataNameStrings[] = "6002";
 const int16_t  kWeaponDataTextID      = 6003;
-
-enum {
-    kShipOrObjectStringNum     = 0,
-    kShipTypeStringNum         = 1,
-    kMassStringNum             = 2,
-    kShieldStringNum           = 3,
-    kHasLightStringNum         = 4,
-    kMaxSpeedStringNum         = 5,
-    kThrustStringNum           = 6,
-    kTurnStringNum             = 7,
-    kWeaponNumberStringNum     = 8,
-    kWeaponNameStringNum       = 9,
-    kWeaponGuidedStringNum     = 10,
-    kWeaponRangeStringNum      = 11,
-    kWeaponDamageStringNum     = 12,
-    kWeaponAutoTargetStringNum = 13,
-};
 
 enum {
     kShipDataDashStringNum    = 2,
@@ -106,9 +81,8 @@ pn::string_view::size_type find_replace(
 
 }  // namespace
 
-void CreateWeaponDataText(
-        pn::string* text, const sfz::optional<BaseObject::Weapon>& weapon,
-        pn::string_view weaponName);
+pn::string CreateWeaponDataText(
+        const sfz::optional<BaseObject::Weapon>& weapon, pn::string_view weaponName);
 
 //
 // BothCommandAndQ:
@@ -130,71 +104,39 @@ bool BothCommandAndQ() {
 }
 
 pn::string CreateObjectDataText(const BaseObject& object) {
-    pn::string data = Resource::text(kShipDataTextID);
+    pn::string tpl = Resource::text(kShipDataTextID);
 
-    auto keys   = Resource::strings(kShipDataKeyStrings);
     auto values = Resource::strings(kShipDataNameStrings);
 
-    // *** Replace place-holders in text with real data, using the fabulous find_replace routine
-    // an object or a ship?
-    if (object.attributes & kCanThink) {
-        pn::string_view name = values.at(0);
-        find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
-    } else {
-        pn::string_view name = values.at(1);
-        find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
-    }
+    bool can_think = (object.attributes & kCanThink);
 
-    // ship name
-    find_replace(data, 0, keys.at(kShipTypeStringNum), object.long_name);
+    pn::string result = pn::format(
+            tpl.c_str(), can_think ? values.at(0) : values.at(1), object.long_name,
+            stringify(Fixed(object.mass)), object.health, object.warpSpeed.val(),
+            stringify(Fixed(object.maxVelocity)), stringify(Fixed(object.thrust)),
+            stringify(Fixed(object.turn_rate)));
+    result += CreateWeaponDataText(object.weapons.pulse, values.at(kShipDataPulseStringNum));
+    result += CreateWeaponDataText(object.weapons.beam, values.at(kShipDataBeamStringNum));
+    result += CreateWeaponDataText(object.weapons.special, values.at(kShipDataSpecialStringNum));
 
-    // ship mass
-    find_replace(data, 0, keys.at(kMassStringNum), stringify(Fixed(object.mass)));
-
-    // ship shields
-    find_replace(data, 0, keys.at(kShieldStringNum), pn::dump(object.health, pn::dump_short));
-
-    // light speed
-    find_replace(
-            data, 0, keys.at(kHasLightStringNum),
-            pn::dump(object.warpSpeed.val(), pn::dump_short));
-
-    // max velocity
-    find_replace(data, 0, keys.at(kMaxSpeedStringNum), stringify(Fixed(object.maxVelocity)));
-
-    // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object.thrust)));
-
-    // par turn
-    find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed(object.turn_rate)));
-
-    // now, check for weapons!
-    CreateWeaponDataText(&data, object.weapons.pulse, values.at(kShipDataPulseStringNum));
-    CreateWeaponDataText(&data, object.weapons.beam, values.at(kShipDataBeamStringNum));
-    CreateWeaponDataText(&data, object.weapons.special, values.at(kShipDataSpecialStringNum));
-
-    return data;
+    return result;
 }
 
-void CreateWeaponDataText(
-        pn::string* text, const sfz::optional<BaseObject::Weapon>& weapon,
-        pn::string_view weaponName) {
-    int32_t mostDamage;
-    bool    isGuided = false;
-
+pn::string CreateWeaponDataText(
+        const sfz::optional<BaseObject::Weapon>& weapon, pn::string_view weaponName) {
     if (!weapon.has_value()) {
-        return;
+        return pn::string{};
     }
     const auto& weaponObject = weapon->base;
 
     // TODO(sfiera): catch exception.
-    pn::string data = Resource::text(kWeaponDataTextID);
+    pn::string tpl = Resource::text(kWeaponDataTextID);
+
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
-    //  object.  We calc this first so we can use isGuided
-
-    mostDamage = 0;
-    isGuided   = false;
+    //  object.  We calc this first so we can use is_guided
+    int32_t mostDamage = 0;
+    bool    is_guided  = false;
     if (weaponObject->activate.action.size() > 0) {
         for (const auto& action : weaponObject->activate.action) {
             const NamedHandle<const BaseObject>* created_base;
@@ -205,7 +147,7 @@ void CreateWeaponDataText(
                 default: continue;
             }
             if ((*created_base)->attributes & kIsGuided) {
-                isGuided = true;
+                is_guided = true;
             }
             if ((*created_base)->collide.damage > mostDamage) {
                 mostDamage = (*created_base)->collide.damage;
@@ -213,45 +155,18 @@ void CreateWeaponDataText(
         }
     }
 
-    auto keys   = Resource::strings(kShipDataKeyStrings);
     auto values = Resource::strings(kShipDataNameStrings);
 
-    // weapon name #
-    find_replace(data, 0, keys.at(kWeaponNumberStringNum), weaponName);
+    pn::string_view yes         = values.at(kShipDataYesStringNum);
+    pn::string_view no          = values.at(kShipDataNoStringNum);
+    pn::string_view dash        = values.at(kShipDataDashStringNum);
+    bool            auto_target = weaponObject->attributes & kAutoTarget;
 
-    // weapon name
-    find_replace(data, 0, keys.at(kWeaponNameStringNum), weaponObject->long_name);
-
-    pn::string_view yes  = values.at(kShipDataYesStringNum);
-    pn::string_view no   = values.at(kShipDataNoStringNum);
-    pn::string_view dash = values.at(kShipDataDashStringNum);
-
-    // is guided
-    if (isGuided) {
-        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), yes);
-    } else {
-        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), no);
-    }
-
-    // is autotarget
-    if (weaponObject->attributes & kAutoTarget) {
-        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), yes);
-    } else {
-        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), no);
-    }
-
-    // range
-    find_replace(
-            data, 0, keys.at(kWeaponRangeStringNum),
-            pn::dump((int64_t)lsqrt(weaponObject->device->range.squared), pn::dump_short));
-
-    if (mostDamage > 0) {
-        find_replace(
-                data, 0, keys.at(kWeaponDamageStringNum), pn::dump(mostDamage, pn::dump_short));
-    } else {
-        find_replace(data, 0, keys.at(kWeaponDamageStringNum), dash);
-    }
-    *text += data;
+    return pn::format(
+            tpl.c_str(), weaponName, weaponObject->long_name, is_guided ? yes : no,
+            lsqrt(weaponObject->device->range.squared),
+            (mostDamage > 0) ? pn::dump(mostDamage, pn::dump_short) : dash,
+            auto_target ? yes : no);
 }
 
 void Replace_KeyCode_Strings_With_Actual_Key_Names(
