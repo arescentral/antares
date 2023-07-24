@@ -964,8 +964,8 @@ static PlainButtonData tab_button_data(
 
 TabButton::TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds)
         : Button{tab_button_data(*box, data, bounds)}, _parent(box), _inner_bounds{bounds} {
-    for (const auto& item : data.content) {
-        _content.push_back(Widget::from(item));
+    for (const auto& kv : data.content) {
+        _content.push_back(Widget::from(kv.second));
     }
 }
 
@@ -1194,9 +1194,10 @@ TabBox::TabBox(const TabBoxData& data)
           _current_tab{0},
           _hue{data.hue},
           _style{data.style} {
-    Rect button_bounds = {_inner_bounds.left + 22, _inner_bounds.top - 20, 0,
-                          _inner_bounds.top - 10};
-    for (const auto& tab : data.tabs) {
+    Rect button_bounds = {
+            _inner_bounds.left + 22, _inner_bounds.top - 20, 0, _inner_bounds.top - 10};
+    for (const auto& kv : data.tabs) {
+        const auto& tab     = kv.second;
         button_bounds.right = button_bounds.left + tab.width;
         _tabs.emplace_back(new TabButton{this, tab, button_bounds});
         button_bounds.left = button_bounds.right + 37;

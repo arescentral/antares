@@ -26,6 +26,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/enums.hpp"
+#include "data/map.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -42,8 +43,8 @@ struct interfaceLabelType {
 };
 
 struct InterfaceData {
-    bool                    fullscreen = false;
-    std::vector<WidgetData> items;
+    bool               fullscreen = false;
+    id_map<WidgetData> items;
 };
 
 struct WidgetDataBase {
@@ -61,8 +62,8 @@ struct WidgetDataBase {
         TAB_BOX,
     };
 
-    WidgetDataBase()                 = default;
-    WidgetDataBase(WidgetDataBase&&) = default;
+    WidgetDataBase()                            = default;
+    WidgetDataBase(WidgetDataBase&&)            = default;
     WidgetDataBase& operator=(WidgetDataBase&&) = default;
     virtual ~WidgetDataBase() {}
 
@@ -106,12 +107,12 @@ struct TabBoxData : public WidgetDataBase {
     InterfaceStyle style = InterfaceStyle::LARGE;
 
     struct Tab {
-        sfz::optional<int64_t>  id;
-        int64_t                 width;
-        pn::string              label;
-        std::vector<WidgetData> content;
+        sfz::optional<int64_t> id;
+        int64_t                width;
+        pn::string             label;
+        id_map<WidgetData>     content;
     };
-    std::vector<Tab> tabs;
+    id_map<Tab> tabs;
 };
 
 class WidgetDataBase::Visitor {

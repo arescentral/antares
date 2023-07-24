@@ -30,8 +30,6 @@
 #include "lang/casts.hpp"
 #include "video/driver.hpp"
 
-using sfz::range;
-
 namespace antares {
 
 DECLARE_FIELD_READER(WidgetData);

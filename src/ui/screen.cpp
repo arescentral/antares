@@ -32,17 +32,14 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using std::unique_ptr;
-using std::vector;
-
 namespace antares {
 
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bounds(bounds) {
     try {
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
-        for (auto& item : data.items) {
-            _widgets.push_back(Widget::from(item));
+        for (const auto& kv : data.items) {
+            _widgets.push_back(Widget::from(kv.second));
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
