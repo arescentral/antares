@@ -37,30 +37,34 @@
 
 namespace antares {
 
-namespace {
+static const secs kMainDemoTimeOutTime  = secs(30);
+static const int  kTitleTextScrollWidth = 450;
 
-const secs kMainDemoTimeOutTime  = secs(30);
-const int  kTitleTextScrollWidth = 450;
-
-}  // namespace
+static constexpr char kSoloButton[]    = "start-new-game";
+static constexpr char kNetButton[]     = "start-network-game";
+static constexpr char kOptionsButton[] = "options";
+static constexpr char kQuitButton[]    = "quit";
+static constexpr char kAboutButton[]   = "about-ares";
+static constexpr char kDemoButton[]    = "demo";
+static constexpr char kIntroButton[]   = "replay-intro";
 
 MainScreen::MainScreen()
         : InterfaceScreen("main", {0, 0, 640, 480}),
           _state(NORMAL),
           _replays(Resource::list_replays()) {
-    button(START_NEW_GAME)
+    button(kSoloButton)
             ->bind({
                     [this] { stack()->push(new SoloGame); },
                     [] { return plug.chapters.find(1) != plug.chapters.end(); },
             });
 
-    button(START_NETWORK_GAME)
+    button(kNetButton)
             ->bind({
                     [] { throw std::runtime_error("Networked games not yet implemented."); },
                     [] { return false; },
             });
 
-    button(REPLAY_INTRO)
+    button(kIntroButton)
             ->bind({
                     [this] {
                         stack()->push(new ScrollTextScreen(
@@ -69,12 +73,15 @@ MainScreen::MainScreen()
                     [] { return plug.info.intro.has_value(); },
             });
 
-    button(DEMO)->bind({
-            [this] { stack()->push(new ReplayGame(_replays.at(rand() % _replays.size()))); },
-            [this] { return !_replays.empty(); },
-    });
+    button(kDemoButton)
+            ->bind({
+                    [this] {
+                        stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
+                    },
+                    [this] { return !_replays.empty(); },
+            });
 
-    button(ABOUT_ARES)
+    button(kAboutButton)
             ->bind({
                     [this] {
                         stack()->push(
@@ -83,18 +90,20 @@ MainScreen::MainScreen()
                     [] { return plug.info.about.has_value(); },
             });
 
-    button(OPTIONS)->bind({
-            [this] { stack()->push(new OptionsScreen); },
-    });
+    button(kOptionsButton)
+            ->bind({
+                    [this] { stack()->push(new OptionsScreen); },
+            });
 
-    button(QUIT)->bind({
-            [this] {
-                // 1-second fade-out.
-                _state = QUITTING;
-                stack()->push(new ColorFade(
-                        ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-            },
-    });
+    button(kQuitButton)
+            ->bind({
+                    [this] {
+                        // 1-second fade-out.
+                        _state = QUITTING;
+                        stack()->push(new ColorFade(
+                                ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+                    },
+            });
 }
 
 MainScreen::~MainScreen() {}

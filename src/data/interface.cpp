@@ -119,8 +119,7 @@ FIELD_READER(WidgetData::Type) {
 
 FIELD_READER(TabBoxData::Tab) {
     return required_struct<TabBoxData::Tab>(
-            x, {{"id", &TabBoxData::Tab::id},
-                {"width", &TabBoxData::Tab::width},
+            x, {{"width", &TabBoxData::Tab::width},
                 {"label", &TabBoxData::Tab::label},
                 {"content", &TabBoxData::Tab::content}});
 }
@@ -129,7 +128,6 @@ static WidgetData rect_interface_item(path_value x) {
     return BoxRectData(required_struct<BoxRectData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &BoxRectData::label},
                 {"hue", &BoxRectData::hue},
                 {"style", &BoxRectData::style}}));
@@ -139,7 +137,6 @@ static WidgetData button_interface_item(path_value x) {
     return required_struct<PlainButtonData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &PlainButtonData::label},
                 {"key", &PlainButtonData::key},
                 {"gamepad", &PlainButtonData::gamepad},
@@ -151,7 +148,6 @@ static WidgetData checkbox_interface_item(path_value x) {
     return required_struct<CheckboxButtonData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &CheckboxButtonData::label},
                 {"key", &CheckboxButtonData::key},
                 {"gamepad", &CheckboxButtonData::gamepad},
@@ -163,7 +159,6 @@ static WidgetData radio_interface_item(path_value x) {
     return required_struct<RadioButtonData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &RadioButtonData::label},
                 {"key", &RadioButtonData::key},
                 {"gamepad", &RadioButtonData::gamepad},
@@ -175,7 +170,6 @@ static WidgetData picture_interface_item(path_value x) {
     return required_struct<PictureRectData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"picture", &PictureRectData::picture}});
 }
 
@@ -183,7 +177,6 @@ static WidgetData text_interface_item(path_value x) {
     return required_struct<TextRectData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"text", &TextRectData::text},
                 {"hue", &TextRectData::hue},
                 {"style", &TextRectData::style}});
@@ -193,7 +186,6 @@ static WidgetData tab_box_interface_item(path_value x) {
     return required_struct<TabBoxData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"hue", &TabBoxData::hue},
                 {"style", &TabBoxData::style},
                 {"tabs", &TabBoxData::tabs}});

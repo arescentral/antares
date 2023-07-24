@@ -53,25 +53,6 @@ class SoundControlScreen : public InterfaceScreen {
     virtual void overlay() const;
 
   private:
-    enum Item {
-        // Checkboxes
-        GAME_MUSIC = 0,
-        IDLE_MUSIC = 1,
-        SPEECH_ON  = 4,
-
-        // Volume Control
-        VOLUME_UP   = 2,
-        VOLUME_DOWN = 3,
-
-        // Buttons
-        CANCEL      = 5,
-        DONE        = 6,
-        KEY_CONTROL = 7,
-
-        // Other
-        VOLUME_BOX = 13,
-    };
-
     OptionsScreen::State* const _state;
 };
 
@@ -90,29 +71,6 @@ class KeyControlScreen : public InterfaceScreen {
 
   private:
     void adjust_interface();
-
-    enum Item {
-        CANCEL        = 0,
-        DONE          = 1,
-        SOUND_CONTROL = 2,
-
-        SHIP_TAB     = 3,
-        COMMAND_TAB  = 4,
-        SHORTCUT_TAB = 5,
-        UTILITY_TAB  = 6,
-        HOT_KEY_TAB  = 7,
-        TAB_BOX      = 8,
-
-        CONFLICT_TEXT = 10,
-    };
-
-    enum Tab {
-        SHIP,
-        COMMAND,
-        SHORTCUT,
-        UTILITY,
-        HOT_KEY,
-    };
 
     void update_conflicts();
     void flash_on(size_t key);

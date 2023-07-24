@@ -39,7 +39,7 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bo
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
         for (const auto& kv : data.items) {
-            _widgets.push_back(Widget::from(kv.second));
+            _widgets.push_back(Widget::from(kv.first, kv.second));
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));
@@ -185,9 +185,9 @@ Point InterfaceScreen::offset() const {
 }
 
 template <typename Vector>
-static Widget* find_id(const Vector& v, int64_t id) {
+static Widget* find_id(const Vector& v, pn::string_view id) {
     for (auto& widget : v) {
-        if (widget->id().has_value() && (*widget->id() == id)) {
+        if (widget->id() == id) {
             return &*widget;
         }
         auto in_children = find_id(widget->children(), id);
@@ -198,21 +198,23 @@ static Widget* find_id(const Vector& v, int64_t id) {
     return nullptr;
 }
 
-const Widget* InterfaceScreen::widget(int id) const { return find_id(_widgets, id); }
+const Widget* InterfaceScreen::widget(pn::string_view id) const { return find_id(_widgets, id); }
 
-Widget* InterfaceScreen::widget(int id) { return find_id(_widgets, id); }
+Widget* InterfaceScreen::widget(pn::string_view id) { return find_id(_widgets, id); }
 
-const PlainButton* InterfaceScreen::button(int id) const {
+const PlainButton* InterfaceScreen::button(pn::string_view id) const {
     return dynamic_cast<const PlainButton*>(widget(id));
 }
 
-PlainButton* InterfaceScreen::button(int id) { return dynamic_cast<PlainButton*>(widget(id)); }
+PlainButton* InterfaceScreen::button(pn::string_view id) {
+    return dynamic_cast<PlainButton*>(widget(id));
+}
 
-const CheckboxButton* InterfaceScreen::checkbox(int id) const {
+const CheckboxButton* InterfaceScreen::checkbox(pn::string_view id) const {
     return dynamic_cast<const CheckboxButton*>(widget(id));
 }
 
-CheckboxButton* InterfaceScreen::checkbox(int id) {
+CheckboxButton* InterfaceScreen::checkbox(pn::string_view id) {
     return dynamic_cast<CheckboxButton*>(widget(id));
 }
 

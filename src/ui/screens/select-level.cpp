@@ -42,6 +42,12 @@ using std::unique_ptr;
 
 namespace antares {
 
+static constexpr char kBeginButton[]    = "begin";
+static constexpr char kCancelButton[]   = "cancel";
+static constexpr char kPreviousButton[] = "previous";
+static constexpr char kNextButton[]     = "next";
+static constexpr char kNameRect[]       = "rect";
+
 SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
         : InterfaceScreen("select-level", {0, 0, 640, 480}),
           _state(SELECTING),
@@ -51,36 +57,38 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
     _index  = _chapters.size() - 1;
     *_level = Level::get(_chapters[_index]);
 
-    button(OK)->bind({[this] {
+    button(kBeginButton)->bind({[this] {
         _state      = FADING_OUT;
         *_cancelled = false;
         stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
     }});
 
-    button(CANCEL)->bind({[this] {
+    button(kCancelButton)->bind({[this] {
         *_cancelled = true;
         stack()->pop(this);
     }});
 
-    button(PREVIOUS)->bind({
-            [this] {
-                if (_index > 0) {
-                    --_index;
-                    *_level = Level::get(_chapters[_index]);
-                }
-            },
-            [this] { return _index > 0; },
-    });
+    button(kPreviousButton)
+            ->bind({
+                    [this] {
+                        if (_index > 0) {
+                            --_index;
+                            *_level = Level::get(_chapters[_index]);
+                        }
+                    },
+                    [this] { return _index > 0; },
+            });
 
-    button(NEXT)->bind({
-            [this] {
-                if (_index < _chapters.size() - 1) {
-                    ++_index;
-                    *_level = Level::get(_chapters[_index]);
-                }
-            },
-            [this] { return _index < _chapters.size() - 1; },
-    });
+    button(kNextButton)
+            ->bind({
+                    [this] {
+                        if (_index < _chapters.size() - 1) {
+                            ++_index;
+                            *_level = Level::get(_chapters[_index]);
+                        }
+                    },
+                    [this] { return _index < _chapters.size() - 1; },
+            });
 }
 
 SelectLevelScreen::~SelectLevelScreen() {}
@@ -153,7 +161,7 @@ void SelectLevelScreen::overlay() const { draw_level_name(); }
 void SelectLevelScreen::draw_level_name() const {
     const pn::string_view chapter_name = (*_level)->base.name;
 
-    const Widget& i = *widget(NAME);
+    const Widget& i = *widget(kNameRect);
 
     const StyledText retro = StyledText::retro(
             chapter_name, {sys.fonts.title, 440, 0, 2},

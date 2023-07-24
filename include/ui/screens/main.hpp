@@ -45,15 +45,6 @@ class MainScreen : public InterfaceScreen {
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
 
   private:
-    enum Button {
-        START_NEW_GAME     = 0,
-        START_NETWORK_GAME = 1,
-        OPTIONS            = 2,
-        QUIT               = 3,
-        ABOUT_ARES         = 4,
-        DEMO               = 5,
-        REPLAY_INTRO       = 6,
-    };
     enum State {
         NORMAL   = 0,
         QUITTING = 1,

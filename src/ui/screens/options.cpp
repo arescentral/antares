@@ -41,10 +41,74 @@
 
 using std::make_pair;
 using std::pair;
-using std::unique_ptr;
 using std::vector;
 
 namespace antares {
+
+static constexpr char kCancelButton[]       = "cancel";
+static constexpr char kDoneButton[]         = "done";
+static constexpr char kKeyControlsButton[]  = "key-controls";
+static constexpr char kSoundControlButton[] = "options";
+
+static constexpr char kGameMusicButton[] = "music-during-action";
+static constexpr char kIdleMusicButton[] = "music-during-interlude";
+
+static constexpr char kVolUpButton[]   = "volume-up";
+static constexpr char kVolDownButton[] = "volume-down";
+static constexpr char kVolRect[]       = "volume";
+
+static constexpr char        kTabBox[] = "tabs";
+static constexpr const char* kTabs[]   = {
+        "ship", "command", "shortcuts", "utility", "hot-keys",
+};
+static constexpr const char* kKeys[] = {
+        "accelerate",
+        "decelerate",
+        "turn-counter-clockwise",
+        "turn-clockwise",
+        "fire-weapon-1",
+        "fire-weapon-2",
+        "fire-activate-special",
+        "warp",
+        "select-friendly",
+        "select-hostile",
+        "select-base",
+        "target",
+        "order-to-go",
+        "scale-in",
+        "scale-out",
+        "computer-previous",
+        "computer-next",
+        "computer-accept-select-do",
+        "computer-cancel-back-up",
+        "transfer-control",
+        "zoom-to-1-1",
+        "zoom-to-1-2",
+        "zoom-to-1-4",
+        "zoom-to-1-16",
+        "zoom-to-closest-hostile",
+        "zoom-to-closest-object",
+        "zoom-to-all",
+        "message-next-page-clear",
+        "help",
+        "lower-volume",
+        "raise-volume",
+        "mute-music",
+        "expert-net-settings",
+        "fast-motion",
+        "hotkey-1",
+        "hotkey-2",
+        "hotkey-3",
+        "hotkey-4",
+        "hotkey-5",
+        "hotkey-6",
+        "hotkey-7",
+        "hotkey-8",
+        "hotkey-9",
+        "hotkey-10",
+};
+
+static constexpr char kConflictTextRect[] = "conflict";
 
 OptionsScreen::OptionsScreen() : _state(SOUND_CONTROL), _revert(sys.prefs->get().copy()) {}
 
@@ -66,7 +130,7 @@ void OptionsScreen::become_front() {
 
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
         : InterfaceScreen("options/sound", {0, 0, 640, 480}), _state(state) {
-    checkbox(IDLE_MUSIC)
+    checkbox(kIdleMusicButton)
             ->bind({
                     [] { return sys.prefs->play_idle_music(); },
                     [](bool on) {
@@ -75,21 +139,22 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
                     },
             });
 
-    checkbox(GAME_MUSIC)
+    checkbox(kGameMusicButton)
             ->bind({
                     [] { return sys.prefs->play_music_in_game(); },
                     [](bool on) { sys.prefs->set_play_music_in_game(on); },
             });
 
-    button(VOLUME_UP)->bind({
-            [] {
-                sys.prefs->set_volume(sys.prefs->volume() + 1);
-                sys.audio->set_global_volume(sys.prefs->volume());
-            },
-            [] { return sys.prefs->volume() < kMaxVolumePreference; },
-    });
+    button(kVolUpButton)
+            ->bind({
+                    [] {
+                        sys.prefs->set_volume(sys.prefs->volume() + 1);
+                        sys.audio->set_global_volume(sys.prefs->volume());
+                    },
+                    [] { return sys.prefs->volume() < kMaxVolumePreference; },
+            });
 
-    button(VOLUME_DOWN)
+    button(kVolDownButton)
             ->bind({
                     [] {
                         sys.prefs->set_volume(sys.prefs->volume() - 1);
@@ -98,21 +163,23 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
                     [] { return sys.prefs->volume() > 0; },
             });
 
-    button(DONE)->bind({
-            [this] {
-                *_state = OptionsScreen::ACCEPT;
-                stack()->pop(this);
-            },
-    });
+    button(kDoneButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::ACCEPT;
+                        stack()->pop(this);
+                    },
+            });
 
-    button(CANCEL)->bind({
-            [this] {
-                *_state = OptionsScreen::CANCEL;
-                stack()->pop(this);
-            },
-    });
+    button(kCancelButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::CANCEL;
+                        stack()->pop(this);
+                    },
+            });
 
-    button(KEY_CONTROL)
+    button(kKeyControlsButton)
             ->bind({
                     [this] {
                         *_state = OptionsScreen::KEY_CONTROL;
@@ -125,7 +192,7 @@ SoundControlScreen::~SoundControlScreen() {}
 
 void SoundControlScreen::overlay() const {
     const int volume = sys.prefs->volume();
-    Rect      bounds = widget(VOLUME_BOX)->inner_bounds();
+    Rect      bounds = widget(kVolRect)->inner_bounds();
     Point     off    = offset();
     bounds.offset(off.h, off.v);
 
@@ -172,22 +239,24 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
           _flashed_on(false),
           _tabs(Resource::strings(kTabNameStrings)),
           _keys(Resource::strings(kControlNameStrings)) {
-    button(DONE)->bind({
-            [this] {
-                *_state = OptionsScreen::ACCEPT;
-                stack()->pop(this);
-            },
-            [this] { return _conflicts.empty(); },
-    });
+    button(kDoneButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::ACCEPT;
+                        stack()->pop(this);
+                    },
+                    [this] { return _conflicts.empty(); },
+            });
 
-    button(CANCEL)->bind({
-            [this] {
-                *_state = OptionsScreen::CANCEL;
-                stack()->pop(this);
-            },
-    });
+    button(kCancelButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::CANCEL;
+                        stack()->pop(this);
+                    },
+            });
 
-    button(SOUND_CONTROL)
+    button(kSoundControlButton)
             ->bind({
                     [this] {
                         *_state = OptionsScreen::SOUND_CONTROL;
@@ -197,7 +266,7 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
             });
 
     for (int key = kKeyIndices[0]; key < kKeyIndices[5]; ++key) {
-        button(key + 15)->bind({[this, key] {
+        button(kKeys[key])->bind({[this, key] {
             _selected_key = key;
             adjust_interface();
         }});
@@ -252,12 +321,12 @@ void KeyControlScreen::fire_timer() {
 }
 
 void KeyControlScreen::adjust_interface() {
-    for (size_t i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        dynamic_cast<TabButton&>(*widget(i)).hue() = Hue::AQUA;
+    for (const auto tab : kTabs) {
+        dynamic_cast<TabButton&>(*widget(tab)).hue() = Hue::AQUA;
     }
 
     for (int key = kKeyIndices[0]; key < kKeyIndices[5]; ++key) {
-        PlainButton* b       = button(key + 15);
+        PlainButton* b       = button(kKeys[key]);
         Key          key_num = sys.prefs->key(key);
         b->key()             = key_num;
         if (key == _selected_key) {
@@ -287,7 +356,7 @@ void KeyControlScreen::overlay() const {
                 "{0}: {1} conflicts with {2}: {3}", _tabs.at(get_tab_num(key_one)),
                 _keys.at(key_one), _tabs.at(get_tab_num(key_two)), _keys.at(key_two));
 
-        const TextRect& box    = dynamic_cast<const TextRect&>(*widget(CONFLICT_TEXT));
+        const TextRect& box    = dynamic_cast<const TextRect&>(*widget(kConflictTextRect));
         Rect            bounds = box.inner_bounds();
         Point           off    = offset();
         bounds.offset(off.h, off.v);
@@ -317,12 +386,12 @@ void KeyControlScreen::update_conflicts() {
 }
 
 void KeyControlScreen::flash_on(size_t key) {
-    TabBox* box = dynamic_cast<TabBox*>(widget(TAB_BOX));
+    TabBox* box = dynamic_cast<TabBox*>(widget(kTabBox));
     if (kKeyIndices[box->current_tab()] <= key && key < kKeyIndices[box->current_tab() + 1]) {
-        PlainButton* item = button(key + 15);
+        PlainButton* item = button(kKeys[key]);
         item->hue()       = Hue::GOLD;
     } else {
-        TabButton* item = dynamic_cast<TabButton*>(widget(SHIP_TAB + get_tab_num(key)));
+        TabButton* item = dynamic_cast<TabButton*>(widget(kTabs[get_tab_num(key)]));
         item->hue()     = Hue::GOLD;
     }
 }

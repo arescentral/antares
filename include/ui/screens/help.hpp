@@ -33,12 +33,6 @@ class HelpScreen : public InterfaceScreen {
     virtual void overlay() const;
 
   private:
-    enum Item {
-        DONE = 0,
-
-        BOX = 1,
-    };
-
     const StyledText _text;
 };
 

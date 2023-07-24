@@ -35,6 +35,9 @@
 
 namespace antares {
 
+static constexpr char kTextBox[]    = "rect";
+static constexpr char kDoneButton[] = "done";
+
 static pn::string help_text() {
     pn::string text = Resource::text("help");
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, kKeyNameStrings, 4);
@@ -44,10 +47,10 @@ static pn::string help_text() {
 HelpScreen::HelpScreen()
         : InterfaceScreen("help", {128, 0, 608, 480}),
           _text{StyledText::retro(
-                  help_text(), {sys.fonts.computer, widget(BOX)->inner_bounds().width()},
+                  help_text(), {sys.fonts.computer, widget(kTextBox)->inner_bounds().width()},
                   GetRGBTranslateColorShade(Hue::RED, LIGHTEST),
                   GetRGBTranslateColorShade(Hue::RED, VERY_DARK))} {
-    button(DONE)->bind({[this] { stack()->pop(this); }});
+    button(kDoneButton)->bind({[this] { stack()->pop(this); }});
 }
 
 HelpScreen::~HelpScreen() {}
@@ -61,7 +64,7 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
 }
 
 void HelpScreen::overlay() const {
-    Rect  bounds = widget(BOX)->inner_bounds();
+    Rect  bounds = widget(kTextBox)->inner_bounds();
     Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);

@@ -67,9 +67,8 @@ struct WidgetDataBase {
     WidgetDataBase& operator=(WidgetDataBase&&) = default;
     virtual ~WidgetDataBase() {}
 
-    Type                   type;
-    Rect                   bounds;
-    sfz::optional<int64_t> id;
+    Type type;
+    Rect bounds;
 };
 
 InterfaceData interface(path_value x);
@@ -107,10 +106,9 @@ struct TabBoxData : public WidgetDataBase {
     InterfaceStyle style = InterfaceStyle::LARGE;
 
     struct Tab {
-        sfz::optional<int64_t> id;
-        int64_t                width;
-        pn::string             label;
-        id_map<WidgetData>     content;
+        int64_t            width;
+        pn::string         label;
+        id_map<WidgetData> content;
     };
     id_map<Tab> tabs;
 };

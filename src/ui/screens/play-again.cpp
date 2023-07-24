@@ -28,9 +28,7 @@
 
 namespace antares {
 
-namespace {
-
-const char* interface_id(bool allow_resume, bool allow_skip) {
+static const char* interface_id(bool allow_resume, bool allow_skip) {
     if (allow_resume) {
         if (allow_skip) {
             return "play-again/tutorial";
@@ -46,38 +44,41 @@ const char* interface_id(bool allow_resume, bool allow_skip) {
     }
 }
 
-}  // namespace
+static constexpr char kRestartButton[] = "start-over";
+static constexpr char kQuitButton[]    = "quit";
+static constexpr char kResumeButton[]  = "resume";
+static constexpr char kSkipButton[]    = "skip";
 
 PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed)
         : InterfaceScreen(interface_id(allow_resume, allow_skip), {48, 0, 688, 480}),
           _state(ASKING),
           _button_pressed(button_pressed) {
-    button(RESTART)->bind(
-            {[this] {
-                 _state           = FADING_OUT;
-                 *_button_pressed = Item::RESTART;
-                 stack()->push(new ColorFade(
-                         ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-             },
-             [] {
-                 // TODO(sfiera): disable if networked.
-                 return true;
-             }});
+    button(kRestartButton)
+            ->bind({[this] {
+                        _state           = FADING_OUT;
+                        *_button_pressed = Item::RESTART;
+                        stack()->push(new ColorFade(
+                                ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+                    },
+                    [] {
+                        // TODO(sfiera): disable if networked.
+                        return true;
+                    }});
 
-    button(QUIT)->bind({[this] {
+    button(kQuitButton)->bind({[this] {
         *_button_pressed = Item::QUIT;
         stack()->pop(this);
     }});
 
-    if (button(RESUME)) {
-        button(RESUME)->bind({[this] {
+    if (button(kResumeButton)) {
+        button(kResumeButton)->bind({[this] {
             *_button_pressed = Item::RESUME;
             stack()->pop(this);
         }});
     }
 
-    if (button(SKIP)) {
-        button(SKIP)->bind({[this] {
+    if (button(kSkipButton)) {
+        button(kSkipButton)->bind({[this] {
             *_button_pressed = Item::SKIP;
             stack()->pop(this);
         }});
