@@ -463,14 +463,19 @@ void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& e
 void BriefingScreen::show_object_data(
         int index, ObjectDataScreen::Trigger trigger, int mouse, Key key,
         Gamepad::Button gamepad) {
-    if (index < _inline_pict.size()) {
-        auto obj = _inline_pict[index].object;
-        if (obj) {
-            const Point origin = _inline_pict[index].bounds.center();
-            stack()->push(new ObjectDataScreen(origin, *obj, trigger, mouse, key, gamepad));
-            return;
-        }
+    if (index >= _inline_pict.size()) {
+        return;
     }
+    const inlinePictType& pict = _inline_pict[index];
+    const BaseObject*     obj  = _inline_pict[index].object;
+    if (!obj) {
+        return;
+    }
+    Point origin = pict.bounds.center();
+    Point off    = offset();
+    origin.offset(off.h, off.v);
+    stack()->push(new ObjectDataScreen(origin, *obj, trigger, mouse, key, gamepad));
+    return;
 }
 
 }  // namespace antares
