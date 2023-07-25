@@ -99,15 +99,14 @@ static BoxRect update_mission_brief_point(
     data.label.emplace(std::move(info.header));
     Rect hiliteBounds = info.highlight;
     hiliteBounds.offset(bounds.left, bounds.top);
-    *inlinePict     = populate_inline_picts(data.bounds, text, data.style);
-    *highlight_rect = Rect{};
 
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, data.style, kMissionDataWidth);
 
     if (hiliteBounds.empty()) {
-        data.bounds = {Point{(bounds.width() / 2) - (kMissionDataWidth / 2) + bounds.left,
-                             (bounds.height() / 2) - (textHeight / 2) + bounds.top},
-                       Size{kMissionDataWidth, textHeight}};
+        data.bounds = {
+                Point{(bounds.width() / 2) - (kMissionDataWidth / 2) + bounds.left,
+                      (bounds.height() / 2) - (textHeight / 2) + bounds.top},
+                Size{kMissionDataWidth, textHeight}};
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
             (bounds.left + (bounds.right - bounds.left) / 2)) {
@@ -180,7 +179,11 @@ static BoxRect update_mission_brief_point(
             lines->push_back(make_pair(p6, p7));
             lines->push_back(make_pair(p7, p8));
         }
+    } else {
+        *highlight_rect = Rect{};
     }
+
+    *inlinePict = populate_inline_picts(data.bounds, text, data.style);
     return box_rect;
 }
 
@@ -460,14 +463,19 @@ void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& e
 void BriefingScreen::show_object_data(
         int index, ObjectDataScreen::Trigger trigger, int mouse, Key key,
         Gamepad::Button gamepad) {
-    if (index < _inline_pict.size()) {
-        auto obj = _inline_pict[index].object;
-        if (obj) {
-            const Point origin = _inline_pict[index].bounds.center();
-            stack()->push(new ObjectDataScreen(origin, *obj, trigger, mouse, key, gamepad));
-            return;
-        }
+    if (index >= _inline_pict.size()) {
+        return;
     }
+    const inlinePictType& pict = _inline_pict[index];
+    const BaseObject*     obj  = _inline_pict[index].object;
+    if (!obj) {
+        return;
+    }
+    Point origin = pict.bounds.center();
+    Point off    = offset();
+    origin.offset(off.h, off.v);
+    stack()->push(new ObjectDataScreen(origin, *obj, trigger, mouse, key, gamepad));
+    return;
 }
 
 }  // namespace antares
