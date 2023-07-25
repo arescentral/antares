@@ -378,7 +378,7 @@ void cap_velocity(Handle<SpaceObject> object) {
 static void apply(
         const PushAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    if (!direct.get()) {
+    if (!subject.get() || !direct.get()) {
         return;
     }
 
@@ -431,8 +431,10 @@ static void apply(
     }
     if (a.player.has_value()) {
         direct->set_owner(*a.player, false);
-    } else {
+    } else if (subject.get()) {
         direct->set_owner(subject->owner, true);
+    } else {
+        direct->set_owner(Admiral::none(), true);
     }
 }
 
@@ -450,7 +452,7 @@ static void apply(
 static void apply(
         const OccupyAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
-    if (direct.get()) {
+    if (subject.get() && direct.get()) {
         direct->alter_occupation(subject->owner, a.value, true);
     }
 }
@@ -496,9 +498,15 @@ static void apply(
     switch (a.origin.value_or(MoveAction::Origin::LEVEL)) {
         case MoveAction::Origin::LEVEL: newLocation = {kUniversalCenter, kUniversalCenter}; break;
         case MoveAction::Origin::SUBJECT:
+            if (!subject.get() || !direct.get()) {
+                return;
+            }
             newLocation = a.reflexive ? direct->location : subject->location;
             break;
         case MoveAction::Origin::DIRECT:
+            if (!subject.get() || !direct.get()) {
+                return;
+            }
             newLocation = a.reflexive ? subject->location : direct->location;
             break;
     }
@@ -610,6 +618,9 @@ static void apply(
 static void apply(
         const TargetAction& a, Handle<SpaceObject> subject, Handle<SpaceObject> direct,
         Point offset) {
+    if (!subject.get() || !direct.get()) {
+        return;
+    }
     uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
     OverrideObjectDestination(subject, direct);
