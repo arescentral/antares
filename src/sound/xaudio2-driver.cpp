@@ -148,19 +148,13 @@ void XAudio2SoundDriver::XAudio2SourceVoiceInstance::reset_and_play_sound(
     
     sound->add_ref();
 
-    XAUDIO2_BUFFER buffer;
-    buffer.Flags      = 0;
+    XAUDIO2_BUFFER buffer = {};
     buffer.AudioBytes = sound->get_data_size();
     buffer.pAudioData = sound->get_data();
-    buffer.PlayBegin  = 0;
     buffer.PlayLength = buffer.AudioBytes / (sizeof(int16_t) * 2);
-    buffer.LoopBegin  = 0;
-    buffer.LoopLength = 0;
-    buffer.LoopCount  = 0;
     buffer.pContext   = sound;
 
     if (looping) {
-        buffer.LoopLength = buffer.PlayLength;
         buffer.LoopCount  = XAUDIO2_LOOP_INFINITE;
     }
 
