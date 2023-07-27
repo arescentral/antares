@@ -44,16 +44,6 @@ class BriefingScreen : public InterfaceScreen {
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
   private:
-    enum Item {
-        // Buttons:
-        DONE     = 0,
-        PREVIOUS = 1,
-        NEXT     = 2,
-
-        // Map area:
-        MAP_RECT = 7,
-    };
-
     void build_star_map();
     void build_brief_point();
 

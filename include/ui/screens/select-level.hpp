@@ -40,17 +40,6 @@ class SelectLevelScreen : public InterfaceScreen {
     virtual void overlay() const;
 
   private:
-    enum Item {
-        // Buttons:
-        OK       = 0,
-        CANCEL   = 1,
-        PREVIOUS = 2,
-        NEXT     = 3,
-
-        // Text box:
-        NAME = 4,
-    };
-
     enum State {
         SELECTING,
         FADING_OUT,

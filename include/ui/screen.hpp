@@ -53,12 +53,12 @@ class InterfaceScreen : public Card {
 
     Point offset() const;
 
-    const PlainButton*    button(int id) const;
-    PlainButton*          button(int id);
-    const CheckboxButton* checkbox(int id) const;
-    CheckboxButton*       checkbox(int id);
-    const Widget*         widget(int id) const;
-    Widget*               widget(int id);
+    const PlainButton*    button(pn::string_view id) const;
+    PlainButton*          button(pn::string_view id);
+    const CheckboxButton* checkbox(pn::string_view id) const;
+    CheckboxButton*       checkbox(pn::string_view id);
+    const Widget*         widget(pn::string_view id) const;
+    Widget*               widget(pn::string_view id);
 
   private:
     enum State {

@@ -34,6 +34,7 @@ namespace antares {
 static const Hue      kLoadingScreenColor = Hue::PALE_GREEN;
 static const RgbColor kLoadingForeColor   = GetRGBTranslateColorShade(Hue::PALE_GREEN, LIGHTEST);
 static const ticks    kTypingDelay        = kMinorTick;
+static constexpr char kLoadingRect[]      = "loading";
 
 LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("loading", {0, 0, 640, 480}),
@@ -99,7 +100,7 @@ void LoadingScreen::fire_timer() {
 void LoadingScreen::overlay() const {
     Rect above_content(0, 0, 640, 480);
     above_content.center_in(world());
-    above_content.bottom = widget(0)->inner_bounds().top;
+    above_content.bottom = widget(kLoadingRect)->inner_bounds().top;
     Rect bounds(0, 0, _name_text.auto_width(), _name_text.height());
     bounds.center_in(above_content);
 
@@ -109,7 +110,7 @@ void LoadingScreen::overlay() const {
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark  = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);
     Point           off   = offset();
-    Rect            bar   = widget(0)->inner_bounds();
+    Rect            bar   = widget(kLoadingRect)->inner_bounds();
     bar.offset(off.h, off.v);
     Rects rects;
     rects.fill(bar, dark);

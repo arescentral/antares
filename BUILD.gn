@@ -149,6 +149,7 @@ source_set("libantares-data") {
     "include/data/initial.hpp",
     "include/data/interface.hpp",
     "include/data/level.hpp",
+    "include/data/map.hpp",
     "include/data/object-ref.hpp",
     "include/data/plugin.hpp",
     "include/data/races.hpp",
@@ -614,8 +615,8 @@ executable("antares") {
   defines = []
 
   if (host_os == "win") {
-    configs -= [ "//build/lib/win:console"]
-    configs += [ "//build/lib/win:windows"]
+    configs -= [ "//build/lib/win:console" ]
+    configs += [ "//build/lib/win:windows" ]
     sources += [ "src/win/main.cpp" ]
   } else {
     sources += [ "src/glfw/main.cpp" ]

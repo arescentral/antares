@@ -36,7 +36,7 @@ class Widget {
 
     virtual ~Widget();
 
-    virtual sfz::optional<int64_t> id() const = 0;
+    virtual pn::string_view id() const = 0;
 
     virtual Widget* accept_click(Point where);
     virtual Widget* accept_key(Key which);
@@ -57,7 +57,7 @@ class BoxRect : public Widget {
   public:
     BoxRect(const BoxRectData& data);
 
-    sfz::optional<int64_t> id() const override { return _id; }
+    pn::string_view id() const override { return _id; }
 
     Hue            hue() const { return _hue; }
     InterfaceStyle style() const { return _style; }
@@ -71,7 +71,7 @@ class BoxRect : public Widget {
     void draw_plain_rect(Point origin) const;
 
     Rect                      _inner_bounds;
-    sfz::optional<int64_t>    _id;
+    pn::string                _id;
     sfz::optional<pn::string> _label;
     Hue                       _hue   = Hue::GRAY;
     InterfaceStyle            _style = InterfaceStyle::LARGE;
@@ -81,7 +81,7 @@ class TextRect : public Widget {
   public:
     TextRect(const TextRectData& data);
 
-    sfz::optional<int64_t> id() const override { return _id; }
+    pn::string_view id() const override { return _id; }
 
     Hue            hue() const { return _hue; }
     InterfaceStyle style() const { return _style; }
@@ -92,7 +92,7 @@ class TextRect : public Widget {
 
   private:
     Rect                      _inner_bounds;
-    sfz::optional<int64_t>    _id;
+    pn::string                _id;
     sfz::optional<pn::string> _text;
     Hue                       _hue   = Hue::GRAY;
     InterfaceStyle            _style = InterfaceStyle::LARGE;
@@ -102,21 +102,21 @@ class PictureRect : public Widget {
   public:
     PictureRect(const PictureRectData& data);
 
-    sfz::optional<int64_t> id() const override { return _id; }
+    pn::string_view id() const override { return _id; }
 
     void draw(Point origin, InputMode mode) const override;
     Rect inner_bounds() const override;
     Rect outer_bounds() const override;
 
   private:
-    Rect                   _inner_bounds;
-    sfz::optional<int64_t> _id;
-    Texture                _texture;
+    Rect       _inner_bounds;
+    pn::string _id;
+    Texture    _texture;
 };
 
 class Button : public Widget {
   public:
-    sfz::optional<int64_t> id() const override { return _id; }
+    pn::string_view id() const override { return _id; }
 
     Widget* accept_click(Point where) override;
     Widget* accept_key(Key which) override;
@@ -140,13 +140,13 @@ class Button : public Widget {
     Button(const ButtonData& data);
 
   private:
-    sfz::optional<int64_t> _id;
-    pn::string             _label;
-    Key                    _key;
-    Gamepad::Button        _gamepad;
-    Hue                    _hue    = Hue::GRAY;
-    InterfaceStyle         _style  = InterfaceStyle::LARGE;
-    bool                   _active = false;
+    pn::string      _id;
+    pn::string      _label;
+    Key             _key;
+    Gamepad::Button _gamepad;
+    Hue             _hue    = Hue::GRAY;
+    InterfaceStyle  _style  = InterfaceStyle::LARGE;
+    bool            _active = false;
 };
 
 class PlainButton : public Button {
@@ -239,7 +239,7 @@ class TabBox : public Widget {
   public:
     TabBox(const TabBoxData& data);
 
-    sfz::optional<int64_t> id() const override { return _id; }
+    pn::string_view id() const override { return _id; }
 
     Widget* accept_click(Point where) override;
     Widget* accept_key(Key which) override;
@@ -263,7 +263,7 @@ class TabBox : public Widget {
     std::vector<MaybeConstWidget*> children() const;
 
     Rect                                    _inner_bounds;
-    sfz::optional<int64_t>                  _id;
+    pn::string                              _id;
     int                                     _current_tab           = 0;
     int64_t                                 _top_right_border_size = 0;
     Hue                                     _hue                   = Hue::GRAY;

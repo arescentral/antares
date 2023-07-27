@@ -48,6 +48,11 @@ namespace antares {
 
 namespace {
 
+static constexpr char kDoneButton[]     = "done";
+static constexpr char kPreviousButton[] = "previous";
+static constexpr char kNextButton[]     = "next";
+static constexpr char kMapRect[]        = "mission-analysis";
+
 enum BriefingPoint {
     STAR_MAP         = -2,
     BLANK_SYSTEM_MAP = -1,
@@ -204,27 +209,29 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         _system_stars.push_back(star);
     }
 
-    button(DONE)->bind({[this] { stack()->pop(this); }});
+    button(kDoneButton)->bind({[this] { stack()->pop(this); }});
 
-    button(PREVIOUS)->bind({
-            [this] {
-                if (_briefing_point > _briefing_point_start) {
-                    --_briefing_point;
-                }
-                build_brief_point();
-            },
-            [this] { return _briefing_point > _briefing_point_start; },
-    });
+    button(kPreviousButton)
+            ->bind({
+                    [this] {
+                        if (_briefing_point > _briefing_point_start) {
+                            --_briefing_point;
+                        }
+                        build_brief_point();
+                    },
+                    [this] { return _briefing_point > _briefing_point_start; },
+            });
 
-    button(NEXT)->bind({
-            [this] {
-                if (_briefing_point < _briefing_point_end - 1) {
-                    ++_briefing_point;
-                }
-                build_brief_point();
-            },
-            [this] { return _briefing_point < _briefing_point_end - 1; },
-    });
+    button(kNextButton)
+            ->bind({
+                    [this] {
+                        if (_briefing_point < _briefing_point_end - 1) {
+                            ++_briefing_point;
+                        }
+                        build_brief_point();
+                    },
+                    [this] { return _briefing_point < _briefing_point_end - 1; },
+            });
 }
 
 BriefingScreen::~BriefingScreen() {}
@@ -320,7 +327,7 @@ void BriefingScreen::build_star_map() {
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
-    _bounds.center_in(widget(MAP_RECT)->inner_bounds());
+    _bounds.center_in(widget(kMapRect)->inner_bounds());
 
     if (_level.base.starmap.has_value()) {
         _star_rect = *_level.base.starmap;
@@ -352,7 +359,7 @@ void BriefingScreen::build_brief_point() {
     if (_briefing_point >= 0) {
         Point corner;
         Scale scale;
-        Rect  map_rect = widget(MAP_RECT)->inner_bounds();
+        Rect  map_rect = widget(kMapRect)->inner_bounds();
         GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;

@@ -226,7 +226,7 @@ std::vector<Widget*>       Widget::children() { return std::vector<Widget*>{}; }
 
 BoxRect::BoxRect(const BoxRectData& data)
         : _inner_bounds{data.bounds},
-          _id{data.id},
+          _id{data.id.copy()},
           _label{data.label.has_value() ? sfz::make_optional<pn::string>(data.label->copy())
                                         : sfz::nullopt},
           _hue{data.hue},
@@ -408,7 +408,7 @@ Rect BoxRect::outer_bounds() const {
 
 TextRect::TextRect(const TextRectData& data)
         : _inner_bounds{data.bounds},
-          _id{data.id},
+          _id{data.id.copy()},
           _text{data.text.has_value() ? sfz::make_optional(data.text->copy()) : sfz::nullopt},
           _hue{data.hue},
           _style{data.style} {}
@@ -431,7 +431,9 @@ Rect TextRect::outer_bounds() const {
 }
 
 PictureRect::PictureRect(const PictureRectData& data)
-        : _inner_bounds(data.bounds), _id{data.id}, _texture{Resource::texture(data.picture)} {}
+        : _inner_bounds(data.bounds),
+          _id{data.id.copy()},
+          _texture{Resource::texture(data.picture)} {}
 
 void PictureRect::draw(Point offset, InputMode) const {
     Rect bounds = _inner_bounds;
@@ -451,7 +453,7 @@ Rect PictureRect::outer_bounds() const {
 }
 
 Button::Button(const ButtonData& data)
-        : _id{data.id},
+        : _id{data.id.copy()},
           _label{data.label.copy()},
           _key{data.key},
           _gamepad{data.gamepad},
@@ -954,7 +956,7 @@ Rect RadioButton::outer_bounds() const {
 static PlainButtonData tab_button_data(
         const TabBox& box, const TabBoxData::Tab& tab, Rect bounds) {
     PlainButtonData button;
-    button.id     = tab.id;
+    button.id     = tab.id.copy();
     button.bounds = bounds;
     button.label  = tab.label.copy();
     button.hue    = box.hue();
@@ -1190,12 +1192,12 @@ Rect TabButton::outer_bounds() const {
 
 TabBox::TabBox(const TabBoxData& data)
         : _inner_bounds{data.bounds},
-          _id{data.id},
+          _id{data.id.copy()},
           _current_tab{0},
           _hue{data.hue},
           _style{data.style} {
-    Rect button_bounds = {_inner_bounds.left + 22, _inner_bounds.top - 20, 0,
-                          _inner_bounds.top - 10};
+    Rect button_bounds = {
+            _inner_bounds.left + 22, _inner_bounds.top - 20, 0, _inner_bounds.top - 10};
     for (const auto& tab : data.tabs) {
         button_bounds.right = button_bounds.left + tab.width;
         _tabs.emplace_back(new TabButton{this, tab, button_bounds});

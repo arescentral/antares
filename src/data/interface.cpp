@@ -30,8 +30,6 @@
 #include "lang/casts.hpp"
 #include "video/driver.hpp"
 
-using sfz::range;
-
 namespace antares {
 
 DECLARE_FIELD_READER(WidgetData);
@@ -79,6 +77,32 @@ WidgetData::~WidgetData() {
     }
 }
 
+pn::string_view WidgetData::id() const {
+    switch (type()) {
+        case WidgetDataBase::Type::NONE: return base.id; break;
+        case WidgetDataBase::Type::RECT: return rect.id; break;
+        case WidgetDataBase::Type::TEXT: return text.id; break;
+        case WidgetDataBase::Type::PICTURE: return picture.id; break;
+        case WidgetDataBase::Type::BUTTON: return button.id; break;
+        case WidgetDataBase::Type::CHECKBOX: return checkbox.id; break;
+        case WidgetDataBase::Type::RADIO: return radio.id; break;
+        case WidgetDataBase::Type::TAB_BOX: return tab_box.id; break;
+    }
+}
+
+void WidgetData::set_id(pn::string id) {
+    switch (type()) {
+        case WidgetDataBase::Type::NONE: base.id = std::move(id); break;
+        case WidgetDataBase::Type::RECT: rect.id = std::move(id); break;
+        case WidgetDataBase::Type::TEXT: text.id = std::move(id); break;
+        case WidgetDataBase::Type::PICTURE: picture.id = std::move(id); break;
+        case WidgetDataBase::Type::BUTTON: button.id = std::move(id); break;
+        case WidgetDataBase::Type::CHECKBOX: checkbox.id = std::move(id); break;
+        case WidgetDataBase::Type::RADIO: radio.id = std::move(id); break;
+        case WidgetDataBase::Type::TAB_BOX: tab_box.id = std::move(id); break;
+    }
+}
+
 FIELD_READER(InterfaceStyle) {
     return required_enum<InterfaceStyle>(
             x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
@@ -121,8 +145,7 @@ FIELD_READER(WidgetData::Type) {
 
 FIELD_READER(TabBoxData::Tab) {
     return required_struct<TabBoxData::Tab>(
-            x, {{"id", &TabBoxData::Tab::id},
-                {"width", &TabBoxData::Tab::width},
+            x, {{"width", &TabBoxData::Tab::width},
                 {"label", &TabBoxData::Tab::label},
                 {"content", &TabBoxData::Tab::content}});
 }
@@ -131,7 +154,6 @@ static WidgetData rect_interface_item(path_value x) {
     return BoxRectData(required_struct<BoxRectData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &BoxRectData::label},
                 {"hue", &BoxRectData::hue},
                 {"style", &BoxRectData::style}}));
@@ -141,7 +163,6 @@ static WidgetData button_interface_item(path_value x) {
     return required_struct<PlainButtonData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &PlainButtonData::label},
                 {"key", &PlainButtonData::key},
                 {"gamepad", &PlainButtonData::gamepad},
@@ -153,7 +174,6 @@ static WidgetData checkbox_interface_item(path_value x) {
     return required_struct<CheckboxButtonData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &CheckboxButtonData::label},
                 {"key", &CheckboxButtonData::key},
                 {"gamepad", &CheckboxButtonData::gamepad},
@@ -165,7 +185,6 @@ static WidgetData radio_interface_item(path_value x) {
     return required_struct<RadioButtonData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"label", &RadioButtonData::label},
                 {"key", &RadioButtonData::key},
                 {"gamepad", &RadioButtonData::gamepad},
@@ -177,7 +196,6 @@ static WidgetData picture_interface_item(path_value x) {
     return required_struct<PictureRectData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"picture", &PictureRectData::picture}});
 }
 
@@ -185,7 +203,6 @@ static WidgetData text_interface_item(path_value x) {
     return required_struct<TextRectData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"text", &TextRectData::text},
                 {"hue", &TextRectData::hue},
                 {"style", &TextRectData::style}});
@@ -195,7 +212,6 @@ static WidgetData tab_box_interface_item(path_value x) {
     return required_struct<TabBoxData>(
             x, {{"type", &WidgetDataBase::type},
                 {"bounds", &WidgetDataBase::bounds},
-                {"id", &WidgetDataBase::id},
                 {"hue", &TabBoxData::hue},
                 {"style", &TabBoxData::style},
                 {"tabs", &TabBoxData::tabs}});

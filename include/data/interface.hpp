@@ -26,6 +26,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/enums.hpp"
+#include "data/map.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -42,8 +43,8 @@ struct interfaceLabelType {
 };
 
 struct InterfaceData {
-    bool                    fullscreen = false;
-    std::vector<WidgetData> items;
+    bool               fullscreen = false;
+    id_map<WidgetData> items;
 };
 
 struct WidgetDataBase {
@@ -61,14 +62,14 @@ struct WidgetDataBase {
         TAB_BOX,
     };
 
-    WidgetDataBase()                 = default;
-    WidgetDataBase(WidgetDataBase&&) = default;
+    WidgetDataBase()                            = default;
+    WidgetDataBase(WidgetDataBase&&)            = default;
     WidgetDataBase& operator=(WidgetDataBase&&) = default;
     virtual ~WidgetDataBase() {}
 
-    Type                   type;
-    Rect                   bounds;
-    sfz::optional<int64_t> id;
+    pn::string id;
+    Type       type;
+    Rect       bounds;
 };
 
 InterfaceData interface(path_value x);
@@ -106,12 +107,14 @@ struct TabBoxData : public WidgetDataBase {
     InterfaceStyle style = InterfaceStyle::LARGE;
 
     struct Tab {
-        sfz::optional<int64_t>  id;
-        int64_t                 width;
-        pn::string              label;
-        std::vector<WidgetData> content;
+        pn::string         id;
+        int64_t            width;
+        pn::string         label;
+        id_map<WidgetData> content;
+
+        void set_id(pn::string id) { this->id = std::move(id); }
     };
-    std::vector<Tab> tabs;
+    id_map<Tab> tabs;
 };
 
 class WidgetDataBase::Visitor {
@@ -131,6 +134,8 @@ union WidgetData {
 
     WidgetDataBase       base;
     WidgetDataBase::Type type() const;
+    pn::string_view      id() const;
+    void                 set_id(pn::string id);
 
     BoxRectData        rect;
     TextRectData       text;
