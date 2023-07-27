@@ -26,7 +26,6 @@
 
 #include "data/enums.hpp"
 #include "data/handle.hpp"
-#include "data/map.hpp"
 #include "data/range.hpp"
 #include "data/tags.hpp"
 #include "drawing/color.hpp"
@@ -251,32 +250,6 @@ sfz::optional<T> optional_struct(path_value x, const std::map<pn::string_view, f
                         .c_str());
     }
 }
-
-template <typename T, T (*F)(path_value x)>
-static id_map<T> optional_map(path_value x) {
-    id_map<T> result;
-    if (x.value().is_map()) {
-        for (pn::key_value_cref kv : x.value().as_map()) {
-            result.emplace_back(kv.key().copy(), F(kv.value()));
-        }
-    } else if (x.value().is_array()) {
-        int i = 0;
-        for (pn::value_cref v : x.value().as_array()) {
-            result.emplace_back(pn::dump(i++, pn::dump_short), F(v));
-        }
-    } else if (!x.value().is_null()) {
-        throw std::runtime_error(pn::format(
-                                         "{0}must be map, array, or null (was {1})", x.prefix(),
-                                         type_string(x.value()))
-                                         .c_str());
-    }
-    return result;
-}
-
-template <typename T>
-struct field_reader<id_map<T>> {
-    static id_map<T> read(path_value x) { return optional_map<T, field_reader<T>::read>(x); }
-};
 
 template <typename T, T (*F)(path_value x)>
 static std::vector<T> optional_array(path_value x) {

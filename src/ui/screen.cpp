@@ -38,8 +38,8 @@ InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds) : _bo
     try {
         InterfaceData data = Resource::interface(name);
         _full_screen       = data.fullscreen;
-        for (const auto& kv : data.items) {
-            _widgets.push_back(Widget::from(kv.first, kv.second));
+        for (const auto& item : data.items) {
+            _widgets.push_back(Widget::from(item));
         }
     } catch (...) {
         std::throw_with_nested(std::runtime_error(name.copy().c_str()));

@@ -92,7 +92,7 @@ static BoxRect update_mission_brief_point(
         vector<pair<Point, Point>>* lines, pn::string_ref text) {
     if (whichBriefPoint < 0) {
         // No longer handled here.
-        return BoxRect{"", {}};
+        return BoxRect{{}};
     }
 
     BoxRectData data;
@@ -144,7 +144,7 @@ static BoxRect update_mission_brief_point(
         }
     }
 
-    BoxRect box_rect{"", std::move(data)};
+    BoxRect box_rect{std::move(data)};
     lines->clear();
     if (!hiliteBounds.empty()) {
         hiliteBounds.right++;
@@ -199,7 +199,7 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
           _briefing_point(_level.base.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
           _briefing_point_start(_briefing_point),
           _briefing_point_end(_level.base.briefings.size()),
-          _data_item{"", {}} {
+          _data_item{{}} {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
         Star star;

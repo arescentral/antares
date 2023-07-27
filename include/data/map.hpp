@@ -22,10 +22,42 @@
 #include <pn/fwd>
 #include <vector>
 
+#include "data/field.hpp"
+
 namespace antares {
 
 template <typename T>
-class id_map : public std::vector<std::pair<pn::string, T>> {};
+class id_map : public std::vector<T> {};
+
+template <typename T, T (*F)(path_value x)>
+static id_map<T> optional_map(path_value x) {
+    id_map<T> result;
+    if (x.value().is_map()) {
+        for (pn::key_value_cref kv : x.value().as_map()) {
+            auto x = F(kv.value());
+            x.set_id(kv.key().copy());
+            result.emplace_back(std::move(x));
+        }
+    } else if (x.value().is_array()) {
+        int i = 0;
+        for (pn::value_cref v : x.value().as_array()) {
+            auto x = F(v);
+            x.set_id(pn::dump(i++, pn::dump_short));
+            result.emplace_back(std::move(F(v)));
+        }
+    } else if (!x.value().is_null()) {
+        throw std::runtime_error(pn::format(
+                                         "{0}must be map, array, or null (was {1})", x.prefix(),
+                                         type_string(x.value()))
+                                         .c_str());
+    }
+    return result;
+}
+
+template <typename T>
+struct field_reader<id_map<T>> {
+    static id_map<T> read(path_value x) { return optional_map<T, field_reader<T>::read>(x); }
+};
 
 }  // namespace antares
 

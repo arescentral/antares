@@ -224,9 +224,9 @@ void Widget::deactivate() {}
 std::vector<const Widget*> Widget::children() const { return std::vector<const Widget*>{}; }
 std::vector<Widget*>       Widget::children() { return std::vector<Widget*>{}; }
 
-BoxRect::BoxRect(pn::string_view id, const BoxRectData& data)
+BoxRect::BoxRect(const BoxRectData& data)
         : _inner_bounds{data.bounds},
-          _id{id.copy()},
+          _id{data.id.copy()},
           _label{data.label.has_value() ? sfz::make_optional<pn::string>(data.label->copy())
                                         : sfz::nullopt},
           _hue{data.hue},
@@ -406,9 +406,9 @@ Rect BoxRect::outer_bounds() const {
     return bounds;
 }
 
-TextRect::TextRect(pn::string_view id, const TextRectData& data)
+TextRect::TextRect(const TextRectData& data)
         : _inner_bounds{data.bounds},
-          _id{id.copy()},
+          _id{data.id.copy()},
           _text{data.text.has_value() ? sfz::make_optional(data.text->copy()) : sfz::nullopt},
           _hue{data.hue},
           _style{data.style} {}
@@ -430,8 +430,10 @@ Rect TextRect::outer_bounds() const {
     return bounds;
 }
 
-PictureRect::PictureRect(pn::string_view id, const PictureRectData& data)
-        : _inner_bounds(data.bounds), _id{id.copy()}, _texture{Resource::texture(data.picture)} {}
+PictureRect::PictureRect(const PictureRectData& data)
+        : _inner_bounds(data.bounds),
+          _id{data.id.copy()},
+          _texture{Resource::texture(data.picture)} {}
 
 void PictureRect::draw(Point offset, InputMode) const {
     Rect bounds = _inner_bounds;
@@ -450,8 +452,8 @@ Rect PictureRect::outer_bounds() const {
     return bounds;
 }
 
-Button::Button(pn::string_view id, const ButtonData& data)
-        : _id{id.copy()},
+Button::Button(const ButtonData& data)
+        : _id{data.id.copy()},
           _label{data.label.copy()},
           _key{data.key},
           _gamepad{data.gamepad},
@@ -479,8 +481,7 @@ Widget* Button::accept_button(Gamepad::Button which) {
     return nullptr;
 }
 
-PlainButton::PlainButton(pn::string_view id, const PlainButtonData& data)
-        : Button{id, data}, _inner_bounds{data.bounds} {}
+PlainButton::PlainButton(const PlainButtonData& data) : Button{data}, _inner_bounds{data.bounds} {}
 
 void PlainButton::bind(Action a) { _action = a; }
 
@@ -667,8 +668,8 @@ Rect PlainButton::outer_bounds() const {
     return bounds;
 }
 
-CheckboxButton::CheckboxButton(pn::string_view id, const CheckboxButtonData& data)
-        : Button{id, data}, _inner_bounds{data.bounds} {}
+CheckboxButton::CheckboxButton(const CheckboxButtonData& data)
+        : Button{data}, _inner_bounds{data.bounds} {}
 
 void CheckboxButton::bind(Value v) { _value = v; }
 bool CheckboxButton::get() const { return _value.get && _value.get(); }
@@ -808,8 +809,7 @@ Rect CheckboxButton::outer_bounds() const {
     return bounds;
 }
 
-RadioButton::RadioButton(pn::string_view id, const RadioButtonData& data)
-        : Button{id, data}, _inner_bounds{data.bounds} {}
+RadioButton::RadioButton(const RadioButtonData& data) : Button{data}, _inner_bounds{data.bounds} {}
 
 void RadioButton::draw(Point offset, InputMode) const {
     /*
@@ -956,6 +956,7 @@ Rect RadioButton::outer_bounds() const {
 static PlainButtonData tab_button_data(
         const TabBox& box, const TabBoxData::Tab& tab, Rect bounds) {
     PlainButtonData button;
+    button.id     = tab.id.copy();
     button.bounds = bounds;
     button.label  = tab.label.copy();
     button.hue    = box.hue();
@@ -963,10 +964,10 @@ static PlainButtonData tab_button_data(
     return button;
 }
 
-TabButton::TabButton(TabBox* box, pn::string_view id, const TabBoxData::Tab& data, Rect bounds)
-        : Button{id, tab_button_data(*box, data, bounds)}, _parent(box), _inner_bounds{bounds} {
-    for (const auto& kv : data.content) {
-        _content.push_back(Widget::from(kv.first, kv.second));
+TabButton::TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds)
+        : Button{tab_button_data(*box, data, bounds)}, _parent(box), _inner_bounds{bounds} {
+    for (const auto& item : data.content) {
+        _content.push_back(Widget::from(item));
     }
 }
 
@@ -1189,18 +1190,17 @@ Rect TabButton::outer_bounds() const {
     return bounds;
 }
 
-TabBox::TabBox(pn::string_view id, const TabBoxData& data)
+TabBox::TabBox(const TabBoxData& data)
         : _inner_bounds{data.bounds},
-          _id{id.copy()},
+          _id{data.id.copy()},
           _current_tab{0},
           _hue{data.hue},
           _style{data.style} {
     Rect button_bounds = {
             _inner_bounds.left + 22, _inner_bounds.top - 20, 0, _inner_bounds.top - 10};
-    for (const auto& kv : data.tabs) {
-        const auto& tab     = kv.second;
+    for (const auto& tab : data.tabs) {
         button_bounds.right = button_bounds.left + tab.width;
-        _tabs.emplace_back(new TabButton{this, kv.first, tab, button_bounds});
+        _tabs.emplace_back(new TabButton{this, tab, button_bounds});
         button_bounds.left = button_bounds.right + 37;
     }
     _tabs[0]->on()         = true;
@@ -1369,23 +1369,21 @@ void TabBox::select(const TabButton& tab) {
     }
 }
 
-std::unique_ptr<Widget> Widget::from(pn::string_view id, const WidgetData& data) {
+std::unique_ptr<Widget> Widget::from(const WidgetData& data) {
     switch (data.type()) {
         case WidgetDataBase::Type::NONE: return nullptr;
-        case WidgetDataBase::Type::RECT:
-            return std::unique_ptr<Widget>(new BoxRect{id, data.rect});
-        case WidgetDataBase::Type::TEXT:
-            return std::unique_ptr<Widget>(new TextRect{id, data.text});
+        case WidgetDataBase::Type::RECT: return std::unique_ptr<Widget>(new BoxRect{data.rect});
+        case WidgetDataBase::Type::TEXT: return std::unique_ptr<Widget>(new TextRect{data.text});
         case WidgetDataBase::Type::PICTURE:
-            return std::unique_ptr<Widget>(new PictureRect{id, data.picture});
+            return std::unique_ptr<Widget>(new PictureRect{data.picture});
         case WidgetDataBase::Type::BUTTON:
-            return std::unique_ptr<Widget>(new PlainButton{id, data.button});
+            return std::unique_ptr<Widget>(new PlainButton{data.button});
         case WidgetDataBase::Type::CHECKBOX:
-            return std::unique_ptr<Widget>(new CheckboxButton{id, data.checkbox});
+            return std::unique_ptr<Widget>(new CheckboxButton{data.checkbox});
         case WidgetDataBase::Type::RADIO:
-            return std::unique_ptr<Widget>(new RadioButton{id, data.radio});
+            return std::unique_ptr<Widget>(new RadioButton{data.radio});
         case WidgetDataBase::Type::TAB_BOX:
-            return std::unique_ptr<Widget>(new TabBox{id, data.tab_box});
+            return std::unique_ptr<Widget>(new TabBox{data.tab_box});
     }
 }
 

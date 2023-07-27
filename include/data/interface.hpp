@@ -67,8 +67,9 @@ struct WidgetDataBase {
     WidgetDataBase& operator=(WidgetDataBase&&) = default;
     virtual ~WidgetDataBase() {}
 
-    Type type;
-    Rect bounds;
+    pn::string id;
+    Type       type;
+    Rect       bounds;
 };
 
 InterfaceData interface(path_value x);
@@ -106,9 +107,12 @@ struct TabBoxData : public WidgetDataBase {
     InterfaceStyle style = InterfaceStyle::LARGE;
 
     struct Tab {
+        pn::string         id;
         int64_t            width;
         pn::string         label;
         id_map<WidgetData> content;
+
+        void set_id(pn::string id) { this->id = std::move(id); }
     };
     id_map<Tab> tabs;
 };
@@ -130,6 +134,8 @@ union WidgetData {
 
     WidgetDataBase       base;
     WidgetDataBase::Type type() const;
+    pn::string_view      id() const;
+    void                 set_id(pn::string id);
 
     BoxRectData        rect;
     TextRectData       text;

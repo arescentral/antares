@@ -77,6 +77,32 @@ WidgetData::~WidgetData() {
     }
 }
 
+pn::string_view WidgetData::id() const {
+    switch (type()) {
+        case WidgetDataBase::Type::NONE: return base.id; break;
+        case WidgetDataBase::Type::RECT: return rect.id; break;
+        case WidgetDataBase::Type::TEXT: return text.id; break;
+        case WidgetDataBase::Type::PICTURE: return picture.id; break;
+        case WidgetDataBase::Type::BUTTON: return button.id; break;
+        case WidgetDataBase::Type::CHECKBOX: return checkbox.id; break;
+        case WidgetDataBase::Type::RADIO: return radio.id; break;
+        case WidgetDataBase::Type::TAB_BOX: return tab_box.id; break;
+    }
+}
+
+void WidgetData::set_id(pn::string id) {
+    switch (type()) {
+        case WidgetDataBase::Type::NONE: base.id = std::move(id); break;
+        case WidgetDataBase::Type::RECT: rect.id = std::move(id); break;
+        case WidgetDataBase::Type::TEXT: text.id = std::move(id); break;
+        case WidgetDataBase::Type::PICTURE: picture.id = std::move(id); break;
+        case WidgetDataBase::Type::BUTTON: button.id = std::move(id); break;
+        case WidgetDataBase::Type::CHECKBOX: checkbox.id = std::move(id); break;
+        case WidgetDataBase::Type::RADIO: radio.id = std::move(id); break;
+        case WidgetDataBase::Type::TAB_BOX: tab_box.id = std::move(id); break;
+    }
+}
+
 FIELD_READER(InterfaceStyle) {
     return required_enum<InterfaceStyle>(
             x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});

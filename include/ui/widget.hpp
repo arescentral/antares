@@ -32,7 +32,7 @@ class TabBox;
 
 class Widget {
   public:
-    static std::unique_ptr<Widget> from(pn::string_view id, const WidgetData& data);
+    static std::unique_ptr<Widget> from(const WidgetData& data);
 
     virtual ~Widget();
 
@@ -55,7 +55,7 @@ class Widget {
 
 class BoxRect : public Widget {
   public:
-    BoxRect(pn::string_view id, const BoxRectData& data);
+    BoxRect(const BoxRectData& data);
 
     pn::string_view id() const override { return _id; }
 
@@ -79,7 +79,7 @@ class BoxRect : public Widget {
 
 class TextRect : public Widget {
   public:
-    TextRect(pn::string_view id, const TextRectData& data);
+    TextRect(const TextRectData& data);
 
     pn::string_view id() const override { return _id; }
 
@@ -100,7 +100,7 @@ class TextRect : public Widget {
 
 class PictureRect : public Widget {
   public:
-    PictureRect(pn::string_view id, const PictureRectData& data);
+    PictureRect(const PictureRectData& data);
 
     pn::string_view id() const override { return _id; }
 
@@ -137,7 +137,7 @@ class Button : public Widget {
     Hue& hue() { return _hue; }
 
   protected:
-    Button(pn::string_view id, const ButtonData& data);
+    Button(const ButtonData& data);
 
   private:
     pn::string      _id;
@@ -156,7 +156,7 @@ class PlainButton : public Button {
         std::function<bool()> possible;
     };
 
-    PlainButton(pn::string_view id, const PlainButtonData& data);
+    PlainButton(const PlainButtonData& data);
 
     void bind(Action a);
     void action() override;
@@ -179,7 +179,7 @@ class CheckboxButton : public Button {
         std::function<bool()>     modifiable;
     };
 
-    CheckboxButton(pn::string_view id, const CheckboxButtonData& data);
+    CheckboxButton(const CheckboxButtonData& data);
 
     void         bind(Value v);
     bool         get() const;
@@ -198,7 +198,7 @@ class CheckboxButton : public Button {
 
 class RadioButton : public Button {
   public:
-    RadioButton(pn::string_view id, const RadioButtonData& data);
+    RadioButton(const RadioButtonData& data);
 
     bool  on() const { return _on; }
     bool& on() { return _on; }
@@ -215,7 +215,7 @@ class RadioButton : public Button {
 
 class TabButton : public Button {
   public:
-    TabButton(TabBox* box, pn::string_view id, const TabBoxData::Tab& data, Rect bounds);
+    TabButton(TabBox* box, const TabBoxData::Tab& data, Rect bounds);
 
     TabBox*                                     parent() const { return _parent; }
     const std::vector<std::unique_ptr<Widget>>& content() const { return _content; }
@@ -237,7 +237,7 @@ class TabButton : public Button {
 
 class TabBox : public Widget {
   public:
-    TabBox(pn::string_view id, const TabBoxData& data);
+    TabBox(const TabBoxData& data);
 
     pn::string_view id() const override { return _id; }
 
