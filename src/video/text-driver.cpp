@@ -166,7 +166,7 @@ TextVideoDriver::TextVideoDriver(Size screen_size, const sfz::optional<pn::strin
     }
 }
 
-int TextVideoDriver::scale() const { return 1; }
+double TextVideoDriver::scale() const { return 1; }
 
 bool TextVideoDriver::start_editing(TextReceiver* text) { return false; }
 

@@ -55,7 +55,7 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver();
 
-    virtual int scale() const;
+    virtual double scale() const;
 
     virtual Texture texture(pn::string_view name, const PixMap& content, int scale);
     virtual void    dither_rect(const Rect& rect, const RgbColor& color);
@@ -65,11 +65,11 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void    draw_diamond(const Rect& rect, const RgbColor& color);
     virtual void    draw_plus(const Rect& rect, const RgbColor& color);
 
-    virtual void*   get_proc_address(const char* proc_name) const;
+    virtual void* get_proc_address(const char* proc_name) const;
 
     struct Uniforms {
         Uniform<vec2>          screen          = {"screen"};
-        Uniform<int>           scale           = {"scale"};
+        Uniform<float>         scale           = {"scale"};
         Uniform<int>           color_mode      = {"color_mode"};
         Uniform<sampler2DRect> sprite          = {"sprite"};
         Uniform<sampler2D>     static_image    = {"static_image"};
@@ -83,7 +83,7 @@ class OpenGlVideoDriver : public VideoDriver {
     class MainLoop {
       public:
         MainLoop(OpenGlVideoDriver& driver, Card* initial);
-        MainLoop(const MainLoop&) = delete;
+        MainLoop(const MainLoop&)            = delete;
         MainLoop& operator=(const MainLoop&) = delete;
 
         void  draw();

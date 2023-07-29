@@ -39,13 +39,13 @@ class TextReceiver;
 class VideoDriver {
   public:
     VideoDriver();
-    VideoDriver(const VideoDriver&) = delete;
+    VideoDriver(const VideoDriver&)            = delete;
     VideoDriver& operator=(const VideoDriver&) = delete;
 
     virtual ~VideoDriver();
     virtual Point     get_mouse()         = 0;
     virtual InputMode input_mode() const  = 0;
-    virtual int       scale() const       = 0;
+    virtual double    scale() const       = 0;
     virtual Size      screen_size() const = 0;
 
     virtual bool start_editing(TextReceiver* text) = 0;
@@ -81,7 +81,7 @@ class Texture {
   public:
     struct Impl {
         Impl() {}
-        Impl(const Impl&) = delete;
+        Impl(const Impl&)            = delete;
         Impl& operator=(const Impl&) = delete;
         virtual ~Impl();
 

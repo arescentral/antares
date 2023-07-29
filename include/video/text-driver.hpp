@@ -34,7 +34,7 @@ class TextVideoDriver : public VideoDriver {
 
     virtual Point     get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return KEYBOARD_MOUSE; }
-    virtual int       scale() const;
+    virtual double    scale() const;
     virtual Size      screen_size() const { return _size; }
 
     virtual bool start_editing(TextReceiver* text);

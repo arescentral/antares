@@ -256,10 +256,12 @@ class OpenGlTextureImpl : public Texture::Impl {
             const Rect& draw_rect, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
         _uniforms.color_mode.set(OUTLINE_SPRITE_MODE);
-        _uniforms.unit.set({float(_size.width) / draw_rect.width(),
-                            float(_size.height) / draw_rect.height()});
-        _uniforms.outline_color.set({outline_color.red / 255.0f, outline_color.green / 255.0f,
-                                     outline_color.blue / 255.0f, outline_color.alpha / 255.0f});
+        _uniforms.unit.set(
+                {float(_size.width) / draw_rect.width(),
+                 float(_size.height) / draw_rect.height()});
+        _uniforms.outline_color.set(
+                {outline_color.red / 255.0f, outline_color.green / 255.0f,
+                 outline_color.blue / 255.0f, outline_color.alpha / 255.0f});
         draw_internal(draw_rect, fill_color);
     }
 
@@ -363,7 +365,7 @@ class OpenGlTextureImpl : public Texture::Impl {
 
     struct Texture {
         Texture() { glGenTextures(1, &id); }
-        Texture(const Texture&) = delete;
+        Texture(const Texture&)            = delete;
         Texture& operator=(const Texture&) = delete;
         ~Texture() { glDeleteTextures(1, &id); }
 
@@ -382,7 +384,9 @@ class OpenGlTextureImpl : public Texture::Impl {
 
 OpenGlVideoDriver::OpenGlVideoDriver() : _static_seed{0} {}
 
-int OpenGlVideoDriver::scale() const { return viewport_size().width / screen_size().width; }
+double OpenGlVideoDriver::scale() const {
+    return static_cast<double>(viewport_size().width) / screen_size().width;
+}
 
 Texture OpenGlVideoDriver::texture(pn::string_view name, const PixMap& content, int scale) {
     return unique_ptr<Texture::Impl>(
@@ -564,9 +568,7 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     _pluses[size].draw_shaded(to, color);
 }
 
-void* OpenGlVideoDriver::get_proc_address(const char* proc_name) const {
-  return nullptr;
-}
+void* OpenGlVideoDriver::get_proc_address(const char* proc_name) const { return nullptr; }
 
 static GLuint make_shader(GLenum shader_type, const GLchar* source, pn::string_view version) {
     GLuint        shader      = glCreateShader(shader_type);
