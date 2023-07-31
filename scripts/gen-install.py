@@ -25,7 +25,7 @@ def main():
         ICONDIR="$PREFIX/share/icons"
         DATADIR="$PREFIX/share/games/antares"
 
-        BINARIES="antares antares-install-data"
+        BINARIES="antares antares-download-sounds"
 
         @() {{
             echo "$@"
@@ -65,7 +65,7 @@ def main():
                 ;;
 
             1-scenario)
-                   @ out/cur/antares-install-data -s "$DATADIR/downloads" -d "$DATADIR/scenarios"
+                   @ out/cur/antares-download-sounds -s "$DATADIR/downloads" -d "$DATADIR/scenarios"
                ;;
         esac
     """).lstrip().format(args=args)
