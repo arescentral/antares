@@ -23,7 +23,7 @@ group("default") {
   testonly = true
   deps = [
     ":antares",
-    ":antares-install-data",
+    ":antares-download-sounds",
     ":build-pix",
     ":color-test",
     ":editable-text-test",
@@ -623,9 +623,9 @@ executable("antares") {
   }
 }
 
-executable("antares-install-data") {
+executable("antares-download-sounds") {
   output_extension = exe
-  sources = [ "src/bin/install-data.cpp" ]
+  sources = [ "src/bin/download-sounds.cpp" ]
   deps = [
     ":libantares",
     ":libantares-real",

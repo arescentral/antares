@@ -38,7 +38,7 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
             "usage: {0} [OPTIONS]\n"
             "\n"
-            "  Downloads and extracts game data\n"
+            "  Downloads and extracts optional non-free sounds\n"
             "\n"
             "  options:\n"
             "    -s, --source=SOURCE directory in which to store or expect zip files\n"
