@@ -25,10 +25,10 @@
 #include <sfz/sfz.hpp>
 
 #ifdef _MSC_VER
-#  include <thread>
-#  include <chrono>
+#include <chrono>
+#include <thread>
 #else
-#  include <unistd.h>
+#include <unistd.h>
 #endif
 
 #include "config/preferences.hpp"
@@ -453,6 +453,7 @@ pn::string_view hint_opengl20() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, 1);
     return "110";
 }
 
@@ -460,6 +461,7 @@ pn::string_view hint_opengl32() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     return "330 core";
