@@ -17,6 +17,8 @@
 
 #include <windows.h>
 
+#include "win/main.hpp"
+
 #undef min
 #undef max
 #undef interface
@@ -26,7 +28,6 @@
 #include <pn/output>
 #include <pn/string>
 #include <sfz/sfz.hpp>
-#include <vector>
 
 #include "config/dirs.hpp"
 #include "config/file-prefs-driver.hpp"
@@ -35,7 +36,6 @@
 #include "data/extractor.hpp"
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
-#include "lang/exception.hpp"
 #include "ui/flows/master.hpp"
 
 #ifdef _MSC_VER
@@ -92,6 +92,8 @@ void extract_data() {
     NullStatusObserver observer;
     extractor.extract(&observer);
 }
+
+}  // namespace
 
 void main(int argc, char* const* argv) {
     pn::string_view progname = sfz::path::basename(argv[0]);
@@ -166,44 +168,4 @@ void main(int argc, char* const* argv) {
     video.loop(new Master(scenario, time(NULL)));
 }
 
-}  // namespace
 }  // namespace antares
-
-int APIENTRY WinMain(HINSTANCE h_inst, HINSTANCE h_inst_prev, PSTR cmd_line, int cmd_show) {
-    LPWSTR* wargv;
-    int     argc;
-
-    wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
-    if (!wargv) {
-        return -1;
-    }
-
-    std::vector<std::string> arg_strings;
-    std::vector<char*>       argv_vector;
-
-    for (int i = 0; i < argc; i++) {
-        const wchar_t* warg = wargv[i];
-        arg_strings.push_back(pn::string(warg).cpp_str());
-    }
-
-    LocalFree(wargv);
-
-    for (int i = 0; i < argc; i++) {
-        argv_vector.push_back(arg_strings[i].data());
-    }
-
-    char* const* argv = nullptr;
-    if (argc > 0) {
-        argv = &argv_vector[0];
-    }
-
-    try {
-        antares::main(argc, argv);
-    } catch (std::exception& e) {
-        MessageBox(
-                NULL, antares::full_exception_string(e).c_str(), "Antares Error",
-                MB_APPLMODAL | MB_ICONEXCLAMATION | MB_OK);
-        return 1;
-    }
-    return 0;
-}

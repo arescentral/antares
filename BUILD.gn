@@ -40,6 +40,7 @@ group("default") {
     deps += [ ":antares_app" ]
   }
   if (target_os == "win") {
+    deps += [ ":antares-console" ]
     deps -= [
       ":build-pix",
       ":offscreen",
@@ -617,9 +618,31 @@ executable("antares") {
   if (host_os == "win") {
     configs -= [ "//build/lib/win:console" ]
     configs += [ "//build/lib/win:windows" ]
-    sources += [ "src/win/main.cpp" ]
+    sources += [
+      "src/win/main.cpp",
+      "src/win/win-main.cpp",
+    ]
   } else {
     sources += [ "src/glfw/main.cpp" ]
+  }
+}
+
+if (target_os == "win") {
+  executable("antares-console") {
+    output_extension = exe
+    sources = [
+      "include/glfw/video-driver.hpp",
+      "src/glfw/video-driver.cpp",
+      "src/win/console-main.cpp",
+      "src/win/main.cpp",
+    ]
+    deps = [
+      ":libantares",
+      ":libantares-real",
+      "//ext/glfw:libglfw",
+    ]
+    configs += [ ":antares_private" ]
+    defines = []
   }
 }
 
