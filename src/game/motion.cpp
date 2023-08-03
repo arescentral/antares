@@ -440,7 +440,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     const Rect   viewport = antares::viewport();
     const Rect   sprite_bounds{
             viewport.left - kSpriteMaxSize, viewport.top - kSpriteMaxSize,
-            viewport.left + kSpriteMaxSize, viewport.top + kSpriteMaxSize};
+            viewport.right + kSpriteMaxSize, viewport.bottom + kSpriteMaxSize};
     for (Handle<SpaceObject> o_handle = g.root; (o = o_handle.get()); o_handle = o->nextObject) {
         if (o->active != kObjectInUse) {
             continue;
