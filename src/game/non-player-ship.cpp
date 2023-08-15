@@ -93,18 +93,20 @@ void SpaceObject::recharge() {
     }
 
     for (auto* weapon : {&pulse, &beam, &special}) {
-        if (weapon->base) {
-            if ((weapon->ammo < (weapon->base->device->ammo >> 1)) && (_energy >= kWeaponRatio)) {
-                weapon->charge++;
-                _energy -= kWeaponRatio;
-
-                if ((weapon->base->device->restockCost >= 0) &&
-                    (weapon->charge >= weapon->base->device->restockCost)) {
-                    weapon->charge -= weapon->base->device->restockCost;
-                    weapon->ammo++;
-                }
-            }
+        if (!weapon->base ||                                        // no weapon in this slot
+            (weapon->ammo >= (weapon->base->device->ammo >> 1)) ||  // ammo above half maximum
+            (_energy < kWeaponRatio)) {                             // not enough energy to charge
+            continue;
         }
+        weapon->charge++;
+        _energy -= kWeaponRatio;
+
+        if ((weapon->base->device->restockCost < 0) ||               // non-rechargeable weapon
+            (weapon->charge < weapon->base->device->restockCost)) {  // not enough charge yet
+            continue;
+        }
+        weapon->charge -= weapon->base->device->restockCost;
+        weapon->ammo++;
     }
 }
 
