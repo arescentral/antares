@@ -13,29 +13,57 @@ import sys
 
 _, screens, sounds, outfile = sys.argv
 
-assert subprocess.call([
-    "ffmpeg",
-    "-r", "60",
-    "-i", screens + "/%06d.png",
-    "-pix_fmt", "yuv420p",
-    "-vcodec", "libvpx",
-    "-vpre", "720p50_60",
-    "-pass", "1",
-    "-r", "60",
-    "-b", "5M",
-    outfile,
-]) == 0
+assert (
+    subprocess.call(
+        [
+            "ffmpeg",
+            "-r",
+            "60",
+            "-i",
+            screens + "/%06d.png",
+            "-pix_fmt",
+            "yuv420p",
+            "-vcodec",
+            "libvpx",
+            "-vpre",
+            "720p50_60",
+            "-pass",
+            "1",
+            "-r",
+            "60",
+            "-b",
+            "5M",
+            outfile,
+        ]
+    )
+    == 0
+)
 
-assert subprocess.call([
-    "ffmpeg",
-    "-r", "60",
-    "-i", screens + "/%06d.png",
-    "-i", sounds,
-    "-pix_fmt", "yuv420p",
-    "-vcodec", "libvpx",
-    "-vpre", "720p50_60",
-    "-pass", "2",
-    "-r", "60",
-    "-b", "5M",
-    "-y", outfile,
-]) == 0
+assert (
+    subprocess.call(
+        [
+            "ffmpeg",
+            "-r",
+            "60",
+            "-i",
+            screens + "/%06d.png",
+            "-i",
+            sounds,
+            "-pix_fmt",
+            "yuv420p",
+            "-vcodec",
+            "libvpx",
+            "-vpre",
+            "720p50_60",
+            "-pass",
+            "2",
+            "-r",
+            "60",
+            "-b",
+            "5M",
+            "-y",
+            outfile,
+        ]
+    )
+    == 0
+)

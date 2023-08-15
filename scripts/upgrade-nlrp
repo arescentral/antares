@@ -10,38 +10,40 @@ import functools
 import struct
 import sys
 
-chapter, = struct.unpack(">l", sys.stdin.read(4))
-global_seed, = struct.unpack(">l", sys.stdin.read(4))
+(chapter,) = struct.unpack(">l", sys.stdin.read(4))
+(global_seed,) = struct.unpack(">l", sys.stdin.read(4))
 
 at = 1
-action_count, = struct.unpack(">l", sys.stdin.read(4))
+(action_count,) = struct.unpack(">l", sys.stdin.read(4))
 actions = collections.defaultdict(functools.partial(collections.defaultdict, list))
-for i in xrange(action_count):
-    kind, = struct.unpack(">b", sys.stdin.read(1))
+for i in range(action_count):
+    (kind,) = struct.unpack(">b", sys.stdin.read(1))
     if kind == 0:
-        wait, = struct.unpack(">l", sys.stdin.read(4))
+        (wait,) = struct.unpack(">l", sys.stdin.read(4))
         at += wait
     elif kind == 1:
-        key_down, = struct.unpack(">b", sys.stdin.read(1))
+        (key_down,) = struct.unpack(">b", sys.stdin.read(1))
         actions[at]["key_down"].append(key_down)
     elif kind == 2:
-        key_up, = struct.unpack(">b", sys.stdin.read(1))
+        (key_up,) = struct.unpack(">b", sys.stdin.read(1))
         actions[at]["key_up"].append(key_up)
 
-print """scenario {
+print(
+    """scenario {
     identifier: "com.biggerplanet.ares"
     version: "1.1.1"
 }
 chapter: %(chapter)s
 global_seed: %(global_seed)s
-duration: %(at)s""" % locals()
+duration: %(at)s"""
+) % locals()
 
 for at, action in sorted(actions.items()):
-    print "action {"
-    print "    at: %s" % at
+    print("action {")
+    print("    at: %s" % at)
     for key in action["key_down"]:
-        print "    key_down: %s" % key
+        print("    key_down: %s" % key)
     for key in action["key_up"]:
-        print "    key_up: %s" % key
+        print("    key_up: %s" % key)
         pass
-    print "}"
+    print("}")

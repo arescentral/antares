@@ -15,7 +15,8 @@ import struct
 import sys
 
 FACTORY = os.path.expanduser(
-    "~/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares/")
+    "~/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares/"
+)
 
 ACTION_KINDS = {
     1: "create",
@@ -85,7 +86,9 @@ td.uncovered.level { background: pink; color: white; }
 td.unreachable.level { background: white; color: darkgray; }
 """.strip()
 
-ObjectData = collections.namedtuple("ObjectData", "name short_name note race class_ frame".split())
+ObjectData = collections.namedtuple(
+    "ObjectData", "name short_name note race class_ frame".split()
+)
 ActionData = collections.namedtuple("ActionData", "kind what".split())
 
 
@@ -172,7 +175,6 @@ def main():
                     else:
                         class_ = "unreachable"
                     with tr(class_=class_):
-
                         td(i, class_="id")
                         td(act.kind, class_="kind")
                         td(act.what, class_="what")
@@ -203,7 +205,9 @@ def load_level_names():
 
 def load_objects():
     object_names = json.load(open(os.path.expanduser(FACTORY + "strings/5000.json")))
-    object_short_names = json.load(open(os.path.expanduser(FACTORY + "strings/5001.json")))
+    object_short_names = json.load(
+        open(os.path.expanduser(FACTORY + "strings/5001.json"))
+    )
     object_notes = json.load(open(os.path.expanduser(FACTORY + "strings/5002.json")))
     with open(os.path.expanduser(FACTORY + "objects/500.bsob")) as f:
         object_data = f.read()
@@ -277,7 +281,10 @@ indent = ""
 
 
 def open_tag(tag, **kwds):
-    attrs = [" %s=\"%s\"" % (k.strip("_"), cgi.escape(v, quote=True)) for k, v in kwds.iteritems()]
+    attrs = [
+        ' %s="%s"' % (k.strip("_"), cgi.escape(v, quote=True))
+        for k, v in kwds.iteritems()
+    ]
     return "<%s%s>" % (tag, "".join(attrs))
 
 
@@ -296,7 +303,9 @@ def context_tag(tag, **kwds):
 def tag(tag, *args, **kwds):
     if args:
         content = " ".join(cgi.escape(str(t)) for t in args)
-        sys.stdout.write("%s%s%s</%s>\n" % (indent, open_tag(tag, **kwds), content, tag))
+        sys.stdout.write(
+            "%s%s%s</%s>\n" % (indent, open_tag(tag, **kwds), content, tag)
+        )
     else:
         return context_tag(tag, **kwds)
 

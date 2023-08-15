@@ -12,63 +12,69 @@ def main():
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
-    script = textwrap.dedent("""
-        #!/bin/bash
+    script = (
+        textwrap.dedent(
+            """
+            #!/bin/bash
 
-        set -o errexit
-        set -o nounset
+            set -o errexit
+            set -o nounset
 
-        PREFIX="${{DESTDIR-}}{args.prefix}"
-        BINDIR="$PREFIX/games"
-        APPDIR="$PREFIX/share/applications"
-        MIMEDIR="$PREFIX/share/mime/packages"
-        ICONDIR="$PREFIX/share/icons"
-        DATADIR="$PREFIX/share/games/antares"
+            PREFIX="${{DESTDIR-}}{args.prefix}"
+            BINDIR="$PREFIX/games"
+            APPDIR="$PREFIX/share/applications"
+            MIMEDIR="$PREFIX/share/mime/packages"
+            ICONDIR="$PREFIX/share/icons"
+            DATADIR="$PREFIX/share/games/antares"
 
-        BINARIES="antares antares-download-sounds"
+            BINARIES="antares antares-download-sounds"
 
-        @() {{
-            echo "$@"
-            "$@"
-        }}
+            @() {{
+                echo "$@"
+                "$@"
+            }}
 
-        case "$#-$1" in
-            1-bin)
-                @ install -m 755 -d "$BINDIR"
-                for BIN in $BINARIES; do
-                    @ install -m 755 out/cur/$BIN "$BINDIR/"
-                done
-                ;;
+            case "$#-$1" in
+                1-bin)
+                    @ install -m 755 -d "$BINDIR"
+                    for BIN in $BINARIES; do
+                        @ install -m 755 out/cur/$BIN "$BINDIR/"
+                    done
+                    ;;
 
-            1-data)
-                for ICON in resources/antares.iconset/icon_*.png; do
-                    ICONSIZE=${{ICON#resources/antares.iconset/icon_}}
-                    ICONSIZE=${{ICON%.png}}
-                    @ install -m 755 -d "$ICONDIR/hicolor/$ICONSIZE/apps"
-                    @ install -m 644 $ICON "$ICONDIR/hicolor/$ICONSIZE/apps/antares.png"
-                done
+                1-data)
+                    for ICON in resources/antares.iconset/icon_*.png; do
+                        ICONSIZE=${{ICON#resources/antares.iconset/icon_}}
+                        ICONSIZE=${{ICON%.png}}
+                        @ install -m 755 -d "$ICONDIR/hicolor/$ICONSIZE/apps"
+                        @ install -m 644 $ICON "$ICONDIR/hicolor/$ICONSIZE/apps/antares.png"
+                    done
 
-                @ install -m 755 -d "$APPDIR"
-                @ install -m 644 resources/antares.desktop "$APPDIR"
+                    @ install -m 755 -d "$APPDIR"
+                    @ install -m 644 resources/antares.desktop "$APPDIR"
 
-                @ install -m 755 -d "$MIMEDIR"
-                @ install -m 644 resources/antares.xml "$MIMEDIR"
+                    @ install -m 755 -d "$MIMEDIR"
+                    @ install -m 644 resources/antares.xml "$MIMEDIR"
 
-                @ install -m 755 -d "$DATADIR/app"
-                for DATA in data/*; do
-                    if [[ -d "$DATA" ]]; then
-                        @ cp -r "$DATA" "$DATADIR/app"
-                    else
-                        @ install -m 644 "$DATA" "$DATADIR/app"
-                    fi
-                done
-                ;;
+                    @ install -m 755 -d "$DATADIR/app"
+                    for DATA in data/*; do
+                        if [[ -d "$DATA" ]]; then
+                            @ cp -r "$DATA" "$DATADIR/app"
+                        else
+                            @ install -m 644 "$DATA" "$DATADIR/app"
+                        fi
+                    done
+                    ;;
 
-            1-scenario)
-                   @ out/cur/antares-download-sounds -s "$DATADIR/downloads" -d "$DATADIR/scenarios"
-               ;;
-        esac
-    """).lstrip().format(args=args)
+                1-scenario)
+                       @ out/cur/antares-download-sounds -s "$DATADIR/downloads" -d "$DATADIR/scenarios"
+                   ;;
+            esac
+            """
+        )
+        .lstrip()
+        .format(args=args)
+    )
 
     try:
         with open(args.out) as f:

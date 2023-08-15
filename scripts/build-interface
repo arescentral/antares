@@ -19,14 +19,18 @@ except (ValueError, AssertionError):
 DESCRIPTION = ">16s22sbbbx"
 DESCRIPTION_SIZE = struct.calcsize(DESCRIPTION)
 
+
 def rect(rect_data):
     left, top, right, bottom = struct.unpack(">IIII", rect_data)
-    return collections.OrderedDict([
-        ("left", left),
-        ("top", top),
-        ("right", right),
-        ("bottom", bottom),
-    ])
+    return collections.OrderedDict(
+        [
+            ("left", left),
+            ("top", top),
+            ("right", right),
+            ("bottom", bottom),
+        ]
+    )
+
 
 COLORS = {
     0: "gray",
@@ -55,23 +59,26 @@ STYLES = {
 with open(keys) as f:
     KEYS = ["INVALID"] + json.load(f)
 
+
 def label(label_data):
-    result = collections.OrderedDict() 
+    result = collections.OrderedDict()
     res_id, index = struct.unpack(">hH", label_data)
     result["id"] = res_id
     result["index"] = index - 1
     return result
 
+
 def text_item(data, color, style):
     result = collections.OrderedDict()
-    res_id, = struct.unpack(">h", data[:2])
+    (res_id,) = struct.unpack(">h", data[:2])
     result["id"] = res_id
     result["color"] = COLORS[color]
     result["style"] = STYLES[style]
     return result
 
+
 def button_item(data, color, style):
-    result = collections.OrderedDict() 
+    result = collections.OrderedDict()
     label_data, key, default = struct.unpack(">4sh?", data[:7])
 
     result["label"] = label(label_data)
@@ -83,58 +90,69 @@ def button_item(data, color, style):
     result["style"] = STYLES[style]
     return result
 
+
 def picture_item(data, color, style):
     result = collections.OrderedDict()
     res_id, visible_bounds = struct.unpack(">h?", data[:3])
     result["id"] = res_id
     assert not visible_bounds
     if visible_bounds:
-        result["rect"] = collections.OrderedDict([
-            ("style", STYLES[style]),
-            ("color", COLORS[color]),
-        ])
+        result["rect"] = collections.OrderedDict(
+            [
+                ("style", STYLES[style]),
+                ("color", COLORS[color]),
+            ]
+        )
     return result
+
 
 def tab_box_item(data, color, style):
-    result = collections.OrderedDict() 
+    result = collections.OrderedDict()
     result["color"] = COLORS[color]
     result["style"] = STYLES[style]
-    result["top-right-border-size"], = struct.unpack(">h", data[:2])
+    (result["top-right-border-size"],) = struct.unpack(">h", data[:2])
     return result
+
 
 def unlabeled_item(data, color, style):
-    result = collections.OrderedDict() 
+    result = collections.OrderedDict()
     result["color"] = COLORS[color]
     result["style"] = STYLES[style]
     return result
 
+
 def labeled_item(data, color, style):
-    result = collections.OrderedDict() 
+    result = collections.OrderedDict()
     result["label"] = label(data[:4])
     result["color"] = COLORS[color]
     result["style"] = STYLES[style]
     return result
 
+
 KINDS = {
-    1:   ("rect",            unlabeled_item),
-    2:   ("rect",            labeled_item),
-    3:   ("list",            labeled_item),
-    4:   ("text",            text_item),
-    5:   ("button",          button_item),
-    6:   ("radio",           labeled_item),
-    7:   ("checkbox",        labeled_item),
-    8:   ("picture",         picture_item),
-    9:   ("tab-box",         tab_box_item),
-    11:  ("tab-box-button",  labeled_item),
+    1: ("rect", unlabeled_item),
+    2: ("rect", labeled_item),
+    3: ("list", labeled_item),
+    4: ("text", text_item),
+    5: ("button", button_item),
+    6: ("radio", labeled_item),
+    7: ("checkbox", labeled_item),
+    8: ("picture", picture_item),
+    9: ("tab-box", tab_box_item),
+    11: ("tab-box-button", labeled_item),
 }
+
 
 def interface_item(data):
     rect_data, kind_data, color, kind, style = struct.unpack(DESCRIPTION, data)
     kind_name, kind_func = KINDS[kind]
-    return collections.OrderedDict([
-        ("bounds", rect(rect_data)),
-        (kind_name, kind_func(kind_data, color, style)),
-    ])
+    return collections.OrderedDict(
+        [
+            ("bounds", rect(rect_data)),
+            (kind_name, kind_func(kind_data, color, style)),
+        ]
+    )
+
 
 items = []
 with open(intr) as f:
@@ -143,4 +161,4 @@ with open(intr) as f:
         item_data, data = data[:DESCRIPTION_SIZE], data[DESCRIPTION_SIZE:]
         items.append(interface_item(item_data))
 
-print json.dumps(items, indent=2)
+print(json.dumps(items, indent=2))
