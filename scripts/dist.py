@@ -18,8 +18,9 @@ def main():
         sys.exit(64)
 
     try:
-        tag = subprocess.check_output("git describe --tags --exact-match HEAD".split(),
-                                      stderr=subprocess.DEVNULL)
+        tag = subprocess.check_output(
+            "git describe --tags --exact-match HEAD".split(), stderr=subprocess.DEVNULL
+        )
         tag = tag.decode("utf-8").strip()
     except subprocess.CalledProcessError:
         tag = None
@@ -78,7 +79,7 @@ def add_files(archive_content, archive_root, add):
 
 def walk(archive_root, walk_root):
     for root, dirs, files in os.walk(walk_root):
-        root = root[1 + len(walk_root):]
+        root = root[1 + len(walk_root) :]
         files[:] = [f for f in files if should_write(f)]
         dirs[:] = [d for d in dirs if should_recurse(root, d)]
 

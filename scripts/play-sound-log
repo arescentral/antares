@@ -17,25 +17,33 @@ import tempfile
 _, infile, length, outfile = sys.argv
 
 SCENARIO_DIR = os.path.expanduser(
-        "~/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares")
+    "~/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares"
+)
 
 FORMAT = [
-    "-t", "raw",
-    "-e", "signed-integer",
-    "-b", "16",
-    "-c", "2",
-    "-r", "44100",
+    "-t",
+    "raw",
+    "-e",
+    "signed-integer",
+    "-b",
+    "16",
+    "-c",
+    "2",
+    "-r",
+    "44100",
 ]
+
 
 def call_logged(args, **kwds):
     sys.stderr.write("%s\n" % " ".join([pipes.quote(x) for x in args]))
     assert subprocess.call(args, **kwds) == 0
 
+
 def duration(ticks):
     return "%f" % (ticks / 60.0)
 
-class Channel(object):
 
+class Channel(object):
     def __init__(self):
         self.out = tempfile.NamedTemporaryFile(suffix=".s16")
         self.sound = None
@@ -56,8 +64,8 @@ class Channel(object):
             if self.loop:
                 sound_args += ["repeat", "50"]
             sound = subprocess.Popen(
-                    sound_args,
-                    stdout=subprocess.PIPE, stderr=open("/dev/null", "w"))
+                sound_args, stdout=subprocess.PIPE, stderr=open("/dev/null", "w")
+            )
             files["stdin"] = sound.stdout
             args += FORMAT + ["-"]
         args += FORMAT[2:] + ["-n"]
@@ -68,6 +76,7 @@ class Channel(object):
         if sound is not None:
             sound.communicate()
 
+
 commands = []
 with open(infile) as log:
     for line in log:
@@ -76,7 +85,7 @@ length = int(length)
 
 channels = []
 sox = []
-for i in xrange(4):
+for i in range(4):
     commands.append(["quiet", i, length])
     channels.append(Channel())
 

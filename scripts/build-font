@@ -28,7 +28,7 @@ image_height = height * 16
 widths = []
 chars = []
 with open(bitmap) as f:
-    for i in xrange(255):
+    for i in range(255):
         widths.append(ord(f.read(1)))
         chars.append(f.read(physical_width * height))
         assert len(chars[-1]) == (physical_width * height)
@@ -43,30 +43,38 @@ if mode == "json":
         col = i % 16
         left = physical_width * 8 * col
         top = height * row
-        chars[chr(i).decode("mac-roman")] = collections.OrderedDict([
-            ("left", left),
-            ("top", top),
-            ("right", left + width),
-            ("bottom", top + height),
-        ])
+        chars[chr(i).decode("mac-roman")] = collections.OrderedDict(
+            [
+                ("left", left),
+                ("top", top),
+                ("right", left + width),
+                ("bottom", top + height),
+            ]
+        )
 
-    json.dump(collections.OrderedDict([
-        ("image", "fonts/{0}.png".format(name)),
-        ("logical-width", logical_width),
-        ("height", height),
-        ("ascent", ascent),
-        ("glyphs", chars),
-    ]), sys.stdout, indent=2)
+    json.dump(
+        collections.OrderedDict(
+            [
+                ("image", "fonts/{0}.png".format(name)),
+                ("logical-width", logical_width),
+                ("height", height),
+                ("ascent", ascent),
+                ("glyphs", chars),
+            ]
+        ),
+        sys.stdout,
+        indent=2,
+    )
     print
 else:  # mode == "ppm"
-    print "P4"
-    print "{0} {1}".format(image_width, image_height)
-    for row in xrange(16):
-        for y in xrange(height):
-            for col in xrange(16):
+    print("P4")
+    print("{0} {1}".format(image_width, image_height))
+    for row in range(16):
+        for y in range(height):
+            for col in range(16):
                 try:
                     char = chars[(row * 16) + col]
                 except IndexError:
                     char = "\0" * physical_width * height
                 start = y * physical_width
-                sys.stdout.write(char[start:start + physical_width])
+                sys.stdout.write(char[start : start + physical_width])

@@ -4,7 +4,7 @@
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
 table = {}
-for i in xrange(1000):
+for i in range(1000):
     flt = i / 1000.0
     fix = int(round(flt * 256))
     rep = ("%03d" % i).rstrip("0") or "0"
@@ -20,7 +20,7 @@ for i in xrange(1000):
                 continue  # then don't replace a more accurate representation
     table[fix] = rep, err
 
-print "static const char fractions[][5] = {"
+print("static const char fractions[][5] = {")
 for _, (rep, _) in sorted(table.items()):
-    print '    ".%s",' % rep
-print "};"
+    print('    ".%s",' % rep)
+print("};")

@@ -39,8 +39,10 @@ def run(opts, queue, name, cmd):
     sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, _ = sub.communicate()
     if sub.returncode != 0:
-        print("%s failed:\n%s" %
-              (os.path.basename(cmd[0]), output.decode("utf-8", errors="replace")))
+        print(
+            "%s failed:\n%s"
+            % (os.path.basename(cmd[0]), output.decode("utf-8", errors="replace"))
+        )
         return False
     return True
 
@@ -51,8 +53,12 @@ def unit_test(opts, queue, name, args=[]):
 
 def diff_test(opts, queue, name, cmd, expected):
     with NamedTemporaryDir() as d:
-        return (run(opts, queue, name, cmd + ["--output=%s" % d]) and run(
-            opts, queue, name, ["diff", "--strip-trailing-cr", "-ru", "-x.*", expected, d]))
+        return run(opts, queue, name, cmd + ["--output=%s" % d]) and run(
+            opts,
+            queue,
+            name,
+            ["diff", "--strip-trailing-cr", "-ru", "-x.*", expected, d],
+        )
 
 
 def data_test(opts, queue, name, args=[], smoke_args=[]):
@@ -93,10 +99,12 @@ def call(args):
 
     sys.stdout = io.StringIO()
 
-    queue.put((
-        name,
-        START,
-    ))
+    queue.put(
+        (
+            name,
+            START,
+        )
+    )
     try:
         start = time.time()
         result = fn(opts, queue, name, *args)
