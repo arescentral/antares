@@ -48,6 +48,7 @@ namespace antares {
 static constexpr char kCancelButton[]       = "cancel";
 static constexpr char kDoneButton[]         = "done";
 static constexpr char kKeyControlsButton[]  = "key-controls";
+static constexpr char kVideoControlButton[] = "video-control";
 static constexpr char kSoundControlButton[] = "options";
 
 static constexpr char kGameMusicButton[] = "music-during-action";
@@ -56,6 +57,8 @@ static constexpr char kIdleMusicButton[] = "music-during-interlude";
 static constexpr char kVolUpButton[]   = "volume-up";
 static constexpr char kVolDownButton[] = "volume-down";
 static constexpr char kVolRect[]       = "volume";
+
+static constexpr char kFullscreenButton[] = "fullscreen";
 
 static constexpr char        kTabBox[] = "tabs";
 static constexpr const char* kTabs[]   = {
@@ -118,6 +121,8 @@ void OptionsScreen::become_front() {
 
         case KEY_CONTROL: stack()->push(new KeyControlScreen(&_state)); break;
 
+        case VIDEO_CONTROL: stack()->push(new VideoControlScreen(&_state)); break;
+
         case ACCEPT: stack()->pop(this); break;
 
         case CANCEL:
@@ -179,6 +184,14 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
                     },
             });
 
+    button(kVideoControlButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::VIDEO_CONTROL;
+                        stack()->pop(this);
+                    },
+            });
+
     button(kKeyControlsButton)
             ->bind({
                     [this] {
@@ -213,6 +226,53 @@ void SoundControlScreen::overlay() const {
         notch.offset(notch_width, 0);
     }
 }
+
+VideoControlScreen::VideoControlScreen(OptionsScreen::State* state)
+        : InterfaceScreen("options/video", {0, 0, 640, 480}), _state(state) {
+    checkbox(kFullscreenButton)
+            ->bind({
+                    [] { return sys.prefs->fullscreen(); },
+                    [](bool on) {
+                        sys.prefs->set_fullscreen(on);
+                    },
+            });
+
+    button(kDoneButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::ACCEPT;
+                        stack()->pop(this);
+                    },
+            });
+
+    button(kCancelButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::CANCEL;
+                        stack()->pop(this);
+                    },
+            });
+
+    button(kKeyControlsButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::KEY_CONTROL;
+                        stack()->pop(this);
+                    },
+            });
+
+    button(kSoundControlButton)
+            ->bind({
+                    [this] {
+                        *_state = OptionsScreen::SOUND_CONTROL;
+                        stack()->pop(this);
+                    },
+            });
+}
+
+VideoControlScreen::~VideoControlScreen() {}
+
+void VideoControlScreen::overlay() const {}
 
 static const usecs kFlashTime = ticks(12);
 
