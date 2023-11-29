@@ -32,6 +32,7 @@ class OptionsScreen : public Card {
   public:
     enum State {
         SOUND_CONTROL,
+        VIDEO_CONTROL,
         KEY_CONTROL,
         ACCEPT,
         CANCEL,
@@ -49,6 +50,17 @@ class SoundControlScreen : public InterfaceScreen {
   public:
     SoundControlScreen(OptionsScreen::State* state);
     ~SoundControlScreen();
+
+    virtual void overlay() const;
+
+  private:
+    OptionsScreen::State* const _state;
+};
+
+class VideoControlScreen : public InterfaceScreen {
+  public:
+    VideoControlScreen(OptionsScreen::State* state);
+    ~VideoControlScreen();
 
     virtual void overlay() const;
 
