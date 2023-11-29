@@ -224,7 +224,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         copy.fill(RgbColor::clear());
         copy.view(Rect(1, 1, size.width - 1, size.height - 1)).copy(image);
         glTexImage2D(
-                GL_TEXTURE_RECTANGLE, 0, GL_RGBA, size.width, size.height, 0, GL_BGRA, type,
+                GL_TEXTURE_RECTANGLE, 0, GL_RGBA8, size.width, size.height, 0, GL_BGRA, type,
                 copy.bytes());
     }
 
