@@ -107,6 +107,12 @@ Size CocoaVideoDriver::screen_size() const {
     };
 }
 
+void CocoaVideoDriver::set_fullscreen(const bool on) {
+    if (sys.prefs->fullscreen() != on) {
+        antares_window_toggle_fullscreen(_window);
+    }
+}
+
 Point CocoaVideoDriver::get_mouse() {
     Point p;
     antares_get_mouse_location(_window, &p.h, &p.v);

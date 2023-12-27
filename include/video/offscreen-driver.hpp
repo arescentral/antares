@@ -43,6 +43,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
         return {_screen_size.width * _scale, _screen_size.height * _scale};
     }
     virtual Size screen_size() const { return _screen_size; }
+    virtual void set_fullscreen(const bool on) {};
 
     virtual Point     get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return _scheduler->input_mode(); }

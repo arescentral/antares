@@ -36,6 +36,7 @@ class TextVideoDriver : public VideoDriver {
     virtual InputMode input_mode() const { return KEYBOARD_MOUSE; }
     virtual int       scale() const;
     virtual Size      screen_size() const { return _size; }
+    virtual void      set_fullscreen(const bool on);
 
     virtual bool start_editing(TextReceiver* text);
     virtual void stop_editing(TextReceiver* text);

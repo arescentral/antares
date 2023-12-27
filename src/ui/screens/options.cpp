@@ -233,7 +233,7 @@ VideoControlScreen::VideoControlScreen(OptionsScreen::State* state)
             ->bind({
                     [] { return sys.prefs->fullscreen(); },
                     [](bool on) {
-                        sys.prefs->set_fullscreen(on);
+                        sys.video->set_fullscreen(on);
                     },
             });
 
