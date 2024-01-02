@@ -28,8 +28,6 @@
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
-using std::unique_ptr;
-
 namespace antares {
 namespace {
 
@@ -38,11 +36,13 @@ const int kScrollTextHeight = 200;
 }  // namespace
 
 ScrollTextScreen::ScrollTextScreen(pn::string_view text, int width, ticks interval)
-        : _build_pix(BuildPix(text, width)), _interval(interval), _play_song(false) {}
+        : _build_pix(BuildPix(sys.fonts.title, text, width)),
+          _interval(interval),
+          _play_song(false) {}
 
 ScrollTextScreen::ScrollTextScreen(
         pn::string_view text, int width, ticks interval, pn::string_view song)
-        : _build_pix(BuildPix(text, width)),
+        : _build_pix(BuildPix(sys.fonts.title, text, width)),
           _interval(interval),
           _play_song(true),
           _song(song.copy()) {}
