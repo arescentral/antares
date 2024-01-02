@@ -32,11 +32,11 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
+#include "game/sys.hpp"
 #include "lang/exception.hpp"
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::dec;
 using std::pair;
 using std::unique_ptr;
 using std::vector;
@@ -54,7 +54,7 @@ class DrawPix : public Card {
 
     virtual void draw() const {
         PluginInit(sfz::nullopt);
-        BuildPix pix(_text(), _width);
+        BuildPix pix(sys.fonts.title, _text(), _width);
         pix.draw({0, 0});
         _set_capture_rect({0, 0, _width, pix.size().height});
     }
@@ -138,6 +138,10 @@ void run(
             {"intro", 450, intro},
             {"about", 540, about},
             {"charset", 450, charset},
+            {"pangram", 540,
+             []() -> pn::string_view {
+                 return "\\fdfLight years from Proxima, zerbilite shockwave jars quadrant\n\n";
+             }},
     };
 
     vector<pair<unique_ptr<Card>, pn::string>> pix;

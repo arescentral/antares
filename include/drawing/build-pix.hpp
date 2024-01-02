@@ -21,6 +21,7 @@
 
 #include <vector>
 #include "drawing/styled-text.hpp"
+#include "drawing/text.hpp"
 #include "math/geometry.hpp"
 #include "video/driver.hpp"
 
@@ -28,7 +29,7 @@ namespace antares {
 
 class BuildPix {
   public:
-    BuildPix(pn::string_view text, int width);
+    BuildPix(const Font& font, pn::string_view text, int width);
 
     Size size() const { return _size; }
     void draw(Point origin) const;

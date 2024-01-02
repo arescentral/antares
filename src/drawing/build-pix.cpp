@@ -91,7 +91,7 @@ class PixDraw {
 
 }  // namespace
 
-BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
+BuildPix::BuildPix(const Font& font, pn::string_view text, int width) : _size({width, 0}) {
     bool                    in_section_header = (text.size() >= 2) && (text.substr(0, 2) == "#+");
     size_t                  start             = 0;
     const size_t            end               = text.size();
@@ -133,9 +133,9 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
             } else {
                 content = pn::format("{0}\n", line);
             }
-            _lines.push_back(Line{
-                    Line::TEXT, nullptr,
-                    StyledText::retro(content, {sys.fonts.title, _size.width - 11, 0, 2}, red)});
+            _lines.push_back(
+                    Line{Line::TEXT, nullptr,
+                         StyledText::retro(content, {font, _size.width - 11, 0, 2}, red)});
         }
     }
 
