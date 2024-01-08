@@ -126,10 +126,9 @@ AntaresWindow* antares_window_create(
     [window.window setContentView:window.view];
     [window.window makeKeyAndOrderFront:NSApp];
     [window.window makeFirstResponder:window.view];
+    [window.window center];
     if (fullscreen) {
-        /* [window.window toggleFullScreen:nil]; */
-    } else {
-        [window.window center];
+        [window.window toggleFullScreen:nil];
     }
     window.window.delegate = window.view;
     return memdup(&window, sizeof(AntaresWindow));
