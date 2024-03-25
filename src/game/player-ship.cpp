@@ -85,10 +85,10 @@ enum HotKeyState {
 };
 
 static ANTARES_GLOBAL DestKeyState gDestKeyState = DEST_KEY_UP;
-static ANTARES_GLOBAL wall_time gDestKeyTime;
+static ANTARES_GLOBAL wall_time    gDestKeyTime;
 
 static ANTARES_GLOBAL HotKeyState gHotKeyState[10];
-static ANTARES_GLOBAL wall_time gHotKeyTime[10];
+static ANTARES_GLOBAL wall_time   gHotKeyTime[10];
 
 static ANTARES_GLOBAL Zoom gPreviousZoomMode;
 
@@ -501,19 +501,15 @@ void PlayerShip::mouse_down(const MouseDownEvent& event) {
     switch (event.button()) {
         case 0:
             if (event.count() == 2) {
-                PlayerShipHandleClick(where, 0);
                 MiniComputerHandleDoubleClick(where, &_player_events);
             } else if (event.count() == 1) {
-                PlayerShipHandleClick(where, 0);
                 MiniComputerHandleClick(where);
             }
             break;
-        case 1:
-            if (event.count() == 1) {
-                PlayerShipHandleClick(where, 1);
-            }
-            break;
+        case 1: break;
+        default: return;
     }
+    PlayerShipHandleClick(where, event.button());
 }
 
 void PlayerShip::mouse_up(const MouseUpEvent& event) {
