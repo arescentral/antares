@@ -47,6 +47,7 @@ class SelectLevelScreen : public InterfaceScreen {
     };
     State _state;
 
+    void update_chapters(size_t* select);
     void draw_level_name() const;
 
     bool*            _cancelled;
