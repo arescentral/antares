@@ -38,8 +38,6 @@
 #include "video/driver.hpp"
 #include "video/transitions.hpp"
 
-using std::unique_ptr;
-
 namespace antares {
 
 static constexpr char kBeginButton[]    = "begin";
@@ -53,9 +51,7 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
           _state(SELECTING),
           _cancelled(cancelled),
           _level(level) {
-    sys.ledger->unlocked_chapters(&_chapters);
-    _index  = _chapters.size() - 1;
-    *_level = Level::get(_chapters[_index]);
+    update_chapters(nullptr);
 
     button(kBeginButton)->bind({[this] {
         _state      = FADING_OUT;
@@ -143,10 +139,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
                 }
                 sys.sound.cloak_off();
                 sys.ledger->unlock_chapter(_unlock_chapter);
-                sys.ledger->unlocked_chapters(&_chapters);
-                _index = std::find(_chapters.begin(), _chapters.end(), _unlock_chapter) -
-                         _chapters.begin();
-                *_level = Level::get(_chapters[_index]);
+                update_chapters(&_unlock_chapter);
             }
             return;
         } break;
@@ -157,6 +150,24 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
 }
 
 void SelectLevelScreen::overlay() const { draw_level_name(); }
+
+void SelectLevelScreen::update_chapters(size_t* select) {
+    sys.ledger->unlocked_chapters(&_chapters);
+    _chapters.erase(
+            std::remove_if(
+                    _chapters.begin(), _chapters.end(),
+                    [](int i) { return Level::get(i) == nullptr; }),
+            _chapters.end());
+
+    if (select) {
+        _index =
+                std::find(_chapters.begin(), _chapters.end(), _unlock_chapter) - _chapters.begin();
+        *_level = Level::get(_chapters[_index]);
+    } else {
+        _index = _chapters.size() - 1;
+    }
+    *_level = Level::get(_chapters[_index]);
+}
 
 void SelectLevelScreen::draw_level_name() const {
     const pn::string_view chapter_name = (*_level)->base.name;
