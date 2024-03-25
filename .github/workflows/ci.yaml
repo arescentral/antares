@@ -10,7 +10,7 @@ jobs:
   Ubuntu:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -28,17 +28,17 @@ jobs:
       - run: sudo make install
 
       - run: ./scripts/dist.py src zip
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: antares-git.zip
           path: dist/antares-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
-        uses: 'google-github-actions/auth@v0'
+        uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCLOUD_CREDENTIALS_JSON }}'
       - if: ${{ github.event_name != 'pull_request' }}
-        uses: 'google-github-actions/upload-cloud-storage@v0'
+        uses: 'google-github-actions/upload-cloud-storage@v2'
         with:
           path: dist/antares-git.zip
           destination: 'downloads.arescentral.org/Antares'
@@ -46,7 +46,7 @@ jobs:
   macOS:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -68,17 +68,17 @@ jobs:
           APPLE_TEAM: ${{ secrets.APPLE_TEAM }}
 
       - run: ./scripts/dist.py mac zip
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: antares-mac-git.zip
           path: dist/antares-mac-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
-        uses: 'google-github-actions/auth@v0'
+        uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCLOUD_CREDENTIALS_JSON }}'
       - if: ${{ github.event_name != 'pull_request' }}
-        uses: 'google-github-actions/upload-cloud-storage@v0'
+        uses: 'google-github-actions/upload-cloud-storage@v2'
         with:
           path: dist/antares-mac-git.zip
           destination: 'downloads.arescentral.org/Antares'
@@ -86,7 +86,7 @@ jobs:
   Windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
@@ -97,17 +97,17 @@ jobs:
       # - run: out/win/opt/procyon-cpp-test
 
       - run: python scripts/dist.py win zip
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: antares-win-git.zip
           path: dist/antares-win-git.zip
 
       - if: ${{ github.event_name != 'pull_request' }}
-        uses: 'google-github-actions/auth@v0'
+        uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.GCLOUD_CREDENTIALS_JSON }}'
       - if: ${{ github.event_name != 'pull_request' }}
-        uses: 'google-github-actions/upload-cloud-storage@v0'
+        uses: 'google-github-actions/upload-cloud-storage@v2'
         with:
           path: dist/antares-win-git.zip
           destination: 'downloads.arescentral.org/Antares'
@@ -115,7 +115,7 @@ jobs:
 #  Wine:
 #    runs-on: ubuntu-latest
 #    steps:
-#      - uses: actions/checkout@v3
+#      - uses: actions/checkout@v4
 #        with:
 #          submodules: true
 #          fetch-depth: 0
