@@ -168,6 +168,10 @@ TextVideoDriver::TextVideoDriver(Size screen_size, const sfz::optional<pn::strin
 
 int TextVideoDriver::scale() const { return 1; }
 
+void TextVideoDriver::set_fullscreen(const bool on) {
+    log("fullscreen", on);
+}
+
 bool TextVideoDriver::start_editing(TextReceiver* text) { return false; }
 
 void TextVideoDriver::stop_editing(TextReceiver* text) {}
