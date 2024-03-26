@@ -496,6 +496,7 @@ void GLFWVideoDriver::loop(Card* initial) {
 
     glfwGetFramebufferSize(_window, &_viewport_size.width, &_viewport_size.height);
     glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(_window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 
     glfwSetWindowUserPointer(_window, this);
     glfwSetKeyCallback(_window, key_callback);
