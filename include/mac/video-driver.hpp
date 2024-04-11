@@ -40,6 +40,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
 
     virtual Size viewport_size() const;
     virtual Size screen_size() const;
+    virtual void set_fullscreen(const bool on);
 
     virtual Point     get_mouse();
     virtual InputMode input_mode() const;

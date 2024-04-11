@@ -44,6 +44,7 @@ int32_t antares_window_screen_width(const AntaresWindow* window);
 int32_t antares_window_screen_height(const AntaresWindow* window);
 int32_t antares_window_viewport_width(const AntaresWindow* window);
 int32_t antares_window_viewport_height(const AntaresWindow* window);
+void    antares_window_toggle_fullscreen(AntaresWindow* window);
 
 void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y);
 
