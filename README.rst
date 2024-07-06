@@ -14,7 +14,7 @@ Antares
 .. |antares-latest-src-url| replace:: https://downloads.arescentral.org/Antares/antares-0.9.1.zip
 
 .. _antares-latest-src: https://downloads.arescentral.org/Antares/antares-0.9.1.zip
-.. _antares-latest-ubuntu: https://arescentral.org/antares/linux/
+.. _antares-latest-ubuntu: https://arescentral.org/antares/linux
 .. _antares-latest-osx: https://downloads.arescentral.org/Antares/antares-mac-0.9.0.zip
 
 .. _Antares 0.9.1 for Mac OS X 10.7+: https://downloads.arescentral.org/Antares/Antares-0.9.1.zip
@@ -50,7 +50,7 @@ Building Antares
 You may need to install some extra software first; the configure script
 will give you instructions if so.
 
-.. _the long version is here: https://arescentral.org/antares/contributing/building/
+.. _the long version is here: https://arescentral.org/antares/contributing/building
 
 Running Antares
 ---------------
@@ -86,8 +86,8 @@ Links
 
 *  `Ares Forums`_
 
-.. _Antares website: https://arescentral.org/antares/
-.. _Contributing to Antares: https://arescentral.org/antares/contributing/
+.. _Antares website: https://arescentral.org/antares
+.. _Contributing to Antares: https://arescentral.org/antares/contributing
 .. _Announcements mailing list: https://groups.google.com/a/arescentral.org/group/antares-announce
 .. _Development mailing list: https://groups.google.com/a/arescentral.org/group/antares-dev
 .. _Ares Forums: https://www.ambrosiasw.com/forums/index.php?showforum=88
