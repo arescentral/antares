@@ -90,6 +90,5 @@ Links
 .. _Contributing to Antares: https://arescentral.org/antares/contributing
 .. _Announcements mailing list: https://groups.google.com/a/arescentral.org/group/antares-announce
 .. _Development mailing list: https://groups.google.com/a/arescentral.org/group/antares-dev
-.. _Ares Forums: https://www.ambrosiasw.com/forums/index.php?showforum=88
 
 .. -*- tab-width: 3; fill-column: 72 -*-
