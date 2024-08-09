@@ -19,6 +19,7 @@
 #include "net/http.hpp"
 
 #include <neon/ne_basic.h>
+#include <neon/ne_redirect.h>
 #include <neon/ne_session.h>
 #include <neon/ne_uri.h>
 #include <unistd.h>
@@ -27,6 +28,8 @@
 #include <pn/string>
 
 using std::unique_ptr;
+
+static const int kMaxRedirect = 3;
 
 namespace antares {
 namespace http {
@@ -61,27 +64,44 @@ void get(pn::string_view url, pn::output_view out) {
     if (ne_uri_parse(url.copy().c_str(), &uri)) {
         throw std::runtime_error("ne_uri_parse()");
     }
-    if (uri.port == 0) {
-        uri.port = ne_uri_defaultport(uri.scheme);
-    }
-    unique_ptr<ne_uri, decltype(&ne_uri_free)>            uri_free(&uri, ne_uri_free);
-    unique_ptr<ne_session, decltype(&ne_session_destroy)> sess(
-            ne_session_create(uri.scheme, uri.host, uri.port), ne_session_destroy);
+    unique_ptr<ne_uri, decltype(&ne_uri_free)> uri_free(&uri, ne_uri_free);
 
-    unique_ptr<ne_request, decltype(&ne_request_destroy)> req(
-            ne_request_create(sess.get(), "GET", uri.path), ne_request_destroy);
+    for (int i = 0; i < kMaxRedirect; ++i) {
+        if (uri.port == 0) {
+            uri.port = ne_uri_defaultport(uri.scheme);
+        }
 
-    ne_userdata userdata = {out};
-    ne_add_response_body_reader(req.get(), accept, reader, &userdata);
+        unique_ptr<ne_session, decltype(&ne_session_destroy)> sess(
+                ne_session_create(uri.scheme, uri.host, uri.port), ne_session_destroy);
+        ne_redirect_register(sess.get());
+        unique_ptr<ne_request, decltype(&ne_request_destroy)> req(
+                ne_request_create(sess.get(), "GET", uri.path), ne_request_destroy);
 
-    auto err = ne_request_dispatch(req.get());
-    if (err != NE_OK) {
-        throw std::runtime_error("ne_request_dispatch()");
+        ne_userdata userdata = {out};
+        ne_add_response_body_reader(req.get(), accept, reader, &userdata);
+
+        switch (ne_request_dispatch(req.get())) {
+            case NE_OK: {
+                const auto* st = ne_get_status(req.get());
+                if (st->code != 200) {
+                    throw std::runtime_error(pn::format("HTTP error {0}", st->code).c_str());
+                }
+                return;
+            }
+
+            case NE_REDIRECT:
+                // Normally, a smart client would re-use the session if possible,
+                // i.e. if the host, scheme, and port are the same as before.
+                // However, that doesn’t happen in practice when used with
+                // the URLs that are relevant to Antares, so don’t bother.
+                ne_uri_free(&uri);
+                ne_uri_copy(&uri, ne_redirect_location(sess.get()));
+                continue;
+
+            default: throw std::runtime_error("ne_request_dispatch()");
+        }
     }
-    auto* st = ne_get_status(req.get());
-    if (st->code != 200) {
-        throw std::runtime_error(pn::format("HTTP error {0}", st->code).c_str());
-    }
+    throw std::runtime_error(pn::format("too many redirects: {}", ne_uri_unparse(&uri)).c_str());
 }
 
 }  // namespace http
