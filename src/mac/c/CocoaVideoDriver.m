@@ -126,10 +126,9 @@ AntaresWindow* antares_window_create(
     [window.window setContentView:window.view];
     [window.window makeKeyAndOrderFront:NSApp];
     [window.window makeFirstResponder:window.view];
+    [window.window center];
     if (fullscreen) {
         [window.window toggleFullScreen:nil];
-    } else {
-        [window.window center];
     }
     window.window.delegate = window.view;
     return memdup(&window, sizeof(AntaresWindow));
@@ -168,6 +167,10 @@ static bool translate_coords(AntaresView* view, NSEvent* event, NSPoint* p) {
     NSSize view_size = [view bounds].size;
     *p               = NSMakePoint(input.x, view_size.height - input.y);
     return true;
+}
+
+void antares_window_toggle_fullscreen(AntaresWindow* window) {
+    [window->window toggleFullScreen:nil];
 }
 
 void antares_get_mouse_location(AntaresWindow* window, int32_t* x, int32_t* y) {

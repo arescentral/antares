@@ -182,6 +182,10 @@ GLFWVideoDriver::~GLFWVideoDriver() { glfwTerminate(); }
 
 pn::string_view GLFWVideoDriver::glsl_version() const { return _glsl_version; }
 
+void GLFWVideoDriver::set_fullscreen(const bool on) {
+  window_maximize(on);
+}
+
 Point GLFWVideoDriver::get_mouse() {
     double x, y;
     glfwGetCursorPos(_window, &x, &y);
