@@ -436,7 +436,11 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     // nothing below can effect any object actions (expire actions get executed)
     // (but they can effect objects thinking)
     // !!!!!!!!
-    SpaceObject* o = nullptr;
+    SpaceObject* o        = nullptr;
+    const Rect   viewport = antares::viewport();
+    const Rect   sprite_bounds{
+            viewport.left - kSpriteMaxSize, viewport.top - kSpriteMaxSize,
+            viewport.right + kSpriteMaxSize, viewport.bottom + kSpriteMaxSize};
     for (Handle<SpaceObject> o_handle = g.root; (o = o_handle.get()); o_handle = o->nextObject) {
         if (o->active != kObjectInUse) {
             continue;
@@ -446,6 +450,9 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         auto& sprite = *o->sprite;
 
         sprite.where = scale_to_viewport(o->location);
+        if (!sprite_bounds.contains(sprite.where)) {
+            sprite.where = Point{-kSpriteMaxSize, -kSpriteMaxSize};
+        }
 
         update_static(o, unitsToDo);
 
