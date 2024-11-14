@@ -271,8 +271,10 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({width, height}, output_dir);
         video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
     } else {
+#ifndef _WIN32
         OffscreenVideoDriver video({width, height}, 1, gl_version, glsl_version, output_dir);
         video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
+#endif
     }
 }
 

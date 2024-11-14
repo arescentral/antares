@@ -41,11 +41,6 @@ group("default") {
   }
   if (target_os == "win") {
     deps += [ ":antares-console" ]
-    deps -= [
-      ":build-pix",
-      ":offscreen",
-      ":replay",
-    ]
   }
 }
 
