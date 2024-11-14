@@ -156,8 +156,10 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({640, 480}, output_dir);
         video.loop(new Master(sfz::nullopt, 14586), scheduler);
     } else {
+#ifndef _WIN32
         OffscreenVideoDriver video({640, 480}, 1, gl_version, glsl_version, output_dir);
         video.loop(new Master(sfz::nullopt, 14586), scheduler);
+#endif
     }
 }
 

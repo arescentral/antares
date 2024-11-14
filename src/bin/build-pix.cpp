@@ -19,7 +19,6 @@
 #include "drawing/build-pix.hpp"
 
 #include <fcntl.h>
-#include <getopt.h>
 
 #include <pn/output>
 #include <sfz/sfz.hpp>
@@ -209,8 +208,10 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({540, 2000}, output_dir);
         run(&video, "txt", [](Rect) {});
     } else {
+#ifndef _WIN32
         OffscreenVideoDriver video({540, 2000}, scale, gl_version, glsl_version, output_dir);
         run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
+#endif
     }
 }
 
