@@ -112,7 +112,7 @@ pn::string_view charset() {
            "Uu Úú Ùù Ûû Üü\n"
            "Yy Ÿÿ\n"
            "\n"
-           "\uf8ff\n";
+           "\xEF\xA3\xBF\n";
 }
 
 template <typename VideoDriver>
