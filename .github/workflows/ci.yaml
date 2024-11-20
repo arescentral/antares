@@ -94,7 +94,9 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
       - run: python configure --antares-version=$(git describe --tags HEAD)
       - run: ./ninja -C out/win/opt
-      # - run: out/win/opt/procyon-cpp-test
+      - run: python scripts/test.py --type=unit
+      - run: python scripts/test.py --type=data
+      - run: python scripts/test.py --type=replay
 
       - run: python scripts/dist.py win zip
       - uses: actions/upload-artifact@v4
