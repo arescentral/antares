@@ -33,6 +33,10 @@ WINE_TESTS = [
 
 
 def run(opts, queue, name, cmd):
+    if cmd[0].startswith("out/cur/") and not os.path.islink("out/cur"):
+        with open("out/cur") as f:
+            cur = f.read().strip()
+        cmd[0] = "out/%s/%s" % (cur, cmd[0][8:])
     if opts.wine and cmd[0].startswith("out/cur/"):
         cmd[0] += ".exe"
         cmd.insert(0, "wine")

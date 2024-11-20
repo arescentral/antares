@@ -2,8 +2,9 @@
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
 
-MAC_BIN := out/cur/Antares.app/Contents/MacOS/Antares
-BUILD := out/cur/ninja -C out/cur
+CUR := out/$(shell readlink out/cur || cat out/cur)
+MAC_BIN := $(CUR)/Antares.app/Contents/MacOS/Antares
+BUILD := $(CUR)/ninja -C $(CUR)
 
 .PHONY: build
 build:
@@ -47,7 +48,7 @@ sign: build
 		--timestamp \
 		--sign "Developer ID Application" \
 		--entitlements resources/entitlements.plist \
-		out/cur/Antares.app
+		$(CUR)/Antares.app
 
 .PHONY: notarize
 notarize: sign
@@ -62,15 +63,15 @@ install: install-bin install-data install-scenario
 
 .PHONY: install-bin
 install-bin: build
-	@out/cur/install bin
+	@$(CUR)/install bin
 
 .PHONY: install-data
 install-data: build
-	@out/cur/install data
+	@$(CUR)/install data
 
 .PHONY: install-scenario
 install-scenario: build
-	@out/cur/install scenario
+	@$(CUR)/install scenario
 
 .PHONY: pull-request
 pull-request:
