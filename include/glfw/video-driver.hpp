@@ -42,6 +42,7 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
 
     virtual Size viewport_size() const { return _viewport_size; }
     virtual Size screen_size() const { return _screen_size; }
+    virtual void set_fullscreen(const bool on);
 
     virtual Point     get_mouse();
     virtual InputMode input_mode() const;
