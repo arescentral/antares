@@ -661,6 +661,7 @@ if (target_os == "mac") {
       "src/mac/core-foundation.cpp",
       "src/mac/core-opengl.cpp",
       "src/mac/http.cpp",
+      "src/mac/platform.cpp",
     ]
     public_deps = [
       "//ext/libsfz",
@@ -747,7 +748,10 @@ if (target_os == "mac") {
   }
 } else if (target_os == "linux") {
   source_set("libantares-linux") {
-    sources = [ "src/linux/http.cpp" ]
+    sources = [
+      "src/linux/http.cpp",
+      "src/linux/platform.cpp",
+    ]
     public_deps = [
       "//ext/libsfz",
       "//ext/procyon:procyon-cpp",
@@ -757,7 +761,10 @@ if (target_os == "mac") {
   }
 } else if (target_os == "win") {
   source_set("libantares-win") {
-    sources = [ "src/win/http.cpp" ]
+    sources = [
+      "src/win/http.cpp",
+      "src/win/platform.cpp",
+    ]
     public_deps = [ "//ext/procyon:procyon-cpp" ]
     if (current_toolchain == "//build/lib/win:msvc") {
       libs = [
