@@ -113,7 +113,7 @@ static int ndigits(size_t n) {
 void SelectLevelScreen::key_down(const KeyDownEvent& event) {
     switch (_state) {
         case SELECTING:
-            switch (event.key()) {
+            switch (event.key().value()) {
                 case Key::K8:
                 case Key::N_TIMES:
                     _state          = UNLOCKING;

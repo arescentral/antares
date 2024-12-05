@@ -564,7 +564,7 @@ void GamePlay::fire_timer() {
 }
 
 void GamePlay::key_down(const KeyDownEvent& event) {
-    switch (event.key()) {
+    switch (event.key().value()) {
         case Key::CAPS_LOCK:
             _state         = PAUSED;
             _player_paused = true;

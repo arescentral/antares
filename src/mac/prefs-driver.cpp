@@ -134,7 +134,7 @@ void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
 
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
     for (int i : range<int>(KEY_COUNT)) {
-        int key = 1 + static_cast<int>(preferences.keys[i]);
+        int key = 1 + preferences.keys[i].value();
         key_settings.append(cf::wrap(key).c_obj());
     }
     cf::set_preference(kKeySettingsPreference, key_settings);

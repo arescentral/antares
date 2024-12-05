@@ -28,13 +28,13 @@ namespace antares {
 KeyMap::KeyMap() : _data{} {}
 
 bool KeyMap::get(Key k) const {
-    size_t index = static_cast<size_t>(k);
+    int index = k.value();
     return _data[index >> 3] & (1 << (index & 0x7));
 }
 
 void KeyMap::set(Key k, bool value) {
     if (get(k) != value) {
-        size_t index = static_cast<size_t>(k);
+        int index = k.value();
         _data[index >> 3] ^= (1 << (index & 0x7));
     }
 }
@@ -57,7 +57,7 @@ bool operator==(const KeyMap& a, const KeyMap& b) { return a.equals(b); }
 bool operator!=(const KeyMap& a, const KeyMap& b) { return !a.equals(b); }
 
 void GetKeyNumName(Key key_num, pn::string& out) {
-    out = sys.key_names.at(static_cast<int>(key_num)).copy();
+    out = sys.key_names.at(key_num.value()).copy();
 }
 
 bool GetKeyNameNum(pn::string_view name, Key& out) {
@@ -81,7 +81,7 @@ bool AnyKeyButThisOne(const KeyMap& key_map, Key k) {
 }
 
 int key_digit(Key k) {
-    switch (k) {
+    switch (k.value()) {
         case Key::K0:
         case Key::N0: return 0;
         case Key::K1:

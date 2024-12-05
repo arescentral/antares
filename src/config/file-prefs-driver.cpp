@@ -31,7 +31,6 @@
 using sfz::makedirs;
 using sfz::range;
 using sfz::path::dirname;
-using std::vector;
 
 namespace antares {
 
@@ -114,7 +113,7 @@ void FilePrefsDriver::set(const Preferences& p) {
 
     pn::map keys;
     for (auto i : range<size_t>(KEY_COUNT)) {
-        keys[kKeyNames[i]] = static_cast<int>(p.keys[i]);
+        keys[kKeyNames[i]] = p.keys[i].value();
     }
 
     makedirs(dirname(_path), 0755);
