@@ -202,46 +202,12 @@ class Key {
 inline bool operator==(Key k1, Key k2) { return k1.value() == k2.value(); }
 inline bool operator!=(Key k1, Key k2) { return k1.value() != k2.value(); }
 
-class KeyMap {
-  public:
-    KeyMap();
-    KeyMap(const KeyMap&)            = delete;
-    KeyMap& operator=(const KeyMap&) = delete;
-
-    bool get(Key k) const;
-    void set(Key k, bool value);
-
-    bool any() const;
-    bool equals(const KeyMap& other) const;
-    void copy(const KeyMap& other);
-    void clear();
-
-  private:
-    typedef uint8_t     Data[32];
-    static const size_t kDataSize = sizeof(Data);
-
-    Data _data;
-};
-
-bool operator==(const KeyMap& a, const KeyMap& b);
-bool operator!=(const KeyMap& a, const KeyMap& b);
-
 constexpr char kKeyNameStrings[]     = "keyboard/short";
 constexpr char kKeyLongNameStrings[] = "keyboard/long";
 const int      kKeyNameLength        = 4;
 
-inline bool mDeleteKey(const KeyMap& km) { return km.get(Key::BACKSPACE); }
-inline bool mCapsLockKey(const KeyMap& km) { return km.get(Key::CAPS_LOCK); }
-inline bool mReturnKey(const KeyMap& km) { return km.get(Key::RETURN); }
-inline bool mEscKey(const KeyMap& km) { return km.get(Key::ESCAPE); }
-inline bool mQKey(const KeyMap& km) { return km.get(Key::Q); }
-inline bool mCommandKey(const KeyMap& km) { return km.get(Key::COMMAND); }
-inline bool mLeftArrowKey(const KeyMap& km) { return km.get(Key::LEFT_ARROW); }
-
-void    GetKeyNumName(Key key_num, pn::string& out);
-bool    GetKeyNameNum(pn::string_view name, Key& out);
-bool    AnyKeyButThisOne(const KeyMap& key_map, Key key_num);
-int32_t GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
+void GetKeyNumName(Key key_num, pn::string& out);
+bool GetKeyNameNum(pn::string_view name, Key& out);
 
 enum KeyNum {
     kUpKeyNum    = 0,  // thrust
@@ -342,8 +308,6 @@ enum {
     kWeaponKeyMask  = (kPulseKey | kBeamKey | kSpecialKey),
     kMiscKeyMask    = (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask)),
 };
-
-bool mCheckKeyMap(const KeyMap& mKeyMap, int mki);
 
 int key_digit(Key k);
 

@@ -327,8 +327,6 @@ static PlayerEvent hot_key_up(int i) {
 }
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
-    _keys.set(event.key(), true);
-
     if (event.key() == Key::RETURN) {
         _message.start_editing();
         return;
@@ -415,8 +413,6 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 }
 
 void PlayerShip::key_up(const KeyUpEvent& event) {
-    _keys.set(event.key(), false);
-
     if (!active()) {
         return;
     }

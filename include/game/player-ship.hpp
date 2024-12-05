@@ -132,7 +132,6 @@ class PlayerShip : public EventReceiver {
     uint32_t                 gTheseKeys;
     uint32_t                 _gamepad_keys;
     std::vector<PlayerEvent> _player_events;
-    KeyMap                   _keys;
 
     enum GamepadState {
         NO_BUMPER              = 0,
@@ -178,7 +177,6 @@ void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> ne
 void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
 void PlayerShipBodyExpire(Handle<SpaceObject> theShip);
-void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool*);
 
 }  // namespace antares
 

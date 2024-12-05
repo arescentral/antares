@@ -25,37 +25,6 @@
 
 namespace antares {
 
-KeyMap::KeyMap() : _data{} {}
-
-bool KeyMap::get(Key k) const {
-    int index = k.value();
-    return _data[index >> 3] & (1 << (index & 0x7));
-}
-
-void KeyMap::set(Key k, bool value) {
-    if (get(k) != value) {
-        int index = k.value();
-        _data[index >> 3] ^= (1 << (index & 0x7));
-    }
-}
-
-bool KeyMap::any() const {
-    static const Data zero = {};
-    return memcmp(_data, zero, kDataSize) == 0;
-}
-
-bool KeyMap::equals(const KeyMap& other) const {
-    return memcmp(_data, other._data, kDataSize) == 0;
-}
-
-void KeyMap::copy(const KeyMap& other) { memcpy(_data, other._data, kDataSize); }
-
-void KeyMap::clear() { memset(_data, 0, kDataSize); }
-
-bool operator==(const KeyMap& a, const KeyMap& b) { return a.equals(b); }
-
-bool operator!=(const KeyMap& a, const KeyMap& b) { return !a.equals(b); }
-
 void GetKeyNumName(Key key_num, pn::string& out) {
     out = sys.key_names.at(key_num.value()).copy();
 }
@@ -72,13 +41,6 @@ bool GetKeyNameNum(pn::string_view name, Key& out) {
 }
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
-
-bool AnyKeyButThisOne(const KeyMap& key_map, Key k) {
-    KeyMap others;
-    others.copy(key_map);
-    others.set(k, false);
-    return others.any();
-}
 
 int key_digit(Key k) {
     switch (k.value()) {
@@ -104,61 +66,6 @@ int key_digit(Key k) {
         case Key::N9: return 9;
         default: return -1;
     }
-}
-
-bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) { return mKeyMap.get(sys.prefs->key(mki)); }
-
-int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
-    // TODO(sfiera): write a new implementation of this method.
-    static_cast<void>(sourceKeyMap);
-    static_cast<void>(previousKeyMap);
-    return 0;
-    /*
-    int16_t         whichKeyCode = 0, modifiers = 0, count;
-    int32_t         result;
-    Ptr             KCHRPtr;
-    KeyMap          keyMap;
-
-    if ( previousKeyMap == nil) {
-        for ( count = 0; count < 4; count++)
-            keyMap[count] = sourceKeyMap[count];
-    } else {
-        keyMap[0] = sourceKeyMap[0] & (~previousKeyMap[0]);
-        keyMap[1] = sourceKeyMap[1] & ((~previousKeyMap[1]) | kModifierKeyMask);
-        keyMap[2] = sourceKeyMap[2] & (~previousKeyMap[2]);
-        keyMap[3] = sourceKeyMap[3] & (~previousKeyMap[3]);
-    }
-
-    if ( keyMap[1] & 0x0008) {
-        keyMap[1] &= ~0x0008;
-    }   // turn off control key
-
-    if ( keyMap[1] & 0x8000) {
-        modifiers |= cmdKey;
-        keyMap[1] &= ~0x8000;   // turn off command key
-    }
-
-    if ( keyMap[1] & 0x0004) {
-        modifiers |= optionKey;
-        keyMap[1] &= ~0x0004;   // turn off option key
-    }
-
-    if ( keyMap[1] & 0x0001) {
-        modifiers |= shiftKey;
-        keyMap[1] &= ~0x0001;   // turn off shift key
-    }
-
-    if ( keyMap[1] & 0x0002) {
-        modifiers |= alphaLock;
-        keyMap[1] &= 0x0002;    // turn caps lock key
-    }
-
-    whichKeyCode = (GetKeyNumFromKeyMap( keyMap) - 1) | modifiers;
-    KCHRPtr = reinterpret_cast<Ptr>(GetScriptManagerVariable( smKCHRCache));
-    result = KeyTranslate( KCHRPtr, whichKeyCode, &gKeyTranslateState);
-
-    return result;
-    */
 }
 
 }  // namespace antares
