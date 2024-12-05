@@ -101,8 +101,7 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
         return space_object->long_name().copy();
     }
 
-    return pn::format(
-            "{0} < {1} >", space_object->long_name(), sys.key_long_names.at(keyNum.value()));
+    return pn::format("{0} < {1} >", space_object->long_name(), keyNum.long_name());
 };
 
 }  // namespace

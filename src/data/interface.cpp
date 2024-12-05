@@ -113,8 +113,8 @@ FIELD_READER(Key) {
     if (!k.has_value()) {
         return Key::NONE;
     }
-    Key i;
-    if (!GetKeyNameNum(*k, i)) {
+    Key i = Key::named(*k);
+    if (i == Key::NONE) {
         throw std::runtime_error(pn::format("{0}must be a key", x.prefix()).c_str());
     }
     return i;

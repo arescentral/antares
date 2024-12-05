@@ -443,9 +443,7 @@ static MiniButton no_button() {
 
 static MiniButton accept(pn::string_view name) {
     MiniButton button;
-    pn::string line_string;
-    GetKeyNumName(sys.prefs->key(kCompAcceptKeyNum), line_string);
-    button.string = line_string.copy();
+    button.string = sys.prefs->key(kCompAcceptKeyNum).name().copy();
     pad_to(button.string, kKeyNameLength);
     button.string += " ";
     button.string += name;
@@ -456,9 +454,7 @@ static MiniButton accept(pn::string_view name) {
 
 static MiniButton cancel(pn::string_view name) {
     MiniButton button;
-    pn::string line_string;
-    GetKeyNumName(sys.prefs->key(kCompCancelKeyNum), line_string);
-    button.string = line_string.copy();
+    button.string = sys.prefs->key(kCompCancelKeyNum).name().copy();
     pad_to(button.string, kKeyNameLength);
     button.string += " ";
     button.string += name;

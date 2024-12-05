@@ -564,7 +564,7 @@ void PlainButton::draw(Point offset, InputMode mode) const {
     pn::string shortcut_text;
     if ((mode == KEYBOARD_MOUSE) && (key() != Key::NONE)) {
         draw_shortcut = true;
-        GetKeyNumName(key(), shortcut_text);
+        shortcut_text = key().name().copy();
     } else if ((mode == GAMEPAD) && (gamepad() != Gamepad::Button::NONE)) {
         draw_shortcut = true;
         Gamepad::name(gamepad(), shortcut_text);
@@ -1121,9 +1121,8 @@ void TabButton::draw(Point offset, InputMode) const {
         } else {
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
         }
-        pn::string s;
-        GetKeyNumName(key(), s);
-        swidth = GetInterfaceFontWidth(style()) * kMaxKeyNameLength;
+        pn::string_view s = key().name();
+        swidth            = GetInterfaceFontWidth(style()) * kMaxKeyNameLength;
 
         Rect uRect(
                 tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,

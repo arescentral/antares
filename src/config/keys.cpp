@@ -25,19 +25,13 @@
 
 namespace antares {
 
-void GetKeyNumName(Key key_num, pn::string& out) {
-    out = sys.key_names.at(key_num.value()).copy();
-}
-
-bool GetKeyNameNum(pn::string_view name, Key& out) {
-    bool result = false;
+Key Key::named(pn::string_view name) {
     for (int i = 0; i < sys.key_names.size(); ++i) {
         if (sys.key_names.at(i) == name) {
-            out    = static_cast<Key>(i);
-            result = true;
+            return Key(i);
         }
     }
-    return result;
+    return Key::NONE;
 }
 
 int Key::digit() const {
@@ -65,5 +59,9 @@ int Key::digit() const {
         default: return -1;
     }
 }
+
+pn::string_view Key::name() const { return sys.key_names.at(_value); }
+
+pn::string_view Key::long_name() const { return sys.key_long_names.at(_value); }
 
 }  // namespace antares

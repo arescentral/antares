@@ -195,7 +195,10 @@ class Key {
     explicit Key(int value) : _value{value} {}
     int value() const { return _value; }
 
-    int digit() const;
+    int             digit() const;
+    pn::string_view name() const;
+    pn::string_view long_name() const;
+    static Key      named(pn::string_view name);
 
   private:
     int _value;
@@ -207,9 +210,6 @@ inline bool operator!=(Key k1, Key k2) { return k1.value() != k2.value(); }
 constexpr char kKeyNameStrings[]     = "keyboard/short";
 constexpr char kKeyLongNameStrings[] = "keyboard/long";
 const int      kKeyNameLength        = 4;
-
-void GetKeyNumName(Key key_num, pn::string& out);
-bool GetKeyNameNum(pn::string_view name, Key& out);
 
 enum KeyNum {
     kUpKeyNum    = 0,  // thrust
