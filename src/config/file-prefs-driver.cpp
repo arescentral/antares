@@ -71,7 +71,7 @@ static void set(int16_t& v, pn::value_cref x) {
 
 static void set(Key& v, pn::value_cref x) {
     if (x.is_int()) {
-        v = static_cast<Key>(x.as_int());
+        v = Key(x.as_int());
     }
 }
 

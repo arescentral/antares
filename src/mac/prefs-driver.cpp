@@ -87,7 +87,7 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
             cf::Number number = cf::cast<cf::Number>(cf::Type(CFRetain(key_settings.get(i))));
             int        key;
             if (cf::unwrap(number, key)) {
-                _current.keys[i] = static_cast<Key>(key - 1);
+                _current.keys[i] = Key(key - 1);
             }
         }
     }
