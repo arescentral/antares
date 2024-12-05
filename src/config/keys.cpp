@@ -40,10 +40,8 @@ bool GetKeyNameNum(pn::string_view name, Key& out) {
     return result;
 }
 
-// returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
-
-int key_digit(Key k) {
-    switch (k.value()) {
+int Key::digit() const {
+    switch (_value) {
         case Key::K0:
         case Key::N0: return 0;
         case Key::K1:

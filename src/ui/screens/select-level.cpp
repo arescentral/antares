@@ -126,7 +126,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             break;
 
         case UNLOCKING: {
-            int digit = key_digit(event.key());
+            int digit = event.key().digit();
             if (digit < 0) {
                 _state = SELECTING;
                 break;

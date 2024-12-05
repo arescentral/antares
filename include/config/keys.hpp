@@ -195,6 +195,8 @@ class Key {
     explicit Key(int value) : _value{value} {}
     int value() const { return _value; }
 
+    int digit() const;
+
   private:
     int _value;
 };
@@ -308,8 +310,6 @@ enum {
     kWeaponKeyMask  = (kPulseKey | kBeamKey | kSpecialKey),
     kMiscKeyMask    = (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask)),
 };
-
-int key_digit(Key k);
 
 }  // namespace antares
 
