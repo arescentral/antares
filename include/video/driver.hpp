@@ -31,7 +31,6 @@
 namespace antares {
 
 class Card;
-class KeyMap;
 class PixMap;
 class Texture;
 class TextReceiver;
@@ -39,7 +38,7 @@ class TextReceiver;
 class VideoDriver {
   public:
     VideoDriver();
-    VideoDriver(const VideoDriver&) = delete;
+    VideoDriver(const VideoDriver&)            = delete;
     VideoDriver& operator=(const VideoDriver&) = delete;
 
     virtual ~VideoDriver();
@@ -81,7 +80,7 @@ class Texture {
   public:
     struct Impl {
         Impl() {}
-        Impl(const Impl&) = delete;
+        Impl(const Impl&)            = delete;
         Impl& operator=(const Impl&) = delete;
         virtual ~Impl();
 

@@ -232,9 +232,7 @@ VideoControlScreen::VideoControlScreen(OptionsScreen::State* state)
     checkbox(kFullscreenButton)
             ->bind({
                     [] { return sys.prefs->fullscreen(); },
-                    [](bool on) {
-                        sys.prefs->set_fullscreen(on);
-                    },
+                    [](bool on) { sys.prefs->set_fullscreen(on); },
             });
 
     button(kDoneButton)
@@ -339,7 +337,7 @@ KeyControlScreen::~KeyControlScreen() {}
 
 void KeyControlScreen::key_down(const KeyDownEvent& event) {
     if (_selected_key >= 0) {
-        switch (event.key()) {
+        switch (event.key().value()) {
             case Key::ESCAPE:
             case Key::RETURN:
             case Key::CAPS_LOCK:

@@ -285,7 +285,7 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
 }
 
 void BriefingScreen::key_down(const KeyDownEvent& event) {
-    switch (event.key()) {
+    switch (event.key().value()) {
         case Key::ESCAPE: {
             *_cancelled = true;
             stack()->pop(this);

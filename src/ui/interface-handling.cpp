@@ -176,7 +176,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         pn::string_view search  = keys.at(i);
-        pn::string      replace = values.at(static_cast<int>(sys.prefs->key(i))).copy();
+        pn::string      replace = values.at(sys.prefs->key(i).value()).copy();
         // First, pad to the desired width.
         while (replace.size() < padTo) {
             replace += pn::rune{' '};

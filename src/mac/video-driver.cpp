@@ -325,7 +325,7 @@ struct CocoaVideoDriver::EventBridge {
         if ((scan_code < 4) || (231 < scan_code)) {
             return;
         }
-        Key usb_key = static_cast<Key>(scan_code);
+        Key usb_key = Key(scan_code);
         if (usb_key == Key::CAPS_LOCK) {
             return;
         }

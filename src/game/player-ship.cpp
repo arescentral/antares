@@ -52,8 +52,6 @@
 #include "math/units.hpp"
 #include "sound/fx.hpp"
 
-namespace macroman = sfz::macroman;
-
 namespace antares {
 
 namespace {
@@ -103,9 +101,7 @@ pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
         return space_object->long_name().copy();
     }
 
-    return pn::format(
-            "{0} < {1} >", space_object->long_name(),
-            sys.key_long_names.at(static_cast<int>(keyNum)));
+    return pn::format("{0} < {1} >", space_object->long_name(), keyNum.long_name());
 };
 
 }  // namespace
@@ -330,8 +326,6 @@ static PlayerEvent hot_key_up(int i) {
 }
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
-    _keys.set(event.key(), true);
-
     if (event.key() == Key::RETURN) {
         _message.start_editing();
         return;
@@ -418,8 +412,6 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 }
 
 void PlayerShip::key_up(const KeyUpEvent& event) {
-    _keys.set(event.key(), false);
-
     if (!active()) {
         return;
     }
