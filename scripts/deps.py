@@ -29,7 +29,7 @@ PACKAGE[DEBIAN] = collections.OrderedDict(
         # Binaries
         ("clang", "clang"),
         ("clang++", "clang"),
-        ("gn", "gn"),
+        ("gn", "generate-ninja"),
         ("ninja", "ninja-build"),
         ("pkg-config", "pkg-config"),
         # Libraries
@@ -50,9 +50,7 @@ PACKAGE[DEBIAN] = collections.OrderedDict(
         ("zlib", "zlib1g-dev"),
     ]
 )
-SOURCES[DEBIAN] = [
-    ("arescentral", "http://apt.arescentral.org", "contrib"),
-]
+SOURCES[DEBIAN] = []
 KEYS[DEBIAN] = [
     (
         "apt-key adv --keyserver keyserver.ubuntu.com --recv"
