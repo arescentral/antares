@@ -18,16 +18,16 @@
             <key>LSHandlerRank</key>
             <string>Owner</string>
         </dict>
-		<dict>
-			<key>CFBundleTypeName</key>
-			<string>Antares Plugin Folder</string>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Antares Plugin Folder</string>
             <key>LSItemContentTypes</key>
             <array>
                 <string>public.folder</string>
             </array>
             <key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-		</dict>
+            <string>Viewer</string>
+        </dict>
     </array>
     <key>CFBundleExecutable</key>
     <string>Antares</string>
