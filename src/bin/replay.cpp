@@ -21,16 +21,11 @@
 #include <pn/output>
 #include <sfz/sfz.hpp>
 
-#include "config/dirs.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "drawing/color.hpp"
-#include "drawing/pix-map.hpp"
 #include "game/admiral.hpp"
-#include "game/cheat.hpp"
-#include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
 #include "game/instruments.hpp"
@@ -38,17 +33,14 @@
 #include "game/level.hpp"
 #include "game/main.hpp"
 #include "game/messages.hpp"
-#include "game/motion.hpp"
 #include "game/space-object.hpp"
 #include "game/sys.hpp"
 #include "game/vector.hpp"
 #include "lang/exception.hpp"
 #include "math/random.hpp"
-#include "math/rotation.hpp"
 #include "sound/driver.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
-#include "ui/interface-handling.hpp"
 #include "ui/screens/debriefing.hpp"
 #include "video/driver.hpp"
 #include "video/offscreen-driver.hpp"
@@ -64,7 +56,8 @@ namespace {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(pn::input_view in, const sfz::optional<pn::string>& output_path)
+    ReplayMaster(pn::input_view in, const sfz::optional<pn::string>& plugin_path,
+                 const sfz::optional<pn::string>& output_path)
             : _state(NEW),
               _replay_data(in),
               _random_seed(_replay_data.global_seed),
@@ -83,9 +76,8 @@ class ReplayMaster : public Card {
                 Randomize(4);  // For the decision to replay intro.
                 _game_result  = NO_GAME;
                 g.random.seed = _random_seed;
-                stack()->push(new MainPlay(
-                        *Level::get(_replay_data.chapter_id), true, &_input_source, false,
-                        &_game_result));
+                stack()->push(new MainPlay(*Level::get(_replay_data.chapter_id), true,
+                                           &_input_source, false, &_game_result));
                 break;
 
             case REPLAY:
@@ -122,6 +114,7 @@ class ReplayMaster : public Card {
     State _state;
 
     sfz::optional<pn::string> _output_path;
+    sfz::optional<pn::string> _plugin_path;
     ReplayData                _replay_data;
     const int32_t             _random_seed;
     GameResult                _game_result;
@@ -137,6 +130,8 @@ void ReplayMaster::init() {
     Label::init();
     Messages::init();
     InstrumentInit();
+    PluginInit(_plugin_path.has_value() ? sfz::make_optional<pn::string_view>(*_plugin_path)
+                                        : sfz::nullopt);
     SpriteHandlingInit();
     PluginInit(sfz::nullopt);
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
@@ -146,12 +141,13 @@ void ReplayMaster::init() {
 
 void usage(pn::output_view out, pn::string_view progname, int retcode) {
     out.format(
-            "usage: {0} [OPTIONS]"
+            "usage: {0} script [scenario] [OPTIONS]"
             "\n"
             "\n  Plays a replay into a set of images and a log of sounds"
             "\n"
             "\n  arguments:"
-            "\n    replay              an Antares replay script"
+            "\n    script              an Antares replay script"
+            "\n    scenario            path to plugin file (default: factory scenario)"
             "\n"
             "\n  options:"
             "\n    -o, --output=OUTPUT  place output in this directory"
@@ -171,10 +167,13 @@ void usage(pn::output_view out, pn::string_view progname, int retcode) {
 void main(int argc, char* const* argv) {
     args::callbacks callbacks;
 
-    sfz::optional<pn::string> replay_path;
-    callbacks.argument = [&replay_path](pn::string_view arg) {
-        if (!replay_path.has_value()) {
-            replay_path.emplace(arg.copy());
+    sfz::optional<pn::string> script_path;
+    sfz::optional<pn::string> plugin_path;
+    callbacks.argument = [&](pn::string_view arg) {
+        if (!script_path.has_value()) {
+            script_path.emplace(arg.copy());
+        } else if (!plugin_path.has_value()) {
+            plugin_path.emplace(arg.copy());
         } else {
             return false;
         }
@@ -235,7 +234,7 @@ void main(int argc, char* const* argv) {
     };
 
     args::parse(argc - 1, argv + 1, callbacks);
-    if (!replay_path.has_value()) {
+    if (!script_path.has_value()) {
         throw std::runtime_error("missing required argument 'replay'");
     }
 
@@ -263,17 +262,17 @@ void main(int argc, char* const* argv) {
     }
     NullLedger ledger;
 
-    pn::input replay_file{*replay_path, pn::binary};
+    pn::input script{*script_path, pn::binary};
     if (smoke) {
         TextVideoDriver video({width, height}, sfz::optional<pn::string>());
-        video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
+        video.loop(new ReplayMaster(script, plugin_path, output_dir), scheduler);
     } else if (text) {
         TextVideoDriver video({width, height}, output_dir);
-        video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
+        video.loop(new ReplayMaster(script, plugin_path, output_dir), scheduler);
     } else {
 #ifndef _WIN32
         OffscreenVideoDriver video({width, height}, 1, gl_version, glsl_version, output_dir);
-        video.loop(new ReplayMaster(replay_file, output_dir), scheduler);
+        video.loop(new ReplayMaster(script, plugin_path, output_dir), scheduler);
 #endif
     }
 }
