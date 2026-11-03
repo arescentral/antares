@@ -28,30 +28,34 @@ def main():
     if config_dir != "":
         os.chdir(config_dir)
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("-m",
-                        "--mode",
-                        metavar="MODE",
-                        type=str,
-                        choices="dbg dev opt".split(),
-                        default="opt",
-                        help="set build configuration:\n"
-                        "  - opt: compile for fast binaries (default)\n"
-                        "  - dev: compile for fast builds\n"
-                        "  - dbg: add debugging symbols")
-    parser.add_argument("-o",
-                        "--target-os",
-                        metavar="OS",
-                        type=str,
-                        help="target os (default: host os)")
-    parser.add_argument("--prefix",
-                        type=str,
-                        default="/usr/local",
-                        help="installation prefix (default: /usr/local)")
-    parser.add_argument("-v",
-                        "--antares-version",
-                        metavar="X.X.X",
-                        type=str,
-                        help="override antares_version string")
+    parser.add_argument(
+        "-m",
+        "--mode",
+        metavar="MODE",
+        type=str,
+        choices="dbg dev opt".split(),
+        default="opt",
+        help="set build configuration:\n"
+        "  - opt: compile for fast binaries (default)\n"
+        "  - dev: compile for fast builds\n"
+        "  - dbg: add debugging symbols",
+    )
+    parser.add_argument(
+        "-o", "--target-os", metavar="OS", type=str, help="target os (default: host os)"
+    )
+    parser.add_argument(
+        "--prefix",
+        type=str,
+        default="/usr/local",
+        help="installation prefix (default: /usr/local)",
+    )
+    parser.add_argument(
+        "-v",
+        "--antares-version",
+        metavar="X.X.X",
+        type=str,
+        help="override antares_version string",
+    )
     args = parser.parse_args()
 
     check_submodules()
@@ -61,7 +65,7 @@ def main():
     if cfg.host_os() == "win":
         script_executable = "python"
 
-    with open('.gn', 'w') as gnf:
+    with open(".gn", "w") as gnf:
         gnf.write('buildconfig = "//build/BUILDCONFIG.gn"\n')
         gnf.write('script_executable = "' + script_executable + '"\n')
 
@@ -77,7 +81,10 @@ def main():
     if args.antares_version:
         config["antares_version"] = args.antares_version
     if args.target_os == "mac":
-        config["macosx_version_min"] = "10.7"
+        if int(platform.mac_ver()[0].split(".")[0]) >= 27:
+            config["macosx_version_min"] = "11.0"
+        else:
+            config["macosx_version_min"] = "10.7"
     cfg.gn(**config)
 
     print("make(1) it so!")
@@ -149,9 +156,11 @@ def check_mac(args):
 
     missing = collections.OrderedDict()
     if not (cfg.check_clang() and cfg.check_libcxx()):
-        missing["xcode"] = ("* To install Xcode, open the App Store:\n"
-                            "    https://itunes.apple.com/en/app/xcode/id497799835\n"
-                            "  After installing, open it and accept the license agreement\n")
+        missing["xcode"] = (
+            "* To install Xcode, open the App Store:\n"
+            "    https://itunes.apple.com/en/app/xcode/id497799835\n"
+            "  After installing, open it and accept the license agreement\n"
+        )
     if not cfg.check_brew():
         missing["brew"] = (
             "* To install Homebrew, run:\n"
@@ -185,6 +194,7 @@ def check_linux_native(args):
         sys.exit(1)
     return config
 
+
 def check_win_native(args):
     config = deps.check(distro="win", codename="win")
     if config is None:
@@ -192,6 +202,7 @@ def check_win_native(args):
     config["gn"] = "gn"
     config["ninja"] = "ninja"
     return config
+
 
 def check_win_on_linux(args):
     with cfg.step("checking Linux distro") as msg:
