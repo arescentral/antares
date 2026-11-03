@@ -77,7 +77,10 @@ def main():
     if args.antares_version:
         config["antares_version"] = args.antares_version
     if args.target_os == "mac":
-        config["macosx_version_min"] = "10.7"
+        if int(platform.mac_ver()[0].split(".")[0]) >= 27:
+            config["macosx_version_min"] = "11.0"
+        else:
+            config["macosx_version_min"] = "10.7"
     cfg.gn(**config)
 
     print("make(1) it so!")
