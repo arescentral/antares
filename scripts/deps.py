@@ -18,8 +18,6 @@ except ImportError:
 PACKAGE = {}
 INSTALL = {}
 UPDATE = {}
-SOURCES = {}
-KEYS = {}
 
 DEBIAN = "debian"
 INSTALL[DEBIAN] = "apt-get install".split()
@@ -50,8 +48,6 @@ PACKAGE[DEBIAN] = collections.OrderedDict(
         ("zlib", "zlib1g-dev"),
     ]
 )
-SOURCES[DEBIAN] = []
-KEYS[DEBIAN] = []
 
 MAC = "mac"
 INSTALL[MAC] = "brew install".split()
@@ -133,21 +129,6 @@ def check(*, distro, codename, prefix=""):
         return config
     commands = []
 
-    for name, url, component in SOURCES.get(distro, []):
-        path = "/etc/apt/sources.list.d/%s.list" % name
-        if os.path.exists(path):
-            continue
-        commands.append(
-            "%s | %s"
-            % (
-                _command("", ["echo", "deb", url, codename, component]),
-                _command(prefix, ["tee", path]),
-            )
-        )
-    if commands:
-        for keys in KEYS.get(distro, []):
-            commands.append(_command(prefix, keys))
-
     if distro in UPDATE:
         commands.append(_command(prefix, UPDATE[distro]))
     missing_pkgs = sorted(set(PACKAGE[distro][pkg] for pkg in missing_pkgs))
@@ -172,17 +153,6 @@ def _command(prefix, args):
 
 
 def install(*, distro, codename, dry_run=False, flags=[]):
-    for name, url, component in SOURCES.get(distro, []):
-        path = "/etc/apt/sources.list.d/%s.list" % name
-        if os.path.exists(path):
-            continue
-        line = "deb %s %s %s" % (url, codename, component)
-        write(dry_run, line, path)
-    for keys in KEYS.get(distro, []):
-        run(dry_run, keys)
-
-    if SOURCES.get(distro, []):
-        run(dry_run, UPDATE[distro])
     run(dry_run, INSTALL[distro] + list(PACKAGE[distro].values()) + flags)
 
 
