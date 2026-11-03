@@ -51,12 +51,7 @@ PACKAGE[DEBIAN] = collections.OrderedDict(
     ]
 )
 SOURCES[DEBIAN] = []
-KEYS[DEBIAN] = [
-    (
-        "apt-key adv --keyserver keyserver.ubuntu.com --recv"
-        " 5A4F5210FF46CEE4B799098BAC879AADD5B51AE9"
-    ).split(),
-]
+KEYS[DEBIAN] = []
 
 MAC = "mac"
 INSTALL[MAC] = "brew install".split()
